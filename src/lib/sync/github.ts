@@ -19,7 +19,7 @@ export async function syncGitHub(supabase: SupabaseClient) {
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('id, github_url')
+    .select('id, github_url, raw_data')
     .not('github_url', 'is', null);
 
   if (!projects || projects.length === 0) {
@@ -55,11 +55,29 @@ export async function syncGitHub(supabase: SupabaseClient) {
 
       const data = await res.json();
 
+      // Merge GitHub enrichment into raw_data
+      const existingRaw = (project.raw_data || {}) as Record<string, unknown>;
+
       await supabase
         .from('projects')
         .update({
           github_stars: data.stargazers_count || 0,
+          github_forks: data.forks_count || 0,
+          github_open_issues: data.open_issues_count || 0,
+          github_language: data.language || null,
           last_github_commit: data.pushed_at || null,
+          raw_data: {
+            ...existingRaw,
+            github: {
+              topics: data.topics || [],
+              subscribers_count: data.subscribers_count || 0,
+              archived: data.archived || false,
+              license: data.license?.spdx_id || null,
+              size: data.size || 0,
+              default_branch: data.default_branch || 'main',
+              synced_at: new Date().toISOString(),
+            },
+          },
         })
         .eq('id', project.id);
 

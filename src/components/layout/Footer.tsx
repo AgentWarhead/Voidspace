@@ -32,6 +32,9 @@ export function Footer() {
             <Link href="/opportunities" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Opportunities
             </Link>
+            <Link href="/ecosystem" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Ecosystem
+            </Link>
             <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Learn
             </Link>

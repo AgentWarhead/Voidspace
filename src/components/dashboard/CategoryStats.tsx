@@ -1,6 +1,6 @@
 'use client';
 
-import { Layers, Activity, DollarSign, Target } from 'lucide-react';
+import { Layers, Activity, DollarSign, Target, Star, Clock } from 'lucide-react';
 import { Card, InfoTooltip } from '@/components/ui';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { ScanLine } from '@/components/effects/ScanLine';
@@ -12,6 +12,8 @@ interface CategoryStatsProps {
   activeProjects: number;
   totalTVL: number;
   gapScore: number;
+  totalStars?: number;
+  recentlyActive?: number;
 }
 
 const statItems = [
@@ -19,13 +21,15 @@ const statItems = [
   { key: 'activeProjects', label: 'Active Projects', icon: Activity, format: formatNumber },
   { key: 'totalTVL', label: 'Combined TVL', icon: DollarSign, format: formatCurrency },
   { key: 'gapScore', label: 'Gap Score', icon: Target, format: formatNumber },
+  { key: 'totalStars', label: 'Total Stars', icon: Star, format: formatNumber },
+  { key: 'recentlyActive', label: 'Recently Active', icon: Clock, format: formatNumber },
 ] as const;
 
-export function CategoryStats({ totalProjects, activeProjects, totalTVL, gapScore }: CategoryStatsProps) {
-  const values = { totalProjects, activeProjects, totalTVL, gapScore };
+export function CategoryStats({ totalProjects, activeProjects, totalTVL, gapScore, totalStars = 0, recentlyActive = 0 }: CategoryStatsProps) {
+  const values = { totalProjects, activeProjects, totalTVL, gapScore, totalStars, recentlyActive };
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
       {statItems.map((item) => {
         const Icon = item.icon;
         const value = values[item.key];

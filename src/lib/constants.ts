@@ -43,6 +43,7 @@ export const NAV_ITEMS = [
   { label: 'Dashboard', href: '/' },
   { label: 'Categories', href: '/categories' },
   { label: 'Opportunities', href: '/opportunities' },
+  { label: 'Ecosystem', href: '/ecosystem' },
   { label: 'Learn', href: '/learn' },
   { label: 'Profile', href: '/profile' },
 ] as const;

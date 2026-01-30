@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Globe, Github, Star, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Globe, Github, Star, Clock, CheckCircle, XCircle, GitFork, AlertCircle, Code } from 'lucide-react';
 import { Badge, Card } from '@/components/ui';
 import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
 import type { Project } from '@/types';
@@ -17,7 +18,17 @@ const SORT_OPTIONS = [
   { key: 'name', label: 'Name' },
   { key: 'recent', label: 'Recent' },
   { key: 'stars', label: 'Stars' },
+  { key: 'forks', label: 'Forks' },
+  { key: 'issues', label: 'Issues' },
 ];
+
+function getHealthColor(lastCommit: string | null): string {
+  if (!lastCommit) return '#666';
+  const daysAgo = (Date.now() - new Date(lastCommit).getTime()) / (1000 * 60 * 60 * 24);
+  if (daysAgo < 30) return '#00EC97'; // green
+  if (daysAgo < 90) return '#FFA502'; // yellow
+  return '#FF4757'; // red
+}
 
 export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps) {
   const router = useRouter();
@@ -79,12 +90,19 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
                   </div>
                 )}
 
+                {/* Health Dot */}
+                <div
+                  className="w-2 h-2 rounded-full shrink-0 mt-2"
+                  style={{ backgroundColor: getHealthColor(project.last_github_commit) }}
+                  title={project.last_github_commit ? `Last commit: ${timeAgo(project.last_github_commit)}` : 'No commit data'}
+                />
+
                 {/* Name + Description + Meta */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-medium text-text-primary truncate">
+                    <Link href={`/projects/${project.slug}`} className="text-sm font-medium text-text-primary truncate hover:text-near-green transition-colors">
                       {project.name}
-                    </h3>
+                    </Link>
                     {project.is_active ? (
                       <span className="inline-flex items-center gap-0.5 text-[10px] text-near-green/70">
                         <CheckCircle className="w-3 h-3" />
@@ -102,13 +120,31 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
                     </p>
                   )}
 
-                  {/* Meta row: stars, last commit */}
-                  <div className="flex items-center gap-3 mt-1.5">
+                  {/* Meta row: stars, forks, issues, language, last commit */}
+                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                     {project.github_stars > 0 && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-text-muted font-mono">
                         <Star className="w-3 h-3 text-warning" />
                         {formatNumber(project.github_stars)}
                       </span>
+                    )}
+                    {project.github_forks > 0 && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-text-muted font-mono">
+                        <GitFork className="w-3 h-3" />
+                        {formatNumber(project.github_forks)}
+                      </span>
+                    )}
+                    {project.github_open_issues > 0 && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-text-muted font-mono">
+                        <AlertCircle className="w-3 h-3" />
+                        {project.github_open_issues}
+                      </span>
+                    )}
+                    {project.github_language && (
+                      <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                        <Code className="w-2.5 h-2.5 mr-0.5" />
+                        {project.github_language}
+                      </Badge>
                     )}
                     {project.last_github_commit && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-text-muted">

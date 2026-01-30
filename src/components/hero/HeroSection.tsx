@@ -12,9 +12,10 @@ import type { EcosystemStats } from '@/types';
 
 interface HeroSectionProps {
   stats: EcosystemStats;
+  totalStars?: number;
 }
 
-export function HeroSection({ stats }: HeroSectionProps) {
+export function HeroSection({ stats, totalStars }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden py-16 sm:py-24">
       {/* Layer 1: Void depth — radial gradient creating infinite depth */}
@@ -77,7 +78,7 @@ export function HeroSection({ stats }: HeroSectionProps) {
           </motion.div>
 
           {/* Stats bar */}
-          <AnimatedStatBar stats={stats} />
+          <AnimatedStatBar stats={stats} totalStars={totalStars} />
 
           {/* CTA */}
           <motion.div

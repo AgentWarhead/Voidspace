@@ -7,6 +7,7 @@ import { GlowCard } from '@/components/effects/GlowCard';
 import { TiltCard } from '@/components/effects/TiltCard';
 import { HotTag } from '@/components/effects/HotTag';
 import { HELP_CONTENT } from '@/lib/help-content';
+import { formatCurrency } from '@/lib/utils';
 import type { CategoryWithStats } from '@/types';
 
 interface CategoryGridProps {
@@ -67,7 +68,9 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">
-                      <span className="text-text-muted font-mono">{cat.projectCount} projects</span>
+                      <span className="text-text-muted font-mono">
+                        {cat.activeProjectCount}/{cat.projectCount} active
+                      </span>
                       <span className="font-mono font-medium flex items-center" style={{
                         color: cat.gapScore >= 67 ? '#00EC97' : cat.gapScore >= 34 ? '#FFA502' : '#FF4757',
                       }}>
@@ -77,6 +80,11 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
                         </InfoTooltip>
                       </span>
                     </div>
+                    {cat.totalTVL > 0 && (
+                      <p className="text-[10px] text-text-muted font-mono">
+                        TVL: {formatCurrency(cat.totalTVL)}
+                      </p>
+                    )}
                     <Progress value={cat.gapScore} size="sm" />
                   </div>
                 </div>

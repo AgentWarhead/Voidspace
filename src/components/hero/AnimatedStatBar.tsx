@@ -9,19 +9,22 @@ import type { EcosystemStats } from '@/types';
 
 interface AnimatedStatBarProps {
   stats: EcosystemStats;
+  totalStars?: number;
 }
 
 interface StatItem {
   label: string;
   value: number;
   formatter: (v: number) => string;
+  helpKey?: keyof typeof HELP_CONTENT;
 }
 
-export function AnimatedStatBar({ stats }: AnimatedStatBarProps) {
+export function AnimatedStatBar({ stats, totalStars }: AnimatedStatBarProps) {
   const items: StatItem[] = [
     { label: 'Projects', value: stats.totalProjects, formatter: formatNumber },
-    { label: 'Total TVL', value: stats.totalTVL, formatter: formatCurrency },
+    { label: 'Total TVL', value: stats.totalTVL, formatter: formatCurrency, helpKey: 'tvl' },
     { label: 'Categories', value: stats.categoryCount, formatter: formatNumber },
+    ...(totalStars ? [{ label: 'GitHub Stars', value: totalStars, formatter: formatNumber, helpKey: 'githubStars' as const }] : []),
   ];
 
   return (
@@ -46,9 +49,9 @@ export function AnimatedStatBar({ stats }: AnimatedStatBarProps) {
             </div>
             <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-widest font-mono mt-0.5 flex items-center justify-center">
               {item.label}
-              {item.label === 'Total TVL' && (
-                <InfoTooltip term={HELP_CONTENT.tvl.term}>
-                  <p>{HELP_CONTENT.tvl.description}</p>
+              {item.helpKey && (
+                <InfoTooltip term={HELP_CONTENT[item.helpKey].term}>
+                  <p>{HELP_CONTENT[item.helpKey].description}</p>
                 </InfoTooltip>
               )}
             </p>

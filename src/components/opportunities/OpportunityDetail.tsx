@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock } from 'lucide-react';
 import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
+import { GapScoreBreakdown } from '@/components/opportunities/GapScoreBreakdown';
 import { SaveButton } from '@/components/opportunities/SaveButton';
 import { BriefGenerator } from '@/components/brief/BriefGenerator';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -13,18 +14,19 @@ import { GlowCard } from '@/components/effects/GlowCard';
 import { GridPattern } from '@/components/effects/GridPattern';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
 import { HELP_CONTENT } from '@/lib/help-content';
-import type { Opportunity, Project, Category } from '@/types';
+import type { Opportunity, Project, Category, GapScoreBreakdown as GapScoreBreakdownType } from '@/types';
 
 interface OpportunityDetailProps {
   opportunity: Opportunity;
   relatedProjects: Project[];
   category: Category;
+  breakdown?: GapScoreBreakdownType;
 }
 
-export function OpportunityDetail({ opportunity, relatedProjects, category }: OpportunityDetailProps) {
+export function OpportunityDetail({ opportunity, relatedProjects, category, breakdown }: OpportunityDetailProps) {
   return (
     <motion.div
       className="space-y-8"
@@ -94,9 +96,47 @@ export function OpportunityDetail({ opportunity, relatedProjects, category }: Op
         </div>
       </div>
 
+      {/* Scores Section */}
+      <ScrollReveal>
+        <SectionHeader title="Scores" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card variant="glass" padding="lg" className="relative overflow-hidden">
+            <ScanLine />
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
+                    Gap Score
+                    <InfoTooltip term={HELP_CONTENT.gapScore.term}>
+                      <p>{HELP_CONTENT.gapScore.description}</p>
+                    </InfoTooltip>
+                  </p>
+                  <GapScoreIndicator score={opportunity.gap_score} size="lg" showLabel />
+                </div>
+                {opportunity.demand_score != null && (
+                  <div>
+                    <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
+                      Demand Score
+                      <InfoTooltip term={HELP_CONTENT.demandScore.term}>
+                        <p>{HELP_CONTENT.demandScore.description}</p>
+                      </InfoTooltip>
+                    </p>
+                    <p className="text-3xl font-bold text-text-primary font-mono flex items-center gap-2 mt-1">
+                      <TrendingUp className="w-5 h-5 text-near-green" />
+                      {Math.round(opportunity.demand_score)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+          {breakdown && <GapScoreBreakdown breakdown={breakdown} />}
+        </div>
+      </ScrollReveal>
+
       {/* Reasoning */}
       {opportunity.reasoning && (
-        <ScrollReveal>
+        <ScrollReveal delay={0.05}>
           <SectionHeader title="Why This Gap Exists" badge="AI ANALYZED" />
           <Card variant="glass" padding="lg">
             <p className="text-text-secondary leading-relaxed">{opportunity.reasoning}</p>
@@ -131,21 +171,47 @@ export function OpportunityDetail({ opportunity, relatedProjects, category }: Op
           <div className="relative z-10">
             {relatedProjects.length > 0 ? (
               <div className="space-y-4">
-                <p className="text-sm text-text-muted">
-                  {relatedProjects.length} existing {relatedProjects.length === 1 ? 'project' : 'projects'} in this category
-                </p>
+                {/* Summary row */}
+                <div className="flex items-center gap-4 flex-wrap text-sm text-text-muted">
+                  <span>{relatedProjects.length} {relatedProjects.length === 1 ? 'project' : 'projects'}</span>
+                  <span className="text-text-muted/50">|</span>
+                  <span>{relatedProjects.filter((p) => p.is_active).length} active</span>
+                  <span className="text-text-muted/50">|</span>
+                  <span>{formatCurrency(relatedProjects.reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0))} TVL</span>
+                  <span className="text-text-muted/50">|</span>
+                  <span>{formatNumber(relatedProjects.reduce((s, p) => s + (p.github_stars || 0), 0))} stars</span>
+                </div>
                 <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
                   {relatedProjects.map((project) => (
                     <div
                       key={project.id}
                       className="flex items-center gap-4 px-4 py-3 border-l-2 border-transparent hover:border-near-green/50 hover:bg-surface-hover transition-colors"
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">{project.name}</p>
-                        {project.description && (
-                          <p className="text-xs text-text-muted truncate">{project.description}</p>
-                        )}
-                      </div>
+                      <Link href={`/projects/${project.slug}`} className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-text-primary truncate hover:text-near-green transition-colors">{project.name}</p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {project.github_stars > 0 && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted font-mono">
+                              <Star className="w-2.5 h-2.5 text-warning" /> {formatNumber(project.github_stars)}
+                            </span>
+                          )}
+                          {project.github_forks > 0 && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted font-mono">
+                              <GitFork className="w-2.5 h-2.5" /> {formatNumber(project.github_forks)}
+                            </span>
+                          )}
+                          {project.github_language && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted">
+                              <Code className="w-2.5 h-2.5" /> {project.github_language}
+                            </span>
+                          )}
+                          {project.last_github_commit && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted">
+                              <Clock className="w-2.5 h-2.5" /> {timeAgo(project.last_github_commit)}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
                       <div className="text-right shrink-0">
                         <p className="text-sm font-medium text-text-primary font-mono">
                           {Number(project.tvl_usd) > 0 ? formatCurrency(Number(project.tvl_usd)) : '-'}

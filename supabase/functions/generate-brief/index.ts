@@ -64,12 +64,51 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Count active projects in same category
-    const { count } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('category_id', opportunity.category_id)
-      .eq('is_active', true);
+    // Fetch rich context: active projects, top projects, chain stats, category aggregates
+    const [
+      { count },
+      { data: topProjects },
+      { data: chainStats },
+      { data: categoryAgg },
+    ] = await Promise.all([
+      supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', opportunity.category_id)
+        .eq('is_active', true),
+      supabase
+        .from('projects')
+        .select('name, description, tvl_usd, github_stars, github_forks, github_language, raw_data, is_active')
+        .eq('category_id', opportunity.category_id)
+        .order('tvl_usd', { ascending: false })
+        .limit(5),
+      supabase
+        .from('chain_stats')
+        .select('total_transactions, total_accounts, nodes_online, avg_block_time')
+        .order('recorded_at', { ascending: false })
+        .limit(1)
+        .single(),
+      supabase
+        .from('projects')
+        .select('tvl_usd, github_stars, github_forks')
+        .eq('category_id', opportunity.category_id),
+    ]);
+
+    // Compute category aggregates
+    const catTVL = (categoryAgg || []).reduce((s: number, p: Record<string, unknown>) => s + (Number(p.tvl_usd) || 0), 0);
+    const catStars = (categoryAgg || []).reduce((s: number, p: Record<string, unknown>) => s + (Number(p.github_stars) || 0), 0);
+    const catForks = (categoryAgg || []).reduce((s: number, p: Record<string, unknown>) => s + (Number(p.github_forks) || 0), 0);
+
+    // Format top projects for context
+    const projectContext = (topProjects || []).map((p: Record<string, unknown>) => {
+      const fastnear = (p.raw_data as Record<string, unknown>)?.fastnear as Record<string, unknown> | undefined;
+      return `  - ${p.name}: TVL $${Number(p.tvl_usd || 0).toLocaleString()}, ${p.github_stars || 0} stars, ${p.github_forks || 0} forks, lang: ${p.github_language || 'N/A'}, NEAR balance: ${fastnear?.balance_near || 'N/A'}, active: ${p.is_active}${p.description ? `, "${p.description}"` : ''}`;
+    }).join('\n');
+
+    // Format chain stats context
+    const chainContext = chainStats
+      ? `NEAR Chain Health: ${Number(chainStats.total_transactions).toLocaleString()} total transactions, ${Number(chainStats.total_accounts).toLocaleString()} total accounts, ${chainStats.nodes_online} nodes online, ${Number(chainStats.avg_block_time).toFixed(2)}s avg block time`
+      : '';
 
     const userPrompt = `Generate a detailed project brief for this NEAR ecosystem gap:
 
@@ -77,8 +116,19 @@ Category: ${opportunity.category?.name}
 Title: ${opportunity.title}
 Description: ${opportunity.description}
 Gap Score: ${opportunity.gap_score}/100 (higher = bigger opportunity)
+Demand Score: ${opportunity.demand_score || 'N/A'}
 Competition Level: ${opportunity.competition_level}
 Current Active Projects: ${count || 0}
+
+=== ECOSYSTEM CONTEXT ===
+Category Aggregates: $${catTVL.toLocaleString()} TVL, ${catStars} GitHub stars, ${catForks} forks across ${(categoryAgg || []).length} projects
+${chainContext}
+
+Top Projects in Category:
+${projectContext || '  (none)'}
+=========================
+
+Use the ecosystem context above to make your brief more specific, data-informed, and actionable. Reference actual competitor projects, real TVL figures, and chain health metrics where relevant.
 
 Return JSON matching this exact structure:
 {

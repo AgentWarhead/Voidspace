@@ -27,6 +27,9 @@ export interface Project {
   logo_url: string | null;
   tvl_usd: number;
   github_stars: number;
+  github_forks: number;
+  github_open_issues: number;
+  github_language: string | null;
   last_github_commit: string | null;
   is_active: boolean;
   raw_data: Record<string, unknown> | null;
@@ -195,4 +198,40 @@ export interface CategoryWithStats extends Category {
   activeProjectCount: number;
   totalTVL: number;
   gapScore: number;
+}
+
+// --- Chain Stats (persisted from NearBlocks + Pikespeak) ---
+
+export interface ChainStatsRecord {
+  id: string;
+  total_transactions: number;
+  total_accounts: number;
+  block_height: number;
+  nodes_online: number;
+  avg_block_time: number;
+  hot_wallets: { account_id: string; amount: number }[] | null;
+  recorded_at: string;
+}
+
+// --- Aggregated GitHub Stats ---
+
+export interface GitHubAggregateStats {
+  totalStars: number;
+  totalForks: number;
+  totalOpenIssues: number;
+  projectsWithGithub: number;
+  recentlyActive: number;
+  topLanguages: { language: string; count: number }[];
+}
+
+// --- Gap Score Breakdown ---
+
+export interface GapScoreBreakdown {
+  demandScore: number;
+  activeSupply: number;
+  baseScore: number;
+  strategicMultiplier: number;
+  supplyModifier: number;
+  supplyModifierLabel: string;
+  finalScore: number;
 }

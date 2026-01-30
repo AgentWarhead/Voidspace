@@ -52,6 +52,14 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
     strategicMultiplier: Number(category.strategic_multiplier) || 1,
   });
 
+  // Compute additional stats from project data
+  const totalStars = projects.reduce((s, p) => s + (p.github_stars || 0), 0);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentlyActive = projects.filter(
+    (p) => p.last_github_commit && new Date(p.last_github_commit) > thirtyDaysAgo
+  ).length;
+
   return (
     <div className="min-h-screen">
       {/* Hero Banner */}
@@ -87,6 +95,8 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
               activeProjects={stats.active}
               totalTVL={stats.tvl}
               gapScore={gapScore}
+              totalStars={totalStars}
+              recentlyActive={recentlyActive}
             />
           </section>
         </ScrollReveal>

@@ -53,12 +53,35 @@ export async function syncPikespeak(supabase: SupabaseClient) {
   let skipped = 0;
   let hotWalletsCount = 0;
 
-  // Step 1: Fetch hot wallets (most active NEAR accounts)
+  // Step 1: Fetch hot wallets (most active NEAR accounts) and persist to chain_stats
   try {
     const hotRes = await fetch(`${BASE_URL}/hot-wallets/near`, { headers });
     if (hotRes.ok) {
       const hotWallets: HotWallet[] = await hotRes.json();
       hotWalletsCount = Array.isArray(hotWallets) ? hotWallets.length : 0;
+
+      // Persist top 50 hot wallets into the latest chain_stats record
+      if (hotWalletsCount > 0) {
+        const top50 = hotWallets
+          .sort((a, b) => b.amount - a.amount)
+          .slice(0, 50)
+          .map((w) => ({ account_id: w.account_id, amount: w.amount }));
+
+        // Update the most recent chain_stats record with hot wallets data
+        const { data: latestStats } = await supabase
+          .from('chain_stats')
+          .select('id')
+          .order('recorded_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (latestStats) {
+          await supabase
+            .from('chain_stats')
+            .update({ hot_wallets: top50 })
+            .eq('id', latestStats.id);
+        }
+      }
 
       // Log hot wallets data for ecosystem insight
       await supabase

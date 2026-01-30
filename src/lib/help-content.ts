@@ -54,4 +54,49 @@ export const HELP_CONTENT = {
     description:
       'A new UX paradigm where users declare what they want to achieve (e.g., \u201Cswap 10 NEAR for USDC at the best rate\u201D) and solvers compete to fulfill the intent optimally. No manual routing or bridging required.',
   },
+  totalTransactions: {
+    term: 'Total Transactions',
+    description:
+      'The total number of transactions ever processed on the NEAR blockchain. This metric reflects overall network usage and adoption.',
+  },
+  totalAccounts: {
+    term: 'Total Accounts',
+    description:
+      'The total number of accounts created on the NEAR blockchain, including user wallets, smart contracts, and named accounts.',
+  },
+  blockHeight: {
+    term: 'Block Height',
+    description:
+      'The current number of blocks produced on the NEAR blockchain. Each block contains a batch of transactions processed by the network.',
+  },
+  nodesOnline: {
+    term: 'Nodes Online',
+    description:
+      'The number of validator and RPC nodes currently active on the NEAR network. More nodes means a healthier, more decentralized chain.',
+  },
+  avgBlockTime: {
+    term: 'Avg Block Time',
+    description:
+      'The average time between blocks being produced on NEAR. Lower block times mean faster transaction finality for users.',
+  },
+  githubStars: {
+    term: 'GitHub Stars',
+    description:
+      'Total stars across all project repositories in the ecosystem. Stars indicate developer interest and community engagement with open-source projects.',
+  },
+  githubForks: {
+    term: 'GitHub Forks',
+    description:
+      'Total forks across ecosystem repositories. Forks indicate developers actively building on or extending existing projects.',
+  },
+  openIssues: {
+    term: 'Open Issues',
+    description:
+      'Total open issues across ecosystem repositories. Active issue tracking indicates healthy projects with engaged communities.',
+  },
+  recentlyActive: {
+    term: 'Recently Active',
+    description:
+      'Projects with a GitHub commit in the last 30 days. A high ratio of recently active projects signals a healthy, developing ecosystem.',
+  },
 } as const;

@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/ui';
 import { OpportunityDetail } from '@/components/opportunities/OpportunityDetail';
-import { getOpportunityById, getRelatedProjects } from '@/lib/queries';
+import { getOpportunityById, getRelatedProjects, getCategoryProjectStats } from '@/lib/queries';
+import { calculateGapScoreBreakdown } from '@/lib/gap-score';
 
 interface Props {
   params: { id: string };
@@ -24,7 +25,20 @@ export default async function OpportunityDetailPage({ params }: Props) {
   if (!opportunity) notFound();
 
   const category = opportunity.category!;
-  const relatedProjects = await getRelatedProjects(opportunity.category_id, 10);
+  const [relatedProjects, catStats] = await Promise.all([
+    getRelatedProjects(opportunity.category_id, 10),
+    getCategoryProjectStats(opportunity.category_id),
+  ]);
+
+  const breakdown = calculateGapScoreBreakdown({
+    categorySlug: category.slug,
+    totalProjects: catStats.total,
+    activeProjects: catStats.active,
+    totalTVL: catStats.tvl,
+    transactionVolume: 0,
+    isStrategic: category.is_strategic,
+    strategicMultiplier: Number(category.strategic_multiplier) || 1,
+  });
 
   return (
     <div className="min-h-screen">
@@ -33,6 +47,7 @@ export default async function OpportunityDetailPage({ params }: Props) {
           opportunity={opportunity}
           relatedProjects={relatedProjects}
           category={category}
+          breakdown={breakdown}
         />
       </Container>
     </div>

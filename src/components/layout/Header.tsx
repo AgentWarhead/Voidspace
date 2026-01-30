@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 import { useState } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
@@ -48,6 +48,13 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/search"
+              className="p-2 text-text-secondary hover:text-near-green transition-colors"
+              aria-label="Search"
+            >
+              <Search className="w-4 h-4" />
+            </Link>
             <ConnectWalletButton />
           </div>
 

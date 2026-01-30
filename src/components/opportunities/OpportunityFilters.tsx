@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Search } from 'lucide-react';
 import type { Category } from '@/types';
 
 interface OpportunityFiltersProps {
@@ -26,10 +27,30 @@ export function OpportunityFilters({ categories }: OpportunityFiltersProps) {
   const currentCategory = searchParams.get('category') || '';
   const currentDifficulty = searchParams.get('difficulty') || '';
   const currentSort = searchParams.get('sort') || 'gap_score';
+  const currentSearch = searchParams.get('q') || '';
+  const [searchValue, setSearchValue] = useState(currentSearch);
+
+  const handleSearch = useCallback(() => {
+    updateFilter('q', searchValue);
+  }, [searchValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-wrap items-center gap-3">
       <SlidersHorizontal className="w-4 h-4 text-text-muted" />
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onBlur={handleSearch}
+          className="bg-surface/60 backdrop-blur-sm border border-border rounded-lg pl-8 pr-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none w-40"
+        />
+      </div>
 
       <select
         value={currentCategory}

@@ -9,6 +9,8 @@ import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { GradientText } from '@/components/effects/GradientText';
 import { EcosystemOverview } from '@/components/dashboard/EcosystemOverview';
+import { ChainHealth } from '@/components/dashboard/ChainHealth';
+import { GitHubPulse } from '@/components/dashboard/GitHubPulse';
 import { CategoryGrid } from '@/components/dashboard/CategoryGrid';
 import { TrendingGaps } from '@/components/dashboard/TrendingGaps';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
@@ -17,6 +19,9 @@ import {
   getCategoriesWithStats,
   getTopOpportunities,
   getRecentProjects,
+  getLatestChainStats,
+  getGitHubAggregateStats,
+  getChainStatsHistory,
 } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
@@ -31,29 +36,67 @@ const TVLByCategory = nextDynamic(
   { ssr: false }
 );
 
+const GitHubActivityChart = nextDynamic(
+  () => import('@/components/charts/GitHubActivityChart').then((m) => m.GitHubActivityChart),
+  { ssr: false }
+);
+
+const ChainActivityChart = nextDynamic(
+  () => import('@/components/charts/ChainActivityChart').then((m) => m.ChainActivityChart),
+  { ssr: false }
+);
+
 export default async function DashboardPage() {
-  const [stats, categories, opportunities, recentProjects] = await Promise.all([
+  const [stats, categories, opportunities, recentProjects, chainStats, githubStats, chainHistory] = await Promise.all([
     getEcosystemStats(),
     getCategoriesWithStats(),
     getTopOpportunities(5),
     getRecentProjects(5),
+    getLatestChainStats(),
+    getGitHubAggregateStats(),
+    getChainStatsHistory(30),
   ]);
 
   const avgGapScore = categories.length > 0
     ? Math.round(categories.reduce((s, c) => s + c.gapScore, 0) / categories.length)
     : 0;
 
+  // Compute GitHub stars by category for chart
+  const githubStarsByCategory = categories
+    .map((c) => ({ name: c.name, stars: 0 })) // Will be populated as projects have github_stars
+    .filter((c) => c.stars > 0)
+    .sort((a, b) => b.stars - a.stars)
+    .slice(0, 10);
+
   return (
     <div className="min-h-screen">
       {/* Hero — The Void Portal */}
-      <HeroSection stats={stats} />
+      <HeroSection stats={stats} totalStars={githubStats.totalStars} />
 
       <Container size="xl" className="py-8 space-y-10">
         {/* Ecosystem Stats */}
         <ScrollReveal>
           <section>
             <SectionHeader title="Ecosystem Overview" badge="LIVE" />
-            <EcosystemOverview stats={stats} avgGapScore={avgGapScore} />
+            <EcosystemOverview stats={stats} avgGapScore={avgGapScore} chainStats={chainStats} githubStats={githubStats} />
+          </section>
+        </ScrollReveal>
+
+        {/* Chain Health */}
+        {chainStats && (
+          <ScrollReveal delay={0.05}>
+            <section>
+              <SectionHeader title="Chain Health" badge="NEARBLOCKS" />
+              <ChainHealth chainStats={chainStats} />
+            </section>
+          </ScrollReveal>
+        )}
+
+        {/* GitHub Pulse */}
+        <ScrollReveal delay={0.08}>
+          <section>
+            <SectionHeader title="GitHub Ecosystem Pulse" badge="GITHUB" />
+            <GitHubPulse stats={githubStats} />
           </section>
         </ScrollReveal>
 
@@ -71,6 +114,16 @@ export default async function DashboardPage() {
                 <ScanLine />
                 <h3 className="text-sm font-medium text-text-secondary mb-4">TVL Distribution</h3>
                 <TVLByCategory categories={categories} />
+              </Card>
+              <Card variant="glass" padding="md" className="relative overflow-hidden">
+                <ScanLine />
+                <h3 className="text-sm font-medium text-text-secondary mb-4">Chain Activity Trend</h3>
+                <ChainActivityChart history={chainHistory} />
+              </Card>
+              <Card variant="glass" padding="md" className="relative overflow-hidden">
+                <ScanLine />
+                <h3 className="text-sm font-medium text-text-secondary mb-4">GitHub Stars by Category</h3>
+                <GitHubActivityChart categories={categories} githubStarsByCategory={githubStarsByCategory} />
               </Card>
             </div>
           </section>

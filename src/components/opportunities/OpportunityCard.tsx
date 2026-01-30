@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Badge } from '@/components/ui';
+import { TrendingUp } from 'lucide-react';
+import { Badge, InfoTooltip } from '@/components/ui';
 import { GlowCard } from '@/components/effects/GlowCard';
 import { TiltCard } from '@/components/effects/TiltCard';
 import { HotTag } from '@/components/effects/HotTag';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { SaveButton } from '@/components/opportunities/SaveButton';
+import { HELP_CONTENT } from '@/lib/help-content';
 import type { Opportunity } from '@/types';
 
 interface OpportunityCardProps {
@@ -50,7 +52,18 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
               </Badge>
             </div>
 
-            <GapScoreIndicator score={opportunity.gap_score} size="md" />
+            <div className="flex items-center justify-between">
+              <GapScoreIndicator score={opportunity.gap_score} size="md" />
+              {opportunity.demand_score != null && opportunity.demand_score > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs text-text-muted font-mono">
+                  <TrendingUp className="w-3 h-3 text-near-green" />
+                  Demand: {Math.round(opportunity.demand_score)}
+                  <InfoTooltip term={HELP_CONTENT.demandScore.term}>
+                    <p>{HELP_CONTENT.demandScore.description}</p>
+                  </InfoTooltip>
+                </span>
+              )}
+            </div>
           </div>
         </GlowCard>
       </TiltCard>

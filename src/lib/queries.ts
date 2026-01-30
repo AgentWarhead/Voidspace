@@ -7,6 +7,8 @@ import type {
   Project,
   Category,
   SyncLog,
+  ChainStatsRecord,
+  GitHubAggregateStats,
 } from '@/types';
 
 // --- Dashboard Queries ---
@@ -182,6 +184,12 @@ export async function getProjectsByCategory(
     case 'stars':
       query = query.order('github_stars', { ascending: false });
       break;
+    case 'forks':
+      query = query.order('github_forks', { ascending: false });
+      break;
+    case 'issues':
+      query = query.order('github_open_issues', { ascending: false });
+      break;
     default:
       query = query.order('tvl_usd', { ascending: false });
   }
@@ -222,6 +230,7 @@ export async function getOpportunities(options: {
   category?: string;
   difficulty?: string;
   sort?: string;
+  search?: string;
   minScore?: number;
   maxScore?: number;
   page?: number;
@@ -232,6 +241,7 @@ export async function getOpportunities(options: {
     category,
     difficulty,
     sort = 'gap_score',
+    search,
     minScore,
     maxScore,
     page = 1,
@@ -241,6 +251,10 @@ export async function getOpportunities(options: {
   let query = supabase
     .from('opportunities')
     .select('*, category:categories(*)', { count: 'exact' });
+
+  if (search) {
+    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+  }
 
   if (category) {
     const { data: cat } = await supabase
@@ -315,4 +329,132 @@ export async function getRelatedProjects(categoryId: string, limit: number = 5):
     .limit(limit);
 
   return (data || []) as Project[];
+}
+
+// --- Chain Stats Queries ---
+
+export async function getLatestChainStats(): Promise<ChainStatsRecord | null> {
+  const supabase = createAdminClient();
+
+  const { data } = await supabase
+    .from('chain_stats')
+    .select('*')
+    .order('recorded_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  return data as ChainStatsRecord | null;
+}
+
+export async function getChainStatsHistory(days: number = 30): Promise<ChainStatsRecord[]> {
+  const supabase = createAdminClient();
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const { data } = await supabase
+    .from('chain_stats')
+    .select('*')
+    .gte('recorded_at', since.toISOString())
+    .order('recorded_at', { ascending: true });
+
+  return (data || []) as ChainStatsRecord[];
+}
+
+// --- GitHub Aggregate Stats ---
+
+export async function getGitHubAggregateStats(): Promise<GitHubAggregateStats> {
+  const supabase = createAdminClient();
+
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('github_stars, github_forks, github_open_issues, github_language, last_github_commit, github_url');
+
+  if (!projects) {
+    return { totalStars: 0, totalForks: 0, totalOpenIssues: 0, projectsWithGithub: 0, recentlyActive: 0, topLanguages: [] };
+  }
+
+  const withGithub = projects.filter((p) => p.github_url);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const recentlyActive = withGithub.filter(
+    (p) => p.last_github_commit && new Date(p.last_github_commit) > thirtyDaysAgo
+  ).length;
+
+  const totalStars = projects.reduce((s, p) => s + (p.github_stars || 0), 0);
+  const totalForks = projects.reduce((s, p) => s + (p.github_forks || 0), 0);
+  const totalOpenIssues = projects.reduce((s, p) => s + (p.github_open_issues || 0), 0);
+
+  // Count languages
+  const langMap: Record<string, number> = {};
+  for (const p of projects) {
+    if (p.github_language) {
+      langMap[p.github_language] = (langMap[p.github_language] || 0) + 1;
+    }
+  }
+  const topLanguages = Object.entries(langMap)
+    .map(([language, count]) => ({ language, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  return {
+    totalStars,
+    totalForks,
+    totalOpenIssues,
+    projectsWithGithub: withGithub.length,
+    recentlyActive,
+    topLanguages,
+  };
+}
+
+// --- Project Queries ---
+
+export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  const supabase = createAdminClient();
+
+  const { data } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  return data as Project | null;
+}
+
+// --- Search ---
+
+export async function searchAll(query: string): Promise<{
+  projects: Project[];
+  opportunities: Opportunity[];
+  categories: Category[];
+}> {
+  const supabase = createAdminClient();
+  const term = `%${query}%`;
+
+  const [projectsRes, opportunitiesRes, categoriesRes] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('*')
+      .or(`name.ilike.${term},description.ilike.${term}`)
+      .order('tvl_usd', { ascending: false })
+      .limit(20),
+    supabase
+      .from('opportunities')
+      .select('*, category:categories(*)')
+      .or(`title.ilike.${term},description.ilike.${term}`)
+      .order('gap_score', { ascending: false })
+      .limit(20),
+    supabase
+      .from('categories')
+      .select('*')
+      .or(`name.ilike.${term},description.ilike.${term}`)
+      .order('name')
+      .limit(20),
+  ]);
+
+  return {
+    projects: (projectsRes.data || []) as Project[],
+    opportunities: (opportunitiesRes.data || []) as Opportunity[],
+    categories: (categoriesRes.data || []) as Category[],
+  };
 }

@@ -77,6 +77,12 @@ export function TrendingGaps({ opportunities }: TrendingGapsProps) {
                   </div>
                 </div>
 
+                {opp.demand_score != null && opp.demand_score > 0 && (
+                  <span className="text-[11px] text-text-muted font-mono shrink-0 hidden sm:block">
+                    Demand: {Math.round(opp.demand_score)}
+                  </span>
+                )}
+
                 <div className="w-24 shrink-0">
                   <GapScoreIndicator score={opp.gap_score} size="sm" />
                 </div>

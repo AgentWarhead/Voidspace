@@ -38,6 +38,17 @@ export async function syncNearBlocks(supabase: SupabaseClient): Promise<{
       avgBlockTime: Number(stats.avg_block_time || stats.avgBlockTime || 0),
     };
 
+    // Persist chain stats to chain_stats table
+    await supabase
+      .from('chain_stats')
+      .insert({
+        total_transactions: chainStats.totalTransactions,
+        total_accounts: chainStats.totalAccounts,
+        block_height: chainStats.blockHeight,
+        nodes_online: chainStats.nodesOnline,
+        avg_block_time: chainStats.avgBlockTime,
+      });
+
     // Log the sync
     await supabase
       .from('sync_logs')

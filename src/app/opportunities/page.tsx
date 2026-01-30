@@ -19,6 +19,7 @@ interface Props {
     minScore?: string;
     maxScore?: string;
     page?: string;
+    q?: string;
   };
 }
 
@@ -38,6 +39,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
       sort: searchParams.sort || 'gap_score',
       minScore: searchParams.minScore ? parseInt(searchParams.minScore) : undefined,
       maxScore: searchParams.maxScore ? parseInt(searchParams.maxScore) : undefined,
+      search: searchParams.q,
       page,
       pageSize,
     }),
