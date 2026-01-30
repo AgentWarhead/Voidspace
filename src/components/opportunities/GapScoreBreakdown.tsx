@@ -15,12 +15,12 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
       <ScanLine />
       <div className="relative z-10 space-y-4">
         <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
-          Score Breakdown
+          Void Analysis
         </h3>
 
         <div className="space-y-3">
           <BreakdownRow
-            label="Demand Score"
+            label="Signal Strength"
             description="log10(TVL + Volume x 100 + 1)"
             value={breakdown.demandScore}
             maxValue={12}
@@ -42,7 +42,7 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
           />
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-text-muted">Strategic Multiplier</span>
+            <span className="text-text-muted">NEAR Priority Boost</span>
             <Badge variant="default" className={breakdown.strategicMultiplier > 1 ? 'bg-near-green/10 text-near-green' : ''}>
               {breakdown.strategicMultiplier}x
             </Badge>
@@ -56,7 +56,7 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
           </div>
 
           <div className="pt-3 border-t border-border flex items-center justify-between">
-            <span className="text-sm font-semibold text-text-primary">Final Score</span>
+            <span className="text-sm font-semibold text-text-primary">Void Score</span>
             <span
               className="text-2xl font-bold font-mono"
               style={{

@@ -21,7 +21,7 @@ export function CategoryHeader({ category, gapScore, projectCount }: CategoryHea
             {category.is_strategic && (
               <span className="flex items-center">
                 <Badge variant="default" className="bg-near-green/10 text-near-green">
-                  Strategic 2x
+                  NEAR Priority
                 </Badge>
                 <InfoTooltip term={HELP_CONTENT.strategicCategory.term}>
                   <p>{HELP_CONTENT.strategicCategory.description}</p>

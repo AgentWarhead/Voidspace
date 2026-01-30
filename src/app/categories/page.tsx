@@ -43,7 +43,7 @@ export default async function CategoriesPage() {
             Ecosystem Categories
           </GradientText>
           <p className="text-text-secondary mt-3 max-w-lg mx-auto">
-            Browse the NEAR ecosystem by category. Green bars indicate high opportunity gaps.
+            Browse the NEAR ecosystem by category. Green bars indicate deep voids with opportunity.
           </p>
 
           {/* Summary Stats */}
@@ -57,12 +57,12 @@ export default async function CategoriesPage() {
               <p className="text-2xl font-bold font-mono" style={{
                 color: avgGapScore >= 67 ? '#00EC97' : avgGapScore >= 34 ? '#FFA502' : '#FF4757',
               }}>{avgGapScore}</p>
-              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Avg Gap Score</p>
+              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Avg Void Score</p>
             </div>
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
             <div className="text-center">
               <p className="text-2xl font-bold text-near-green font-mono">{strategicCount}</p>
-              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Strategic</p>
+              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">NEAR Priority</p>
             </div>
           </div>
         </Container>

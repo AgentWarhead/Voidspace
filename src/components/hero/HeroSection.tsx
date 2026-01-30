@@ -12,10 +12,10 @@ import type { EcosystemStats } from '@/types';
 
 interface HeroSectionProps {
   stats: EcosystemStats;
-  totalStars?: number;
+  totalOpportunities?: number;
 }
 
-export function HeroSection({ stats, totalStars }: HeroSectionProps) {
+export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden py-16 sm:py-24">
       {/* Layer 1: Void depth — radial gradient creating infinite depth */}
@@ -70,15 +70,16 @@ export function HeroSection({ stats, totalStars }: HeroSectionProps) {
             <TypewriterText
               lines={[
                 'Scanning the NEAR ecosystem for voids...',
-                'AI-powered. Real-time. Opportunities found.',
+                'AI-powered void detection. Real-time. Actionable.',
+                'From void to vision in 60 seconds.',
               ]}
               speed={35}
               className="max-w-lg mx-auto"
             />
           </motion.div>
 
-          {/* Stats bar */}
-          <AnimatedStatBar stats={stats} totalStars={totalStars} />
+          {/* Stats bar — 3 credibility stats */}
+          <AnimatedStatBar stats={stats} totalOpportunities={totalOpportunities} />
 
           {/* CTA */}
           <motion.div

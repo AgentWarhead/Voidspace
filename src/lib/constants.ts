@@ -3,7 +3,7 @@
 // ============================================================
 
 export const SITE_NAME = 'Voidspace';
-export const SITE_DESCRIPTION = 'AI-powered NEAR ecosystem gap scanner. Find voids. Build the future.';
+export const SITE_DESCRIPTION = 'AI-powered NEAR ecosystem void scanner. Find voids. Build the future.';
 export const SITE_TAGLINE = 'Every ecosystem has voids. Voidspace finds them.';
 
 export const COLORS = {
@@ -28,9 +28,9 @@ export const COLORS = {
 } as const;
 
 export const COMPETITION_LABELS = {
-  low: 'Wide Open',
-  medium: 'Competitive',
-  high: 'Saturated',
+  low: 'Open Void',
+  medium: 'Closing',
+  high: 'Filled',
 } as const;
 
 export const DIFFICULTY_LABELS = {
@@ -40,10 +40,9 @@ export const DIFFICULTY_LABELS = {
 } as const;
 
 export const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/' },
+  { label: 'Command Center', href: '/' },
+  { label: 'Voids', href: '/opportunities' },
   { label: 'Categories', href: '/categories' },
-  { label: 'Opportunities', href: '/opportunities' },
-  { label: 'Ecosystem', href: '/ecosystem' },
   { label: 'Learn', href: '/learn' },
   { label: 'Profile', href: '/profile' },
 ] as const;

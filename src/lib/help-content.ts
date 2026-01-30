@@ -1,8 +1,8 @@
 export const HELP_CONTENT = {
   gapScore: {
-    term: 'Gap Score',
+    term: 'Void Score',
     description:
-      'A 0\u2013100 score measuring how much opportunity exists in a category. Higher scores mean bigger gaps waiting to be filled. Calculated from TVL demand, number of active projects, and NEAR strategic priorities.',
+      'A 0\u2013100 score measuring how deep the void is in a category. Higher scores mean bigger voids \u2014 more opportunity for builders. Calculated from capital demand, number of active projects, and NEAR priorities.',
   },
   tvl: {
     term: 'TVL (Total Value Locked)',
@@ -10,9 +10,9 @@ export const HELP_CONTENT = {
       'The total dollar value of crypto assets deposited in a protocol\u2019s smart contracts. Higher TVL signals more user trust and capital flowing through the ecosystem.',
   },
   competitionLevel: {
-    term: 'Competition Level',
+    term: 'Void Status',
     description:
-      'How many active projects already exist in this space. \u201CWide Open\u201D means 0\u20132 projects (huge opportunity), \u201CCompetitive\u201D means 3\u201310, and \u201CSaturated\u201D means 10+ existing players.',
+      'How filled or empty this void is. \u201COpen Void\u201D means 0\u20132 projects (massive opportunity), \u201CClosing\u201D means 3\u201310 builders are moving in, and \u201CFilled\u201D means 10+ established players.',
   },
   difficulty: {
     term: 'Build Difficulty',
@@ -20,19 +20,19 @@ export const HELP_CONTENT = {
       'Estimated technical complexity. Beginner: basic smart contracts and frontend. Intermediate: complex contracts with integrations. Advanced: novel cryptography, infrastructure, or cross-chain systems.',
   },
   strategicCategory: {
-    term: 'Strategic Category',
+    term: 'NEAR Priority',
     description:
-      'Categories NEAR Protocol has designated as strategic priorities. These receive a 2\u00D7 multiplier on their Gap Score, reflecting extra ecosystem support, grants, and attention from the foundation.',
+      'Categories NEAR Protocol has designated as strategic priorities. These receive boosted Void Scores, reflecting extra ecosystem support, grants, and attention from the foundation.',
   },
   aiBrief: {
-    term: 'AI Project Brief',
+    term: 'Void Brief',
     description:
-      'An AI-generated project plan created by Claude, tailored to the specific opportunity. Includes tech stack recommendations, key features, monetization ideas, and NEAR-specific integration guidance.',
+      'An AI-generated build plan created by Claude, tailored to the specific void. Includes tech stack recommendations, key features, monetization ideas, and NEAR-specific integration guidance.',
   },
   demandScore: {
-    term: 'Demand Score',
+    term: 'Signal Strength',
     description:
-      'Measures user demand in a category based on TVL and transaction volume. Higher demand with fewer projects means a bigger opportunity gap.',
+      'Measures how strong the market signal is for this category based on TVL and transaction volume. Stronger signals with fewer projects means a deeper void.',
   },
   shadeAgents: {
     term: 'Shade Agents',

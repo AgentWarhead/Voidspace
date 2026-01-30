@@ -19,21 +19,18 @@ export function Footer() {
             <div>
               <span className="text-sm font-semibold text-gradient">Voidspace</span>
               <p className="text-[10px] text-text-muted">
-                AI-powered ecosystem scanner
+                AI-powered void scanner
               </p>
             </div>
           </div>
 
           {/* Quick links */}
           <div className="flex items-center justify-center gap-4">
+            <Link href="/opportunities" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Voids
+            </Link>
             <Link href="/categories" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Categories
-            </Link>
-            <Link href="/opportunities" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
-              Opportunities
-            </Link>
-            <Link href="/ecosystem" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
-              Ecosystem
             </Link>
             <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Learn

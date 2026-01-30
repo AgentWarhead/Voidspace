@@ -79,7 +79,7 @@ export function TrendingGaps({ opportunities }: TrendingGapsProps) {
 
                 {opp.demand_score != null && opp.demand_score > 0 && (
                   <span className="text-[11px] text-text-muted font-mono shrink-0 hidden sm:block">
-                    Demand: {Math.round(opp.demand_score)}
+                    Signal: {Math.round(opp.demand_score)}
                   </span>
                 )}
 

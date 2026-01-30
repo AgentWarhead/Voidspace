@@ -40,7 +40,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Opportunities
+        Back to Voids
       </Link>
 
       {/* Header Banner */}
@@ -96,9 +96,22 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         </div>
       </div>
 
-      {/* Scores Section */}
+      {/* Void Brief — PROMOTED to 2nd position */}
       <ScrollReveal>
-        <SectionHeader title="Scores" />
+        <div className="flex items-center gap-1">
+          <SectionHeader title="Void Brief" badge="POWERED BY CLAUDE AI" />
+          <InfoTooltip term={HELP_CONTENT.aiBrief.term}>
+            <p>{HELP_CONTENT.aiBrief.description}</p>
+          </InfoTooltip>
+        </div>
+        <AnimatedBorderCard padding="none">
+          <BriefGenerator opportunityId={opportunity.id} />
+        </AnimatedBorderCard>
+      </ScrollReveal>
+
+      {/* Void Analysis */}
+      <ScrollReveal delay={0.05}>
+        <SectionHeader title="Void Analysis" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card variant="glass" padding="lg" className="relative overflow-hidden">
             <ScanLine />
@@ -106,7 +119,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
-                    Gap Score
+                    Void Score
                     <InfoTooltip term={HELP_CONTENT.gapScore.term}>
                       <p>{HELP_CONTENT.gapScore.description}</p>
                     </InfoTooltip>
@@ -116,7 +129,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                 {opportunity.demand_score != null && (
                   <div>
                     <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
-                      Demand Score
+                      Signal Strength
                       <InfoTooltip term={HELP_CONTENT.demandScore.term}>
                         <p>{HELP_CONTENT.demandScore.description}</p>
                       </InfoTooltip>
@@ -136,8 +149,8 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
 
       {/* Reasoning */}
       {opportunity.reasoning && (
-        <ScrollReveal delay={0.05}>
-          <SectionHeader title="Why This Gap Exists" badge="AI ANALYZED" />
+        <ScrollReveal delay={0.1}>
+          <SectionHeader title="Why This Void Exists" badge="AI ANALYZED" />
           <Card variant="glass" padding="lg">
             <p className="text-text-secondary leading-relaxed">{opportunity.reasoning}</p>
           </Card>
@@ -146,7 +159,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
 
       {/* Suggested Features */}
       {opportunity.suggested_features && opportunity.suggested_features.length > 0 && (
-        <ScrollReveal delay={0.1}>
+        <ScrollReveal delay={0.15}>
           <SectionHeader title="Suggested Features" count={opportunity.suggested_features.length} />
           <Card variant="glass" padding="lg">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -164,7 +177,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
       )}
 
       {/* Competition Analysis */}
-      <ScrollReveal delay={0.15}>
+      <ScrollReveal delay={0.2}>
         <SectionHeader title="Competition Analysis" count={relatedProjects.length} />
         <Card variant="glass" padding="lg" className="relative overflow-hidden">
           <ScanLine />
@@ -233,24 +246,11 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
               </div>
             ) : (
               <p className="text-sm text-text-muted">
-                No competing projects found in this category — wide open opportunity.
+                No competing projects found in this category — this void is wide open.
               </p>
             )}
           </div>
         </Card>
-      </ScrollReveal>
-
-      {/* Brief Generator */}
-      <ScrollReveal delay={0.2}>
-        <div className="flex items-center gap-1">
-          <SectionHeader title="AI Project Brief" badge="PREMIUM" />
-          <InfoTooltip term={HELP_CONTENT.aiBrief.term}>
-            <p>{HELP_CONTENT.aiBrief.description}</p>
-          </InfoTooltip>
-        </div>
-        <AnimatedBorderCard padding="none">
-          <BriefGenerator opportunityId={opportunity.id} />
-        </AnimatedBorderCard>
       </ScrollReveal>
     </motion.div>
   );

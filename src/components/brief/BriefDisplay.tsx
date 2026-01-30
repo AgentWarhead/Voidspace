@@ -54,7 +54,7 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
     if (brief.nearTechStack.useIntents) nearTech.push('NEAR Intents');
     if (brief.nearTechStack.useChainSignatures) nearTech.push('Chain Signatures');
     if (nearTech.length) lines.push(`Recommended: ${nearTech.join(', ')}\n`);
-    lines.push(`## Competitive Landscape\n${brief.competitiveLandscape}\n`);
+    lines.push(`## Void Landscape\n${brief.competitiveLandscape}\n`);
     lines.push(`## Monetization Ideas`);
     brief.monetizationIdeas.forEach((m) => lines.push(`- ${m}`));
     lines.push('');
@@ -224,7 +224,7 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
       </BriefSection>
 
       {/* Competitive Landscape */}
-      <BriefSection title="Competitive Landscape" icon={<TrendingUp className="w-4 h-4" />}>
+      <BriefSection title="Void Landscape" icon={<TrendingUp className="w-4 h-4" />}>
         <p className="text-sm text-text-secondary leading-relaxed">
           {brief.competitiveLandscape}
         </p>

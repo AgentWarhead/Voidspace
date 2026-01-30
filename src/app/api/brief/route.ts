@@ -28,21 +28,38 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
-      // Count briefs this month
-      const monthStart = new Date();
-      monthStart.setDate(1);
-      monthStart.setHours(0, 0, 0, 0);
+      const tier = user.tier as TierName;
 
-      const { count: briefsThisMonth } = await supabase
-        .from('usage')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('action', 'brief_generated')
-        .gte('created_at', monthStart.toISOString());
+      // Shade tier: 3 lifetime briefs (all-time count)
+      // All other tiers: monthly limit
+      let briefCount = 0;
+      if (tier === 'shade') {
+        const { count } = await supabase
+          .from('usage')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('action', 'brief_generated');
+        briefCount = count || 0;
+      } else {
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
 
-      if (!canGenerateBrief(user.tier as TierName, briefsThisMonth || 0)) {
+        const { count } = await supabase
+          .from('usage')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('action', 'brief_generated')
+          .gte('created_at', monthStart.toISOString());
+        briefCount = count || 0;
+      }
+
+      if (!canGenerateBrief(tier, briefCount)) {
+        const message = tier === 'shade'
+          ? 'You\u2019ve used all 3 free Void Briefs. Upgrade to continue generating briefs.'
+          : 'Void Brief generation limit reached for your tier this month.';
         return NextResponse.json(
-          { error: 'Brief generation limit reached for your tier' },
+          { error: message },
           { status: 403 }
         );
       }

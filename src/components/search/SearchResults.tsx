@@ -24,7 +24,7 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
 
   const tabs: { key: Tab; label: string; count: number; icon: React.ReactNode }[] = [
     { key: 'projects', label: 'Projects', count: projects.length, icon: <Layers className="w-3.5 h-3.5" /> },
-    { key: 'opportunities', label: 'Opportunities', count: opportunities.length, icon: <Target className="w-3.5 h-3.5" /> },
+    { key: 'opportunities', label: 'Voids', count: opportunities.length, icon: <Target className="w-3.5 h-3.5" /> },
     { key: 'categories', label: 'Categories', count: categories.length, icon: <Grid3X3 className="w-3.5 h-3.5" /> },
   ];
 
@@ -33,7 +33,7 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
   if (!query) {
     return (
       <div className="text-center py-16">
-        <p className="text-text-muted text-sm">Enter a search term above to find projects, opportunities, and categories.</p>
+        <p className="text-text-muted text-sm">Enter a search term above to find projects, voids, and categories.</p>
       </div>
     );
   }
@@ -157,7 +157,7 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-text-primary">{cat.name}</span>
                     {cat.is_strategic && (
-                      <Badge variant="default" className="text-[10px] bg-near-green/10 text-near-green">Strategic</Badge>
+                      <Badge variant="default" className="text-[10px] bg-near-green/10 text-near-green">NEAR Priority</Badge>
                     )}
                   </div>
                   {cat.description && (

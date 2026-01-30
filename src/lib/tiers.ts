@@ -5,11 +5,11 @@ export const TIERS: Record<TierName, TierConfig> = {
     name: 'Shade',
     tagline: 'Glimpse the void',
     price: 0,
-    briefsPerMonth: 0,
+    briefsPerMonth: 3, // 3 lifetime briefs (not per month — enforced in API)
     previewsPerDay: 3,
     maxSaved: 5,
     color: '#666666',
-    features: ['dashboard', 'browse', 'preview'],
+    features: ['dashboard', 'browse', 'preview', 'briefs'],
   },
   specter: {
     name: 'Specter',
@@ -43,8 +43,8 @@ export const TIERS: Record<TierName, TierConfig> = {
   },
 } as const;
 
-export function canGenerateBrief(tier: TierName, usageThisMonth: number): boolean {
-  return usageThisMonth < TIERS[tier].briefsPerMonth;
+export function canGenerateBrief(tier: TierName, usageCount: number): boolean {
+  return usageCount < TIERS[tier].briefsPerMonth;
 }
 
 export function canPreview(tier: TierName, previewsToday: number): boolean {

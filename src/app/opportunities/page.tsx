@@ -24,8 +24,8 @@ interface Props {
 }
 
 export const metadata = {
-  title: 'Opportunities — Voidspace',
-  description: 'Discover gap opportunities in the NEAR ecosystem.',
+  title: 'Voids — Voidspace',
+  description: 'Discover voids in the NEAR ecosystem. Find your next build.',
 };
 
 export default async function OpportunitiesPage({ searchParams }: Props) {
@@ -65,17 +65,17 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
         />
         <Container size="xl" className="relative z-10 text-center">
           <GradientText as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight">
-            Opportunities
+            Detected Voids
           </GradientText>
           <p className="text-text-secondary mt-3 max-w-lg mx-auto">
-            Discover gaps in the NEAR ecosystem. Higher gap scores indicate greater opportunity.
+            Explore voids in the NEAR ecosystem. Higher Void Scores mean deeper opportunities.
           </p>
 
           {/* Summary Stats */}
           <div className="flex items-center justify-center gap-6 sm:gap-10 mt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-near-green font-mono">{total}</p>
-              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Total Gaps</p>
+              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Voids Detected</p>
             </div>
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
             <div className="text-center">
@@ -97,7 +97,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
 
         <ScrollReveal delay={0.1}>
           <section>
-            <SectionHeader title="All Opportunities" count={total} badge="HOT" />
+            <SectionHeader title="All Voids" count={total} badge="HOT" />
             <OpportunityList
               opportunities={opportunities}
               total={total}

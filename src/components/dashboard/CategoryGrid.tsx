@@ -56,7 +56,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
                       {cat.is_strategic && <HotTag />}
                       {cat.is_strategic && (
                         <Badge variant="default" className="bg-near-green/10 text-near-green text-xs">
-                          2x
+                          NEAR Priority
                         </Badge>
                       )}
                     </div>
@@ -74,7 +74,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
                       <span className="font-mono font-medium flex items-center" style={{
                         color: cat.gapScore >= 67 ? '#00EC97' : cat.gapScore >= 34 ? '#FFA502' : '#FF4757',
                       }}>
-                        Gap: {cat.gapScore}
+                        Void: {cat.gapScore}
                         <InfoTooltip term={HELP_CONTENT.gapScore.term}>
                           <p>{HELP_CONTENT.gapScore.description}</p>
                         </InfoTooltip>

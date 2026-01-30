@@ -15,7 +15,7 @@ interface Props {
 
 export const metadata = {
   title: 'Search — Voidspace',
-  description: 'Search across projects, opportunities, and categories in the NEAR ecosystem.',
+  description: 'Search across projects, voids, and categories in the NEAR ecosystem.',
 };
 
 export default async function SearchPage({ searchParams }: Props) {
@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: Props) {
             Search
           </GradientText>
           <p className="text-text-secondary mt-3 max-w-lg mx-auto">
-            Search across projects, opportunities, and categories in the NEAR ecosystem.
+            Search across projects, voids, and categories in the NEAR ecosystem.
           </p>
 
           {/* Search Form */}
@@ -59,7 +59,7 @@ export default async function SearchPage({ searchParams }: Props) {
                   type="text"
                   name="q"
                   defaultValue={query}
-                  placeholder="Search projects, opportunities, categories..."
+                  placeholder="Search projects, voids, categories..."
                   className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted px-4 py-3 text-sm outline-none"
                   autoFocus
                 />

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExternalLink, Zap, Code2, Users, Brain, Link2, Shield, BookOpen, BarChart3, Target, Swords } from 'lucide-react';
+import { ExternalLink, Zap, Code2, Users, Brain, Link2, Shield, BookOpen, BarChart3, Target, Swords, Sparkles } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -10,7 +10,7 @@ import { GlowCard } from '@/components/effects/GlowCard';
 
 export const metadata: Metadata = {
   title: 'Learn — Voidspace',
-  description: 'Learn about NEAR Protocol, its technology, and how Voidspace helps you find your next build.',
+  description: 'Learn about NEAR Protocol, its technology, and how Voidspace uses AI to help you find and build your next project.',
 };
 
 const NEAR_FEATURES = [
@@ -58,18 +58,18 @@ const KEY_TECHNOLOGIES = [
 const VOIDSPACE_METRICS = [
   {
     icon: Target,
-    title: 'Gap Score (0–100)',
-    description: 'Measures how much opportunity exists in a category. Calculated from: TVL demand (how much capital is flowing), active project count (how many builders are present), and NEAR strategic priorities. Higher score = bigger gap to fill.',
+    title: 'Void Score (0\u2013100)',
+    description: 'Measures how deep the void is in a category. Calculated from: capital demand (TVL flow), active project count (how many builders are present), and NEAR priorities. Higher score = deeper void = bigger opportunity.',
   },
   {
     icon: Swords,
-    title: 'Competition Level',
-    description: '"Wide Open" means 0–2 existing projects (massive opportunity). "Competitive" means 3–10 projects. "Saturated" means 10+ established players. Low competition + high demand = best opportunities.',
+    title: 'Void Status',
+    description: '\u201COpen Void\u201D means 0\u20132 existing projects (massive opportunity). \u201CClosing\u201D means 3\u201310 builders are moving in. \u201CFilled\u201D means 10+ established players. Open voids with strong signals = best opportunities.',
   },
   {
     icon: BarChart3,
-    title: 'Strategic Categories',
-    description: 'NEAR Foundation has designated certain categories (AI & Agents, Privacy, Intents, RWA, Data & Analytics) as strategic priorities. These get a 2× Gap Score multiplier, reflecting extra grants, support, and ecosystem attention.',
+    title: 'NEAR Priority Categories',
+    description: 'NEAR Foundation has designated certain categories (AI & Agents, Privacy, Intents, RWA, Data & Analytics) as strategic priorities. These get boosted Void Scores, reflecting extra grants, support, and ecosystem attention.',
   },
 ];
 
@@ -192,11 +192,51 @@ export default function LearnPage() {
           </div>
         </ScrollReveal>
 
+        {/* How AI Creates Your Void Brief */}
+        <ScrollReveal delay={0.12}>
+          <SectionHeader title="How AI Creates Your Void Brief" badge="POWERED BY CLAUDE" />
+          <Card variant="glass" padding="lg">
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
+                  <Sparkles className="w-5 h-5 text-near-green" />
+                </div>
+                <div className="space-y-3 text-text-secondary leading-relaxed">
+                  <p>
+                    Voidspace uses <strong className="text-text-primary">Claude AI by Anthropic</strong> to generate personalized build plans called <strong className="text-text-primary">Void Briefs</strong>. Each brief is tailored to a specific void in the NEAR ecosystem and includes everything you need to start building.
+                  </p>
+                  <p>
+                    When you request a Void Brief, our system feeds Claude real-time ecosystem data from 6 sources — project registry, DeFiLlama TVL data, GitHub activity, NearBlocks chain metrics, FastNEAR on-chain data, and Pikespeak wallet analytics. This means every brief is grounded in actual ecosystem data, not generic templates.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[
+                  { title: 'Problem Statement', desc: 'What the void is and why it matters' },
+                  { title: 'Solution Overview', desc: 'High-level architecture and approach' },
+                  { title: 'Tech Stack', desc: 'Frontend, backend, and blockchain requirements' },
+                  { title: 'NEAR Technologies', desc: 'Which NEAR features to leverage (Intents, Shade Agents, etc.)' },
+                  { title: 'Key Features', desc: 'Prioritized feature list with must-haves' },
+                  { title: 'Build Complexity', desc: 'Timeline, team size, and difficulty estimate' },
+                ].map((item) => (
+                  <div key={item.title} className="p-3 rounded-lg bg-surface-hover">
+                    <h4 className="text-sm font-medium text-text-primary">{item.title}</h4>
+                    <p className="text-xs text-text-muted mt-1">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-text-muted font-mono">
+                Free tier includes 3 Void Briefs after connecting your wallet. Upgrade for unlimited access.
+              </p>
+            </div>
+          </Card>
+        </ScrollReveal>
+
         {/* Understanding Voidspace Metrics */}
         <ScrollReveal delay={0.15}>
           <SectionHeader title="Understanding Voidspace" badge="METRICS" />
           <p className="text-text-secondary mb-4">
-            Voidspace analyzes the NEAR ecosystem to find underserved categories where new projects can make the biggest impact. Here&apos;s how to read the data:
+            Voidspace analyzes the NEAR ecosystem to find underserved voids where new projects can make the biggest impact. Here&apos;s how to read the data:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {VOIDSPACE_METRICS.map((metric) => {
@@ -251,14 +291,14 @@ export default function LearnPage() {
               Ready to Build?
             </GradientText>
             <p className="text-text-secondary mb-4 max-w-md mx-auto">
-              Explore ecosystem gaps, generate AI project briefs, and find your opportunity in the NEAR ecosystem.
+              Explore detected voids, generate your AI-powered Void Brief, and find your opportunity in the NEAR ecosystem.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link
                 href="/opportunities"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-near-green text-background font-semibold rounded-lg hover:opacity-90 transition-opacity text-sm"
               >
-                Browse Opportunities
+                Explore the Void
               </Link>
               <Link
                 href="/categories"

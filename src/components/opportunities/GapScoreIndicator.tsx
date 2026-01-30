@@ -16,11 +16,11 @@ function getScoreColor(score: number): string {
 }
 
 function getScoreLabel(score: number): string {
-  if (score >= 80) return 'Critical Gap';
-  if (score >= 60) return 'High Gap';
+  if (score >= 80) return 'Deep Void';
+  if (score >= 60) return 'Open Void';
   if (score >= 40) return 'Moderate';
-  if (score >= 20) return 'Low Gap';
-  return 'Saturated';
+  if (score >= 20) return 'Shallow';
+  return 'Filled';
 }
 
 export function GapScoreIndicator({ score, size = 'md', showLabel = false }: GapScoreIndicatorProps) {
