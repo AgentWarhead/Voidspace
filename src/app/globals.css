@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
   --background: #0a0a0a;
@@ -88,6 +88,94 @@ body {
     border: 1px solid var(--near-green-dim);
     box-shadow: 0 0 10px var(--near-green-dim);
   }
+
+  .text-gradient-animated {
+    background: linear-gradient(135deg, var(--near-green), var(--accent-cyan), #9D4EDD, var(--near-green));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease infinite;
+  }
+
+  .void-glow {
+    filter: drop-shadow(0 0 8px rgba(0, 236, 151, 0.4));
+  }
+}
+
+/* Scanning line animation */
+@keyframes scan-line {
+  0% { top: -2px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Rotating gradient border */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotate-border {
+  to { --angle: 360deg; }
+}
+
+.animated-border {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--angle), transparent 60%, #00EC97, #00D4FF, transparent 90%);
+  animation: rotate-border 4s linear infinite;
+  z-index: -1;
+}
+
+.animated-border::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: var(--surface);
+  z-index: -1;
+}
+
+/* Skeleton scanning shimmer */
+@keyframes skeleton-scan {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Gradient shift for animated text */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Shimmer button sweep */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.shimmer-btn {
+  background: linear-gradient(110deg, #00EC97 0%, #00EC97 40%, #00FFB2 50%, #00EC97 60%, #00EC97 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Cursor blink for typewriter */
+@keyframes cursor-blink {
+  0%, 50% { border-color: var(--near-green); }
+  51%, 100% { border-color: transparent; }
 }
 
 /* Wallet Selector Modal Overrides */

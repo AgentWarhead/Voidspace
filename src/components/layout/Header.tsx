@@ -6,6 +6,8 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
+import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
+import { LiveScanIndicator } from '@/components/effects/LiveScanIndicator';
 import { NAV_ITEMS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -19,8 +21,12 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
+            <VoidspaceLogo size="sm" animate={false} />
             <span className="text-xl font-bold text-gradient">Voidspace</span>
           </Link>
+
+          {/* Live indicator */}
+          <LiveScanIndicator />
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">

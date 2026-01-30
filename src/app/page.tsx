@@ -1,6 +1,9 @@
 import dynamic from 'next/dynamic';
-import { Container } from '@/components/ui';
-import { GradientText } from '@/components/effects/GradientText';
+import { Container, Card } from '@/components/ui';
+import { HeroSection } from '@/components/hero/HeroSection';
+import { ScrollReveal } from '@/components/effects/ScrollReveal';
+import { SectionHeader } from '@/components/effects/SectionHeader';
+import { ScanLine } from '@/components/effects/ScanLine';
 import { EcosystemOverview } from '@/components/dashboard/EcosystemOverview';
 import { CategoryGrid } from '@/components/dashboard/CategoryGrid';
 import { TrendingGaps } from '@/components/dashboard/TrendingGaps';
@@ -11,7 +14,6 @@ import {
   getTopOpportunities,
   getRecentProjects,
 } from '@/lib/queries';
-import { Card } from '@/components/ui';
 
 const CategorySaturationChart = dynamic(
   () => import('@/components/charts/CategorySaturationChart').then((m) => m.CategorySaturationChart),
@@ -33,51 +35,60 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <Container size="xl" className="py-8 space-y-10">
-        {/* Compact Hero */}
-        <section className="text-center space-y-2 py-4">
-          <GradientText as="h1" className="text-3xl sm:text-4xl font-bold">
-            Voidspace
-          </GradientText>
-          <p className="text-text-secondary">
-            Every ecosystem has voids. Voidspace finds them.
-          </p>
-        </section>
+      {/* Hero — The Void Portal */}
+      <HeroSection stats={stats} />
 
+      <Container size="xl" className="py-8 space-y-10">
         {/* Ecosystem Stats */}
-        <section>
-          <EcosystemOverview stats={stats} />
-        </section>
+        <ScrollReveal>
+          <section>
+            <SectionHeader title="Ecosystem Overview" badge="LIVE" />
+            <EcosystemOverview stats={stats} />
+          </section>
+        </ScrollReveal>
 
         {/* Charts */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card padding="md">
-            <h3 className="text-sm font-medium text-text-secondary mb-4">Category Saturation</h3>
-            <CategorySaturationChart categories={categories} />
-          </Card>
-          <Card padding="md">
-            <h3 className="text-sm font-medium text-text-secondary mb-4">TVL Distribution</h3>
-            <TVLByCategory categories={categories} />
-          </Card>
-        </section>
+        <ScrollReveal delay={0.1}>
+          <section>
+            <SectionHeader title="Analytics" badge="AI ANALYZED" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card variant="glass" padding="md" className="relative overflow-hidden">
+                <ScanLine />
+                <h3 className="text-sm font-medium text-text-secondary mb-4">Category Saturation</h3>
+                <CategorySaturationChart categories={categories} />
+              </Card>
+              <Card variant="glass" padding="md" className="relative overflow-hidden">
+                <ScanLine />
+                <h3 className="text-sm font-medium text-text-secondary mb-4">TVL Distribution</h3>
+                <TVLByCategory categories={categories} />
+              </Card>
+            </div>
+          </section>
+        </ScrollReveal>
 
         {/* Category Grid */}
-        <section>
-          <h2 className="text-lg font-semibold text-text-primary mb-4">Ecosystem Categories</h2>
-          <CategoryGrid categories={categories} />
-        </section>
+        <ScrollReveal delay={0.15}>
+          <section>
+            <SectionHeader title="Ecosystem Categories" count={categories.length} />
+            <CategoryGrid categories={categories} />
+          </section>
+        </ScrollReveal>
 
         {/* Trending Gaps */}
-        <section>
-          <h2 className="text-lg font-semibold text-text-primary mb-4">Trending Opportunities</h2>
-          <TrendingGaps opportunities={opportunities} />
-        </section>
+        <ScrollReveal delay={0.1}>
+          <section>
+            <SectionHeader title="Trending Opportunities" count={opportunities.length} badge="HOT" />
+            <TrendingGaps opportunities={opportunities} />
+          </section>
+        </ScrollReveal>
 
         {/* Recent Activity */}
-        <section>
-          <h2 className="text-lg font-semibold text-text-primary mb-4">Recent Activity</h2>
-          <RecentActivity recentProjects={recentProjects} lastSyncAt={stats.lastSyncAt} />
-        </section>
+        <ScrollReveal delay={0.1}>
+          <section>
+            <SectionHeader title="Recent Activity" />
+            <RecentActivity recentProjects={recentProjects} lastSyncAt={stats.lastSyncAt} />
+          </section>
+        </ScrollReveal>
       </Container>
     </div>
   );

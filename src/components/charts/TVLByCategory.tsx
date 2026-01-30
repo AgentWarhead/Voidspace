@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatCurrency } from '@/lib/utils';
+import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import type { CategoryWithStats } from '@/types';
 
 interface TVLByCategoryProps {
@@ -21,10 +22,10 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
 
   const data = payload[0].payload;
   return (
-    <div className="bg-surface border border-border rounded-lg p-3 shadow-lg">
+    <div className="backdrop-blur-md bg-surface/90 border border-white/10 rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       <p className="font-medium text-text-primary text-sm">{data.name}</p>
-      <p className="text-xs text-text-muted mt-1">
-        TVL: <span className="text-near-green">{formatCurrency(data.tvl)}</span>
+      <p className="text-xs text-text-muted mt-1 font-mono">
+        TVL: <span className="text-near-green font-bold">{formatCurrency(data.tvl)}</span>
       </p>
     </div>
   );
@@ -54,6 +55,15 @@ export function TVLByCategory({ categories }: TVLByCategoryProps) {
     <div className="relative">
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
+          <defs>
+            <filter id="pieGlow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           <Pie
             data={data}
             cx="50%"
@@ -62,9 +72,12 @@ export function TVLByCategory({ categories }: TVLByCategoryProps) {
             outerRadius={110}
             paddingAngle={2}
             dataKey="value"
+            filter="url(#pieGlow)"
+            animationDuration={1500}
+            animationEasing="ease-out"
           >
             {data.map((_entry, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              <Cell key={index} fill={COLORS[index % COLORS.length]} fillOpacity={0.85} />
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
@@ -72,8 +85,10 @@ export function TVLByCategory({ categories }: TVLByCategoryProps) {
       </ResponsiveContainer>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center">
-          <p className="text-xs text-text-muted">Total TVL</p>
-          <p className="text-lg font-bold text-text-primary">{formatCurrency(totalTVL)}</p>
+          <p className="text-xs text-text-muted uppercase tracking-wider font-mono">Total TVL</p>
+          <p className="text-lg font-bold text-text-primary font-mono">
+            <AnimatedCounter value={totalTVL} formatter={formatCurrency} />
+          </p>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   tier?: TierName;
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   competition?: 'low' | 'medium' | 'high';
+  pulse?: boolean;
 }
 
 const tierStyles: Record<TierName, string> = {
@@ -35,6 +36,7 @@ export function Badge({
   tier,
   difficulty,
   competition,
+  pulse = false,
   children,
   ...props
 }: BadgeProps) {
@@ -55,12 +57,15 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full border',
+        'relative inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full border',
         style,
         className
       )}
       {...props}
     >
+      {pulse && (
+        <span className="absolute -inset-0.5 rounded-full animate-ping bg-current opacity-20 pointer-events-none" />
+      )}
       {label}
     </span>
   );

@@ -29,6 +29,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
         glow: '0 0 20px rgba(0, 236, 151, 0.5)',
@@ -45,6 +46,8 @@ const config: Config = {
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'fade-in': 'fade-in 0.5s ease-out',
         'slide-up': 'slide-up 0.5s ease-out',
+        'scan': 'scan-line 3.5s ease-in-out infinite',
+        'skeleton-scan': 'skeleton-scan 1.5s ease-in-out infinite',
       },
       keyframes: {
         'pulse-glow': {

@@ -32,13 +32,13 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
 
   const data = payload[0].payload;
   return (
-    <div className="bg-surface border border-border rounded-lg p-3 shadow-lg">
+    <div className="backdrop-blur-md bg-surface/90 border border-white/10 rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       <p className="font-medium text-text-primary text-sm">{data.name}</p>
-      <p className="text-xs text-text-muted mt-1">
+      <p className="text-xs text-text-muted mt-1 font-mono">
         Projects: <span className="text-text-primary">{data.projects}</span>
       </p>
-      <p className="text-xs text-text-muted">
-        Gap Score: <span style={{ color: getBarColor(data.gapScore) }}>{data.gapScore}</span>
+      <p className="text-xs text-text-muted font-mono">
+        Gap Score: <span className="font-bold" style={{ color: getBarColor(data.gapScore) }}>{data.gapScore}</span>
       </p>
     </div>
   );
@@ -54,21 +54,36 @@ export function CategorySaturationChart({ categories }: CategorySaturationChartP
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 10 }}>
+        <defs>
+          <filter id="barGlow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
         <XAxis
           dataKey="name"
-          tick={{ fill: '#aaaaaa', fontSize: 11 }}
+          tick={{ fill: '#aaaaaa', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
           axisLine={{ stroke: '#222222' }}
           tickLine={false}
         />
         <YAxis
-          tick={{ fill: '#aaaaaa', fontSize: 11 }}
+          tick={{ fill: '#aaaaaa', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
           axisLine={{ stroke: '#222222' }}
           tickLine={false}
         />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-        <Bar dataKey="projects" radius={[4, 4, 0, 0]}>
+        <Bar
+          dataKey="projects"
+          radius={[4, 4, 0, 0]}
+          filter="url(#barGlow)"
+          animationDuration={1500}
+          animationEasing="ease-out"
+        >
           {data.map((entry, index) => (
-            <Cell key={index} fill={getBarColor(entry.gapScore)} />
+            <Cell key={index} fill={getBarColor(entry.gapScore)} fillOpacity={0.85} />
           ))}
         </Bar>
       </BarChart>

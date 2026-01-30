@@ -17,7 +17,7 @@ export function Skeleton({
   return (
     <div
       className={cn(
-        'bg-surface animate-pulse',
+        'bg-gradient-to-r from-surface via-surface-hover to-surface bg-[length:200%_100%] animate-skeleton-scan',
         variant === 'text' && 'h-4 rounded w-full',
         variant === 'circular' && 'rounded-full',
         variant === 'rectangular' && 'rounded-lg',
