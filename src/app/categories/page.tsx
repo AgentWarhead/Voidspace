@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Container } from '@/components/ui';
 import { CategoryGrid } from '@/components/dashboard/CategoryGrid';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';

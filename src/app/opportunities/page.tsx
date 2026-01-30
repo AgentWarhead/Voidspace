@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import { Container, Card } from '@/components/ui';
 import { OpportunityFilters } from '@/components/opportunities/OpportunityFilters';

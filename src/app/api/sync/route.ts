@@ -5,6 +5,8 @@ import { syncDeFiLlama } from '@/lib/sync/defillama';
 import { generateOpportunities } from '@/lib/sync/opportunities';
 import { syncGitHub } from '@/lib/sync/github';
 import { syncNearBlocks } from '@/lib/sync/nearblocks';
+import { syncFastNear } from '@/lib/sync/fastnear';
+import { syncPikespeak } from '@/lib/sync/pikespeak';
 
 const CATEGORIES = [
   // Strategic categories (2x multiplier)
@@ -97,7 +99,13 @@ export async function POST(request: Request) {
     // Step 2.75: Sync NearBlocks chain stats
     results.nearblocks = await syncNearBlocks(supabase);
 
-    // Step 3: Generate/update opportunities
+    // Step 3: Enrich with FastNEAR on-chain data
+    results.fastnear = await syncFastNear(supabase);
+
+    // Step 3.5: Enrich with Pikespeak analytics
+    results.pikespeak = await syncPikespeak(supabase);
+
+    // Step 4: Generate/update opportunities
     results.opportunities = await generateOpportunities(supabase);
 
     // Log sync completion

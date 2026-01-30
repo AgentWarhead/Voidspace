@@ -1,5 +1,6 @@
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
+
 import { BookOpen } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { HeroSection } from '@/components/hero/HeroSection';
@@ -18,12 +19,14 @@ import {
   getRecentProjects,
 } from '@/lib/queries';
 
-const CategorySaturationChart = dynamic(
+export const dynamic = 'force-dynamic';
+
+const CategorySaturationChart = nextDynamic(
   () => import('@/components/charts/CategorySaturationChart').then((m) => m.CategorySaturationChart),
   { ssr: false }
 );
 
-const TVLByCategory = dynamic(
+const TVLByCategory = nextDynamic(
   () => import('@/components/charts/TVLByCategory').then((m) => m.TVLByCategory),
   { ssr: false }
 );

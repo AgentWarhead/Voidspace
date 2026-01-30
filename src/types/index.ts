@@ -108,7 +108,7 @@ export interface ProjectBriefRecord {
 
 export interface SyncLog {
   id: string;
-  source: 'ecosystem' | 'defillama' | 'github';
+  source: 'ecosystem' | 'defillama' | 'github' | 'nearblocks' | 'fastnear' | 'pikespeak';
   status: 'started' | 'completed' | 'failed';
   records_processed: number;
   error_message: string | null;
