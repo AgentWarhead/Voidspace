@@ -142,7 +142,12 @@ Return JSON matching this exact structure:
     }
 
     const claudeData = await claudeRes.json();
-    const briefContent = JSON.parse(claudeData.content[0].text);
+    let rawText = claudeData.content[0].text.trim();
+    // Strip markdown code block wrappers if present (e.g. ```json ... ```)
+    if (rawText.startsWith('```')) {
+      rawText = rawText.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+    }
+    const briefContent = JSON.parse(rawText);
 
     // Save to database
     const { data: savedBrief } = await supabase
