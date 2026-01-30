@@ -2,7 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
+import { InfoTooltip } from '@/components/ui';
 import { formatNumber, formatCurrency } from '@/lib/utils';
+import { HELP_CONTENT } from '@/lib/help-content';
 import type { EcosystemStats } from '@/types';
 
 interface AnimatedStatBarProps {
@@ -42,8 +44,13 @@ export function AnimatedStatBar({ stats }: AnimatedStatBarProps) {
                 duration={2500}
               />
             </div>
-            <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-widest font-mono mt-0.5">
+            <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-widest font-mono mt-0.5 flex items-center justify-center">
               {item.label}
+              {item.label === 'Total TVL' && (
+                <InfoTooltip term={HELP_CONTENT.tvl.term}>
+                  <p>{HELP_CONTENT.tvl.description}</p>
+                </InfoTooltip>
+              )}
             </p>
           </div>
         </div>

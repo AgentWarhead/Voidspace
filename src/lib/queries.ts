@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { calculateGapScore } from '@/lib/gap-score';
 import type {
   EcosystemStats,
@@ -12,7 +12,7 @@ import type {
 // --- Dashboard Queries ---
 
 export async function getEcosystemStats(): Promise<EcosystemStats> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const [
     { count: totalProjects },
@@ -45,7 +45,7 @@ export async function getEcosystemStats(): Promise<EcosystemStats> {
 }
 
 export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data: categories } = await supabase
     .from('categories')
@@ -93,7 +93,7 @@ export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
 }
 
 export async function getTopOpportunities(limit: number = 5): Promise<Opportunity[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('opportunities')
@@ -105,7 +105,7 @@ export async function getTopOpportunities(limit: number = 5): Promise<Opportunit
 }
 
 export async function getRecentProjects(limit: number = 5): Promise<Project[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('projects')
@@ -117,7 +117,7 @@ export async function getRecentProjects(limit: number = 5): Promise<Project[]> {
 }
 
 export async function getRecentSyncLogs(limit: number = 5): Promise<SyncLog[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('sync_logs')
@@ -131,7 +131,7 @@ export async function getRecentSyncLogs(limit: number = 5): Promise<SyncLog[]> {
 // --- Category Queries ---
 
 export async function getAllCategories(): Promise<Category[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('categories')
@@ -142,7 +142,7 @@ export async function getAllCategories(): Promise<Category[]> {
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('categories')
@@ -157,7 +157,7 @@ export async function getProjectsByCategory(
   categoryId: string,
   options: { sort?: string; activeOnly?: boolean } = {}
 ): Promise<Project[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const { sort = 'tvl', activeOnly = false } = options;
 
   let query = supabase
@@ -179,6 +179,9 @@ export async function getProjectsByCategory(
     case 'recent':
       query = query.order('updated_at', { ascending: false });
       break;
+    case 'stars':
+      query = query.order('github_stars', { ascending: false });
+      break;
     default:
       query = query.order('tvl_usd', { ascending: false });
   }
@@ -192,7 +195,7 @@ export async function getCategoryProjectStats(categoryId: string): Promise<{
   active: number;
   tvl: number;
 }> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const [
     { count: total },
@@ -224,7 +227,7 @@ export async function getOpportunities(options: {
   page?: number;
   pageSize?: number;
 } = {}): Promise<{ data: Opportunity[]; total: number }> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const {
     category,
     difficulty,
@@ -289,7 +292,7 @@ export async function getOpportunities(options: {
 }
 
 export async function getOpportunityById(id: string): Promise<Opportunity | null> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('opportunities')
@@ -301,7 +304,7 @@ export async function getOpportunityById(id: string): Promise<Opportunity | null
 }
 
 export async function getRelatedProjects(categoryId: string, limit: number = 5): Promise<Project[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from('projects')

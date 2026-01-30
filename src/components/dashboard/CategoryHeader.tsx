@@ -1,6 +1,7 @@
-import { Badge, Progress } from '@/components/ui';
+import { Badge, Progress, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { GradientText } from '@/components/effects/GradientText';
+import { HELP_CONTENT } from '@/lib/help-content';
 import type { Category } from '@/types';
 
 interface CategoryHeaderProps {
@@ -18,9 +19,14 @@ export function CategoryHeader({ category, gapScore, projectCount }: CategoryHea
           <div className="flex items-center gap-3 mb-1">
             <GradientText as="h1" className="text-2xl font-bold">{category.name}</GradientText>
             {category.is_strategic && (
-              <Badge variant="default" className="bg-near-green/10 text-near-green">
-                Strategic 2x
-              </Badge>
+              <span className="flex items-center">
+                <Badge variant="default" className="bg-near-green/10 text-near-green">
+                  Strategic 2x
+                </Badge>
+                <InfoTooltip term={HELP_CONTENT.strategicCategory.term}>
+                  <p>{HELP_CONTENT.strategicCategory.description}</p>
+                </InfoTooltip>
+              </span>
             )}
           </div>
           <p className="text-text-secondary">{category.description}</p>

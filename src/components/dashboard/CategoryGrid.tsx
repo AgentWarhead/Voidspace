@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Badge, Progress } from '@/components/ui';
+import { Badge, Progress, InfoTooltip } from '@/components/ui';
 import { GlowCard } from '@/components/effects/GlowCard';
 import { TiltCard } from '@/components/effects/TiltCard';
 import { HotTag } from '@/components/effects/HotTag';
+import { HELP_CONTENT } from '@/lib/help-content';
 import type { CategoryWithStats } from '@/types';
 
 interface CategoryGridProps {
@@ -67,10 +68,13 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">
                       <span className="text-text-muted font-mono">{cat.projectCount} projects</span>
-                      <span className="font-mono font-medium" style={{
+                      <span className="font-mono font-medium flex items-center" style={{
                         color: cat.gapScore >= 67 ? '#00EC97' : cat.gapScore >= 34 ? '#FFA502' : '#FF4757',
                       }}>
                         Gap: {cat.gapScore}
+                        <InfoTooltip term={HELP_CONTENT.gapScore.term}>
+                          <p>{HELP_CONTENT.gapScore.description}</p>
+                        </InfoTooltip>
                       </span>
                     </div>
                     <Progress value={cat.gapScore} size="sm" />

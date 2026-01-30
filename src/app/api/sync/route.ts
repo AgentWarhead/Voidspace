@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { syncEcosystem } from '@/lib/sync/ecosystem';
 import { syncDeFiLlama } from '@/lib/sync/defillama';
 import { generateOpportunities } from '@/lib/sync/opportunities';
+import { syncGitHub } from '@/lib/sync/github';
+import { syncNearBlocks } from '@/lib/sync/nearblocks';
 
 const CATEGORIES = [
   // Strategic categories (2x multiplier)
@@ -88,6 +90,12 @@ export async function POST(request: Request) {
 
     // Step 2: Sync DeFiLlama TVL data
     results.defillama = await syncDeFiLlama(supabase);
+
+    // Step 2.5: Sync GitHub data (stars, last commit)
+    results.github = await syncGitHub(supabase);
+
+    // Step 2.75: Sync NearBlocks chain stats
+    results.nearblocks = await syncNearBlocks(supabase);
 
     // Step 3: Generate/update opportunities
     results.opportunities = await generateOpportunities(supabase);

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, CheckCircle2 } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { SaveButton } from '@/components/opportunities/SaveButton';
 import { BriefGenerator } from '@/components/brief/BriefGenerator';
@@ -15,6 +15,7 @@ import { ScanLine } from '@/components/effects/ScanLine';
 import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
 import { formatCurrency } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
+import { HELP_CONTENT } from '@/lib/help-content';
 import type { Opportunity, Project, Category } from '@/types';
 
 interface OpportunityDetailProps {
@@ -60,12 +61,22 @@ export function OpportunityDetail({ opportunity, relatedProjects, category }: Op
             <div className="flex-1 space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="default">{category.name}</Badge>
-                <Badge variant="difficulty" difficulty={opportunity.difficulty}>
-                  {DIFFICULTY_LABELS[opportunity.difficulty] || opportunity.difficulty}
-                </Badge>
-                <Badge variant="competition" competition={opportunity.competition_level}>
-                  {COMPETITION_LABELS[opportunity.competition_level] || opportunity.competition_level}
-                </Badge>
+                <span className="flex items-center">
+                  <Badge variant="difficulty" difficulty={opportunity.difficulty}>
+                    {DIFFICULTY_LABELS[opportunity.difficulty] || opportunity.difficulty}
+                  </Badge>
+                  <InfoTooltip term={HELP_CONTENT.difficulty.term}>
+                    <p>{HELP_CONTENT.difficulty.description}</p>
+                  </InfoTooltip>
+                </span>
+                <span className="flex items-center">
+                  <Badge variant="competition" competition={opportunity.competition_level}>
+                    {COMPETITION_LABELS[opportunity.competition_level] || opportunity.competition_level}
+                  </Badge>
+                  <InfoTooltip term={HELP_CONTENT.competitionLevel.term}>
+                    <p>{HELP_CONTENT.competitionLevel.description}</p>
+                  </InfoTooltip>
+                </span>
               </div>
               <h1 className="text-2xl font-bold text-text-primary">
                 {opportunity.title}
@@ -165,7 +176,12 @@ export function OpportunityDetail({ opportunity, relatedProjects, category }: Op
 
       {/* Brief Generator */}
       <ScrollReveal delay={0.2}>
-        <SectionHeader title="AI Project Brief" badge="PREMIUM" />
+        <div className="flex items-center gap-1">
+          <SectionHeader title="AI Project Brief" badge="PREMIUM" />
+          <InfoTooltip term={HELP_CONTENT.aiBrief.term}>
+            <p>{HELP_CONTENT.aiBrief.description}</p>
+          </InfoTooltip>
+        </div>
         <AnimatedBorderCard padding="none">
           <BriefGenerator opportunityId={opportunity.id} />
         </AnimatedBorderCard>

@@ -1,10 +1,11 @@
 'use client';
 
 import { Layers, Activity, DollarSign, Target } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, InfoTooltip } from '@/components/ui';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { formatNumber, formatCurrency } from '@/lib/utils';
+import { HELP_CONTENT } from '@/lib/help-content';
 
 interface CategoryStatsProps {
   totalProjects: number;
@@ -36,7 +37,19 @@ export function CategoryStats({ totalProjects, activeProjects, totalTVL, gapScor
                 <Icon className="w-5 h-5 text-near-green" />
               </div>
               <div>
-                <p className="text-xs text-text-muted uppercase tracking-wide font-mono">{item.label}</p>
+                <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
+                  {item.label}
+                  {item.key === 'gapScore' && (
+                    <InfoTooltip term={HELP_CONTENT.gapScore.term}>
+                      <p>{HELP_CONTENT.gapScore.description}</p>
+                    </InfoTooltip>
+                  )}
+                  {item.key === 'totalTVL' && (
+                    <InfoTooltip term={HELP_CONTENT.tvl.term}>
+                      <p>{HELP_CONTENT.tvl.description}</p>
+                    </InfoTooltip>
+                  )}
+                </p>
                 <p className="text-xl font-bold text-text-primary">
                   <AnimatedCounter value={value} formatter={item.format} />
                 </p>
