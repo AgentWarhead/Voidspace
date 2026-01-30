@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --surface: #111111;
+  --surface-hover: #1a1a1a;
+  --border: #222222;
+  --border-hover: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-muted: #666666;
+  --near-green: #00EC97;
+  --near-green-dim: rgba(0, 236, 151, 0.2);
+  --near-green-glow: rgba(0, 236, 151, 0.5);
+  --accent-cyan: #00D4FF;
+  --error: #FF4757;
+  --warning: #FFA502;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--background);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle grid background */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Selection color */
+::selection {
+  background: var(--near-green-dim);
+  color: var(--near-green);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--near-green), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-glow {
+    border: 1px solid var(--near-green-dim);
+    box-shadow: 0 0 10px var(--near-green-dim);
+  }
+}
+
+/* Wallet Selector Modal Overrides */
+.nws-modal-wrapper {
+  z-index: 100 !important;
+}
+
+.nws-modal-wrapper .modal {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.nws-modal-wrapper .modal-header {
+  color: var(--text-primary) !important;
+}
+
+.nws-modal-wrapper .wallet-option {
+  background: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.nws-modal-wrapper .wallet-option:hover {
+  background: var(--surface-hover) !important;
+  border-color: var(--border-hover) !important;
+}
+
+.nws-modal-wrapper .wallet-option .wallet-name {
+  color: var(--text-primary) !important;
+}
+
+.nws-modal-wrapper .wallet-option .wallet-desc {
+  color: var(--text-secondary) !important;
+}
+
+.nws-modal-wrapper .close-button {
+  color: var(--text-secondary) !important;
+}
+
+.nws-modal-wrapper .close-button:hover {
+  color: var(--text-primary) !important;
+}
+
+.nws-modal-wrapper .overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Toast slide-up animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out;
+}

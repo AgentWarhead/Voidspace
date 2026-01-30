@@ -1,0 +1,60 @@
+import type { TierName, TierConfig } from '@/types';
+
+export const TIERS: Record<TierName, TierConfig> = {
+  shade: {
+    name: 'Shade',
+    tagline: 'Glimpse the void',
+    price: 0,
+    briefsPerMonth: 0,
+    previewsPerDay: 3,
+    maxSaved: 5,
+    color: '#666666',
+    features: ['dashboard', 'browse', 'preview'],
+  },
+  specter: {
+    name: 'Specter',
+    tagline: 'See what others miss',
+    price: 14.99,
+    briefsPerMonth: 10,
+    previewsPerDay: 999,
+    maxSaved: 999,
+    color: '#00EC97',
+    features: ['dashboard', 'browse', 'preview', 'briefs', 'export', 'history'],
+  },
+  legion: {
+    name: 'Legion',
+    tagline: 'Hunt as one',
+    price: 49.99,
+    briefsPerMonth: 50,
+    previewsPerDay: 999,
+    maxSaved: 999,
+    color: '#00D4FF',
+    features: ['dashboard', 'browse', 'preview', 'briefs', 'export', 'history', 'team', 'api'],
+  },
+  leviathan: {
+    name: 'Leviathan',
+    tagline: 'Command the abyss',
+    price: null,
+    briefsPerMonth: 999,
+    previewsPerDay: 999,
+    maxSaved: 999,
+    color: '#9D4EDD',
+    features: ['all'],
+  },
+} as const;
+
+export function canGenerateBrief(tier: TierName, usageThisMonth: number): boolean {
+  return usageThisMonth < TIERS[tier].briefsPerMonth;
+}
+
+export function canPreview(tier: TierName, previewsToday: number): boolean {
+  return previewsToday < TIERS[tier].previewsPerDay;
+}
+
+export function canSaveOpportunity(tier: TierName, savedCount: number): boolean {
+  return savedCount < TIERS[tier].maxSaved;
+}
+
+export function getTierColor(tier: TierName): string {
+  return TIERS[tier].color;
+}
