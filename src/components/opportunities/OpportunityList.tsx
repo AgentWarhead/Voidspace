@@ -30,7 +30,7 @@ export function OpportunityList({
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-text-muted">
+      <p className="text-sm text-text-muted font-mono">
         {total} {total === 1 ? 'opportunity' : 'opportunities'} found
       </p>
 
@@ -46,32 +46,32 @@ export function OpportunityList({
           {page > 1 ? (
             <Link
               href={`${baseUrl}?page=${page - 1}`}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/60 border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               Previous
             </Link>
           ) : (
-            <span className="flex items-center gap-1 px-3 py-1.5 text-sm text-text-muted cursor-not-allowed">
+            <span className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/30 border border-border/50 text-text-muted cursor-not-allowed">
               <ChevronLeft className="w-4 h-4" />
               Previous
             </span>
           )}
 
-          <span className="text-sm text-text-secondary">
+          <span className="text-xs text-text-secondary font-mono">
             Page {page} of {totalPages}
           </span>
 
           {page < totalPages ? (
             <Link
               href={`${baseUrl}?page=${page + 1}`}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/60 border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
             >
               Next
               <ChevronRight className="w-4 h-4" />
             </Link>
           ) : (
-            <span className="flex items-center gap-1 px-3 py-1.5 text-sm text-text-muted cursor-not-allowed">
+            <span className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/30 border border-border/50 text-text-muted cursor-not-allowed">
               Next
               <ChevronRight className="w-4 h-4" />
             </span>

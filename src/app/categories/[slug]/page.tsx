@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation';
-import { Container, Card } from '@/components/ui';
+import { Container } from '@/components/ui';
 import { CategoryHeader } from '@/components/dashboard/CategoryHeader';
 import { CategoryStats } from '@/components/dashboard/CategoryStats';
 import { ProjectList } from '@/components/dashboard/ProjectList';
+import { ScrollReveal } from '@/components/effects/ScrollReveal';
+import { SectionHeader } from '@/components/effects/SectionHeader';
+import { GridPattern } from '@/components/effects/GridPattern';
 import {
   getCategoryBySlug,
   getProjectsByCategory,
@@ -49,28 +52,49 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
 
   return (
     <div className="min-h-screen">
-      <Container size="xl" className="py-8 space-y-8">
-        <Card padding="lg">
+      {/* Hero Banner */}
+      <section className="relative overflow-hidden py-10 sm:py-14">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(0,236,151,0.04) 0%, transparent 70%)',
+          }}
+        />
+        <GridPattern className="opacity-20" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at center, transparent 40%, #0a0a0a 100%)',
+          }}
+        />
+        <Container size="xl" className="relative z-10">
           <CategoryHeader
             category={category}
             gapScore={gapScore}
             projectCount={stats.total}
           />
-        </Card>
+        </Container>
+      </section>
 
-        <CategoryStats
-          totalProjects={stats.total}
-          activeProjects={stats.active}
-          totalTVL={stats.tvl}
-          gapScore={gapScore}
-        />
+      <Container size="xl" className="py-8 space-y-8">
+        <ScrollReveal>
+          <section>
+            <SectionHeader title="Category Statistics" badge="AI ANALYZED" />
+            <CategoryStats
+              totalProjects={stats.total}
+              activeProjects={stats.active}
+              totalTVL={stats.tvl}
+              gapScore={gapScore}
+            />
+          </section>
+        </ScrollReveal>
 
-        <div>
-          <h2 className="text-lg font-semibold text-text-primary mb-4">
-            Projects ({stats.total})
-          </h2>
-          <ProjectList projects={projects} initialSort={searchParams.sort || 'tvl'} />
-        </div>
+        <ScrollReveal delay={0.1}>
+          <section>
+            <SectionHeader title="Projects" count={stats.total} />
+            <ProjectList projects={projects} initialSort={searchParams.sort || 'tvl'} />
+          </section>
+        </ScrollReveal>
       </Container>
     </div>
   );

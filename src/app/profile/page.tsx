@@ -1,5 +1,6 @@
 import { Container } from '@/components/ui';
 import { ProfileContent } from '@/components/profile/ProfileContent';
+import { GridPattern } from '@/components/effects/GridPattern';
 
 export const metadata = {
   title: 'Profile — Voidspace',
@@ -8,8 +9,9 @@ export const metadata = {
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen">
-      <Container size="lg" className="py-8">
+    <div className="min-h-screen relative">
+      <GridPattern className="opacity-10" />
+      <Container size="lg" className="relative z-10 py-8">
         <ProfileContent />
       </Container>
     </div>

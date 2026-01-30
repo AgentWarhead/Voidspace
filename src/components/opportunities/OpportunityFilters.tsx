@@ -34,7 +34,7 @@ export function OpportunityFilters({ categories }: OpportunityFiltersProps) {
       <select
         value={currentCategory}
         onChange={(e) => updateFilter('category', e.target.value)}
-        className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none"
+        className="bg-surface/60 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none"
       >
         <option value="">All Categories</option>
         {categories.map((cat) => (
@@ -47,7 +47,7 @@ export function OpportunityFilters({ categories }: OpportunityFiltersProps) {
       <select
         value={currentDifficulty}
         onChange={(e) => updateFilter('difficulty', e.target.value)}
-        className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none"
+        className="bg-surface/60 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none"
       >
         <option value="">All Difficulties</option>
         <option value="beginner">Beginner</option>
@@ -58,7 +58,7 @@ export function OpportunityFilters({ categories }: OpportunityFiltersProps) {
       <select
         value={currentSort}
         onChange={(e) => updateFilter('sort', e.target.value)}
-        className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none"
+        className="bg-surface/60 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-near-green focus:outline-none"
       >
         <option value="gap_score">Gap Score</option>
         <option value="date">Most Recent</option>
