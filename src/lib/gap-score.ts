@@ -37,8 +37,8 @@ export function getCompetitionLevel(activeProjects: number): 'low' | 'medium' | 
 }
 
 export function getDifficulty(category: string): 'beginner' | 'intermediate' | 'advanced' {
-  const advanced = ['privacy', 'intents'];
-  const intermediate = ['ai-agents', 'defi', 'rwa'];
+  const advanced = ['privacy', 'intents', 'data-analytics', 'dex-trading'];
+  const intermediate = ['ai-agents', 'defi', 'rwa', 'gaming', 'nfts', 'daos', 'social', 'dev-tools', 'wallets', 'infrastructure'];
 
   if (advanced.includes(category)) return 'advanced';
   if (intermediate.includes(category)) return 'intermediate';

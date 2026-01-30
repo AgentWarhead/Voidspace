@@ -191,10 +191,26 @@ CREATE TRIGGER update_subscriptions_updated_at
 -- ============================================================
 
 INSERT INTO categories (name, slug, description, icon, is_strategic, strategic_multiplier) VALUES
+  -- Strategic categories (2x multiplier)
   ('AI & Agents', 'ai-agents', 'AI agents, inference, autonomous systems leveraging Shade Agents', '🤖', true, 2.0),
   ('Privacy', 'privacy', 'Private transactions, identity protection, ZK proofs', '🔒', true, 2.0),
   ('Intents & Chain Abstraction', 'intents', 'Intent solvers, cross-chain operations, account abstraction', '🔗', true, 2.0),
   ('Real World Assets', 'rwa', 'Oracles, RWA tokenization, payments, real-world bridges', '🌍', true, 2.0),
-  ('DeFi', 'defi', 'DEX, lending, stablecoins, yield aggregators, derivatives', '💰', false, 1.0),
-  ('Infrastructure', 'infrastructure', 'Wallets, explorers, RPC nodes, indexers, dev tools', '🔧', false, 1.0),
-  ('Consumer & Social', 'consumer', 'Social apps, gaming, NFT marketplaces, DAOs, creator tools', '👥', false, 1.0);
+  ('Data & Analytics', 'data-analytics', 'On-chain analytics, data indexing, blockchain intelligence', '📊', true, 1.5),
+  -- Standard categories
+  ('DeFi', 'defi', 'Lending, borrowing, yield aggregation, derivatives, stablecoins', '💰', false, 1.0),
+  ('DEX & Trading', 'dex-trading', 'Decentralized exchanges, AMMs, order books, trading tools', '📈', false, 1.0),
+  ('Gaming & Metaverse', 'gaming', 'Blockchain games, metaverse worlds, GameFi, play-to-earn', '🎮', false, 1.0),
+  ('NFTs & Digital Art', 'nfts', 'NFT marketplaces, minting tools, digital art platforms, collectibles', '🎨', false, 1.0),
+  ('DAOs & Governance', 'daos', 'DAO tooling, governance frameworks, treasury management, voting', '🏛️', false, 1.0),
+  ('Social & Creator Economy', 'social', 'Social platforms, creator tools, content monetization, community', '💬', false, 1.0),
+  ('Developer Tools', 'dev-tools', 'SDKs, testing frameworks, debugging tools, smart contract libraries', '🛠️', false, 1.0),
+  ('Wallets & Identity', 'wallets', 'Wallet apps, account management, identity, authentication', '👛', false, 1.0),
+  ('Education & Onboarding', 'education', 'Learning platforms, tutorials, bootcamps, developer education', '📚', false, 1.0),
+  ('Infrastructure', 'infrastructure', 'RPC nodes, indexers, explorers, validators, storage', '🔧', false, 1.0)
+ON CONFLICT (slug) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  icon = EXCLUDED.icon,
+  is_strategic = EXCLUDED.is_strategic,
+  strategic_multiplier = EXCLUDED.strategic_multiplier;

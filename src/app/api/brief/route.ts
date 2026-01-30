@@ -81,11 +81,14 @@ export async function POST(request: NextRequest) {
 
     // Log usage
     if (userId) {
-      await supabase.from('usage').insert({
+      const { error: usageError } = await supabase.from('usage').insert({
         user_id: userId,
         action: 'brief_generated',
         opportunity_id: opportunityId,
       });
+      if (usageError) {
+        console.error('Failed to log usage:', usageError.message, usageError.details);
+      }
     }
 
     return NextResponse.json({ brief: data });

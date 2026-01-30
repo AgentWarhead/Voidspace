@@ -29,29 +29,61 @@ function mapToCategory(
   const name = (entity.title || '').toLowerCase();
   const combined = [...tags, desc, name].join(' ');
 
-  if (/\b(ai|agent|inference|machine.?learning|shade|llm|gpt)\b/.test(combined)) {
+  // Strategic categories first (order matters — first match wins)
+  if (/\b(ai|agent|inference|machine.?learning|shade|llm|gpt|neural|model)\b/.test(combined)) {
     return categoryMap.get('ai-agents') || null;
   }
-  if (/\b(privacy|zk|zero.?knowledge|private|confidential|secret)\b/.test(combined)) {
+  if (/\b(privacy|zk|zero.?knowledge|private|confidential|secret|mixnet)\b/.test(combined)) {
     return categoryMap.get('privacy') || null;
   }
-  if (/\b(intent|chain.?abstraction|cross.?chain|bridge|multichain|interop)\b/.test(combined)) {
+  if (/\b(intent|chain.?abstraction|cross.?chain|bridge|multichain|interop|relay)\b/.test(combined)) {
     return categoryMap.get('intents') || null;
   }
-  if (/\b(rwa|real.?world|oracle|payment|tokeniz|payroll|remittance)\b/.test(combined)) {
+  if (/\b(rwa|real.?world|tokeniz|payroll|remittance|invoice)\b/.test(combined)) {
     return categoryMap.get('rwa') || null;
   }
-  if (/\b(defi|dex|swap|lend|borrow|yield|stablecoin|liquidity|amm|derivatives)\b/.test(combined)) {
-    return categoryMap.get('defi') || null;
-  }
-  if (/\b(wallet|explorer|tool|infra|sdk|indexer|rpc|node|api|dev.?tool|cli)\b/.test(combined)) {
-    return categoryMap.get('infrastructure') || null;
-  }
-  if (/\b(social|gaming|game|nft|dao|community|creator|metaverse|marketplace|art)\b/.test(combined)) {
-    return categoryMap.get('consumer') || null;
+  if (/\b(analytics|data\s|indexer|indexing|intelligence|dashboard|tracker|insight)\b/.test(combined)) {
+    return categoryMap.get('data-analytics') || null;
   }
 
-  // Default to infrastructure
+  // Standard categories
+  if (/\b(dex|swap|amm|order.?book|trading|exchange)\b/.test(combined)) {
+    return categoryMap.get('dex-trading') || null;
+  }
+  if (/\b(lend|borrow|yield|stablecoin|liquidity|vault|derivatives|margin)\b/.test(combined)) {
+    return categoryMap.get('defi') || null;
+  }
+  if (/\b(gaming|game|play.?to|metaverse|gamefi|p2e|virtual.?world)\b/.test(combined)) {
+    return categoryMap.get('gaming') || null;
+  }
+  if (/\b(nft|art|collectible|mint|digital.?art|generative|pfp)\b/.test(combined)) {
+    return categoryMap.get('nfts') || null;
+  }
+  if (/\b(dao|governance|voting|treasury|proposal|multisig)\b/.test(combined)) {
+    return categoryMap.get('daos') || null;
+  }
+  if (/\b(social|community|creator|content|messaging|chat|forum|feed)\b/.test(combined)) {
+    return categoryMap.get('social') || null;
+  }
+  if (/\b(education|learn|tutorial|bootcamp|course|academy|onboard)\b/.test(combined)) {
+    return categoryMap.get('education') || null;
+  }
+  if (/\b(wallet|identity|auth|login|account|signer|key.?manage)\b/.test(combined)) {
+    return categoryMap.get('wallets') || null;
+  }
+  if (/\b(sdk|tool|debug|test|framework|library|cli|boilerplate|template|dev)\b/.test(combined)) {
+    return categoryMap.get('dev-tools') || null;
+  }
+  if (/\b(oracle|payment|rpc|node|validator|storage|explorer|infra)\b/.test(combined)) {
+    return categoryMap.get('infrastructure') || null;
+  }
+
+  // Broad DeFi catch-all
+  if (/\b(defi|finance|protocol|staking|farm)\b/.test(combined)) {
+    return categoryMap.get('defi') || null;
+  }
+
+  // Default to infrastructure for unmatched
   return categoryMap.get('infrastructure') || null;
 }
 
