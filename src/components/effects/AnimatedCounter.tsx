@@ -21,19 +21,22 @@ export function AnimatedCounter({
   className,
 }: AnimatedCounterProps) {
   const [displayValue, setDisplayValue] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
+  const hasAnimatedRef = useRef(false);
   const ref = useRef<HTMLSpanElement>(null);
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || value === 0) return;
+
+    // Reset when value changes so counter re-animates
+    hasAnimatedRef.current = false;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
+        if (entry.isIntersecting && !hasAnimatedRef.current) {
+          hasAnimatedRef.current = true;
           startTimeRef.current = null;
 
           const animate = (timestamp: number) => {
@@ -61,7 +64,7 @@ export function AnimatedCounter({
       observer.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [value, duration, hasAnimated]);
+  }, [value, duration]);
 
   const formatted = formatter ? formatter(displayValue) : displayValue.toLocaleString();
 
