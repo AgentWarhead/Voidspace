@@ -65,15 +65,27 @@ export default async function DashboardPage() {
         <ScrollReveal delay={0.15}>
           <section>
             <SectionHeader title="Void Analysis" badge="AI ANALYZED" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card variant="glass" padding="md" className="relative overflow-hidden">
+            <div className="space-y-8">
+              <Card variant="glass" padding="lg" className="relative overflow-hidden">
                 <ScanLine />
-                <h3 className="text-sm font-medium text-text-secondary mb-4">Void Density</h3>
+                <div className="mb-6">
+                  <h3 className="text-base font-semibold text-text-primary">Ecosystem Gap Radar</h3>
+                  <p className="text-xs text-text-muted mt-1 max-w-2xl">
+                    Each slice represents a NEAR ecosystem category. Slices that extend further from
+                    the center have higher opportunity scores — more demand and fewer active projects.
+                  </p>
+                </div>
                 <CategorySaturationChart categories={categories} />
               </Card>
-              <Card variant="glass" padding="md" className="relative overflow-hidden">
+              <Card variant="glass" padding="lg" className="relative overflow-hidden">
                 <ScanLine />
-                <h3 className="text-sm font-medium text-text-secondary mb-4">Capital Flow</h3>
+                <div className="mb-6">
+                  <h3 className="text-base font-semibold text-text-primary">Capital Gravity Map</h3>
+                  <p className="text-xs text-text-muted mt-1 max-w-2xl">
+                    Categories orbit around total ecosystem TVL. Closer to center = more capital locked in.
+                    Larger circles = more active projects. Color shows opportunity level.
+                  </p>
+                </div>
                 <TVLByCategory categories={categories} />
               </Card>
             </div>
