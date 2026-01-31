@@ -48,39 +48,15 @@ export async function getEcosystemStats(): Promise<EcosystemStats> {
 
 export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
   const supabase = createAdminClient();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ data: categories }, { data: allProjects }, { data: newsData }] = await Promise.all([
+  const [{ data: categories }, { data: allProjects }] = await Promise.all([
     supabase.from('categories').select('*').order('name'),
     supabase.from('projects').select('id, category_id, tvl_usd, is_active, github_stars, github_forks, github_open_issues, last_github_commit'),
-    supabase.from('news_articles').select('category').gte('published_at', sevenDaysAgo),
   ]);
 
   if (!categories) return [];
 
   const projects = allProjects || [];
-
-  // Count news articles by news category, then map to Voidspace slugs
-  const slugToNewsCategory: Record<string, string[]> = {
-    'defi': ['defi', 'market'], 'dex-trading': ['defi', 'exchange'],
-    'nfts': ['nft'], 'privacy': ['security', 'regulatory'],
-    'ai-agents': ['market'], 'intents': ['layer2', 'market'],
-    'rwa': ['regulatory', 'market'], 'data-analytics': ['market'],
-    'gaming': ['nft', 'market'], 'daos': ['market'],
-    'social': ['market'], 'dev-tools': ['market', 'layer1'],
-    'wallets': ['security', 'market'], 'education': ['market'],
-    'infrastructure': ['layer1', 'layer2'],
-  };
-  const newsCategoryCounts = new Map<string, number>();
-  for (const n of (newsData || [])) {
-    if (n.category) newsCategoryCounts.set(n.category, (newsCategoryCounts.get(n.category) || 0) + 1);
-  }
-  const newsCountBySlug = new Map<string, number>();
-  for (const [slug, newsCats] of Object.entries(slugToNewsCategory)) {
-    let count = 0;
-    for (const nc of newsCats) count += newsCategoryCounts.get(nc) || 0;
-    newsCountBySlug.set(slug, count);
-  }
 
   // Group projects by category_id
   const projectsByCategory = new Map<string, typeof projects>();
@@ -130,7 +106,6 @@ export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
       })),
       allCategoryActiveProjects,
       ecosystemAverageTVL,
-      newsArticleCount: newsCountBySlug.get(cat.slug) || 0,
     });
 
     results.push({

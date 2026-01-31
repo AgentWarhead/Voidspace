@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { Container } from '@/components/ui';
 import { OpportunityDetail } from '@/components/opportunities/OpportunityDetail';
 import { getOpportunityById, getRelatedProjects, getCategoryProjectStats, getProjectsByCategory } from '@/lib/queries';
-import { getNewsByCategory } from '@/lib/news-queries';
 import { calculateGapScoreBreakdown } from '@/lib/gap-score';
 
 interface Props {
@@ -26,11 +25,10 @@ export default async function OpportunityDetailPage({ params }: Props) {
   if (!opportunity) notFound();
 
   const category = opportunity.category!;
-  const [relatedProjects, catStats, categoryProjects, categoryNews] = await Promise.all([
+  const [relatedProjects, catStats, categoryProjects] = await Promise.all([
     getRelatedProjects(opportunity.category_id, 10),
     getCategoryProjectStats(opportunity.category_id),
     getProjectsByCategory(opportunity.category_id),
-    getNewsByCategory(category.slug, 5),
   ]);
 
   const breakdown = calculateGapScoreBreakdown({
@@ -58,7 +56,6 @@ export default async function OpportunityDetailPage({ params }: Props) {
           relatedProjects={relatedProjects}
           category={category}
           breakdown={breakdown}
-          news={categoryNews}
         />
       </Container>
     </div>

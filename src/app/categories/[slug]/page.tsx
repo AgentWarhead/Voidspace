@@ -13,10 +13,7 @@ import {
   getProjectsByCategory,
   getCategoryProjectStats,
 } from '@/lib/queries';
-import { getNewsByCategory } from '@/lib/news-queries';
 import { calculateGapScore } from '@/lib/gap-score';
-import { Card } from '@/components/ui';
-import { NewsSidebar } from '@/components/news/NewsSidebar';
 
 interface Props {
   params: { slug: string };
@@ -37,13 +34,12 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
   const category = await getCategoryBySlug(params.slug);
   if (!category) notFound();
 
-  const [projects, stats, categoryNews] = await Promise.all([
+  const [projects, stats] = await Promise.all([
     getProjectsByCategory(category.id, {
       sort: searchParams.sort,
       activeOnly: searchParams.activeOnly === 'true',
     }),
     getCategoryProjectStats(category.id),
-    getNewsByCategory(category.slug, 5),
   ]);
 
   const gapScore = calculateGapScore({
@@ -112,18 +108,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
           </section>
         </ScrollReveal>
 
-        {categoryNews.length > 0 && (
-          <ScrollReveal delay={0.1}>
-            <section>
-              <SectionHeader title="Related News" badge="LIVE FEED" />
-              <Card variant="glass" padding="lg">
-                <NewsSidebar articles={categoryNews} />
-              </Card>
-            </section>
-          </ScrollReveal>
-        )}
-
-        <ScrollReveal delay={0.15}>
+        <ScrollReveal delay={0.1}>
           <section>
             <SectionHeader title="Projects" count={stats.total} />
             <ProjectList projects={projects} initialSort={searchParams.sort || 'tvl'} />

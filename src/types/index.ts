@@ -171,23 +171,6 @@ export interface TierConfig {
   features: string[];
 }
 
-// --- News Articles ---
-
-export interface NewsArticle {
-  id: string;
-  title: string;
-  url: string;
-  source: string;
-  source_quality: number;
-  published_at: string | null;
-  summary: string | null;
-  category: string | null;
-  relevance_score: number;
-  coins_mentioned: string[];
-  near_relevant: boolean;
-  synced_at: string;
-}
-
 // --- Gap Score ---
 
 export interface GapScoreInput {
@@ -207,7 +190,6 @@ export interface GapScoreInput {
   }[];
   allCategoryActiveProjects?: number[];
   ecosystemAverageTVL?: number;
-  newsArticleCount?: number;
 }
 
 // --- Dashboard ---
@@ -259,7 +241,6 @@ export interface GapScoreBreakdown {
   devActivityGap: number;
   strategicPriority: number;
   marketDemand: number;
-  newsMomentum?: number;
   finalScore: number;
   signals: {
     label: string;

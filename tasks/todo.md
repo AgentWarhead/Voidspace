@@ -1,122 +1,54 @@
-# Crypto News Integration — Task List
+# Remove News Features — Complete Cleanup
+
+## Why
+
+General crypto RSS feeds produce zero NEAR-relevant content. NEAR-specific Medium feeds haven't published in months. The news feature shows irrelevant crypto articles (Ripple, Bitcoin ETFs, XRP) everywhere on the site. It hurts the product's NEAR focus rather than helping.
 
 ## Tasks
 
-- [x] Phase 1: Install rss-parser dependency
-- [x] Phase 1: Create news_articles DB migration
-- [x] Phase 1: Create src/lib/sync/news.ts (core news syncer)
-- [x] Phase 1: Add NewsArticle type to types/index.ts
-- [x] Phase 1: Add syncNews step to sync route
-- [x] Phase 2: Create src/lib/news-queries.ts
-- [x] Phase 2: Create NewsFeed component
-- [x] Phase 2: Create /news page
-- [x] Phase 2: Add News to navigation
-- [x] Phase 3: Modify generate-brief to inject news context
-- [x] Phase 4: Add newsMomentum signal to gap-score.ts
-- [x] Phase 4: Update queries.ts and opportunities.ts for news counts
-- [x] Phase 5: Create NewsSidebar component
-- [x] Phase 5: Add sidebar to opportunity detail + category pages
-- [x] Phase 6: Create HotSignalBar component
-- [x] Phase 6: Add HotSignalBar to dashboard
-- [x] Phase 7: Add extractOpportunitiesFromNews to news.ts
-- [x] Build and verify all changes
+### Delete Files (6)
+- [ ] Delete `src/app/news/page.tsx`
+- [ ] Delete `src/components/news/NewsFeed.tsx`
+- [ ] Delete `src/components/news/NewsSidebar.tsx`
+- [ ] Delete `src/components/news/HotSignalBar.tsx`
+- [ ] Delete `src/lib/news-queries.ts`
+- [ ] Delete `src/lib/sync/news.ts`
+
+### Modify Files (11)
+- [ ] `src/lib/constants.ts` — Remove "News" from NAV_ITEMS
+- [ ] `src/app/api/sync/route.ts` — Remove news import, syncNews step, extractOpportunitiesFromNews step
+- [ ] `src/app/page.tsx` — Remove HotSignalBar + getNewsVelocity from dashboard
+- [ ] `src/app/categories/[slug]/page.tsx` — Remove NewsSidebar + getNewsByCategory
+- [ ] `src/app/opportunities/[id]/page.tsx` — Remove getNewsByCategory + news prop
+- [ ] `src/components/opportunities/OpportunityDetail.tsx` — Remove NewsSidebar + news prop + NewsArticle type
+- [ ] `src/lib/queries.ts` — Remove news_articles fetch + news count mapping from getCategoriesWithStats
+- [ ] `src/lib/sync/opportunities.ts` — Remove news count fetch + newsArticleCount passing
+- [ ] `src/lib/gap-score.ts` — Remove Signal 6 (News Momentum), rebalance 5 weights to sum to 1.0
+- [ ] `src/types/index.ts` — Remove NewsArticle interface, newsArticleCount from GapScoreInput, newsMomentum from GapScoreBreakdown
+- [ ] `supabase/functions/generate-brief/index.ts` — Remove news context from Claude prompt
+
+### Verify
+- [ ] `npm run build` passes with zero errors
+- [ ] Commit and push to trigger Vercel deploy
+
+## Weight Rebalancing (5 signals)
+
+| Signal | Old Weight | New Weight |
+|--------|-----------|------------|
+| Supply Scarcity | 0.25 | 0.28 |
+| TVL Concentration | 0.18 | 0.20 |
+| Dev Activity Gap | 0.18 | 0.21 |
+| Strategic Priority | 0.14 | 0.16 |
+| Market Demand | 0.13 | 0.15 |
+| News Momentum | 0.12 | REMOVED |
+| **Total** | **1.00** | **1.00** |
+
+## Notes
+
+- The DB table `news_articles` and migration `002_news_articles.sql` stay — dropping tables requires a separate Supabase migration and there's no harm leaving an unused table
+- The `rss-parser` npm dep stays — removing it would change the lockfile substantially for no functional benefit
+- DB data in `news_articles` stays — doesn't affect anything
 
 ## Review
 
-### Summary of Changes
-
-Integrated 6 crypto news features into Voidspace using a TypeScript port of the Python RSS news aggregator skill. All features share a single `news_articles` DB table and sync pipeline.
-
-### New Files Created (7)
-
-| File | Purpose |
-|------|---------|
-| `supabase/migrations/002_news_articles.sql` | DB table + indexes + RLS |
-| `src/lib/sync/news.ts` | Core RSS fetcher, scorer, syncer, news-to-opportunity pipeline |
-| `src/lib/news-queries.ts` | Data access layer for news (5 query functions) |
-| `src/components/news/NewsFeed.tsx` | Full news feed component with source badges + scores |
-| `src/components/news/NewsSidebar.tsx` | Compact 5-article sidebar for detail pages |
-| `src/components/news/HotSignalBar.tsx` | Trending topics bar with velocity spike detection |
-| `src/app/news/page.tsx` | New /news page with NEAR-specific section |
-
-### Existing Files Modified (11)
-
-| File | Change |
-|------|--------|
-| `src/types/index.ts` | Added `NewsArticle` type, `newsArticleCount` to `GapScoreInput`, `newsMomentum` to `GapScoreBreakdown` |
-| `src/app/api/sync/route.ts` | Added news sync + opportunity extraction steps |
-| `src/lib/gap-score.ts` | Added 6th signal "News Momentum" (12% weight), rebalanced weights |
-| `src/lib/queries.ts` | Fetches news counts per category, passes to gap score |
-| `src/lib/sync/opportunities.ts` | Fetches news counts, passes to gap score |
-| `supabase/functions/generate-brief/index.ts` | Fetches recent news, injects into Claude prompt |
-| `src/app/opportunities/[id]/page.tsx` | Fetches category news, passes to detail component |
-| `src/components/opportunities/OpportunityDetail.tsx` | Renders NewsSidebar after competition analysis |
-| `src/app/categories/[slug]/page.tsx` | Fetches category news, renders NewsSidebar |
-| `src/app/page.tsx` | Fetches news velocity, renders HotSignalBar on dashboard |
-| `src/lib/constants.ts` | Added "News" to NAV_ITEMS |
-
-### Dependencies Added
-
-- `rss-parser` (v3.x) — 1 new npm package
-
-### Build Status
-
-`npm run build` passes with zero errors.
-
-### Next Steps
-
-1. Run the DB migration (`002_news_articles.sql`) on Supabase
-2. Trigger a data sync (`POST /api/sync`) to populate news articles
-3. Verify the /news page, hot signal bar, news sidebars, and brief generation
-4. Deploy to Vercel
-
----
-
-## NEAR News Curation Fix
-
-### Problem
-News articles across the site were showing random crypto content (Ripple, Bitcoin ETFs, etc.) with no NEAR ecosystem relevance.
-
-### Tasks
-
-- [x] Expand NEAR_KEYWORDS from 18 to 50+ terms (NEAR ecosystem projects)
-- [x] Add 2 NEAR-specific RSS feeds (NEAR Protocol Medium, Mintbase Medium)
-- [x] Add `nearSource` flag to auto-tag articles from NEAR feeds
-- [x] Add +25 scoring bonus for NEAR-relevant articles
-- [x] Add `near_relevant: true` filter to all 4 query functions
-- [x] Update /news page copy to "NEAR Ecosystem News"
-- [x] Build passes with zero errors
-- [x] Re-sync completed (496 articles fetched, 491 inserted)
-
-### Files Modified (3)
-
-| File | Change |
-|------|--------|
-| `src/lib/sync/news.ts` | Added `nearSource` flag to RSSSource, 2 NEAR RSS feeds, expanded NEAR_KEYWORDS (18→50+), +25 NEAR bonus in scoreArticle(), pre-computed `isNear` in sync loop |
-| `src/lib/news-queries.ts` | Added `.eq('near_relevant', true)` to `getNewsByCategory()`, `getNewsVelocity()` (2 queries), `getNewsCountByCategory()`, changed `nearOnly` default to `true` |
-| `src/app/news/page.tsx` | Updated page title to "NEAR Ecosystem News", section title to "Latest NEAR News" |
-
----
-
-## False Positive Fix (NEAR Detection)
-
-### Problem
-`detectNearRelevance()` regex `/\bnear\b/i` matched the English word "near" (close to) in any crypto article. Only 3 articles were `near_relevant: true` — all false positives. Same 3 irrelevant articles shown everywhere. NEAR Medium feeds had no recent articles (pruned by 14-day TTL).
-
-### Tasks
-
-- [x] Remove broken regex from `detectNearRelevance()` — rely only on NEAR_KEYWORDS
-- [x] Add NEAR-adjacent AI keywords (ai agent crypto, onchain ai, decentralized ai, etc.)
-- [x] Revert `getRecentNews()` default to `nearOnly: false`
-- [x] Remove `near_relevant` filter from `getNewsByCategory()` and `getNewsVelocity()`
-- [x] Restructure /news page into "NEAR & AI" + "Crypto Market" sections
-- [x] Build passes, re-sync verified zero false positives
-- [x] Committed and pushed to trigger Vercel deploy
-
-### Files Modified (3)
-
-| File | Change |
-|------|--------|
-| `src/lib/sync/news.ts` | Removed broken regex from `detectNearRelevance()`, added 11 AI-adjacent keywords |
-| `src/lib/news-queries.ts` | Reverted `nearOnly` default to `false`, removed `near_relevant` filter from `getNewsByCategory()` and `getNewsVelocity()` |
-| `src/app/news/page.tsx` | Restructured into NEAR-specific + Crypto Market sections, removed unused `getNearNews` import |
+_(to be filled after completion)_

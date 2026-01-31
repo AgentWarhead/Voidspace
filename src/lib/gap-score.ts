@@ -2,12 +2,11 @@ import type { GapScoreInput, GapScoreBreakdown } from '@/types';
 
 /* ── Weights ── */
 const WEIGHTS = {
-  supplyScarcity: 0.25,
-  tvlConcentration: 0.18,
-  devActivityGap: 0.18,
-  strategicPriority: 0.14,
-  marketDemand: 0.13,
-  newsMomentum: 0.12,
+  supplyScarcity: 0.28,
+  tvlConcentration: 0.20,
+  devActivityGap: 0.21,
+  strategicPriority: 0.16,
+  marketDemand: 0.15,
 };
 
 /* ── Signal 1: Supply Scarcity (0-100) ── */
@@ -104,19 +103,6 @@ function computeMarketDemand(input: GapScoreInput): number {
   return Math.round(Math.max(5, Math.min(95, 80 - ratio * 40)));
 }
 
-/* ── Signal 6: News Momentum (0-100) ── */
-function computeNewsMomentum(input: GapScoreInput): number {
-  const count = input.newsArticleCount ?? 0;
-  const projects = input.activeProjects;
-
-  // No news data available — return neutral score
-  if (count === 0) return 50;
-
-  // High news volume + few projects = high opportunity
-  const ratio = count / Math.max(1, projects);
-  return Math.min(100, Math.round(ratio * 15 + Math.min(count * 3, 40)));
-}
-
 /* ── Composite Score ── */
 export function calculateGapScore(input: GapScoreInput): number {
   const ss = computeSupplyScarcity(input);
@@ -124,15 +110,13 @@ export function calculateGapScore(input: GapScoreInput): number {
   const da = computeDevActivityGap(input);
   const sp = computeStrategicPriority(input);
   const md = computeMarketDemand(input);
-  const nm = computeNewsMomentum(input);
 
   const composite =
     ss * WEIGHTS.supplyScarcity +
     tc * WEIGHTS.tvlConcentration +
     da * WEIGHTS.devActivityGap +
     sp * WEIGHTS.strategicPriority +
-    md * WEIGHTS.marketDemand +
-    nm * WEIGHTS.newsMomentum;
+    md * WEIGHTS.marketDemand;
 
   return Math.min(100, Math.max(0, Math.round(composite)));
 }
@@ -144,15 +128,13 @@ export function calculateGapScoreBreakdown(input: GapScoreInput): GapScoreBreakd
   const da = computeDevActivityGap(input);
   const sp = computeStrategicPriority(input);
   const md = computeMarketDemand(input);
-  const nm = computeNewsMomentum(input);
 
   const finalScore = Math.min(100, Math.max(0, Math.round(
     ss * WEIGHTS.supplyScarcity +
     tc * WEIGHTS.tvlConcentration +
     da * WEIGHTS.devActivityGap +
     sp * WEIGHTS.strategicPriority +
-    md * WEIGHTS.marketDemand +
-    nm * WEIGHTS.newsMomentum
+    md * WEIGHTS.marketDemand
   )));
 
   return {
@@ -161,7 +143,6 @@ export function calculateGapScoreBreakdown(input: GapScoreInput): GapScoreBreakd
     devActivityGap: da,
     strategicPriority: sp,
     marketDemand: md,
-    newsMomentum: nm,
     finalScore,
     signals: [
       {
@@ -202,19 +183,11 @@ export function calculateGapScoreBreakdown(input: GapScoreInput): GapScoreBreakd
           ? 'Below-average TVL \u2014 growth potential'
           : 'Above-average TVL captured',
       },
-      {
-        label: 'News Momentum',
-        value: nm,
-        weight: WEIGHTS.newsMomentum,
-        description: (input.newsArticleCount ?? 0) > 0
-          ? `${input.newsArticleCount} recent news articles in this category`
-          : 'No recent news data available',
-      },
     ],
   };
 }
 
-/* ── Helpers (unchanged) ── */
+/* ── Helpers ── */
 export function getCompetitionLevel(activeProjects: number): 'low' | 'medium' | 'high' {
   if (activeProjects <= 2) return 'low';
   if (activeProjects <= 10) return 'medium';

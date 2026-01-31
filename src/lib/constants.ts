@@ -43,7 +43,6 @@ export const NAV_ITEMS = [
   { label: 'Command Center', href: '/' },
   { label: 'Voids', href: '/opportunities' },
   { label: 'Categories', href: '/categories' },
-  { label: 'News', href: '/news' },
   { label: 'Learn', href: '/learn' },
   { label: 'Profile', href: '/profile' },
 ] as const;
