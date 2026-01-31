@@ -3,14 +3,14 @@ import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { NewsFeed } from '@/components/news/NewsFeed';
-import { getRecentNews, getNearNews } from '@/lib/news-queries';
+import { getRecentNews } from '@/lib/news-queries';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NewsPage() {
-  const [allNews, nearNews] = await Promise.all([
+  const [nearNews, marketNews] = await Promise.all([
+    getRecentNews({ limit: 20, nearOnly: true }),
     getRecentNews({ limit: 30 }),
-    getNearNews(10),
   ]);
 
   return (
@@ -24,11 +24,11 @@ export default async function NewsPage() {
           </p>
         </div>
 
-        {/* NEAR-Specific News */}
+        {/* NEAR & AI News */}
         {nearNews.length > 0 && (
           <ScrollReveal>
             <section className="relative">
-              <SectionHeader title="NEAR Ecosystem" badge="NEAR SIGNAL" />
+              <SectionHeader title="NEAR & AI" badge="NEAR SIGNAL" />
               <div className="relative overflow-hidden rounded-xl border border-near-green/20 bg-near-green/[0.02] p-4">
                 <ScanLine />
                 <NewsFeed articles={nearNews} />
@@ -37,11 +37,11 @@ export default async function NewsPage() {
           </ScrollReveal>
         )}
 
-        {/* All Crypto News */}
+        {/* Crypto Market Context */}
         <ScrollReveal delay={0.1}>
           <section>
-            <SectionHeader title="Latest NEAR News" badge="LIVE FEED" count={allNews.length} />
-            <NewsFeed articles={allNews} />
+            <SectionHeader title="Crypto Market" badge="LIVE FEED" count={marketNews.length} />
+            <NewsFeed articles={marketNews} />
           </section>
         </ScrollReveal>
       </Container>

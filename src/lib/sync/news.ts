@@ -121,7 +121,11 @@ const NEAR_KEYWORDS = [
   // NEAR Tech
   'shade agent', 'chain signatures', 'chain abstraction',
   'near intents', 'near sharding', 'nightshade', 'doomslug',
-  'near data availability', 'near da',
+  'near data availability', 'near da', 'account abstraction',
+  // NEAR-Adjacent Topics (AI + Chain Abstraction — core NEAR narratives)
+  'ai agent crypto', 'crypto ai agent', 'onchain ai', 'on-chain ai',
+  'decentralized ai', 'ai blockchain', 'ai web3',
+  'ai defi', 'ai nft', 'ai dao',
   // Projects & Infrastructure
   'pagoda', 'fastnear', 'mintbase', 'ref finance',
   'burrow cash', 'meta pool', 'linear protocol',
@@ -138,10 +142,7 @@ const NEAR_KEYWORDS = [
 
 function detectNearRelevance(text: string): boolean {
   const lower = text.toLowerCase();
-  // Check for "NEAR" as a word boundary (avoid false positives like "nearby")
-  if (/\bnear\b/i.test(text) && /\b(protocol|blockchain|chain|token|crypto|defi|web3|dao|nft|wallet|ecosystem)\b/i.test(text)) {
-    return true;
-  }
+  // Only match explicit NEAR ecosystem keywords (no loose "near" word matching)
   return NEAR_KEYWORDS.some((kw) => lower.includes(kw));
 }
 

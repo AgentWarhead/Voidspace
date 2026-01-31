@@ -27,7 +27,7 @@ export async function getRecentNews(options: {
   nearOnly?: boolean;
 } = {}): Promise<NewsArticle[]> {
   const supabase = createAdminClient();
-  const { category, limit = 20, minScore = 0, nearOnly = true } = options;
+  const { category, limit = 20, minScore = 0, nearOnly = false } = options;
 
   let query = supabase
     .from('news_articles')
@@ -59,7 +59,6 @@ export async function getNewsByCategory(
     .from('news_articles')
     .select('*')
     .in('category', newsCategories)
-    .eq('near_relevant', true)
     .order('relevance_score', { ascending: false })
     .limit(limit);
 
@@ -98,13 +97,11 @@ export async function getNewsVelocity(): Promise<HotTopic[]> {
     supabase
       .from('news_articles')
       .select('category')
-      .gte('published_at', sixHoursAgo)
-      .eq('near_relevant', true),
+      .gte('published_at', sixHoursAgo),
     supabase
       .from('news_articles')
       .select('category')
-      .gte('published_at', sevenDaysAgo)
-      .eq('near_relevant', true),
+      .gte('published_at', sevenDaysAgo),
   ]);
 
   if (!recent || !baseline) return [];
