@@ -95,3 +95,28 @@ News articles across the site were showing random crypto content (Ripple, Bitcoi
 | `src/lib/sync/news.ts` | Added `nearSource` flag to RSSSource, 2 NEAR RSS feeds, expanded NEAR_KEYWORDS (18→50+), +25 NEAR bonus in scoreArticle(), pre-computed `isNear` in sync loop |
 | `src/lib/news-queries.ts` | Added `.eq('near_relevant', true)` to `getNewsByCategory()`, `getNewsVelocity()` (2 queries), `getNewsCountByCategory()`, changed `nearOnly` default to `true` |
 | `src/app/news/page.tsx` | Updated page title to "NEAR Ecosystem News", section title to "Latest NEAR News" |
+
+---
+
+## False Positive Fix (NEAR Detection)
+
+### Problem
+`detectNearRelevance()` regex `/\bnear\b/i` matched the English word "near" (close to) in any crypto article. Only 3 articles were `near_relevant: true` — all false positives. Same 3 irrelevant articles shown everywhere. NEAR Medium feeds had no recent articles (pruned by 14-day TTL).
+
+### Tasks
+
+- [x] Remove broken regex from `detectNearRelevance()` — rely only on NEAR_KEYWORDS
+- [x] Add NEAR-adjacent AI keywords (ai agent crypto, onchain ai, decentralized ai, etc.)
+- [x] Revert `getRecentNews()` default to `nearOnly: false`
+- [x] Remove `near_relevant` filter from `getNewsByCategory()` and `getNewsVelocity()`
+- [x] Restructure /news page into "NEAR & AI" + "Crypto Market" sections
+- [x] Build passes, re-sync verified zero false positives
+- [x] Committed and pushed to trigger Vercel deploy
+
+### Files Modified (3)
+
+| File | Change |
+|------|--------|
+| `src/lib/sync/news.ts` | Removed broken regex from `detectNearRelevance()`, added 11 AI-adjacent keywords |
+| `src/lib/news-queries.ts` | Reverted `nearOnly` default to `false`, removed `near_relevant` filter from `getNewsByCategory()` and `getNewsVelocity()` |
+| `src/app/news/page.tsx` | Restructured into NEAR-specific + Crypto Market sections, removed unused `getNearNews` import |
