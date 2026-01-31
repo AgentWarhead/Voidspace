@@ -11,6 +11,7 @@ NEAR Protocol Key Features:
 - Performance: Sub-600ms finality, potential for 1M+ TPS with sharding
 
 When recommending technical approaches, always consider how NEAR's unique features can be leveraged.
+Use the recent news context (if provided) to identify timely opportunities and current market dynamics that make this project especially relevant right now.
 
 Output valid JSON only. No markdown code blocks or explanations.`;
 
@@ -64,12 +65,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch rich context: active projects, top projects, chain stats, category aggregates
+    // Map category slugs to news categories for context
+    const categoryNewsMap: Record<string, string[]> = {
+      'defi': ['defi', 'market'], 'dex-trading': ['defi', 'exchange'],
+      'nfts': ['nft'], 'privacy': ['security', 'regulatory'],
+      'ai-agents': ['market'], 'intents': ['layer2', 'market'],
+      'rwa': ['regulatory', 'market'], 'data-analytics': ['market'],
+      'gaming': ['nft', 'market'], 'daos': ['market'],
+      'social': ['market'], 'dev-tools': ['market', 'layer1'],
+      'wallets': ['security', 'market'], 'education': ['market'],
+      'infrastructure': ['layer1', 'layer2'],
+    };
+    const newsCategories = categoryNewsMap[opportunity.category?.slug || ''] || ['market'];
+
+    // Fetch rich context: active projects, top projects, chain stats, category aggregates, + recent news
     const [
       { count },
       { data: topProjects },
       { data: chainStats },
       { data: categoryAgg },
+      { data: recentNews },
     ] = await Promise.all([
       supabase
         .from('projects')
@@ -92,6 +107,12 @@ Deno.serve(async (req) => {
         .from('projects')
         .select('tvl_usd, github_stars, github_forks')
         .eq('category_id', opportunity.category_id),
+      supabase
+        .from('news_articles')
+        .select('title, source, published_at, summary')
+        .in('category', newsCategories)
+        .order('relevance_score', { ascending: false })
+        .limit(5),
     ]);
 
     // Compute category aggregates
@@ -109,6 +130,14 @@ Deno.serve(async (req) => {
     const chainContext = chainStats
       ? `NEAR Chain Health: ${Number(chainStats.total_transactions).toLocaleString()} total transactions, ${Number(chainStats.total_accounts).toLocaleString()} total accounts, ${chainStats.nodes_online} nodes online, ${Number(chainStats.avg_block_time).toFixed(2)}s avg block time`
       : '';
+
+    // Format recent news context
+    const newsContext = (recentNews || []).length > 0
+      ? (recentNews || []).map((n: Record<string, unknown>) => {
+          const age = n.published_at ? `(${new Date(n.published_at as string).toLocaleDateString()})` : '';
+          return `  - [${n.source}] ${n.title} ${age}`;
+        }).join('\n')
+      : '  (no recent news)';
 
     const userPrompt = `Generate a detailed project brief for this NEAR ecosystem gap:
 
@@ -128,7 +157,11 @@ Top Projects in Category:
 ${projectContext || '  (none)'}
 =========================
 
-Use the ecosystem context above to make your brief more specific, data-informed, and actionable. Reference actual competitor projects, real TVL figures, and chain health metrics where relevant.
+=== RECENT NEWS CONTEXT ===
+${newsContext}
+===========================
+
+Use the ecosystem context and recent news above to make your brief more specific, data-informed, and actionable. Reference actual competitor projects, real TVL figures, chain health metrics, and recent news developments where relevant to show why this opportunity is timely.
 
 Return JSON matching this exact structure:
 {

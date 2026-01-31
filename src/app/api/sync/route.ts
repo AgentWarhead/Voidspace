@@ -7,6 +7,7 @@ import { syncGitHub } from '@/lib/sync/github';
 import { syncNearBlocks } from '@/lib/sync/nearblocks';
 import { syncFastNear } from '@/lib/sync/fastnear';
 import { syncPikespeak } from '@/lib/sync/pikespeak';
+import { syncNews, extractOpportunitiesFromNews } from '@/lib/sync/news';
 
 const CATEGORIES = [
   // Strategic categories (2x multiplier)
@@ -105,8 +106,14 @@ export async function POST(request: Request) {
     // Step 3.5: Enrich with Pikespeak analytics
     results.pikespeak = await syncPikespeak(supabase);
 
+    // Step 3.8: Sync crypto news from RSS feeds
+    results.news = await syncNews(supabase);
+
     // Step 4: Generate/update opportunities
     results.opportunities = await generateOpportunities(supabase);
+
+    // Step 5: Extract opportunities from NEAR-relevant news
+    results.newsOpportunities = await extractOpportunitiesFromNews(supabase);
 
     // Log sync completion
     if (syncLog) {

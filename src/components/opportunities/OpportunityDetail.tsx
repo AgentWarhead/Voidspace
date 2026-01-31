@@ -17,16 +17,18 @@ import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
 import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
 import { HELP_CONTENT } from '@/lib/help-content';
-import type { Opportunity, Project, Category, GapScoreBreakdown as GapScoreBreakdownType } from '@/types';
+import { NewsSidebar } from '@/components/news/NewsSidebar';
+import type { Opportunity, Project, Category, GapScoreBreakdown as GapScoreBreakdownType, NewsArticle } from '@/types';
 
 interface OpportunityDetailProps {
   opportunity: Opportunity;
   relatedProjects: Project[];
   category: Category;
   breakdown?: GapScoreBreakdownType;
+  news?: NewsArticle[];
 }
 
-export function OpportunityDetail({ opportunity, relatedProjects, category, breakdown }: OpportunityDetailProps) {
+export function OpportunityDetail({ opportunity, relatedProjects, category, breakdown, news }: OpportunityDetailProps) {
   return (
     <motion.div
       className="space-y-8"
@@ -252,6 +254,16 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </div>
         </Card>
       </ScrollReveal>
+
+      {/* Related News */}
+      {news && news.length > 0 && (
+        <ScrollReveal delay={0.25}>
+          <SectionHeader title="Related News" badge="LIVE FEED" />
+          <Card variant="glass" padding="lg">
+            <NewsSidebar articles={news} />
+          </Card>
+        </ScrollReveal>
+      )}
     </motion.div>
   );
 }

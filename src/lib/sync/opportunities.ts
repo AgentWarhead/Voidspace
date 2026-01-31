@@ -324,6 +324,34 @@ export async function generateOpportunities(supabase: SupabaseClient) {
 
   if (!categories) throw new Error('No categories found');
 
+  // Fetch news counts by category for gap score signal
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: newsData } = await supabase
+    .from('news_articles')
+    .select('category')
+    .gte('published_at', sevenDaysAgo);
+
+  const slugToNewsCategory: Record<string, string[]> = {
+    'defi': ['defi', 'market'], 'dex-trading': ['defi', 'exchange'],
+    'nfts': ['nft'], 'privacy': ['security', 'regulatory'],
+    'ai-agents': ['market'], 'intents': ['layer2', 'market'],
+    'rwa': ['regulatory', 'market'], 'data-analytics': ['market'],
+    'gaming': ['nft', 'market'], 'daos': ['market'],
+    'social': ['market'], 'dev-tools': ['market', 'layer1'],
+    'wallets': ['security', 'market'], 'education': ['market'],
+    'infrastructure': ['layer1', 'layer2'],
+  };
+  const newsCategoryCounts = new Map<string, number>();
+  for (const n of (newsData || [])) {
+    if (n.category) newsCategoryCounts.set(n.category, (newsCategoryCounts.get(n.category) || 0) + 1);
+  }
+  const newsCountBySlug = new Map<string, number>();
+  for (const [slug, newsCats] of Object.entries(slugToNewsCategory)) {
+    let count = 0;
+    for (const nc of newsCats) count += newsCategoryCounts.get(nc) || 0;
+    newsCountBySlug.set(slug, count);
+  }
+
   for (const category of categories) {
     // Count total and active projects in this category
     const { count: totalCount } = await supabase
@@ -362,6 +390,7 @@ export async function generateOpportunities(supabase: SupabaseClient) {
         lastCommit: p.last_github_commit,
         isActive: p.is_active,
       })),
+      newsArticleCount: newsCountBySlug.get(category.slug) || 0,
     });
 
     const competitionLevel = getCompetitionLevel(activeCount || 0);

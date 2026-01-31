@@ -17,6 +17,8 @@ import {
   getCategoriesWithStats,
   getTopOpportunities,
 } from '@/lib/queries';
+import { getNewsVelocity } from '@/lib/news-queries';
+import { HotSignalBar } from '@/components/news/HotSignalBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,10 +33,11 @@ const TVLByCategory = nextDynamic(
 );
 
 export default async function DashboardPage() {
-  const [stats, categories, opportunities] = await Promise.all([
+  const [stats, categories, opportunities, hotTopics] = await Promise.all([
     getEcosystemStats(),
     getCategoriesWithStats(),
     getTopOpportunities(12),
+    getNewsVelocity(),
   ]);
 
   return (
@@ -47,6 +50,19 @@ export default async function DashboardPage() {
         <ScrollReveal>
           <VoidDetectionShowcase />
         </ScrollReveal>
+
+        {/* Section 2.5: News Signal — Hot Topics */}
+        {hotTopics.length > 0 && (
+          <ScrollReveal delay={0.03}>
+            <section>
+              <SectionHeader title="News Signal" badge="LIVE" />
+              <Card variant="glass" padding="md" className="relative overflow-hidden">
+                <ScanLine />
+                <HotSignalBar hotTopics={hotTopics} />
+              </Card>
+            </section>
+          </ScrollReveal>
+        )}
 
         {/* Section 3: Priority Voids — NEAR Strategic Areas */}
         <ScrollReveal delay={0.05}>
