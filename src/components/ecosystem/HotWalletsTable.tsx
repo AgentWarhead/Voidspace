@@ -30,7 +30,7 @@ export function HotWalletsTable({ wallets }: HotWalletsTableProps) {
           </h3>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 overflow-x-auto">
           {/* Header */}
           <div className="grid grid-cols-[1fr_auto_1fr] gap-3 text-[10px] text-text-muted uppercase tracking-wide font-mono px-2">
             <span>Account</span>

@@ -65,7 +65,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             {project.logo_url ? (
               <Image
                 src={project.logo_url}
-                alt=""
+                alt={`${project.name} logo`}
                 width={64}
                 height={64}
                 className="w-16 h-16 rounded-xl object-cover bg-surface-hover shrink-0"

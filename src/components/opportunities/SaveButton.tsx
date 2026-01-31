@@ -64,6 +64,7 @@ export function SaveButton({ opportunityId, size = 'md' }: SaveButtonProps) {
         loading && 'opacity-50 cursor-not-allowed'
       )}
       title={saved ? 'Unsave' : 'Save'}
+      aria-label={saved ? 'Unsave opportunity' : 'Save opportunity'}
     >
       <Heart className={cn(iconSize, saved && 'fill-current', 'transition-transform')} />
     </button>

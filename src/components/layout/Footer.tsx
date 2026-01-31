@@ -6,8 +6,9 @@ import { GridPattern } from '@/components/effects/GridPattern';
 export function Footer() {
   return (
     <footer className="relative bg-background overflow-hidden">
-      {/* Gradient top border */}
+      {/* Gradient top border with glow */}
       <div className="h-px bg-gradient-to-r from-transparent via-near-green/30 to-transparent" />
+      <div className="h-px bg-gradient-to-r from-transparent via-near-green/10 to-transparent blur-sm" />
 
       <GridPattern className="opacity-10" />
 

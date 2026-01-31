@@ -25,7 +25,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
           variant === 'glass'
             ? 'bg-surface/60 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
             : 'bg-surface border border-border',
-          hover && 'hover:border-border-hover transition-colors',
+          hover && 'hover:border-border-hover hover:translate-y-[-1px] transition-all duration-200',
           glow && 'hover:shadow-glow-sm hover:border-near-green/30 transition-all',
           paddingStyles[padding],
           className

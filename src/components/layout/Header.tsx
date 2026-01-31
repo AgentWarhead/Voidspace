@@ -73,6 +73,7 @@ export function Header() {
           <button
             className="md:hidden p-2 text-text-secondary hover:text-text-primary"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>

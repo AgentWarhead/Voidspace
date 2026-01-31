@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock } from 'lucide-react';
 import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
+import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { GapScoreBreakdown } from '@/components/opportunities/GapScoreBreakdown';
 import { SaveButton } from '@/components/opportunities/SaveButton';
 import { BriefGenerator } from '@/components/brief/BriefGenerator';
@@ -137,7 +138,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                     </p>
                     <p className="text-3xl font-bold text-text-primary font-mono flex items-center gap-2 mt-1">
                       <TrendingUp className="w-5 h-5 text-near-green" />
-                      {Math.round(opportunity.demand_score)}
+                      <AnimatedCounter value={Math.round(opportunity.demand_score)} className="text-3xl font-bold text-text-primary" />
                     </p>
                   </div>
                 )}
@@ -237,6 +238,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-text-muted hover:text-near-green transition-colors shrink-0"
+                          aria-label={`Visit ${project.name} website`}
                         >
                           <ExternalLink className="w-4 h-4" />
                         </a>

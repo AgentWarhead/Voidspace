@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Layers, Target, Grid3X3, Star, GitFork, TrendingUp } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { Layers, Target, Grid3X3, Star, GitFork, TrendingUp, Search } from 'lucide-react';
+import { Card, Badge, VoidEmptyState } from '@/components/ui';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import type { Project, Opportunity, Category } from '@/types';
@@ -32,19 +32,21 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
 
   if (!query) {
     return (
-      <div className="text-center py-16">
-        <p className="text-text-muted text-sm">Enter a search term above to find projects, voids, and categories.</p>
-      </div>
+      <VoidEmptyState
+        icon={Search}
+        title="Search the Void"
+        description="Enter a search term above to find projects, voids, and categories."
+      />
     );
   }
 
   if (totalResults === 0) {
     return (
-      <div className="text-center py-16">
-        <p className="text-text-muted text-sm">
-          No results found for &ldquo;{query}&rdquo;. Try a different search term.
-        </p>
-      </div>
+      <VoidEmptyState
+        icon={Search}
+        title="No results found"
+        description={`Nothing matched \u201c${query}\u201d. Try a different search term.`}
+      />
     );
   }
 

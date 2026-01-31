@@ -68,7 +68,7 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
         </Card>
       ) : (
         <Card padding="none">
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border overflow-x-auto">
             {projects.map((project) => (
               <div
                 key={project.id}
@@ -78,7 +78,7 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
                 {project.logo_url ? (
                   <Image
                     src={project.logo_url}
-                    alt=""
+                    alt={`${project.name} logo`}
                     width={32}
                     height={32}
                     className="w-8 h-8 rounded-full object-cover bg-surface-hover shrink-0 mt-0.5"
@@ -175,6 +175,7 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
                       className="text-text-muted hover:text-near-green transition-colors p-1 rounded hover:bg-near-green/5"
                       onClick={(e) => e.stopPropagation()}
                       title="Website"
+                      aria-label={`${project.name} website`}
                     >
                       <Globe className="w-3.5 h-3.5" />
                     </a>
@@ -187,6 +188,7 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
                       className="text-text-muted hover:text-near-green transition-colors p-1 rounded hover:bg-near-green/5"
                       onClick={(e) => e.stopPropagation()}
                       title="GitHub"
+                      aria-label={`${project.name} GitHub`}
                     >
                       <Github className="w-3.5 h-3.5" />
                     </a>
@@ -199,6 +201,7 @@ export function ProjectList({ projects, initialSort = 'tvl' }: ProjectListProps)
                       className="text-text-muted hover:text-near-green transition-colors p-1 rounded hover:bg-near-green/5"
                       onClick={(e) => e.stopPropagation()}
                       title="Twitter / X"
+                      aria-label={`${project.name} on X`}
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />

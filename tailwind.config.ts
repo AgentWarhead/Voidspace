@@ -16,7 +16,7 @@ const config: Config = {
         'border-hover': '#333333',
         'text-primary': '#ffffff',
         'text-secondary': '#aaaaaa',
-        'text-muted': '#666666',
+        'text-muted': '#888888',
         'near-green': '#00EC97',
         'near-green-dim': 'rgba(0, 236, 151, 0.2)',
         'accent-cyan': '#00D4FF',

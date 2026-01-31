@@ -148,3 +148,61 @@ Added comprehensive interaction design polish across the entire Voidspace websit
 ### Build Status
 
 `npm run build` passes with zero errors.
+
+---
+
+# UX Enhancement Round 2 — Accessibility, Consistency, Brand
+
+## Tasks
+
+### Category A: Accessibility
+- [x] A1 — Fix text-muted contrast ratio: `#666666` → `#888888` (WCAG AA compliance, 5.1:1 ratio)
+- [x] A2 — Add aria-labels: mobile menu toggle, save button, external project links
+- [x] A3 — Add alt text to project logo images + aria-labels on social link icons in ProjectList
+
+### Category B: Visual Consistency
+- [x] B1 — Standardize hover depth: Card `hover` prop now includes `translate-y-[-1px]` lift effect
+- [x] B5 — Search empty states: replaced plain text with branded `VoidEmptyState` component
+
+### Category C: Brand Deepening
+- [x] C1 — Noise texture overlay: subtle SVG fractalNoise at 3% opacity, fixed position, "static in the void"
+- [x] C3 — Footer enhancement: added blurred glow line below top border gradient
+- [x] C5 — AnimatedCounter: demand score in opportunity detail now counts up from 0 on scroll
+
+### Category D: Mobile
+- [x] D1 — Responsive tables: added `overflow-x-auto` to ProjectList and HotWalletsTable
+
+### Verify
+- [x] `npm run build` passes with zero errors
+
+## Files Changed
+
+### Modified (11 files)
+- `src/app/globals.css` — `--text-muted` → `#888888`, noise texture `body::before` overlay
+- `tailwind.config.ts` — `text-muted` color → `#888888`
+- `src/components/layout/Header.tsx` — `aria-label` on mobile menu toggle
+- `src/components/opportunities/SaveButton.tsx` — `aria-label` on save button
+- `src/components/opportunities/OpportunityDetail.tsx` — `aria-label` on external links, `AnimatedCounter` on demand score
+- `src/components/search/SearchResults.tsx` — `VoidEmptyState` for no-query and no-results states
+- `src/components/ui/Card.tsx` — hover lift effect (`translate-y-[-1px]`)
+- `src/components/dashboard/ProjectList.tsx` — alt text on logos, aria-labels on social links, `overflow-x-auto`
+- `src/components/ecosystem/HotWalletsTable.tsx` — `overflow-x-auto` on data grid
+- `src/app/projects/[slug]/page.tsx` — alt text on project logo
+- `src/components/layout/Footer.tsx` — blurred glow line on top border
+
+## Review
+
+### Summary
+
+Applied 11 targeted UX improvements across accessibility, visual consistency, brand deepening, and mobile experience. Every change is minimal and focused — no new files, no architecture changes, just surgical improvements to existing components.
+
+### What changed
+
+- **Accessibility (A1-A3)**: Fixed WCAG AA contrast failure on muted text (3.2:1 → 5.1:1), added aria-labels to 6 icon-only interactive elements, added descriptive alt text to all project logo images
+- **Visual consistency (B1, B5)**: Cards with hover prop now lift 1px on hover for consistent interactive feedback. Search empty states use branded VoidEmptyState component instead of plain text
+- **Brand deepening (C1, C3, C5)**: Subtle noise grain texture across the entire site creates a "static in the void" effect. Footer top border has a soft glow. Demand score animates counting up when scrolled into view
+- **Mobile (D1)**: ProjectList and HotWalletsTable now scroll horizontally on small screens instead of breaking layout
+
+### Build Status
+
+`npm run build` passes with zero errors.
