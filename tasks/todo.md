@@ -7,29 +7,29 @@ General crypto RSS feeds produce zero NEAR-relevant content. NEAR-specific Mediu
 ## Tasks
 
 ### Delete Files (6)
-- [ ] Delete `src/app/news/page.tsx`
-- [ ] Delete `src/components/news/NewsFeed.tsx`
-- [ ] Delete `src/components/news/NewsSidebar.tsx`
-- [ ] Delete `src/components/news/HotSignalBar.tsx`
-- [ ] Delete `src/lib/news-queries.ts`
-- [ ] Delete `src/lib/sync/news.ts`
+- [x] Delete `src/app/news/page.tsx`
+- [x] Delete `src/components/news/NewsFeed.tsx`
+- [x] Delete `src/components/news/NewsSidebar.tsx`
+- [x] Delete `src/components/news/HotSignalBar.tsx`
+- [x] Delete `src/lib/news-queries.ts`
+- [x] Delete `src/lib/sync/news.ts`
 
 ### Modify Files (11)
-- [ ] `src/lib/constants.ts` — Remove "News" from NAV_ITEMS
-- [ ] `src/app/api/sync/route.ts` — Remove news import, syncNews step, extractOpportunitiesFromNews step
-- [ ] `src/app/page.tsx` — Remove HotSignalBar + getNewsVelocity from dashboard
-- [ ] `src/app/categories/[slug]/page.tsx` — Remove NewsSidebar + getNewsByCategory
-- [ ] `src/app/opportunities/[id]/page.tsx` — Remove getNewsByCategory + news prop
-- [ ] `src/components/opportunities/OpportunityDetail.tsx` — Remove NewsSidebar + news prop + NewsArticle type
-- [ ] `src/lib/queries.ts` — Remove news_articles fetch + news count mapping from getCategoriesWithStats
-- [ ] `src/lib/sync/opportunities.ts` — Remove news count fetch + newsArticleCount passing
-- [ ] `src/lib/gap-score.ts` — Remove Signal 6 (News Momentum), rebalance 5 weights to sum to 1.0
-- [ ] `src/types/index.ts` — Remove NewsArticle interface, newsArticleCount from GapScoreInput, newsMomentum from GapScoreBreakdown
-- [ ] `supabase/functions/generate-brief/index.ts` — Remove news context from Claude prompt
+- [x] `src/lib/constants.ts` — Remove "News" from NAV_ITEMS
+- [x] `src/app/api/sync/route.ts` — Remove news import, syncNews step, extractOpportunitiesFromNews step
+- [x] `src/app/page.tsx` — Remove HotSignalBar + getNewsVelocity from dashboard
+- [x] `src/app/categories/[slug]/page.tsx` — Remove NewsSidebar + getNewsByCategory + unused Card import
+- [x] `src/app/opportunities/[id]/page.tsx` — Remove getNewsByCategory + news prop
+- [x] `src/components/opportunities/OpportunityDetail.tsx` — Remove NewsSidebar + news prop + NewsArticle type
+- [x] `src/lib/queries.ts` — Remove news_articles fetch + news count mapping + sevenDaysAgo variable from getCategoriesWithStats
+- [x] `src/lib/sync/opportunities.ts` — Remove news count fetch + newsArticleCount passing
+- [x] `src/lib/gap-score.ts` — Remove Signal 6 (News Momentum), rebalance 5 weights to sum to 1.0
+- [x] `src/types/index.ts` — Remove NewsArticle interface, newsArticleCount from GapScoreInput, newsMomentum from GapScoreBreakdown
+- [x] `supabase/functions/generate-brief/index.ts` — Remove news context from Claude prompt
 
 ### Verify
-- [ ] `npm run build` passes with zero errors
-- [ ] Commit and push to trigger Vercel deploy
+- [x] `npm run build` passes with zero errors
+- [x] Commit and push to trigger Vercel deploy
 
 ## Weight Rebalancing (5 signals)
 
@@ -51,4 +51,100 @@ General crypto RSS feeds produce zero NEAR-relevant content. NEAR-specific Mediu
 
 ## Review
 
-_(to be filled after completion)_
+### Summary
+
+Completely removed all 6 crypto news features from Voidspace. The RSS-based news aggregation produced zero NEAR-relevant content — general crypto feeds don't mention NEAR Protocol, and NEAR-specific Medium feeds haven't published in months. The result was irrelevant articles (Ripple, Bitcoin ETFs, XRP) appearing across the entire site, which hurt the product's NEAR focus.
+
+### What was removed
+
+- **6 files deleted** (1,274 lines removed): /news page, NewsFeed component, NewsSidebar component, HotSignalBar component, news-queries data layer, news syncer
+- **11 files cleaned up**: Removed all news imports, data fetching, UI rendering, gap score signal, and brief generation context
+- **Gap score rebalanced**: 5 signals now (was 6). News Momentum (12%) redistributed proportionally across remaining signals
+
+### What was kept
+
+- DB table `news_articles` — harmless, dropping requires a separate migration
+- `rss-parser` npm dependency — removing changes lockfile for no benefit
+- Migration file `002_news_articles.sql` — no harm leaving it
+
+### Build Status
+
+`npm run build` passes with zero errors. Pushed to main → Vercel deploy triggered.
+
+---
+
+# Interaction Design Upgrade — UX Polish
+
+## Tasks
+
+### Phase 1: Global Infrastructure
+- [x] Create `PageTransitionWrapper` client component with `key={pathname}` — every route change now has a smooth fade-in/slide-up animation
+- [x] Create 7 `loading.tsx` skeleton files (dashboard, opportunities, opportunity detail, categories, category detail, search, profile)
+- [x] Add Framer Motion `whileHover`/`whileTap` micro-interactions to Button component + green glow on primary variant
+
+### Phase 2: Navigation & Header
+- [x] Add animated nav underline with `layoutId` that slides between active links
+- [x] Wrap mobile menu in `AnimatePresence` for smooth enter/exit animation
+- [x] Add cyan hover glow to search icon via `drop-shadow`
+
+### Phase 3: New Utility Components
+- [x] Create `VoidEmptyState` — branded empty state with icon, title, description, action
+- [x] Create `StaggeredList` — Framer Motion wrapper for staggered child entrance animations
+
+### Phase 4: Page-Specific Polish
+- [x] Use `GradientText` on opportunity detail title
+- [x] Use `VoidEmptyState` for profile not-connected state + empty saved opportunities
+- [x] Add glow shadow to wallet connect button
+- [x] Add cyan focus glow to search input card via `focus-within`
+
+### Phase 5: Global CSS
+- [x] Add `*:focus-visible` green outline for keyboard navigation
+- [x] Add `prefers-reduced-motion: reduce` to disable all animations
+
+### Verify
+- [x] `npm run build` passes with zero errors
+
+## Files Changed
+
+### Created (10 files)
+- `src/components/layout/PageTransitionWrapper.tsx` — Client wrapper for page transitions
+- `src/app/loading.tsx` — Dashboard skeleton
+- `src/app/opportunities/loading.tsx` — Opportunity list skeleton
+- `src/app/opportunities/[id]/loading.tsx` — Opportunity detail skeleton
+- `src/app/categories/loading.tsx` — Category list skeleton
+- `src/app/categories/[slug]/loading.tsx` — Category detail skeleton
+- `src/app/search/loading.tsx` — Search skeleton
+- `src/app/profile/loading.tsx` — Profile skeleton
+- `src/components/ui/VoidEmptyState.tsx` — Branded empty state component
+- `src/components/effects/StaggeredList.tsx` — Staggered list animation wrapper
+
+### Modified (8 files)
+- `src/app/layout.tsx` — Wrapped children with PageTransitionWrapper
+- `src/components/ui/Button.tsx` — Added `motion.button` with whileHover/whileTap + glow
+- `src/components/ui/index.ts` — Added VoidEmptyState export
+- `src/components/layout/Header.tsx` — Nav underline, mobile menu animation, search glow
+- `src/components/opportunities/OpportunityDetail.tsx` — GradientText on title
+- `src/components/profile/ProfileContent.tsx` — VoidEmptyState for empty states
+- `src/app/search/page.tsx` — Focus-within glow on search input
+- `src/app/globals.css` — focus-visible + prefers-reduced-motion
+
+## Review
+
+### Summary
+
+Added comprehensive interaction design polish across the entire Voidspace website. Every page now has smooth entrance transitions, loading skeletons, and consistent motion patterns that reinforce the void/space brand.
+
+### What changed
+
+- **Page transitions**: Every route change triggers a smooth fade-in/slide-up via PageTransition + pathname key
+- **Loading states**: 7 void-themed skeleton screens match each page's layout structure
+- **Button feel**: Spring-based hover (1.02x scale) and press (0.98x) with green glow on primary buttons
+- **Navigation**: Active link underline animates between items; mobile menu slides in/out smoothly
+- **Search**: Cyan glow on icon hover; input card glows on focus
+- **Empty states**: Branded VoidEmptyState with ambient glow replaces plain text messages
+- **Opportunity detail**: Title uses gradient text for stronger visual impact
+- **Accessibility**: Green focus-visible ring for keyboard users; prefers-reduced-motion disables all animations
+
+### Build Status
+
+`npm run build` passes with zero errors.

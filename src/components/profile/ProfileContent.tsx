@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { User, Shield, FileText, Calendar, ExternalLink } from 'lucide-react';
-import { Card, Badge, Button, Progress } from '@/components/ui';
+import { User, Shield, FileText, Calendar, ExternalLink, Bookmark } from 'lucide-react';
+import { Card, Badge, Button, Progress, VoidEmptyState } from '@/components/ui';
 import { PageTransition } from '@/components/effects/PageTransition';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -49,17 +49,17 @@ export function ProfileContent() {
 
   if (!isConnected) {
     return (
-      <Card variant="glass" padding="lg" className="text-center py-16">
-        <User className="w-12 h-12 text-text-muted mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-text-primary mb-2">
-          Connect Your Wallet
-        </h2>
-        <p className="text-text-secondary mb-6 max-w-md mx-auto">
-          Connect your NEAR wallet to view your profile, saved opportunities, and usage stats.
-        </p>
-        <Button variant="primary" size="lg" onClick={openModal}>
-          Connect Wallet
-        </Button>
+      <Card variant="glass" padding="lg">
+        <VoidEmptyState
+          icon={User}
+          title="Connect Your Wallet"
+          description="Connect your NEAR wallet to view your profile, saved opportunities, and usage stats."
+          action={
+            <Button variant="primary" size="lg" onClick={openModal} className="hover:shadow-[0_0_24px_rgba(0,236,151,0.4)]">
+              Connect Wallet
+            </Button>
+          }
+        />
       </Card>
     );
   }
@@ -237,9 +237,16 @@ export function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-text-muted text-center py-6">
-                No saved opportunities yet. Browse opportunities and click the heart to save them.
-              </p>
+              <VoidEmptyState
+                icon={Bookmark}
+                title="No saved voids yet"
+                description="Browse voids and click the bookmark icon to save them here."
+                action={
+                  <Link href="/opportunities">
+                    <Button variant="secondary" size="sm">Browse Voids</Button>
+                  </Link>
+                }
+              />
             )}
           </div>
         </Card>

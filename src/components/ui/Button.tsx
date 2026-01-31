@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+// Omit event handlers that conflict with Framer Motion's motion.button props
+type ConflictingHandlers = 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd';
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, ConflictingHandlers> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
@@ -13,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  primary: 'bg-near-green text-background font-semibold hover:opacity-90',
+  primary: 'bg-near-green text-background font-semibold hover:opacity-90 hover:shadow-[0_0_20px_rgba(0,236,151,0.3)]',
   secondary: 'bg-surface border border-border hover:border-border-hover text-text-secondary',
   ghost: 'bg-transparent hover:bg-surface-hover text-text-secondary',
   danger: 'bg-error/10 text-error border border-error/20 hover:bg-error/20',
@@ -28,7 +31,7 @@ const sizeStyles = {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
     return (
-      <button
+      <motion.button
         ref={ref}
         className={cn(
           'inline-flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
@@ -37,6 +40,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         disabled={disabled || isLoading}
+        whileHover={disabled || isLoading ? undefined : { scale: 1.02 }}
+        whileTap={disabled || isLoading ? undefined : { scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         {...props}
       >
         {isLoading ? (
@@ -46,7 +52,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : null}
         {children}
         {rightIcon && !isLoading ? rightIcon : null}
-      </button>
+      </motion.button>
     );
   }
 );

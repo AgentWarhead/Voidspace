@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Providers } from '@/components/providers/Providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -22,7 +23,9 @@ export default function RootLayout({
         <Providers>
           <Header />
           <main className="flex-1">
-            <ErrorBoundary>{children}</ErrorBoundary>
+            <ErrorBoundary>
+              <PageTransitionWrapper>{children}</PageTransitionWrapper>
+            </ErrorBoundary>
           </main>
           <Footer />
         </Providers>

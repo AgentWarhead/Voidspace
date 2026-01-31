@@ -51,7 +51,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
           {/* Search Form */}
           <form action="/search" method="GET" className="mt-6 max-w-xl mx-auto">
-            <Card variant="glass" padding="none" className="relative overflow-hidden">
+            <Card variant="glass" padding="none" className="relative overflow-hidden transition-shadow duration-300 focus-within:ring-1 focus-within:ring-cyan-400/50 focus-within:shadow-[0_0_20px_rgba(0,212,255,0.15)]">
               <ScanLine />
               <div className="relative z-10 flex items-center">
                 <Search className="w-5 h-5 text-text-muted ml-4 shrink-0" />

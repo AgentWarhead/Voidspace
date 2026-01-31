@@ -13,6 +13,7 @@ import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GlowCard } from '@/components/effects/GlowCard';
 import { GridPattern } from '@/components/effects/GridPattern';
 import { ScanLine } from '@/components/effects/ScanLine';
+import { GradientText } from '@/components/effects/GradientText';
 import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
 import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
@@ -80,9 +81,9 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                   </InfoTooltip>
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-text-primary">
+              <GradientText as="h1" className="text-2xl font-bold">
                 {opportunity.title}
-              </h1>
+              </GradientText>
               {opportunity.description && (
                 <p className="text-text-secondary">{opportunity.description}</p>
               )}
