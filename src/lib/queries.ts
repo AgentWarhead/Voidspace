@@ -49,43 +49,69 @@ export async function getEcosystemStats(): Promise<EcosystemStats> {
 export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
   const supabase = createAdminClient();
 
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
+  const [{ data: categories }, { data: allProjects }] = await Promise.all([
+    supabase.from('categories').select('*').order('name'),
+    supabase.from('projects').select('id, category_id, tvl_usd, is_active, github_stars, github_forks, github_open_issues, last_github_commit'),
+  ]);
 
   if (!categories) return [];
+
+  const projects = allProjects || [];
+
+  // Group projects by category_id
+  const projectsByCategory = new Map<string, typeof projects>();
+  for (const p of projects) {
+    if (!p.category_id) continue;
+    const arr = projectsByCategory.get(p.category_id) || [];
+    arr.push(p);
+    projectsByCategory.set(p.category_id, arr);
+  }
+
+  // Compute cross-category context for rank-based scoring
+  const allCategoryActiveProjects: number[] = [];
+  const allCategoryTVLs: number[] = [];
+
+  for (const cat of categories) {
+    const catProjects = projectsByCategory.get(cat.id) || [];
+    allCategoryActiveProjects.push(catProjects.filter((p) => p.is_active).length);
+    allCategoryTVLs.push(catProjects.reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0));
+  }
+
+  const ecosystemAverageTVL = allCategoryTVLs.length > 0
+    ? allCategoryTVLs.reduce((s, v) => s + v, 0) / allCategoryTVLs.length
+    : 0;
 
   const results: CategoryWithStats[] = [];
 
   for (const cat of categories) {
-    const [
-      { count: projectCount },
-      { count: activeCount },
-      { data: tvlData },
-    ] = await Promise.all([
-      supabase.from('projects').select('*', { count: 'exact', head: true }).eq('category_id', cat.id),
-      supabase.from('projects').select('*', { count: 'exact', head: true }).eq('category_id', cat.id).eq('is_active', true),
-      supabase.from('projects').select('tvl_usd').eq('category_id', cat.id),
-    ]);
-
-    const totalTVL = tvlData?.reduce((sum, p) => sum + (Number(p.tvl_usd) || 0), 0) || 0;
-    const active = activeCount || 0;
+    const catProjects = projectsByCategory.get(cat.id) || [];
+    const projectCount = catProjects.length;
+    const activeProjectCount = catProjects.filter((p) => p.is_active).length;
+    const totalTVL = catProjects.reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0);
 
     const gapScore = calculateGapScore({
       categorySlug: cat.slug,
-      totalProjects: projectCount || 0,
-      activeProjects: active,
+      totalProjects: projectCount,
+      activeProjects: activeProjectCount,
       totalTVL,
-      transactionVolume: 0,
       isStrategic: cat.is_strategic,
       strategicMultiplier: Number(cat.strategic_multiplier) || 1,
+      projectTVLs: catProjects.map((p) => Number(p.tvl_usd) || 0),
+      projectGithubStats: catProjects.map((p) => ({
+        stars: p.github_stars || 0,
+        forks: p.github_forks || 0,
+        openIssues: p.github_open_issues || 0,
+        lastCommit: p.last_github_commit,
+        isActive: p.is_active,
+      })),
+      allCategoryActiveProjects,
+      ecosystemAverageTVL,
     });
 
     results.push({
       ...cat,
-      projectCount: projectCount || 0,
-      activeProjectCount: active,
+      projectCount,
+      activeProjectCount,
       totalTVL,
       gapScore,
     });

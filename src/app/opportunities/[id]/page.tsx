@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/ui';
 import { OpportunityDetail } from '@/components/opportunities/OpportunityDetail';
-import { getOpportunityById, getRelatedProjects, getCategoryProjectStats } from '@/lib/queries';
+import { getOpportunityById, getRelatedProjects, getCategoryProjectStats, getProjectsByCategory } from '@/lib/queries';
 import { calculateGapScoreBreakdown } from '@/lib/gap-score';
 
 interface Props {
@@ -25,9 +25,10 @@ export default async function OpportunityDetailPage({ params }: Props) {
   if (!opportunity) notFound();
 
   const category = opportunity.category!;
-  const [relatedProjects, catStats] = await Promise.all([
+  const [relatedProjects, catStats, categoryProjects] = await Promise.all([
     getRelatedProjects(opportunity.category_id, 10),
     getCategoryProjectStats(opportunity.category_id),
+    getProjectsByCategory(opportunity.category_id),
   ]);
 
   const breakdown = calculateGapScoreBreakdown({
@@ -35,9 +36,16 @@ export default async function OpportunityDetailPage({ params }: Props) {
     totalProjects: catStats.total,
     activeProjects: catStats.active,
     totalTVL: catStats.tvl,
-    transactionVolume: 0,
     isStrategic: category.is_strategic,
     strategicMultiplier: Number(category.strategic_multiplier) || 1,
+    projectTVLs: categoryProjects.map((p) => Number(p.tvl_usd) || 0),
+    projectGithubStats: categoryProjects.map((p) => ({
+      stars: p.github_stars || 0,
+      forks: p.github_forks || 0,
+      openIssues: p.github_open_issues || 0,
+      lastCommit: p.last_github_commit,
+      isActive: p.is_active,
+    })),
   });
 
   return (

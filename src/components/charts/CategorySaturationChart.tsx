@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChartLegend } from './ChartLegend';
 import type { CategoryWithStats } from '@/types';
@@ -57,6 +58,7 @@ function outerArc(r: number, a1: number, a2: number): string {
 /* ── Component ── */
 export function CategorySaturationChart({ categories }: CategorySaturationChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const router = useRouter();
 
   const sorted = useMemo(
     () => [...categories].sort((a, b) => b.gapScore - a.gapScore),
@@ -189,6 +191,7 @@ export function CategorySaturationChart({ categories }: CategorySaturationChartP
               }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
+              onClick={() => router.push(`/categories/${w.cat.slug}`)}
             />
           ))}
 
@@ -223,7 +226,10 @@ export function CategorySaturationChart({ categories }: CategorySaturationChartP
                 fill={hovered === i ? '#ffffff' : 'rgba(255,255,255,0.45)'}
                 fontSize={12}
                 fontFamily="'JetBrains Mono', monospace"
-                style={{ transition: 'fill .3s', pointerEvents: 'none' }}
+                style={{ transition: 'fill .3s', cursor: 'pointer' }}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                onClick={() => router.push(`/categories/${w.cat.slug}`)}
               >
                 {w.cat.name}
               </text>

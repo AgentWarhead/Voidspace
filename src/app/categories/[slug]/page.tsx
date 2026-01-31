@@ -47,9 +47,16 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
     totalProjects: stats.total,
     activeProjects: stats.active,
     totalTVL: stats.tvl,
-    transactionVolume: 0,
     isStrategic: category.is_strategic,
     strategicMultiplier: Number(category.strategic_multiplier) || 1,
+    projectTVLs: projects.map((p) => Number(p.tvl_usd) || 0),
+    projectGithubStats: projects.map((p) => ({
+      stars: p.github_stars || 0,
+      forks: p.github_forks || 0,
+      openIssues: p.github_open_issues || 0,
+      lastCommit: p.last_github_commit,
+      isActive: p.is_active,
+    })),
   });
 
   // Compute additional stats from project data

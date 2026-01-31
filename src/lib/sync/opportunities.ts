@@ -337,13 +337,14 @@ export async function generateOpportunities(supabase: SupabaseClient) {
       .eq('category_id', category.id)
       .eq('is_active', true);
 
-    // Sum TVL for this category
-    const { data: tvlData } = await supabase
+    // Fetch per-project stats for this category
+    const { data: projectStats } = await supabase
       .from('projects')
-      .select('tvl_usd')
+      .select('tvl_usd, github_stars, github_forks, github_open_issues, last_github_commit, is_active')
       .eq('category_id', category.id);
 
-    const totalTVL = tvlData?.reduce((sum, p) => sum + (Number(p.tvl_usd) || 0), 0) || 0;
+    const categoryProjects = projectStats || [];
+    const totalTVL = categoryProjects.reduce((sum, p) => sum + (Number(p.tvl_usd) || 0), 0);
 
     // Calculate base gap score
     const baseGapScore = calculateGapScore({
@@ -351,9 +352,16 @@ export async function generateOpportunities(supabase: SupabaseClient) {
       totalProjects: totalCount || 0,
       activeProjects: activeCount || 0,
       totalTVL,
-      transactionVolume: 0,
       isStrategic: category.is_strategic,
       strategicMultiplier: Number(category.strategic_multiplier),
+      projectTVLs: categoryProjects.map((p) => Number(p.tvl_usd) || 0),
+      projectGithubStats: categoryProjects.map((p) => ({
+        stars: p.github_stars || 0,
+        forks: p.github_forks || 0,
+        openIssues: p.github_open_issues || 0,
+        lastCommit: p.last_github_commit,
+        isActive: p.is_active,
+      })),
     });
 
     const competitionLevel = getCompetitionLevel(activeCount || 0);

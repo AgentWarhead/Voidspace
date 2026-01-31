@@ -178,9 +178,18 @@ export interface GapScoreInput {
   totalProjects: number;
   activeProjects: number;
   totalTVL: number;
-  transactionVolume: number;
   isStrategic: boolean;
   strategicMultiplier: number;
+  projectTVLs: number[];
+  projectGithubStats: {
+    stars: number;
+    forks: number;
+    openIssues: number;
+    lastCommit: string | null;
+    isActive: boolean;
+  }[];
+  allCategoryActiveProjects?: number[];
+  ecosystemAverageTVL?: number;
 }
 
 // --- Dashboard ---
@@ -227,11 +236,16 @@ export interface GitHubAggregateStats {
 // --- Gap Score Breakdown ---
 
 export interface GapScoreBreakdown {
-  demandScore: number;
-  activeSupply: number;
-  baseScore: number;
-  strategicMultiplier: number;
-  supplyModifier: number;
-  supplyModifierLabel: string;
+  supplyScarcity: number;
+  tvlConcentration: number;
+  devActivityGap: number;
+  strategicPriority: number;
+  marketDemand: number;
   finalScore: number;
+  signals: {
+    label: string;
+    value: number;
+    weight: number;
+    description: string;
+  }[];
 }

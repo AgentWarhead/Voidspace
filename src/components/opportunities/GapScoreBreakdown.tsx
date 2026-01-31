@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Badge } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { Progress } from '@/components/ui';
 import type { GapScoreBreakdown as GapScoreBreakdownType } from '@/types';
@@ -19,41 +19,21 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
         </h3>
 
         <div className="space-y-3">
-          <BreakdownRow
-            label="Signal Strength"
-            description="log10(TVL + Volume x 100 + 1)"
-            value={breakdown.demandScore}
-            maxValue={12}
-          />
-
-          <BreakdownRow
-            label="Active Supply"
-            description={`${breakdown.activeSupply} active projects competing`}
-            value={breakdown.activeSupply}
-            maxValue={20}
-            invert
-          />
-
-          <BreakdownRow
-            label="Base Score"
-            description="(Demand / Supply) x 10"
-            value={breakdown.baseScore}
-            maxValue={100}
-          />
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text-muted">NEAR Priority Boost</span>
-            <Badge variant="default" className={breakdown.strategicMultiplier > 1 ? 'bg-near-green/10 text-near-green' : ''}>
-              {breakdown.strategicMultiplier}x
-            </Badge>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text-muted">Supply Modifier</span>
-            <Badge variant="default" className={breakdown.supplyModifier > 1 ? 'bg-near-green/10 text-near-green' : breakdown.supplyModifier < 1 ? 'bg-red-500/10 text-red-400' : ''}>
-              {breakdown.supplyModifierLabel}
-            </Badge>
-          </div>
+          {breakdown.signals.map((signal, i) => (
+            <div key={i} className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-text-muted">{signal.label}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-text-muted font-mono">
+                    {Math.round(signal.weight * 100)}%
+                  </span>
+                  <span className="font-mono text-text-primary">{signal.value}</span>
+                </div>
+              </div>
+              <Progress value={signal.value} size="sm" />
+              <p className="text-[10px] text-text-muted">{signal.description}</p>
+            </div>
+          ))}
 
           <div className="pt-3 border-t border-border flex items-center justify-between">
             <span className="text-sm font-semibold text-text-primary">Void Score</span>
@@ -69,32 +49,5 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
         </div>
       </div>
     </Card>
-  );
-}
-
-function BreakdownRow({
-  label,
-  description,
-  value,
-  maxValue,
-  invert = false,
-}: {
-  label: string;
-  description: string;
-  value: number;
-  maxValue: number;
-  invert?: boolean;
-}) {
-  const pct = Math.min((value / maxValue) * 100, 100);
-
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-text-muted">{label}</span>
-        <span className="font-mono text-text-primary">{value.toFixed(1)}</span>
-      </div>
-      <Progress value={invert ? 100 - pct : pct} size="sm" />
-      <p className="text-[10px] text-text-muted">{description}</p>
-    </div>
   );
 }

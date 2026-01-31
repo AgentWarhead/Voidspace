@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
@@ -40,6 +41,7 @@ function voidColor(score: number): string {
 /* ── Component ── */
 export function TVLByCategory({ categories }: TVLByCategoryProps) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const router = useRouter();
 
   const totalTVL = categories.reduce((s, c) => s + c.totalTVL, 0);
 
@@ -170,6 +172,7 @@ export function TVLByCategory({ categories }: TVLByCategoryProps) {
               style={{ cursor: 'pointer' }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
+              onClick={() => router.push(`/categories/${node.cat.slug}`)}
             >
               {/* Outer glow ring */}
               <circle
@@ -231,7 +234,10 @@ export function TVLByCategory({ categories }: TVLByCategoryProps) {
                   fill={hovered === i ? '#ffffff' : 'rgba(255,255,255,0.45)'}
                   fontSize={11}
                   fontFamily="'JetBrains Mono', monospace"
-                  style={{ transition: 'fill .3s', pointerEvents: 'none' }}
+                  style={{ transition: 'fill .3s', cursor: 'pointer' }}
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                  onClick={() => router.push(`/categories/${node.cat.slug}`)}
                 >
                   {node.cat.name}
                 </text>
