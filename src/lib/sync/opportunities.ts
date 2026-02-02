@@ -324,6 +324,32 @@ export async function generateOpportunities(supabase: SupabaseClient) {
 
   if (!categories) throw new Error('No categories found');
 
+  // Pre-compute cross-category context for accurate gap scores
+  const allCategoryActiveProjects: number[] = [];
+  const allCategoryTVLs: number[] = [];
+
+  for (const cat of categories) {
+    const { count: catActive } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('category_id', cat.id)
+      .eq('is_active', true);
+
+    const { data: catProjects } = await supabase
+      .from('projects')
+      .select('tvl_usd')
+      .eq('category_id', cat.id);
+
+    allCategoryActiveProjects.push(catActive || 0);
+    allCategoryTVLs.push(
+      (catProjects || []).reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0)
+    );
+  }
+
+  const ecosystemAverageTVL = allCategoryTVLs.length > 0
+    ? allCategoryTVLs.reduce((s, v) => s + v, 0) / allCategoryTVLs.length
+    : 0;
+
   for (const category of categories) {
     // Count total and active projects in this category
     const { count: totalCount } = await supabase
@@ -362,6 +388,8 @@ export async function generateOpportunities(supabase: SupabaseClient) {
         lastCommit: p.last_github_commit,
         isActive: p.is_active,
       })),
+      allCategoryActiveProjects,
+      ecosystemAverageTVL,
     });
 
     const competitionLevel = getCompetitionLevel(activeCount || 0);

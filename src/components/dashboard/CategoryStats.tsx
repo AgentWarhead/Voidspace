@@ -43,14 +43,34 @@ export function CategoryStats({ totalProjects, activeProjects, totalTVL, gapScor
               <div>
                 <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
                   {item.label}
-                  {item.key === 'gapScore' && (
-                    <InfoTooltip term={HELP_CONTENT.gapScore.term}>
-                      <p>{HELP_CONTENT.gapScore.description}</p>
+                  {item.key === 'totalProjects' && (
+                    <InfoTooltip term={HELP_CONTENT.totalProjects.term}>
+                      <p>{HELP_CONTENT.totalProjects.description}</p>
+                    </InfoTooltip>
+                  )}
+                  {item.key === 'activeProjects' && (
+                    <InfoTooltip term={HELP_CONTENT.activeProjects.term}>
+                      <p>{HELP_CONTENT.activeProjects.description}</p>
                     </InfoTooltip>
                   )}
                   {item.key === 'totalTVL' && (
                     <InfoTooltip term={HELP_CONTENT.tvl.term}>
                       <p>{HELP_CONTENT.tvl.description}</p>
+                    </InfoTooltip>
+                  )}
+                  {item.key === 'gapScore' && (
+                    <InfoTooltip term={HELP_CONTENT.gapScore.term}>
+                      <p>{HELP_CONTENT.gapScore.description}</p>
+                    </InfoTooltip>
+                  )}
+                  {item.key === 'totalStars' && (
+                    <InfoTooltip term={HELP_CONTENT.githubStars.term}>
+                      <p>{HELP_CONTENT.githubStars.description}</p>
+                    </InfoTooltip>
+                  )}
+                  {item.key === 'recentlyActive' && (
+                    <InfoTooltip term={HELP_CONTENT.recentlyActive.term}>
+                      <p>{HELP_CONTENT.recentlyActive.description}</p>
                     </InfoTooltip>
                   )}
                 </p>

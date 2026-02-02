@@ -34,7 +34,7 @@ export default async function DashboardPage() {
   const [stats, categories, opportunities] = await Promise.all([
     getEcosystemStats(),
     getCategoriesWithStats(),
-    getTopOpportunities(12),
+    getTopOpportunities(100),
   ]);
 
   return (

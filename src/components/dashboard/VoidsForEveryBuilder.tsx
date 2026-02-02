@@ -38,10 +38,24 @@ const item = {
 export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProps) {
   const [activeTab, setActiveTab] = useState<Difficulty>('beginner');
 
+  // Prioritize non-filled voids with highest gap scores for display
+  const bestOpps = opportunities
+    .filter((o) => o.competition_level !== 'high')
+    .sort((a, b) => b.gap_score - a.gap_score);
+
+  // Fall back to all opportunities sorted by score if every void is filled
+  const displayOpps = bestOpps.length > 0 ? bestOpps : [...opportunities].sort((a, b) => b.gap_score - a.gap_score);
+
+  const counts: Record<Difficulty, number> = {
+    beginner: opportunities.filter((o) => o.difficulty === 'beginner').length,
+    intermediate: opportunities.filter((o) => o.difficulty === 'intermediate').length,
+    advanced: opportunities.filter((o) => o.difficulty === 'advanced').length,
+  };
+
   const grouped: Record<Difficulty, Opportunity[]> = {
-    beginner: opportunities.filter((o) => o.difficulty === 'beginner').slice(0, 3),
-    intermediate: opportunities.filter((o) => o.difficulty === 'intermediate').slice(0, 3),
-    advanced: opportunities.filter((o) => o.difficulty === 'advanced').slice(0, 3),
+    beginner: displayOpps.filter((o) => o.difficulty === 'beginner').slice(0, 3),
+    intermediate: displayOpps.filter((o) => o.difficulty === 'intermediate').slice(0, 3),
+    advanced: displayOpps.filter((o) => o.difficulty === 'advanced').slice(0, 3),
   };
 
   const tabs: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
@@ -72,7 +86,7 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
           >
             {DIFFICULTY_META[tab].label}
             <span className="text-[10px] font-mono text-text-muted ml-1.5">
-              ({grouped[tab].length})
+              ({counts[tab]})
             </span>
           </button>
         ))}

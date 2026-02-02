@@ -99,4 +99,14 @@ export const HELP_CONTENT = {
     description:
       'Projects with a GitHub commit in the last 30 days. A high ratio of recently active projects signals a healthy, developing ecosystem.',
   },
+  totalProjects: {
+    term: 'Total Projects',
+    description:
+      'The total number of projects tracked in this category, including both active and inactive. More projects indicates a more mature category.',
+  },
+  activeProjects: {
+    term: 'Active Projects',
+    description:
+      'Projects currently active in this category — maintained, updated, and with recent on-chain or GitHub activity.',
+  },
 } as const;
