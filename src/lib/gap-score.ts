@@ -146,42 +146,44 @@ export function calculateGapScoreBreakdown(input: GapScoreInput): GapScoreBreakd
     finalScore,
     signals: [
       {
-        label: 'Supply Scarcity',
+        label: 'Builder Gap',
         value: ss,
         weight: WEIGHTS.supplyScarcity,
-        description: `${input.activeProjects} active project${input.activeProjects !== 1 ? 's' : ''} in this category`,
+        description: ss >= 60
+          ? `Only ${input.activeProjects} active project${input.activeProjects !== 1 ? 's' : ''} — wide open space for builders`
+          : `${input.activeProjects} active projects in this category`,
       },
       {
-        label: 'TVL Concentration',
+        label: 'Market Control',
         value: tc,
         weight: WEIGHTS.tvlConcentration,
         description: tc >= 60
-          ? 'Market dominated by few players'
-          : 'TVL spread across multiple projects',
+          ? 'A few big players dominate — room for challengers'
+          : 'Value spread across multiple projects',
       },
       {
-        label: 'Dev Activity Gap',
+        label: 'Dev Momentum',
         value: da,
         weight: WEIGHTS.devActivityGap,
         description: da >= 60
-          ? 'Low recent development activity'
+          ? 'Development has slowed — fresh energy needed'
           : 'Active development ongoing',
       },
       {
-        label: 'Strategic Priority',
+        label: 'NEAR Focus',
         value: sp,
         weight: WEIGHTS.strategicPriority,
         description: input.isStrategic
-          ? `NEAR Priority area (${input.strategicMultiplier}x)`
+          ? `NEAR Foundation priority area (${input.strategicMultiplier}x boost)`
           : 'Standard ecosystem category',
       },
       {
-        label: 'Market Demand',
+        label: 'Untapped Demand',
         value: md,
         weight: WEIGHTS.marketDemand,
         description: md >= 60
-          ? 'Below-average TVL \u2014 growth potential'
-          : 'Above-average TVL captured',
+          ? 'User demand exists but isn\u2019t being met'
+          : 'Market demand is being served',
       },
     ],
   };

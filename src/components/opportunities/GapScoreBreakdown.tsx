@@ -9,7 +9,25 @@ interface GapScoreBreakdownProps {
   breakdown: GapScoreBreakdownType;
 }
 
+function generateNarrative(breakdown: GapScoreBreakdownType): string {
+  const reasons: string[] = [];
+  const signals = breakdown.signals;
+  const strong = signals.filter((s) => s.value >= 60).sort((a, b) => b.value * b.weight - a.value * a.weight);
+  for (const s of strong.slice(0, 3)) {
+    if (s.label === 'Builder Gap') reasons.push('very few teams are building here');
+    else if (s.label === 'Market Control') reasons.push('the market is dominated by a few players');
+    else if (s.label === 'Dev Momentum') reasons.push('development activity has slowed');
+    else if (s.label === 'NEAR Focus') reasons.push('NEAR Foundation considers this a strategic priority');
+    else if (s.label === 'Untapped Demand') reasons.push('user demand isn\u2019t being met');
+  }
+  if (reasons.length === 0) return `This void scores ${breakdown.finalScore}/100.`;
+  const joined = reasons.length === 1 ? reasons[0] : reasons.slice(0, -1).join(', ') + ', and ' + reasons[reasons.length - 1];
+  return `This void scores ${breakdown.finalScore}/100 because ${joined}.`;
+}
+
 export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
+  const narrative = generateNarrative(breakdown);
+
   return (
     <Card variant="glass" padding="lg" className="relative overflow-hidden">
       <ScanLine />
@@ -17,6 +35,10 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
         <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
           Void Analysis
         </h3>
+
+        <p className="text-xs text-text-secondary leading-relaxed italic">
+          {narrative}
+        </p>
 
         <div className="space-y-3">
           {breakdown.signals.map((signal, i) => (

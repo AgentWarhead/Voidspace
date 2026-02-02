@@ -46,7 +46,7 @@ export function PriorityVoids({ categories }: PriorityVoidsProps) {
           Where NEAR Needs Builders Most
         </GradientText>
         <p className="text-text-secondary mt-2 max-w-md mx-auto text-sm">
-          Strategic priority areas aligned with NEAR Protocol&apos;s 2026 roadmap. These voids have boosted scores.
+          NEAR Foundation has flagged these areas as critical for ecosystem growth. Fewer builders + high demand = your opportunity.
         </p>
       </div>
 

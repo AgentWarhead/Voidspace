@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { rateLimit } from '@/lib/auth/rate-limit';
 import { syncEcosystem } from '@/lib/sync/ecosystem';
 import { syncDeFiLlama } from '@/lib/sync/defillama';
 import { generateOpportunities } from '@/lib/sync/opportunities';
@@ -30,10 +32,20 @@ const CATEGORIES = [
 
 export async function POST(request: Request) {
   try {
-    // Simple auth check
-    const authHeader = request.headers.get('authorization');
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`sync:${ip}`, 2, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    // Auth check: fail-closed with timing-safe comparison
     const expectedKey = process.env.SYNC_API_KEY;
-    if (expectedKey && authHeader !== `Bearer ${expectedKey}`) {
+    if (!expectedKey) {
+      console.error('SYNC_API_KEY not configured');
+      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+    }
+    const token = request.headers.get('authorization')?.replace('Bearer ', '') || '';
+    if (!token || token.length !== expectedKey.length ||
+        !timingSafeEqual(Buffer.from(token), Buffer.from(expectedKey))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

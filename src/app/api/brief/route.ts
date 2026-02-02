@@ -1,22 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { rateLimit } from '@/lib/auth/rate-limit';
+import { isValidUUID } from '@/lib/auth/validate';
 import { canGenerateBrief } from '@/lib/tiers';
 import type { TierName } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { opportunityId, userId } = await request.json();
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`brief:${ip}`, 5, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
 
-    if (!opportunityId) {
+    const auth = getAuthenticatedUser(request);
+    const userId = auth?.userId || null;
+
+    const { opportunityId } = await request.json();
+
+    if (!opportunityId || !isValidUUID(opportunityId)) {
       return NextResponse.json(
-        { error: 'opportunityId is required' },
+        { error: 'Valid opportunityId is required' },
         { status: 400 }
       );
     }
 
     const supabase = createAdminClient();
 
-    // If userId provided, enforce tier limits
+    // Anti-abuse: IP-based monthly cap for free tier (5 generations/IP/month)
+    const FREE_TIER_IP_MONTHLY_CAP = 5;
+    const monthlyIpKey = `brief-monthly:${ip}:${new Date().getFullYear()}-${new Date().getMonth()}`;
+    const ipCheck = rateLimit(monthlyIpKey, FREE_TIER_IP_MONTHLY_CAP, 31 * 24 * 60 * 60 * 1000);
+
+    // If authenticated, enforce tier limits
     if (userId) {
       const { data: user } = await supabase
         .from('users')
@@ -30,34 +46,31 @@ export async function POST(request: NextRequest) {
 
       const tier = user.tier as TierName;
 
-      // Shade tier: 3 lifetime briefs (all-time count)
-      // All other tiers: monthly limit
-      let briefCount = 0;
-      if (tier === 'shade') {
-        const { count } = await supabase
-          .from('usage')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('action', 'brief_generated');
-        briefCount = count || 0;
-      } else {
-        const monthStart = new Date();
-        monthStart.setDate(1);
-        monthStart.setHours(0, 0, 0, 0);
+      // All tiers now use monthly limits
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
 
-        const { count } = await supabase
-          .from('usage')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('action', 'brief_generated')
-          .gte('created_at', monthStart.toISOString());
-        briefCount = count || 0;
+      const { count } = await supabase
+        .from('usage')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('action', 'brief_generated')
+        .gte('created_at', monthStart.toISOString());
+      const briefCount = count || 0;
+
+      // For free tier, also enforce IP-based cap (prevents multi-wallet abuse)
+      if (tier === 'shade' && !ipCheck.allowed) {
+        return NextResponse.json(
+          { error: 'Monthly generation limit reached. Try again next month or upgrade for more briefs.' },
+          { status: 429 }
+        );
       }
 
       if (!canGenerateBrief(tier, briefCount)) {
         const message = tier === 'shade'
-          ? 'You\u2019ve used all 3 free Void Briefs. Upgrade to continue generating briefs.'
-          : 'Void Brief generation limit reached for your tier this month.';
+          ? 'You\u2019ve used your 3 free mission briefs this month. Upgrade for more briefs or come back next month.'
+          : 'Mission brief generation limit reached for your tier this month.';
         return NextResponse.json(
           { error: message },
           { status: 403 }

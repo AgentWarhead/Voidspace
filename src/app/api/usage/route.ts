@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { rateLimit } from '@/lib/auth/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get('userId');
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`usage:${ip}`, 30, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
+
+    const auth = getAuthenticatedUser(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = auth.userId;
 
     const supabase = createAdminClient();
 

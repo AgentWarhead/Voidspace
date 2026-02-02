@@ -129,6 +129,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (!selector) return;
     const wallet = await selector.wallet();
     await wallet.signOut();
+    // Clear server session cookie
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setAccountId(null);
     setUser(null);
   }, [selector]);

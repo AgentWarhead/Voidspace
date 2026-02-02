@@ -16,7 +16,7 @@ export function useSavedOpportunities() {
 
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/saved?userId=${user.id}`);
+      const res = await fetch('/api/saved');
       if (res.ok) {
         const data = await res.json();
         const ids = new Set<string>(
@@ -43,7 +43,7 @@ export function useSavedOpportunities() {
         const res = await fetch('/api/saved', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, opportunityId }),
+          body: JSON.stringify({ opportunityId }),
         });
 
         if (res.ok) {
@@ -68,7 +68,7 @@ export function useSavedOpportunities() {
         const res = await fetch('/api/saved', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, opportunityId }),
+          body: JSON.stringify({ opportunityId }),
         });
 
         if (res.ok) {

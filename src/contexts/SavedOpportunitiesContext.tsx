@@ -32,7 +32,7 @@ export function SavedOpportunitiesProvider({ children }: { children: React.React
     }
 
     setIsLoading(true);
-    fetch(`/api/saved?userId=${user.id}`)
+    fetch('/api/saved')
       .then((r) => r.json())
       .then((data) => {
         const ids = new Set<string>(
@@ -52,7 +52,7 @@ export function SavedOpportunitiesProvider({ children }: { children: React.React
         const res = await fetch('/api/saved', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, opportunityId }),
+          body: JSON.stringify({ opportunityId }),
         });
 
         if (res.ok) {
@@ -77,7 +77,7 @@ export function SavedOpportunitiesProvider({ children }: { children: React.React
         const res = await fetch('/api/saved', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, opportunityId }),
+          body: JSON.stringify({ opportunityId }),
         });
 
         if (res.ok) {

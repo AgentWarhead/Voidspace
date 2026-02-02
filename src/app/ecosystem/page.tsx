@@ -60,7 +60,7 @@ export default async function EcosystemPage() {
             Ecosystem Health
           </GradientText>
           <p className="text-text-secondary mt-3 max-w-lg mx-auto">
-            Live NEAR Protocol chain metrics, developer activity, and wallet analytics powered by 6 data sources.
+            NEAR is a thriving, production-grade blockchain. These numbers prove your next project has real infrastructure and real users behind it.
           </p>
 
           {/* Summary Stats */}
@@ -94,6 +94,7 @@ export default async function EcosystemPage() {
         <ScrollReveal>
           <section>
             <SectionHeader title="Chain Health" badge="NEARBLOCKS" />
+            <p className="text-xs text-text-muted mb-4 -mt-2">Sub-second finality, hundreds of nodes, millions of accounts — your app runs on serious infrastructure.</p>
             <ChainHealth chainStats={chainStats} />
           </section>
         </ScrollReveal>
@@ -115,6 +116,7 @@ export default async function EcosystemPage() {
         <ScrollReveal delay={0.1}>
           <section>
             <SectionHeader title="GitHub Ecosystem Pulse" badge="GITHUB" />
+            <p className="text-xs text-text-muted mb-4 -mt-2">An active open-source community means documentation, libraries, and support when you need it.</p>
             <GitHubPulse stats={githubStats} />
           </section>
         </ScrollReveal>
@@ -127,8 +129,23 @@ export default async function EcosystemPage() {
           </section>
         </ScrollReveal>
 
-        {/* Data Sources */}
+        {/* CTA — Connect to Voids */}
         <ScrollReveal delay={0.2}>
+          <div className="text-center py-6">
+            <p className="text-sm text-text-secondary mb-3">
+              NEAR is thriving. Now see where it needs you most.
+            </p>
+            <a
+              href="/opportunities"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-near-green/10 border border-near-green/20 text-near-green hover:bg-near-green/20 rounded-lg transition-colors text-sm font-medium"
+            >
+              Explore Voids
+            </a>
+          </div>
+        </ScrollReveal>
+
+        {/* Data Sources */}
+        <ScrollReveal delay={0.25}>
           <Card variant="glass" padding="md" className="relative overflow-hidden">
             <ScanLine />
             <div className="relative z-10">

@@ -32,14 +32,14 @@ export function ProfileContent() {
   useEffect(() => {
     if (user?.id) {
       // Fetch usage
-      fetch(`/api/usage?userId=${user.id}`)
+      fetch('/api/usage')
         .then((r) => r.json())
         .then(setUsage)
         .catch(() => {});
 
       // Fetch saved opportunities
       setSavedLoading(true);
-      fetch(`/api/saved?userId=${user.id}`)
+      fetch('/api/saved')
         .then((r) => r.json())
         .then((data) => setSaved(data.saved || []))
         .catch(() => {})

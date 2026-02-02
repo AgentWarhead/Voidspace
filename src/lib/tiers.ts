@@ -5,7 +5,7 @@ export const TIERS: Record<TierName, TierConfig> = {
     name: 'Shade',
     tagline: 'Glimpse the void',
     price: 0,
-    briefsPerMonth: 3, // 3 lifetime briefs (not per month — enforced in API)
+    briefsPerMonth: 3, // 3 per month for free tier
     previewsPerDay: 3,
     maxSaved: 5,
     color: '#666666',

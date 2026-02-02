@@ -71,8 +71,7 @@ export default async function DashboardPage() {
                 <div className="mb-6">
                   <h3 className="text-base font-semibold text-text-primary">Ecosystem Gap Radar</h3>
                   <p className="text-xs text-text-muted mt-1 max-w-2xl">
-                    Each slice represents a NEAR ecosystem category. Slices that extend further from
-                    the center have higher opportunity scores — more demand and fewer active projects.
+                    Each slice is a NEAR category. The further it extends, the bigger the void — more demand, fewer builders. Look for the longest spikes — that&apos;s where your opportunity lives.
                   </p>
                 </div>
                 <CategorySaturationChart categories={categories} />
@@ -82,8 +81,7 @@ export default async function DashboardPage() {
                 <div className="mb-6">
                   <h3 className="text-base font-semibold text-text-primary">Capital Gravity Map</h3>
                   <p className="text-xs text-text-muted mt-1 max-w-2xl">
-                    Categories orbit around total ecosystem TVL. Closer to center = more capital locked in.
-                    Larger circles = more active projects. Color shows opportunity level.
+                    Where is the money? Categories closer to center have more capital locked in. Small circles with green color = few builders, big opportunity. That&apos;s where smart money hasn&apos;t arrived yet.
                   </p>
                 </div>
                 <TVLByCategory categories={categories} />
@@ -114,7 +112,7 @@ export default async function DashboardPage() {
                 Ready to build the future of NEAR?
               </GradientText>
               <p className="text-text-secondary mt-3 max-w-md mx-auto text-sm">
-                Explore detected voids, generate your AI build plan, and start building.
+                Every void you fill makes NEAR stronger. Find your opportunity, generate your mission brief, and start building.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
                 <Link href="/opportunities">

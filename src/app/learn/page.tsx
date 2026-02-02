@@ -38,6 +38,8 @@ const KEY_TECHNOLOGIES = [
     badge: 'AI',
     description: 'Autonomous AI agents that run in Trusted Execution Environments (TEEs). Shade Agents can hold private keys, manage funds, and execute complex strategies — all verifiably and trustlessly on-chain.',
     useCases: ['Autonomous trading bots', 'AI-powered portfolio management', 'Automated DAO operations', 'Intelligent DeFi yield optimization'],
+    voidLink: '/opportunities?category=ai-agents',
+    voidLabel: 'See AI & Agents voids',
   },
   {
     icon: Link2,
@@ -45,6 +47,8 @@ const KEY_TECHNOLOGIES = [
     badge: 'UX',
     description: 'Users declare what they want to achieve ("swap 10 NEAR for USDC at the best rate") and a network of solvers competes to fulfill the intent optimally. No manual bridging, no chain switching — one account works everywhere.',
     useCases: ['Cross-chain swaps without bridges', 'Unified portfolio across chains', 'Gas-free user experiences', 'Seamless multi-chain dApp interactions'],
+    voidLink: '/opportunities?category=intents',
+    voidLabel: 'See Intents voids',
   },
   {
     icon: Shield,
@@ -52,6 +56,8 @@ const KEY_TECHNOLOGIES = [
     badge: 'CRYPTO',
     description: 'A multi-party computation (MPC) scheme that enables a single NEAR account to sign transactions on any blockchain — Ethereum, Bitcoin, Cosmos, and more. The cryptographic foundation for true chain abstraction.',
     useCases: ['Control Bitcoin from a NEAR account', 'Sign Ethereum transactions from NEAR', 'Build cross-chain dApps natively', 'Unified identity across all chains'],
+    voidLink: '/opportunities?category=wallets',
+    voidLabel: 'See Wallets & Identity voids',
   },
 ];
 
@@ -184,6 +190,13 @@ export default function LearnPage() {
                           </li>
                         ))}
                       </ul>
+                      <Link
+                        href={tech.voidLink}
+                        className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-near-green hover:text-near-green/80 transition-colors"
+                      >
+                        <Target className="w-3 h-3" />
+                        {tech.voidLabel} &rarr;
+                      </Link>
                     </div>
                   </div>
                 </Card>
@@ -212,12 +225,12 @@ export default function LearnPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
-                  { title: 'Problem Statement', desc: 'What the void is and why it matters' },
-                  { title: 'Solution Overview', desc: 'High-level architecture and approach' },
-                  { title: 'Tech Stack', desc: 'Frontend, backend, and blockchain requirements' },
-                  { title: 'NEAR Technologies', desc: 'Which NEAR features to leverage (Intents, Shade Agents, etc.)' },
+                  { title: 'Problem & Solution', desc: 'What the void is and how to fill it' },
+                  { title: 'Why Now', desc: 'Market timing and ecosystem readiness' },
+                  { title: 'Tech Stack', desc: 'Frontend, backend, and NEAR-specific requirements' },
                   { title: 'Key Features', desc: 'Prioritized feature list with must-haves' },
-                  { title: 'Build Complexity', desc: 'Timeline, team size, and difficulty estimate' },
+                  { title: 'Next Steps', desc: '5 concrete actions for your first week' },
+                  { title: 'Funding & Monetization', desc: 'Grants, revenue models, and build complexity' },
                 ].map((item) => (
                   <div key={item.title} className="p-3 rounded-lg bg-surface-hover">
                     <h4 className="text-sm font-medium text-text-primary">{item.title}</h4>
@@ -226,7 +239,7 @@ export default function LearnPage() {
                 ))}
               </div>
               <p className="text-xs text-text-muted font-mono">
-                Free tier includes 3 Void Briefs after connecting your wallet. Upgrade for unlimited access.
+                Free tier includes 3 mission briefs per month. Upgrade for more.
               </p>
             </div>
           </Card>

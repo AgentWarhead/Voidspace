@@ -24,7 +24,7 @@ export function BriefGenerator({ opportunityId }: BriefGeneratorProps) {
   // Fetch usage stats
   useEffect(() => {
     if (user?.id) {
-      fetch(`/api/usage?userId=${user.id}`)
+      fetch('/api/usage')
         .then((r) => r.json())
         .then(setUsage)
         .catch(() => {});
@@ -39,10 +39,7 @@ export function BriefGenerator({ opportunityId }: BriefGeneratorProps) {
       const res = await fetch('/api/brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          opportunityId,
-          userId: user?.id,
-        }),
+        body: JSON.stringify({ opportunityId }),
       });
 
       const data = await res.json();
@@ -85,14 +82,14 @@ export function BriefGenerator({ opportunityId }: BriefGeneratorProps) {
   const briefsLimit = tierConfig.briefsPerMonth;
 
   return (
-    <TierGate requiredTier="specter" feature="generate AI project briefs">
+    <TierGate requiredTier="shade" feature="generate AI mission briefs">
       <Card padding="lg" className="text-center">
         <Sparkles className="w-8 h-8 text-near-green mx-auto mb-3" />
         <h2 className="text-lg font-semibold text-text-primary mb-2">
           Ready to Build?
         </h2>
         <p className="text-sm text-text-secondary mb-2 max-w-md mx-auto">
-          Generate an AI-powered project brief with technical specs, NEAR integration recommendations, and monetization strategies.
+          Generate an AI-powered mission brief with market analysis, technical specs, NEAR integration, monetization strategies, and your first week&apos;s action plan.
         </p>
 
         {isConnected && usage && (
@@ -118,7 +115,7 @@ export function BriefGenerator({ opportunityId }: BriefGeneratorProps) {
             )
           }
         >
-          {loading ? 'Generating...' : 'Generate Project Brief'}
+          {loading ? 'Generating Your Mission Brief...' : 'Generate Your Mission Brief'}
         </Button>
       </Card>
     </TierGate>

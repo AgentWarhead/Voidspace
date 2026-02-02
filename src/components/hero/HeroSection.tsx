@@ -69,9 +69,9 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
           >
             <TypewriterText
               lines={[
-                'Scanning the NEAR ecosystem for voids...',
-                'AI-powered void detection. Real-time. Actionable.',
-                'From void to vision in 60 seconds.',
+                'The NEAR ecosystem has gaps. Your next project fills one.',
+                'Real data. AI analysis. Your mission brief in 60 seconds.',
+                'Find where NEAR needs you most.',
               ]}
               speed={35}
               className="max-w-lg mx-auto"

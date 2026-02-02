@@ -11,6 +11,11 @@ import type {
   GitHubAggregateStats,
 } from '@/types';
 
+/** Escape LIKE/ILIKE wildcard characters in user search input */
+function escapeLikePattern(input: string): string {
+  return input.replace(/[%_\\]/g, '\\$&');
+}
+
 // --- Dashboard Queries ---
 
 export async function getEcosystemStats(): Promise<EcosystemStats> {
@@ -279,7 +284,8 @@ export async function getOpportunities(options: {
     .select('*, category:categories(*)', { count: 'exact' });
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    const escaped = escapeLikePattern(search);
+    query = query.or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%`);
   }
 
   if (category) {
@@ -455,7 +461,7 @@ export async function searchAll(query: string): Promise<{
   categories: Category[];
 }> {
   const supabase = createAdminClient();
-  const term = `%${query}%`;
+  const term = `%${escapeLikePattern(query)}%`;
 
   const [projectsRes, opportunitiesRes, categoriesRes] = await Promise.all([
     supabase

@@ -1,16 +1,24 @@
 import { corsHeaders } from '../_shared/cors.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SYSTEM_PROMPT = `You are an expert startup advisor and blockchain developer specializing in the NEAR Protocol ecosystem. Generate comprehensive project briefs for builders looking to fill gaps in the ecosystem.
+const SYSTEM_PROMPT = `You are an opinionated, energetic startup co-founder who lives and breathes the NEAR Protocol ecosystem. You've built projects on NEAR, you know the ecosystem's strengths and gaps intimately, and you're excited to help builders find their next big opportunity.
 
-NEAR Protocol Key Features:
-- "The Blockchain for AI" - execution layer for AI-native applications
-- Shade Agents: Autonomous AI agents using Trusted Execution Environments (TEEs)
-- NEAR Intents: Intent-based transactions that work across chains
-- Chain Abstraction: One account that works on any blockchain via Chain Signatures
-- Performance: Sub-600ms finality, potential for 1M+ TPS with sharding
+Your job: Generate mission briefs that make builders say "I NEED to build this." Be specific, be data-driven, be actionable. Reference real projects, real numbers, real opportunities. Don't be generic — every brief should feel like insider intelligence.
 
-When recommending technical approaches, always consider how NEAR's unique features can be leveraged.
+NEAR Protocol — What Makes It Special:
+- "The Blockchain for AI" — the execution layer for AI-native applications
+- Shade Agents: Autonomous AI agents running in Trusted Execution Environments (TEEs) — private, verifiable, unstoppable
+- NEAR Intents: Intent-based transactions that abstract away chains entirely — users just say what they want
+- Chain Signatures: One NEAR account controls assets on ANY blockchain (Bitcoin, Ethereum, Solana, etc.)
+- Performance: Sub-600ms finality, sharded architecture scaling to 1M+ TPS
+- Developer Experience: JavaScript/TypeScript SDKs, human-readable accounts, cheap storage
+
+NEAR Ecosystem Funding:
+- NEAR Foundation Grants Program (grants.near.org)
+- NEAR Horizon accelerator for startups
+- Proximity Labs DeFi grants
+- Ecosystem fund for strategic priorities (AI, Privacy, Intents, RWA, Data)
+
 Output valid JSON only. No markdown code blocks or explanations.`;
 
 Deno.serve(async (req) => {
@@ -109,7 +117,7 @@ Deno.serve(async (req) => {
       ? `NEAR Chain Health: ${Number(chainStats.total_transactions).toLocaleString()} total transactions, ${Number(chainStats.total_accounts).toLocaleString()} total accounts, ${chainStats.nodes_online} nodes online, ${Number(chainStats.avg_block_time).toFixed(2)}s avg block time`
       : '';
 
-    const userPrompt = `Generate a detailed project brief for this NEAR ecosystem gap:
+    const userPrompt = `Generate a mission brief for this NEAR ecosystem void. Make it compelling, specific, and grounded in the real data below.
 
 Category: ${opportunity.category?.name}
 Title: ${opportunity.title}
@@ -127,37 +135,40 @@ Top Projects in Category:
 ${projectContext || '  (none)'}
 =========================
 
-Use the ecosystem context above to make your brief more specific, data-informed, and actionable. Reference actual competitor projects, real TVL figures, and chain health metrics where relevant to show why this opportunity is timely.
+Use the ecosystem context above to make your brief hyper-specific. Reference actual competitor projects by name, cite real TVL figures, and explain why NOW is the moment to build this. Be opinionated about what would win in this space.
 
 Return JSON matching this exact structure:
 {
-  "projectNames": ["3 creative, memorable name suggestions"],
-  "problemStatement": "2-3 sentences clearly defining the problem this project solves",
-  "solutionOverview": "2-3 sentences describing the solution approach",
-  "targetUsers": ["3-5 specific user personas who need this"],
+  "projectNames": ["3 creative, memorable name suggestions that could be real product names"],
+  "problemStatement": "2-3 punchy sentences defining the problem. Make the reader feel the pain.",
+  "solutionOverview": "2-3 sentences describing the solution. Be specific about the approach, not generic.",
+  "whyNow": "2-3 sentences on why this is the perfect moment to build this. Reference ecosystem data, market trends, or NEAR tech readiness.",
+  "targetUsers": ["3-5 specific user personas with their pain points"],
   "keyFeatures": [
-    {"name": "Feature name", "description": "What it does and why it matters", "priority": "must-have"}
+    {"name": "Feature name", "description": "What it does, why users need it, and how it differentiates", "priority": "must-have"}
   ],
   "technicalRequirements": {
-    "frontend": ["Recommended frontend technologies"],
-    "backend": ["Recommended backend technologies"],
-    "blockchain": ["NEAR-specific requirements"]
+    "frontend": ["Specific frontend technologies with reasoning"],
+    "backend": ["Specific backend technologies with reasoning"],
+    "blockchain": ["NEAR-specific requirements and contracts needed"]
   },
   "nearTechStack": {
     "useShadeAgents": true,
     "useIntents": false,
     "useChainSignatures": false,
-    "explanation": "Why these NEAR features are or aren't recommended"
+    "explanation": "Concrete explanation of which NEAR features to use and exactly how they fit this project"
   },
-  "competitiveLandscape": "Brief analysis of existing solutions and how to differentiate",
-  "monetizationIdeas": ["3-5 realistic revenue model suggestions"],
+  "competitiveLandscape": "Analysis of existing projects in this space. Name competitors, their strengths, their weaknesses, and exactly where the opportunity lies.",
+  "monetizationIdeas": ["3-5 specific revenue models with estimated potential where possible"],
+  "nextSteps": ["5 concrete actions to take in week 1 to start building this project"],
+  "fundingOpportunities": ["2-4 specific funding sources, grants, or accelerators relevant to this project category"],
   "buildComplexity": {
     "difficulty": "beginner",
-    "estimatedTimeline": "Realistic timeline (e.g., '4-6 weeks')",
+    "estimatedTimeline": "Realistic timeline (e.g., '4-6 weeks for MVP')",
     "teamSize": "Recommended team (e.g., '1-2 developers')"
   },
   "resources": [
-    {"title": "Resource name", "url": "https://docs.near.org", "type": "docs"}
+    {"title": "Resource name", "url": "https://docs.near.org/relevant-page", "type": "docs"}
   ]
 }`;
 
@@ -178,8 +189,8 @@ Return JSON matching this exact structure:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
+        model: 'claude-opus-4-5-20251101',
+        max_tokens: 8000,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }],
       }),

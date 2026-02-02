@@ -16,6 +16,10 @@ import {
   Check,
   Download,
   FileText,
+  Clock,
+  Rocket,
+  Coins,
+  Share2,
 } from 'lucide-react';
 import { Badge, Button } from '@/components/ui';
 import { BriefSection } from './BriefSection';
@@ -36,6 +40,7 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
     lines.push(`> Suggested names: ${brief.projectNames.join(', ')}\n`);
     lines.push(`## Problem Statement\n${brief.problemStatement}\n`);
     lines.push(`## Solution Overview\n${brief.solutionOverview}\n`);
+    if (brief.whyNow) lines.push(`## Why Now\n${brief.whyNow}\n`);
     lines.push(`## Target Users`);
     brief.targetUsers.forEach((u) => lines.push(`- ${u}`));
     lines.push('');
@@ -58,6 +63,16 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
     lines.push(`## Monetization Ideas`);
     brief.monetizationIdeas.forEach((m) => lines.push(`- ${m}`));
     lines.push('');
+    if (brief.nextSteps?.length) {
+      lines.push(`## Next Steps — Week 1`);
+      brief.nextSteps.forEach((s, i) => lines.push(`${i + 1}. ${s}`));
+      lines.push('');
+    }
+    if (brief.fundingOpportunities?.length) {
+      lines.push(`## Funding Opportunities`);
+      brief.fundingOpportunities.forEach((f) => lines.push(`- ${f}`));
+      lines.push('');
+    }
     lines.push(`## Build Complexity`);
     lines.push(`- Difficulty: ${brief.buildComplexity.difficulty}`);
     lines.push(`- Timeline: ${brief.buildComplexity.estimatedTimeline}`);
@@ -90,6 +105,14 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
     a.click();
     URL.revokeObjectURL(url);
     addToast('Brief downloaded', 'success');
+  }
+
+  function shareOnX() {
+    const text = `I just found a void in the NEAR ecosystem and got an AI-generated mission brief from Voidspace.\n\nProject idea: ${brief.projectNames[0]}\n\n${brief.problemStatement.slice(0, 120)}...\n\nFind your void:`;
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+    addToast('Opening X to share', 'success');
   }
 
   return (
@@ -129,6 +152,14 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
           >
             {copied ? 'Copied' : 'Copy'}
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={shareOnX}
+            leftIcon={<Share2 className="w-3.5 h-3.5" />}
+          >
+            Share
+          </Button>
         </div>
       </div>
 
@@ -145,6 +176,15 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
           {brief.solutionOverview}
         </p>
       </BriefSection>
+
+      {/* Why Now */}
+      {brief.whyNow && (
+        <BriefSection title="Why Now" icon={<Clock className="w-4 h-4" />}>
+          <p className="text-sm text-text-secondary leading-relaxed">
+            {brief.whyNow}
+          </p>
+        </BriefSection>
+      )}
 
       {/* Target Users */}
       <BriefSection title="Target Users" icon={<Users className="w-4 h-4" />}>
@@ -241,6 +281,34 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
           ))}
         </ul>
       </BriefSection>
+
+      {/* Next Steps */}
+      {brief.nextSteps && brief.nextSteps.length > 0 && (
+        <BriefSection title="Next Steps — Week 1" icon={<Rocket className="w-4 h-4" />}>
+          <ol className="space-y-1.5">
+            {brief.nextSteps.map((step, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                <span className="text-near-green font-mono text-xs mt-0.5">{i + 1}.</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </BriefSection>
+      )}
+
+      {/* Funding Opportunities */}
+      {brief.fundingOpportunities && brief.fundingOpportunities.length > 0 && (
+        <BriefSection title="Funding Opportunities" icon={<Coins className="w-4 h-4" />}>
+          <ul className="space-y-1.5">
+            {brief.fundingOpportunities.map((fund, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                <span className="text-near-green mt-1">-</span>
+                {fund}
+              </li>
+            ))}
+          </ul>
+        </BriefSection>
+      )}
 
       {/* Build Complexity */}
       <BriefSection title="Build Complexity" icon={<Gauge className="w-4 h-4" />}>

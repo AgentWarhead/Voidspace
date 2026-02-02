@@ -125,6 +125,7 @@ export interface ProjectBrief {
   projectNames: string[];
   problemStatement: string;
   solutionOverview: string;
+  whyNow?: string;
   targetUsers: string[];
   keyFeatures: {
     name: string;
@@ -144,6 +145,8 @@ export interface ProjectBrief {
   };
   competitiveLandscape: string;
   monetizationIdeas: string[];
+  nextSteps?: string[];
+  fundingOpportunities?: string[];
   buildComplexity: {
     difficulty: 'beginner' | 'intermediate' | 'advanced';
     estimatedTimeline: string;

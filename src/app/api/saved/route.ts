@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { rateLimit } from '@/lib/auth/rate-limit';
+import { isValidUUID } from '@/lib/auth/validate';
 import { canSaveOpportunity } from '@/lib/tiers';
 import type { TierName } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get('userId');
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`saved:${ip}`, 30, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
+
+    const auth = getAuthenticatedUser(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = auth.userId;
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -30,10 +39,21 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, opportunityId } = await request.json();
-    if (!userId || !opportunityId) {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`saved:${ip}`, 30, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    const auth = getAuthenticatedUser(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = auth.userId;
+
+    const { opportunityId } = await request.json();
+    if (!opportunityId || !isValidUUID(opportunityId)) {
       return NextResponse.json(
-        { error: 'userId and opportunityId are required' },
+        { error: 'Valid opportunityId is required' },
         { status: 400 }
       );
     }
@@ -99,10 +119,21 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId, opportunityId } = await request.json();
-    if (!userId || !opportunityId) {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`saved:${ip}`, 30, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    const auth = getAuthenticatedUser(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = auth.userId;
+
+    const { opportunityId } = await request.json();
+    if (!opportunityId || !isValidUUID(opportunityId)) {
       return NextResponse.json(
-        { error: 'userId and opportunityId are required' },
+        { error: 'Valid opportunityId is required' },
         { status: 400 }
       );
     }
