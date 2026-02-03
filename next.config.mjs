@@ -26,7 +26,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com wss://*.near.org",
+              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com https://graph.mintbase.xyz wss://*.near.org",
               "frame-ancestors 'none'",
             ].join('; '),
           },

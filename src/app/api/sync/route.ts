@@ -9,6 +9,8 @@ import { syncGitHub } from '@/lib/sync/github';
 import { syncNearBlocks } from '@/lib/sync/nearblocks';
 import { syncFastNear } from '@/lib/sync/fastnear';
 import { syncPikespeak } from '@/lib/sync/pikespeak';
+import { syncMintbase } from '@/lib/sync/mintbase';
+import { syncAstroDAO } from '@/lib/sync/astrodao';
 
 const CATEGORIES = [
   // Strategic categories (2x multiplier)
@@ -116,6 +118,12 @@ export async function POST(request: Request) {
 
     // Step 3.5: Enrich with Pikespeak analytics
     results.pikespeak = await syncPikespeak(supabase);
+
+    // Step 3.75: Enrich with Mintbase NFT data
+    results.mintbase = await syncMintbase(supabase);
+
+    // Step 3.85: Enrich with Sputnik DAO governance data
+    results.astrodao = await syncAstroDAO(supabase);
 
     // Step 4: Generate/update opportunities
     results.opportunities = await generateOpportunities(supabase);

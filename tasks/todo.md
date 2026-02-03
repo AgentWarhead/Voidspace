@@ -401,3 +401,77 @@ Applied 10 targeted improvements across the Voidspace platform to maximize the p
 2. **Run a data sync** to ensure fresh data before the demo: `curl -X POST /api/sync -H "Authorization: Bearer YOUR_KEY"`
 3. **Clear existing cached briefs** if you want all briefs to use the new Opus 4.5 format (optional — old briefs still display fine)
 4. **Test brief generation end-to-end** — verify new fields (whyNow, nextSteps, fundingOpportunities) appear
+
+---
+
+# New API Integrations — Mintbase + Sputnik DAO + X/Twitter
+
+## Context
+
+Adding new data sources to enrich ecosystem intelligence:
+1. **Mintbase** — NFT marketplace data via GraphQL API (enriches NFTs & Digital Art category)
+2. **Sputnik DAO** — DAO governance data via direct NEAR RPC contract calls (enriches DAOs & Governance category)
+3. **X/Twitter** — Social sharing + ecosystem sentiment (pending API approval)
+
+The Astro DAO hosted API (`api.app.astrodao.com`) is dead (DNS doesn't resolve — decommissioned after 2023 community transition). The Sputnik V2 smart contracts are still live on-chain at `*.sputnik-dao.near`, so we query them directly via NEAR RPC.
+
+## Tasks
+
+### 1. Mintbase Sync Module
+- [ ] Create `src/lib/sync/mintbase.ts`
+  - POST GraphQL to `https://graph.mintbase.xyz/mainnet`
+  - Header: `mb-api-key: 2d1513ca-0eae-4b22-be81-245e4f2f4f03`
+  - Query: Aggregate NFT ecosystem stats (total stores, total tokens, active listings)
+  - Enrich NFT-category projects by matching slug/name to Mintbase store data
+  - Store enrichment in `raw_data.mintbase` on matching projects
+  - Return metrics: `{ enriched, failed, skipped, total, ecosystemStats }`
+  - Follow existing sync pattern (async, SupabaseClient param, rate limiting)
+
+### 2. Sputnik DAO Sync Module
+- [ ] Create `src/lib/sync/astrodao.ts`
+  - Query NEAR RPC at `https://rpc.mainnet.near.org` (already in CSP)
+  - JSON-RPC `query` with `call_function` request type
+  - For projects in "DAOs & Governance" category: derive `*.sputnik-dao.near` contract ID
+  - Call `get_policy` (member count, roles) and `get_last_proposal_id` (proposal count)
+  - Store in `raw_data.astrodao` on matching projects
+  - Return metrics: `{ enriched, failed, skipped, total }`
+  - Graceful failure — if contract doesn't exist, skip
+
+### 3. Wire Into Sync Route
+- [ ] Add imports for `syncMintbase` and `syncAstroDAO` to `src/app/api/sync/route.ts`
+- [ ] Add as steps after FastNEAR/Pikespeak, before opportunity generation
+- [ ] Add results to response object
+
+### 4. CSP Update
+- [ ] Add `https://graph.mintbase.xyz` to `connect-src` in `next.config.mjs`
+
+### 5. X/Twitter (Future)
+- [ ] Awaiting X Developer API approval
+- [ ] Once approved: social sharing + ecosystem sentiment
+
+### 6. Verify
+- [x] `npm run build` passes with zero errors
+- [ ] Commit and push
+
+## Review
+
+### Summary
+
+Added two new data source integrations to enrich Voidspace ecosystem intelligence: Mintbase (NFT marketplace data) and Sputnik DAO (on-chain governance data). The Astro DAO hosted API is dead, so DAO data is queried directly from Sputnik V2 smart contracts via NEAR RPC.
+
+### Files Created (2)
+- `src/lib/sync/mintbase.ts` — GraphQL queries to Mintbase indexer for NFT ecosystem stats + per-project store matching
+- `src/lib/sync/astrodao.ts` — Direct NEAR RPC calls to Sputnik DAO contracts for member counts, proposals, roles
+
+### Files Modified (2)
+- `src/app/api/sync/route.ts` — Added syncMintbase and syncAstroDAO steps between Pikespeak and opportunity generation
+- `next.config.mjs` — Added `https://graph.mintbase.xyz` to CSP connect-src
+
+### How It Works
+
+**Mintbase:** Posts GraphQL queries to `graph.mintbase.xyz/mainnet` with the Mintbase API key. Fetches ecosystem-wide NFT stats (total stores, active listings, total tokens) and enriches NFT-category projects by matching slug/name to Mintbase store data. Stores enrichment in `raw_data.mintbase`.
+
+**Sputnik DAO:** Calls NEAR RPC view methods on `*.sputnik-dao.near` contracts. For each DAO-category project, derives the contract ID (from known mappings or slug-based guess), calls `get_policy` for member/role data and `get_last_proposal_id` for proposal count. Stores in `raw_data.astrodao`. Gracefully skips contracts that don't exist.
+
+### Build Status
+`npm run build` passes with zero errors.
