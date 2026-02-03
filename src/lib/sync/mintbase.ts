@@ -18,25 +18,40 @@ interface MintbaseEcosystemStats {
 }
 
 async function graphqlQuery<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const res = await fetch(GRAPHQL_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'mb-api-key': API_KEY,
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  // Add timeout to prevent hanging if API is unresponsive
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-  if (!res.ok) {
-    throw new Error(`Mintbase GraphQL error: ${res.status}`);
+  try {
+    const res = await fetch(GRAPHQL_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'mb-api-key': API_KEY,
+      },
+      body: JSON.stringify({ query, variables }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      throw new Error(`Mintbase GraphQL error: ${res.status}`);
+    }
+
+    const json = await res.json();
+    if (json.errors) {
+      throw new Error(`Mintbase GraphQL: ${json.errors[0]?.message || 'Unknown error'}`);
+    }
+
+    return json.data as T;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Mintbase API timeout (10s)');
+    }
+    throw err;
   }
-
-  const json = await res.json();
-  if (json.errors) {
-    throw new Error(`Mintbase GraphQL: ${json.errors[0]?.message || 'Unknown error'}`);
-  }
-
-  return json.data as T;
 }
 
 /**
@@ -105,7 +120,16 @@ export async function syncMintbase(supabase: SupabaseClient) {
     ecosystemStats = await fetchEcosystemStats();
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    return { enriched: 0, failed: 1, skipped: 0, total: 0, ecosystemStats, error: message };
+    // Return gracefully with status indicating API unavailable
+    return {
+      enriched: 0,
+      failed: 0,
+      skipped: 0,
+      total: 0,
+      ecosystemStats,
+      status: 'api_unavailable',
+      error: message,
+    };
   }
 
   // Step 2: Fetch Mintbase stores for matching
