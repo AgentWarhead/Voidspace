@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 interface Transaction {
-  hash: string;
+  transaction_hash: string;
   receiver_account_id: string;
-  signer_account_id: string;
+  predecessor_account_id: string;
   block_timestamp: string;
-  transaction_actions: Array<{
-    action_kind: string;
-    args?: Record<string, unknown>;
+  actions: Array<{
+    action: string;
+    method?: string | null;
+    deposit: number;
+    args?: string | null;
   }>;
-  outcomes: {
-    transaction_outcome: {
-      outcome: {
-        gas_burnt: number;
-      };
-    };
+  actions_agg?: {
+    deposit: number;
   };
 }
 
@@ -144,12 +142,12 @@ export async function POST(request: NextRequest) {
     });
 
     for (const tx of data.txns) {
-      const { receiver_account_id, signer_account_id, block_timestamp, outcomes } = tx;
+      const { receiver_account_id, predecessor_account_id, block_timestamp, actions_agg } = tx;
       
       // Determine the other party in the transaction
-      const otherParty = signer_account_id === address ? receiver_account_id : signer_account_id;
+      const otherParty = predecessor_account_id === address ? receiver_account_id : predecessor_account_id;
       
-      if (otherParty === address) continue; // Skip self-transactions
+      if (otherParty === address || otherParty === 'system') continue; // Skip self-transactions and system
       
       // Track connections
       const connectionKey = [address, otherParty].sort().join('->');
@@ -166,9 +164,9 @@ export async function POST(request: NextRequest) {
       const connection = connectionMap.get(connectionKey)!;
       connection.transactionCount++;
       
-      // Estimate transaction value based on gas used (rough approximation)
-      const gasUsed = outcomes?.transaction_outcome?.outcome?.gas_burnt || 0;
-      connection.totalValue += gasUsed / 1e12; // Convert to NEAR
+      // Get transaction value from deposit
+      const depositValue = actions_agg?.deposit || 0;
+      connection.totalValue += Number(depositValue) / 1e24; // Convert yoctoNEAR to NEAR
       
       if (block_timestamp > connection.lastSeen) {
         connection.lastSeen = block_timestamp;
