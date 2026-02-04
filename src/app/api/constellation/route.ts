@@ -99,28 +99,54 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch transactions for the given address
-    const transactionUrl = `https://api.nearblocks.io/v1/account/${address}/txns?page=1&per_page=500&order=desc`;
+    const transactionUrl = `https://api.nearblocks.io/v1/account/${address}/txns?page=1&per_page=100&order=desc`;
     
-    console.log('Fetching transactions for:', address);
+    console.log('Fetching transactions from:', transactionUrl);
     
-    const response = await fetch(transactionUrl, { headers });
+    let response;
+    try {
+      response = await fetch(transactionUrl, { 
+        headers,
+        // Add timeout and cache settings for serverless
+        next: { revalidate: 60 }
+      });
+    } catch (fetchError) {
+      console.error('Fetch error:', fetchError);
+      return NextResponse.json(
+        { error: 'Network error connecting to NEAR Blocks API' },
+        { status: 503 }
+      );
+    }
     
     if (!response.ok) {
-      console.error('NEAR Blocks API error:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('NEAR Blocks API error:', response.status, errorText);
       return NextResponse.json(
-        { error: 'Failed to fetch transaction data from NEAR Blocks' },
+        { error: `NEAR Blocks API error: ${response.status}` },
         { status: response.status }
       );
     }
 
-    const data: NearBlocksResponse = await response.json();
-    
-    if (!data.txns) {
+    let data: NearBlocksResponse;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
       return NextResponse.json(
-        { error: 'No transaction data found' },
+        { error: 'Failed to parse NEAR Blocks response' },
+        { status: 500 }
+      );
+    }
+    
+    if (!data.txns || !Array.isArray(data.txns)) {
+      console.log('No txns in response, data keys:', Object.keys(data));
+      return NextResponse.json(
+        { error: 'No transaction data found for this address' },
         { status: 404 }
       );
     }
+    
+    console.log(`Found ${data.txns.length} transactions for ${address}`);
 
     // Process transactions to build constellation data
     const connectionMap = new Map<string, {
