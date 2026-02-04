@@ -27,6 +27,21 @@ interface ReputationAnalysis {
   };
 }
 
+// Helper to convert yoctoNEAR to NEAR (divide by 10^24)
+function yoctoToNear(yoctoAmount: string): string {
+  const yocto = BigInt(yoctoAmount || '0');
+  const near = Number(yocto) / 1e24;
+  return near.toFixed(2);
+}
+
+// Helper to convert nanoseconds timestamp to ISO string
+function nanoToISOString(nanoTimestamp: string | number | null): string | null {
+  if (!nanoTimestamp) return null;
+  const ms = Number(nanoTimestamp) / 1_000_000;
+  if (isNaN(ms) || ms <= 0) return null;
+  return new Date(ms).toISOString();
+}
+
 async function fetchWalletData(address: string): Promise<WalletData | null> {
   try {
     const baseUrl = 'https://api.nearblocks.io/v1/account';
@@ -41,6 +56,8 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
     }
     
     const accountData = await accountResponse.json();
+    // NearBlocks returns data in account[0] array
+    const account = accountData.account?.[0] || accountData;
     
     // Fetch transactions (last 100)
     const txResponse = await fetch(`${baseUrl}/${address}/txns?page=1&per_page=100`, {
@@ -48,6 +65,7 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
     });
     
     const txData = txResponse.ok ? await txResponse.json() : { txns: [] };
+    const transactions = txData.txns || [];
     
     // Fetch tokens
     const tokensResponse = await fetch(`${baseUrl}/${address}/tokens?page=1&per_page=50`, {
@@ -56,16 +74,24 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
     
     const tokensData = tokensResponse.ok ? await tokensResponse.json() : { tokens: [] };
     
+    // Get first/last transaction timestamps (in nanoseconds from API)
+    const firstTxTimestamp = transactions.length > 0 
+      ? transactions[transactions.length - 1]?.block_timestamp 
+      : account.created?.block_timestamp;
+    const lastTxTimestamp = transactions.length > 0 
+      ? transactions[0]?.block_timestamp 
+      : null;
+    
     return {
       account: address,
-      balance: accountData.amount || '0',
-      transactions: txData.txns || [],
-      contracts: [], // Would need separate API call
+      balance: yoctoToNear(account.amount || '0'),
+      transactions: transactions,
+      contracts: [],
       tokens: tokensData.tokens || [],
       stats: {
-        total_transactions: txData.txns?.length || 0,
-        first_transaction: txData.txns?.length > 0 ? txData.txns[txData.txns.length - 1]?.block_timestamp : null,
-        last_transaction: txData.txns?.length > 0 ? txData.txns[0]?.block_timestamp : null,
+        total_transactions: transactions.length || 0,
+        first_transaction: nanoToISOString(firstTxTimestamp),
+        last_transaction: nanoToISOString(lastTxTimestamp),
       }
     };
   } catch (error) {
