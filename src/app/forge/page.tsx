@@ -1,13 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
-import { GridPattern } from '@/components/effects/GridPattern';
+import { ParticleBackground } from './components/ParticleBackground';
 import { CategoryPicker } from './components/CategoryPicker';
 import { ForgeChat } from './components/ForgeChat';
-import { CodePreview } from './components/CodePreview';
+import { TypewriterCode } from './components/TypewriterCode';
 import { TokenCounter } from './components/TokenCounter';
+import { ForgeVisualization } from './components/ForgeVisualization';
+import { GlassPanel } from './components/GlassPanel';
+import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft } from 'lucide-react';
+
+type ForgeStage = 'idle' | 'thinking' | 'generating' | 'complete';
 
 export default function ForgePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -15,11 +21,42 @@ export default function ForgePage() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [tokensUsed, setTokensUsed] = useState(0);
-  const [tokenBalance, setTokenBalance] = useState(50000); // Demo balance
+  const [tokenBalance, setTokenBalance] = useState(50000);
+  const [forgeStage, setForgeStage] = useState<ForgeStage>('idle');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [messageCount, setMessageCount] = useState(0);
+  const [deployCount, setDeployCount] = useState(0);
+
+  const unlockAchievement = useCallback((achievementId: string) => {
+    if (unlockedAchievements.has(achievementId)) return;
+    
+    const achievement = ACHIEVEMENTS[achievementId];
+    if (achievement) {
+      setUnlockedAchievements(prev => new Set(Array.from(prev).concat([achievementId])));
+      setCurrentAchievement(achievement);
+      
+      // Play sound if enabled
+      if (soundEnabled) {
+        const audio = new Audio('/sounds/achievement.mp3');
+        audio.volume = 0.3;
+        audio.play().catch(() => {});
+      }
+    }
+  }, [unlockedAchievements, soundEnabled]);
 
   const handleCategorySelect = (categorySlug: string) => {
     setSelectedCategory(categorySlug);
     setSessionStarted(true);
+    
+    // Check for category-specific achievements
+    if (categorySlug === 'chain-signatures') {
+      setTimeout(() => unlockAchievement('chain_signatures'), 2000);
+    } else if (categorySlug === 'ai-agents') {
+      setTimeout(() => unlockAchievement('shade_agent'), 2000);
+    }
   };
 
   const handleCustomStart = () => {
@@ -33,94 +70,269 @@ export default function ForgePage() {
     const total = input + output;
     setTokensUsed(prev => prev + total);
     setTokenBalance(prev => prev - total);
+    setMessageCount(prev => prev + 1);
+    
+    // First message achievement
+    if (messageCount === 0) {
+      unlockAchievement('first_message');
+    }
+  };
+
+  const handleCodeGenerated = (code: string) => {
+    setForgeStage('generating');
+    setIsGenerating(true);
+    setGeneratedCode(code);
+    
+    // First code achievement
+    if (!unlockedAchievements.has('first_code')) {
+      setTimeout(() => unlockAchievement('first_code'), 1500);
+    }
+    
+    // Complete after typing animation
+    setTimeout(() => {
+      setForgeStage('complete');
+      setIsGenerating(false);
+    }, code.length * 10 + 500);
+  };
+
+  const handleDeploy = async () => {
+    setForgeStage('thinking');
+    
+    // Simulate deployment
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setDeployCount(prev => prev + 1);
+    
+    // First deploy achievement
+    if (deployCount === 0) {
+      unlockAchievement('first_deploy');
+    }
+    
+    setForgeStage('complete');
+    
+    // Play deploy sound
+    if (soundEnabled) {
+      const audio = new Audio('/sounds/deploy.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+    }
+  };
+
+  const handleBack = () => {
+    setSessionStarted(false);
+    setSelectedCategory(null);
+    setGeneratedCode('');
+    setForgeStage('idle');
   };
 
   return (
-    <div className="min-h-screen bg-void-black">
-      {/* Hero Section */}
-      {!sessionStarted && (
-        <section className="relative overflow-hidden py-16 sm:py-24">
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(0,236,151,0.06) 0%, transparent 70%)',
-            }}
-          />
-          <GridPattern className="opacity-20" />
-          <Container size="xl" className="relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 mb-6">
-              <span className="text-near-green text-sm font-mono">FORGE IDE</span>
-              <span className="text-text-muted text-sm">by Voidspace</span>
-            </div>
-            
-            <GradientText as="h1" className="text-5xl sm:text-6xl font-bold tracking-tight mb-4">
-              Build Smart Contracts
-              <br />
-              <span className="text-near-green">By Talking</span>
-            </GradientText>
-            
-            <p className="text-text-secondary text-lg max-w-2xl mx-auto mb-12">
-              AI-powered contract development for NEAR Protocol. Pick what you want to build,
-              chat with the AI, learn as you go, deploy in minutes. No coding required.
-            </p>
+    <div className="min-h-screen bg-void-black relative overflow-hidden">
+      {/* Animated particle background */}
+      <ParticleBackground />
 
-            {/* Category Picker */}
-            <CategoryPicker 
-              onSelect={handleCategorySelect}
-              customPrompt={customPrompt}
-              setCustomPrompt={setCustomPrompt}
-              onCustomStart={handleCustomStart}
-            />
-          </Container>
+      {/* Achievement popup */}
+      <AchievementPopup
+        achievement={currentAchievement}
+        onClose={() => setCurrentAchievement(null)}
+      />
+
+      {/* Landing / Category Selection */}
+      {!sessionStarted && (
+        <section className="relative z-10 min-h-screen flex flex-col">
+          {/* Hero */}
+          <div className="flex-1 flex items-center justify-center py-16">
+            <Container size="xl" className="text-center">
+              {/* Animated badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 mb-8 animate-pulse-glow">
+                <Sparkles className="w-4 h-4 text-near-green" />
+                <span className="text-near-green text-sm font-mono font-medium">FORGE IDE</span>
+                <span className="text-text-muted text-sm">by Voidspace</span>
+              </div>
+
+              {/* Title */}
+              <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
+                <span className="text-text-primary">Build Smart Contracts</span>
+                <br />
+                <GradientText className="mt-2">By Talking</GradientText>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-text-secondary text-xl max-w-2xl mx-auto mb-12">
+                AI-powered contract development for NEAR Protocol.
+                <br />
+                <span className="text-near-green">Learn Rust as you build.</span> Deploy in minutes.
+              </p>
+
+              {/* Stats */}
+              <div className="flex items-center justify-center gap-8 mb-16">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-text-primary font-mono">15</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Categories</div>
+                </div>
+                <div className="w-px h-12 bg-border-subtle" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-near-green font-mono">5</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">NEAR Priorities</div>
+                </div>
+                <div className="w-px h-12 bg-border-subtle" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-text-primary font-mono">&lt;5m</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">To Deploy</div>
+                </div>
+              </div>
+
+              {/* Category Picker */}
+              <CategoryPicker
+                onSelect={handleCategorySelect}
+                customPrompt={customPrompt}
+                setCustomPrompt={setCustomPrompt}
+                onCustomStart={handleCustomStart}
+              />
+            </Container>
+          </div>
+
+          {/* Features footer */}
+          <div className="py-8 border-t border-border-subtle bg-void-black/50 backdrop-blur-sm">
+            <Container size="xl">
+              <div className="flex items-center justify-center gap-12 text-sm text-text-muted">
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-near-green" />
+                  <span>Rust Smart Contracts</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  <span>Chain Signatures</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <span>Shade Agents</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Rocket className="w-4 h-4 text-cyan-400" />
+                  <span>One-Click Deploy</span>
+                </div>
+              </div>
+            </Container>
+          </div>
         </section>
       )}
 
       {/* Build Session */}
       {sessionStarted && (
-        <div className="flex h-[calc(100vh-64px)]">
+        <div className="relative z-10 flex h-screen">
           {/* Left Panel - Chat */}
-          <div className="w-1/2 border-r border-border-subtle flex flex-col">
-            <div className="p-4 border-b border-border-subtle bg-void-gray/50">
+          <GlassPanel className="w-1/2 flex flex-col m-2 mr-1" glow glowColor="purple">
+            {/* Header */}
+            <div className="p-4 border-b border-white/[0.05]">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-text-primary">
-                    🔥 Building: {selectedCategory === 'custom' ? 'Custom Project' : selectedCategory}
-                  </h2>
-                  <p className="text-sm text-text-muted">Chat with Forge to build your contract</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleBack}
+                    className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-text-muted" />
+                  </button>
+                  <div>
+                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                      <span className="text-2xl">🔥</span>
+                      Building: {selectedCategory === 'custom' ? 'Custom Project' : selectedCategory?.replace('-', ' ')}
+                    </h2>
+                    <p className="text-sm text-text-muted">Chat with Forge to build your contract</p>
+                  </div>
                 </div>
-                <TokenCounter 
-                  tokensUsed={tokensUsed} 
-                  tokenBalance={tokenBalance}
-                />
+                
+                <div className="flex items-center gap-4">
+                  {/* Sound toggle */}
+                  <button
+                    onClick={() => setSoundEnabled(!soundEnabled)}
+                    className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
+                    title={soundEnabled ? 'Sound on' : 'Sound off'}
+                  >
+                    {soundEnabled ? '🔊' : '🔇'}
+                  </button>
+                  
+                  <TokenCounter 
+                    tokensUsed={tokensUsed} 
+                    tokenBalance={tokenBalance}
+                  />
+                </div>
               </div>
             </div>
-            
+
+            {/* Chat */}
             <ForgeChat 
               category={selectedCategory}
               customPrompt={customPrompt}
-              onCodeGenerated={setGeneratedCode}
+              onCodeGenerated={handleCodeGenerated}
               onTokensUsed={handleTokensUsed}
             />
-          </div>
+          </GlassPanel>
 
           {/* Right Panel - Code Preview */}
-          <div className="w-1/2 flex flex-col bg-void-gray/30">
-            <div className="p-4 border-b border-border-subtle">
+          <GlassPanel className="w-1/2 flex flex-col m-2 ml-1" glow glowColor="green">
+            {/* Header */}
+            <div className="p-4 border-b border-white/[0.05]">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-text-primary">📄 Contract Preview</h2>
+                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  <span className="text-xl">📄</span>
+                  Contract Preview
+                </h2>
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 text-sm bg-void-gray hover:bg-void-gray/80 rounded-lg border border-border-subtle transition-colors">
-                    📋 Copy
+                  <button 
+                    className="px-4 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2"
+                    onClick={() => navigator.clipboard.writeText(generatedCode)}
+                    disabled={!generatedCode}
+                  >
+                    <Code2 className="w-4 h-4" />
+                    Copy
                   </button>
-                  <button className="px-3 py-1.5 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-colors">
-                    🚀 Deploy
+                  <button 
+                    className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                    onClick={handleDeploy}
+                    disabled={!generatedCode || forgeStage === 'thinking'}
+                  >
+                    <Rocket className="w-4 h-4" />
+                    Deploy
                   </button>
                 </div>
               </div>
             </div>
-            
-            <CodePreview code={generatedCode} />
-          </div>
+
+            {/* Forge Visualization */}
+            {!generatedCode && (
+              <div className="flex-1 flex flex-col items-center justify-center p-8">
+                <ForgeVisualization
+                  isGenerating={isGenerating}
+                  progress={0}
+                  stage={forgeStage}
+                />
+                <p className="mt-6 text-text-muted text-center max-w-sm">
+                  Start chatting with Forge to generate your smart contract code.
+                  I'll teach you Rust as we build together.
+                </p>
+              </div>
+            )}
+
+            {/* Code with typing animation */}
+            {generatedCode && (
+              <TypewriterCode 
+                code={generatedCode}
+                speed={8}
+                onComplete={() => setForgeStage('complete')}
+              />
+            )}
+
+            {/* File info */}
+            {generatedCode && (
+              <div className="p-3 border-t border-white/[0.05] bg-void-black/30 flex items-center justify-between text-xs text-text-muted">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                  contract.rs
+                </span>
+                <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
+              </div>
+            )}
+          </GlassPanel>
         </div>
       )}
     </div>
