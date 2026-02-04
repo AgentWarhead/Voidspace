@@ -4,9 +4,9 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 interface WalletData {
   account: string;
   balance: string;
-  transactions: any[];
-  contracts: any[];
-  tokens: any[];
+  transactions: Array<Record<string, unknown>>;
+  contracts: Array<Record<string, unknown>>;
+  tokens: Array<Record<string, unknown>>;
   stats: {
     total_transactions: number;
     first_transaction: string | null;

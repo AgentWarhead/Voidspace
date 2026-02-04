@@ -9,9 +9,6 @@ import {
   Settings, 
   TrendingUp, 
   ArrowRight,
-  Clock,
-  DollarSign,
-  Users,
   Zap
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -27,7 +24,7 @@ interface TransactionData {
   signer_id: string;
   receiver_id: string;
   action_kind: string;
-  args: any;
+  args: Record<string, unknown>;
   deposit: string;
   gas: string;
   method_name?: string;
@@ -62,6 +59,7 @@ export function PulseStreams() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [lastTimestamp, setLastTimestamp] = useState<string>('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [stats, setStats] = useState({ total: 0, filtered: 0 });
   
   const [filters, setFilters] = useState<StreamFilters>({

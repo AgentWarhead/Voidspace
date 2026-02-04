@@ -7,7 +7,7 @@ interface Transaction {
   block_timestamp: string;
   transaction_actions: Array<{
     action_kind: string;
-    args?: any;
+    args?: Record<string, unknown>;
   }>;
   outcomes: {
     transaction_outcome: {
@@ -84,7 +84,7 @@ function calculateWeight(txCount: number, totalValue: number): number {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { address, depth = 1 } = body;
+    const { address } = body;
 
     if (!address) {
       return NextResponse.json({ error: 'Address is required' }, { status: 400 });

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Shield, TrendingUp, Activity, Wallet, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Search, Shield, TrendingUp, Activity, Wallet, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
+
 import { Progress } from '@/components/ui/Progress';
 import { cn } from '@/lib/utils';
 
@@ -25,8 +25,8 @@ interface ReputationAnalysis {
 interface WalletData {
   account: string;
   balance: string;
-  transactions: any[];
-  tokens: any[];
+  transactions: Array<Record<string, unknown>>;
+  tokens: Array<Record<string, unknown>>;
   stats: {
     total_transactions: number;
     first_transaction: string | null;

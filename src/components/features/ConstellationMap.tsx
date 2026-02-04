@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
-import { Search, RotateCcw, ZoomIn, ZoomOut, Maximize2, Info } from 'lucide-react';
+import { Search, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -70,6 +70,7 @@ export function ConstellationMap() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const simulationRef = useRef<d3.Simulation<ConstellationNode, ConstellationEdge> | null>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
@@ -120,7 +121,7 @@ export function ConstellationMap() {
         .attr('width', '200%')
         .attr('height', '200%');
       
-      const feGaussianBlur = filter.append('feGaussianBlur')
+      filter.append('feGaussianBlur')
         .attr('stdDeviation', '3')
         .attr('result', 'coloredBlur');
       
@@ -147,7 +148,7 @@ export function ConstellationMap() {
     // Create force simulation
     const simulation = d3.forceSimulation(data.nodes)
       .force('link', d3.forceLink(data.edges)
-        .id((d: any) => d.id)
+        .id((d: ConstellationNode | d3.SimulationNodeDatum) => (d as ConstellationNode).id)
         .distance(d => 50 + (d as ConstellationEdge).weight)
         .strength(0.3)
       )

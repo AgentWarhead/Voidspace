@@ -8,7 +8,7 @@ interface TransactionData {
   signer_id: string;
   receiver_id: string;
   action_kind: string;
-  args: any;
+  args: Record<string, unknown>;
   deposit: string;
   gas: string;
   method_name?: string;
