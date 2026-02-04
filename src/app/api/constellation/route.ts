@@ -121,6 +121,15 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('NEAR Blocks API error:', response.status, errorText);
+      
+      // Handle rate limiting
+      if (response.status === 429) {
+        return NextResponse.json(
+          { error: 'Rate limited by NEAR Blocks. Please wait a moment and try again.' },
+          { status: 429 }
+        );
+      }
+      
       return NextResponse.json(
         { error: `NEAR Blocks API error: ${response.status}` },
         { status: response.status }
@@ -250,7 +259,12 @@ export async function POST(request: NextRequest) {
 
     console.log(`Built constellation with ${nodes.length} nodes and ${edges.length} edges`);
 
-    return NextResponse.json(constellation);
+    // Return with cache headers to reduce API calls
+    return NextResponse.json(constellation, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      }
+    });
     
   } catch (error) {
     console.error('Constellation API error:', error);
