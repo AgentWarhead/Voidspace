@@ -4,7 +4,7 @@ import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
 import type { TierName } from '@/types';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'tier' | 'difficulty' | 'competition';
+  variant?: 'default' | 'tier' | 'difficulty' | 'competition' | 'glass';
   tier?: TierName;
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   competition?: 'low' | 'medium' | 'high';
@@ -52,6 +52,8 @@ export function Badge({
   } else if (variant === 'competition' && competition) {
     style = competitionStyles[competition];
     label = label || COMPETITION_LABELS[competition];
+  } else if (variant === 'glass') {
+    style = 'bg-surface/60 backdrop-blur-xl border-white/10 text-text-primary shadow-lg';
   }
 
   return (

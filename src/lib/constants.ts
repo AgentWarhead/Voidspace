@@ -44,6 +44,7 @@ export const NAV_ITEMS = [
   { label: 'Voids', href: '/opportunities' },
   { label: 'Categories', href: '/categories' },
   { label: 'Void Lens', href: '/void-lens' },
+  { label: 'Constellation', href: '/constellation' },
   { label: 'Pulse Streams', href: '/pulse-streams' },
   { label: 'Learn', href: '/learn' },
   { label: 'Profile', href: '/profile' },
