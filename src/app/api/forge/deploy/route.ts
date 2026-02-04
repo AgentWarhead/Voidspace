@@ -10,36 +10,58 @@ import { NextRequest, NextResponse } from 'next/server';
 
 interface DeployRequest {
   code: string;
-  projectName: string;
-  network: 'testnet' | 'mainnet';
+  projectName?: string;
+  category?: string;
+  network?: 'testnet' | 'mainnet';
 }
+
+// Category to contract prefix mapping
+const CATEGORY_PREFIXES: Record<string, string> = {
+  'ai-agents': 'shade-agent',
+  'intents': 'intent',
+  'chain-signatures': 'xchain',
+  'privacy': 'private',
+  'rwa': 'rwa-token',
+  'defi': 'defi',
+  'dex-trading': 'dex',
+  'gaming': 'game',
+  'nfts': 'nft',
+  'daos': 'dao',
+  'social': 'social',
+  'dev-tools': 'devtool',
+  'wallets': 'wallet',
+  'data-analytics': 'data',
+  'infrastructure': 'infra',
+  'custom': 'forge',
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, projectName, network }: DeployRequest = await request.json();
+    const { code, projectName, category, network = 'testnet' }: DeployRequest = await request.json();
 
-    if (!code || !projectName) {
+    if (!code) {
       return NextResponse.json(
-        { error: 'Missing code or project name' },
+        { error: 'Missing contract code' },
         { status: 400 }
       );
     }
 
     // Validate it looks like Rust/NEAR code
-    if (!code.includes('near') && !code.includes('pub fn')) {
+    if (!code.includes('near') && !code.includes('pub fn') && !code.includes('struct')) {
       return NextResponse.json(
         { error: 'Invalid contract code' },
         { status: 400 }
       );
     }
 
-    // Generate a contract address
-    const sanitizedName = projectName
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .substring(0, 20);
-    const timestamp = Date.now().toString(36);
-    const contractId = `${sanitizedName}-${timestamp}.${network === 'mainnet' ? 'near' : 'testnet'}`;
+    // Generate a contract address based on category or project name
+    const prefix = category ? (CATEGORY_PREFIXES[category] || 'forge') : 'forge';
+    const sanitizedName = projectName 
+      ? projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 15)
+      : prefix;
+    const timestamp = Date.now().toString(36).slice(-6);
+    const randomSuffix = Math.random().toString(36).slice(2, 6);
+    const contractId = `${sanitizedName}-${timestamp}${randomSuffix}.${network === 'mainnet' ? 'near' : 'testnet'}`;
 
     // Simulate deployment delay
     await new Promise(resolve => setTimeout(resolve, 2000));

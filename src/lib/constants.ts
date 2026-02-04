@@ -41,6 +41,7 @@ export const DIFFICULTY_LABELS = {
 
 export const NAV_ITEMS = [
   { label: 'Command Center', href: '/' },
+  { label: 'Forge IDE', href: '/forge' },
   { label: 'Voids', href: '/opportunities' },
   { label: 'Categories', href: '/categories' },
   { label: 'Void Lens', href: '/void-lens' },

@@ -11,6 +11,7 @@ import { TokenCounter } from './components/TokenCounter';
 import { ForgeVisualization } from './components/ForgeVisualization';
 import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
+import { DeployCelebration } from './components/DeployCelebration';
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft } from 'lucide-react';
 
 type ForgeStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -29,6 +30,8 @@ export default function ForgePage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [messageCount, setMessageCount] = useState(0);
   const [deployCount, setDeployCount] = useState(0);
+  const [showDeployCelebration, setShowDeployCelebration] = useState(false);
+  const [deployedContractId, setDeployedContractId] = useState<string | null>(null);
 
   const unlockAchievement = useCallback((achievementId: string) => {
     if (unlockedAchievements.has(achievementId)) return;
@@ -98,23 +101,41 @@ export default function ForgePage() {
   const handleDeploy = async () => {
     setForgeStage('thinking');
     
-    // Simulate deployment
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setDeployCount(prev => prev + 1);
-    
-    // First deploy achievement
-    if (deployCount === 0) {
-      unlockAchievement('first_deploy');
-    }
-    
-    setForgeStage('complete');
-    
-    // Play deploy sound
-    if (soundEnabled) {
-      const audio = new Audio('/sounds/deploy.mp3');
-      audio.volume = 0.5;
-      audio.play().catch(() => {});
+    try {
+      // Call deploy API
+      const response = await fetch('/api/forge/deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: generatedCode,
+          category: selectedCategory,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      setDeployCount(prev => prev + 1);
+      
+      // First deploy achievement
+      if (deployCount === 0) {
+        unlockAchievement('first_deploy');
+      }
+      
+      setForgeStage('complete');
+      
+      // Show celebration with contract ID
+      setDeployedContractId(data.contractId || `forge-${Date.now()}.testnet`);
+      setShowDeployCelebration(true);
+      
+      // Play deploy sound
+      if (soundEnabled) {
+        const audio = new Audio('/sounds/deploy.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(() => {});
+      }
+    } catch (error) {
+      console.error('Deploy error:', error);
+      setForgeStage('complete');
     }
   };
 
@@ -134,6 +155,14 @@ export default function ForgePage() {
       <AchievementPopup
         achievement={currentAchievement}
         onClose={() => setCurrentAchievement(null)}
+      />
+
+      {/* Deploy celebration with confetti */}
+      <DeployCelebration
+        isVisible={showDeployCelebration}
+        contractId={deployedContractId || undefined}
+        explorerUrl={deployedContractId ? `https://explorer.testnet.near.org/accounts/${deployedContractId}` : undefined}
+        onClose={() => setShowDeployCelebration(false)}
       />
 
       {/* Landing / Category Selection */}

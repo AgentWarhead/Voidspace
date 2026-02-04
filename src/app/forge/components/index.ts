@@ -7,4 +7,5 @@ export { ForgeVisualization } from './ForgeVisualization';
 export { TypewriterCode } from './TypewriterCode';
 export { AchievementPopup, ACHIEVEMENTS } from './AchievementPopup';
 export { GlassPanel } from './GlassPanel';
+export { DeployCelebration } from './DeployCelebration';
 export type { Achievement } from './AchievementPopup';
