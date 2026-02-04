@@ -8,6 +8,7 @@ interface ProgressProps {
   showValue?: boolean;
   color?: 'green' | 'cyan' | 'warning' | 'error' | 'auto';
   size?: 'sm' | 'md';
+  className?: string;
 }
 
 const colorStyles = {
@@ -30,6 +31,7 @@ export function Progress({
   showValue = false,
   color = 'auto',
   size = 'md',
+  className,
 }: ProgressProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
   const barColor = color === 'auto' ? getAutoColor(percentage) : colorStyles[color];
@@ -45,7 +47,8 @@ export function Progress({
       <div
         className={cn(
           'w-full bg-background rounded-full overflow-hidden',
-          size === 'sm' ? 'h-1.5' : 'h-2.5'
+          size === 'sm' ? 'h-1.5' : 'h-2.5',
+          className
         )}
       >
         <div

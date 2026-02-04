@@ -230,7 +230,7 @@ export function PulseStreams() {
 
         <div className="flex items-center gap-3">
           <Button
-            variant={showFilters ? "secondary" : "outline"}
+            variant={showFilters ? "secondary" : "ghost"}
             onClick={() => setShowFilters(!showFilters)}
             size="sm"
           >
@@ -352,7 +352,7 @@ export function PulseStreams() {
                 {tempFilters.accounts.map(account => (
                   <Badge 
                     key={account} 
-                    variant="secondary"
+                    variant="glass"
                     className="cursor-pointer hover:bg-error/20 hover:text-error"
                     onClick={() => removeAccount(account)}
                   >
@@ -374,7 +374,7 @@ export function PulseStreams() {
                   includeContracts: true
                 });
               }}
-              variant="outline"
+              variant="secondary"
             >
               Reset
             </Button>

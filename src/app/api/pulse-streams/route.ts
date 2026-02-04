@@ -58,8 +58,9 @@ async function fetchLatestTransactions(filters: StreamFilters = {}): Promise<Tra
     }
 
     if (filters.txType && filters.txType !== 'all') {
+      const txTypeFilter = filters.txType;
       transactions = transactions.filter(tx => 
-        tx.action_kind.toLowerCase() === filters.txType.toLowerCase()
+        tx.action_kind.toLowerCase() === txTypeFilter.toLowerCase()
       );
     }
 

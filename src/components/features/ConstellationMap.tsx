@@ -158,7 +158,10 @@ export function ConstellationMap() {
       )
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide()
-        .radius(d => (d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount)) + 5)
+        .radius((d) => {
+          const node = d as ConstellationNode;
+          return (node.id === data.centerNode ? NODE_RADIUS.center : nodeScale(node.transactionCount)) + 5;
+        })
       );
 
     simulationRef.current = simulation;

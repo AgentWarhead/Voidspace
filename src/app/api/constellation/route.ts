@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
     const nodes = Array.from(nodeData.values());
     const edges: EdgeData[] = [];
     
-    for (const [connectionKey, connection] of connectionMap) {
+    for (const [connectionKey, connection] of Array.from(connectionMap.entries())) {
       const [source, target] = connectionKey.split('->');
       
       // Only include connections with meaningful interaction
