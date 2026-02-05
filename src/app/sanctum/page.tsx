@@ -261,9 +261,12 @@ export default function SanctumPage() {
         </section>
       )}
 
-      {/* Build Session - uses calc to account for header (h-16 = 64px) */}
+      {/* Build Session - fills remaining viewport height below header */}
       {sessionStarted && (
-        <div className="fixed top-16 left-0 right-0 bottom-0 z-40 flex flex-col bg-void-black">
+        <div 
+          className="relative z-40 flex flex-col bg-void-black"
+          style={{ height: 'calc(100vh - 64px)' }}
+        >
           {/* Session background - contained, no bleeding */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-void-black to-near-green/10" />
@@ -272,7 +275,7 @@ export default function SanctumPage() {
           </div>
           
           {/* Main content - fills available space */}
-          <div className="relative z-10 flex flex-1 gap-3 p-3 h-full overflow-hidden">
+          <div className="relative z-10 flex flex-1 gap-3 p-3 overflow-hidden">
             {/* Left Panel - Chat */}
             <div className="w-1/2 flex flex-col h-full">
               <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
