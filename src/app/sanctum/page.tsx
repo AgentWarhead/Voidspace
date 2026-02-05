@@ -13,6 +13,7 @@ import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline';
+// @ts-expect-error - lucide-react types issue with TS 5.9
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 

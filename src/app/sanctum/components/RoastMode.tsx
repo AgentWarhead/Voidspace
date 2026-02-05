@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+// @ts-expect-error - lucide-react types issue with TS 5.9
 import { Flame, AlertTriangle, AlertCircle, Info, CheckCircle, Copy, Loader2 } from 'lucide-react';
 
 interface Vulnerability {

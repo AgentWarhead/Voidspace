@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+// @ts-expect-error - lucide-react types issue with TS 5.9
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { PersonaSelector } from './PersonaSelector';
