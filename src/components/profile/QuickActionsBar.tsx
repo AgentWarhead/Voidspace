@@ -17,6 +17,7 @@ interface QuickActionsBarProps {
   accountId: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function QuickActionsBar({ hasActiveMission, lastSanctumVoid, accountId }: QuickActionsBarProps) {
   const handleShare = async () => {
     const url = `${window.location.origin}/profile/${accountId}`;

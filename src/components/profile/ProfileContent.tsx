@@ -13,7 +13,6 @@ import { VoidMissionCard } from './VoidMissionCard';
 import { QuickActionsBar } from './QuickActionsBar';
 import { useWallet } from '@/hooks/useWallet';
 import { useUser } from '@/hooks/useUser';
-import { cn } from '@/lib/utils';
 import type { TierName, SavedOpportunity, MissionStatus } from '@/types';
 
 interface UsageStats {

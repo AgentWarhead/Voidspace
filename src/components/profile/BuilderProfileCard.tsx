@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Shield, 
   Calendar, 
@@ -12,11 +12,9 @@ import {
   Share2,
   ChevronRight
 } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
-import { GradientText } from '@/components/effects/GradientText';
 import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
 import { cn } from '@/lib/utils';
 import type { TierName, SavedOpportunity } from '@/types';
@@ -71,6 +69,7 @@ export function BuilderProfileCard({
   joinedAt, 
   stats,
   reputation,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   missions 
 }: BuilderProfileCardProps) {
   const [showAllAchievements, setShowAllAchievements] = useState(false);
@@ -98,11 +97,6 @@ export function BuilderProfileCard({
   ].filter(Boolean);
 
   const tierConfig = TIERS[tier];
-  
-  // Format account name
-  const displayName = accountId
-    .replace(/\.(near|testnet)$/, '')
-    .replace(/^\w/, (c: string) => c.toUpperCase());
 
   // Format join date
   const joinDate = new Date(joinedAt);
