@@ -21,6 +21,8 @@ import { GasEstimatorCompact } from './components/GasEstimator';
 import { ContractComparison } from './components/ContractComparison';
 import { SimulationSandbox } from './components/SimulationSandbox';
 import { PairProgramming, generateSessionId } from './components/PairProgramming';
+import { DownloadButton } from './components/DownloadContract';
+import { FileStructure, FileStructureToggle } from './components/FileStructure';
 // @ts-expect-error - lucide-react types issue with TS 5.9
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
@@ -55,6 +57,7 @@ export default function SanctumPage() {
   const [showSimulation, setShowSimulation] = useState(false);
   const [showPairProgramming, setShowPairProgramming] = useState(false);
   const [pairSessionId] = useState(() => generateSessionId());
+  const [showFileStructure, setShowFileStructure] = useState(false);
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -569,6 +572,13 @@ export default function SanctumPage() {
                       >
                         <Code2 className="w-4 h-4" />
                       </button>
+                      <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} />
+                      <FileStructureToggle 
+                        code={generatedCode} 
+                        contractName={selectedCategory || 'my-contract'}
+                        isOpen={showFileStructure}
+                        onToggle={() => setShowFileStructure(!showFileStructure)}
+                      />
                       <button 
                         className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-blue-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-blue-500/30 disabled:opacity-50"
                         onClick={() => setShowComparison(true)}
@@ -613,6 +623,16 @@ export default function SanctumPage() {
                   {/* Task progress row */}
                   <TaskProgressInline task={currentTask} isThinking={isThinking} />
                 </div>
+
+                {/* File Structure Panel */}
+                {showFileStructure && generatedCode && (
+                  <div className="p-4 border-b border-white/[0.08]">
+                    <FileStructure 
+                      code={generatedCode} 
+                      contractName={selectedCategory || 'my-contract'}
+                    />
+                  </div>
+                )}
 
                 {/* Sanctum Visualization */}
                 {!generatedCode && (

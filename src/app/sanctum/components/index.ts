@@ -16,5 +16,7 @@ export { GasEstimator, GasEstimatorCompact } from './GasEstimator';
 export { ContractComparison } from './ContractComparison';
 export { SimulationSandbox } from './SimulationSandbox';
 export { PairProgramming, generateSessionId } from './PairProgramming';
+export { DownloadButton } from './DownloadContract';
+export { FileStructure, FileStructureToggle } from './FileStructure';
 export type { Achievement } from './AchievementPopup';
 export type { DeployedContract } from './DeploymentHistory';
