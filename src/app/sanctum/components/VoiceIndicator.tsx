@@ -44,7 +44,7 @@ export function VoiceIndicator({ isListening, interimText }: VoiceIndicatorProps
       {/* Live transcript preview */}
       {interimText && (
         <div className="text-text-muted text-sm italic max-w-md text-center">
-          "{interimText}"
+          &ldquo;{interimText}&rdquo;
         </div>
       )}
       

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, StopSquare, MicIcon, MicOffIcon } from 'lucide-react';
+import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { PersonaSelector } from './PersonaSelector';
 import { PERSONAS, Persona, getPersona } from '../lib/personas';
@@ -731,7 +731,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
               } disabled:opacity-50`}
               title={isListening ? "Stop listening" : "Voice input"}
             >
-              {isListening ? <MicOffIcon className="w-5 h-5" /> : <MicIcon className="w-5 h-5" />}
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </button>
           )}
           
@@ -741,7 +741,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
               className="px-4 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all"
               title="Stop generation"
             >
-              <StopSquare className="w-5 h-5 fill-current" />
+              <Square className="w-5 h-5 fill-current" />
             </button>
           ) : (
             <button

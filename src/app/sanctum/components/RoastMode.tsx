@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, Flame, AlertTriangle, AlertCircle, Info, CheckCircle, Copy, Share2, Loader2 } from 'lucide-react';
+import { Upload, Flame, AlertTriangle, AlertCircle, Info, CheckCircle, Copy, Loader2 } from 'lucide-react';
 
 interface Vulnerability {
   severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
