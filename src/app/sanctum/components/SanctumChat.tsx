@@ -50,11 +50,29 @@ interface Message {
   };
 }
 
+// Task tracking types
+interface TaskStep {
+  id: string;
+  label: string;
+  status: 'pending' | 'working' | 'complete' | 'error';
+  progress?: number;
+  detail?: string;
+}
+
+interface CurrentTask {
+  name: string;
+  description?: string;
+  steps: TaskStep[];
+  startedAt?: number;
+}
+
 interface SanctumChatProps {
   category: string | null;
   customPrompt: string;
   onCodeGenerated: (code: string) => void;
   onTokensUsed: (input: number, output: number) => void;
+  onTaskUpdate?: (task: CurrentTask | null) => void;
+  onThinkingChange?: (thinking: boolean) => void;
 }
 
 // Category-specific starter prompts
@@ -77,7 +95,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensUsed }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -261,6 +279,37 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
     setInput('');
     setAttachedFiles([]);
     setIsLoading(true);
+    onThinkingChange?.(true);
+
+    // Determine task name from the request
+    const taskName = getTaskName(text);
+    const hasAttachments = userMessage.attachments && userMessage.attachments.length > 0;
+    
+    // Initialize task with steps
+    const task: CurrentTask = {
+      name: taskName,
+      description: text.length > 50 ? text.slice(0, 50) + '...' : text,
+      startedAt: Date.now(),
+      steps: [
+        { id: 'analyze', label: 'Analyzing request', status: 'working', progress: 0 },
+        ...(hasAttachments ? [{ id: 'attachments', label: 'Processing attachments', status: 'pending' as const }] : []),
+        { id: 'design', label: 'Designing solution', status: 'pending' },
+        { id: 'generate', label: 'Generating code', status: 'pending' },
+        { id: 'review', label: 'Review & explain', status: 'pending' },
+      ],
+    };
+    onTaskUpdate?.(task);
+
+    // Simulate progress on analyze step
+    let analyzeProgress = 0;
+    const analyzeInterval = setInterval(() => {
+      analyzeProgress = Math.min(analyzeProgress + 15, 90);
+      const updatedTask = { ...task };
+      updatedTask.steps = task.steps.map(s => 
+        s.id === 'analyze' ? { ...s, progress: analyzeProgress, detail: 'Understanding your requirements...' } : s
+      );
+      onTaskUpdate?.(updatedTask);
+    }, 200);
 
     // Build content with attachments for API
     let fullContent = text;
@@ -273,6 +322,32 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
     }
 
     try {
+      // Complete analyze step
+      clearInterval(analyzeInterval);
+      task.steps = task.steps.map(s => 
+        s.id === 'analyze' ? { ...s, status: 'complete', progress: 100 } : s
+      );
+      onTaskUpdate?.({ ...task });
+      
+      // Start attachments step if present
+      if (hasAttachments) {
+        task.steps = task.steps.map(s => 
+          s.id === 'attachments' ? { ...s, status: 'working', detail: 'Reading attached files...' } : s
+        );
+        onTaskUpdate?.({ ...task });
+        await new Promise(r => setTimeout(r, 300));
+        task.steps = task.steps.map(s => 
+          s.id === 'attachments' ? { ...s, status: 'complete' } : s
+        );
+        onTaskUpdate?.({ ...task });
+      }
+
+      // Start design step
+      task.steps = task.steps.map(s => 
+        s.id === 'design' ? { ...s, status: 'working', detail: 'Planning contract architecture...' } : s
+      );
+      onTaskUpdate?.({ ...task });
+
       const response = await fetch('/api/sanctum/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -286,11 +361,62 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
         }),
       });
 
+      // Complete design step
+      task.steps = task.steps.map(s => 
+        s.id === 'design' ? { ...s, status: 'complete' } : s
+      );
+      onTaskUpdate?.({ ...task });
+
       const data = await response.json();
 
       if (data.error) {
         throw new Error(data.error);
       }
+
+      // If code was generated, animate that step
+      if (data.code) {
+        task.steps = task.steps.map(s => 
+          s.id === 'generate' ? { ...s, status: 'working', progress: 0, detail: 'Writing Rust code...' } : s
+        );
+        onTaskUpdate?.({ ...task });
+        
+        // Animate code generation progress
+        const codeLines = data.code.split('\n').length;
+        let codeProgress = 0;
+        const codeInterval = setInterval(() => {
+          codeProgress = Math.min(codeProgress + 5, 100);
+          const updatedTask = { ...task };
+          updatedTask.steps = task.steps.map(s => 
+            s.id === 'generate' ? { ...s, progress: codeProgress, detail: `Writing line ${Math.floor(codeProgress/100 * codeLines)}/${codeLines}...` } : s
+          );
+          onTaskUpdate?.(updatedTask);
+          
+          if (codeProgress >= 100) clearInterval(codeInterval);
+        }, 50);
+        
+        await new Promise(r => setTimeout(r, 800));
+        clearInterval(codeInterval);
+        
+        task.steps = task.steps.map(s => 
+          s.id === 'generate' ? { ...s, status: 'complete', progress: 100 } : s
+        );
+        onTaskUpdate?.({ ...task });
+      } else {
+        // Skip generate step if no code
+        task.steps = task.steps.filter(s => s.id !== 'generate');
+        onTaskUpdate?.({ ...task });
+      }
+
+      // Review step
+      task.steps = task.steps.map(s => 
+        s.id === 'review' ? { ...s, status: 'working', detail: 'Preparing explanation...' } : s
+      );
+      onTaskUpdate?.({ ...task });
+      await new Promise(r => setTimeout(r, 300));
+      task.steps = task.steps.map(s => 
+        s.id === 'review' ? { ...s, status: 'complete' } : s
+      );
+      onTaskUpdate?.({ ...task });
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -313,8 +439,22 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       if (data.usage) {
         onTokensUsed(data.usage.input, data.usage.output);
       }
+
+      // Clear task after completion
+      setTimeout(() => {
+        onTaskUpdate?.(null);
+      }, 1500);
+      
     } catch (error) {
+      clearInterval(analyzeInterval);
       console.error('Chat error:', error);
+      
+      // Mark current working step as error
+      task.steps = task.steps.map(s => 
+        s.status === 'working' ? { ...s, status: 'error', detail: 'Something went wrong' } : s
+      );
+      onTaskUpdate?.({ ...task });
+      
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -322,7 +462,24 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       }]);
     } finally {
       setIsLoading(false);
+      onThinkingChange?.(false);
     }
+  }
+  
+  // Determine a task name based on the user's request
+  function getTaskName(text: string): string {
+    const lower = text.toLowerCase();
+    if (lower.includes('nft')) return 'Building NFT Contract';
+    if (lower.includes('token') || lower.includes('fungible')) return 'Building Token Contract';
+    if (lower.includes('dao') || lower.includes('vote') || lower.includes('govern')) return 'Building DAO Contract';
+    if (lower.includes('marketplace')) return 'Building Marketplace';
+    if (lower.includes('lend') || lower.includes('borrow')) return 'Building Lending Protocol';
+    if (lower.includes('swap') || lower.includes('dex')) return 'Building DEX Contract';
+    if (lower.includes('stake') || lower.includes('staking')) return 'Building Staking Contract';
+    if (lower.includes('portfolio') || lower.includes('agent')) return 'Building AI Agent';
+    if (lower.includes('trading') || lower.includes('bot')) return 'Building Trading Bot';
+    if (lower.includes('chain signature')) return 'Building Cross-Chain Contract';
+    return 'Processing Request';
   }
 
   function handleOptionClick(value: string) {

@@ -12,7 +12,7 @@ import { SanctumVisualization } from './components/SanctumVisualization';
 import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
-import { BuilderProgress } from './components/BuilderProgress';
+import { TaskTracker, CurrentTask } from './components/TaskTracker';
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft } from 'lucide-react';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -30,12 +30,12 @@ export default function SanctumPage() {
   const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [messageCount, setMessageCount] = useState(0);
-  const [codeGenCount, setCodeGenCount] = useState(0);
   const [deployCount, setDeployCount] = useState(0);
   const [showDeployCelebration, setShowDeployCelebration] = useState(false);
   const [deployedContractId, setDeployedContractId] = useState<string | null>(null);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
-  const [sessionMinutes, setSessionMinutes] = useState(0);
+  const [currentTask, setCurrentTask] = useState<CurrentTask | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -58,15 +58,6 @@ export default function SanctumPage() {
       document.body.removeAttribute('data-immersive');
     };
   }, [sessionStarted, sessionStartTime]);
-
-  // Update session minutes every minute
-  useEffect(() => {
-    if (!sessionStartTime) return;
-    const interval = setInterval(() => {
-      setSessionMinutes(Math.floor((Date.now() - sessionStartTime) / 60000));
-    }, 10000); // Update every 10 seconds for responsiveness
-    return () => clearInterval(interval);
-  }, [sessionStartTime]);
 
   const unlockAchievement = useCallback((achievementId: string) => {
     if (unlockedAchievements.has(achievementId)) return;
@@ -120,7 +111,6 @@ export default function SanctumPage() {
     setSanctumStage('generating');
     setIsGenerating(true);
     setGeneratedCode(code);
-    setCodeGenCount(prev => prev + 1);
     
     // First code achievement
     if (!unlockedAchievements.has('first_code')) {
@@ -133,6 +123,15 @@ export default function SanctumPage() {
       setIsGenerating(false);
     }, code.length * 10 + 500);
   };
+
+  // Task tracking for live progress display
+  const handleTaskUpdate = useCallback((task: CurrentTask | null) => {
+    setCurrentTask(task);
+  }, []);
+
+  const handleThinkingChange = useCallback((thinking: boolean) => {
+    setIsThinking(thinking);
+  }, []);
 
   const handleDeploy = async () => {
     setSanctumStage('thinking');
@@ -345,6 +344,8 @@ export default function SanctumPage() {
                     customPrompt={customPrompt}
                     onCodeGenerated={handleCodeGenerated}
                     onTokensUsed={handleTokensUsed}
+                    onTaskUpdate={handleTaskUpdate}
+                    onThinkingChange={handleThinkingChange}
                   />
                 </div>
               </GlassPanel>
@@ -381,15 +382,11 @@ export default function SanctumPage() {
                   </div>
                 </div>
 
-                {/* Builder Progress Widget */}
-                <div className="flex-shrink-0 p-3 border-b border-white/[0.05]">
-                  <BuilderProgress
-                    messagesCount={messageCount}
-                    codeGenerations={codeGenCount}
-                    deploysCount={deployCount}
-                    tokensUsed={tokensUsed}
-                    unlockedAchievements={unlockedAchievements}
-                    sessionMinutes={sessionMinutes}
+                {/* Live Task Tracker */}
+                <div className="flex-shrink-0 border-b border-white/[0.05] bg-void-gray/30">
+                  <TaskTracker
+                    task={currentTask}
+                    isThinking={isThinking}
                   />
                 </div>
 
