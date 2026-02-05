@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import ObservatoryContent from './ObservatoryContent';
 import { Container } from '@/components/ui/Container';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Telescope } from 'lucide-react';
+import { Globe } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Observatory — Voidspace',
@@ -18,7 +18,7 @@ function ObservatoryLoading() {
         <Container size="xl">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-near-green/10 border border-near-green/20">
-              <Telescope className="w-5 h-5 text-near-green" />
+              <Globe className="w-5 h-5 text-near-green" />
             </div>
             <Skeleton variant="text" width="200px" height="32px" />
           </div>

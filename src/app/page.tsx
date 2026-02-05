@@ -1,7 +1,7 @@
 import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 
-import { ChevronRight, BookOpen, Telescope, Sparkles } from 'lucide-react';
+import { ChevronRight, BookOpen, Search, Sparkles } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { HeroSection } from '@/components/hero/HeroSection';
 import { VoidDetectionShowcase } from '@/components/dashboard/VoidDetectionShowcase';
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
                   href="/observatory"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 text-cyan-300 rounded-lg transition-colors text-sm"
                 >
-                  <Telescope className="w-4 h-4" />
+                  <Search className="w-4 h-4" />
                   Observatory
                 </Link>
                 <Link

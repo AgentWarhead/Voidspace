@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExternalLink, Zap, Code2, Users, Brain, Link2, Shield, BookOpen, BarChart3, Target, Swords, Sparkles, Terminal, Cpu, Lock, Rocket } from 'lucide-react';
+import { ExternalLink, Zap, Code2, Users, Brain, Link2, Shield, BookOpen, BarChart3, Target, Swords, Sparkles, Code, Gauge, Lock, Rocket } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -33,7 +33,7 @@ const NEAR_FEATURES = [
 
 const RUST_BENEFITS = [
   {
-    icon: Cpu,
+    icon: Gauge,
     title: 'Performance',
     description: 'Rust compiles to WebAssembly (WASM) with near-native performance. Your contracts execute faster and cost less gas than interpreted languages.',
   },
@@ -43,7 +43,7 @@ const RUST_BENEFITS = [
     description: 'Rust\'s ownership model eliminates entire classes of bugs at compile time — no null pointers, no buffer overflows, no data races. Critical for code that handles real money.',
   },
   {
-    icon: Terminal,
+    icon: Code,
     title: 'Great Tooling',
     description: 'Cargo package manager, excellent error messages, built-in testing, and the near-sdk-rs makes NEAR-specific patterns easy. The compiler is your pair programmer.',
   },

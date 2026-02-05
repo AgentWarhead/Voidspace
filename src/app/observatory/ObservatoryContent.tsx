@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Network, Activity, Telescope } from 'lucide-react';
+import { Eye, Network, Activity, Globe } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { GradientText } from '@/components/effects/GradientText';
 import { GridPattern } from '@/components/effects/GridPattern';
@@ -81,7 +81,7 @@ export default function ObservatoryContent() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-near-green/10 border border-near-green/20">
-                  <Telescope className="w-5 h-5 text-near-green" />
+                  <Globe className="w-5 h-5 text-near-green" />
                 </div>
                 <GradientText as="h1" className="text-2xl sm:text-3xl font-bold">
                   Observatory
