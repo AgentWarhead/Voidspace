@@ -22,7 +22,7 @@ interface Message {
   };
 }
 
-interface ForgeChatProps {
+interface SanctumChatProps {
   category: string | null;
   customPrompt: string;
   onCodeGenerated: (code: string) => void;
@@ -49,7 +49,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function ForgeChat({ category, customPrompt, onCodeGenerated, onTokensUsed }: ForgeChatProps) {
+export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensUsed }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +131,7 @@ export function ForgeChat({ category, customPrompt, onCodeGenerated, onTokensUse
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/forge/chat', {
+      const response = await fetch('/api/sanctum/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

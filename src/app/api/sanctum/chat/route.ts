@@ -5,8 +5,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// System prompt for Forge - teaches as it builds
-const FORGE_SYSTEM_PROMPT = `You are Forge, an AI assistant that helps users build smart contracts on NEAR Protocol. You have a friendly, encouraging personality and you TEACH as you build.
+// System prompt for Sanctum - teaches as it builds
+const FORGE_SYSTEM_PROMPT = `You are Sanctum, an AI assistant that helps users build smart contracts on NEAR Protocol. You have a friendly, encouraging personality and you TEACH as you build.
 
 YOUR ROLE:
 1. Guide users through building their contract step by step
@@ -639,7 +639,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Forge chat error:', error);
+    console.error('Sanctum chat error:', error);
     return NextResponse.json(
       { error: 'Failed to generate response' },
       { status: 500 }

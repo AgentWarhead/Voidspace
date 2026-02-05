@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-interface ForgeVisualizationProps {
+interface SanctumVisualizationProps {
   isGenerating: boolean;
   progress: number; // 0-100
   stage: 'idle' | 'thinking' | 'generating' | 'complete';
 }
 
-export function ForgeVisualization({ isGenerating, progress, stage }: ForgeVisualizationProps) {
+export function SanctumVisualization({ isGenerating, progress, stage }: SanctumVisualizationProps) {
   const [pulseIntensity, setPulseIntensity] = useState(0);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function ForgeVisualization({ isGenerating, progress, stage }: ForgeVisua
         }}
       />
 
-      {/* Forge icon */}
+      {/* Sanctum icon */}
       <div className="relative z-10 flex flex-col items-center">
         {/* Animated rings */}
         {isGenerating && (
@@ -52,7 +52,7 @@ export function ForgeVisualization({ isGenerating, progress, stage }: ForgeVisua
           </>
         )}
 
-        {/* Main forge icon */}
+        {/* Main sanctum icon */}
         <div
           className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
             isGenerating ? 'scale-110' : 'scale-100'
@@ -75,10 +75,10 @@ export function ForgeVisualization({ isGenerating, progress, stage }: ForgeVisua
         {/* Status text */}
         <div className="mt-3 text-center">
           <p className={`text-sm font-medium transition-colors ${isGenerating ? 'text-near-green' : 'text-text-muted'}`}>
-            {stage === 'idle' && 'Ready to forge'}
+            {stage === 'idle' && 'Ready to sanctum'}
             {stage === 'thinking' && 'Analyzing requirements...'}
             {stage === 'generating' && 'Forging your contract...'}
-            {stage === 'complete' && 'Contract forged!'}
+            {stage === 'complete' && 'Contract sanctumd!'}
           </p>
 
           {/* Progress bar */}

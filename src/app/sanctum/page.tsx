@@ -5,25 +5,25 @@ import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
 import { CategoryPicker } from './components/CategoryPicker';
-import { ForgeChat } from './components/ForgeChat';
+import { SanctumChat } from './components/SanctumChat';
 import { TypewriterCode } from './components/TypewriterCode';
 import { TokenCounter } from './components/TokenCounter';
-import { ForgeVisualization } from './components/ForgeVisualization';
+import { SanctumVisualization } from './components/SanctumVisualization';
 import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft } from 'lucide-react';
 
-type ForgeStage = 'idle' | 'thinking' | 'generating' | 'complete';
+type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
 
-export default function ForgePage() {
+export default function SanctumPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [sessionStarted, setSessionStarted] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [tokensUsed, setTokensUsed] = useState(0);
   const [tokenBalance, setTokenBalance] = useState(50000);
-  const [forgeStage, setForgeStage] = useState<ForgeStage>('idle');
+  const [sanctumStage, setSanctumStage] = useState<SanctumStage>('idle');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
   const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
@@ -82,7 +82,7 @@ export default function ForgePage() {
   };
 
   const handleCodeGenerated = (code: string) => {
-    setForgeStage('generating');
+    setSanctumStage('generating');
     setIsGenerating(true);
     setGeneratedCode(code);
     
@@ -93,17 +93,17 @@ export default function ForgePage() {
     
     // Complete after typing animation
     setTimeout(() => {
-      setForgeStage('complete');
+      setSanctumStage('complete');
       setIsGenerating(false);
     }, code.length * 10 + 500);
   };
 
   const handleDeploy = async () => {
-    setForgeStage('thinking');
+    setSanctumStage('thinking');
     
     try {
       // Call deploy API
-      const response = await fetch('/api/forge/deploy', {
+      const response = await fetch('/api/sanctum/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,10 +121,10 @@ export default function ForgePage() {
         unlockAchievement('first_deploy');
       }
       
-      setForgeStage('complete');
+      setSanctumStage('complete');
       
       // Show celebration with contract ID
-      setDeployedContractId(data.contractId || `forge-${Date.now()}.testnet`);
+      setDeployedContractId(data.contractId || `sanctum-${Date.now()}.testnet`);
       setShowDeployCelebration(true);
       
       // Play deploy sound
@@ -135,7 +135,7 @@ export default function ForgePage() {
       }
     } catch (error) {
       console.error('Deploy error:', error);
-      setForgeStage('complete');
+      setSanctumStage('complete');
     }
   };
 
@@ -143,7 +143,7 @@ export default function ForgePage() {
     setSessionStarted(false);
     setSelectedCategory(null);
     setGeneratedCode('');
-    setForgeStage('idle');
+    setSanctumStage('idle');
   };
 
   return (
@@ -266,7 +266,7 @@ export default function ForgePage() {
                       <span className="text-2xl">🔥</span>
                       Building: {selectedCategory === 'custom' ? 'Custom Project' : selectedCategory?.replace('-', ' ')}
                     </h2>
-                    <p className="text-sm text-text-muted">Chat with Forge to build your contract</p>
+                    <p className="text-sm text-text-muted">Chat with Sanctum to build your contract</p>
                   </div>
                 </div>
                 
@@ -289,7 +289,7 @@ export default function ForgePage() {
             </div>
 
             {/* Chat */}
-            <ForgeChat 
+            <SanctumChat 
               category={selectedCategory}
               customPrompt={customPrompt}
               onCodeGenerated={handleCodeGenerated}
@@ -318,7 +318,7 @@ export default function ForgePage() {
                   <button 
                     className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50"
                     onClick={handleDeploy}
-                    disabled={!generatedCode || forgeStage === 'thinking'}
+                    disabled={!generatedCode || sanctumStage === 'thinking'}
                   >
                     <Rocket className="w-4 h-4" />
                     Deploy
@@ -327,17 +327,17 @@ export default function ForgePage() {
               </div>
             </div>
 
-            {/* Forge Visualization */}
+            {/* Sanctum Visualization */}
             {!generatedCode && (
               <div className="flex-1 flex flex-col items-center justify-center p-8">
-                <ForgeVisualization
+                <SanctumVisualization
                   isGenerating={isGenerating}
                   progress={0}
-                  stage={forgeStage}
+                  stage={sanctumStage}
                 />
                 <p className="mt-6 text-text-muted text-center max-w-sm">
-                  Start chatting with Forge to generate your smart contract code.
-                  I'll teach you Rust as we build together.
+                  Start chatting with Sanctum to generate your smart contract code.
+                  I&apos;ll teach you Rust as we build together.
                 </p>
               </div>
             )}
@@ -347,7 +347,7 @@ export default function ForgePage() {
               <TypewriterCode 
                 code={generatedCode}
                 speed={8}
-                onComplete={() => setForgeStage('complete')}
+                onComplete={() => setSanctumStage('complete')}
               />
             )}
 

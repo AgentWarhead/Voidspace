@@ -181,8 +181,8 @@ export function AchievementPopup({ achievement, onClose }: AchievementPopupProps
 export const ACHIEVEMENTS: Record<string, Achievement> = {
   first_message: {
     id: 'first_message',
-    title: 'Hello, Forge!',
-    description: 'Sent your first message to Forge',
+    title: 'Hello, Sanctum!',
+    description: 'Sent your first message to Sanctum',
     icon: 'sparkles',
     rarity: 'common',
     xp: 10,

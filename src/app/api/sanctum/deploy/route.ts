@@ -32,7 +32,7 @@ const CATEGORY_PREFIXES: Record<string, string> = {
   'wallets': 'wallet',
   'data-analytics': 'data',
   'infrastructure': 'infra',
-  'custom': 'forge',
+  'custom': 'sanctum',
 };
 
 export async function POST(request: NextRequest) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate a contract address based on category or project name
-    const prefix = category ? (CATEGORY_PREFIXES[category] || 'forge') : 'forge';
+    const prefix = category ? (CATEGORY_PREFIXES[category] || 'sanctum') : 'sanctum';
     const sanitizedName = projectName 
       ? projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 15)
       : prefix;

@@ -85,7 +85,7 @@ export function CodePreview({ code }: CodePreviewProps) {
           <Code className="w-16 h-16 text-text-muted mx-auto mb-4 opacity-30" />
           <h3 className="text-lg font-medium text-text-secondary mb-2">No code yet</h3>
           <p className="text-sm text-text-muted max-w-xs">
-            Start chatting with Forge to generate your smart contract code
+            Start chatting with Sanctum to generate your smart contract code
           </p>
         </div>
       </div>
