@@ -633,10 +633,10 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder={isListening ? "Listening..." : "Describe what you want to build..."}
-            className={`flex-1 px-4 py-3 rounded-xl bg-void-gray border focus:outline-none focus:ring-1 text-text-primary placeholder:text-text-muted transition-all ${
+            className={`flex-1 px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-white placeholder:text-text-muted transition-all ${
               isListening 
                 ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30 animate-pulse' 
-                : 'border-border-subtle focus:border-near-green/50 focus:ring-near-green/30'
+                : 'border-border focus:border-near-green/50 focus:ring-near-green/30'
             }`}
             disabled={isLoading}
           />
