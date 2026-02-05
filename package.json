@@ -21,7 +21,7 @@
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "framer-motion": "^12.29.2",
-    "lucide-react": "^0.563.0",
+    "lucide-react": "^0.453.0",
     "near-api-js": "^7.0.4",
     "next": "14.2.35",
     "react": "^18",
