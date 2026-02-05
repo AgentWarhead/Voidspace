@@ -23,8 +23,9 @@ import { SimulationSandbox } from './components/SimulationSandbox';
 import { PairProgramming, generateSessionId } from './components/PairProgramming';
 import { DownloadButton } from './components/DownloadContract';
 import { FileStructure, FileStructureToggle } from './components/FileStructure';
+import { WebappBuilder } from './components/WebappBuilder';
 // @ts-expect-error - lucide-react types issue with TS 5.9
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users, Globe } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -58,6 +59,7 @@ export default function SanctumPage() {
   const [showPairProgramming, setShowPairProgramming] = useState(false);
   const [pairSessionId] = useState(() => generateSessionId());
   const [showFileStructure, setShowFileStructure] = useState(false);
+  const [showWebappBuilder, setShowWebappBuilder] = useState(false);
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -295,6 +297,16 @@ export default function SanctumPage() {
         <PairProgramming
           sessionId={pairSessionId}
           onClose={() => setShowPairProgramming(false)}
+        />
+      )}
+
+      {/* Webapp Builder modal */}
+      {showWebappBuilder && generatedCode && (
+        <WebappBuilder
+          code={generatedCode}
+          contractName={selectedCategory || 'my-contract'}
+          deployedAddress={deployedContractId || undefined}
+          onClose={() => setShowWebappBuilder(false)}
         />
       )}
 
@@ -617,6 +629,15 @@ export default function SanctumPage() {
                       >
                         <Rocket className="w-4 h-4" />
                         Deploy
+                      </button>
+                      <button 
+                        className="px-4 py-2 text-sm bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-cyan-500/20"
+                        onClick={() => setShowWebappBuilder(true)}
+                        disabled={!generatedCode}
+                        title="Generate webapp for this contract"
+                      >
+                        <Globe className="w-4 h-4" />
+                        Webapp
                       </button>
                     </div>
                   </div>

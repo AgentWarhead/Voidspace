@@ -18,5 +18,6 @@ export { SimulationSandbox } from './SimulationSandbox';
 export { PairProgramming, generateSessionId } from './PairProgramming';
 export { DownloadButton } from './DownloadContract';
 export { FileStructure, FileStructureToggle } from './FileStructure';
+export { WebappBuilder } from './WebappBuilder';
 export type { Achievement } from './AchievementPopup';
 export type { DeployedContract } from './DeploymentHistory';
