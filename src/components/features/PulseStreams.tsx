@@ -118,7 +118,7 @@ export function PulseStreams() {
   // Initial load
   useEffect(() => {
     fetchTransactions();
-  }, [filters]);
+  }, [filters, fetchTransactions]);
 
   // Polling effect for real-time updates
   useEffect(() => {
