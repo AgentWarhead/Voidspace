@@ -25,6 +25,7 @@ import { DownloadButton } from './components/DownloadContract';
 import { FileStructure, FileStructureToggle } from './components/FileStructure';
 import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract, ImportedContract } from './components/ImportContract';
+import { WebappSession } from './components/WebappSession';
 // @ts-expect-error - lucide-react types issue with TS 5.9
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users, Globe } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
@@ -63,6 +64,7 @@ export default function SanctumPage() {
   const [showWebappBuilder, setShowWebappBuilder] = useState(false);
   const [showImportContract, setShowImportContract] = useState(false);
   const [importedContract, setImportedContract] = useState<ImportedContract | null>(null);
+  const [showWebappSession, setShowWebappSession] = useState(false);
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -303,7 +305,7 @@ export default function SanctumPage() {
         />
       )}
 
-      {/* Webapp Builder modal */}
+      {/* Webapp Builder modal (legacy download mode) */}
       {showWebappBuilder && (generatedCode || importedContract) && (
         <WebappBuilder
           code={generatedCode || importedContract?.code || ''}
@@ -311,6 +313,19 @@ export default function SanctumPage() {
           deployedAddress={importedContract?.address || deployedContractId || undefined}
           onClose={() => {
             setShowWebappBuilder(false);
+            setImportedContract(null);
+          }}
+        />
+      )}
+
+      {/* Interactive Webapp Session */}
+      {showWebappSession && importedContract && (
+        <WebappSession
+          contractName={importedContract.name}
+          contractAddress={importedContract.address}
+          methods={importedContract.methods}
+          onBack={() => {
+            setShowWebappSession(false);
             setImportedContract(null);
           }}
         />
@@ -480,12 +495,12 @@ export default function SanctumPage() {
                   onImport={(data) => {
                     setImportedContract(data);
                     setShowImportContract(false);
-                    // If they imported code, set it as generated code and go to webapp builder
+                    // Start the interactive webapp session
                     if (data.code) {
                       setGeneratedCode(data.code);
                     }
                     setSelectedCategory(data.name);
-                    setShowWebappBuilder(true);
+                    setShowWebappSession(true);
                   }}
                   onCancel={() => setShowImportContract(false)}
                 />

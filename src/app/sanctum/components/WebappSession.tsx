@@ -1,0 +1,214 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { ChevronLeft, Download, Rocket, Zap, Clock } from 'lucide-react';
+import { WebappChat, WebappComponent } from './WebappChat';
+import { WebappPreview } from './WebappPreview';
+import { ExtractedMethod } from './ImportContract';
+import { GlassPanel } from './GlassPanel';
+import { GradientText } from '@/components/effects/GradientText';
+
+interface WebappSessionProps {
+  contractName: string;
+  contractAddress?: string;
+  methods: ExtractedMethod[];
+  onBack: () => void;
+  onDeploy?: () => void;
+}
+
+export function WebappSession({
+  contractName,
+  contractAddress,
+  methods,
+  onBack,
+  onDeploy,
+}: WebappSessionProps) {
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [components, setComponents] = useState<WebappComponent[]>([]);
+  const [tokensUsed, setTokensUsed] = useState(0);
+  const [sessionTime, setSessionTime] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Track session time
+  useState(() => {
+    const interval = setInterval(() => {
+      setSessionTime(prev => prev + 1);
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  });
+
+  const handlePreviewUpdate = useCallback((html: string) => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      setPreviewHtml(html);
+      setIsGenerating(false);
+    }, 500);
+  }, []);
+
+  const handleComponentAdd = useCallback((component: WebappComponent) => {
+    setComponents(prev => [...prev, component].sort((a, b) => a.order - b.order));
+  }, []);
+
+  const handleTokensUsed = useCallback((tokens: number) => {
+    setTokensUsed(prev => prev + tokens);
+  }, []);
+
+  const handleSave = () => {
+    // Save to localStorage
+    const projectData = {
+      contractName,
+      contractAddress,
+      components,
+      previewHtml,
+      tokensUsed,
+      sessionTime,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(`webapp_project_${contractName}`, JSON.stringify(projectData));
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
+  };
+
+  const handleDownload = () => {
+    // Generate downloadable project
+    const blob = new Blob([previewHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${contractName}-webapp.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-void-black flex flex-col">
+      {/* Header */}
+      <div className="flex-shrink-0 px-4 py-3 border-b border-void-purple/20 bg-void-darker/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="text-xl">🌐</span>
+                <GradientText>{contractName}</GradientText>
+                <span className="text-sm text-gray-500 font-normal">Webapp Builder</span>
+              </h1>
+              {contractAddress && (
+                <p className="text-xs text-gray-500 font-mono">{contractAddress}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Stats */}
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5 text-amber-400">
+                <Zap className="w-4 h-4" />
+                <span>{tokensUsed.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-gray-400">
+                <Clock className="w-4 h-4" />
+                <span>{formatTime(sessionTime)}</span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSave}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                  isSaved 
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-void-purple/20 text-void-purple border border-void-purple/30 hover:bg-void-purple/30'
+                }`}
+              >
+                <span>💾</span>
+                {isSaved ? 'Saved!' : 'Save'}
+              </button>
+              <button
+                onClick={handleDownload}
+                disabled={!previewHtml}
+                className="px-4 py-2 bg-void-gray border border-void-purple/30 rounded-lg text-gray-300 hover:bg-void-purple/20 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download
+              </button>
+              <button
+                onClick={onDeploy}
+                disabled={!previewHtml}
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Rocket className="w-4 h-4" />
+                Deploy to Vercel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Chat Panel */}
+        <div className="w-1/2 border-r border-void-purple/20">
+          <GlassPanel className="h-full" glow glowColor="blue">
+            <WebappChat
+              contractName={contractName}
+              methods={methods}
+              onPreviewUpdate={handlePreviewUpdate}
+              onComponentAdd={handleComponentAdd}
+              onTokensUsed={handleTokensUsed}
+            />
+          </GlassPanel>
+        </div>
+
+        {/* Preview Panel */}
+        <div className="w-1/2">
+          <GlassPanel className="h-full" glow glowColor="green">
+            <WebappPreview
+              html={previewHtml}
+              components={components}
+              isGenerating={isGenerating}
+            />
+          </GlassPanel>
+        </div>
+      </div>
+
+      {/* Components Bar */}
+      {components.length > 0 && (
+        <div className="flex-shrink-0 px-4 py-2 border-t border-void-purple/20 bg-void-darker/50">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">Components:</span>
+            <div className="flex gap-1 overflow-x-auto">
+              {components.map((c) => (
+                <span
+                  key={c.id}
+                  className="px-2 py-1 bg-void-purple/20 text-void-purple text-xs rounded-lg flex-shrink-0"
+                >
+                  {c.name}
+                </span>
+              ))}
+            </div>
+            <span className="text-xs text-gray-500 ml-auto">
+              {components.length} total
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
