@@ -16,8 +16,13 @@ import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline
 import { ShareContract } from './components/ShareContract';
 import { DeploymentHistory, saveDeployment, DeployedContract } from './components/DeploymentHistory';
 import { SocialProof, LiveBuildersIndicator } from './components/SocialProof';
+import { ContractDNA } from './components/ContractDNA';
+import { GasEstimatorCompact } from './components/GasEstimator';
+import { ContractComparison } from './components/ContractComparison';
+import { SimulationSandbox } from './components/SimulationSandbox';
+import { PairProgramming, generateSessionId } from './components/PairProgramming';
 // @ts-expect-error - lucide-react types issue with TS 5.9
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -46,6 +51,10 @@ export default function SanctumPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [contractToShare, setContractToShare] = useState<{ code: string; name: string; category?: string } | null>(null);
+  const [showComparison, setShowComparison] = useState(false);
+  const [showSimulation, setShowSimulation] = useState(false);
+  const [showPairProgramming, setShowPairProgramming] = useState(false);
+  const [pairSessionId] = useState(() => generateSessionId());
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -259,6 +268,30 @@ export default function SanctumPage() {
             setShowShareModal(false);
             setContractToShare(null);
           }}
+        />
+      )}
+
+      {/* Comparison modal */}
+      {showComparison && generatedCode && (
+        <ContractComparison
+          currentCode={generatedCode}
+          onClose={() => setShowComparison(false)}
+        />
+      )}
+
+      {/* Simulation modal */}
+      {showSimulation && generatedCode && (
+        <SimulationSandbox
+          code={generatedCode}
+          onClose={() => setShowSimulation(false)}
+        />
+      )}
+
+      {/* Pair Programming modal */}
+      {showPairProgramming && (
+        <PairProgramming
+          sessionId={pairSessionId}
+          onClose={() => setShowPairProgramming(false)}
         />
       )}
 
@@ -529,20 +562,43 @@ export default function SanctumPage() {
                     </h2>
                     <div className="flex items-center gap-2">
                       <button 
-                        className="px-4 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
+                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
                         onClick={() => navigator.clipboard.writeText(generatedCode)}
                         disabled={!generatedCode}
+                        title="Copy code"
                       >
                         <Code2 className="w-4 h-4" />
-                        Copy
                       </button>
                       <button 
-                        className="px-4 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
+                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-blue-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-blue-500/30 disabled:opacity-50"
+                        onClick={() => setShowComparison(true)}
+                        disabled={!generatedCode}
+                        title="Compare versions"
+                      >
+                        <GitCompare className="w-4 h-4" />
+                      </button>
+                      <button 
+                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-green-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-green-500/30 disabled:opacity-50"
+                        onClick={() => setShowSimulation(true)}
+                        disabled={!generatedCode}
+                        title="Test in sandbox"
+                      >
+                        <Play className="w-4 h-4" />
+                      </button>
+                      <button 
+                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-pink-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-pink-500/30"
+                        onClick={() => setShowPairProgramming(true)}
+                        title="Pair programming"
+                      >
+                        <Users className="w-4 h-4" />
+                      </button>
+                      <button 
+                        className="px-3 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
                         onClick={handleShare}
                         disabled={!generatedCode}
+                        title="Share contract"
                       >
                         <Share2 className="w-4 h-4" />
-                        Share
                       </button>
                       <button 
                         className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
@@ -550,7 +606,7 @@ export default function SanctumPage() {
                         disabled={!generatedCode || sanctumStage === 'thinking'}
                       >
                         <Rocket className="w-4 h-4" />
-                        Deploy to NEAR
+                        Deploy
                       </button>
                     </div>
                   </div>
@@ -584,14 +640,22 @@ export default function SanctumPage() {
                   </div>
                 )}
 
-                {/* File info */}
+                {/* Contract DNA + Gas + File info */}
                 {generatedCode && (
-                  <div className="flex-shrink-0 p-3 border-t border-white/[0.08] bg-void-black/50 flex items-center justify-between text-xs text-text-muted">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
-                      contract.rs
-                    </span>
-                    <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
+                  <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
+                    {/* DNA and Gas row */}
+                    <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
+                      <ContractDNA code={generatedCode} size="sm" showLabel={true} />
+                      <GasEstimatorCompact code={generatedCode} />
+                    </div>
+                    {/* File info row */}
+                    <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                        contract.rs
+                      </span>
+                      <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
+                    </div>
                   </div>
                 )}
               </GlassPanel>
