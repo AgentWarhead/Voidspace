@@ -176,11 +176,17 @@ body::before {
 /* Void button pulse - ethereal glow effect */
 @keyframes void-pulse {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(0, 236, 151, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+    box-shadow: 
+      0 0 20px 5px rgba(0, 236, 151, 0.4),
+      0 0 40px 10px rgba(0, 236, 151, 0.2),
+      0 0 60px 15px rgba(139, 92, 246, 0.15);
     filter: brightness(1);
   }
   50% { 
-    box-shadow: 0 0 30px rgba(0, 236, 151, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
+    box-shadow: 
+      0 0 30px 8px rgba(0, 236, 151, 0.6),
+      0 0 60px 15px rgba(0, 236, 151, 0.3),
+      0 0 90px 25px rgba(139, 92, 246, 0.25);
     filter: brightness(1.05);
   }
 }
@@ -189,10 +195,14 @@ body::before {
   background: linear-gradient(135deg, #00EC97 0%, #00D68A 50%, #00EC97 100%);
   animation: void-pulse 2.5s ease-in-out infinite;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .shimmer-btn:hover {
-  box-shadow: 0 0 40px rgba(0, 236, 151, 0.6), 0 0 80px rgba(139, 92, 246, 0.3);
+  box-shadow: 
+    0 0 40px 10px rgba(0, 236, 151, 0.7),
+    0 0 80px 20px rgba(0, 236, 151, 0.4),
+    0 0 120px 40px rgba(139, 92, 246, 0.3);
   transform: scale(1.02);
 }
 
