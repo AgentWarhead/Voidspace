@@ -26,7 +26,7 @@ export function GlassPanel({
   return (
     <div
       className={`
-        relative overflow-hidden rounded-2xl
+        relative overflow-hidden rounded-2xl h-full
         bg-gradient-to-br from-white/[0.08] to-white/[0.02]
         backdrop-blur-xl
         border border-white/[0.08]
@@ -45,8 +45,8 @@ export function GlassPanel({
         />
       </div>
       
-      {/* Content */}
-      <div className="relative z-10">
+      {/* Content - fill entire panel, inherit flex */}
+      <div className="relative z-10 flex flex-col h-full">
         {children}
       </div>
     </div>

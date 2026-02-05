@@ -248,120 +248,136 @@ export default function SanctumPage() {
 
       {/* Build Session */}
       {sessionStarted && (
-        <div className="relative z-10 flex h-screen">
-          {/* Left Panel - Chat */}
-          <GlassPanel className="w-1/2 flex flex-col m-2 mr-1" glow glowColor="purple">
-            {/* Header */}
-            <div className="p-4 border-b border-white/[0.05]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleBack}
-                    className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5 text-text-muted" />
-                  </button>
-                  <div>
-                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                      <span className="text-2xl">🔥</span>
-                      Building: {selectedCategory === 'custom' ? 'Custom Project' : selectedCategory?.replace('-', ' ')}
-                    </h2>
-                    <p className="text-sm text-text-muted">Chat with Sanctum to build your contract</p>
+        <div className="fixed inset-0 z-10 flex flex-col bg-void-black">
+          {/* Session background - contained, no bleeding */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-void-black to-near-green/10" />
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-near-green/10 rounded-full blur-3xl" />
+          </div>
+          
+          {/* Main content - fills viewport exactly */}
+          <div className="relative z-10 flex flex-1 gap-3 p-3 min-h-0">
+            {/* Left Panel - Chat */}
+            <GlassPanel className="w-1/2 flex flex-col min-h-0" glow glowColor="purple">
+              {/* Header */}
+              <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleBack}
+                      className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors group"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
+                    </button>
+                    <div>
+                      <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                        <span className="text-2xl">🔮</span>
+                        <GradientText>
+                          {selectedCategory === 'custom' ? 'Custom Build' : selectedCategory?.replace('-', ' ')}
+                        </GradientText>
+                      </h2>
+                      <p className="text-sm text-text-muted">Chat with Sanctum to forge your contract</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    {/* Sound toggle */}
+                    <button
+                      onClick={() => setSoundEnabled(!soundEnabled)}
+                      className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
+                      title={soundEnabled ? 'Sound on' : 'Sound off'}
+                    >
+                      {soundEnabled ? '🔊' : '🔇'}
+                    </button>
+                    
+                    <TokenCounter 
+                      tokensUsed={tokensUsed} 
+                      tokenBalance={tokenBalance}
+                    />
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-4">
-                  {/* Sound toggle */}
-                  <button
-                    onClick={() => setSoundEnabled(!soundEnabled)}
-                    className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
-                    title={soundEnabled ? 'Sound on' : 'Sound off'}
-                  >
-                    {soundEnabled ? '🔊' : '🔇'}
-                  </button>
-                  
-                  <TokenCounter 
-                    tokensUsed={tokensUsed} 
-                    tokenBalance={tokenBalance}
+              </div>
+
+              {/* Chat - flex-1 with min-h-0 for proper scrolling */}
+              <div className="flex-1 min-h-0">
+                <SanctumChat 
+                  category={selectedCategory}
+                  customPrompt={customPrompt}
+                  onCodeGenerated={handleCodeGenerated}
+                  onTokensUsed={handleTokensUsed}
+                />
+              </div>
+            </GlassPanel>
+
+            {/* Right Panel - Code Preview */}
+            <GlassPanel className="w-1/2 flex flex-col min-h-0" glow glowColor="green">
+              {/* Header */}
+              <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                    <span className="text-xl">⚡</span>
+                    <span className="text-near-green">Contract</span> Preview
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      className="px-4 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
+                      onClick={() => navigator.clipboard.writeText(generatedCode)}
+                      disabled={!generatedCode}
+                    >
+                      <Code2 className="w-4 h-4" />
+                      Copy
+                    </button>
+                    <button 
+                      className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
+                      onClick={handleDeploy}
+                      disabled={!generatedCode || sanctumStage === 'thinking'}
+                    >
+                      <Rocket className="w-4 h-4" />
+                      Deploy to NEAR
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sanctum Visualization */}
+              {!generatedCode && (
+                <div className="flex-1 flex flex-col items-center justify-center p-8">
+                  <SanctumVisualization
+                    isGenerating={isGenerating}
+                    progress={0}
+                    stage={sanctumStage}
+                  />
+                  <p className="mt-6 text-text-muted text-center max-w-sm">
+                    Start chatting with Sanctum to generate your smart contract code.
+                    I&apos;ll teach you Rust as we build together.
+                  </p>
+                </div>
+              )}
+
+              {/* Code with typing animation */}
+              {generatedCode && (
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <TypewriterCode 
+                    code={generatedCode}
+                    speed={8}
+                    onComplete={() => setSanctumStage('complete')}
                   />
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Chat */}
-            <SanctumChat 
-              category={selectedCategory}
-              customPrompt={customPrompt}
-              onCodeGenerated={handleCodeGenerated}
-              onTokensUsed={handleTokensUsed}
-            />
-          </GlassPanel>
-
-          {/* Right Panel - Code Preview */}
-          <GlassPanel className="w-1/2 flex flex-col m-2 ml-1" glow glowColor="green">
-            {/* Header */}
-            <div className="p-4 border-b border-white/[0.05]">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                  <span className="text-xl">📄</span>
-                  Contract Preview
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button 
-                    className="px-4 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2"
-                    onClick={() => navigator.clipboard.writeText(generatedCode)}
-                    disabled={!generatedCode}
-                  >
-                    <Code2 className="w-4 h-4" />
-                    Copy
-                  </button>
-                  <button 
-                    className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50"
-                    onClick={handleDeploy}
-                    disabled={!generatedCode || sanctumStage === 'thinking'}
-                  >
-                    <Rocket className="w-4 h-4" />
-                    Deploy
-                  </button>
+              {/* File info */}
+              {generatedCode && (
+                <div className="flex-shrink-0 p-3 border-t border-white/[0.08] bg-void-black/50 flex items-center justify-between text-xs text-text-muted">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                    contract.rs
+                  </span>
+                  <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Sanctum Visualization */}
-            {!generatedCode && (
-              <div className="flex-1 flex flex-col items-center justify-center p-8">
-                <SanctumVisualization
-                  isGenerating={isGenerating}
-                  progress={0}
-                  stage={sanctumStage}
-                />
-                <p className="mt-6 text-text-muted text-center max-w-sm">
-                  Start chatting with Sanctum to generate your smart contract code.
-                  I&apos;ll teach you Rust as we build together.
-                </p>
-              </div>
-            )}
-
-            {/* Code with typing animation */}
-            {generatedCode && (
-              <TypewriterCode 
-                code={generatedCode}
-                speed={8}
-                onComplete={() => setSanctumStage('complete')}
-              />
-            )}
-
-            {/* File info */}
-            {generatedCode && (
-              <div className="p-3 border-t border-white/[0.05] bg-void-black/30 flex items-center justify-between text-xs text-text-muted">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
-                  contract.rs
-                </span>
-                <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
-              </div>
-            )}
-          </GlassPanel>
+              )}
+            </GlassPanel>
+          </div>
         </div>
       )}
     </div>
