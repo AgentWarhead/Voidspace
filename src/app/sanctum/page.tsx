@@ -12,7 +12,7 @@ import { SanctumVisualization } from './components/SanctumVisualization';
 import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
-import { TaskTracker, CurrentTask } from './components/TaskTracker';
+import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline';
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft } from 'lucide-react';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -354,9 +354,10 @@ export default function SanctumPage() {
             {/* Right Panel - Code Preview */}
             <div className="w-1/2 flex flex-col h-full">
               <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
-                {/* Header */}
+                {/* Header with inline task progress */}
                 <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
-                  <div className="flex items-center justify-between">
+                  {/* Top row: Title + Buttons */}
+                  <div className="flex items-center justify-between mb-3">
                     <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                       <span className="text-xl">⚡</span>
                       <span className="text-near-green">Contract</span> Preview
@@ -380,14 +381,8 @@ export default function SanctumPage() {
                       </button>
                     </div>
                   </div>
-                </div>
-
-                {/* Live Task Tracker */}
-                <div className="flex-shrink-0 border-b border-white/[0.05] bg-void-gray/30">
-                  <TaskTracker
-                    task={currentTask}
-                    isThinking={isThinking}
-                  />
+                  {/* Task progress row */}
+                  <TaskProgressInline task={currentTask} isThinking={isThinking} />
                 </div>
 
                 {/* Sanctum Visualization */}
