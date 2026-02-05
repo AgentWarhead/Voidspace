@@ -13,8 +13,11 @@ import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline';
+import { ShareContract } from './components/ShareContract';
+import { DeploymentHistory, saveDeployment, DeployedContract } from './components/DeploymentHistory';
+import { SocialProof, LiveBuildersIndicator } from './components/SocialProof';
 // @ts-expect-error - lucide-react types issue with TS 5.9
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -40,6 +43,9 @@ export default function SanctumPage() {
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [currentTask, setCurrentTask] = useState<CurrentTask | null>(null);
   const [isThinking, setIsThinking] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [contractToShare, setContractToShare] = useState<{ code: string; name: string; category?: string } | null>(null);
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -163,8 +169,19 @@ export default function SanctumPage() {
       setSanctumStage('complete');
       
       // Show celebration with contract ID
-      setDeployedContractId(data.contractId || `sanctum-${Date.now()}.testnet`);
+      const contractId = data.contractId || `sanctum-${Date.now()}.testnet`;
+      setDeployedContractId(contractId);
       setShowDeployCelebration(true);
+      
+      // Save to deployment history
+      saveDeployment({
+        name: selectedCategory === 'custom' ? 'Custom Contract' : (selectedCategory || 'My Contract'),
+        category: selectedCategory || 'custom',
+        network: 'testnet',
+        contractAddress: contractId,
+        txHash: data.txHash || `tx-${Date.now()}`,
+        code: generatedCode,
+      });
       
       // Play deploy sound
       if (soundEnabled) {
@@ -185,6 +202,34 @@ export default function SanctumPage() {
     setSanctumStage('idle');
   };
 
+  const handleShare = useCallback(() => {
+    if (generatedCode) {
+      setContractToShare({
+        code: generatedCode,
+        name: selectedCategory === 'custom' ? 'Custom Contract' : (selectedCategory || 'My Contract'),
+        category: selectedCategory || undefined,
+      });
+      setShowShareModal(true);
+    }
+  }, [generatedCode, selectedCategory]);
+
+  const handleShareFromHistory = useCallback((contract: DeployedContract) => {
+    setContractToShare({
+      code: contract.code,
+      name: contract.name,
+      category: contract.category,
+    });
+    setShowShareModal(true);
+  }, []);
+
+  const handleRemixFromHistory = useCallback((code: string, name: string) => {
+    setGeneratedCode(code);
+    setSelectedCategory('custom');
+    setCustomPrompt(`Remix: ${name}`);
+    setSessionStarted(true);
+    setShowHistory(false);
+  }, []);
+
   return (
     <div className="min-h-screen bg-void-black relative overflow-hidden">
       {/* Animated particle background */}
@@ -204,17 +249,33 @@ export default function SanctumPage() {
         onClose={() => setShowDeployCelebration(false)}
       />
 
+      {/* Share modal */}
+      {showShareModal && contractToShare && (
+        <ShareContract
+          code={contractToShare.code}
+          contractName={contractToShare.name}
+          category={contractToShare.category}
+          onClose={() => {
+            setShowShareModal(false);
+            setContractToShare(null);
+          }}
+        />
+      )}
+
       {/* Landing / Category Selection */}
       {!sessionStarted && (
         <section className="relative z-10 min-h-screen flex flex-col">
           {/* Hero */}
           <div className="flex-1 flex items-center justify-center py-16">
             <Container size="xl" className="text-center">
-              {/* Animated badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 mb-8 animate-pulse-glow">
-                <Sparkles className="w-4 h-4 text-near-green" />
-                <span className="text-near-green text-sm font-mono font-medium">THE SANCTUM</span>
-                <span className="text-text-muted text-sm">by Voidspace</span>
+              {/* Animated badge + Live indicator */}
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 animate-pulse-glow">
+                  <Sparkles className="w-4 h-4 text-near-green" />
+                  <span className="text-near-green text-sm font-mono font-medium">THE SANCTUM</span>
+                  <span className="text-text-muted text-sm">by Voidspace</span>
+                </div>
+                <LiveBuildersIndicator />
               </div>
 
               {/* Title */}
@@ -274,6 +335,32 @@ export default function SanctumPage() {
                   <div className="text-xs text-text-muted uppercase tracking-wider">To Deploy</div>
                 </div>
               </div>
+
+              {/* Social Proof Banner */}
+              <div className="mb-12">
+                <SocialProof variant="banner" />
+              </div>
+
+              {/* History toggle */}
+              <div className="flex justify-center mb-8">
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-text-muted hover:text-white bg-void-gray/50 hover:bg-void-gray border border-border-subtle hover:border-purple-500/30 rounded-lg transition-all"
+                >
+                  <Clock className="w-4 h-4" />
+                  {showHistory ? 'Hide' : 'View'} My Deployments
+                </button>
+              </div>
+
+              {/* Deployment History (collapsible) */}
+              {showHistory && (
+                <div className="max-w-2xl mx-auto mb-12">
+                  <DeploymentHistory
+                    onRemix={handleRemixFromHistory}
+                    onShare={handleShareFromHistory}
+                  />
+                </div>
+              )}
 
               {/* Category Picker (Build Mode) or Start Roast (Roast Mode) */}
               {mode === 'build' ? (
@@ -448,6 +535,14 @@ export default function SanctumPage() {
                       >
                         <Code2 className="w-4 h-4" />
                         Copy
+                      </button>
+                      <button 
+                        className="px-4 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
+                        onClick={handleShare}
+                        disabled={!generatedCode}
+                      >
+                        <Share2 className="w-4 h-4" />
+                        Share
                       </button>
                       <button 
                         className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
