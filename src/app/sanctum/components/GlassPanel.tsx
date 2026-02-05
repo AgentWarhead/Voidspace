@@ -26,7 +26,7 @@ export function GlassPanel({
   return (
     <div
       className={`
-        relative overflow-hidden rounded-2xl h-full
+        relative rounded-2xl
         bg-gradient-to-br from-white/[0.08] to-white/[0.02]
         backdrop-blur-xl
         border border-white/[0.08]
@@ -36,7 +36,7 @@ export function GlassPanel({
       `}
     >
       {/* Inner glow effect */}
-      <div className="absolute inset-0 opacity-50">
+      <div className="absolute inset-0 opacity-50 pointer-events-none rounded-2xl overflow-hidden">
         <div 
           className="absolute top-0 left-1/4 w-1/2 h-px"
           style={{
@@ -45,10 +45,8 @@ export function GlassPanel({
         />
       </div>
       
-      {/* Content - fill entire panel, inherit flex */}
-      <div className="relative z-10 flex flex-col h-full">
-        {children}
-      </div>
+      {/* Content - inherits flex behavior from className */}
+      {children}
     </div>
   );
 }
