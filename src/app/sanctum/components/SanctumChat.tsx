@@ -3,6 +3,26 @@
 import { useState, useRef, useEffect } from 'react';
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image } from 'lucide-react';
 
+// Microphone icons (inline SVG since lucide-react export is having issues)
+const MicIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+    <line x1="12" x2="12" y1="19" y2="22" />
+  </svg>
+);
+
+const MicOffIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="2" x2="22" y1="2" y2="22" />
+    <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+    <path d="M5 10v2a7 7 0 0 0 12 5" />
+    <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
+    <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+    <line x1="12" x2="12" y1="19" y2="22" />
+  </svg>
+);
+
 interface AttachedFile {
   name: string;
   type: string;
@@ -62,8 +82,61 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Check for speech recognition support
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          }
+        }
+        
+        if (finalTranscript) {
+          setInput(prev => prev + finalTranscript);
+        }
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+    
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   // Handle file selection
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -402,10 +475,31 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder="Describe what you want to build..."
-            className="flex-1 px-4 py-3 rounded-xl bg-void-gray border border-border-subtle focus:border-near-green/50 focus:outline-none focus:ring-1 focus:ring-near-green/30 text-text-primary placeholder:text-text-muted"
+            placeholder={isListening ? "Listening..." : "Describe what you want to build..."}
+            className={`flex-1 px-4 py-3 rounded-xl bg-void-gray border focus:outline-none focus:ring-1 text-text-primary placeholder:text-text-muted transition-all ${
+              isListening 
+                ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30 animate-pulse' 
+                : 'border-border-subtle focus:border-near-green/50 focus:ring-near-green/30'
+            }`}
             disabled={isLoading}
           />
+          
+          {/* Voice input button */}
+          {speechSupported && (
+            <button
+              onClick={toggleListening}
+              disabled={isLoading}
+              className={`px-3 py-3 rounded-xl border transition-all ${
+                isListening
+                  ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
+                  : 'bg-void-gray border-border-subtle hover:border-near-green/30 hover:bg-near-green/10 text-text-muted hover:text-near-green'
+              } disabled:opacity-50`}
+              title={isListening ? "Stop listening" : "Voice input"}
+            >
+              {isListening ? <MicOffIcon className="w-5 h-5" /> : <MicIcon className="w-5 h-5" />}
+            </button>
+          )}
+          
           <button
             onClick={() => handleSend()}
             disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
