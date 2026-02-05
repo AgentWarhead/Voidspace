@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image } from 'lucide-react';
+import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square } from 'lucide-react';
 
 // Microphone icons (inline SVG since lucide-react export is having issues)
 const MicIcon = ({ className }: { className?: string }) => (
@@ -105,6 +105,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Check for speech recognition support
   useEffect(() => {
@@ -348,6 +349,9 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       );
       onTaskUpdate?.({ ...task });
 
+      // Create abort controller for this request
+      abortControllerRef.current = new AbortController();
+
       const response = await fetch('/api/sanctum/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -359,6 +363,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
           category,
           attachments: userMessage.attachments?.filter(f => f.type.startsWith('image/')),
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       // Complete design step
@@ -447,22 +452,46 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       
     } catch (error) {
       clearInterval(analyzeInterval);
-      console.error('Chat error:', error);
       
-      // Mark current working step as error
-      task.steps = task.steps.map(s => 
-        s.status === 'working' ? { ...s, status: 'error', detail: 'Something went wrong' } : s
-      );
-      onTaskUpdate?.({ ...task });
-      
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
-      }]);
+      // Check if this was a user-initiated abort
+      if (error instanceof Error && error.name === 'AbortError') {
+        // User cancelled - show cancelled state
+        task.steps = task.steps.map(s => 
+          s.status === 'working' ? { ...s, status: 'error', detail: 'Cancelled' } : s
+        );
+        onTaskUpdate?.({ ...task });
+        
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '🛑 Request cancelled. No tokens were wasted!',
+        }]);
+      } else {
+        console.error('Chat error:', error);
+        
+        // Mark current working step as error
+        task.steps = task.steps.map(s => 
+          s.status === 'working' ? { ...s, status: 'error', detail: 'Something went wrong' } : s
+        );
+        onTaskUpdate?.({ ...task });
+        
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Sorry, I encountered an error. Please try again.',
+        }]);
+      }
     } finally {
       setIsLoading(false);
       onThinkingChange?.(false);
+      abortControllerRef.current = null;
+    }
+  }
+
+  // Stop/cancel the current request
+  function handleStop() {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
   }
   
@@ -657,13 +686,23 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
             </button>
           )}
           
-          <button
-            onClick={() => handleSend()}
-            disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
-            className="px-4 py-3 rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            <ArrowRight className="w-5 h-5" />
-          </button>
+          {isLoading ? (
+            <button
+              onClick={handleStop}
+              className="px-4 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all"
+              title="Stop generation"
+            >
+              <Square className="w-5 h-5 fill-current" />
+            </button>
+          ) : (
+            <button
+              onClick={() => handleSend()}
+              disabled={!input.trim() && attachedFiles.length === 0}
+              className="px-4 py-3 rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
     </div>
