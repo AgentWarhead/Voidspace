@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
@@ -16,6 +16,26 @@ import { cn } from '@/lib/utils';
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isImmersive, setIsImmersive] = useState(false);
+
+  // Listen for immersive mode changes
+  useEffect(() => {
+    const checkImmersive = () => {
+      setIsImmersive(document.body.hasAttribute('data-immersive'));
+    };
+    
+    // Check on mount
+    checkImmersive();
+    
+    // Watch for attribute changes
+    const observer = new MutationObserver(checkImmersive);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-immersive'] });
+    
+    return () => observer.disconnect();
+  }, []);
+
+  // Hide header in immersive mode
+  if (isImmersive) return null;
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">

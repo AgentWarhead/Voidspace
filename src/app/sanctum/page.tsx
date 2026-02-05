@@ -37,11 +37,12 @@ export default function SanctumPage() {
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [sessionMinutes, setSessionMinutes] = useState(0);
 
-  // Lock body scroll when session is active
+  // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
     if (sessionStarted) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
+      document.body.setAttribute('data-immersive', 'true');
       // Start session timer
       if (!sessionStartTime) {
         setSessionStartTime(Date.now());
@@ -49,10 +50,12 @@ export default function SanctumPage() {
     } else {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
+      document.body.removeAttribute('data-immersive');
     }
     return () => {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
+      document.body.removeAttribute('data-immersive');
     };
   }, [sessionStarted, sessionStartTime]);
 
@@ -279,11 +282,10 @@ export default function SanctumPage() {
         </section>
       )}
 
-      {/* Build Session - fills remaining viewport height below header */}
+      {/* Build Session - full screen immersive mode */}
       {sessionStarted && (
         <div 
-          className="relative z-40 flex flex-col bg-void-black"
-          style={{ height: 'calc(100vh - 64px)' }}
+          className="relative z-40 flex flex-col bg-void-black h-screen"
         >
           {/* Session background - contained, no bleeding */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">

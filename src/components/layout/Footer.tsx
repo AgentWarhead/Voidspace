@@ -1,9 +1,33 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container } from '@/components/ui/Container';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 import { GridPattern } from '@/components/effects/GridPattern';
 
 export function Footer() {
+  const [isImmersive, setIsImmersive] = useState(false);
+
+  // Listen for immersive mode changes
+  useEffect(() => {
+    const checkImmersive = () => {
+      setIsImmersive(document.body.hasAttribute('data-immersive'));
+    };
+    
+    // Check on mount
+    checkImmersive();
+    
+    // Watch for attribute changes
+    const observer = new MutationObserver(checkImmersive);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-immersive'] });
+    
+    return () => observer.disconnect();
+  }, []);
+
+  // Hide footer in immersive mode
+  if (isImmersive) return null;
+
   return (
     <footer className="relative bg-background overflow-hidden">
       {/* Gradient top border with glow */}
