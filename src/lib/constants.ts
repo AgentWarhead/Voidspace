@@ -41,12 +41,16 @@ export const DIFFICULTY_LABELS = {
 
 export const NAV_ITEMS = [
   { label: 'Command Center', href: '/' },
-  { label: 'Sanctum', href: '/sanctum' },
   { label: 'Voids', href: '/opportunities' },
-  { label: 'Categories', href: '/categories' },
-  { label: 'Void Lens', href: '/void-lens' },
-  { label: 'Constellation', href: '/constellation' },
-  { label: 'Pulse Streams', href: '/pulse-streams' },
+  { label: 'Sanctum', href: '/sanctum' },
+  { label: 'Observatory', href: '/observatory' },
   { label: 'Learn', href: '/learn' },
   { label: 'Profile', href: '/profile' },
+] as const;
+
+// Observatory tool tabs
+export const OBSERVATORY_TOOLS = [
+  { id: 'void-lens', label: 'Void Lens', icon: 'Eye', description: 'Wallet reputation scoring' },
+  { id: 'constellation', label: 'Constellation', icon: 'Network', description: 'Wallet relationship mapping' },
+  { id: 'pulse-streams', label: 'Pulse Streams', icon: 'Activity', description: 'Real-time transaction feed' },
 ] as const;
