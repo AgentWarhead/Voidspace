@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Network, Activity, Telescope } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
@@ -43,8 +44,25 @@ const TOOLS = [
 
 type ToolId = typeof TOOLS[number]['id'];
 
+const isValidToolId = (id: string | null): id is ToolId => {
+  return id !== null && TOOLS.some(t => t.id === id);
+};
+
 export default function ObservatoryPage() {
-  const [activeTool, setActiveTool] = useState<ToolId>('void-lens');
+  const searchParams = useSearchParams();
+  const toolParam = searchParams.get('tool');
+  
+  const [activeTool, setActiveTool] = useState<ToolId>(() => {
+    return isValidToolId(toolParam) ? toolParam : 'void-lens';
+  });
+
+  // Sync with URL param changes
+  useEffect(() => {
+    if (isValidToolId(toolParam) && toolParam !== activeTool) {
+      setActiveTool(toolParam);
+    }
+  }, [toolParam, activeTool]);
+
   const activeToolData = TOOLS.find(t => t.id === activeTool)!;
 
   return (
@@ -82,7 +100,7 @@ export default function ObservatoryPage() {
           </div>
 
           {/* Tool Tabs */}
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-2">
             {TOOLS.map((tool) => {
               const Icon = tool.icon;
               const isActive = activeTool === tool.id;

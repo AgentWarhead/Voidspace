@@ -1,6 +1,28 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@near-wallet-selector/modal-ui'],
+  
+  // Redirect legacy tool routes to Observatory
+  async redirects() {
+    return [
+      {
+        source: '/void-lens',
+        destination: '/observatory?tool=void-lens',
+        permanent: true,
+      },
+      {
+        source: '/constellation',
+        destination: '/observatory?tool=constellation',
+        permanent: true,
+      },
+      {
+        source: '/pulse-streams',
+        destination: '/observatory?tool=pulse-streams',
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

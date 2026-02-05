@@ -217,68 +217,69 @@ export function PulseStreams() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-accent-cyan/20 flex items-center justify-center">
-            <Activity className="w-6 h-6 text-accent-cyan" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-accent-cyan/20 flex items-center justify-center flex-shrink-0">
+            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-accent-cyan" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">Pulse Streams</h1>
-            <p className="text-text-secondary">Real-time NEAR blockchain transaction feed</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Pulse Streams</h1>
+            <p className="text-text-secondary text-sm sm:text-base">Real-time NEAR blockchain transaction feed</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant={showFilters ? "secondary" : "ghost"}
             onClick={() => setShowFilters(!showFilters)}
             size="sm"
           >
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
+            <Filter className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Filters</span>
           </Button>
           
           <Button
             variant={isStreaming ? "secondary" : "primary"}
             onClick={isStreaming ? handleStopStreaming : handleStartStreaming}
+            size="sm"
             className={cn(
               "transition-all",
               isStreaming && "animate-pulse-glow"
             )}
           >
             {isStreaming ? (
-              <><Pause className="w-4 h-4 mr-2" />Stop Stream</>
+              <><Pause className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Stop Stream</span></>
             ) : (
-              <><Play className="w-4 h-4 mr-2" />Start Stream</>
+              <><Play className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Start Stream</span></>
             )}
           </Button>
         </div>
       </div>
 
       {/* Stats Bar */}
-      <Card className="flex items-center justify-between" padding="sm">
-        <div className="flex items-center gap-6">
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-2" padding="sm">
+        <div className="flex items-center flex-wrap gap-3 sm:gap-6">
           <div className="flex items-center gap-2">
             <div className={cn(
-              "w-3 h-3 rounded-full",
+              "w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full",
               isStreaming ? "bg-near-green animate-pulse" : "bg-text-muted"
             )} />
-            <span className="text-sm text-text-secondary">
+            <span className="text-xs sm:text-sm text-text-secondary">
               {isStreaming ? 'Live' : 'Paused'}
             </span>
           </div>
           
-          <div className="text-sm text-text-secondary">
-            <span className="font-medium">{transactions.length}</span> transactions
+          <div className="text-xs sm:text-sm text-text-secondary">
+            <span className="font-medium">{transactions.length}</span> txns
           </div>
           
-          <div className="text-sm text-text-secondary">
-            Last updated: {lastTimestamp ? formatTime(lastTimestamp) : 'Never'}
+          <div className="text-xs sm:text-sm text-text-secondary hidden sm:block">
+            Updated: {lastTimestamp ? formatTime(lastTimestamp) : 'Never'}
           </div>
         </div>
         
-        <div className="text-sm text-text-muted">
-          Updates every 5 seconds
+        <div className="text-xs text-text-muted">
+          Updates every 5s
         </div>
       </Card>
 
@@ -402,9 +403,46 @@ export function PulseStreams() {
               {transactions.map((tx) => (
                 <div
                   key={tx.hash}
-                  className="px-6 py-4 hover:bg-surface-hover transition-colors border-b border-border last:border-b-0"
+                  className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-surface-hover transition-colors border-b border-border last:border-b-0"
                 >
-                  <div className="flex items-center justify-between">
+                  {/* Mobile Layout */}
+                  <div className="sm:hidden space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-md border text-xs font-medium",
+                        getActionColor(tx.action_kind)
+                      )}>
+                        {getActionIcon(tx.action_kind)}
+                        {tx.action_kind}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {parseFloat(tx.deposit) > 0 && (
+                          <span className="text-xs font-medium text-text-primary">
+                            {formatAmount(tx.deposit)}
+                          </span>
+                        )}
+                        <div className={cn(
+                          "w-2 h-2 rounded-full",
+                          tx.status === 'SUCCESS' ? 'bg-near-green' : 'bg-error'
+                        )} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className="font-mono text-text-secondary truncate max-w-[120px]">
+                        {truncateAddress(tx.signer_id, 10)}
+                      </span>
+                      <ArrowRight className="w-3 h-3 text-text-muted flex-shrink-0" />
+                      <span className="font-mono text-text-secondary truncate max-w-[120px]">
+                        {truncateAddress(tx.receiver_id, 10)}
+                      </span>
+                    </div>
+                    <div className="text-xs text-text-muted">
+                      {formatTime(tx.block_timestamp)} • Block #{tx.block_height.toLocaleString()}
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:flex items-center justify-between">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className={cn(
                         "flex items-center gap-2 px-2 py-1 rounded-md border text-xs font-medium",

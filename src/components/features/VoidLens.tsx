@@ -135,12 +135,12 @@ export function VoidLens() {
       {/* Header */}
       <div className="text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-lg bg-near-green/20 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-near-green" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-near-green/20 flex items-center justify-center">
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-near-green" />
           </div>
-          <h1 className="text-3xl font-bold text-text-primary">Void Lens</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Void Lens</h1>
         </div>
-        <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+        <p className="text-text-secondary text-sm sm:text-lg max-w-2xl mx-auto px-4">
           Advanced NEAR wallet reputation scoring powered by blockchain analytics and AI
         </p>
       </div>
@@ -194,12 +194,12 @@ export function VoidLens() {
             <Card className="lg:col-span-2" variant="glass" glow hover>
               <div className="text-center mb-6">
                 <div className={cn(
-                  "text-6xl font-bold mb-2",
+                  "text-5xl sm:text-6xl font-bold mb-2",
                   getScoreColor(result.analysis.score)
                 )}>
                   {result.analysis.score}
                 </div>
-                <div className="text-text-secondary">Reputation Score</div>
+                <div className="text-text-secondary text-sm sm:text-base">Reputation Score</div>
                 
                 <div className={cn(
                   "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium mt-3",
