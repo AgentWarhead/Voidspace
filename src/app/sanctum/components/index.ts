@@ -19,5 +19,7 @@ export { PairProgramming, generateSessionId } from './PairProgramming';
 export { DownloadButton } from './DownloadContract';
 export { FileStructure, FileStructureToggle } from './FileStructure';
 export { WebappBuilder } from './WebappBuilder';
+export { ImportContract } from './ImportContract';
 export type { Achievement } from './AchievementPopup';
+export type { ImportedContract, ExtractedMethod } from './ImportContract';
 export type { DeployedContract } from './DeploymentHistory';

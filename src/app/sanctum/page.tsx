@@ -24,12 +24,13 @@ import { PairProgramming, generateSessionId } from './components/PairProgramming
 import { DownloadButton } from './components/DownloadContract';
 import { FileStructure, FileStructureToggle } from './components/FileStructure';
 import { WebappBuilder } from './components/WebappBuilder';
+import { ImportContract, ImportedContract } from './components/ImportContract';
 // @ts-expect-error - lucide-react types issue with TS 5.9
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users, Globe } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
-type SanctumMode = 'build' | 'roast';
+type SanctumMode = 'build' | 'roast' | 'webapp';
 
 export default function SanctumPage() {
   const [mode, setMode] = useState<SanctumMode>('build');
@@ -60,6 +61,8 @@ export default function SanctumPage() {
   const [pairSessionId] = useState(() => generateSessionId());
   const [showFileStructure, setShowFileStructure] = useState(false);
   const [showWebappBuilder, setShowWebappBuilder] = useState(false);
+  const [showImportContract, setShowImportContract] = useState(false);
+  const [importedContract, setImportedContract] = useState<ImportedContract | null>(null);
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -301,12 +304,15 @@ export default function SanctumPage() {
       )}
 
       {/* Webapp Builder modal */}
-      {showWebappBuilder && generatedCode && (
+      {showWebappBuilder && (generatedCode || importedContract) && (
         <WebappBuilder
-          code={generatedCode}
-          contractName={selectedCategory || 'my-contract'}
-          deployedAddress={deployedContractId || undefined}
-          onClose={() => setShowWebappBuilder(false)}
+          code={generatedCode || importedContract?.code || ''}
+          contractName={importedContract?.name || selectedCategory || 'my-contract'}
+          deployedAddress={importedContract?.address || deployedContractId || undefined}
+          onClose={() => {
+            setShowWebappBuilder(false);
+            setImportedContract(null);
+          }}
         />
       )}
 
@@ -341,7 +347,7 @@ export default function SanctumPage() {
               </p>
 
               {/* Mode Switcher */}
-              <div className="flex items-center justify-center gap-2 mb-12">
+              <div className="flex items-center justify-center gap-2 mb-12 flex-wrap">
                 <button
                   onClick={() => setMode('build')}
                   className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
@@ -351,7 +357,18 @@ export default function SanctumPage() {
                   }`}
                 >
                   <Hammer className="w-5 h-5" />
-                  Build Mode
+                  Build Contract
+                </button>
+                <button
+                  onClick={() => setMode('webapp')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                    mode === 'webapp'
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/20'
+                      : 'bg-void-gray text-text-muted border border-border-subtle hover:border-cyan-500/30'
+                  }`}
+                >
+                  <Globe className="w-5 h-5" />
+                  Build Webapp
                 </button>
                 <button
                   onClick={() => setMode('roast')}
@@ -410,15 +427,71 @@ export default function SanctumPage() {
                 </div>
               )}
 
-              {/* Category Picker (Build Mode) or Start Roast (Roast Mode) */}
-              {mode === 'build' ? (
+              {/* Category Picker (Build Mode), Webapp Import, or Start Roast */}
+              {mode === 'build' && (
                 <CategoryPicker
                   onSelect={handleCategorySelect}
                   customPrompt={customPrompt}
                   setCustomPrompt={setCustomPrompt}
                   onCustomStart={handleCustomStart}
                 />
-              ) : (
+              )}
+              
+              {mode === 'webapp' && !showImportContract && (
+                <div className="text-center max-w-2xl mx-auto">
+                  <p className="text-text-secondary mb-8">
+                    Build a beautiful frontend for your NEAR smart contract. 
+                    <br />
+                    <span className="text-cyan-400">Bring your own contract or use one you just built.</span>
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <button
+                      onClick={() => setShowImportContract(true)}
+                      className="p-6 rounded-xl bg-void-gray/50 border border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/30 transition-colors">
+                        <Globe className="w-6 h-6 text-cyan-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-white mb-2">Import Existing Contract</h3>
+                      <p className="text-sm text-gray-400">
+                        Have a contract already? Paste the address or code and we&apos;ll build a webapp for it.
+                      </p>
+                    </button>
+                    
+                    <button
+                      onClick={() => setMode('build')}
+                      className="p-6 rounded-xl bg-void-gray/50 border border-near-green/30 hover:border-near-green/50 hover:bg-near-green/10 transition-all text-left group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-near-green/20 flex items-center justify-center mb-4 group-hover:bg-near-green/30 transition-colors">
+                        <Hammer className="w-6 h-6 text-near-green" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-white mb-2">Build Contract First</h3>
+                      <p className="text-sm text-gray-400">
+                        Don&apos;t have a contract yet? Build one with Sanctum, then come back for the webapp.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {mode === 'webapp' && showImportContract && (
+                <ImportContract
+                  onImport={(data) => {
+                    setImportedContract(data);
+                    setShowImportContract(false);
+                    // If they imported code, set it as generated code and go to webapp builder
+                    if (data.code) {
+                      setGeneratedCode(data.code);
+                    }
+                    setSelectedCategory(data.name);
+                    setShowWebappBuilder(true);
+                  }}
+                  onCancel={() => setShowImportContract(false)}
+                />
+              )}
+              
+              {mode === 'roast' && (
                 <div className="text-center">
                   <p className="text-text-secondary mb-6">
                     Paste any NEAR smart contract and watch it get torn apart by our security experts.
