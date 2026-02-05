@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
+import { PersonaSelector } from './PersonaSelector';
+import { PERSONAS, Persona, getPersona } from '../lib/personas';
 
 interface AttachedFile {
   name: string;
@@ -16,6 +18,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   code?: string;
+  personaId?: string; // Which persona sent this message
   attachments?: AttachedFile[];
   learnTip?: {
     title: string;
@@ -78,6 +81,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
 
 export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS.sanctum);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
@@ -219,6 +223,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       id: 'initial',
       role: 'assistant',
       content: starterMessage,
+      personaId: currentPersona.id,
       options: getInitialOptions(category),
     };
     setMessages([initialMessage]);
@@ -369,6 +374,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
             content: m.content,
           })),
           category,
+          personaId: currentPersona.id,
           attachments: userMessage.attachments?.filter(f => f.type.startsWith('image/')),
         }),
         signal: abortControllerRef.current.signal,
@@ -436,6 +442,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
         role: 'assistant',
         content: data.content,
         code: data.code,
+        personaId: currentPersona.id,
         learnTip: data.learnTip,
         options: data.options,
         tokensUsed: data.usage,
@@ -535,6 +542,18 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Persona selector header */}
+      <div className="flex-shrink-0 p-3 border-b border-border-subtle bg-void-black/30 flex items-center justify-between">
+        <PersonaSelector 
+          currentPersona={currentPersona}
+          onSelect={setCurrentPersona}
+          disabled={isLoading}
+        />
+        <div className="text-xs text-text-muted">
+          Switch experts for specialized help
+        </div>
+      </div>
+      
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
@@ -542,13 +561,18 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
             <div className={`max-w-[85%] ${message.role === 'user' ? 'order-2' : ''}`}>
               {/* Avatar */}
               <div className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  message.role === 'user' 
-                    ? 'bg-near-green/20 text-near-green' 
-                    : 'bg-purple-500/20 text-purple-400'
-                }`}>
-                  {message.role === 'user' ? '👤' : '🐧'}
-                </div>
+                {(() => {
+                  const persona = message.personaId ? getPersona(message.personaId) : currentPersona;
+                  return (
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.role === 'user' 
+                        ? 'bg-near-green/20 text-near-green' 
+                        : persona.bgColor
+                    }`}>
+                      {message.role === 'user' ? '👤' : persona.emoji}
+                    </div>
+                  );
+                })()}
                 
                 <div className={`rounded-2xl px-4 py-3 ${
                   message.role === 'user'
