@@ -10,7 +10,7 @@ export { GlassPanel } from './GlassPanel';
 export { DeployCelebration } from './DeployCelebration';
 export { ShareContract } from './ShareContract';
 export { DeploymentHistory, saveDeployment } from './DeploymentHistory';
-export { SocialProof, LiveBuildersIndicator } from './SocialProof';
+export { SocialProof } from './SocialProof';
 export { ContractDNA, ContractDNAInline } from './ContractDNA';
 export { GasEstimator, GasEstimatorCompact } from './GasEstimator';
 export { ContractComparison } from './ContractComparison';

@@ -15,7 +15,7 @@ import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline';
 import { ShareContract } from './components/ShareContract';
 import { DeploymentHistory, saveDeployment, DeployedContract } from './components/DeploymentHistory';
-import { SocialProof, LiveBuildersIndicator } from './components/SocialProof';
+import { SocialProof } from './components/SocialProof';
 import { ContractDNA } from './components/ContractDNA';
 import { GasEstimatorCompact } from './components/GasEstimator';
 import { ContractComparison } from './components/ContractComparison';
@@ -337,28 +337,27 @@ export default function SanctumPage() {
           {/* Hero */}
           <div className="flex-1 flex items-center justify-center py-16">
             <Container size="xl" className="text-center">
-              {/* Animated badge + Live indicator */}
-              <div className="flex items-center justify-center gap-4 mb-8">
+              {/* Animated badge */}
+              <div className="flex items-center justify-center mb-8">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 animate-pulse-glow">
                   <Sparkles className="w-4 h-4 text-near-green" />
                   <span className="text-near-green text-sm font-mono font-medium">THE SANCTUM</span>
                   <span className="text-text-muted text-sm">by Voidspace</span>
                 </div>
-                <LiveBuildersIndicator />
               </div>
 
               {/* Title */}
               <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
-                <span className="text-text-primary">Build Smart Contracts</span>
+                <span className="text-text-primary">Build on NEAR</span>
                 <br />
-                <GradientText className="mt-2">By Talking</GradientText>
+                <GradientText className="mt-2">From Idea to Launch</GradientText>
               </h1>
 
               {/* Subtitle */}
               <p className="text-text-secondary text-xl max-w-2xl mx-auto mb-12">
-                AI-powered contract development for NEAR Protocol.
+                AI-powered development studio for NEAR Protocol.
                 <br />
-                <span className="text-near-green">Learn Rust as you build.</span> Deploy in minutes.
+                <span className="text-near-green">Contracts, webapps, deployment</span> — all through conversation.
               </p>
 
               {/* Mode Switcher */}
@@ -399,19 +398,19 @@ export default function SanctumPage() {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center justify-center gap-8 mb-16">
+              <div className="flex items-center justify-center gap-8 mb-16 flex-wrap">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-text-primary font-mono">15</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Categories</div>
+                  <div className="text-3xl font-bold text-text-primary font-mono">15+</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Contract Types</div>
                 </div>
-                <div className="w-px h-12 bg-border-subtle" />
+                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-near-green font-mono">5</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">NEAR Priorities</div>
+                  <div className="text-3xl font-bold text-cyan-400 font-mono">Full</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Stack Builder</div>
                 </div>
-                <div className="w-px h-12 bg-border-subtle" />
+                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-text-primary font-mono">&lt;5m</div>
+                  <div className="text-3xl font-bold text-near-green font-mono">&lt;5m</div>
                   <div className="text-xs text-text-muted uppercase tracking-wider">To Deploy</div>
                 </div>
               </div>
