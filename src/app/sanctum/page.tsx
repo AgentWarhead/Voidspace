@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
@@ -32,6 +32,21 @@ export default function SanctumPage() {
   const [deployCount, setDeployCount] = useState(0);
   const [showDeployCelebration, setShowDeployCelebration] = useState(false);
   const [deployedContractId, setDeployedContractId] = useState<string | null>(null);
+
+  // Lock body scroll when session is active
+  useEffect(() => {
+    if (sessionStarted) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [sessionStarted]);
 
   const unlockAchievement = useCallback((achievementId: string) => {
     if (unlockedAchievements.has(achievementId)) return;

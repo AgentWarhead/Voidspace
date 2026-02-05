@@ -1,13 +1,21 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Loader2, ArrowRight, Sparkles, Lightbulb } from 'lucide-react';
+import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image } from 'lucide-react';
+
+interface AttachedFile {
+  name: string;
+  type: string;
+  size: number;
+  content: string; // base64 for images, text for code files
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   code?: string;
+  attachments?: AttachedFile[];
   learnTip?: {
     title: string;
     explanation: string;
@@ -53,7 +61,56 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file selection
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newAttachments: AttachedFile[] = [];
+    
+    for (const file of Array.from(files)) {
+      // Limit file size to 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Max 5MB.`);
+        continue;
+      }
+
+      const isImage = file.type.startsWith('image/');
+      const isText = file.type.startsWith('text/') || 
+        ['.rs', '.ts', '.tsx', '.js', '.jsx', '.json', '.toml', '.md', '.sol'].some(ext => file.name.endsWith(ext));
+
+      if (isImage) {
+        // Read as base64 for images
+        const content = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+        newAttachments.push({ name: file.name, type: file.type, size: file.size, content });
+      } else if (isText || file.size < 100 * 1024) {
+        // Read as text for code files
+        const content = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsText(file);
+        });
+        newAttachments.push({ name: file.name, type: 'text/plain', size: file.size, content });
+      } else {
+        alert(`File type not supported: ${file.name}`);
+      }
+    }
+
+    setAttachedFiles(prev => [...prev, ...newAttachments]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Initialize with category-specific starter
   useEffect(() => {
@@ -118,28 +175,41 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
 
   async function handleSend(messageText?: string) {
     const text = messageText || input;
-    if (!text.trim() || isLoading) return;
+    if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: text,
+      attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setAttachedFiles([]);
     setIsLoading(true);
+
+    // Build content with attachments for API
+    let fullContent = text;
+    if (userMessage.attachments) {
+      for (const file of userMessage.attachments) {
+        if (file.type === 'text/plain') {
+          fullContent += `\n\n--- Attached file: ${file.name} ---\n${file.content}\n--- End of ${file.name} ---`;
+        }
+      }
+    }
 
     try {
       const response = await fetch('/api/sanctum/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({
+          messages: [...messages, { ...userMessage, content: fullContent }].map(m => ({
             role: m.role,
             content: m.content,
           })),
           category,
+          attachments: userMessage.attachments?.filter(f => f.type.startsWith('image/')),
         }),
       });
 
@@ -208,6 +278,22 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
                     ? 'bg-near-green/20 border border-near-green/30'
                     : 'bg-void-gray border border-border-subtle'
                 }`}>
+                  {/* Attached files */}
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {message.attachments.map((file, i) => (
+                        <div key={i} className="flex items-center gap-1.5 px-2 py-1 rounded bg-void-black/30 text-xs">
+                          {file.type.startsWith('image/') ? (
+                            <Image className="w-3 h-3 text-purple-400" />
+                          ) : (
+                            <FileText className="w-3 h-3 text-near-green" />
+                          )}
+                          <span className="text-text-muted">{file.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
                   {/* Message content */}
                   <p className="text-text-primary whitespace-pre-wrap">{message.content}</p>
                   
@@ -266,8 +352,51 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-border-subtle">
-        <div className="flex gap-3">
+      <div className="flex-shrink-0 p-4 border-t border-border-subtle bg-void-black/30">
+        {/* Attached files preview */}
+        {attachedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {attachedFiles.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-void-gray border border-border-subtle text-sm"
+              >
+                {file.type.startsWith('image/') ? (
+                  <Image className="w-4 h-4 text-purple-400" />
+                ) : (
+                  <FileText className="w-4 h-4 text-near-green" />
+                )}
+                <span className="text-text-secondary max-w-[120px] truncate">{file.name}</span>
+                <button
+                  onClick={() => removeAttachment(index)}
+                  className="p-0.5 hover:bg-white/10 rounded transition-colors"
+                >
+                  <X className="w-3 h-3 text-text-muted hover:text-red-400" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="flex gap-2">
+          {/* File attachment button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".rs,.ts,.tsx,.js,.jsx,.json,.toml,.md,.sol,.txt,image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            className="px-3 py-3 rounded-xl bg-void-gray border border-border-subtle hover:border-purple-500/30 hover:bg-purple-500/10 disabled:opacity-50 transition-all"
+            title="Attach files (code, images)"
+          >
+            <Link2 className="w-5 h-5 text-text-muted" />
+          </button>
+          
           <input
             type="text"
             value={input}
@@ -279,7 +408,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
           />
           <button
             onClick={() => handleSend()}
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
             className="px-4 py-3 rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <ArrowRight className="w-5 h-5" />
