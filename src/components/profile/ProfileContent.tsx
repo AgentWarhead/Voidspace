@@ -1,20 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { User, Shield, FileText, Calendar, ExternalLink, Bookmark } from 'lucide-react';
-import { Card, Badge, Button, Progress, VoidEmptyState } from '@/components/ui';
+import { User, Search as SearchIcon, Filter } from 'lucide-react';
+import { Card, Button, VoidEmptyState } from '@/components/ui';
 import { PageTransition } from '@/components/effects/PageTransition';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GradientText } from '@/components/effects/GradientText';
-import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
-import { ScanLine } from '@/components/effects/ScanLine';
+import { BuilderProfileCard } from './BuilderProfileCard';
+import { VoidMissionCard } from './VoidMissionCard';
+import { QuickActionsBar } from './QuickActionsBar';
 import { useWallet } from '@/hooks/useWallet';
 import { useUser } from '@/hooks/useUser';
-import { TIERS } from '@/lib/tiers';
-import { timeAgo } from '@/lib/utils';
-import type { TierName, SavedOpportunity } from '@/types';
+import { cn } from '@/lib/utils';
+import type { TierName, SavedOpportunity, MissionStatus } from '@/types';
 
 interface UsageStats {
   briefsThisMonth: number;
@@ -22,13 +22,24 @@ interface UsageStats {
   savedCount: number;
 }
 
+type FilterStatus = 'all' | MissionStatus;
+
 export function ProfileContent() {
   const { isConnected, accountId, openModal } = useWallet();
   const { user, isLoading } = useUser();
   const [usage, setUsage] = useState<UsageStats | null>(null);
-  const [saved, setSaved] = useState<SavedOpportunity[]>([]);
-  const [savedLoading, setSavedLoading] = useState(false);
+  const [missions, setMissions] = useState<SavedOpportunity[]>([]);
+  const [missionsLoading, setMissionsLoading] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [focusedMission, setFocusedMission] = useState<string | null>(null);
+  const [reputation, setReputation] = useState<{
+    score: number;
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    accountAge: string;
+    transactionCount: number;
+  } | null>(null);
 
+  // Fetch data
   useEffect(() => {
     if (user?.id) {
       // Fetch usage
@@ -37,25 +48,120 @@ export function ProfileContent() {
         .then(setUsage)
         .catch(() => {});
 
-      // Fetch saved opportunities
-      setSavedLoading(true);
+      // Fetch saved opportunities (missions)
+      setMissionsLoading(true);
       fetch('/api/saved')
         .then((r) => r.json())
-        .then((data) => setSaved(data.saved || []))
+        .then((data) => {
+          const savedMissions = (data.saved || []).map((m: SavedOpportunity) => ({
+            ...m,
+            health: m.health || 'green',
+            progress: m.progress || 0,
+          }));
+          setMissions(savedMissions);
+          
+          // Set focus to first "building" mission or most recent
+          const buildingMission = savedMissions.find((m: SavedOpportunity) => m.status === 'building');
+          if (buildingMission) {
+            setFocusedMission(buildingMission.opportunity_id);
+          }
+        })
         .catch(() => {})
-        .finally(() => setSavedLoading(false));
+        .finally(() => setMissionsLoading(false));
+
+      // Fetch wallet reputation if we have accountId
+      if (accountId) {
+        fetch('/api/void-lens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: accountId }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.analysis) {
+              setReputation({
+                score: data.analysis.score,
+                riskLevel: data.analysis.riskLevel,
+                accountAge: data.walletData?.stats?.first_transaction || '',
+                transactionCount: data.walletData?.stats?.total_transactions || 0,
+              });
+            }
+          })
+          .catch(() => {});
+      }
     }
-  }, [user?.id]);
+  }, [user?.id, accountId]);
+
+  // Update mission handler
+  const handleMissionUpdate = useCallback(async (opportunityId: string, updates: Partial<SavedOpportunity>) => {
+    // Optimistic update
+    setMissions(prev => prev.map(m => 
+      m.opportunity_id === opportunityId ? { ...m, ...updates } : m
+    ));
+
+    try {
+      const res = await fetch('/api/saved', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ opportunityId, ...updates }),
+      });
+
+      if (!res.ok) {
+        // Revert on error
+        const data = await fetch('/api/saved').then(r => r.json());
+        setMissions(data.saved || []);
+      }
+    } catch {
+      // Revert on error
+      const data = await fetch('/api/saved').then(r => r.json());
+      setMissions(data.saved || []);
+    }
+  }, []);
+
+  // Set focus handler
+  const handleSetFocus = useCallback((opportunityId: string) => {
+    setFocusedMission(opportunityId);
+  }, []);
+
+  // Filter missions
+  const filteredMissions = missions.filter(m => 
+    filterStatus === 'all' || m.status === filterStatus
+  );
+
+  // Sort: focused first, then by updated_at
+  const sortedMissions = [...filteredMissions].sort((a, b) => {
+    if (a.opportunity_id === focusedMission) return -1;
+    if (b.opportunity_id === focusedMission) return 1;
+    return new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime();
+  });
+
+  // Calculate stats
+  const stats = {
+    voidsExplored: missions.length,
+    briefsGenerated: usage?.briefsThisMonth || 0,
+    building: missions.filter(m => m.status === 'building').length,
+    shipped: missions.filter(m => m.status === 'shipped').length,
+    sanctumSessions: 0, // TODO: track this
+    totalTokensUsed: 0, // TODO: track this
+  };
+
+  // Find last building mission for quick actions
+  const lastBuildingMission = missions.find(m => m.status === 'building');
 
   if (!isConnected) {
     return (
       <Card variant="glass" padding="lg">
         <VoidEmptyState
           icon={User}
-          title="Connect Your Wallet"
-          description="Connect your NEAR wallet to view your profile, saved opportunities, and usage stats."
+          title="Enter the Void"
+          description="Connect your NEAR wallet to access your Void Command — your personal builder headquarters."
           action={
-            <Button variant="primary" size="lg" onClick={openModal} className="hover:shadow-[0_0_24px_rgba(0,236,151,0.4)]">
+            <Button 
+              variant="primary" 
+              size="lg" 
+              onClick={openModal} 
+              className="hover:shadow-[0_0_24px_rgba(0,236,151,0.4)]"
+            >
               Connect Wallet
             </Button>
           }
@@ -66,191 +172,142 @@ export function ProfileContent() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-32 bg-surface rounded-xl animate-pulse" />
-        <div className="h-48 bg-surface rounded-xl animate-pulse" />
+      <div className="space-y-6">
+        <div className="h-64 bg-surface rounded-2xl animate-pulse" />
+        <div className="h-16 bg-surface rounded-xl animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-80 bg-surface rounded-xl animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
   const tier = (user?.tier as TierName) || 'shade';
-  const tierConfig = TIERS[tier];
-
-  // Extract display name from account ID (e.g. "alice.near" → "Alice")
-  const displayName = accountId
-    ? accountId.replace(/\.(near|testnet)$/, '').replace(/^\w/, (c: string) => c.toUpperCase())
-    : 'Explorer';
 
   return (
     <PageTransition className="space-y-8">
-      <GradientText as="h1" className="text-3xl font-bold">
-        Welcome back, {displayName}
-      </GradientText>
-
-      {/* User Info */}
-      <ScrollReveal>
-        <Card variant="glass" padding="lg" className="relative overflow-hidden">
-          <ScanLine />
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-near-green/20 flex items-center justify-center shrink-0">
-              <User className="w-6 h-6 text-near-green" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold text-text-primary truncate font-mono">
-                {accountId}
-              </h2>
-              <div className="flex items-center gap-3 mt-1">
-                <Badge variant="tier" tier={tier}>
-                  {tierConfig.name}
-                </Badge>
-                {user?.created_at && (
-                  <span className="text-xs text-text-muted flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    Joined {timeAgo(user.created_at)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </ScrollReveal>
-
-      {/* Tier + Usage */}
-      <ScrollReveal delay={0.1}>
-        <SectionHeader title="Plan & Usage" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Current Plan */}
-          <AnimatedBorderCard padding="lg">
-            <div className="flex items-center gap-2 mb-3">
-              <Shield className="w-5 h-5 text-near-green" />
-              <h3 className="font-semibold text-text-primary">Current Plan</h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Tier</span>
-                <Badge variant="tier" tier={tier}>{tierConfig.name}</Badge>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Briefs/Month</span>
-                <span className="text-text-primary font-mono">{tierConfig.briefsPerMonth}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Max Saved</span>
-                <span className="text-text-primary font-mono">{tierConfig.maxSaved}</span>
-              </div>
-              {tierConfig.price !== null && tierConfig.price > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-secondary">Price</span>
-                  <span className="text-text-primary font-mono">${tierConfig.price}/mo</span>
-                </div>
-              )}
-            </div>
-            {tier === 'shade' && (
-              <div className="mt-4 pt-3 border-t border-border">
-                <p className="text-xs text-text-muted mb-2">
-                  Upgrade to generate AI project briefs and save unlimited opportunities.
-                </p>
-                <Button variant="primary" size="sm" className="w-full">
-                  Upgrade to Specter — $14.99/mo
-                </Button>
-              </div>
-            )}
-          </AnimatedBorderCard>
-
-          {/* Usage Stats */}
-          <Card variant="glass" padding="lg" className="relative overflow-hidden">
-            <ScanLine />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <FileText className="w-5 h-5 text-near-green" />
-                <h3 className="font-semibold text-text-primary">Usage This Month</h3>
-              </div>
-              {usage ? (
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-text-secondary">Briefs Generated</span>
-                      <span className="text-text-primary font-mono">
-                        {usage.briefsThisMonth}/{tierConfig.briefsPerMonth}
-                      </span>
-                    </div>
-                    <Progress
-                      value={usage.briefsThisMonth}
-                      max={tierConfig.briefsPerMonth}
-                      size="sm"
-                      color="green"
-                    />
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-secondary">Saved Opportunities</span>
-                    <span className="text-text-primary font-mono">
-                      {usage.savedCount}/{tierConfig.maxSaved}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-secondary">Previews Today</span>
-                    <span className="text-text-primary font-mono">{usage.previewsToday}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-20 flex items-center justify-center">
-                  <span className="text-sm text-text-muted">Loading usage...</span>
-                </div>
-              )}
-            </div>
-          </Card>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <GradientText as="h1" className="text-3xl font-bold">
+          Void Command
+        </GradientText>
+        <div className="text-sm text-text-muted font-mono">
+          🐧 Your Builder HQ
         </div>
+      </div>
+
+      {/* Builder Profile Card */}
+      <ScrollReveal>
+        <BuilderProfileCard
+          accountId={accountId || ''}
+          tier={tier}
+          joinedAt={user?.created_at || new Date().toISOString()}
+          stats={stats}
+          reputation={reputation}
+          missions={missions}
+        />
       </ScrollReveal>
 
-      {/* Saved Opportunities */}
-      <ScrollReveal delay={0.15}>
-        <SectionHeader title="Saved Opportunities" count={saved.length} badge="LIVE" />
-        <Card variant="glass" padding="none">
-          <div className="p-4">
-            {savedLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-14 bg-surface-hover rounded-lg animate-pulse" />
-                ))}
-              </div>
-            ) : saved.length > 0 ? (
-              <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
-                {saved.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/opportunities/${item.opportunity_id}`}
-                    className="flex items-center gap-3 px-4 py-3 border-l-2 border-transparent hover:border-near-green/50 hover:bg-surface-hover transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text-primary truncate">
-                        {item.opportunity?.title || 'Opportunity'}
-                      </p>
-                      {item.opportunity?.category && (
-                        <p className="text-xs text-text-muted truncate">
-                          {item.opportunity.category.name}
-                        </p>
-                      )}
-                    </div>
-                    <Badge variant="default">{item.status}</Badge>
-                    <ExternalLink className="w-3.5 h-3.5 text-text-muted shrink-0" />
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <VoidEmptyState
-                icon={Bookmark}
-                title="No saved voids yet"
-                description="Browse voids and click the bookmark icon to save them here."
-                action={
-                  <Link href="/opportunities">
-                    <Button variant="secondary" size="sm">Browse Voids</Button>
-                  </Link>
-                }
-              />
-            )}
-          </div>
-        </Card>
+      {/* Quick Actions */}
+      <ScrollReveal delay={0.05}>
+        <QuickActionsBar
+          hasActiveMission={!!lastBuildingMission}
+          lastSanctumVoid={lastBuildingMission?.opportunity_id}
+          accountId={accountId || ''}
+        />
       </ScrollReveal>
+
+      {/* Missions Section */}
+      <ScrollReveal delay={0.1}>
+        <div className="flex items-center justify-between mb-4">
+          <SectionHeader 
+            title="Void Missions" 
+            count={missions.length} 
+            badge={stats.building > 0 ? `${stats.building} ACTIVE` : undefined}
+          />
+          
+          {/* Filter */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-text-muted" />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+              className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-secondary focus:outline-none focus:border-near-green/50"
+            >
+              <option value="all">All Missions</option>
+              <option value="saved">📑 Saved</option>
+              <option value="researching">🔍 Researching</option>
+              <option value="building">🔨 Building</option>
+              <option value="shipped">🚀 Shipped</option>
+              <option value="paused">⏸️ Paused</option>
+            </select>
+          </div>
+        </div>
+
+        {missionsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-80 bg-surface rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : sortedMissions.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sortedMissions.map((mission) => (
+              <VoidMissionCard
+                key={mission.id}
+                mission={mission}
+                onUpdate={handleMissionUpdate}
+                onSetFocus={handleSetFocus}
+                isFocused={mission.opportunity_id === focusedMission}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card variant="glass" padding="lg">
+            <VoidEmptyState
+              icon={SearchIcon}
+              title={filterStatus === 'all' ? "No missions yet" : `No ${filterStatus} missions`}
+              description={filterStatus === 'all' 
+                ? "Start your journey by exploring voids and saving ones that interest you."
+                : "Change the filter to see other missions, or explore new voids."
+              }
+              action={
+                <Link href="/opportunities">
+                  <Button variant="primary">Explore Voids</Button>
+                </Link>
+              }
+            />
+          </Card>
+        )}
+      </ScrollReveal>
+
+      {/* Footer Stats */}
+      {missions.length > 0 && (
+        <ScrollReveal delay={0.15}>
+          <Card variant="glass" padding="md" className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-6">
+              <span className="text-text-muted">
+                Total Missions: <span className="text-text-primary font-mono">{missions.length}</span>
+              </span>
+              <span className="text-text-muted">
+                Completion Rate: <span className="text-near-green font-mono">
+                  {missions.length > 0 
+                    ? Math.round((stats.shipped / missions.length) * 100) 
+                    : 0}%
+                </span>
+              </span>
+            </div>
+            <Link 
+              href="/opportunities" 
+              className="text-near-green/70 hover:text-near-green transition-colors"
+            >
+              + Add Mission
+            </Link>
+          </Card>
+        </ScrollReveal>
+      )}
     </PageTransition>
   );
 }

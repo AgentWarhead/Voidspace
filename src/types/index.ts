@@ -90,15 +90,24 @@ export interface Usage {
   created_at: string;
 }
 
+export type MissionStatus = 'saved' | 'researching' | 'building' | 'shipped' | 'paused';
+export type MissionHealth = 'green' | 'yellow' | 'red';
+
 export interface SavedOpportunity {
   id: string;
   user_id: string;
   opportunity_id: string;
-  status: 'saved' | 'researching' | 'building' | 'launched';
+  status: MissionStatus;
+  health: MissionHealth;
+  progress: number;
   notes: string | null;
   created_at: string;
+  updated_at: string;
   // Joined fields
   opportunity?: Opportunity;
+  // Computed fields
+  briefs_count?: number;
+  sanctum_sessions?: number;
 }
 
 export interface ProjectBriefRecord {
