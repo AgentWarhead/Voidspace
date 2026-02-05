@@ -1,27 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square } from 'lucide-react';
-
-// Microphone icons (inline SVG since lucide-react export is having issues)
-const MicIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-    <line x1="12" x2="12" y1="19" y2="22" />
-  </svg>
-);
-
-const MicOffIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="2" x2="22" y1="2" y2="22" />
-    <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
-    <path d="M5 10v2a7 7 0 0 0 12 5" />
-    <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
-    <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
-    <line x1="12" x2="12" y1="19" y2="22" />
-  </svg>
-);
+import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
+import { VoiceIndicator } from './VoiceIndicator';
 
 interface AttachedFile {
   name: string;
@@ -102,6 +83,9 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [voiceAutoSend, setVoiceAutoSend] = useState(false);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -119,26 +103,50 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       
       recognition.onresult = (event) => {
         let finalTranscript = '';
+        let interim = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
             finalTranscript += transcript;
+          } else {
+            interim += transcript;
           }
         }
         
+        // Show interim results live
+        setInterimTranscript(interim);
+        
         if (finalTranscript) {
           setInput(prev => prev + finalTranscript);
+          setInterimTranscript('');
+          
+          // Reset silence timer - auto-send after 2s of silence
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+          }
+          silenceTimerRef.current = setTimeout(() => {
+            // Flag for auto-send and stop listening
+            setVoiceAutoSend(true);
+            recognition.stop();
+          }, 2000);
         }
       };
       
       recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        setInterimTranscript('');
       };
       
       recognition.onend = () => {
         setIsListening(false);
+        setInterimTranscript('');
+        // Clear silence timer
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
       };
       
       recognitionRef.current = recognition;
@@ -494,6 +502,16 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       abortControllerRef.current.abort();
     }
   }
+
+  // Auto-send after voice input stops (with content)
+  useEffect(() => {
+    if (voiceAutoSend && input.trim() && !isLoading) {
+      setVoiceAutoSend(false);
+      handleSend();
+    } else if (voiceAutoSend) {
+      setVoiceAutoSend(false);
+    }
+  }, [voiceAutoSend, input, isLoading]);
   
   // Determine a task name based on the user's request
   function getTaskName(text: string): string {
@@ -612,6 +630,13 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
 
       {/* Input */}
       <div className="flex-shrink-0 p-4 border-t border-border-subtle bg-void-black/30">
+        {/* Voice mode indicator */}
+        {isListening && (
+          <div className="mb-3">
+            <VoiceIndicator isListening={isListening} interimText={interimTranscript || input} />
+          </div>
+        )}
+        
         {/* Attached files preview */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
@@ -682,7 +707,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
               } disabled:opacity-50`}
               title={isListening ? "Stop listening" : "Voice input"}
             >
-              {isListening ? <MicOffIcon className="w-5 h-5" /> : <MicIcon className="w-5 h-5" />}
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </button>
           )}
           
