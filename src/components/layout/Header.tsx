@@ -9,6 +9,7 @@ import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 import { LiveScanIndicator } from '@/components/effects/LiveScanIndicator';
+import { NearPriceTicker } from '@/components/layout/NearPriceTicker';
 import { NAV_ITEMS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -26,8 +27,11 @@ export function Header() {
             <span className="text-xl font-bold text-gradient">Voidspace</span>
           </Link>
 
-          {/* Live indicator */}
-          <LiveScanIndicator />
+          {/* Center section: Live indicator + Price ticker */}
+          <div className="hidden md:flex items-center gap-3">
+            <LiveScanIndicator />
+            <NearPriceTicker />
+          </div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
