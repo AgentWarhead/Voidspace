@@ -6,7 +6,7 @@ interface GlassPanelProps {
   children: ReactNode;
   className?: string;
   glow?: boolean;
-  glowColor?: 'green' | 'purple' | 'blue';
+  glowColor?: 'green' | 'purple' | 'blue' | 'red';
   hover?: boolean;
 }
 
@@ -21,6 +21,7 @@ export function GlassPanel({
     green: 'shadow-near-green/20 hover:shadow-near-green/40',
     purple: 'shadow-purple-500/20 hover:shadow-purple-500/40',
     blue: 'shadow-blue-500/20 hover:shadow-blue-500/40',
+    red: 'shadow-red-500/20 hover:shadow-red-500/40',
   };
 
   return (

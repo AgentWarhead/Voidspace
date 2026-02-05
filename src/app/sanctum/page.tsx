@@ -13,11 +13,14 @@ import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline';
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer } from 'lucide-react';
+import { RoastMode } from './components/RoastMode';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
+type SanctumMode = 'build' | 'roast';
 
 export default function SanctumPage() {
+  const [mode, setMode] = useState<SanctumMode>('build');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -227,6 +230,32 @@ export default function SanctumPage() {
                 <span className="text-near-green">Learn Rust as you build.</span> Deploy in minutes.
               </p>
 
+              {/* Mode Switcher */}
+              <div className="flex items-center justify-center gap-2 mb-12">
+                <button
+                  onClick={() => setMode('build')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                    mode === 'build'
+                      ? 'bg-near-green/20 text-near-green border border-near-green/30 shadow-lg shadow-near-green/20'
+                      : 'bg-void-gray text-text-muted border border-border-subtle hover:border-near-green/30'
+                  }`}
+                >
+                  <Hammer className="w-5 h-5" />
+                  Build Mode
+                </button>
+                <button
+                  onClick={() => setMode('roast')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                    mode === 'roast'
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20'
+                      : 'bg-void-gray text-text-muted border border-border-subtle hover:border-red-500/30'
+                  }`}
+                >
+                  <Flame className="w-5 h-5" />
+                  Roast Mode
+                </button>
+              </div>
+
               {/* Stats */}
               <div className="flex items-center justify-center gap-8 mb-16">
                 <div className="text-center">
@@ -245,13 +274,28 @@ export default function SanctumPage() {
                 </div>
               </div>
 
-              {/* Category Picker */}
-              <CategoryPicker
-                onSelect={handleCategorySelect}
-                customPrompt={customPrompt}
-                setCustomPrompt={setCustomPrompt}
-                onCustomStart={handleCustomStart}
-              />
+              {/* Category Picker (Build Mode) or Start Roast (Roast Mode) */}
+              {mode === 'build' ? (
+                <CategoryPicker
+                  onSelect={handleCategorySelect}
+                  customPrompt={customPrompt}
+                  setCustomPrompt={setCustomPrompt}
+                  onCustomStart={handleCustomStart}
+                />
+              ) : (
+                <div className="text-center">
+                  <p className="text-text-secondary mb-6">
+                    Paste any NEAR smart contract and watch it get torn apart by our security experts.
+                  </p>
+                  <button
+                    onClick={() => setSessionStarted(true)}
+                    className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold text-lg hover:from-red-600 hover:to-orange-600 transition-all shadow-lg shadow-red-500/25"
+                  >
+                    <Flame className="w-6 h-6" />
+                    🔥 Enter the Roast Zone 🔥
+                  </button>
+                </div>
+              )}
             </Container>
           </div>
 
@@ -281,8 +325,41 @@ export default function SanctumPage() {
         </section>
       )}
 
+      {/* Roast Session - full screen */}
+      {sessionStarted && mode === 'roast' && (
+        <div className="relative z-40 flex flex-col bg-void-black h-screen">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-void-black to-orange-900/10" />
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+          </div>
+          
+          <div className="relative z-10 flex flex-1 p-3 overflow-hidden">
+            <div className="w-full max-w-4xl mx-auto">
+              <GlassPanel className="flex-1 flex flex-col h-full overflow-hidden" glow glowColor="red">
+                {/* Header with back button */}
+                <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleBack}
+                      className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors group"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-red-400 transition-colors" />
+                    </button>
+                    <span className="text-text-muted">Back to modes</span>
+                  </div>
+                </div>
+                
+                {/* Roast Mode Component */}
+                <RoastMode />
+              </GlassPanel>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Build Session - full screen immersive mode */}
-      {sessionStarted && (
+      {sessionStarted && mode === 'build' && (
         <div 
           className="relative z-40 flex flex-col bg-void-black h-screen"
         >
