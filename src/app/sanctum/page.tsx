@@ -174,7 +174,7 @@ export default function SanctumPage() {
               {/* Animated badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 mb-8 animate-pulse-glow">
                 <Sparkles className="w-4 h-4 text-near-green" />
-                <span className="text-near-green text-sm font-mono font-medium">FORGE IDE</span>
+                <span className="text-near-green text-sm font-mono font-medium">THE SANCTUM</span>
                 <span className="text-text-muted text-sm">by Voidspace</span>
               </div>
 

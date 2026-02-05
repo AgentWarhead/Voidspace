@@ -41,7 +41,7 @@ export const DIFFICULTY_LABELS = {
 
 export const NAV_ITEMS = [
   { label: 'Command Center', href: '/' },
-  { label: 'Sanctum IDE', href: '/sanctum' },
+  { label: 'Sanctum', href: '/sanctum' },
   { label: 'Voids', href: '/opportunities' },
   { label: 'Categories', href: '/categories' },
   { label: 'Void Lens', href: '/void-lens' },
