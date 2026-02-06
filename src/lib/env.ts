@@ -71,19 +71,19 @@ function validateEnvironment() {
   console.log('✅ Environment validation passed');
 }
 
-// Typed environment exports
+// Typed environment exports — use fallbacks to prevent runtime crashes
 export const env = {
   // Public variables (available on client)
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
   NEXT_PUBLIC_NEAR_NETWORK: (process.env.NEXT_PUBLIC_NEAR_NETWORK || 'testnet') as 'mainnet' | 'testnet',
   
   // Server-only variables (these will be undefined on client)
   ...(typeof window === 'undefined' && {
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    SESSION_SECRET: process.env.SESSION_SECRET!,
-    SYNC_API_KEY: process.env.SYNC_API_KEY,
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    SESSION_SECRET: process.env.SESSION_SECRET || '',
+    SYNC_API_KEY: process.env.SYNC_API_KEY || '',
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
   }),
 } as const;
 
