@@ -631,6 +631,326 @@ impl RecoverableWallet {
 - Data aggregation
 - Analytics dashboards`,
 
+  'meme-tokens': `Focus on fungible tokens and meme coins on NEAR:
+- NEP-141 standard tokens (the NEAR equivalent of ERC-20)
+- Meme coins with custom tokenomics
+- Buy/sell tax mechanisms
+- Auto-burn, reflection, and redistribution
+- Supply management (mint/burn authority)
+
+STARTER TEMPLATE - Meme Coin with Tax & Burn:
+\`\`\`rust
+use near_sdk::{near, AccountId, env, NearToken};
+use near_sdk::json_types::U128;
+use near_sdk::store::LookupMap;
+
+const TOTAL_SUPPLY: u128 = 1_000_000_000 * 10u128.pow(18); // 1 billion tokens
+const TAX_BPS: u128 = 300; // 3% tax on transfers
+const BURN_BPS: u128 = 100; // 1% of tax burned
+
+#[near(contract_state)]
+pub struct MemeCoin {
+    name: String,
+    symbol: String,
+    decimals: u8,
+    total_supply: u128,
+    balances: LookupMap<AccountId, u128>,
+    owner: AccountId,
+    tax_wallet: AccountId,
+    total_burned: u128,
+}
+
+#[near]
+impl MemeCoin {
+    #[init]
+    pub fn new(name: String, symbol: String, tax_wallet: AccountId) -> Self {
+        let owner = env::predecessor_account_id();
+        let mut balances = LookupMap::new(b"b");
+        balances.insert(owner.clone(), TOTAL_SUPPLY);
+        Self {
+            name, symbol, decimals: 18,
+            total_supply: TOTAL_SUPPLY,
+            balances, owner,
+            tax_wallet, total_burned: 0,
+        }
+    }
+
+    pub fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128) {
+        let sender = env::predecessor_account_id();
+        let amount = amount.0;
+        let tax = amount * TAX_BPS / 10000;
+        let burn = tax * BURN_BPS / 10000;
+        let tax_amount = tax - burn;
+        let transfer_amount = amount - tax;
+
+        let sender_bal = self.balances.get(&sender).unwrap_or(&0);
+        assert!(sender_bal >= &amount, "Insufficient balance");
+
+        self.balances.insert(sender.clone(), sender_bal - amount);
+        let receiver_bal = self.balances.get(&receiver_id).unwrap_or(&0);
+        self.balances.insert(receiver_id, receiver_bal + transfer_amount);
+        let tax_bal = self.balances.get(&self.tax_wallet).unwrap_or(&0);
+        self.balances.insert(self.tax_wallet.clone(), tax_bal + tax_amount);
+        self.total_supply -= burn;
+        self.total_burned += burn;
+    }
+
+    pub fn ft_balance_of(&self, account_id: AccountId) -> U128 {
+        U128(*self.balances.get(&account_id).unwrap_or(&0))
+    }
+
+    pub fn ft_total_supply(&self) -> U128 { U128(self.total_supply) }
+    pub fn ft_total_burned(&self) -> U128 { U128(self.total_burned) }
+}
+\`\`\``,
+
+  'staking-rewards': `Focus on staking and reward distribution on NEAR:
+- Token staking with lockup periods
+- Reward calculation and distribution
+- Vesting schedules
+- Flexible vs locked staking
+- Auto-compounding
+
+STARTER TEMPLATE - Staking Pool with Rewards:
+\`\`\`rust
+use near_sdk::{near, AccountId, env, NearToken, Promise};
+use near_sdk::json_types::U128;
+use near_sdk::store::LookupMap;
+
+#[near(serializers = [json, borsh])]
+pub struct StakeInfo {
+    pub amount: u128,
+    pub staked_at: u64,
+    pub reward_debt: u128,
+}
+
+#[near(contract_state)]
+pub struct StakingPool {
+    stakes: LookupMap<AccountId, StakeInfo>,
+    total_staked: u128,
+    reward_per_token: u128,
+    reward_rate: u128, // rewards per second
+    last_update: u64,
+    owner: AccountId,
+}
+
+#[near]
+impl StakingPool {
+    #[init]
+    pub fn new(reward_rate: U128) -> Self {
+        Self {
+            stakes: LookupMap::new(b"s"),
+            total_staked: 0,
+            reward_per_token: 0,
+            reward_rate: reward_rate.0,
+            last_update: env::block_timestamp(),
+            owner: env::predecessor_account_id(),
+        }
+    }
+
+    #[payable]
+    pub fn stake(&mut self) {
+        let amount = env::attached_deposit().as_yoctonear();
+        let sender = env::predecessor_account_id();
+        self.update_rewards();
+        let existing = self.stakes.get(&sender);
+        let new_stake = StakeInfo {
+            amount: existing.map_or(0, |s| s.amount) + amount,
+            staked_at: env::block_timestamp(),
+            reward_debt: self.reward_per_token,
+        };
+        self.stakes.insert(sender, new_stake);
+        self.total_staked += amount;
+    }
+
+    fn update_rewards(&mut self) {
+        let now = env::block_timestamp();
+        if self.total_staked > 0 {
+            let elapsed = (now - self.last_update) as u128;
+            self.reward_per_token += elapsed * self.reward_rate / self.total_staked;
+        }
+        self.last_update = now;
+    }
+}
+\`\`\``,
+
+  'prediction-markets': `Focus on prediction markets and betting on NEAR:
+- Binary outcome markets (yes/no)
+- Multi-outcome prediction markets
+- Oracle-based resolution
+- Automated market makers for predictions
+- Sports betting, event betting
+
+STARTER TEMPLATE - Binary Prediction Market:
+\`\`\`rust
+use near_sdk::{near, AccountId, env, NearToken, Promise};
+use near_sdk::json_types::U128;
+use near_sdk::store::LookupMap;
+
+#[near(serializers = [json, borsh])]
+pub enum Outcome { Yes, No }
+
+#[near(serializers = [json, borsh])]
+pub enum MarketStatus { Open, Resolved(Outcome), Cancelled }
+
+#[near(contract_state)]
+pub struct PredictionMarket {
+    question: String,
+    deadline: u64,
+    status: MarketStatus,
+    yes_pool: u128,
+    no_pool: u128,
+    bets_yes: LookupMap<AccountId, u128>,
+    bets_no: LookupMap<AccountId, u128>,
+    resolver: AccountId,
+}
+
+#[near]
+impl PredictionMarket {
+    #[init]
+    pub fn new(question: String, deadline: u64, resolver: AccountId) -> Self {
+        Self {
+            question, deadline, resolver,
+            status: MarketStatus::Open,
+            yes_pool: 0, no_pool: 0,
+            bets_yes: LookupMap::new(b"y"),
+            bets_no: LookupMap::new(b"n"),
+        }
+    }
+
+    #[payable]
+    pub fn bet(&mut self, outcome: Outcome) {
+        let amount = env::attached_deposit().as_yoctonear();
+        let sender = env::predecessor_account_id();
+        match outcome {
+            Outcome::Yes => {
+                let current = self.bets_yes.get(&sender).unwrap_or(&0);
+                self.bets_yes.insert(sender, current + amount);
+                self.yes_pool += amount;
+            }
+            Outcome::No => {
+                let current = self.bets_no.get(&sender).unwrap_or(&0);
+                self.bets_no.insert(sender, current + amount);
+                self.no_pool += amount;
+            }
+        }
+    }
+}
+\`\`\``,
+
+  'launchpads': `Focus on token launchpad and IDO platforms on NEAR:
+- Fair launch mechanisms
+- Whitelist/allowlist systems
+- Token vesting schedules
+- Fundraising with caps
+- Anti-bot protection
+
+STARTER TEMPLATE - Token Launchpad:
+\`\`\`rust
+use near_sdk::{near, AccountId, env, NearToken, Promise};
+use near_sdk::json_types::U128;
+use near_sdk::store::{LookupMap, UnorderedSet};
+
+#[near(contract_state)]
+pub struct Launchpad {
+    token: AccountId,
+    price: u128, // price per token in yoctoNEAR
+    cap: u128, // max raise
+    total_raised: u128,
+    whitelist: UnorderedSet<AccountId>,
+    contributions: LookupMap<AccountId, u128>,
+    max_per_wallet: u128,
+    start_time: u64,
+    end_time: u64,
+    owner: AccountId,
+}
+
+#[near]
+impl Launchpad {
+    #[init]
+    pub fn new(token: AccountId, price: U128, cap: U128, max_per_wallet: U128, start_time: u64, end_time: u64) -> Self {
+        Self {
+            token, price: price.0, cap: cap.0,
+            total_raised: 0,
+            whitelist: UnorderedSet::new(b"w"),
+            contributions: LookupMap::new(b"c"),
+            max_per_wallet: max_per_wallet.0,
+            start_time, end_time,
+            owner: env::predecessor_account_id(),
+        }
+    }
+
+    #[payable]
+    pub fn contribute(&mut self) {
+        let amount = env::attached_deposit().as_yoctonear();
+        let sender = env::predecessor_account_id();
+        let now = env::block_timestamp();
+        assert!(now >= self.start_time && now <= self.end_time, "Sale not active");
+        assert!(self.whitelist.contains(&sender), "Not whitelisted");
+        let current = self.contributions.get(&sender).unwrap_or(&0);
+        assert!(current + amount <= self.max_per_wallet, "Exceeds max per wallet");
+        assert!(self.total_raised + amount <= self.cap, "Cap reached");
+        self.contributions.insert(sender, current + amount);
+        self.total_raised += amount;
+    }
+}
+\`\`\``,
+
+  'bridges': `Focus on cross-chain bridges and interoperability on NEAR:
+- Wrapped token contracts
+- Bridge relay/validator systems
+- Cross-chain message passing
+- Light client verification
+- Uses Chain Signatures for native cross-chain
+
+STARTER TEMPLATE - Wrapped Token Bridge:
+\`\`\`rust
+use near_sdk::{near, AccountId, env, NearToken};
+use near_sdk::json_types::U128;
+use near_sdk::store::LookupMap;
+
+#[near(contract_state)]
+pub struct WrappedToken {
+    name: String,
+    symbol: String,
+    source_chain: String,
+    source_address: String,
+    balances: LookupMap<AccountId, u128>,
+    total_supply: u128,
+    bridge_authority: AccountId,
+}
+
+#[near]
+impl WrappedToken {
+    #[init]
+    pub fn new(name: String, symbol: String, source_chain: String, source_address: String) -> Self {
+        Self {
+            name, symbol, source_chain, source_address,
+            balances: LookupMap::new(b"b"),
+            total_supply: 0,
+            bridge_authority: env::predecessor_account_id(),
+        }
+    }
+
+    /// Called by bridge authority when tokens are locked on source chain
+    pub fn mint(&mut self, to: AccountId, amount: U128) {
+        assert_eq!(env::predecessor_account_id(), self.bridge_authority, "Unauthorized");
+        let current = self.balances.get(&to).unwrap_or(&0);
+        self.balances.insert(to, current + amount.0);
+        self.total_supply += amount.0;
+    }
+
+    /// Burn to unlock on source chain
+    pub fn burn(&mut self, amount: U128) {
+        let sender = env::predecessor_account_id();
+        let current = self.balances.get(&sender).unwrap_or(&0);
+        assert!(current >= &amount.0, "Insufficient balance");
+        self.balances.insert(sender, current - amount.0);
+        self.total_supply -= amount.0;
+    }
+}
+\`\`\``,
+
   'infrastructure': `Focus on core infrastructure on NEAR:
 - RPC and API proxies
 - Relayer services

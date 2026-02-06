@@ -33,6 +33,11 @@ const CATEGORY_PREFIXES: Record<string, string> = {
   'wallets': 'wallet',
   'data-analytics': 'data',
   'infrastructure': 'infra',
+  'meme-tokens': 'meme',
+  'staking-rewards': 'stake',
+  'prediction-markets': 'predict',
+  'launchpads': 'launch',
+  'bridges': 'bridge',
   'custom': 'sanctum',
 };
 
