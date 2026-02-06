@@ -28,7 +28,6 @@ const CATEGORIES = [
   { name: 'Social & Creator Economy', slug: 'social', description: 'Social platforms, creator tools, content monetization, community', icon: '💬', is_strategic: false, strategic_multiplier: 1.0 },
   { name: 'Developer Tools', slug: 'dev-tools', description: 'SDKs, testing frameworks, debugging tools, smart contract libraries', icon: '🛠️', is_strategic: false, strategic_multiplier: 1.0 },
   { name: 'Wallets & Identity', slug: 'wallets', description: 'Wallet apps, account management, identity, authentication', icon: '👛', is_strategic: false, strategic_multiplier: 1.0 },
-  { name: 'Education & Onboarding', slug: 'education', description: 'Learning platforms, tutorials, bootcamps, developer education', icon: '📚', is_strategic: false, strategic_multiplier: 1.0 },
   { name: 'Infrastructure', slug: 'infrastructure', description: 'RPC nodes, indexers, explorers, validators, storage', icon: '🔧', is_strategic: false, strategic_multiplier: 1.0 },
   { name: 'Chain Signatures', slug: 'chain-signatures', description: 'MPC-powered cross-chain signing, multi-chain wallets, transaction relaying', icon: '✍️', is_strategic: true, strategic_multiplier: 2.0 },
   { name: 'Meme Coins & Tokens', slug: 'meme-tokens', description: 'Fungible tokens, meme coins, tax/burn/reflection mechanics, fair launches', icon: '🪙', is_strategic: false, strategic_multiplier: 1.0 },

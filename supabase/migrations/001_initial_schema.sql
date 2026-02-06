@@ -206,7 +206,6 @@ INSERT INTO categories (name, slug, description, icon, is_strategic, strategic_m
   ('Social & Creator Economy', 'social', 'Social platforms, creator tools, content monetization, community', '💬', false, 1.0),
   ('Developer Tools', 'dev-tools', 'SDKs, testing frameworks, debugging tools, smart contract libraries', '🛠️', false, 1.0),
   ('Wallets & Identity', 'wallets', 'Wallet apps, account management, identity, authentication', '👛', false, 1.0),
-  ('Education & Onboarding', 'education', 'Learning platforms, tutorials, bootcamps, developer education', '📚', false, 1.0),
   ('Infrastructure', 'infrastructure', 'RPC nodes, indexers, explorers, validators, storage', '🔧', false, 1.0),
   -- New categories (matching Sanctum)
   ('Chain Signatures', 'chain-signatures', 'MPC-powered cross-chain signing, multi-chain wallets, transaction relaying', '✍️', true, 2.0),
