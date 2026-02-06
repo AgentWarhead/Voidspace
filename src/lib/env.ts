@@ -36,9 +36,9 @@ function validateEnvironment() {
   const dangerousVars = allEnvVars.filter(varName => 
     varName.startsWith('NEXT_PUBLIC_') && 
     !['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_NEAR_NETWORK'].includes(varName) &&
-    varName.toLowerCase().includes('key') || 
-    varName.toLowerCase().includes('secret') || 
-    varName.toLowerCase().includes('private')
+    (varName.toLowerCase().includes('key') || 
+     varName.toLowerCase().includes('secret') || 
+     varName.toLowerCase().includes('private'))
   );
 
   if (dangerousVars.length > 0) {
@@ -60,8 +60,8 @@ function validateEnvironment() {
     }
     
     if (typeof window === 'undefined') {
-      // Server-side: exit the process
-      process.exit(1);
+      // Server-side: warn but don't crash (process.exit kills Vercel builds)
+      console.error('⚠️ Continuing with missing env vars — some features may not work');
     } else {
       // Client-side: throw error
       throw new Error('Environment configuration error - check server logs');
