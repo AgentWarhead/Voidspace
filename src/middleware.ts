@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRateLimiter } from '@/lib/auth/rate-limit';
+import { logAbuseEvent } from '@/lib/auth/abuse-detection';
 import { randomBytes } from 'crypto';
 
 // Suspicious User-Agent patterns
@@ -41,6 +42,7 @@ export function middleware(request: NextRequest) {
       
       if (bodySize > maxSize) {
         console.log(`🚫 SIZE: Request too large (${bodySize} bytes) for ${pathname} from ${ip}`);
+        logAbuseEvent({ type: 'oversized_request', ip, path: pathname });
         return new NextResponse('Request entity too large', { status: 413 });
       }
     }
@@ -66,6 +68,7 @@ export function middleware(request: NextRequest) {
 
   if (isSuspicious) {
     console.log(`🚫 UA: Blocked suspicious user agent "${userAgent}" from ${ip}`);
+    logAbuseEvent({ type: 'suspicious_ua', ip, path: pathname });
     return new NextResponse('Forbidden', { status: 403 });
   }
 
@@ -73,6 +76,7 @@ export function middleware(request: NextRequest) {
   const rateLimitResult = globalRateLimiter.rateLimit(ip);
   if (!rateLimitResult.allowed) {
     console.log(`🚫 RATE: Global rate limit exceeded for ${ip} on ${pathname} (remaining: ${rateLimitResult.remaining})`);
+    logAbuseEvent({ type: 'rate_limit', ip, path: pathname });
     return new NextResponse('Too Many Requests', { status: 429 });
   }
 
@@ -92,6 +96,7 @@ export function middleware(request: NextRequest) {
         
         if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
           console.log(`🚫 CSRF: Token mismatch for ${pathname} from ${ip}`);
+          logAbuseEvent({ type: 'csrf_failure', ip, path: pathname });
           return new NextResponse('CSRF token invalid', { status: 403 });
         }
       }

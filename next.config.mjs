@@ -44,7 +44,7 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'", // Removed 'unsafe-eval' - modern wallet-selector doesn't need it
+              "script-src 'self' 'unsafe-inline' 'strict-dynamic'", // Removed 'unsafe-eval' - modern wallet-selector doesn't need it
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
