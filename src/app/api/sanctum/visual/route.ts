@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 
 // Nano Banana Pro integration for visual generation
 // Uses Gemini 2.0 Flash for image generation
@@ -14,8 +15,14 @@ const ALLOWED_TYPES = ['architecture', 'flow', 'infographic', 'social'] as const
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    if (!rateLimit(`visual:${ip}`, 3, 60_000).allowed) {
+    // Require authentication
+    const user = getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const rateKey = `visual:${user.userId}`;
+    if (!rateLimit(rateKey, 3, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 

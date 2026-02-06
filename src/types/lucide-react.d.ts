@@ -45,6 +45,7 @@ declare module 'lucide-react' {
   export const Grid3X3: Icon;
   export const Heart: Icon;
   export const HelpCircle: Icon;
+  export const Home: Icon;
   export const Image: Icon;
   export const Info: Icon;
   export const Landmark: Icon;

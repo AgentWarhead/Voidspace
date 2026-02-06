@@ -114,7 +114,7 @@ export function verifySessionToken(token: string): VerifyResult | null {
       shouldRotate
     };
 
-  } catch (error) {
+  } catch {
     // Invalid token format
     return null;
   }

@@ -31,6 +31,20 @@ export function middleware(request: NextRequest) {
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
   const method = request.method;
 
+  // 0. Body Size Limit - Check before any other processing
+  if (pathname.startsWith('/api/')) {
+    const contentLength = request.headers.get('content-length');
+    if (contentLength) {
+      const bodySize = parseInt(contentLength, 10);
+      const maxSize = pathname === '/api/sync' ? 1048576 : 102400; // 1MB for sync, 100KB for others
+      
+      if (bodySize > maxSize) {
+        console.log(`🚫 SIZE: Request too large (${bodySize} bytes) for ${pathname} from ${ip}`);
+        return new NextResponse('Request entity too large', { status: 413 });
+      }
+    }
+  }
+
   // 1. CORS Protection - Only allow same-origin requests for API routes
   if (pathname.startsWith('/api/')) {
     const referer = request.headers.get('referer');

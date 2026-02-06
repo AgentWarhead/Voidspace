@@ -615,14 +615,14 @@ impl RecoverableWallet {
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    
-    // Check authentication and apply appropriate rate limiting
+    // Require authentication
     const user = getAuthenticatedUser(request);
-    const rateKey = user ? `chat:auth:${user.userId}` : `chat:${ip}`;
-    const limit = user ? 10 : 3; // 10/min for authenticated, 3/min for unauthenticated
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
     
-    if (!rateLimit(rateKey, limit, 60_000).allowed) {
+    const rateKey = `chat:auth:${user.userId}`;
+    if (!rateLimit(rateKey, 10, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 

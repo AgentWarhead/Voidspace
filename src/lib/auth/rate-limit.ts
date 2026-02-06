@@ -117,9 +117,6 @@ class RateLimiter {
   }
 }
 
-// Default global rate limiter instance
-const defaultLimiter = new RateLimiter({ limit: 100, windowMs: 60000 });
-
 // Legacy function for backwards compatibility
 export function rateLimit(
   key: string,

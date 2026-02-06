@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       const { receiver_account_id, predecessor_account_id, block_timestamp, actions_agg } = tx;
       
       // Determine the other party in the transaction
-      const otherParty = predecessor_account_id === address ? receiver_account_id : predecessor_account_id;
+      const otherParty: string = predecessor_account_id === address ? receiver_account_id : predecessor_account_id;
       
       if (otherParty === address || otherParty === 'system') continue; // Skip self-transactions and system
       

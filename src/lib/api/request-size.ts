@@ -20,7 +20,7 @@ export class JsonParseError extends Error {
  * @throws RequestSizeError if body exceeds maxBytes
  * @throws JsonParseError if JSON parsing fails
  */
-export async function parseJsonBody<T = any>(
+export async function parseJsonBody<T = unknown>(
   request: Request, 
   maxBytes: number = 102400 // 100KB default
 ): Promise<T> {

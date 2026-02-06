@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Saved GET database error:', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 
     const response = NextResponse.json({ saved: data || [] });
@@ -112,7 +113,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Saved POST database error:', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 
     return NextResponse.json({ saved: data });
@@ -178,7 +180,8 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Saved PATCH database error:', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 
     return NextResponse.json({ saved: data });
@@ -217,7 +220,8 @@ export async function DELETE(request: NextRequest) {
       .eq('opportunity_id', opportunityId);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Saved DELETE database error:', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

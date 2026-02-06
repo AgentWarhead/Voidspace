@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, House, Target, Sparkles, Globe, BookOpen, User } from 'lucide-react';
+import { Menu, X, Search, Home, Target, Sparkles, Globe, BookOpen, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
@@ -43,7 +43,7 @@ export function Header() {
   const getNavIcon = (label: string, isActive: boolean) => {
     const iconClass = `w-4 h-4 ${isActive ? 'text-near-green' : 'text-text-muted'}`;
     switch (label) {
-      case 'Home': return <House className={iconClass} />;
+      case 'Home': return <Home className={iconClass} />;
       case 'Voids': return <Target className={iconClass} />;
       case 'Sanctum': return <Sparkles className={iconClass} />;
       case 'Observatory': return <Globe className={iconClass} />;

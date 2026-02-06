@@ -143,6 +143,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, results });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Sync error:', error);
 
     // Log failure
     try {
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { success: false, error: message },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createSessionToken, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/auth/session';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
-import { PublicKey } from 'near-api-js';
+import * as nacl from 'tweetnacl';
 
 function respondWithSession(user: { id: string }, accountId: string) {
   const token = createSessionToken(user.id, accountId);
@@ -19,38 +19,36 @@ function respondWithSession(user: { id: string }, accountId: string) {
 }
 
 /**
- * Verify NEAR wallet signature for enhanced security.
- * Returns true if signature is valid or if signature verification is not required.
+ * Verify NEAR wallet signature using ed25519 cryptographic verification.
+ * Requires message, signature, and publicKey for proper authentication.
  */
 async function verifyNearSignature(
   accountId: string,
-  message?: string,
-  signature?: string
-): Promise<{ valid: boolean; warning?: string }> {
-  // If signature fields are not present, allow auth but log warning
-  // TODO: Make signature verification mandatory before mainnet launch
-  if (!message || !signature) {
-    console.warn(`[AUTH] No signature provided for account ${accountId} - this will be mandatory in production`);
-    return { valid: true, warning: 'signature_missing' };
-  }
-
+  message: string,
+  signature: string,
+  publicKey: string
+): Promise<{ valid: boolean }> {
   try {
-    // Create message hash
-    const messageBytes = Buffer.from(message, 'utf8');
-    const signatureBytes = Buffer.from(signature, 'base64');
-
-    // For simplicity, we'll assume the signature was created with the account's public key
-    // In a real implementation, you might need to fetch the public key from NEAR network
-    // or require the client to provide it along with proof of ownership
-    
-    // For now, we'll do a basic validation that the signature is well-formed
-    if (signatureBytes.length !== 64) {
+    // Validate expected message format
+    const expectedMessageStart = `Sign in to Voidspace\nAccount: ${accountId}\nNonce:`;
+    if (!message.startsWith(expectedMessageStart)) {
+      console.warn(`[AUTH] Invalid message format for account ${accountId}`);
       return { valid: false };
     }
 
-    // Basic validation passed - in production, implement full signature verification
-    // using the account's public key from NEAR network
-    return { valid: true };
+    // Convert inputs to byte arrays
+    const messageBytes = new TextEncoder().encode(message);
+    const signatureBytes = Buffer.from(signature, 'base64');
+    const publicKeyBytes = Buffer.from(publicKey, 'base64');
+
+    // Verify signature using tweetnacl's ed25519 verification
+    const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+
+    if (!isValid) {
+      console.warn(`[AUTH] Invalid signature for account ${accountId}`);
+    }
+
+    return { valid: isValid };
 
   } catch (error) {
     console.error('[AUTH] Signature verification error:', error);
@@ -65,7 +63,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
-    const { accountId, message, signature } = await request.json();
+    const { accountId, message, signature, publicKey } = await request.json();
 
     if (!accountId || typeof accountId !== 'string' || !isValidNearAccountId(accountId)) {
       return NextResponse.json(
@@ -74,8 +72,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify NEAR wallet signature if provided
-    const signatureCheck = await verifyNearSignature(accountId, message, signature);
+    // Require signature verification - all fields must be provided
+    if (!message || !signature || !publicKey) {
+      return NextResponse.json(
+        { error: 'message, signature, and publicKey are required for authentication' },
+        { status: 401 }
+      );
+    }
+
+    // Verify NEAR wallet signature
+    const signatureCheck = await verifyNearSignature(accountId, message, signature, publicKey);
     if (!signatureCheck.valid) {
       return NextResponse.json(
         { error: 'Invalid signature' },

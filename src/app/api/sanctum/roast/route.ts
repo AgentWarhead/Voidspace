@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { rateLimit } from '@/lib/auth/rate-limit';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -65,8 +66,14 @@ Be thorough. Be harsh. But be helpful. Every roast should teach something.`;
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    if (!rateLimit(`roast:${ip}`, 5, 60_000).allowed) {
+    // Require authentication
+    const user = getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const rateKey = `roast:${user.userId}`;
+    if (!rateLimit(rateKey, 5, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 

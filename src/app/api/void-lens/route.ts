@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 
 interface WalletData {
   account: string;
@@ -209,8 +210,14 @@ function generateBasicAnalysis(walletData: WalletData): ReputationAnalysis {
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    if (!rateLimit(`void-lens:${ip}`, 10, 60_000).allowed) {
+    // Require authentication
+    const user = getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const rateKey = `void-lens:${user.userId}`;
+    if (!rateLimit(rateKey, 10, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 

@@ -9,6 +9,7 @@ interface VoidEmptyStateProps {
   icon?: LucideIcon;
   title: string;
   description?: string;
+  action?: React.ReactNode;
   actionLabel?: string;
   actionHref?: string;
   actionOnClick?: () => void;
@@ -18,6 +19,7 @@ export function VoidEmptyState({
   icon: Icon = Circle, 
   title, 
   description, 
+  action,
   actionLabel,
   actionHref,
   actionOnClick
@@ -75,14 +77,14 @@ export function VoidEmptyState({
         </motion.p>
       )}
 
-      {(ActionLink || ActionButton) && (
+      {(action || ActionLink || ActionButton) && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
           className="mt-4"
         >
-          {actionHref ? ActionLink : ActionButton}
+          {action || (actionHref ? ActionLink : ActionButton)}
         </motion.div>
       )}
     </div>
