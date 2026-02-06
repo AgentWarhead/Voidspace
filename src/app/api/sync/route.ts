@@ -30,6 +30,12 @@ const CATEGORIES = [
   { name: 'Wallets & Identity', slug: 'wallets', description: 'Wallet apps, account management, identity, authentication', icon: '👛', is_strategic: false, strategic_multiplier: 1.0 },
   { name: 'Education & Onboarding', slug: 'education', description: 'Learning platforms, tutorials, bootcamps, developer education', icon: '📚', is_strategic: false, strategic_multiplier: 1.0 },
   { name: 'Infrastructure', slug: 'infrastructure', description: 'RPC nodes, indexers, explorers, validators, storage', icon: '🔧', is_strategic: false, strategic_multiplier: 1.0 },
+  { name: 'Chain Signatures', slug: 'chain-signatures', description: 'MPC-powered cross-chain signing, multi-chain wallets, transaction relaying', icon: '✍️', is_strategic: true, strategic_multiplier: 2.0 },
+  { name: 'Meme Coins & Tokens', slug: 'meme-tokens', description: 'Fungible tokens, meme coins, tax/burn/reflection mechanics, fair launches', icon: '🪙', is_strategic: false, strategic_multiplier: 1.0 },
+  { name: 'Staking & Rewards', slug: 'staking-rewards', description: 'Staking pools, lockup contracts, reward distribution, yield strategies', icon: '💎', is_strategic: false, strategic_multiplier: 1.0 },
+  { name: 'Prediction Markets', slug: 'prediction-markets', description: 'Binary betting, outcome markets, oracle-based resolution, prediction pools', icon: '🎰', is_strategic: false, strategic_multiplier: 1.0 },
+  { name: 'Launchpads & IDOs', slug: 'launchpads', description: 'Token sale platforms, IDO infrastructure, whitelist management, vesting', icon: '📱', is_strategic: false, strategic_multiplier: 1.0 },
+  { name: 'Bridges & Cross-Chain', slug: 'bridges', description: 'Cross-chain bridges, wrapped tokens, message relaying, interoperability', icon: '🌉', is_strategic: false, strategic_multiplier: 1.0 },
 ];
 
 export async function POST(request: Request) {

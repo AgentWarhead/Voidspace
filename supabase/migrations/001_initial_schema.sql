@@ -207,7 +207,14 @@ INSERT INTO categories (name, slug, description, icon, is_strategic, strategic_m
   ('Developer Tools', 'dev-tools', 'SDKs, testing frameworks, debugging tools, smart contract libraries', '🛠️', false, 1.0),
   ('Wallets & Identity', 'wallets', 'Wallet apps, account management, identity, authentication', '👛', false, 1.0),
   ('Education & Onboarding', 'education', 'Learning platforms, tutorials, bootcamps, developer education', '📚', false, 1.0),
-  ('Infrastructure', 'infrastructure', 'RPC nodes, indexers, explorers, validators, storage', '🔧', false, 1.0)
+  ('Infrastructure', 'infrastructure', 'RPC nodes, indexers, explorers, validators, storage', '🔧', false, 1.0),
+  -- New categories (matching Sanctum)
+  ('Chain Signatures', 'chain-signatures', 'MPC-powered cross-chain signing, multi-chain wallets, transaction relaying', '✍️', true, 2.0),
+  ('Meme Coins & Tokens', 'meme-tokens', 'Fungible tokens, meme coins, tax/burn/reflection mechanics, fair launches', '🪙', false, 1.0),
+  ('Staking & Rewards', 'staking-rewards', 'Staking pools, lockup contracts, reward distribution, yield strategies', '💎', false, 1.0),
+  ('Prediction Markets', 'prediction-markets', 'Binary betting, outcome markets, oracle-based resolution, prediction pools', '🎰', false, 1.0),
+  ('Launchpads & IDOs', 'launchpads', 'Token sale platforms, IDO infrastructure, whitelist management, vesting', '📱', false, 1.0),
+  ('Bridges & Cross-Chain', 'bridges', 'Cross-chain bridges, wrapped tokens, message relaying, interoperability', '🌉', false, 1.0)
 ON CONFLICT (slug) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,
