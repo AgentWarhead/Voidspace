@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/auth/rate-limit';
+import { isValidNearAccountId } from '@/lib/auth/validate';
 
 interface Transaction {
   transaction_hash: string;
@@ -81,11 +83,20 @@ function calculateWeight(txCount: number, totalValue: number): number {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`constellation:${ip}`, 10, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { address } = body;
 
-    if (!address) {
-      return NextResponse.json({ error: 'Address is required' }, { status: 400 });
+    if (!address || typeof address !== 'string') {
+      return NextResponse.json({ error: 'Address is required and must be a string' }, { status: 400 });
+    }
+
+    if (!isValidNearAccountId(address)) {
+      return NextResponse.json({ error: 'Invalid NEAR account ID format' }, { status: 400 });
     }
 
     const apiKey = process.env.NEARBLOCKS_API_KEY;

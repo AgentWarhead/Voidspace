@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { LogOut, User, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { useWallet } from '@/hooks/useWallet';
 import { truncateAddress } from '@/lib/utils';
@@ -10,7 +11,36 @@ import { truncateAddress } from '@/lib/utils';
 export function ConnectWalletButton() {
   const { accountId, isConnected, isLoading, openModal, signOut } = useWallet();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Check if tooltip should be shown on mount
+  useEffect(() => {
+    const tooltipShown = localStorage.getItem('voidspace_wallet_tooltip_shown');
+    if (!tooltipShown && !isConnected) {
+      setShowTooltip(true);
+      // Auto-dismiss after 8 seconds
+      tooltipTimeoutRef.current = setTimeout(() => {
+        handleTooltipDismiss();
+      }, 8000);
+    }
+    
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, [isConnected]);
+
+  // Handle tooltip dismiss
+  const handleTooltipDismiss = () => {
+    setShowTooltip(false);
+    localStorage.setItem('voidspace_wallet_tooltip_shown', 'true');
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -18,10 +48,14 @@ export function ConnectWalletButton() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
+      // Dismiss tooltip on any click
+      if (showTooltip) {
+        handleTooltipDismiss();
+      }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+  }, [showTooltip]);
 
   if (isLoading) {
     return (
@@ -33,9 +67,32 @@ export function ConnectWalletButton() {
 
   if (!isConnected || !accountId) {
     return (
-      <Button variant="primary" size="sm" onClick={openModal}>
-        Connect Wallet
-      </Button>
+      <div className="relative">
+        <Button variant="primary" size="sm" onClick={openModal}>
+          Connect Wallet
+        </Button>
+        
+        {/* Tooltip */}
+        <AnimatePresence>
+          {showTooltip && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-64 z-50"
+            >
+              <div className="bg-surface/95 backdrop-blur-sm border border-near-green/30 rounded-lg p-3 shadow-lg">
+                <div className="text-sm text-text-secondary leading-relaxed">
+                  Connect your NEAR wallet to save opportunities, track builds, and get personalized recommendations
+                </div>
+                {/* Arrow pointing up */}
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-surface/95 border-l border-t border-near-green/30 rotate-45" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   }
 

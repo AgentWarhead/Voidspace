@@ -51,17 +51,23 @@ export function Footer() {
 
           {/* Quick links */}
           <div className="flex items-center justify-center gap-4">
+            <Link href="/" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Home
+            </Link>
             <Link href="/opportunities" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Voids
             </Link>
-            <Link href="/categories" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
-              Categories
+            <Link href="/sanctum" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Sanctum
+            </Link>
+            <Link href="/observatory" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Observatory
             </Link>
             <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Learn
             </Link>
-            <Link href="/profile" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
-              Profile
+            <Link href="/ecosystem" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Ecosystem
             </Link>
           </div>
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/auth/rate-limit';
 
 // Nano Banana Pro integration for visual generation
 // Uses Gemini 2.0 Flash for image generation
@@ -9,13 +10,34 @@ interface VisualRequest {
   projectContext?: string;
 }
 
+const ALLOWED_TYPES = ['architecture', 'flow', 'infographic', 'social'] as const;
+
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`visual:${ip}`, 3, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { prompt, type, projectContext }: VisualRequest = await request.json();
 
-    if (!prompt) {
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Missing prompt' },
+        { error: 'Prompt must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    if (prompt.length > 1000) {
+      return NextResponse.json(
+        { error: 'Prompt too long (max 1000 characters)' },
+        { status: 400 }
+      );
+    }
+
+    if (!type || !ALLOWED_TYPES.includes(type)) {
+      return NextResponse.json(
+        { error: 'Type must be one of: architecture, flow, infographic, social' },
         { status: 400 }
       );
     }

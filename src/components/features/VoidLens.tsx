@@ -158,6 +158,25 @@ export function VoidLens() {
               onKeyPress={(e) => e.key === 'Enter' && handleAnalyze()}
             />
           </div>
+
+          {/* Example Wallets */}
+          <div className="space-y-2">
+            <p className="text-xs text-text-muted">Try an example:</p>
+            <div className="flex flex-wrap gap-2">
+              {['aurora.near', 'ref-finance.near', 'app.nearcrowd.near', 'v2.ref-finance.near'].map((example) => (
+                <button
+                  key={example}
+                  onClick={() => {
+                    setAddress(example);
+                    setTimeout(() => handleAnalyze(), 100);
+                  }}
+                  className="px-2.5 py-1 text-xs font-mono rounded-md bg-surface border border-border text-text-secondary hover:border-near-green/30 hover:text-text-primary transition-colors"
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
           
           <Button 
             onClick={handleAnalyze}

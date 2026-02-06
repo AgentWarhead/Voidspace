@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { OpportunityCard } from '@/components/opportunities/OpportunityCard';
+import { VoidEmptyState } from '@/components/ui/VoidEmptyState';
 import type { Opportunity } from '@/types';
 
 interface OpportunityListProps {
@@ -9,6 +10,7 @@ interface OpportunityListProps {
   page: number;
   pageSize: number;
   baseUrl?: string;
+  onClearFilters?: () => void;
 }
 
 export function OpportunityList({
@@ -17,14 +19,19 @@ export function OpportunityList({
   page,
   pageSize,
   baseUrl = '/opportunities',
+  onClearFilters,
 }: OpportunityListProps) {
   const totalPages = Math.ceil(total / pageSize);
 
   if (opportunities.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-text-muted">No opportunities found matching your filters.</p>
-      </div>
+      <VoidEmptyState
+        icon={Filter}
+        title="No voids match your filters"
+        description="Try adjusting your filters or search terms"
+        actionLabel={onClearFilters ? "Clear Filters" : undefined}
+        actionOnClick={onClearFilters}
+      />
     );
   }
 

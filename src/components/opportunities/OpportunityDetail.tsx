@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock } from 'lucide-react';
+import { ArrowLeft, ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock, Sparkles } from 'lucide-react';
 import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
@@ -98,9 +98,61 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         </div>
       </div>
 
+      {/* Generate My Build Plan CTA */}
+      <ScrollReveal>
+        <div className="text-center">
+          <motion.button
+            onClick={() => {
+              const briefSection = document.querySelector('[data-brief-section]');
+              if (briefSection) {
+                briefSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-near-green to-near-green/80 rounded-xl text-background font-bold text-lg shadow-lg shadow-near-green/25 hover:shadow-near-green/40 transition-all duration-300"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            animate={{
+              boxShadow: [
+                "0 10px 25px rgba(0, 236, 151, 0.25)",
+                "0 10px 35px rgba(0, 236, 151, 0.35)",
+                "0 10px 25px rgba(0, 236, 151, 0.25)"
+              ]
+            }}
+            transition={{
+              boxShadow: {
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut"
+              }
+            }}
+          >
+            <Sparkles className="w-6 h-6" />
+            Generate My Build Plan
+            <motion.div
+              className="absolute inset-0 bg-white/20 rounded-xl"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: [0, 0.3, 0], scale: [0.8, 1.1, 1.2] }}
+              transition={{
+                repeat: Infinity,
+                duration: 3,
+                ease: "easeInOut"
+              }}
+            />
+          </motion.button>
+          <p className="text-xs text-text-muted mt-3 flex items-center justify-center gap-1">
+            <span className="w-1 h-1 bg-near-green rounded-full animate-pulse"></span>
+            AI-powered
+            <span className="text-text-muted/50">•</span>
+            Takes ~60 seconds
+            <span className="text-text-muted/50">•</span>
+            Personalized to this void
+          </p>
+        </div>
+      </ScrollReveal>
+
       {/* Void Brief — PROMOTED to 2nd position */}
       <ScrollReveal>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" data-brief-section>
           <SectionHeader title="Void Brief" badge="POWERED BY CLAUDE AI" />
           <InfoTooltip term={HELP_CONTENT.aiBrief.term}>
             <p>{HELP_CONTENT.aiBrief.description}</p>

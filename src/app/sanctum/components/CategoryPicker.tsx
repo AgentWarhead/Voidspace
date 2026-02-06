@@ -9,8 +9,8 @@ interface CategoryPickerProps {
   onCustomStart: () => void;
 }
 
-// NEAR Strategic Priority Categories (what the NEAR team is pushing)
-const NEAR_PRIORITIES = [
+// Popular categories - beginner-friendly and commonly used
+const POPULAR_CATEGORIES = [
   {
     slug: 'ai-agents',
     name: 'AI & Shade Agents',
@@ -21,13 +21,28 @@ const NEAR_PRIORITIES = [
     borderColor: 'border-purple-500/30',
   },
   {
-    slug: 'intents',
-    name: 'Intents & Chain Abstraction',
-    icon: '🔗',
-    description: 'Cross-chain operations, define outcomes',
-    tech: ['NEAR Intents', 'Chain Signatures', 'Omnibridge'],
-    color: 'from-cyan-500/20 to-blue-500/20',
-    borderColor: 'border-cyan-500/30',
+    slug: 'defi',
+    name: 'DeFi',
+    icon: '💰',
+    description: 'Lending, yield, stablecoins',
+    color: 'from-green-500/20 to-emerald-500/20',
+    borderColor: 'border-green-500/30',
+  },
+  {
+    slug: 'nfts',
+    name: 'NFTs & Digital Art',
+    icon: '🎨',
+    description: 'Collections, marketplaces, royalties',
+    color: 'from-pink-500/20 to-rose-500/20',
+    borderColor: 'border-pink-500/30',
+  },
+  {
+    slug: 'gaming',
+    name: 'Gaming & Metaverse',
+    icon: '🎮',
+    description: 'GameFi, play-to-earn, in-game assets',
+    color: 'from-blue-500/20 to-indigo-500/20',
+    borderColor: 'border-blue-500/30',
   },
   {
     slug: 'chain-signatures',
@@ -37,6 +52,27 @@ const NEAR_PRIORITIES = [
     tech: ['MPC', 'Cross-chain', 'Multi-chain wallets'],
     color: 'from-emerald-500/20 to-teal-500/20',
     borderColor: 'border-emerald-500/30',
+  },
+  {
+    slug: 'social',
+    name: 'Social & Creator',
+    icon: '💬',
+    description: 'Tipping, gated content, communities',
+    color: 'from-cyan-500/20 to-blue-500/20',
+    borderColor: 'border-cyan-500/30',
+  },
+];
+
+// Advanced categories - for experienced developers
+const ADVANCED_CATEGORIES = [
+  {
+    slug: 'intents',
+    name: 'Intents & Chain Abstraction',
+    icon: '🔗',
+    description: 'Cross-chain operations, define outcomes',
+    tech: ['NEAR Intents', 'Chain Signatures', 'Omnibridge'],
+    color: 'from-cyan-500/20 to-blue-500/20',
+    borderColor: 'border-cyan-500/30',
   },
   {
     slug: 'privacy',
@@ -56,100 +92,133 @@ const NEAR_PRIORITIES = [
     color: 'from-amber-500/20 to-orange-500/20',
     borderColor: 'border-amber-500/30',
   },
-];
-
-// Standard Voidspace Categories
-const STANDARD_CATEGORIES = [
-  { slug: 'defi', name: 'DeFi', icon: '💰', description: 'Lending, yield, stablecoins' },
-  { slug: 'dex-trading', name: 'DEX & Trading', icon: '📈', description: 'AMMs, order books, trading bots' },
-  { slug: 'gaming', name: 'Gaming & Metaverse', icon: '🎮', description: 'GameFi, play-to-earn, in-game assets' },
-  { slug: 'nfts', name: 'NFTs & Digital Art', icon: '🎨', description: 'Collections, marketplaces, royalties' },
-  { slug: 'daos', name: 'DAOs & Governance', icon: '🏛️', description: 'Voting, treasury, multi-sig' },
-  { slug: 'social', name: 'Social & Creator', icon: '💬', description: 'Tipping, gated content, communities' },
-  { slug: 'dev-tools', name: 'Developer Tools', icon: '🛠️', description: 'SDKs, testing, libraries' },
-  { slug: 'wallets', name: 'Wallets & Identity', icon: '👛', description: 'Account management, auth' },
-  { slug: 'data-analytics', name: 'Data & Analytics', icon: '📊', description: 'Indexers, dashboards, oracles' },
-  { slug: 'infrastructure', name: 'Infrastructure', icon: '🔧', description: 'RPC, validators, storage' },
+  {
+    slug: 'dex-trading',
+    name: 'DEX & Trading',
+    icon: '📈',
+    description: 'AMMs, order books, trading bots',
+    color: 'from-red-500/20 to-orange-500/20',
+    borderColor: 'border-red-500/30',
+  },
+  {
+    slug: 'daos',
+    name: 'DAOs & Governance',
+    icon: '🏛️',
+    description: 'Voting, treasury, multi-sig',
+    color: 'from-purple-500/20 to-violet-500/20',
+    borderColor: 'border-purple-500/30',
+  },
+  {
+    slug: 'dev-tools',
+    name: 'Developer Tools',
+    icon: '🛠️',
+    description: 'SDKs, testing, libraries',
+    color: 'from-gray-500/20 to-slate-500/20',
+    borderColor: 'border-gray-500/30',
+  },
+  {
+    slug: 'wallets',
+    name: 'Wallets & Identity',
+    icon: '👛',
+    description: 'Account management, auth',
+    color: 'from-yellow-500/20 to-amber-500/20',
+    borderColor: 'border-yellow-500/30',
+  },
+  {
+    slug: 'data-analytics',
+    name: 'Data & Analytics',
+    icon: '📊',
+    description: 'Indexers, dashboards, oracles',
+    color: 'from-indigo-500/20 to-purple-500/20',
+    borderColor: 'border-indigo-500/30',
+  },
+  {
+    slug: 'infrastructure',
+    name: 'Infrastructure',
+    icon: '🔧',
+    description: 'RPC, validators, storage',
+    color: 'from-neutral-500/20 to-stone-500/20',
+    borderColor: 'border-neutral-500/30',
+  },
 ];
 
 export function CategoryPicker({ onSelect, customPrompt, setCustomPrompt, onCustomStart }: CategoryPickerProps) {
-  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const renderCategoryCard = (cat: {
+    slug: string;
+    name: string;
+    icon: string;
+    description: string;
+    tech?: string[];
+    color: string;
+    borderColor: string;
+  }) => (
+    <button
+      key={cat.slug}
+      onClick={() => onSelect(cat.slug)}
+      className={`group relative p-4 rounded-xl border ${cat.borderColor} bg-gradient-to-br ${cat.color} hover:scale-[1.02] transition-all text-left`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-2xl">{cat.icon}</span>
+        <div className="flex-1">
+          <h4 className="font-semibold text-text-primary group-hover:text-near-green transition-colors">
+            {cat.name}
+          </h4>
+          <p className="text-sm text-text-muted mt-1">{cat.description}</p>
+          {cat.tech && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {cat.tech.map((t) => (
+                <span key={t} className="px-2 py-0.5 text-xs bg-void-black/30 rounded text-text-secondary">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-near-green text-sm">Build →</span>
+      </div>
+    </button>
+  );
 
   return (
     <div className="max-w-5xl mx-auto">
-      {/* NEAR Priorities Section */}
+      {/* Popular Categories */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-near-green">⭐</span>
-          <h3 className="text-lg font-semibold text-text-primary">NEAR Superpowers</h3>
-          <span className="px-2 py-0.5 text-xs bg-near-green/20 text-near-green rounded-full">Strategic Priority</span>
+        <div className="mb-4">
+          <h3 className="text-xs font-mono text-text-muted uppercase tracking-wider mb-3">POPULAR</h3>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {NEAR_PRIORITIES.map((cat) => (
-            <button
-              key={cat.slug}
-              onClick={() => onSelect(cat.slug)}
-              className={`group relative p-4 rounded-xl border ${cat.borderColor} bg-gradient-to-br ${cat.color} hover:scale-[1.02] transition-all text-left`}
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">{cat.icon}</span>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-text-primary group-hover:text-near-green transition-colors">
-                    {cat.name}
-                  </h4>
-                  <p className="text-sm text-text-muted mt-1">{cat.description}</p>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {cat.tech.map((t) => (
-                      <span key={t} className="px-2 py-0.5 text-xs bg-void-black/30 rounded text-text-secondary">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-near-green text-sm">Build →</span>
-              </div>
-            </button>
-          ))}
+          {POPULAR_CATEGORIES.map((cat) => renderCategoryCard(cat))}
         </div>
       </div>
 
-      {/* Standard Categories */}
+      {/* Advanced Categories Toggle */}
       <div className="mb-8">
         <button
-          onClick={() => setShowAllCategories(!showAllCategories)}
+          onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center gap-2 mb-4 text-text-secondary hover:text-text-primary transition-colors"
         >
-          <span>📦</span>
-          <h3 className="text-lg font-semibold">More Categories</h3>
-          <span className="text-sm">({STANDARD_CATEGORIES.length})</span>
-          <span className={`transition-transform ${showAllCategories ? 'rotate-180' : ''}`}>▼</span>
+          <span className="text-xs font-mono text-text-muted uppercase tracking-wider">ADVANCED</span>
+          <span className="text-sm text-text-muted">({ADVANCED_CATEGORIES.length} categories)</span>
+          <span className={`text-text-muted transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>
+            {showAdvanced ? '▲' : '▼'}
+          </span>
         </button>
         
-        {showAllCategories && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {STANDARD_CATEGORIES.map((cat) => (
-              <button
-                key={cat.slug}
-                onClick={() => onSelect(cat.slug)}
-                className="group p-3 rounded-lg border border-border-subtle bg-void-gray/30 hover:bg-void-gray/50 hover:border-near-green/30 transition-all text-left"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{cat.icon}</span>
-                  <span className="font-medium text-text-primary text-sm group-hover:text-near-green transition-colors">
-                    {cat.name}
-                  </span>
-                </div>
-                <p className="text-xs text-text-muted">{cat.description}</p>
-              </button>
-            ))}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+          showAdvanced ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+            {ADVANCED_CATEGORIES.map((cat) => renderCategoryCard(cat))}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Custom Project */}
+      {/* Custom Project - Always Visible */}
       <div className="border-t border-border-subtle pt-8">
         <div className="flex items-center gap-2 mb-4">
           <span>✨</span>

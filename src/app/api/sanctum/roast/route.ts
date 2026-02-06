@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { rateLimit } from '@/lib/auth/rate-limit';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -64,11 +65,22 @@ Be thorough. Be harsh. But be helpful. Every roast should teach something.`;
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`roast:${ip}`, 5, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    // Check request body size (max 100KB)
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 100 * 1024) {
+      return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+    }
+
     const { code } = await request.json();
 
-    if (!code || typeof code !== 'string') {
+    if (!code || typeof code !== 'string' || code.trim().length === 0) {
       return NextResponse.json(
-        { error: 'No code provided' },
+        { error: 'Code must be a non-empty string' },
         { status: 400 }
       );
     }

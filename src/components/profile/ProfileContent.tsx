@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { User, Search as SearchIcon, Filter } from 'lucide-react';
+import { User, Search as SearchIcon, Filter, Bookmark } from 'lucide-react';
 import { Card, Button, VoidEmptyState } from '@/components/ui';
 import { PageTransition } from '@/components/effects/PageTransition';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -266,17 +266,14 @@ export function ProfileContent() {
         ) : (
           <Card variant="glass" padding="lg">
             <VoidEmptyState
-              icon={SearchIcon}
-              title={filterStatus === 'all' ? "No missions yet" : `No ${filterStatus} missions`}
+              icon={filterStatus === 'all' ? Bookmark : SearchIcon}
+              title={filterStatus === 'all' ? "No saved opportunities yet" : `No ${filterStatus} missions`}
               description={filterStatus === 'all' 
-                ? "Start your journey by exploring voids and saving ones that interest you."
+                ? "Browse voids and save the ones that interest you"
                 : "Change the filter to see other missions, or explore new voids."
               }
-              action={
-                <Link href="/opportunities">
-                  <Button variant="primary">Explore Voids</Button>
-                </Link>
-              }
+              actionLabel="Explore Voids"
+              actionHref="/opportunities"
             />
           </Card>
         )}

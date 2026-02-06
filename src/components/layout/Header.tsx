@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, House, Target, Sparkles, Globe, BookOpen, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
@@ -12,11 +12,13 @@ import { LiveScanIndicator } from '@/components/effects/LiveScanIndicator';
 import { NearPriceTicker } from '@/components/layout/NearPriceTicker';
 import { NAV_ITEMS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { useWallet } from '@/hooks/useWallet';
 
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isImmersive, setIsImmersive] = useState(false);
+  const { isConnected } = useWallet();
 
   // Listen for immersive mode changes
   useEffect(() => {
@@ -37,6 +39,26 @@ export function Header() {
   // Hide header in immersive mode
   if (isImmersive) return null;
 
+  // Get icon for nav item
+  const getNavIcon = (label: string, isActive: boolean) => {
+    const iconClass = `w-4 h-4 ${isActive ? 'text-near-green' : 'text-text-muted'}`;
+    switch (label) {
+      case 'Home': return <House className={iconClass} />;
+      case 'Voids': return <Target className={iconClass} />;
+      case 'Sanctum': return <Sparkles className={iconClass} />;
+      case 'Observatory': return <Globe className={iconClass} />;
+      case 'Learn': return <BookOpen className={iconClass} />;
+      case 'Profile': return <User className={iconClass} />;
+      default: return null;
+    }
+  };
+
+  // Create nav items with conditional Profile
+  const navItems = [...NAV_ITEMS] as Array<{ label: string; href: string }>;
+  if (isConnected) {
+    navItems.push({ label: 'Profile', href: '/profile' });
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <Container>
@@ -55,7 +77,7 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -114,21 +136,25 @@ export function Header() {
               className="md:hidden pb-4 border-t border-border mt-2 pt-4"
             >
               <nav className="flex flex-col gap-1">
-                {NAV_ITEMS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'px-3 py-2 text-sm rounded-lg transition-colors',
-                      pathname === item.href
-                        ? 'text-near-green bg-near-green/10'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors',
+                        isActive
+                          ? 'text-near-green bg-near-green/10'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                      )}
+                    >
+                      {getNavIcon(item.label, isActive)}
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </nav>
               <div className="mt-3 px-3">
                 <ConnectWalletButton />

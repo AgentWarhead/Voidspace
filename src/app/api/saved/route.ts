@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { getAuthenticatedUser, rotateSessionIfNeeded } from '@/lib/auth/verify-request';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidUUID } from '@/lib/auth/validate';
 import { canSaveOpportunity } from '@/lib/tiers';
@@ -30,7 +30,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ saved: data || [] });
+    const response = NextResponse.json({ saved: data || [] });
+    
+    // Handle token rotation if needed
+    rotateSessionIfNeeded(response, auth.userId, auth.accountId, auth.shouldRotate);
+    
+    return response;
   } catch (err) {
     console.error('Saved GET error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

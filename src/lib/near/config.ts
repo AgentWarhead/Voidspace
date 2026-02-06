@@ -1,4 +1,6 @@
-export const NEAR_NETWORK = (process.env.NEXT_PUBLIC_NEAR_NETWORK || 'testnet') as 'mainnet' | 'testnet';
+import { env } from '@/lib/env';
+
+export const NEAR_NETWORK = env.NEXT_PUBLIC_NEAR_NETWORK;
 
 export const NEAR_CONFIG = {
   mainnet: {

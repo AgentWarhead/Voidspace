@@ -393,10 +393,29 @@ export function PulseStreams() {
           {transactions.length === 0 ? (
             <div className="p-12 text-center">
               <Activity className="w-12 h-12 text-text-muted mx-auto mb-4" />
-              <p className="text-text-secondary mb-2">No transactions found</p>
-              <p className="text-text-muted text-sm">
-                {isStreaming ? 'Waiting for new transactions...' : 'Start streaming to see real-time data'}
+              <p className="text-text-secondary mb-2">
+                {isStreaming ? 'Waiting for new transactions...' : 'Hit the Play button to start streaming live NEAR transactions'}
               </p>
+              {!isStreaming && (
+                <div className="mt-6 space-y-3">
+                  <p className="text-text-muted text-sm">Try filtering by:</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['Transfer', 'Function Call', 'Staking'].map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => {
+                          const txType = filter.toLowerCase().replace(' ', '');
+                          setTempFilters(prev => ({ ...prev, txType }));
+                          setFilters(prev => ({ ...prev, txType }));
+                        }}
+                        className="px-2.5 py-1 text-xs rounded-md bg-surface border border-border text-text-secondary hover:border-near-green/30 hover:text-text-primary transition-colors"
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-1">

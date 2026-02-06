@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { Circle } from 'lucide-react';
 
@@ -8,10 +9,37 @@ interface VoidEmptyStateProps {
   icon?: LucideIcon;
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  actionLabel?: string;
+  actionHref?: string;
+  actionOnClick?: () => void;
 }
 
-export function VoidEmptyState({ icon: Icon = Circle, title, description, action }: VoidEmptyStateProps) {
+export function VoidEmptyState({ 
+  icon: Icon = Circle, 
+  title, 
+  description, 
+  actionLabel,
+  actionHref,
+  actionOnClick
+}: VoidEmptyStateProps) {
+  const ActionButton = actionLabel ? (
+    <button
+      onClick={actionOnClick}
+      className="px-4 py-2 bg-near-green hover:bg-near-green/80 text-white font-medium rounded-lg transition-colors"
+    >
+      {actionLabel}
+    </button>
+  ) : null;
+
+  const ActionLink = actionLabel && actionHref ? (
+    <Link
+      href={actionHref}
+      className="px-4 py-2 bg-near-green hover:bg-near-green/80 text-white font-medium rounded-lg transition-colors"
+    >
+      {actionLabel}
+    </Link>
+  ) : null;
+
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <motion.div
@@ -23,7 +51,7 @@ export function VoidEmptyState({ icon: Icon = Circle, title, description, action
         {/* Ambient glow behind icon */}
         <div className="absolute inset-0 blur-2xl bg-near-green/10 rounded-full scale-150" />
         <div className="relative p-4 rounded-full border border-border bg-surface/50">
-          <Icon className="w-8 h-8 text-text-muted" />
+          <Icon className="w-16 h-16 text-text-muted" />
         </div>
       </motion.div>
 
@@ -47,14 +75,14 @@ export function VoidEmptyState({ icon: Icon = Circle, title, description, action
         </motion.p>
       )}
 
-      {action && (
+      {(ActionLink || ActionButton) && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
           className="mt-4"
         >
-          {action}
+          {actionHref ? ActionLink : ActionButton}
         </motion.div>
       )}
     </div>

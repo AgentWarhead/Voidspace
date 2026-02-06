@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/auth/rate-limit';
 
 // NOTE: Full deployment requires:
 // 1. Rust/cargo installed on server
@@ -37,11 +38,24 @@ const CATEGORY_PREFIXES: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`deploy:${ip}`, 2, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { code, projectName, category, network = 'testnet' }: DeployRequest = await request.json();
 
-    if (!code) {
+    if (!code || typeof code !== 'string' || code.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Missing contract code' },
+        { error: 'Code must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    // Validate network
+    if (network !== 'testnet' && network !== 'mainnet') {
+      return NextResponse.json(
+        { error: 'Network must be "testnet" or "mainnet"' },
         { status: 400 }
       );
     }

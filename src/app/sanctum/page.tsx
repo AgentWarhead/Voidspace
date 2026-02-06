@@ -27,7 +27,7 @@ import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract, ImportedContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 // @ts-expect-error - lucide-react types issue with TS 5.9
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Clock, GitCompare, Play, Users, Globe } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
@@ -65,6 +65,7 @@ export default function SanctumPage() {
   const [showImportContract, setShowImportContract] = useState(false);
   const [importedContract, setImportedContract] = useState<ImportedContract | null>(null);
   const [showWebappSession, setShowWebappSession] = useState(false);
+  const [activePanel, setActivePanel] = useState<'chat' | 'code'>('chat');
 
   // Lock body scroll and enable immersive mode when session is active
   useEffect(() => {
@@ -360,99 +361,98 @@ export default function SanctumPage() {
                 <span className="text-near-green">Contracts, webapps, deployment</span> — all through conversation.
               </p>
 
-              {/* Mode Switcher */}
-              <div className="flex items-center justify-center gap-2 mb-12 flex-wrap">
+              {/* Friendly Mode Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
                 <button
                   onClick={() => setMode('build')}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
                     mode === 'build'
-                      ? 'bg-near-green/20 text-near-green border border-near-green/30 shadow-lg shadow-near-green/20'
-                      : 'bg-void-gray text-text-muted border border-border-subtle hover:border-near-green/30'
+                      ? 'border-near-green/50 bg-near-green/10 shadow-lg shadow-near-green/20'
+                      : 'border-border-subtle bg-void-gray/30 hover:border-near-green/30 hover:bg-near-green/5'
                   }`}
                 >
-                  <Hammer className="w-5 h-5" />
-                  Build Contract
+                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
+                    mode === 'build' 
+                      ? 'bg-near-green/20 text-near-green' 
+                      : 'bg-border-subtle text-text-muted group-hover:bg-near-green/20 group-hover:text-near-green'
+                  }`}>
+                    <Hammer className="w-6 h-6" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                    mode === 'build' ? 'text-near-green' : 'text-text-primary group-hover:text-near-green'
+                  }`}>
+                    Build a Smart Contract
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    AI walks you through creating a Rust smart contract step by step
+                  </p>
                 </button>
+
                 <button
                   onClick={() => setMode('webapp')}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
                     mode === 'webapp'
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/20'
-                      : 'bg-void-gray text-text-muted border border-border-subtle hover:border-cyan-500/30'
+                      ? 'border-cyan-500/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                      : 'border-border-subtle bg-void-gray/30 hover:border-cyan-500/30 hover:bg-cyan-500/5'
                   }`}
                 >
-                  <Globe className="w-5 h-5" />
-                  Build Webapp
+                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
+                    mode === 'webapp' 
+                      ? 'bg-cyan-500/20 text-cyan-400' 
+                      : 'bg-border-subtle text-text-muted group-hover:bg-cyan-500/20 group-hover:text-cyan-400'
+                  }`}>
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                    mode === 'webapp' ? 'text-cyan-400' : 'text-text-primary group-hover:text-cyan-400'
+                  }`}>
+                    Build a Web App
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    Generate a frontend for your existing NEAR contract
+                  </p>
                 </button>
+
                 <button
                   onClick={() => setMode('roast')}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
                     mode === 'roast'
-                      ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20'
-                      : 'bg-void-gray text-text-muted border border-border-subtle hover:border-red-500/30'
+                      ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
+                      : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-red-500/5'
                   }`}
                 >
-                  <Flame className="w-5 h-5" />
-                  Roast Mode
+                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
+                    mode === 'roast' 
+                      ? 'bg-red-500/20 text-red-400' 
+                      : 'bg-border-subtle text-text-muted group-hover:bg-red-500/20 group-hover:text-red-400'
+                  }`}>
+                    <Flame className="w-6 h-6" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                    mode === 'roast' ? 'text-red-400' : 'text-text-primary group-hover:text-red-400'
+                  }`}>
+                    Audit Your Code
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    Paste any contract and get a brutally honest security review
+                  </p>
                 </button>
               </div>
-
-              {/* Stats */}
-              <div className="flex items-center justify-center gap-8 mb-16 flex-wrap">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-text-primary font-mono">15+</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Contract Types</div>
-                </div>
-                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-cyan-400 font-mono">Full</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Stack Builder</div>
-                </div>
-                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-near-green font-mono">&lt;5m</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">To Deploy</div>
-                </div>
-              </div>
-
-              {/* Social Proof Banner */}
-              <div className="mb-12">
-                <SocialProof variant="banner" />
-              </div>
-
-              {/* History toggle */}
-              <div className="flex justify-center mb-8">
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-text-muted hover:text-white bg-void-gray/50 hover:bg-void-gray border border-border-subtle hover:border-purple-500/30 rounded-lg transition-all"
-                >
-                  <Clock className="w-4 h-4" />
-                  {showHistory ? 'Hide' : 'View'} My Deployments
-                </button>
-              </div>
-
-              {/* Deployment History (collapsible) */}
-              {showHistory && (
-                <div className="max-w-2xl mx-auto mb-12">
-                  <DeploymentHistory
-                    onRemix={handleRemixFromHistory}
-                    onShare={handleShareFromHistory}
-                  />
-                </div>
-              )}
 
               {/* Category Picker (Build Mode), Webapp Import, or Start Roast */}
               {mode === 'build' && (
-                <CategoryPicker
-                  onSelect={handleCategorySelect}
-                  customPrompt={customPrompt}
-                  setCustomPrompt={setCustomPrompt}
-                  onCustomStart={handleCustomStart}
-                />
+                <div className="mb-16">
+                  <CategoryPicker
+                    onSelect={handleCategorySelect}
+                    customPrompt={customPrompt}
+                    setCustomPrompt={setCustomPrompt}
+                    onCustomStart={handleCustomStart}
+                  />
+                </div>
               )}
               
               {mode === 'webapp' && !showImportContract && (
-                <div className="text-center max-w-2xl mx-auto">
+                <div className="text-center max-w-2xl mx-auto mb-16">
                   <p className="text-text-secondary mb-8">
                     Build a beautiful frontend for your NEAR smart contract. 
                     <br />
@@ -490,23 +490,25 @@ export default function SanctumPage() {
               )}
               
               {mode === 'webapp' && showImportContract && (
-                <ImportContract
-                  onImport={(data) => {
-                    setImportedContract(data);
-                    setShowImportContract(false);
-                    // Start the interactive webapp session
-                    if (data.code) {
-                      setGeneratedCode(data.code);
-                    }
-                    setSelectedCategory(data.name);
-                    setShowWebappSession(true);
-                  }}
-                  onCancel={() => setShowImportContract(false)}
-                />
+                <div className="mb-16">
+                  <ImportContract
+                    onImport={(data) => {
+                      setImportedContract(data);
+                      setShowImportContract(false);
+                      // Start the interactive webapp session
+                      if (data.code) {
+                        setGeneratedCode(data.code);
+                      }
+                      setSelectedCategory(data.name);
+                      setShowWebappSession(true);
+                    }}
+                    onCancel={() => setShowImportContract(false)}
+                  />
+                </div>
               )}
               
               {mode === 'roast' && (
-                <div className="text-center">
+                <div className="text-center mb-16">
                   <p className="text-text-secondary mb-6">
                     Paste any NEAR smart contract and watch it get torn apart by our security experts.
                   </p>
@@ -517,6 +519,49 @@ export default function SanctumPage() {
                     <Flame className="w-6 h-6" />
                     🔥 Enter the Roast Zone 🔥
                   </button>
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-text-primary font-mono">15+</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Contract Types</div>
+                </div>
+                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-cyan-400 font-mono">Full</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Stack Builder</div>
+                </div>
+                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-near-green font-mono">&lt;5m</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">To Deploy</div>
+                </div>
+              </div>
+
+              {/* Social Proof Banner */}
+              <div className="mb-8">
+                <SocialProof variant="banner" />
+              </div>
+
+              {/* History toggle - smaller and less prominent */}
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="text-xs text-text-muted hover:text-text-secondary transition-colors underline decoration-dotted underline-offset-4"
+                >
+                  {showHistory ? 'Hide' : 'View'} My Deployments
+                </button>
+              </div>
+
+              {/* Deployment History (collapsible) */}
+              {showHistory && (
+                <div className="max-w-2xl mx-auto mt-8">
+                  <DeploymentHistory
+                    onRemix={handleRemixFromHistory}
+                    onShare={handleShareFromHistory}
+                  />
                 </div>
               )}
             </Container>
@@ -583,210 +628,389 @@ export default function SanctumPage() {
 
       {/* Build Session - full screen immersive mode */}
       {sessionStarted && mode === 'build' && (
-        <div 
-          className="relative z-40 flex flex-col bg-void-black h-screen"
-        >
+        <div className="relative z-40 flex flex-col bg-void-black h-screen">
           {/* Session background - contained, no bleeding */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-void-black to-near-green/10" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-near-green/10 rounded-full blur-3xl" />
           </div>
+
+          {/* Header with back button - always visible */}
+          <div className="relative z-10 flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBack}
+                  className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors group"
+                >
+                  <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
+                </button>
+                <div>
+                  <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                    <span className="text-2xl">🔮</span>
+                    <GradientText>
+                      {selectedCategory === 'custom' ? 'Custom Build' : selectedCategory?.replace('-', ' ')}
+                    </GradientText>
+                  </h2>
+                  <p className="text-sm text-text-muted">Chat with Sanctum to forge your contract</p>
+                </div>
+              </div>
+              
+              {/* Desktop controls */}
+              <div className="hidden md:flex items-center gap-4">
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
+                  title={soundEnabled ? 'Sound on' : 'Sound off'}
+                >
+                  {soundEnabled ? '🔊' : '🔇'}
+                </button>
+                
+                <TokenCounter 
+                  tokensUsed={tokensUsed} 
+                  tokenBalance={tokenBalance}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Tab Bar */}
+          <div className="md:hidden relative z-10 flex-shrink-0 sticky top-0 bg-void-black/80 backdrop-blur-sm border-b border-white/[0.08]">
+            <div className="flex">
+              <button
+                onClick={() => setActivePanel('chat')}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-all ${
+                  activePanel === 'chat'
+                    ? 'text-purple-400 border-b-2 border-purple-500 bg-purple-500/10'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+              >
+                <span>💬</span>
+                Chat
+              </button>
+              <button
+                onClick={() => setActivePanel('code')}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-all ${
+                  activePanel === 'code'
+                    ? 'text-near-green border-b-2 border-near-green bg-near-green/10'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+              >
+                <span>⚡</span>
+                Code
+              </button>
+            </div>
+          </div>
           
-          {/* Main content - fills available space */}
-          <div className="relative z-10 flex flex-1 gap-3 p-3 overflow-hidden">
-            {/* Left Panel - Chat */}
-            <div className="w-1/2 flex flex-col h-full">
-              <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
-                {/* Header */}
-                <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={handleBack}
-                        className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors group"
-                      >
-                        <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
-                      </button>
-                      <div>
-                        <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                          <span className="text-2xl">🔮</span>
-                          <GradientText>
-                            {selectedCategory === 'custom' ? 'Custom Build' : selectedCategory?.replace('-', ' ')}
-                          </GradientText>
-                        </h2>
-                        <p className="text-sm text-text-muted">Chat with Sanctum to forge your contract</p>
+          {/* Main content - responsive layout */}
+          <div className="relative z-10 flex-1 flex overflow-hidden">
+            {/* Desktop Layout: Side-by-side */}
+            <div className="hidden md:flex flex-1 gap-3 p-3 overflow-hidden">
+              {/* Left Panel - Chat */}
+              <div className="w-1/2 flex flex-col h-full">
+                <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
+                  {/* Chat - fills remaining space */}
+                  <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                    <SanctumChat 
+                      category={selectedCategory}
+                      customPrompt={customPrompt}
+                      onCodeGenerated={handleCodeGenerated}
+                      onTokensUsed={handleTokensUsed}
+                      onTaskUpdate={handleTaskUpdate}
+                      onThinkingChange={handleThinkingChange}
+                    />
+                  </div>
+                </GlassPanel>
+              </div>
+
+              {/* Right Panel - Code Preview */}
+              <div className="w-1/2 flex flex-col h-full">
+                <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
+                  {/* Header with inline task progress */}
+                  <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
+                    {/* Top row: Title + Buttons */}
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                        <span className="text-xl">⚡</span>
+                        <span className="text-near-green">Contract</span> Preview
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
+                          onClick={() => navigator.clipboard.writeText(generatedCode)}
+                          disabled={!generatedCode}
+                          title="Copy code"
+                        >
+                          <Code2 className="w-4 h-4" />
+                        </button>
+                        <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} />
+                        <FileStructureToggle 
+                          code={generatedCode} 
+                          contractName={selectedCategory || 'my-contract'}
+                          isOpen={showFileStructure}
+                          onToggle={() => setShowFileStructure(!showFileStructure)}
+                        />
+                        <button 
+                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-blue-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-blue-500/30 disabled:opacity-50"
+                          onClick={() => setShowComparison(true)}
+                          disabled={!generatedCode}
+                          title="Compare versions"
+                        >
+                          <GitCompare className="w-4 h-4" />
+                        </button>
+                        <button 
+                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-green-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-green-500/30 disabled:opacity-50"
+                          onClick={() => setShowSimulation(true)}
+                          disabled={!generatedCode}
+                          title="Test in sandbox"
+                        >
+                          <Play className="w-4 h-4" />
+                        </button>
+                        <button 
+                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-pink-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-pink-500/30"
+                          onClick={() => setShowPairProgramming(true)}
+                          title="Pair programming"
+                        >
+                          <Users className="w-4 h-4" />
+                        </button>
+                        <button 
+                          className="px-3 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
+                          onClick={handleShare}
+                          disabled={!generatedCode}
+                          title="Share contract"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
+                          onClick={handleDeploy}
+                          disabled={!generatedCode || sanctumStage === 'thinking'}
+                        >
+                          <Rocket className="w-4 h-4" />
+                          Deploy
+                        </button>
+                        <button 
+                          className="px-4 py-2 text-sm bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-cyan-500/20"
+                          onClick={() => setShowWebappBuilder(true)}
+                          disabled={!generatedCode}
+                          title="Generate webapp for this contract"
+                        >
+                          <Globe className="w-4 h-4" />
+                          Webapp
+                        </button>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-4">
-                      {/* Sound toggle */}
-                      <button
-                        onClick={() => setSoundEnabled(!soundEnabled)}
-                        className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
-                        title={soundEnabled ? 'Sound on' : 'Sound off'}
-                      >
-                        {soundEnabled ? '🔊' : '🔇'}
-                      </button>
-                      
-                      <TokenCounter 
-                        tokensUsed={tokensUsed} 
-                        tokenBalance={tokenBalance}
-                      />
-                    </div>
+                    {/* Task progress row */}
+                    <TaskProgressInline task={currentTask} isThinking={isThinking} />
                   </div>
-                </div>
 
-                {/* Chat - fills remaining space */}
-                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                  <SanctumChat 
-                    category={selectedCategory}
-                    customPrompt={customPrompt}
-                    onCodeGenerated={handleCodeGenerated}
-                    onTokensUsed={handleTokensUsed}
-                    onTaskUpdate={handleTaskUpdate}
-                    onThinkingChange={handleThinkingChange}
-                  />
-                </div>
-              </GlassPanel>
-            </div>
-
-            {/* Right Panel - Code Preview */}
-            <div className="w-1/2 flex flex-col h-full">
-              <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
-                {/* Header with inline task progress */}
-                <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
-                  {/* Top row: Title + Buttons */}
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                      <span className="text-xl">⚡</span>
-                      <span className="text-near-green">Contract</span> Preview
-                    </h2>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
-                        onClick={() => navigator.clipboard.writeText(generatedCode)}
-                        disabled={!generatedCode}
-                        title="Copy code"
-                      >
-                        <Code2 className="w-4 h-4" />
-                      </button>
-                      <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} />
-                      <FileStructureToggle 
+                  {/* File Structure Panel */}
+                  {showFileStructure && generatedCode && (
+                    <div className="p-4 border-b border-white/[0.08]">
+                      <FileStructure 
                         code={generatedCode} 
                         contractName={selectedCategory || 'my-contract'}
-                        isOpen={showFileStructure}
-                        onToggle={() => setShowFileStructure(!showFileStructure)}
                       />
-                      <button 
-                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-blue-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-blue-500/30 disabled:opacity-50"
-                        onClick={() => setShowComparison(true)}
-                        disabled={!generatedCode}
-                        title="Compare versions"
-                      >
-                        <GitCompare className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-green-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-green-500/30 disabled:opacity-50"
-                        onClick={() => setShowSimulation(true)}
-                        disabled={!generatedCode}
-                        title="Test in sandbox"
-                      >
-                        <Play className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-pink-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-pink-500/30"
-                        onClick={() => setShowPairProgramming(true)}
-                        title="Pair programming"
-                      >
-                        <Users className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="px-3 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
-                        onClick={handleShare}
-                        disabled={!generatedCode}
-                        title="Share contract"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
-                        onClick={handleDeploy}
-                        disabled={!generatedCode || sanctumStage === 'thinking'}
-                      >
-                        <Rocket className="w-4 h-4" />
-                        Deploy
-                      </button>
-                      <button 
-                        className="px-4 py-2 text-sm bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-cyan-500/20"
-                        onClick={() => setShowWebappBuilder(true)}
-                        disabled={!generatedCode}
-                        title="Generate webapp for this contract"
-                      >
-                        <Globe className="w-4 h-4" />
-                        Webapp
-                      </button>
                     </div>
-                  </div>
-                  {/* Task progress row */}
-                  <TaskProgressInline task={currentTask} isThinking={isThinking} />
+                  )}
+
+                  {/* Sanctum Visualization */}
+                  {!generatedCode && (
+                    <div className="flex-1 flex flex-col items-center justify-center p-8">
+                      <SanctumVisualization
+                        isGenerating={isGenerating}
+                        progress={0}
+                        stage={sanctumStage}
+                      />
+                      <p className="mt-6 text-text-muted text-center max-w-sm">
+                        Start chatting with Sanctum to generate your smart contract code.
+                        I&apos;ll teach you Rust as we build together.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Code with typing animation */}
+                  {generatedCode && (
+                    <div className="flex-1 min-h-0 overflow-auto">
+                      <TypewriterCode 
+                        code={generatedCode}
+                        speed={8}
+                        onComplete={() => setSanctumStage('complete')}
+                      />
+                    </div>
+                  )}
+
+                  {/* Contract DNA + Gas + File info */}
+                  {generatedCode && (
+                    <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
+                      {/* DNA and Gas row */}
+                      <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
+                        <ContractDNA code={generatedCode} size="sm" showLabel={true} />
+                        <GasEstimatorCompact code={generatedCode} />
+                      </div>
+                      {/* File info row */}
+                      <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                          contract.rs
+                        </span>
+                        <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
+                      </div>
+                    </div>
+                  )}
+                </GlassPanel>
+              </div>
+            </div>
+
+            {/* Mobile Layout: Stacked with tabs */}
+            <div className="md:hidden flex-1 flex flex-col overflow-hidden">
+              {/* Chat Panel */}
+              {activePanel === 'chat' && (
+                <div className="flex-1 p-3 overflow-hidden">
+                  <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
+                    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                      <SanctumChat 
+                        category={selectedCategory}
+                        customPrompt={customPrompt}
+                        onCodeGenerated={handleCodeGenerated}
+                        onTokensUsed={handleTokensUsed}
+                        onTaskUpdate={handleTaskUpdate}
+                        onThinkingChange={handleThinkingChange}
+                      />
+                    </div>
+                  </GlassPanel>
                 </div>
+              )}
 
-                {/* File Structure Panel */}
-                {showFileStructure && generatedCode && (
-                  <div className="p-4 border-b border-white/[0.08]">
-                    <FileStructure 
-                      code={generatedCode} 
-                      contractName={selectedCategory || 'my-contract'}
-                    />
-                  </div>
-                )}
+              {/* Code Panel */}
+              {activePanel === 'code' && (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <div className="flex-1 p-3 overflow-hidden">
+                    <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
+                      {/* Mobile Code Header */}
+                      <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                            <span className="text-xl">⚡</span>
+                            <span className="text-near-green">Contract</span>
+                          </h2>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2"
+                              onClick={() => navigator.clipboard.writeText(generatedCode)}
+                              disabled={!generatedCode}
+                              title="Copy"
+                            >
+                              <Code2 className="w-4 h-4" />
+                            </button>
+                            <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} />
+                          </div>
+                        </div>
+                        <TaskProgressInline task={currentTask} isThinking={isThinking} />
+                      </div>
 
-                {/* Sanctum Visualization */}
-                {!generatedCode && (
-                  <div className="flex-1 flex flex-col items-center justify-center p-8">
-                    <SanctumVisualization
-                      isGenerating={isGenerating}
-                      progress={0}
-                      stage={sanctumStage}
-                    />
-                    <p className="mt-6 text-text-muted text-center max-w-sm">
-                      Start chatting with Sanctum to generate your smart contract code.
-                      I&apos;ll teach you Rust as we build together.
-                    </p>
-                  </div>
-                )}
+                      {/* File Structure Panel */}
+                      {showFileStructure && generatedCode && (
+                        <div className="p-4 border-b border-white/[0.08]">
+                          <FileStructure 
+                            code={generatedCode} 
+                            contractName={selectedCategory || 'my-contract'}
+                          />
+                        </div>
+                      )}
 
-                {/* Code with typing animation */}
-                {generatedCode && (
-                  <div className="flex-1 min-h-0 overflow-auto">
-                    <TypewriterCode 
-                      code={generatedCode}
-                      speed={8}
-                      onComplete={() => setSanctumStage('complete')}
-                    />
-                  </div>
-                )}
+                      {/* Sanctum Visualization */}
+                      {!generatedCode && (
+                        <div className="flex-1 flex flex-col items-center justify-center p-6">
+                          <SanctumVisualization
+                            isGenerating={isGenerating}
+                            progress={0}
+                            stage={sanctumStage}
+                          />
+                          <p className="mt-4 text-text-muted text-center text-sm">
+                            Switch to Chat to start building your contract.
+                          </p>
+                        </div>
+                      )}
 
-                {/* Contract DNA + Gas + File info */}
-                {generatedCode && (
-                  <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
-                    {/* DNA and Gas row */}
-                    <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
-                      <ContractDNA code={generatedCode} size="sm" showLabel={true} />
-                      <GasEstimatorCompact code={generatedCode} />
-                    </div>
-                    {/* File info row */}
-                    <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
-                      <span className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
-                        contract.rs
-                      </span>
-                      <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
-                    </div>
+                      {/* Code with typing animation */}
+                      {generatedCode && (
+                        <div className="flex-1 min-h-0 overflow-auto">
+                          <TypewriterCode 
+                            code={generatedCode}
+                            speed={8}
+                            onComplete={() => setSanctumStage('complete')}
+                          />
+                        </div>
+                      )}
+
+                      {/* Contract info footer */}
+                      {generatedCode && (
+                        <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
+                          <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
+                            <ContractDNA code={generatedCode} size="sm" showLabel={false} />
+                            <GasEstimatorCompact code={generatedCode} />
+                          </div>
+                          <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                              contract.rs
+                            </span>
+                            <span>{generatedCode.split('\n').length} lines</span>
+                          </div>
+                        </div>
+                      )}
+                    </GlassPanel>
                   </div>
-                )}
-              </GlassPanel>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Bottom Toolbar */}
+          <div className="md:hidden relative z-10 flex-shrink-0 border-t border-white/[0.08] bg-void-black/80 backdrop-blur-sm">
+            <div className="flex items-center gap-2 p-3 overflow-x-auto">
+              <button 
+                className="flex items-center gap-2 px-3 py-2 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                onClick={handleShare}
+                disabled={!generatedCode}
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </button>
+              <button 
+                className="flex items-center gap-2 px-3 py-2 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg border border-blue-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                onClick={() => setShowComparison(true)}
+                disabled={!generatedCode}
+              >
+                <GitCompare className="w-4 h-4" />
+                Compare
+              </button>
+              <button 
+                className="flex items-center gap-2 px-3 py-2 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                onClick={() => setShowSimulation(true)}
+                disabled={!generatedCode}
+              >
+                <Play className="w-4 h-4" />
+                Test
+              </button>
+              <button 
+                className="flex items-center gap-2 px-4 py-2 text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-50 whitespace-nowrap font-medium"
+                onClick={handleDeploy}
+                disabled={!generatedCode || sanctumStage === 'thinking'}
+              >
+                <Rocket className="w-4 h-4" />
+                Deploy
+              </button>
+              <button 
+                className="flex items-center gap-2 px-3 py-2 text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                onClick={() => setShowWebappBuilder(true)}
+                disabled={!generatedCode}
+              >
+                <Globe className="w-4 h-4" />
+                Webapp
+              </button>
             </div>
           </div>
         </div>

@@ -45,7 +45,9 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
       <VoidEmptyState
         icon={Search}
         title="No results found"
-        description={`Nothing matched \u201c${query}\u201d. Try a different search term.`}
+        description="Try a different search term or browse all voids"
+        actionLabel="Browse All Voids"
+        actionHref="/opportunities"
       />
     );
   }

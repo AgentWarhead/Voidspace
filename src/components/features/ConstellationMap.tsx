@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
-import { Search, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { Search, RotateCcw, ZoomIn, ZoomOut, Network } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -419,31 +419,52 @@ export function ConstellationMap() {
 
       {/* Search Interface */}
       <Card className="max-w-4xl mx-auto" padding="lg">
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <Input
-              placeholder="Enter NEAR wallet address (e.g., alice.near)"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="text-lg"
-            />
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Enter NEAR wallet address (e.g., alice.near)"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="text-lg"
+              />
+            </div>
+            <Button 
+              onClick={handleSearch}
+              disabled={loading || !address.trim()}
+              variant="primary"
+              className="px-8"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                  Mapping...
+                </div>
+              ) : (
+                'Explore Constellation'
+              )}
+            </Button>
           </div>
-          <Button 
-            onClick={handleSearch}
-            disabled={loading || !address.trim()}
-            variant="primary"
-            className="px-8"
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                Mapping...
-              </div>
-            ) : (
-              'Explore Constellation'
-            )}
-          </Button>
+
+          {/* Example Wallets */}
+          <div className="space-y-2">
+            <p className="text-xs text-text-muted">Try an example:</p>
+            <div className="flex flex-wrap gap-2">
+              {['aurora.near', 'ref-finance.near', 'token.sweat'].map((example) => (
+                <button
+                  key={example}
+                  onClick={() => {
+                    setAddress(example);
+                    setTimeout(() => handleSearch(), 100);
+                  }}
+                  className="px-2.5 py-1 text-xs font-mono rounded-md bg-surface border border-border text-text-secondary hover:border-near-green/30 hover:text-text-primary transition-colors"
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         
         {error && (
@@ -550,11 +571,11 @@ export function ConstellationMap() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
-              <Search className="w-8 h-8 text-purple-400" />
+              <Network className="w-8 h-8 text-purple-400" />
             </div>
             <div>
               <h3 className="text-xl font-semibold text-text-primary mb-2">Ready to Explore the Void</h3>
-              <p className="text-text-secondary">Enter a NEAR wallet address to visualize its connection constellation</p>
+              <p className="text-text-secondary">Enter a NEAR wallet address to visualize its transaction network</p>
             </div>
           </div>
         </div>

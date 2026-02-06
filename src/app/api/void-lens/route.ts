@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
+import { isValidNearAccountId } from '@/lib/auth/validate';
 
 interface WalletData {
   account: string;
@@ -217,6 +218,10 @@ export async function POST(request: NextRequest) {
     
     if (!address || typeof address !== 'string') {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
+    }
+
+    if (!isValidNearAccountId(address)) {
+      return NextResponse.json({ error: 'Invalid NEAR account ID format' }, { status: 400 });
     }
 
     const walletData = await fetchWalletData(address);

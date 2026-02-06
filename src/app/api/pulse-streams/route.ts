@@ -89,17 +89,52 @@ async function fetchLatestTransactions(filters: StreamFilters = {}): Promise<Tra
 export async function GET(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    if (!rateLimit(`pulse-streams:${ip}`, 30, 60_000).allowed) {
+    if (!rateLimit(`pulse-streams:${ip}`, 10, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { searchParams } = new URL(request.url);
     
+    // Input validation for filters
+    const txType = searchParams.get('txType');
+    const minAmountStr = searchParams.get('minAmount');
+    const accountsStr = searchParams.get('accounts');
+    const includeContractsStr = searchParams.get('includeContracts');
+
+    // Validate txType if provided
+    if (txType && !/^[a-zA-Z_-]+$/.test(txType)) {
+      return NextResponse.json({ error: 'Invalid txType format' }, { status: 400 });
+    }
+
+    // Validate minAmount if provided
+    let minAmount: number | undefined;
+    if (minAmountStr) {
+      minAmount = parseFloat(minAmountStr);
+      if (isNaN(minAmount) || minAmount < 0) {
+        return NextResponse.json({ error: 'minAmount must be a positive number' }, { status: 400 });
+      }
+    }
+
+    // Validate accounts if provided
+    let accounts: string[] | undefined;
+    if (accountsStr) {
+      accounts = accountsStr.split(',').filter(Boolean);
+      if (accounts.length > 10) {
+        return NextResponse.json({ error: 'Too many accounts (max 10)' }, { status: 400 });
+      }
+      // Basic account ID validation
+      for (const account of accounts) {
+        if (account.length > 64 || !/^[a-z0-9._-]+$/i.test(account)) {
+          return NextResponse.json({ error: 'Invalid account ID format' }, { status: 400 });
+        }
+      }
+    }
+
     const filters: StreamFilters = {
-      txType: searchParams.get('txType') || undefined,
-      minAmount: searchParams.get('minAmount') ? parseFloat(searchParams.get('minAmount')!) : undefined,
-      accounts: searchParams.get('accounts')?.split(',').filter(Boolean) || undefined,
-      includeContracts: searchParams.get('includeContracts') === 'true'
+      txType: txType || undefined,
+      minAmount,
+      accounts,
+      includeContracts: includeContractsStr === 'true'
     };
 
     const transactions = await fetchLatestTransactions(filters);
@@ -121,7 +156,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    if (!rateLimit(`pulse-streams-poll:${ip}`, 60, 60_000).allowed) {
+    if (!rateLimit(`pulse-streams-poll:${ip}`, 10, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 

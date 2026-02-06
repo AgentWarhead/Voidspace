@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { rateLimit } from '@/lib/auth/rate-limit';
+import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -613,7 +615,48 @@ impl RecoverableWallet {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    
+    // Check authentication and apply appropriate rate limiting
+    const user = getAuthenticatedUser(request);
+    const rateKey = user ? `chat:auth:${user.userId}` : `chat:${ip}`;
+    const limit = user ? 10 : 3; // 10/min for authenticated, 3/min for unauthenticated
+    
+    if (!rateLimit(rateKey, limit, 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    // Check request body size (max 50KB)
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 50 * 1024) {
+      return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
+    }
+
     const { messages, category, personaId } = await request.json();
+
+    // Input validation
+    if (!Array.isArray(messages)) {
+      return NextResponse.json({ error: 'Messages must be an array' }, { status: 400 });
+    }
+
+    if (messages.length > 20) {
+      return NextResponse.json({ error: 'Too many messages (max 20)' }, { status: 400 });
+    }
+
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      if (!msg || typeof msg.content !== 'string') {
+        return NextResponse.json({ error: `Invalid message at index ${i}` }, { status: 400 });
+      }
+      if (msg.content.length > 10000) {
+        return NextResponse.json({ error: `Message ${i} too long (max 10000 chars)` }, { status: 400 });
+      }
+    }
+
+    // Validate personaId against PERSONA_PROMPTS keys
+    if (personaId && !PERSONA_PROMPTS[personaId]) {
+      return NextResponse.json({ error: 'Invalid persona ID' }, { status: 400 });
+    }
 
     // Build the context with persona
     const categoryContext = CATEGORY_CONTEXT[category] || '';

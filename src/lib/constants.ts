@@ -40,12 +40,11 @@ export const DIFFICULTY_LABELS = {
 } as const;
 
 export const NAV_ITEMS = [
-  { label: 'Command Center', href: '/' },
+  { label: 'Home', href: '/' },
   { label: 'Voids', href: '/opportunities' },
   { label: 'Sanctum', href: '/sanctum' },
   { label: 'Observatory', href: '/observatory' },
   { label: 'Learn', href: '/learn' },
-  { label: 'Profile', href: '/profile' },
 ] as const;
 
 // Observatory tool tabs

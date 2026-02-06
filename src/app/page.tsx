@@ -1,15 +1,12 @@
-import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 
 import { ChevronRight, BookOpen, Search, Sparkles } from 'lucide-react';
-import { Container, Card } from '@/components/ui';
+import { Container } from '@/components/ui';
 import { HeroSection } from '@/components/hero/HeroSection';
-import { VoidDetectionShowcase } from '@/components/dashboard/VoidDetectionShowcase';
 import { PriorityVoids } from '@/components/dashboard/PriorityVoids';
 import { VoidsForEveryBuilder } from '@/components/dashboard/VoidsForEveryBuilder';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
-import { ScanLine } from '@/components/effects/ScanLine';
 import { GradientText } from '@/components/effects/GradientText';
 import {
   getEcosystemStats,
@@ -18,16 +15,6 @@ import {
 } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
-
-const CategorySaturationChart = nextDynamic(
-  () => import('@/components/charts/CategorySaturationChart').then((m) => m.CategorySaturationChart),
-  { ssr: false }
-);
-
-const TVLByCategory = nextDynamic(
-  () => import('@/components/charts/TVLByCategory').then((m) => m.TVLByCategory),
-  { ssr: false }
-);
 
 export default async function DashboardPage() {
   const [stats, categories, opportunities] = await Promise.all([
@@ -42,55 +29,29 @@ export default async function DashboardPage() {
       <HeroSection stats={stats} totalOpportunities={opportunities.length} />
 
       <Container size="xl" className="py-8 space-y-16">
-        {/* Section 2: AI-Powered Void Detection */}
+        {/* Section 2: Here's what NEAR needs — Combined Void Detection + Priority Voids */}
         <ScrollReveal>
-          <VoidDetectionShowcase />
-        </ScrollReveal>
-
-        {/* Section 3: Priority Voids — NEAR Strategic Areas */}
-        <ScrollReveal delay={0.05}>
           <section>
-            <SectionHeader title="Priority Voids" badge="NEAR PRIORITY" />
+            <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
+            <div className="mb-8">
+              <p className="text-text-secondary max-w-3xl mx-auto text-center">
+                Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
+              </p>
+            </div>
             <PriorityVoids categories={categories} />
           </section>
         </ScrollReveal>
 
-        {/* Section 4: Voids For Every Builder — Skill Level Showcase */}
+        {/* Section 3: Pick your path — Voids For Every Builder */}
         <ScrollReveal delay={0.1}>
-          <VoidsForEveryBuilder opportunities={opportunities} />
-        </ScrollReveal>
-
-        {/* Section 5: Void Analysis — Charts that work */}
-        <ScrollReveal delay={0.15}>
           <section>
-            <SectionHeader title="Void Analysis" badge="AI ANALYZED" />
-            <div className="space-y-8">
-              <Card variant="glass" padding="lg" className="relative overflow-hidden">
-                <ScanLine />
-                <div className="mb-6">
-                  <h3 className="text-base font-semibold text-text-primary">Ecosystem Gap Radar</h3>
-                  <p className="text-xs text-text-muted mt-1 max-w-2xl">
-                    Each slice is a NEAR category. The further it extends, the bigger the void — more demand, fewer builders. Look for the longest spikes — that&apos;s where your opportunity lives.
-                  </p>
-                </div>
-                <CategorySaturationChart categories={categories} />
-              </Card>
-              <Card variant="glass" padding="lg" className="relative overflow-hidden">
-                <ScanLine />
-                <div className="mb-6">
-                  <h3 className="text-base font-semibold text-text-primary">Capital Gravity Map</h3>
-                  <p className="text-xs text-text-muted mt-1 max-w-2xl">
-                    Where is the money? Categories closer to center have more capital locked in. Small circles with green color = few builders, big opportunity. That&apos;s where smart money hasn&apos;t arrived yet.
-                  </p>
-                </div>
-                <TVLByCategory categories={categories} />
-              </Card>
-            </div>
+            <SectionHeader title="Pick your path" badge="FOR EVERY BUILDER" />
+            <VoidsForEveryBuilder opportunities={opportunities} />
           </section>
         </ScrollReveal>
 
-        {/* Section 6: Enter the Void — CTA Footer */}
-        <ScrollReveal delay={0.2}>
+        {/* Section 4: Ready to build — CTA Footer */}
+        <ScrollReveal delay={0.15}>
           <div className="relative overflow-hidden rounded-2xl">
             <div
               className="absolute inset-0"

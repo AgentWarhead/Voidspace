@@ -18,27 +18,21 @@ const TOOLS = [
     label: 'Void Lens',
     icon: Eye,
     description: 'Analyze wallet reputation and trust signals',
-    gradient: 'from-cyan-500/20 to-blue-500/20',
-    activeColor: 'text-cyan-400',
-    borderColor: 'border-cyan-500/50',
+    iconTint: 'text-cyan-400',
   },
   {
     id: 'constellation',
     label: 'Constellation',
     icon: Network,
     description: 'Map wallet relationships and transaction patterns',
-    gradient: 'from-purple-500/20 to-pink-500/20',
-    activeColor: 'text-purple-400',
-    borderColor: 'border-purple-500/50',
+    iconTint: 'text-purple-400',
   },
   {
     id: 'pulse-streams',
     label: 'Pulse Streams',
     icon: Activity,
     description: 'Monitor real-time ecosystem activity',
-    gradient: 'from-near-green/20 to-emerald-500/20',
-    activeColor: 'text-near-green',
-    borderColor: 'border-near-green/50',
+    iconTint: 'text-near-green',
   },
 ] as const;
 
@@ -109,21 +103,17 @@ export default function ObservatoryContent() {
                   key={tool.id}
                   onClick={() => setActiveTool(tool.id)}
                   className={cn(
-                    'relative flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200',
+                    'flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200',
                     isActive
-                      ? `bg-gradient-to-r ${tool.gradient} ${tool.borderColor} ${tool.activeColor}`
+                      ? 'bg-near-green/10 border-near-green/30 text-near-green'
                       : 'bg-surface border-border text-text-secondary hover:bg-surface-hover hover:text-text-primary hover:border-border-hover'
                   )}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={cn(
+                    "w-4 h-4",
+                    isActive ? "text-near-green" : tool.iconTint
+                  )} />
                   <span className="text-sm font-medium">{tool.label}</span>
-                  {isActive && (
-                    <motion.span
-                      layoutId="observatory-tab-indicator"
-                      className="absolute inset-0 rounded-lg border-2 border-current opacity-50"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
                 </button>
               );
             })}

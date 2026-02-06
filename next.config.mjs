@@ -44,11 +44,14 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-inline'", // Removed 'unsafe-eval' - modern wallet-selector doesn't need it
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com https://api.coingecko.com https://graph.mintbase.xyz wss://*.near.org",
+              "base-uri 'self'", // Prevent base tag injection attacks
+              "form-action 'self'", // Prevent form hijacking
+              "upgrade-insecure-requests", // Force HTTPS
               "frame-ancestors 'none'",
             ].join('; '),
           },
