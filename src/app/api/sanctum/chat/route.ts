@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -620,6 +621,15 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
+
+    // Check AI usage budget
+    const budget = await checkAiBudget(user.userId);
+    if (!budget.allowed) {
+      return NextResponse.json({ 
+        error: 'Daily AI usage limit reached', 
+        remaining: budget.remaining 
+      }, { status: 429 });
+    }
     
     const rateKey = `chat:auth:${user.userId}`;
     if (!rateLimit(rateKey, 10, 60_000).allowed) {
@@ -704,6 +714,10 @@ export async function POST(request: NextRequest) {
         options: null,
       };
     }
+
+    // Log AI usage for budget tracking
+    const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
+    await logAiUsage(user.userId, 'sanctum_chat', totalTokens);
 
     return NextResponse.json({
       ...parsed,

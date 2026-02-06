@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 
 interface WalletData {
   account: string;
@@ -102,12 +103,22 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
   }
 }
 
-async function generateReputationAnalysis(walletData: WalletData): Promise<ReputationAnalysis> {
+async function generateReputationAnalysis(walletData: WalletData, userId?: string): Promise<ReputationAnalysis> {
   try {
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     if (!anthropicKey) {
       // Fallback to basic analysis if Claude API not available
       return generateBasicAnalysis(walletData);
+    }
+
+    // Check AI budget if userId provided (for authenticated users)
+    if (userId) {
+      const budget = await checkAiBudget(userId);
+      if (!budget.allowed) {
+        // Fall back to basic analysis if budget exceeded
+        console.log(`AI budget exceeded for user ${userId}, using basic analysis`);
+        return generateBasicAnalysis(walletData);
+      }
     }
 
     const prompt = `Analyze this NEAR wallet and generate a reputation score (0-100) and analysis:
@@ -158,6 +169,12 @@ Consider factors like account age, transaction frequency, balance consistency, i
 
     const result = await response.json();
     const analysis = JSON.parse(result.content[0].text);
+    
+    // Log AI usage for budget tracking if userId provided
+    if (userId && result.usage) {
+      const totalTokens = result.usage.input_tokens + result.usage.output_tokens;
+      await logAiUsage(userId, 'void_lens_ai', totalTokens);
+    }
     
     return analysis;
   } catch (error) {
@@ -236,7 +253,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch wallet data' }, { status: 404 });
     }
 
-    const analysis = await generateReputationAnalysis(walletData);
+    const analysis = await generateReputationAnalysis(walletData, user.userId);
     
     return NextResponse.json({
       address,

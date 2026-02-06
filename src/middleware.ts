@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRateLimiter } from '@/lib/auth/rate-limit';
+import { randomBytes } from 'crypto';
 
 // Suspicious User-Agent patterns
 const SUSPICIOUS_USER_AGENTS = [
@@ -75,15 +76,43 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 });
   }
 
-  // 4. Request logging for API routes
+  // 4. CSRF Protection and Request logging for API routes
   if (pathname.startsWith('/api/')) {
     const startTime = Date.now();
     
     // Log the request
     console.log(`📡 API: ${method} ${pathname} from ${ip} (${userAgent.slice(0, 50)}${userAgent.length > 50 ? '...' : ''})`);
 
-    // Create response and measure timing
+    // Verify CSRF token for write operations (before processing)
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      // Skip CSRF for Bearer auth endpoints and health check
+      if (pathname !== '/api/sync' && pathname !== '/api/health') {
+        const csrfHeader = request.headers.get('x-csrf-token');
+        const csrfCookie = request.cookies.get('vs_csrf')?.value;
+        
+        if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
+          console.log(`🚫 CSRF: Token mismatch for ${pathname} from ${ip}`);
+          return new NextResponse('CSRF token invalid', { status: 403 });
+        }
+      }
+    }
+
+    // Create response
     const response = NextResponse.next();
+    
+    // Generate and set CSRF token for read operations
+    if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      const existingToken = request.cookies.get('vs_csrf')?.value;
+      if (!existingToken) {
+        const csrfToken = randomBytes(32).toString('hex');
+        response.cookies.set('vs_csrf', csrfToken, {
+          httpOnly: false, // JS needs to read this
+          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+        });
+      }
+    }
     
     // Add timing header for debugging
     response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);

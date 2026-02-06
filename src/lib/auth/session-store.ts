@@ -1,9 +1,12 @@
 /**
  * In-memory session revocation store with LRU eviction.
  * 
- * This is a simple implementation for demonstration. In a production
- * distributed system, consider using Redis or a database for persistence
- * across multiple instances.
+ * ⚠️ LIMITATION: This only works within a single serverless invocation.
+ * Vercel serverless functions have no shared memory between instances,
+ * so revocation won't persist across different function executions.
+ * 
+ * TODO: Replace with Supabase-based revocation using a `revoked_at` column
+ * in the users table for true distributed session revocation.
  */
 
 interface RevocationEntry {
@@ -95,9 +98,15 @@ export function revokeSession(userId: string): void {
 
 /**
  * Check if a user's sessions are revoked.
+ * 
+ * ⚠️ CURRENTLY DISABLED: Always returns false due to serverless limitations.
+ * Real revocation checking will be implemented in verifySessionToken() using
+ * a Supabase `revoked_at` timestamp check.
  */
-export function isRevoked(userId: string): boolean {
-  return revocationStore.isRevoked(userId);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function isRevoked(_userId: string): boolean {
+  // TODO: Move revocation check to Supabase in verifySessionToken()
+  return false; // Disabled - no shared memory in serverless
 }
 
 // Export for testing/monitoring

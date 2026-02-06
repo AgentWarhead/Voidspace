@@ -104,6 +104,10 @@ export function verifySessionToken(token: string): VerifyResult | null {
       return null;
     }
 
+    // TODO: Add Supabase revocation check here:
+    // Query users table for revoked_at timestamp and compare with token's issuedAt
+    // if (user.revoked_at && issuedAt < user.revoked_at) return null;
+
     // Check if token should be rotated (>50% through its lifetime)
     const rotationThreshold = (SESSION_MAX_AGE * 1000) * 0.5;
     const shouldRotate = tokenAge > rotationThreshold;

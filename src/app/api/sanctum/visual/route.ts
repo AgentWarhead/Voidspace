@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 
+// NOTE: This endpoint uses Gemini (Google) for image generation, not Claude.
+// AI budget tracking is only for Claude (Anthropic) usage.
+
 // Nano Banana Pro integration for visual generation
 // Uses Gemini 2.0 Flash for image generation
 
