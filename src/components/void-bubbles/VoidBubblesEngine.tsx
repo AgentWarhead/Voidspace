@@ -571,26 +571,50 @@ export function VoidBubblesEngine() {
   const handleSnapshot = useCallback(() => {
     if (!svgRef.current || !containerRef.current) return;
     try {
-      const { width: cw, height: ch } = containerRef.current.getBoundingClientRect();
       const today = new Date().toISOString().split('T')[0];
-      const PAD = 50;
-      const BRAND_H = 70;
-      const totalW = Math.round(cw + PAD * 2);
-      const totalH = Math.round(ch + PAD * 2 + BRAND_H);
-      const brandY = Math.round(ch + PAD * 2 + 10);
-      const logoX = totalW - 280;
 
-      // Serialize the live SVG innerHTML (just the inner content, not the <svg> tag)
+      // Get the bounding box of actual bubble content to crop tightly
+      const bubblesLayer = svgRef.current.querySelector('.bubbles-layer');
+      const shockwaveLayer = svgRef.current.querySelector('.shockwave-layer');
+
+      // Use the bubbles layer bbox to determine content bounds
+      let contentBBox = { x: 0, y: 0, width: 0, height: 0 };
+      if (bubblesLayer && (bubblesLayer as SVGGraphicsElement).getBBox) {
+        const bbox = (bubblesLayer as SVGGraphicsElement).getBBox();
+        contentBBox = { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height };
+      } else {
+        // Fallback to container dimensions
+        const rect = containerRef.current.getBoundingClientRect();
+        contentBBox = { x: 0, y: 0, width: rect.width, height: rect.height };
+      }
+
+      // Add margin around the content
+      const MARGIN = 60;
+      const BRAND_H = 80;
+      const contentW = Math.round(contentBBox.width + MARGIN * 2);
+      const contentH = Math.round(contentBBox.height + MARGIN * 2);
+      const totalW = Math.max(contentW, 800); // min width for branding
+      const totalH = contentH + BRAND_H;
+
+      // Offset to center the bubbles in the export
+      const offsetX = Math.round(-contentBBox.x + MARGIN + (totalW - contentW) / 2);
+      const offsetY = Math.round(-contentBBox.y + MARGIN);
+
+      // Get the SVG inner content
       const innerContent = svgRef.current.innerHTML;
 
-      // Build complete SVG as a string — no DOM manipulation, just concatenation
+      // Branding positions
+      const brandY = totalH - BRAND_H + 15;
+      const logoX = totalW - 280;
+
       const svgString = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}">
   <rect width="${totalW}" height="${totalH}" fill="#0a0a0a"/>
-  <g transform="translate(${PAD},${PAD})">
+  <g transform="translate(${offsetX},${offsetY})">
     ${innerContent}
   </g>
-  <line x1="${PAD}" y1="${brandY - 6}" x2="${totalW - PAD}" y2="${brandY - 6}" stroke="rgba(0,236,151,0.2)" stroke-width="1"/>
+  <rect x="0" y="${totalH - BRAND_H}" width="${totalW}" height="${BRAND_H}" fill="#0a0a0a"/>
+  <line x1="40" y1="${brandY - 12}" x2="${totalW - 40}" y2="${brandY - 12}" stroke="rgba(0,236,151,0.15)" stroke-width="1"/>
   <g transform="translate(${logoX},${brandY})" opacity="0.7">
     <path d="M 38 22 A 16 16 0 1 1 29 8.4" stroke="#00EC97" stroke-width="2.5" stroke-linecap="round" fill="none"/>
     <path d="M 31 22 A 9 9 0 1 1 22 13" stroke="#00EC97" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.35"/>
@@ -599,7 +623,7 @@ export function VoidBubblesEngine() {
     <text x="50" y="20" fill="#00EC97" font-family="monospace" font-size="18" font-weight="bold">VOIDSPACE<tspan fill="#00D4FF" font-weight="normal">.io</tspan></text>
     <text x="50" y="36" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="9">NEAR ECOSYSTEM INTELLIGENCE</text>
   </g>
-  <text x="${PAD}" y="${brandY + 28}" fill="rgba(255,255,255,0.3)" font-family="monospace" font-size="11">VOID BUBBLES · ${tokens.length} TOKENS · ${today}</text>
+  <text x="40" y="${brandY + 8}" fill="rgba(255,255,255,0.25)" font-family="monospace" font-size="10">VOID BUBBLES  ·  ${tokens.length} TOKENS  ·  ${today}</text>
 </svg>`;
 
       const blob = new Blob([svgString], { type: 'image/svg+xml' });
