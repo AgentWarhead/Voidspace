@@ -576,7 +576,7 @@ export function VoidBubblesEngine() {
 
       // Padding & branding zone
       const PAD = 50;
-      const BRAND_H = 70;
+      const BRAND_H = 90;
       const totalW = cw + PAD * 2;
       const totalH = ch + PAD * 2 + BRAND_H;
 
@@ -642,7 +642,7 @@ export function VoidBubblesEngine() {
       wrapper.appendChild(clone);
 
       // ── Branding zone (bottom) ──
-      const brandY = ch + PAD * 2 + 8;
+      const brandY = ch + PAD * 2 + 16;
       const brandG = document.createElementNS(ns, 'g');
       brandG.setAttribute('opacity', '0.6');
 
