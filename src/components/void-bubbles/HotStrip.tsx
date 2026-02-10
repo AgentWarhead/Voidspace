@@ -1,0 +1,153 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface VoidBubbleToken {
+  id: string;
+  symbol: string;
+  name: string;
+  price: number;
+  priceChange24h: number;
+  volume24h: number;
+  liquidity: number;
+  marketCap: number;
+  category: string;
+  healthScore: number;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskFactors: string[];
+  detectedAt: string;
+  priceChange1h: number;
+  priceChange6h: number;
+  dexScreenerUrl?: string;
+  refFinanceUrl?: string;
+  contractAddress: string;
+}
+
+interface HotStripProps {
+  onTokenClick?: (tokenId: string) => void;
+}
+
+export function HotStrip({ onTokenClick }: HotStripProps) {
+  const [tokens, setTokens] = useState<VoidBubbleToken[]>([]);
+  const [loading, setLoading] = useState(true);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  const fetchTokens = async () => {
+    try {
+      const res = await fetch('/api/void-bubbles');
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      setTokens(data.tokens || []);
+    } catch (error) {
+      console.error('Failed to fetch tokens for hot strip:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTokens();
+    const interval = setInterval(fetchTokens, 60000); // Refresh every 60s
+    return () => clearInterval(interval);
+  }, []);
+
+  // Get top 10 movers (5 gainers + 5 losers mixed)
+  const topMovers = [...tokens]
+    .sort((a, b) => Math.abs(b.priceChange24h) - Math.abs(a.priceChange24h))
+    .slice(0, 10);
+
+  // Duplicate items for seamless loop
+  const tickerItems = [...topMovers, ...topMovers];
+
+  const handleTokenClick = (tokenId: string) => {
+    onTokenClick?.(tokenId);
+  };
+
+  if (loading) {
+    return (
+      <div className="overflow-hidden bg-background/90 border-b border-border">
+        <div className="flex items-center px-4 py-2 font-mono text-xs text-text-muted">
+          <span className="animate-pulse">⚡ SCANNING MARKET MOVERS...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (topMovers.length === 0) {
+    return (
+      <div className="overflow-hidden bg-background/90 border-b border-border">
+        <div className="flex items-center px-4 py-2 font-mono text-xs text-text-muted">
+          <span>⚡ HOT STRIP — NO DATA</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden bg-background/90 border-b border-border">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/3 to-transparent opacity-50" />
+      
+      {/* Animated ticker */}
+      <div 
+        ref={stripRef}
+        className="relative flex items-center whitespace-nowrap"
+        style={{
+          animation: 'scroll-left 45s linear infinite',
+        }}
+      >
+        {tickerItems.map((token, index) => {
+          const isGainer = token.priceChange24h >= 0;
+          const change = token.priceChange24h;
+          
+          return (
+            <div
+              key={`${token.id}-${index}`}
+              onClick={() => handleTokenClick(token.id)}
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-surface/30 transition-colors",
+                "font-mono text-xs font-bold tracking-wide"
+              )}
+            >
+              {/* Token symbol */}
+              <span className="text-text-primary">
+                {token.symbol}
+              </span>
+              
+              {/* Change percentage with icon */}
+              <div className={cn(
+                "flex items-center gap-1",
+                isGainer ? "text-near-green" : "text-error"
+              )}>
+                {isGainer ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                <span>
+                  {isGainer ? '+' : ''}{change.toFixed(1)}%
+                </span>
+              </div>
+              
+              {/* Separator dot */}
+              <span className="text-text-muted">•</span>
+            </div>
+          );
+        })}
+      </div>
+      
+      <style jsx>{`
+        @keyframes scroll-left {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}

@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, RotateCcw, Clock, Activity, Zap, X,
-  TrendingUp, TrendingDown, Shield,
+  TrendingUp, TrendingDown, Shield, Search,
 } from 'lucide-react';
 // These icons exist but TS types are broken in v0.453 RSC mode
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
@@ -175,6 +175,9 @@ export function VoidBubblesEngine() {
   const [period, setPeriod] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d');
   const [sizeMetric, setSizeMetric] = useState<'marketCap' | 'volume' | 'performance'>('marketCap');
   const [bubbleContent, setBubbleContent] = useState<'performance' | 'price' | 'volume' | 'marketCap'>('performance');
+  // Spotlight Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   // Refs
   const svgRef = useRef<SVGSVGElement>(null);
@@ -592,27 +595,7 @@ export function VoidBubblesEngine() {
     
     setTimeout(animateScanLine, 2000);
 
-    // Category zone labels (subtle, behind bubbles)
-    const labelLayer = svg.append('g').attr('class', 'category-labels');
-    if (filterCategory === 'all' && uniqueCats.length > 1) {
-      uniqueCats.forEach(cat => {
-        const angle = catAngle(cat);
-        const labelDist = clusterRadius * 1.6;
-        const lx = centerX + Math.cos(angle) * labelDist;
-        const ly = centerY + Math.sin(angle) * labelDist;
-        labelLayer.append('text')
-          .attr('x', lx)
-          .attr('y', ly)
-          .attr('text-anchor', 'middle')
-          .attr('fill', CATEGORY_COLORS[cat] || '#888')
-          .attr('font-size', 10)
-          .attr('font-family', "'JetBrains Mono', monospace")
-          .attr('font-weight', '500')
-          .attr('letter-spacing', '0.1em')
-          .attr('opacity', 0.2)
-          .text(cat.toUpperCase());
-      });
-    }
+    // Category zone labels removed - replaced with colored bubble borders
 
     // Bubble groups
     const bubbleGroups = svg.append('g').attr('class', 'bubbles-layer')
@@ -651,18 +634,15 @@ export function VoidBubblesEngine() {
       .attr('opacity', 0)
       .attr('filter', 'url(#xray-glow)');
 
-    // Main bubble — clean, vibrant orb
+    // Main bubble — clean, vibrant orb with category-colored border
     bubbleGroups.append('circle')
       .attr('class', 'bubble-main')
       .attr('data-id', d => d.token.id)
       .attr('r', 0)
       .attr('fill', d => `url(#grad-${d.id.replace(/[^a-zA-Z0-9]/g, '_')})`)
-      .attr('stroke', d => {
-        const s = d3.hsl(d.glowColor);
-        s.l = Math.min(s.l + 0.1, 0.7);
-        return s.formatRgb();
-      })
-      .attr('stroke-width', d => d.targetRadius > 30 ? 2 : d.targetRadius > 16 ? 1.5 : 0.5)
+      .attr('stroke', d => CATEGORY_COLORS[d.token.category] || '#64748B')
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.4)
       .attr('opacity', 0.92);
 
     // Skull overlay for critical risk
@@ -856,7 +836,6 @@ export function VoidBubblesEngine() {
       .on('zoom', (event) => {
         svg.select('.bubbles-layer').attr('transform', event.transform);
         svg.select('.shockwave-layer').attr('transform', event.transform);
-        svg.select('.category-labels').attr('transform', event.transform);
       });
 
     svg.call(zoom);
@@ -957,6 +936,47 @@ export function VoidBubblesEngine() {
         .attr('opacity', isHighlighted ? 1 : 0.1);
     });
   }, [highlightMode, filteredTokens, getCurrentPriceChange]);
+
+  // Spotlight Search effect
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const svg = d3.select(svgRef.current);
+    const groups = svg.selectAll('.bubble-group');
+    
+    if (!searchQuery.trim()) {
+      // Reset all bubbles to normal when search is cleared
+      groups.select('.bubble-main').transition().duration(300).attr('opacity', 0.92);
+      groups.select('.bubble-glow').transition().duration(300).attr('opacity', 0.35);
+      groups.select('.bubble-label').transition().duration(300).attr('opacity', 1);
+      groups.select('.bubble-secondary').transition().duration(300).attr('opacity', 1);
+      return;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    
+    groups.each(function() {
+      const el = d3.select(this);
+      const d = el.datum() as BubbleNode;
+      const matches = d.token.symbol.toLowerCase().includes(query) || 
+                     d.token.name.toLowerCase().includes(query);
+      
+      el.select('.bubble-main')
+        .transition().duration(400)
+        .attr('opacity', matches ? 1 : 0.15);
+      
+      el.select('.bubble-glow')
+        .transition().duration(400)
+        .attr('opacity', matches ? 0.7 : 0.05);
+      
+      el.select('.bubble-label')
+        .transition().duration(400)
+        .attr('opacity', matches ? 1 : 0.1);
+      
+      el.select('.bubble-secondary')
+        .transition().duration(400)
+        .attr('opacity', matches ? 1 : 0.1);
+    });
+  }, [searchQuery, filteredTokens]);
 
   // ────────────────────── Snapshot & Share ──────────────────────
 
@@ -1711,6 +1731,57 @@ export function VoidBubblesEngine() {
         {renderTokenAnatomy()}
       </AnimatePresence>
       {renderWhaleAlerts()}
+
+      {/* Spotlight Search */}
+      <div className="absolute bottom-4 right-4 z-30">
+        <AnimatePresence>
+          {showSearch ? (
+            <motion.div
+              initial={{ width: 44, opacity: 0.8 }}
+              animate={{ width: 280, opacity: 1 }}
+              exit={{ width: 44, opacity: 0.8 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="flex items-center gap-2 bg-surface/95 backdrop-blur-xl border border-border rounded-lg p-2 shadow-xl"
+            >
+              <Search className="w-4 h-4 text-near-green shrink-0" />
+              <input
+                type="text"
+                placeholder="Search tokens..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchQuery('');
+                    setShowSearch(false);
+                  }
+                }}
+                className="flex-1 bg-transparent border-none outline-none text-sm font-mono text-text-primary placeholder-text-muted"
+                autoFocus
+              />
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setShowSearch(false);
+                }}
+                className="p-1 hover:bg-surface-hover rounded transition-colors shrink-0"
+              >
+                <X className="w-3 h-3 text-text-muted" />
+              </button>
+            </motion.div>
+          ) : (
+            <motion.button
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowSearch(true)}
+              className="flex items-center justify-center w-11 h-11 bg-surface/95 backdrop-blur-xl border border-border rounded-lg shadow-xl hover:border-near-green/30 transition-all group"
+            >
+              <Search className="w-4 h-4 text-near-green group-hover:text-near-green" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
