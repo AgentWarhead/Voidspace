@@ -130,9 +130,24 @@ const generateRandomEvent = (): VoidEvent => {
 export function VoidPulseNotifications() {
   const [currentEvent, setCurrentEvent] = useState<VoidEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
+  // Check if mobile viewport
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // sm breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    // Don't show notifications on mobile at all
+    if (isMobile) return;
+
     const generateEvent = () => {
       if (currentEvent) return; // Don't generate if one is already showing
 
@@ -140,30 +155,30 @@ export function VoidPulseNotifications() {
       setCurrentEvent(event);
       setIsVisible(true);
 
-      // Auto-dismiss after 5 seconds
+      // Auto-dismiss after 3 seconds on desktop (reduced from 5)
       setTimeout(() => {
         setIsVisible(false);
         setTimeout(() => {
           setCurrentEvent(null);
         }, 300); // Wait for exit animation
-      }, 5000);
+      }, 3000);
     };
 
-    // Generate first event after 10-20 seconds
-    const initialDelay = Math.random() * 10000 + 10000;
+    // Generate first event after 15-25 seconds (increased delay)
+    const initialDelay = Math.random() * 10000 + 15000;
     const initialTimer = setTimeout(generateEvent, initialDelay);
 
-    // Then generate events every 30-60 seconds
+    // Then generate events every 45-90 seconds (less frequent)
     const interval = setInterval(() => {
-      const delay = Math.random() * 30000 + 30000; // 30-60 seconds
+      const delay = Math.random() * 45000 + 45000; // 45-90 seconds
       setTimeout(generateEvent, delay);
-    }, 60000); // Check every minute
+    }, 90000); // Check every 90 seconds
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(interval);
     };
-  }, [currentEvent]);
+  }, [currentEvent, isMobile]);
 
   const handleClick = () => {
     if (!currentEvent) return;
@@ -190,27 +205,28 @@ export function VoidPulseNotifications() {
     }, 300);
   };
 
-  if (!currentEvent) return null;
+  // Don't render at all on mobile
+  if (!currentEvent || isMobile) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 pointer-events-none">
+    <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
       <AnimatePresence>
         {isVisible && (
           <motion.div
-            initial={{ opacity: 0, x: 400, scale: 0.9 }}
+            initial={{ opacity: 0, x: 300, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 400, scale: 0.9 }}
+            exit={{ opacity: 0, x: 300, scale: 0.8 }}
             transition={{ 
               type: "spring", 
-              stiffness: 300, 
-              damping: 30,
-              duration: 0.3 
+              stiffness: 400, 
+              damping: 25,
+              duration: 0.2 
             }}
             className="pointer-events-auto"
           >
             <div
               onClick={handleClick}
-              className="group relative w-80 bg-surface border border-border rounded-lg p-4 cursor-pointer hover:bg-surface-hover hover:border-border-hover transition-all duration-200 hover:shadow-glow-sm"
+              className="group relative w-64 bg-surface/90 backdrop-blur-xl border border-border rounded-lg p-3 cursor-pointer hover:bg-surface-hover hover:border-border-hover transition-all duration-200 hover:shadow-glow-sm"
             >
               {/* Pulse dot indicator */}
               <div className="absolute -top-1 -left-1">
@@ -229,30 +245,30 @@ export function VoidPulseNotifications() {
               </button>
 
               {/* Header */}
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1.5">
                 <div 
-                  className="flex items-center justify-center w-6 h-6 rounded-full"
+                  className="flex items-center justify-center w-5 h-5 rounded-full"
                   style={{ backgroundColor: `${currentEvent.color}20`, color: currentEvent.color }}
                 >
                   {currentEvent.icon}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-near-green">LIVE</span>
-                  <span className="text-xs text-text-muted">Just now</span>
+                  <span className="text-[10px] font-medium text-near-green font-mono uppercase tracking-wider">LIVE</span>
+                  <span className="text-[10px] text-text-muted font-mono">Now</span>
                 </div>
               </div>
 
               {/* Message */}
-              <p className="text-sm text-text-primary leading-relaxed">
+              <p className="text-xs text-text-primary leading-relaxed">
                 {currentEvent.message}
               </p>
 
               {/* Footer */}
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-text-muted">
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[10px] text-text-muted font-mono opacity-70">
                   Click to explore →
                 </span>
-                <div className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-near-green animate-pulse" />
               </div>
 
               {/* Subtle border animation */}

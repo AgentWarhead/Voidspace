@@ -675,45 +675,49 @@ export function VoidBubblesEngine() {
       .attr('opacity', 0)
       .text('💀');
 
-    // Symbol labels — all bubbles ≥12px radius get a label
-    bubbleGroups.filter(d => d.targetRadius >= 12)
+    // Symbol labels — all bubbles ≥8px radius get a label (lower threshold for mobile)
+    bubbleGroups.filter(d => d.targetRadius >= 8)
       .append('text')
       .attr('class', 'bubble-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('dy', d => d.targetRadius >= 28 ? '-0.4em' : '0')
+      .attr('dy', d => d.targetRadius >= 26 ? '-0.35em' : '0')
       .attr('fill', '#fff')
       .attr('font-size', d => {
         const symbolLen = d.token.symbol.length;
-        const fitFont = (d.targetRadius * 1.5) / Math.max(symbolLen, 2);
-        return Math.max(Math.min(fitFont, 15), 6);
+        const baseMultiplier = width < 768 ? 1.8 : 1.7; // Larger text on mobile
+        const fitFont = (d.targetRadius * baseMultiplier) / Math.max(symbolLen, 2);
+        return Math.max(Math.min(fitFont, 18), 8); // Increased max font size
       })
       .attr('font-weight', '700')
       .attr('font-family', "'JetBrains Mono', monospace")
       .attr('pointer-events', 'none')
-      .attr('opacity', d => d.targetRadius < 16 ? 0.75 : 1)
-      .style('text-shadow', '0 1px 3px rgba(0,0,0,0.7)')
+      .attr('opacity', 1)
+      .style('text-shadow', '0 2px 6px rgba(0,0,0,0.9)') // Stronger shadow for better readability
       .text(d => d.token.symbol);
 
-    // Secondary label (on bubbles ≥28px radius) - content based on bubbleContent selection
-    bubbleGroups.filter(d => d.targetRadius >= 28)
+    // Secondary label (on bubbles ≥20px radius) - content based on bubbleContent selection - reduced threshold for mobile
+    bubbleGroups.filter(d => d.targetRadius >= 20)
       .append('text')
       .attr('class', 'bubble-secondary')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('dy', '0.65em')
+      .attr('dy', '0.6em')
       .attr('fill', d => {
         if (bubbleContent === 'performance') {
           const currentChange = getCurrentPriceChange(d.token);
-          return currentChange >= 0 ? '#b8ffd9' : '#ffb3b8';
+          return currentChange >= 0 ? '#00EC97' : '#FF3366';
         }
         return '#d1d5db'; // neutral color for non-performance displays
       })
-      .attr('font-size', d => Math.max(Math.min(d.targetRadius * 0.28, 11), 7))
-      .attr('font-weight', '600')
+      .attr('font-size', d => {
+        const mobileMultiplier = width < 768 ? 0.4 : 0.36; // Larger on mobile
+        return Math.max(Math.min(d.targetRadius * mobileMultiplier, 14), 9); // Better size range
+      })
+      .attr('font-weight', '700') // Bolder for better visibility
       .attr('font-family', "'JetBrains Mono', monospace")
       .attr('pointer-events', 'none')
-      .style('text-shadow', '0 1px 2px rgba(0,0,0,0.6)')
+      .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)') // Stronger shadow
       .text(d => {
         switch (bubbleContent) {
           case 'performance':
@@ -777,15 +781,19 @@ export function VoidBubblesEngine() {
         if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
       });
 
-    // Force simulation — balanced spacing with category hints (enhanced bubble spacing)
+    // Force simulation — enhanced spacing for better mobile UX
+    const isMobile = width < 768;
+    const spacingMultiplier = isMobile ? 1.8 : 1.4; // More spacing on mobile
+    const repulsionStrength = isMobile ? -50 : -40; // Stronger repulsion on mobile
+    
     const simulation = d3.forceSimulation(nodes)
-      .force('center', d3.forceCenter(centerX, centerY).strength(0.05))
-      .force('charge', d3.forceManyBody().strength(-25))
-      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 8).strength(0.9).iterations(4))
-      .force('x', d3.forceX<BubbleNode>(d => catX(d.token.category)).strength(0.02))
-      .force('y', d3.forceY<BubbleNode>(d => catY(d.token.category)).strength(0.02))
-      .alphaDecay(0.015)
-      .velocityDecay(0.45)
+      .force('center', d3.forceCenter(centerX, centerY).strength(0.04))
+      .force('charge', d3.forceManyBody().strength(repulsionStrength))
+      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + (15 * spacingMultiplier)).strength(0.98).iterations(6))
+      .force('x', d3.forceX<BubbleNode>(d => catX(d.token.category)).strength(0.01)) // Further reduced clustering
+      .force('y', d3.forceY<BubbleNode>(d => catY(d.token.category)).strength(0.01))
+      .alphaDecay(0.008) // Even slower settling for better spacing
+      .velocityDecay(0.6) // Higher friction for stability
       .on('tick', () => {
         bubbleGroups.attr('transform', d => `translate(${d.x},${d.y})`);
       });
@@ -1201,7 +1209,6 @@ export function VoidBubblesEngine() {
               <button
                 onClick={() => navigator.clipboard.writeText(selectedToken.contractAddress)}
                 className="px-2 py-1 text-xs bg-surface hover:bg-surface-hover rounded transition-colors"
-                title="Copy address"
               >
                 📋
               </button>
@@ -1258,13 +1265,41 @@ export function VoidBubblesEngine() {
       hoveredToken.healthScore >= 50 ? 'text-warning' :
       hoveredToken.healthScore >= 25 ? 'text-orange-400' : 'text-error';
 
+    // Smart positioning to prevent cutoff - especially important on mobile
+    const tooltip = {
+      width: 180, // estimated tooltip width
+      height: 60, // estimated tooltip height
+    };
+    
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+    
+    let left = hoverPos.x + 16;
+    let top = hoverPos.y - 10;
+    
+    // Adjust horizontal position if tooltip would overflow
+    if (left + tooltip.width > viewport.width - 10) {
+      left = hoverPos.x - tooltip.width - 16;
+    }
+    
+    // Adjust vertical position if tooltip would overflow
+    if (top + tooltip.height > viewport.height - 10) {
+      top = hoverPos.y - tooltip.height - 16;
+    }
+    
+    // Ensure tooltip stays on screen
+    left = Math.max(10, Math.min(left, viewport.width - tooltip.width - 10));
+    top = Math.max(10, Math.min(top, viewport.height - tooltip.height - 10));
+
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed z-50 pointer-events-none"
-        style={{ left: hoverPos.x + 16, top: hoverPos.y - 10 }}
+        className="fixed z-50 pointer-events-none hidden sm:block"
+        style={{ left, top }}
       >
         <div className="relative animated-border bg-surface/95 backdrop-blur-xl border border-border rounded-lg p-3 shadow-2xl min-w-[180px]">
           {/* Scan line sweep effect */}
@@ -1299,7 +1334,7 @@ export function VoidBubblesEngine() {
     if (whaleAlerts.length === 0) return null;
 
     return (
-      <div className="absolute bottom-14 sm:bottom-14 left-2 sm:left-4 z-20 space-y-1.5 max-w-[260px] sm:max-w-[280px]">
+      <div className="hidden sm:block absolute bottom-14 left-4 z-20 space-y-1.5 max-w-[280px]">
         <AnimatePresence mode="popLayout">
           {whaleAlerts.slice(0, 3).map(alert => (
             <motion.div
@@ -1317,18 +1352,22 @@ export function VoidBubblesEngine() {
               }}
               exit={{ opacity: 0, x: -50, scale: 0.8 }}
               transition={{
-                boxShadow: { duration: 1.5, times: [0, 0.1, 1] }
+                boxShadow: { duration: 1.5, times: [0, 0.1, 1] },
+                type: "spring",
+                damping: 15,
+                stiffness: 100
               }}
               className={cn(
-                "flex items-center gap-2 bg-surface/90 backdrop-blur-xl border rounded-lg px-3 py-2",
+                "flex items-center gap-2 bg-surface/80 backdrop-blur-xl border rounded-lg px-2.5 py-1.5 shadow-lg",
+                "transform hover:scale-105 transition-transform duration-200",
                 alert.type === 'buy' 
-                  ? 'border-l-2 border-l-near-green border-border' 
-                  : 'border-l-2 border-l-error border-border'
+                  ? 'border-l-2 border-l-near-green border-border/50' 
+                  : 'border-l-2 border-l-error border-border/50'
               )}
             >
-              <Zap className={cn('w-3.5 h-3.5 shrink-0', alert.type === 'buy' ? 'text-near-green' : 'text-error')} />
+              <Zap className={cn('w-3 h-3 shrink-0', alert.type === 'buy' ? 'text-near-green' : 'text-error')} />
               <div className="min-w-0">
-                <p className="text-[11px] text-text-primary font-mono truncate">
+                <p className="text-[10px] text-text-primary font-mono truncate">
                   <span className={alert.type === 'buy' ? 'text-near-green' : 'text-error'}>
                     {alert.type === 'buy' ? '🐋 BUY' : '🐋 SELL'}
                   </span>
@@ -1402,7 +1441,8 @@ export function VoidBubblesEngine() {
                 key={p}
                 onClick={() => setPeriod(p)}
                 className={cn(
-                  'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold transition-all uppercase',
+                  'px-3 sm:px-3 py-2 sm:py-1 rounded-md text-xs sm:text-[11px] font-mono font-bold transition-all uppercase',
+                  'min-w-[40px] sm:min-w-auto min-h-[40px] sm:min-h-auto touch-manipulation', // Better touch targets on mobile
                   period === p
                     ? 'bg-near-green/20 text-near-green border border-near-green/30'
                     : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -1414,7 +1454,7 @@ export function VoidBubblesEngine() {
           </div>
           
           {/* Category filters — command terminal aesthetic */}
-          <div className="relative flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full min-w-0">
+          <div className="relative flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full min-w-0 scroll-smooth">
           {/* Scan line glow behind control row */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/5 to-transparent opacity-30" />
           
@@ -1422,7 +1462,8 @@ export function VoidBubblesEngine() {
           <button
             onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
             className={cn(
-              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              'relative px-3 sm:px-2.5 py-2 sm:py-1 rounded-md text-xs sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              'min-h-[44px] sm:min-h-auto touch-manipulation', // Better touch targets and touch optimization
               highlightMode === 'gainers'
                 ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
                 : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -1434,7 +1475,8 @@ export function VoidBubblesEngine() {
           <button
             onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
             className={cn(
-              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              'relative px-3 sm:px-2.5 py-2 sm:py-1 rounded-md text-xs sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              'min-h-[44px] sm:min-h-auto touch-manipulation', // Better touch targets
               highlightMode === 'losers'
                 ? 'bg-red-500/20 text-red-400 border border-red-500/30 border-l-2 border-l-red-500'
                 : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -1451,7 +1493,8 @@ export function VoidBubblesEngine() {
               key={cat}
               onClick={() => setFilterCategory(cat)}
               className={cn(
-                'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group',
+                'relative px-3 sm:px-2.5 py-2 sm:py-1 rounded-md text-xs sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group',
+                'min-h-[44px] sm:min-h-auto touch-manipulation', // Better touch targets
                 filterCategory === cat
                   ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
                   : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -1474,7 +1517,7 @@ export function VoidBubblesEngine() {
         <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 self-end sm:self-auto">
           {/* Bubble Size Toggle */}
           <div className="flex items-center gap-0.5 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-0.5">
-            <span className="text-[9px] font-mono text-text-muted px-1.5 uppercase">Size</span>
+            <span className="hidden sm:block text-[9px] font-mono text-text-muted px-1.5 uppercase">Size</span>
             {[
               { key: 'marketCap', label: 'Cap' },
               { key: 'volume', label: 'Vol' },
@@ -1484,7 +1527,8 @@ export function VoidBubblesEngine() {
                 key={opt.key} 
                 onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
                 className={cn(
-                  'px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-all uppercase',
+                  'px-2.5 sm:px-2 py-2 sm:py-1 rounded-md text-xs sm:text-[10px] font-mono font-bold transition-all uppercase',
+                  'min-w-[40px] sm:min-w-auto min-h-[40px] sm:min-h-auto touch-manipulation', // Better touch targets
                   sizeMetric === opt.key
                     ? 'bg-near-green/20 text-near-green border border-near-green/30'
                     : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -1497,7 +1541,7 @@ export function VoidBubblesEngine() {
           
           {/* Bubble Content Toggle */}
           <div className="flex items-center gap-0.5 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-0.5">
-            <span className="text-[9px] font-mono text-text-muted px-1.5 uppercase">Show</span>
+            <span className="hidden sm:block text-[9px] font-mono text-text-muted px-1.5 uppercase">Show</span>
             {[
               { key: 'performance', label: '%' },
               { key: 'price', label: '$' },
@@ -1508,7 +1552,8 @@ export function VoidBubblesEngine() {
                 key={opt.key} 
                 onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
                 className={cn(
-                  'px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-all uppercase',
+                  'px-2.5 sm:px-2 py-2 sm:py-1 rounded-md text-xs sm:text-[10px] font-mono font-bold transition-all uppercase',
+                  'min-w-[36px] sm:min-w-auto min-h-[40px] sm:min-h-auto touch-manipulation', // Better touch targets
                   bubbleContent === opt.key
                     ? 'bg-near-green/20 text-near-green border border-near-green/30'
                     : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -1522,76 +1567,77 @@ export function VoidBubblesEngine() {
             <button
               onClick={() => setXrayMode(!xrayMode)}
               className={cn(
-                'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
+                'relative p-2.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
+                'min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto touch-manipulation', // Better mobile touch targets
                 xrayMode
                   ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
                   : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
               )}
-              title="X-Ray Mode — See concentration risk"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
               <div className="relative z-10">
                 {xrayMode ? <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               </div>
             </button>
-            <FeatureTip
-              tip="X-Ray Mode reveals concentration risk and rug detection scores. Red rings = high risk. Use this before aping!"
-              title="🔍 X-RAY MODE"
-              position="top"
-              className="ml-1"
-            />
+            <div className="hidden sm:block">
+              <FeatureTip
+                tip="X-Ray Mode reveals concentration risk and rug detection scores. Red rings = high risk. Use this before aping!"
+                title="🔍 X-RAY MODE"
+                position="top"
+                className="ml-1"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => { setSoundEnabled(!soundEnabled); }}
               className={cn(
-                'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
+                'relative p-2.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
+                'min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto touch-manipulation', // Better mobile touch targets
                 soundEnabled
                   ? 'bg-near-green/20 border-near-green/30 text-near-green'
                   : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
               )}
-              title="Sonic Mode — Hear the market"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
               <div className="relative z-10">
                 {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               </div>
             </button>
-            <FeatureTip
-              tip="Sonic Mode lets you HEAR the market. Pumps play ascending tones, dumps play low rumbles, and whale alerts get dramatic chimes."
-              title="🔊 SONIC MODE"
-              position="top"
-              className="ml-1"
-            />
+            <div className="hidden sm:block">
+              <FeatureTip
+                tip="Sonic Mode lets you HEAR the market. Pumps play ascending tones, dumps play low rumbles, and whale alerts get dramatic chimes."
+                title="🔊 SONIC MODE"
+                position="top"
+                className="ml-1"
+              />
+            </div>
           </div>
           <button
             onClick={handleSnapshot}
-            className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
-            title="Save snapshot"
+            className="relative p-2.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto touch-manipulation"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
             <div className="relative z-10">
-              <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Camera className="w-4 h-4 sm:w-4 sm:h-4" />
             </div>
           </button>
           <button
             onClick={handleShareX}
-            className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
-            title="Share on X"
+            className="relative p-2.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto touch-manipulation"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
             <div className="relative z-10">
-              <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Share2 className="w-4 h-4 sm:w-4 sm:h-4" />
             </div>
           </button>
           <button
             onClick={() => { initSimulation(); }}
-            className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
-            title="Reset view"
+            className="relative p-2.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto touch-manipulation"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
             <div className="relative z-10">
-              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <RotateCcw className="w-4 h-4 sm:w-4 sm:h-4" />
             </div>
           </button>
         </div>
@@ -1622,12 +1668,14 @@ export function VoidBubblesEngine() {
               <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
                 AI-POWERED
               </span>
-              <FeatureTip
-                tip="Void Bubbles uses AI health scoring to assess every token's risk level. Click any bubble for the full breakdown."
-                title="🧠 AI-POWERED"
-                position="top"
-                className=""
-              />
+              <div className="hidden sm:block">
+                <FeatureTip
+                  tip="Void Bubbles uses AI health scoring to assess every token's risk level. Click any bubble for the full breakdown."
+                  title="🧠 AI-POWERED"
+                  position="top"
+                  className=""
+                />
+              </div>
             </div>
           </div>
           {/* Right: Voidspace logo */}
