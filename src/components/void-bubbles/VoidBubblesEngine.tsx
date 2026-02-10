@@ -1683,7 +1683,7 @@ export function VoidBubblesEngine() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-background">
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         {/* Animated background grid */}
         <div className="absolute inset-0 bg-grid opacity-40" />
         
@@ -1716,7 +1716,7 @@ export function VoidBubblesEngine() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-background">
+      <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-4">
           <AlertTriangle className="w-16 h-16 text-red-400 mx-auto" />
           <h2 className="text-xl font-bold text-text-primary">Connection Lost</h2>
@@ -1730,7 +1730,7 @@ export function VoidBubblesEngine() {
   }
 
   return (
-    <div className="flex-1 relative overflow-hidden bg-background">
+    <div className="flex-1 relative overflow-hidden">
       {/* Power Bar — Desktop */}
       <div className="hidden sm:block absolute top-4 left-4 z-20">
         <div className="bg-surface/95 backdrop-blur-xl border border-border rounded-lg shadow-xl p-3">
@@ -2095,7 +2095,7 @@ export function VoidBubblesEngine() {
       {/* Branding Bar — always visible at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-20">
         <div className="h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent" />
-        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-background/90 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-[#04060b]/80 backdrop-blur-xl">
           {/* Left: Stats */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">

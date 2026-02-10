@@ -15,9 +15,62 @@ export function VoidBubblesPageClient() {
   }, []);
 
   return (
-    <div className="flex flex-col bg-background overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
+    <div className="flex flex-col overflow-hidden relative" style={{ height: 'calc(100vh - 4rem)' }}>
+      {/* ── Full-Viewport Voidspace Background ── */}
+      <div className="absolute inset-0 z-0 bg-[#04060b]">
+        {/* Deep space gradient layers */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 120% 80% at 20% 10%, rgba(0,236,151,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse 100% 60% at 80% 90%, rgba(0,212,255,0.05) 0%, transparent 50%),
+              radial-gradient(ellipse 80% 80% at 50% 50%, rgba(157,78,221,0.04) 0%, transparent 60%),
+              radial-gradient(circle at 50% 50%, rgba(0,236,151,0.02) 0%, transparent 80%)
+            `,
+          }}
+        />
+        {/* Animated nebula pulse */}
+        <div
+          className="absolute inset-0 animate-pulse"
+          style={{
+            animationDuration: '8s',
+            background: `
+              radial-gradient(ellipse 60% 40% at 30% 70%, rgba(0,236,151,0.03) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 50% at 70% 30%, rgba(0,212,255,0.03) 0%, transparent 70%)
+            `,
+          }}
+        />
+        {/* Fine grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(0,236,151,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,236,151,0.3) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
+        {/* Vignette */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(4,6,11,0.7) 100%)',
+          }}
+        />
+        {/* Horizontal scan line (slow sweep) */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute w-full h-px"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(0,236,151,0.15) 20%, rgba(0,212,255,0.2) 50%, rgba(0,236,151,0.15) 80%, transparent 100%)',
+              animation: 'void-bg-scan 12s linear infinite',
+            }}
+          />
+        </div>
+      </div>
+
       {/* Compact Hero */}
-      <section className="relative py-2 border-b border-border shrink-0 overflow-hidden">
+      <section className="relative py-2 border-b border-border shrink-0 overflow-hidden z-10">
         <div
           className="absolute inset-0"
           style={{
@@ -56,10 +109,12 @@ export function VoidBubblesPageClient() {
       </section>
 
       {/* Hot Strip - Live Market Movers */}
-      <HotStrip />
+      <div className="relative z-10">
+        <HotStrip />
+      </div>
 
       {/* Main Visualization — takes all remaining space */}
-      <section className="flex-1 min-h-0 py-1">
+      <section className="flex-1 min-h-0 py-1 relative z-10">
         <Container size="xl" className="h-full">
           <VoidBubblesEngine />
         </Container>
