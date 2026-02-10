@@ -107,13 +107,17 @@ export function HotStrip({ onTokenClick }: HotStripProps) {
               key={`${token.id}-${index}`}
               onClick={() => handleTokenClick(token.id)}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-surface/30 transition-colors",
-                "font-mono text-xs font-bold tracking-wide"
+                "inline-flex items-center gap-2 px-4 py-2 cursor-pointer transition-all duration-200",
+                "font-mono text-xs font-bold tracking-wide",
+                "hover:bg-surface/40 hover:scale-105 hover:shadow-lg",
+                "active:scale-95 active:bg-near-green/10"
               )}
+              title={`Click to highlight ${token.symbol} in visualization`}
             >
-              {/* Token symbol */}
-              <span className="text-text-primary">
+              {/* Token symbol with clickable indicator */}
+              <span className="text-text-primary flex items-center gap-1">
                 {token.symbol}
+                <span className="w-1 h-1 bg-near-green/50 rounded-full opacity-60"></span>
               </span>
               
               {/* Change percentage with icon */}
