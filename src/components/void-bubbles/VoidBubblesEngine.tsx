@@ -372,7 +372,7 @@ export function VoidBubblesEngine() {
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs font-mono">
+                  <Badge variant="default" className="text-xs font-mono">
                     {token.category}
                   </Badge>
                   <button
@@ -393,7 +393,7 @@ export function VoidBubblesEngine() {
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold text-white">{formatPrice(token.price)}</span>
                   <Badge 
-                    variant={currentChange >= 0 ? "default" : "destructive"}
+                    variant="default"
                     className="font-mono text-xs"
                   >
                     {currentChange >= 0 ? '+' : ''}{currentChange.toFixed(1)}%
@@ -402,13 +402,13 @@ export function VoidBubblesEngine() {
 
                 {/* Price Performance Row */}
                 <div className="flex gap-1">
-                  <Badge variant="outline" className="text-xs font-mono">
+                  <Badge variant="glass" className="text-xs font-mono">
                     1H: {token.priceChange1h >= 0 ? '+' : ''}{token.priceChange1h.toFixed(1)}%
                   </Badge>
-                  <Badge variant="outline" className="text-xs font-mono">
+                  <Badge variant="glass" className="text-xs font-mono">
                     6H: {token.priceChange6h >= 0 ? '+' : ''}{token.priceChange6h.toFixed(1)}%
                   </Badge>
-                  <Badge variant="outline" className="text-xs font-mono">
+                  <Badge variant="glass" className="text-xs font-mono">
                     24H: {token.priceChange24h >= 0 ? '+' : ''}{token.priceChange24h.toFixed(1)}%
                   </Badge>
                 </div>
@@ -463,7 +463,7 @@ export function VoidBubblesEngine() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge variant={token.riskLevel === 'low' ? 'default' : token.riskLevel === 'critical' ? 'destructive' : 'secondary'}>
+                  <Badge variant='default'>
                     Risk: {token.riskLevel.charAt(0).toUpperCase() + token.riskLevel.slice(1)}
                   </Badge>
                 </div>
@@ -471,7 +471,7 @@ export function VoidBubblesEngine() {
                 {token.riskFactors.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {token.riskFactors.map((factor, i) => (
-                      <Badge key={i} variant="outline" className="text-xs">
+                      <Badge key={i} variant="glass" className="text-xs">
                         {factor}
                       </Badge>
                     ))}
@@ -494,7 +494,7 @@ export function VoidBubblesEngine() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-text-muted">Supply Concentration:</span>
                 <Badge 
-                  variant={supplyConcentration === 'Low' ? 'default' : supplyConcentration === 'High' ? 'destructive' : 'secondary'}
+                  variant='default'
                   className="text-xs"
                 >
                   {supplyConcentration}
@@ -508,7 +508,7 @@ export function VoidBubblesEngine() {
               <div className="flex flex-wrap gap-2">
                 <Button 
                   size="sm" 
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank')}
                   className="text-xs"
                 >
@@ -517,7 +517,7 @@ export function VoidBubblesEngine() {
                 </Button>
                 <Button 
                   size="sm" 
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank')}
                   className="text-xs"
                 >
@@ -527,7 +527,7 @@ export function VoidBubblesEngine() {
                 {token.website && (
                   <Button 
                     size="sm" 
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => window.open(token.website, '_blank')}
                     className="text-xs"
                   >
@@ -538,7 +538,7 @@ export function VoidBubblesEngine() {
                 {token.twitter && (
                   <Button 
                     size="sm" 
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => window.open(token.twitter, '_blank')}
                     className="text-xs"
                   >
@@ -1185,11 +1185,12 @@ export function VoidBubblesEngine() {
         d3.select(this).select('.bubble-glow')
           .transition().duration(200)
           .attr('stroke-width', 3.5)
-          .attr('opacity', d => {
-            const currentChange = getCurrentPriceChange(d.token);
+          .attr('opacity', (d: unknown) => {
+            const node = d as BubbleNode;
+            const currentChange = getCurrentPriceChange(node.token);
             const baseOpacity = 0.45;
             const performanceBonus = Math.min(Math.abs(currentChange) / 50, 0.2);
-            const sizeBonus = Math.min(d.targetRadius / 100, 0.15);
+            const sizeBonus = Math.min(node.targetRadius / 100, 0.15);
             return Math.min(baseOpacity + performanceBonus + sizeBonus, 0.8);
           });
       })
@@ -1494,7 +1495,7 @@ export function VoidBubblesEngine() {
             <div className="px-3 py-2 space-y-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">{hoveredToken.symbol}</span>
-                <Badge variant="secondary" className="text-xs">{hoveredToken.category}</Badge>
+                <Badge variant="default" className="text-xs">{hoveredToken.category}</Badge>
               </div>
               <div className="text-xs text-text-muted">
                 <div>{formatPrice(hoveredToken.price)} • MC: {formatCompact(hoveredToken.marketCap)}</div>
@@ -1542,7 +1543,7 @@ export function VoidBubblesEngine() {
               <div>
                 <h3 className="text-lg font-semibold text-text-primary">{selectedToken.name}</h3>
                 <p className="text-text-muted font-mono">{selectedToken.symbol}</p>
-                <Badge variant="secondary" className="mt-1">{selectedToken.category}</Badge>
+                <Badge variant="default" className="mt-1">{selectedToken.category}</Badge>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1573,7 +1574,7 @@ export function VoidBubblesEngine() {
                 </div>
                 <div>
                   <p className="text-sm text-text-muted">Risk Level</p>
-                  <Badge variant={selectedToken.riskLevel === 'low' ? 'default' : 'destructive'}>
+                  <Badge variant='default'>
                     {selectedToken.riskLevel}
                   </Badge>
                 </div>
@@ -1583,7 +1584,7 @@ export function VoidBubblesEngine() {
                 {selectedToken.contractAddress && selectedToken.contractAddress !== 'N/A' && (
                   <Button 
                     size="sm" 
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => window.open(`https://dexscreener.com/near/${selectedToken.contractAddress}`, '_blank')}
                   >
                     <ExternalLink className="w-3 h-3 mr-1" />
@@ -1593,7 +1594,7 @@ export function VoidBubblesEngine() {
                 {selectedToken.contractAddress && selectedToken.contractAddress !== 'N/A' && (
                   <Button 
                     size="sm" 
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => window.open(`https://app.ref.finance/#near|${selectedToken.contractAddress}`, '_blank')}
                   >
                     <ExternalLink className="w-3 h-3 mr-1" />
@@ -1605,7 +1606,7 @@ export function VoidBubblesEngine() {
               {selectedToken.website && (
                 <Button 
                   size="sm" 
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => window.open(selectedToken.website, '_blank')}
                   className="w-full"
                 >
@@ -1617,7 +1618,7 @@ export function VoidBubblesEngine() {
               {selectedToken.twitter && (
                 <Button 
                   size="sm" 
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => window.open(selectedToken.twitter, '_blank')}
                   className="w-full"
                 >
@@ -1629,7 +1630,7 @@ export function VoidBubblesEngine() {
               {selectedToken.telegram && (
                 <Button 
                   size="sm" 
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => window.open(selectedToken.telegram, '_blank')}
                   className="w-full"
                 >
@@ -1658,7 +1659,7 @@ export function VoidBubblesEngine() {
               </div>
 
               <Button 
-                variant="default" 
+                variant="primary" 
                 className="w-full"
                 onClick={() => toggleWatchlist(selectedToken.id)}
               >
@@ -1737,7 +1738,7 @@ export function VoidBubblesEngine() {
                 <Button
                   key={p}
                   size="sm"
-                  variant={period === p ? 'default' : 'ghost'}
+                  variant={period === p ? 'primary' : 'ghost'}
                   onClick={() => setPeriod(p)}
                   className="text-xs px-2"
                 >
@@ -1750,7 +1751,7 @@ export function VoidBubblesEngine() {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                variant={highlightMode === 'gainers' ? 'default' : 'secondary'}
+                variant={highlightMode === 'gainers' ? 'primary' : 'secondary'}
                 onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
                 className="text-xs"
               >
@@ -1759,7 +1760,7 @@ export function VoidBubblesEngine() {
               </Button>
               <Button
                 size="sm"
-                variant={highlightMode === 'losers' ? 'default' : 'secondary'}
+                variant={highlightMode === 'losers' ? 'primary' : 'secondary'}
                 onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
                 className="text-xs"
               >
@@ -1774,7 +1775,7 @@ export function VoidBubblesEngine() {
                 <Button
                   key={cat}
                   size="sm"
-                  variant={filterCategory === cat ? 'default' : 'ghost'}
+                  variant={filterCategory === cat ? 'primary' : 'ghost'}
                   onClick={() => setFilterCategory(cat)}
                   className="text-xs px-2"
                 >
@@ -1795,7 +1796,7 @@ export function VoidBubblesEngine() {
                   <Button
                     key={opt.key}
                     size="sm"
-                    variant={sizeMetric === opt.key ? 'default' : 'ghost'}
+                    variant={sizeMetric === opt.key ? 'primary' : 'ghost'}
                     onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
                     className="text-xs justify-start"
                   >
@@ -1818,7 +1819,7 @@ export function VoidBubblesEngine() {
                   <Button
                     key={opt.key}
                     size="sm"
-                    variant={bubbleContent === opt.key ? 'default' : 'ghost'}
+                    variant={bubbleContent === opt.key ? 'primary' : 'ghost'}
                     onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
                     className="text-xs justify-start"
                   >
@@ -1832,7 +1833,7 @@ export function VoidBubblesEngine() {
             <div className="border-t border-border pt-3">
               <Button
                 size="sm"
-                variant={xrayMode ? 'default' : 'secondary'}
+                variant={xrayMode ? 'primary' : 'secondary'}
                 onClick={() => setXrayMode(!xrayMode)}
                 className="w-full text-xs"
               >
@@ -1928,7 +1929,7 @@ export function VoidBubblesEngine() {
                       <Button
                         key={p}
                         size="sm"
-                        variant={period === p ? 'default' : 'ghost'}
+                        variant={period === p ? 'primary' : 'ghost'}
                         onClick={() => setPeriod(p)}
                         className="text-xs"
                       >
@@ -1944,7 +1945,7 @@ export function VoidBubblesEngine() {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant={highlightMode === 'gainers' ? 'default' : 'secondary'}
+                      variant={highlightMode === 'gainers' ? 'primary' : 'secondary'}
                       onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
                       className="text-xs flex-1"
                     >
@@ -1953,7 +1954,7 @@ export function VoidBubblesEngine() {
                     </Button>
                     <Button
                       size="sm"
-                      variant={highlightMode === 'losers' ? 'default' : 'secondary'}
+                      variant={highlightMode === 'losers' ? 'primary' : 'secondary'}
                       onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
                       className="text-xs flex-1"
                     >
@@ -1971,7 +1972,7 @@ export function VoidBubblesEngine() {
                       <Button
                         key={cat}
                         size="sm"
-                        variant={filterCategory === cat ? 'default' : 'ghost'}
+                        variant={filterCategory === cat ? 'primary' : 'ghost'}
                         onClick={() => setFilterCategory(cat)}
                         className="text-xs"
                       >
@@ -1993,7 +1994,7 @@ export function VoidBubblesEngine() {
                       <Button
                         key={opt.key}
                         size="sm"
-                        variant={sizeMetric === opt.key ? 'default' : 'ghost'}
+                        variant={sizeMetric === opt.key ? 'primary' : 'ghost'}
                         onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
                         className="text-xs justify-start"
                       >
@@ -2016,7 +2017,7 @@ export function VoidBubblesEngine() {
                       <Button
                         key={opt.key}
                         size="sm"
-                        variant={bubbleContent === opt.key ? 'default' : 'ghost'}
+                        variant={bubbleContent === opt.key ? 'primary' : 'ghost'}
                         onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
                         className="text-xs justify-start"
                       >
@@ -2029,7 +2030,7 @@ export function VoidBubblesEngine() {
                 <div className="space-y-2">
                   <Button
                     size="sm"
-                    variant={xrayMode ? 'default' : 'secondary'}
+                    variant={xrayMode ? 'primary' : 'secondary'}
                     onClick={() => setXrayMode(!xrayMode)}
                     className="w-full text-xs"
                   >
@@ -2115,7 +2116,7 @@ export function VoidBubblesEngine() {
 
           {/* Right: Period indicator for mobile */}
           <div className="sm:hidden">
-            <Badge variant="secondary" className="text-xs font-mono">
+            <Badge variant="default" className="text-xs font-mono">
               {period}
             </Badge>
           </div>
