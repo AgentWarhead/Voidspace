@@ -91,11 +91,7 @@ const getHealthStatus = (healthScore: number) => {
   return 'unhealthy';
 };
 
-const getHealthIcon = (healthScore: number) => {
-  if (healthScore > 70) return '✅';
-  if (healthScore >= 40) return '⚠️';
-  return '❌';
-};
+// Health icons removed from bubbles — health data displayed in popup card only
 
 const getSupplyConcentration = (token: VoidBubbleToken) => {
   if (!token.liquidity || !token.marketCap) return 'Unknown';
@@ -337,10 +333,9 @@ export function VoidBubblesEngine() {
     const token = tokens.find(t => t.id === tokenId);
     if (!token || !containerRef.current) return;
 
-    // Get the mouse position relative to the container
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    // Use viewport coordinates for fixed positioning
+    const x = event.clientX;
+    const y = event.clientY;
     
     setPopupCard({ token, position: { x, y } });
   }, [tokens]);
@@ -356,11 +351,14 @@ export function VoidBubblesEngine() {
     const supplyConcentration = getSupplyConcentration(token);
     const volLiqRatio = token.liquidity > 0 ? token.volume24h / token.liquidity : 0;
 
-    // Position the card (mobile = full width, desktop = near bubble)
-    const isMobile = window.innerWidth < 768;
-    const cardStyle = isMobile 
+    // Position the card (mobile = centered, desktop = near bubble)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    // Clamp position so card doesn't overflow viewport
+    const clampedX = Math.min(position.x + 20, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 420);
+    const clampedY = Math.max(20, Math.min(position.y - 200, (typeof window !== 'undefined' ? window.innerHeight : 800) - 500));
+    const cardStyle: React.CSSProperties = isMobile 
       ? { left: '1rem', right: '1rem', top: '50%', transform: 'translateY(-50%)' }
-      : { left: position.x + 20, top: position.y - 200 };
+      : { left: clampedX, top: clampedY };
 
     return (
       <AnimatePresence>
@@ -1037,16 +1035,7 @@ export function VoidBubblesEngine() {
       .attr('opacity', 0)
       .attr('filter', 'url(#xray-glow)');
 
-    // Health indicator icon (only visible in X-ray mode)
-    bubbleGroups.append('text')
-      .attr('class', 'health-indicator')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'central')
-      .attr('y', d => -d.targetRadius - 15)
-      .attr('font-size', '14')
-      .attr('opacity', 0)
-      .style('pointer-events', 'none')
-      .text(d => getHealthIcon(d.token.healthScore));
+    // Health indicator icons removed — health data now displayed in popup card only
 
     // Main bubble — clean, vibrant orb with category-colored border
     bubbleGroups.append('circle')
@@ -1349,7 +1338,6 @@ export function VoidBubblesEngine() {
             .attr('opacity', function() {
               const className = d3.select(this).attr('class');
               if (className?.includes('skull-overlay')) return d.token.riskLevel === 'critical' ? 0.7 : 0.4;
-              if (className?.includes('health-indicator')) return xrayMode ? 1 : 0;
               if (className?.includes('whale-indicator')) return 0.8;
               return 1;
             });
@@ -1362,9 +1350,7 @@ export function VoidBubblesEngine() {
       .transition().duration(300)
       .attr('opacity', xrayMode ? 0.8 : 0);
     
-    bubbleGroups.selectAll('.health-indicator')
-      .transition().duration(300)
-      .attr('opacity', xrayMode ? 1 : 0);
+    // Health indicators removed — data in popup card only
 
     // Enhanced pulsing animation for high volume tokens using CSS instead of JS for performance
     const highVolTokens = nodes.filter(d => d.token.volume24h > d.token.liquidity * 2);
