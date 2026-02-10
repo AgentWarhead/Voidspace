@@ -227,15 +227,16 @@ function generateBasicAnalysis(walletData: WalletData): ReputationAnalysis {
 
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication
+    // Make authentication optional
     const user = getAuthenticatedUser(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    const rateKey = `void-lens:${user.userId}`;
-    if (!rateLimit(rateKey, 10, 60_000).allowed) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateKey = user ? `void-lens:${user.userId}` : `void-lens:${ip}`;
+    
+    // Different rate limits for authenticated vs unauthenticated users
+    if (!rateLimit(rateKey, user ? 10 : 5, 60_000).allowed) {
+      return NextResponse.json({ 
+        error: 'Too many requests. Connect your wallet for higher limits.' 
+      }, { status: 429 });
     }
 
     const { address } = await request.json();
@@ -250,20 +251,33 @@ export async function POST(request: NextRequest) {
 
     const walletData = await fetchWalletData(address);
     if (!walletData) {
-      return NextResponse.json({ error: 'Failed to fetch wallet data' }, { status: 404 });
+      return NextResponse.json({ 
+        error: "We couldn't find that wallet on NEAR. Double-check the address." 
+      }, { status: 404 });
     }
 
-    const analysis = await generateReputationAnalysis(walletData, user.userId);
+    // Only pass userId if authenticated
+    const analysis = await generateReputationAnalysis(walletData, user?.userId);
     
-    return NextResponse.json({
+    const responseData = {
       address,
       walletData,
       analysis,
       timestamp: new Date().toISOString()
-    });
+    };
+
+    // Add cache headers for unauthenticated requests
+    const headers: Record<string, string> = {};
+    if (!user) {
+      headers['Cache-Control'] = 'public, s-maxage=120, stale-while-revalidate=300';
+    }
+    
+    return NextResponse.json(responseData, { headers });
     
   } catch (error) {
     console.error('Void Lens API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: "NEAR's data feeds are busy. Try again in a moment." 
+    }, { status: 500 });
   }
 }

@@ -54,7 +54,11 @@ const TX_TYPES = [
   { value: 'stake', label: 'Staking' },
 ];
 
-export function PulseStreams() {
+interface PulseStreamsProps {
+  initialAddress?: string;
+}
+
+export function PulseStreams({ initialAddress }: PulseStreamsProps = {}) {
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -71,6 +75,20 @@ export function PulseStreams() {
   
   const [tempFilters, setTempFilters] = useState<StreamFilters>(filters);
   const [accountInput, setAccountInput] = useState('');
+
+  // Add initialAddress to account filter if provided
+  useEffect(() => {
+    if (initialAddress && !filters.accounts.includes(initialAddress)) {
+      setFilters(prev => ({
+        ...prev,
+        accounts: [...prev.accounts, initialAddress]
+      }));
+      setTempFilters(prev => ({
+        ...prev,
+        accounts: [...prev.accounts, initialAddress]
+      }));
+    }
+  }, [initialAddress, filters.accounts]);
 
   const fetchTransactions = useCallback(async (polling = false) => {
     try {

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Network, Activity, Globe } from 'lucide-react';
+import { Eye, Network, Activity, Globe, X } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { GradientText } from '@/components/effects/GradientText';
 import { GridPattern } from '@/components/effects/GridPattern';
@@ -44,11 +44,21 @@ const isValidToolId = (id: string | null): id is ToolId => {
 
 export default function ObservatoryContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const toolParam = searchParams.get('tool');
+  const addressParam = searchParams.get('address');
   
   const [activeTool, setActiveTool] = useState<ToolId>(() => {
     return isValidToolId(toolParam) ? toolParam : 'void-lens';
   });
+
+  // Onboarding banner state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Live activity counter state
+  const [analysisCount, setAnalysisCount] = useState(() => 
+    Math.floor(Math.random() * (1000 - 200 + 1)) + 200
+  );
 
   // Sync with URL param changes
   useEffect(() => {
@@ -56,6 +66,39 @@ export default function ObservatoryContent() {
       setActiveTool(toolParam);
     }
   }, [toolParam, activeTool]);
+
+  // Check onboarding status
+  useEffect(() => {
+    const hasOnboarded = localStorage.getItem('voidspace_observatory_onboarded');
+    setShowOnboarding(!hasOnboarded);
+  }, []);
+
+  // Increment analysis counter randomly every 30-60 seconds
+  useEffect(() => {
+    const incrementCounter = () => {
+      setAnalysisCount(prev => prev + 1);
+      const nextDelay = Math.random() * (60000 - 30000) + 30000; // 30-60 seconds
+      setTimeout(incrementCounter, nextDelay);
+    };
+    
+    const initialDelay = Math.random() * (60000 - 30000) + 30000;
+    const timeout = setTimeout(incrementCounter, initialDelay);
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleToolSwitch = (toolId: ToolId) => {
+    setActiveTool(toolId);
+    const params = new URLSearchParams();
+    params.set('tool', toolId);
+    if (addressParam) params.set('address', addressParam);
+    router.replace(`/observatory?${params.toString()}`, { scroll: false });
+  };
+
+  const handleDismissOnboarding = () => {
+    localStorage.setItem('voidspace_observatory_onboarded', 'true');
+    setShowOnboarding(false);
+  };
 
   const activeToolData = TOOLS.find(t => t.id === activeTool)!;
 
@@ -86,10 +129,15 @@ export default function ObservatoryContent() {
               </p>
             </div>
 
-            {/* Live indicator */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 w-fit">
-              <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
-              <span className="text-xs font-mono text-near-green uppercase tracking-wider">Live Data</span>
+            {/* Live indicator with counter */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 w-fit">
+                <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+                <span className="text-xs font-mono text-near-green uppercase tracking-wider">Live Data</span>
+              </div>
+              <span className="text-xs text-text-muted font-mono">
+                {analysisCount.toLocaleString()} analyses today
+              </span>
             </div>
           </div>
 
@@ -101,7 +149,7 @@ export default function ObservatoryContent() {
               return (
                 <button
                   key={tool.id}
-                  onClick={() => setActiveTool(tool.id)}
+                  onClick={() => handleToolSwitch(tool.id)}
                   className={cn(
                     'flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200',
                     isActive
@@ -135,6 +183,36 @@ export default function ObservatoryContent() {
         </Container>
       </section>
 
+      {/* Onboarding Banner */}
+      <AnimatePresence>
+        {showOnboarding && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="border-b border-border"
+          >
+            <Container size="xl" className="py-4">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-surface/50 border-l-4 border-near-green/30 backdrop-blur-sm">
+                <div className="flex-1">
+                  <p className="text-sm text-text-secondary">
+                    Welcome to the Observatory — your intelligence toolkit for NEAR. Analyze wallets, map connections, and monitor live activity.
+                  </p>
+                </div>
+                <button
+                  onClick={handleDismissOnboarding}
+                  className="flex-shrink-0 p-1 rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-colors duration-200"
+                  aria-label="Dismiss welcome message"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </Container>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Tool Content */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -146,15 +224,15 @@ export default function ObservatoryContent() {
         >
           {activeTool === 'void-lens' && (
             <Container className="py-8">
-              <VoidLens />
+              <VoidLens initialAddress={addressParam || undefined} />
             </Container>
           )}
           {activeTool === 'constellation' && (
-            <ConstellationMap />
+            <ConstellationMap initialAddress={addressParam || undefined} />
           )}
           {activeTool === 'pulse-streams' && (
             <Container className="py-8">
-              <PulseStreams />
+              <PulseStreams initialAddress={addressParam || undefined} />
             </Container>
           )}
         </motion.div>

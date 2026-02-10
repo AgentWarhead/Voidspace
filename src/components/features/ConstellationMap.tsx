@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
-import { Search, RotateCcw, ZoomIn, ZoomOut, Network } from 'lucide-react';
+import { Search, RotateCcw, ZoomIn, ZoomOut, Network, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -62,18 +62,54 @@ const NODE_RADIUS = {
   center: 15,
 };
 
-export function ConstellationMap() {
+interface ConstellationMapProps {
+  initialAddress?: string;
+}
+
+export function ConstellationMap({ initialAddress }: ConstellationMapProps = {}) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(initialAddress || '');
   const [constellation, setConstellation] = useState<ConstellationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [, setSelectedNode] = useState<string | null>(null);
+  const [insightBanner, setInsightBanner] = useState<string>('');
+  const [showInsight, setShowInsight] = useState(false);
+  const [loadingNodes, setLoadingNodes] = useState<Set<string>>(new Set());
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const simulationRef = useRef<d3.Simulation<ConstellationNode, ConstellationEdge> | null>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+
+  // Calculate insight banner content
+  const calculateInsight = useCallback((data: ConstellationData) => {
+    if (!data.edges.length) return '';
+    
+    // Find strongest connection
+    const strongestEdge = data.edges.reduce((max, edge) => 
+      edge.transactionCount > max.transactionCount ? edge : max
+    );
+    
+    // Count node types
+    const nodeCounts = data.nodes.reduce((counts, node) => {
+      counts[node.type] = (counts[node.type] || 0) + 1;
+      return counts;
+    }, {} as Record<string, number>);
+    
+    const strongestConnection = typeof strongestEdge.target === 'string' 
+      ? strongestEdge.target 
+      : (strongestEdge.target as ConstellationNode).id;
+      
+    const parts = [
+      `Strongest connection: ${strongestConnection} (${strongestEdge.transactionCount} txns)`
+    ];
+    
+    if (nodeCounts.dao) parts.push(`${nodeCounts.dao} DAO${nodeCounts.dao > 1 ? 's' : ''}`);
+    if (nodeCounts.contract) parts.push(`${nodeCounts.contract} contract${nodeCounts.contract > 1 ? 's' : ''} detected`);
+    
+    return parts.join(' · ');
+  }, []);
 
   // Initialize D3 visualization
   const initializeVisualization = useCallback((data: ConstellationData) => {
@@ -84,11 +120,13 @@ export function ConstellationMap() {
     
     // Clear previous content
     svg.selectAll('*').remove();
+    setShowInsight(false);
     
     const width = container.offsetWidth;
     const height = container.offsetHeight;
     
-    svg.attr('width', width).attr('height', height);
+    svg.attr('width', width).attr('height', height)
+       .style('opacity', 0); // Start with opacity 0 for entrance animation
 
     // Create main group for zoom/pan
     const g = svg.append('g');
@@ -138,6 +176,9 @@ export function ConstellationMap() {
 
     // Create nodes group  
     const nodeGroup = g.append('g').attr('class', 'nodes');
+    
+    // Create labels group
+    const labelGroup = g.append('g').attr('class', 'labels');
 
     // Scale for node sizes based on transaction count
     const nodeScale = d3.scalePow()
@@ -145,8 +186,15 @@ export function ConstellationMap() {
       .domain(d3.extent(data.nodes, d => d.transactionCount) as [number, number])
       .range([NODE_RADIUS.min, NODE_RADIUS.max]);
 
-    // Create force simulation
+    // ENTRANCE ANIMATION: Start all nodes at center
+    data.nodes.forEach(node => {
+      node.x = width / 2;
+      node.y = height / 2;
+    });
+
+    // Create force simulation with high alpha for dramatic entrance
     const simulation = d3.forceSimulation(data.nodes)
+      .alpha(1.0) // High alpha for dramatic burst
       .force('link', d3.forceLink(data.edges)
         .id((d: ConstellationNode | d3.SimulationNodeDatum) => (d as ConstellationNode).id)
         .distance(d => 50 + (d as ConstellationEdge).weight)
@@ -177,7 +225,27 @@ export function ConstellationMap() {
       .style('filter', 'drop-shadow(0 0 3px #374151)')
       .style('transition', 'all 0.3s ease');
 
-    // Create nodes
+    // Determine important nodes for labeling
+    const sortedNodes = [...data.nodes]
+      .filter(n => n.id !== data.centerNode) // Exclude center node from sorting
+      .sort((a, b) => b.transactionCount - a.transactionCount);
+    
+    const importantNodes = new Set<string>();
+    importantNodes.add(data.centerNode); // Always label center node
+    
+    // Add nodes with transactionCount > 5
+    data.nodes.forEach(node => {
+      if (node.transactionCount > 5) {
+        importantNodes.add(node.id);
+      }
+    });
+    
+    // Add top 5 nodes by transaction count if not already included
+    sortedNodes.slice(0, 5).forEach(node => {
+      importantNodes.add(node.id);
+    });
+
+    // Create nodes with expanded state styling
     const nodes = nodeGroup.selectAll('.node')
       .data(data.nodes)
       .enter().append('circle')
@@ -185,6 +253,8 @@ export function ConstellationMap() {
       .attr('r', d => d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount))
       .style('fill', d => d.id === data.centerNode ? NODE_COLORS.center : NODE_COLORS[d.type])
       .style('filter', d => `url(#outer-glow-${d.id === data.centerNode ? 'center' : d.type})`)
+      .style('stroke', d => expandedNodes.has(d.id) ? '#10B981' : 'none')
+      .style('stroke-width', d => expandedNodes.has(d.id) ? '2px' : '0')
       .style('cursor', 'pointer')
       .style('transition', 'all 0.3s ease')
       .on('mouseover', function(event, d) {
@@ -236,6 +306,43 @@ export function ConstellationMap() {
         .on('drag', dragged)
         .on('end', dragended));
 
+    // Create loading indicators for expanding nodes
+    const loadingIndicators = nodeGroup.selectAll('.loading-indicator')
+      .data(data.nodes.filter(d => loadingNodes.has(d.id)))
+      .enter().append('circle')
+      .attr('class', 'loading-indicator')
+      .attr('r', d => (d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount)) + 8)
+      .style('fill', 'none')
+      .style('stroke', '#10B981')
+      .style('stroke-width', '2px')
+      .style('stroke-dasharray', '5,5')
+      .style('opacity', 0.8);
+
+    // Animate loading indicators
+    loadingIndicators
+      .transition()
+      .duration(1500)
+      .ease(d3.easeLinear)
+      .style('stroke-dashoffset', '-20')
+      .on('end', function() {
+        d3.select(this).transition().duration(0).style('stroke-dashoffset', '0');
+      });
+
+    // Create labels for important nodes
+    const labels = labelGroup.selectAll('.label')
+      .data(data.nodes.filter(d => importantNodes.has(d.id)))
+      .enter().append('text')
+      .attr('class', 'label')
+      .style('font-size', '9px')
+      .style('fill', '#9CA3AF')
+      .style('text-anchor', 'middle')
+      .style('pointer-events', 'none')
+      .style('user-select', 'none')
+      .text(d => {
+        const name = d.id.length > 15 ? d.id.substring(0, 15) + '...' : d.id;
+        return name;
+      });
+
     // Add zoom and pan
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
@@ -246,8 +353,33 @@ export function ConstellationMap() {
     svg.call(zoom);
     zoomRef.current = zoom;
 
+    // Entrance animation: Fade in after 300ms delay
+    setTimeout(() => {
+      svg.transition()
+        .duration(800)
+        .style('opacity', 1);
+    }, 300);
+
+    // Track simulation progress for insight banner
+    let insightShown = false;
+    const insightTimeout = setTimeout(() => {
+      if (!insightShown) {
+        setInsightBanner(calculateInsight(data));
+        setShowInsight(true);
+        insightShown = true;
+      }
+    }, 3000);
+
     // Update positions on simulation tick
     simulation.on('tick', () => {
+      // Check if simulation has settled
+      if (simulation.alpha() < 0.05 && !insightShown) {
+        setInsightBanner(calculateInsight(data));
+        setShowInsight(true);
+        insightShown = true;
+        clearTimeout(insightTimeout);
+      }
+
       links
         .attr('x1', d => (d.source as ConstellationNode).x!)
         .attr('y1', d => (d.source as ConstellationNode).y!)
@@ -255,6 +387,16 @@ export function ConstellationMap() {
         .attr('y2', d => (d.target as ConstellationNode).y!);
 
       nodes
+        .attr('cx', d => d.x!)
+        .attr('cy', d => d.y!);
+
+      // Update labels to follow nodes (positioned slightly below)
+      labels
+        .attr('x', d => d.x!)
+        .attr('y', d => d.y! + (d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount)) + 12);
+
+      // Update loading indicators
+      loadingIndicators
         .attr('cx', d => d.x!)
         .attr('cy', d => d.y!);
 
@@ -305,12 +447,102 @@ export function ConstellationMap() {
         .remove();
     }
 
-  }, []);
+  }, [expandedNodes, loadingNodes, calculateInsight]);
 
   const expandNode = async (nodeId: string) => {
-    // TODO: Fetch additional connections for the selected node
-    // This would call the API again with the new node as center
-    console.log('Expanding node:', nodeId);
+    if (expandedNodes.has(nodeId) || loadingNodes.has(nodeId)) {
+      return; // Already expanded or loading
+    }
+
+    // Add to loading state
+    setLoadingNodes(prev => { const next = new Set(prev); next.add(nodeId); return next; });
+    
+    try {
+      const response = await fetch('/api/constellation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: nodeId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to expand node');
+      }
+
+      const newData: ConstellationData = await response.json();
+      
+      if (!constellation) return;
+
+      // Merge new data with existing
+      const existingNodeIds = new Set(constellation.nodes.map(n => n.id));
+      const newNodes = newData.nodes.filter(n => !existingNodeIds.has(n.id));
+      
+      // Limit total nodes to 150
+      const totalNodes = constellation.nodes.length + newNodes.length;
+      const nodesToAdd = totalNodes > 150 
+        ? newNodes.slice(0, 150 - constellation.nodes.length)
+        : newNodes;
+
+      const existingEdgeKeys = new Set(
+        constellation.edges.map(e => {
+          const sourceId = typeof e.source === 'string' ? e.source : e.source.id;
+          const targetId = typeof e.target === 'string' ? e.target : e.target.id;
+          return `${sourceId}-${targetId}`;
+        })
+      );
+
+      const newEdges = newData.edges.filter(e => {
+        const sourceId = typeof e.source === 'string' ? e.source : e.source.id;
+        const targetId = typeof e.target === 'string' ? e.target : e.target.id;
+        const key1 = `${sourceId}-${targetId}`;
+        const key2 = `${targetId}-${sourceId}`;
+        return !existingEdgeKeys.has(key1) && !existingEdgeKeys.has(key2);
+      });
+
+      // Update constellation state
+      const updatedConstellation: ConstellationData = {
+        ...constellation,
+        nodes: [...constellation.nodes, ...nodesToAdd],
+        edges: [...constellation.edges, ...newEdges]
+      };
+
+      setConstellation(updatedConstellation);
+      setExpandedNodes(prev => { const next = new Set(prev); next.add(nodeId); return next; });
+
+      // Update simulation with new nodes
+      if (simulationRef.current) {
+        simulationRef.current.nodes(updatedConstellation.nodes);
+        simulationRef.current.force('link', d3.forceLink(updatedConstellation.edges)
+          .id((d: ConstellationNode | d3.SimulationNodeDatum) => (d as ConstellationNode).id)
+          .distance(d => 50 + (d as ConstellationEdge).weight)
+          .strength(0.3)
+        );
+        simulationRef.current.alpha(0.3).restart();
+      }
+
+    } catch (err) {
+      console.error('Failed to expand node:', err);
+      setError(err instanceof Error ? err.message : 'Failed to expand node');
+    } finally {
+      // Remove from loading state
+      setLoadingNodes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(nodeId);
+        return newSet;
+      });
+    }
+  };
+
+  const getErrorMessage = (error: string, status?: number) => {
+    if (status === 429 || error.toLowerCase().includes('rate limit')) {
+      return "NEAR's data feeds are busy at the moment. Try again shortly.";
+    }
+    if (error.toLowerCase().includes('not found') || error.toLowerCase().includes('no data')) {
+      return "No connections found for this wallet. It may be new or inactive.";
+    }
+    return error || 'An unexpected error occurred. Please try again.';
   };
 
   const handleSearch = async () => {
@@ -322,6 +554,9 @@ export function ConstellationMap() {
     setLoading(true);
     setError('');
     setConstellation(null);
+    setShowInsight(false);
+    setExpandedNodes(new Set());
+    setLoadingNodes(new Set());
 
     try {
       const response = await fetch('/api/constellation', {
@@ -334,10 +569,14 @@ export function ConstellationMap() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch constellation data');
+        throw new Error(getErrorMessage(errorData.error || 'Failed to fetch constellation data', response.status));
       }
 
       const data: ConstellationData = await response.json();
+      if (!data.nodes.length) {
+        throw new Error("No connections found for this wallet. It may be new or inactive.");
+      }
+      
       setConstellation(data);
       
     } catch (err) {
@@ -345,6 +584,10 @@ export function ConstellationMap() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const retrySearch = () => {
+    handleSearch();
   };
 
   const resetView = () => {
@@ -403,7 +646,7 @@ export function ConstellationMap() {
   };
 
   return (
-    <div className="space-y-6 h-screen flex flex-col">
+    <div className="space-y-6 flex flex-col">
       {/* Header */}
       <div className="text-center py-6">
         <div className="flex items-center justify-center gap-3 mb-4">
@@ -451,7 +694,7 @@ export function ConstellationMap() {
           <div className="space-y-2">
             <p className="text-xs text-text-muted">Try an example:</p>
             <div className="flex flex-wrap gap-2">
-              {['aurora.near', 'ref-finance.near', 'token.sweat'].map((example) => (
+              {['root.near', 'zavodil.near', 'chadoh.near'].map((example) => (
                 <button
                   key={example}
                   onClick={() => {
@@ -468,16 +711,41 @@ export function ConstellationMap() {
         </div>
         
         {error && (
-          <div className="mt-4 p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm">
-            {error}
+          <div className="mt-4 p-4 rounded-lg bg-red-900/20 border border-red-500/20 text-red-300">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium mb-1">Connection Failed</p>
+                <p className="text-xs text-red-200">{error}</p>
+              </div>
+              <Button 
+                onClick={retrySearch}
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Retry
+              </Button>
+            </div>
           </div>
         )}
       </Card>
 
+      {/* Insight Banner */}
+      {showInsight && insightBanner && (
+        <div className="max-w-4xl mx-auto px-4 transform transition-all duration-500 ease-out animate-in slide-in-from-top-4">
+          <div className="bg-gradient-to-r from-green-500/10 to-cyan-500/10 border border-green-500/20 rounded-lg px-4 py-2 backdrop-blur-sm">
+            <p className="text-sm text-green-400 font-medium text-center">
+              ✨ {insightBanner}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Constellation Visualization */}
       {constellation && (
-        <div className="flex-1 mx-4 mb-4">
-          <Card className="h-full relative overflow-hidden" variant="glass">
+        <div className="mx-4 mb-4">
+          <Card className="h-[600px] min-h-[500px] max-h-[70vh] relative overflow-hidden" variant="glass">
             {/* Controls */}
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               <InfoTooltip term="Controls">
