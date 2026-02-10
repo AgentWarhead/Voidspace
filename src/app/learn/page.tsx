@@ -405,7 +405,7 @@ export default function LearnPage() {
           <Card variant="glass" padding="lg" className="mb-6">
             <div className="space-y-4 text-text-secondary leading-relaxed">
               <p>
-                <strong className="text-text-primary">Void Bubbles</strong> is Voidspace's real-time token visualization engine. Every NEAR token becomes a living bubble that breathes with market activity, complete with AI health scoring and risk detection.
+                <strong className="text-text-primary">Void Bubbles</strong> is Voidspace&apos;s real-time token visualization engine. Every NEAR token becomes a living bubble that breathes with market activity, complete with AI health scoring and risk detection.
               </p>
             </div>
           </Card>
