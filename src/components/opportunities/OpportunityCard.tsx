@@ -50,23 +50,21 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
                 </Badge>
               )}
               
-              {/* Hidden by default, show on hover */}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-2 flex-wrap">
-                <Badge variant="difficulty" difficulty={opportunity.difficulty}>
-                  {opportunity.difficulty}
-                </Badge>
-                <Badge variant="competition" competition={opportunity.competition_level}>
-                  {opportunity.competition_level}
-                </Badge>
-              </div>
+              {/* Always visible: Difficulty and competition badges */}
+              <Badge variant="difficulty" difficulty={opportunity.difficulty}>
+                {opportunity.difficulty}
+              </Badge>
+              <Badge variant="competition" competition={opportunity.competition_level}>
+                {opportunity.competition_level}
+              </Badge>
             </div>
 
             <div className="flex items-center justify-between">
               {/* Always visible: Void Score indicator */}
               <GapScoreIndicator score={opportunity.gap_score} size="md" />
               
-              {/* Hidden by default, show on hover */}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {/* Always visible on mobile, hover-reveal on desktop */}
+              <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                 {opportunity.demand_score != null && opportunity.demand_score > 0 && (
                   <span className="inline-flex items-center gap-1 text-xs text-text-muted font-mono">
                     <TrendingUp className="w-3 h-3 text-near-green" />

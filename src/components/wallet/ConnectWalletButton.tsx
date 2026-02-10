@@ -20,10 +20,10 @@ export function ConnectWalletButton() {
     const tooltipShown = localStorage.getItem('voidspace_wallet_tooltip_shown');
     if (!tooltipShown && !isConnected) {
       setShowTooltip(true);
-      // Auto-dismiss after 8 seconds
+      // Auto-dismiss after 12 seconds
       tooltipTimeoutRef.current = setTimeout(() => {
         handleTooltipDismiss();
-      }, 8000);
+      }, 12000);
     }
     
     return () => {
@@ -48,14 +48,10 @@ export function ConnectWalletButton() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
-      // Dismiss tooltip on any click
-      if (showTooltip) {
-        handleTooltipDismiss();
-      }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [showTooltip]);
+  }, []);
 
   if (isLoading) {
     return (

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
@@ -10,245 +9,43 @@ import { TypewriterCode } from './components/TypewriterCode';
 import { TokenCounter } from './components/TokenCounter';
 import { SanctumVisualization } from './components/SanctumVisualization';
 import { GlassPanel } from './components/GlassPanel';
-import { AchievementPopup, Achievement, ACHIEVEMENTS } from './components/AchievementPopup';
+import { AchievementPopup } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
-import { TaskProgressInline, CurrentTask } from './components/TaskProgressInline';
+import { TaskProgressInline } from './components/TaskProgressInline';
 import { ShareContract } from './components/ShareContract';
-import { DeploymentHistory, saveDeployment, DeployedContract } from './components/DeploymentHistory';
+import { DeploymentHistory } from './components/DeploymentHistory';
 import { SocialProof } from './components/SocialProof';
 import { ContractDNA } from './components/ContractDNA';
 import { GasEstimatorCompact } from './components/GasEstimator';
 import { ContractComparison } from './components/ContractComparison';
 import { SimulationSandbox } from './components/SimulationSandbox';
-import { PairProgramming, generateSessionId } from './components/PairProgramming';
+import { PairProgramming } from './components/PairProgramming';
 import { DownloadButton } from './components/DownloadContract';
 import { FileStructure, FileStructureToggle } from './components/FileStructure';
 import { WebappBuilder } from './components/WebappBuilder';
-import { ImportContract, ImportedContract } from './components/ImportContract';
+import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
+import { useSanctumState } from './hooks/useSanctumState';
 // @ts-expect-error - lucide-react types issue with TS 5.9
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 
-type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
-type SanctumMode = 'build' | 'roast' | 'webapp';
-
 export default function SanctumPage() {
-  const [mode, setMode] = useState<SanctumMode>('build');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [customPrompt, setCustomPrompt] = useState('');
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState<string>('');
-  const [tokensUsed, setTokensUsed] = useState(0);
-  const [tokenBalance, setTokenBalance] = useState(50000);
-  const [sanctumStage, setSanctumStage] = useState<SanctumStage>('idle');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
-  const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [messageCount, setMessageCount] = useState(0);
-  const [deployCount, setDeployCount] = useState(0);
-  const [showDeployCelebration, setShowDeployCelebration] = useState(false);
-  const [deployedContractId, setDeployedContractId] = useState<string | null>(null);
-  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
-  const [currentTask, setCurrentTask] = useState<CurrentTask | null>(null);
-  const [isThinking, setIsThinking] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [contractToShare, setContractToShare] = useState<{ code: string; name: string; category?: string } | null>(null);
-  const [showComparison, setShowComparison] = useState(false);
-  const [showSimulation, setShowSimulation] = useState(false);
-  const [showPairProgramming, setShowPairProgramming] = useState(false);
-  const [pairSessionId] = useState(() => generateSessionId());
-  const [showFileStructure, setShowFileStructure] = useState(false);
-  const [showWebappBuilder, setShowWebappBuilder] = useState(false);
-  const [showImportContract, setShowImportContract] = useState(false);
-  const [importedContract, setImportedContract] = useState<ImportedContract | null>(null);
-  const [showWebappSession, setShowWebappSession] = useState(false);
-  const [activePanel, setActivePanel] = useState<'chat' | 'code'>('chat');
-
-  // Lock body scroll and enable immersive mode when session is active
-  useEffect(() => {
-    if (sessionStarted) {
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-      document.body.setAttribute('data-immersive', 'true');
-      // Start session timer
-      if (!sessionStartTime) {
-        setSessionStartTime(Date.now());
-      }
-    } else {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      document.body.removeAttribute('data-immersive');
-    }
-    return () => {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      document.body.removeAttribute('data-immersive');
-    };
-  }, [sessionStarted, sessionStartTime]);
-
-  const unlockAchievement = useCallback((achievementId: string) => {
-    if (unlockedAchievements.has(achievementId)) return;
-    
-    const achievement = ACHIEVEMENTS[achievementId];
-    if (achievement) {
-      setUnlockedAchievements(prev => new Set(Array.from(prev).concat([achievementId])));
-      setCurrentAchievement(achievement);
-      
-      // Play sound if enabled
-      if (soundEnabled) {
-        const audio = new Audio('/sounds/achievement.mp3');
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-      }
-    }
-  }, [unlockedAchievements, soundEnabled]);
-
-  const handleCategorySelect = (categorySlug: string) => {
-    setSelectedCategory(categorySlug);
-    setSessionStarted(true);
-    
-    // Check for category-specific achievements
-    if (categorySlug === 'chain-signatures') {
-      setTimeout(() => unlockAchievement('chain_signatures'), 2000);
-    } else if (categorySlug === 'ai-agents') {
-      setTimeout(() => unlockAchievement('shade_agent'), 2000);
-    }
-  };
-
-  const handleCustomStart = () => {
-    if (customPrompt.trim()) {
-      setSelectedCategory('custom');
-      setSessionStarted(true);
-    }
-  };
-
-  const handleTokensUsed = (input: number, output: number) => {
-    const total = input + output;
-    setTokensUsed(prev => prev + total);
-    setTokenBalance(prev => prev - total);
-    setMessageCount(prev => prev + 1);
-    
-    // First message achievement
-    if (messageCount === 0) {
-      unlockAchievement('first_message');
-    }
-  };
-
-  const handleCodeGenerated = (code: string) => {
-    setSanctumStage('generating');
-    setIsGenerating(true);
-    setGeneratedCode(code);
-    
-    // First code achievement
-    if (!unlockedAchievements.has('first_code')) {
-      setTimeout(() => unlockAchievement('first_code'), 1500);
-    }
-    
-    // Complete after typing animation
-    setTimeout(() => {
-      setSanctumStage('complete');
-      setIsGenerating(false);
-    }, code.length * 10 + 500);
-  };
-
-  // Task tracking for live progress display
-  const handleTaskUpdate = useCallback((task: CurrentTask | null) => {
-    setCurrentTask(task);
-  }, []);
-
-  const handleThinkingChange = useCallback((thinking: boolean) => {
-    setIsThinking(thinking);
-  }, []);
-
-  const handleDeploy = async () => {
-    setSanctumStage('thinking');
-    
-    try {
-      // Call deploy API
-      const response = await fetch('/api/sanctum/deploy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code: generatedCode,
-          category: selectedCategory,
-        }),
-      });
-      
-      const data = await response.json();
-      
-      setDeployCount(prev => prev + 1);
-      
-      // First deploy achievement
-      if (deployCount === 0) {
-        unlockAchievement('first_deploy');
-      }
-      
-      setSanctumStage('complete');
-      
-      // Show celebration with contract ID
-      const contractId = data.contractId || `sanctum-${Date.now()}.testnet`;
-      setDeployedContractId(contractId);
-      setShowDeployCelebration(true);
-      
-      // Save to deployment history
-      saveDeployment({
-        name: selectedCategory === 'custom' ? 'Custom Contract' : (selectedCategory || 'My Contract'),
-        category: selectedCategory || 'custom',
-        network: 'testnet',
-        contractAddress: contractId,
-        txHash: data.txHash || `tx-${Date.now()}`,
-        code: generatedCode,
-      });
-      
-      // Play deploy sound
-      if (soundEnabled) {
-        const audio = new Audio('/sounds/deploy.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(() => {});
-      }
-    } catch (error) {
-      console.error('Deploy error:', error);
-      setSanctumStage('complete');
-    }
-  };
-
-  const handleBack = () => {
-    setSessionStarted(false);
-    setSelectedCategory(null);
-    setGeneratedCode('');
-    setSanctumStage('idle');
-  };
-
-  const handleShare = useCallback(() => {
-    if (generatedCode) {
-      setContractToShare({
-        code: generatedCode,
-        name: selectedCategory === 'custom' ? 'Custom Contract' : (selectedCategory || 'My Contract'),
-        category: selectedCategory || undefined,
-      });
-      setShowShareModal(true);
-    }
-  }, [generatedCode, selectedCategory]);
-
-  const handleShareFromHistory = useCallback((contract: DeployedContract) => {
-    setContractToShare({
-      code: contract.code,
-      name: contract.name,
-      category: contract.category,
-    });
-    setShowShareModal(true);
-  }, []);
-
-  const handleRemixFromHistory = useCallback((code: string, name: string) => {
-    setGeneratedCode(code);
-    setSelectedCategory('custom');
-    setCustomPrompt(`Remix: ${name}`);
-    setSessionStarted(true);
-    setShowHistory(false);
-  }, []);
+  const {
+    state,
+    dispatch,
+    handleCategorySelect,
+    handleCustomStart,
+    handleTokensUsed,
+    handleCodeGenerated,
+    handleTaskUpdate,
+    handleThinkingChange,
+    handleDeploy,
+    handleBack,
+    handleShare,
+    handleShareFromHistory,
+    handleRemixFromHistory,
+  } = useSanctumState();
 
   return (
     <div className="min-h-screen bg-void-black relative overflow-hidden">
@@ -257,83 +54,83 @@ export default function SanctumPage() {
 
       {/* Achievement popup */}
       <AchievementPopup
-        achievement={currentAchievement}
-        onClose={() => setCurrentAchievement(null)}
+        achievement={state.currentAchievement}
+        onClose={() => dispatch({ type: 'SET_CURRENT_ACHIEVEMENT', payload: null })}
       />
 
       {/* Deploy celebration with confetti */}
       <DeployCelebration
-        isVisible={showDeployCelebration}
-        contractId={deployedContractId || undefined}
-        explorerUrl={deployedContractId ? `https://explorer.testnet.near.org/accounts/${deployedContractId}` : undefined}
-        onClose={() => setShowDeployCelebration(false)}
+        isVisible={state.showDeployCelebration}
+        contractId={state.deployedContractId || undefined}
+        explorerUrl={state.deployedContractId ? `https://explorer.testnet.near.org/accounts/${state.deployedContractId}` : undefined}
+        onClose={() => dispatch({ type: 'SET_SHOW_DEPLOY_CELEBRATION', payload: false })}
       />
 
       {/* Share modal */}
-      {showShareModal && contractToShare && (
+      {state.showShareModal && state.contractToShare && (
         <ShareContract
-          code={contractToShare.code}
-          contractName={contractToShare.name}
-          category={contractToShare.category}
+          code={state.contractToShare.code}
+          contractName={state.contractToShare.name}
+          category={state.contractToShare.category}
           onClose={() => {
-            setShowShareModal(false);
-            setContractToShare(null);
+            dispatch({ type: 'SET_SHOW_SHARE_MODAL', payload: false });
+            dispatch({ type: 'SET_CONTRACT_TO_SHARE', payload: null });
           }}
         />
       )}
 
       {/* Comparison modal */}
-      {showComparison && generatedCode && (
+      {state.showComparison && state.generatedCode && (
         <ContractComparison
-          currentCode={generatedCode}
-          onClose={() => setShowComparison(false)}
+          currentCode={state.generatedCode}
+          onClose={() => dispatch({ type: 'SET_SHOW_COMPARISON', payload: false })}
         />
       )}
 
       {/* Simulation modal */}
-      {showSimulation && generatedCode && (
+      {state.showSimulation && state.generatedCode && (
         <SimulationSandbox
-          code={generatedCode}
-          onClose={() => setShowSimulation(false)}
+          code={state.generatedCode}
+          onClose={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: false })}
         />
       )}
 
       {/* Pair Programming modal */}
-      {showPairProgramming && (
+      {state.showPairProgramming && (
         <PairProgramming
-          sessionId={pairSessionId}
-          onClose={() => setShowPairProgramming(false)}
+          sessionId={state.pairSessionId}
+          onClose={() => dispatch({ type: 'SET_SHOW_PAIR_PROGRAMMING', payload: false })}
         />
       )}
 
       {/* Webapp Builder modal (legacy download mode) */}
-      {showWebappBuilder && (generatedCode || importedContract) && (
+      {state.showWebappBuilder && (state.generatedCode || state.importedContract) && (
         <WebappBuilder
-          code={generatedCode || importedContract?.code || ''}
-          contractName={importedContract?.name || selectedCategory || 'my-contract'}
-          deployedAddress={importedContract?.address || deployedContractId || undefined}
+          code={state.generatedCode || state.importedContract?.code || ''}
+          contractName={state.importedContract?.name || state.selectedCategory || 'my-contract'}
+          deployedAddress={state.importedContract?.address || state.deployedContractId || undefined}
           onClose={() => {
-            setShowWebappBuilder(false);
-            setImportedContract(null);
+            dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: false });
+            dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: null });
           }}
         />
       )}
 
       {/* Interactive Webapp Session */}
-      {showWebappSession && importedContract && (
+      {state.showWebappSession && state.importedContract && (
         <WebappSession
-          contractName={importedContract.name}
-          contractAddress={importedContract.address}
-          methods={importedContract.methods}
+          contractName={state.importedContract.name}
+          contractAddress={state.importedContract.address}
+          methods={state.importedContract.methods}
           onBack={() => {
-            setShowWebappSession(false);
-            setImportedContract(null);
+            dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: false });
+            dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: null });
           }}
         />
       )}
 
       {/* Landing / Category Selection */}
-      {!sessionStarted && (
+      {!state.sessionStarted && (
         <section className="relative z-10 min-h-screen flex flex-col">
           {/* Hero */}
           <div className="flex-1 flex items-center justify-center py-16">
@@ -364,22 +161,22 @@ export default function SanctumPage() {
               {/* Friendly Mode Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
                 <button
-                  onClick={() => setMode('build')}
+                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    mode === 'build'
+                    state.mode === 'build'
                       ? 'border-near-green/50 bg-near-green/10 shadow-lg shadow-near-green/20'
                       : 'border-border-subtle bg-void-gray/30 hover:border-near-green/30 hover:bg-near-green/5'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    mode === 'build' 
+                    state.mode === 'build' 
                       ? 'bg-near-green/20 text-near-green' 
                       : 'bg-border-subtle text-text-muted group-hover:bg-near-green/20 group-hover:text-near-green'
                   }`}>
                     <Hammer className="w-6 h-6" />
                   </div>
                   <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    mode === 'build' ? 'text-near-green' : 'text-text-primary group-hover:text-near-green'
+                    state.mode === 'build' ? 'text-near-green' : 'text-text-primary group-hover:text-near-green'
                   }`}>
                     Build a Smart Contract
                   </h3>
@@ -389,22 +186,22 @@ export default function SanctumPage() {
                 </button>
 
                 <button
-                  onClick={() => setMode('webapp')}
+                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'webapp' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    mode === 'webapp'
+                    state.mode === 'webapp'
                       ? 'border-cyan-500/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
                       : 'border-border-subtle bg-void-gray/30 hover:border-cyan-500/30 hover:bg-cyan-500/5'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    mode === 'webapp' 
+                    state.mode === 'webapp' 
                       ? 'bg-cyan-500/20 text-cyan-400' 
                       : 'bg-border-subtle text-text-muted group-hover:bg-cyan-500/20 group-hover:text-cyan-400'
                   }`}>
                     <Globe className="w-6 h-6" />
                   </div>
                   <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    mode === 'webapp' ? 'text-cyan-400' : 'text-text-primary group-hover:text-cyan-400'
+                    state.mode === 'webapp' ? 'text-cyan-400' : 'text-text-primary group-hover:text-cyan-400'
                   }`}>
                     Build a Web App
                   </h3>
@@ -414,22 +211,22 @@ export default function SanctumPage() {
                 </button>
 
                 <button
-                  onClick={() => setMode('roast')}
+                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'roast' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    mode === 'roast'
+                    state.mode === 'roast'
                       ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
                       : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-red-500/5'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    mode === 'roast' 
+                    state.mode === 'roast' 
                       ? 'bg-red-500/20 text-red-400' 
                       : 'bg-border-subtle text-text-muted group-hover:bg-red-500/20 group-hover:text-red-400'
                   }`}>
                     <Flame className="w-6 h-6" />
                   </div>
                   <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    mode === 'roast' ? 'text-red-400' : 'text-text-primary group-hover:text-red-400'
+                    state.mode === 'roast' ? 'text-red-400' : 'text-text-primary group-hover:text-red-400'
                   }`}>
                     Audit Your Code
                   </h3>
@@ -440,18 +237,18 @@ export default function SanctumPage() {
               </div>
 
               {/* Category Picker (Build Mode), Webapp Import, or Start Roast */}
-              {mode === 'build' && (
+              {state.mode === 'build' && (
                 <div className="mb-16">
                   <CategoryPicker
                     onSelect={handleCategorySelect}
-                    customPrompt={customPrompt}
-                    setCustomPrompt={setCustomPrompt}
+                    customPrompt={state.customPrompt}
+                    setCustomPrompt={(prompt) => dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt })}
                     onCustomStart={handleCustomStart}
                   />
                 </div>
               )}
               
-              {mode === 'webapp' && !showImportContract && (
+              {state.mode === 'webapp' && !state.showImportContract && (
                 <div className="text-center max-w-2xl mx-auto mb-16">
                   <p className="text-text-secondary mb-8">
                     Build a beautiful frontend for your NEAR smart contract. 
@@ -461,7 +258,7 @@ export default function SanctumPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     <button
-                      onClick={() => setShowImportContract(true)}
+                      onClick={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true })}
                       className="p-6 rounded-xl bg-void-gray/50 border border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
                     >
                       <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/30 transition-colors">
@@ -474,7 +271,7 @@ export default function SanctumPage() {
                     </button>
                     
                     <button
-                      onClick={() => setMode('build')}
+                      onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
                       className="p-6 rounded-xl bg-void-gray/50 border border-near-green/30 hover:border-near-green/50 hover:bg-near-green/10 transition-all text-left group"
                     >
                       <div className="w-12 h-12 rounded-xl bg-near-green/20 flex items-center justify-center mb-4 group-hover:bg-near-green/30 transition-colors">
@@ -489,31 +286,31 @@ export default function SanctumPage() {
                 </div>
               )}
               
-              {mode === 'webapp' && showImportContract && (
+              {state.mode === 'webapp' && state.showImportContract && (
                 <div className="mb-16">
                   <ImportContract
                     onImport={(data) => {
-                      setImportedContract(data);
-                      setShowImportContract(false);
+                      dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
+                      dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
                       // Start the interactive webapp session
                       if (data.code) {
-                        setGeneratedCode(data.code);
+                        dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
                       }
-                      setSelectedCategory(data.name);
-                      setShowWebappSession(true);
+                      dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
+                      dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
                     }}
-                    onCancel={() => setShowImportContract(false)}
+                    onCancel={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false })}
                   />
                 </div>
               )}
               
-              {mode === 'roast' && (
+              {state.mode === 'roast' && (
                 <div className="text-center mb-16">
                   <p className="text-text-secondary mb-6">
                     Paste any NEAR smart contract and watch it get torn apart by our security experts.
                   </p>
                   <button
-                    onClick={() => setSessionStarted(true)}
+                    onClick={() => dispatch({ type: 'SET_SESSION_STARTED', payload: true })}
                     className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold text-lg hover:from-red-600 hover:to-orange-600 transition-all shadow-lg shadow-red-500/25"
                   >
                     <Flame className="w-6 h-6" />
@@ -548,15 +345,15 @@ export default function SanctumPage() {
               {/* History toggle - smaller and less prominent */}
               <div className="flex justify-center">
                 <button
-                  onClick={() => setShowHistory(!showHistory)}
+                  onClick={() => dispatch({ type: 'SET_SHOW_HISTORY', payload: !state.showHistory })}
                   className="text-xs text-text-muted hover:text-text-secondary transition-colors underline decoration-dotted underline-offset-4"
                 >
-                  {showHistory ? 'Hide' : 'View'} My Deployments
+                  {state.showHistory ? 'Hide' : 'View'} My Deployments
                 </button>
               </div>
 
               {/* Deployment History (collapsible) */}
-              {showHistory && (
+              {state.showHistory && (
                 <div className="max-w-2xl mx-auto mt-8">
                   <DeploymentHistory
                     onRemix={handleRemixFromHistory}
@@ -570,7 +367,7 @@ export default function SanctumPage() {
           {/* Features footer */}
           <div className="py-8 border-t border-border-subtle bg-void-black/50 backdrop-blur-sm">
             <Container size="xl">
-              <div className="flex items-center justify-center gap-12 text-sm text-text-muted">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 lg:gap-12 text-sm text-text-muted">
                 <div className="flex items-center gap-2">
                   <Code2 className="w-4 h-4 text-near-green" />
                   <span>Rust Smart Contracts</span>
@@ -594,7 +391,7 @@ export default function SanctumPage() {
       )}
 
       {/* Roast Session - full screen */}
-      {sessionStarted && mode === 'roast' && (
+      {state.sessionStarted && state.mode === 'roast' && (
         <div className="relative z-40 flex flex-col bg-void-black h-screen">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-void-black to-orange-900/10" />
@@ -627,7 +424,7 @@ export default function SanctumPage() {
       )}
 
       {/* Build Session - full screen immersive mode */}
-      {sessionStarted && mode === 'build' && (
+      {state.sessionStarted && state.mode === 'build' && (
         <div className="relative z-40 flex flex-col bg-void-black h-screen">
           {/* Session background - contained, no bleeding */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -650,7 +447,7 @@ export default function SanctumPage() {
                   <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                     <span className="text-2xl">🔮</span>
                     <GradientText>
-                      {selectedCategory === 'custom' ? 'Custom Build' : selectedCategory?.replace('-', ' ')}
+                      {state.selectedCategory === 'custom' ? 'Custom Build' : state.selectedCategory?.replace('-', ' ')}
                     </GradientText>
                   </h2>
                   <p className="text-sm text-text-muted">Chat with Sanctum to forge your contract</p>
@@ -660,16 +457,16 @@ export default function SanctumPage() {
               {/* Desktop controls */}
               <div className="hidden md:flex items-center gap-4">
                 <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  onClick={() => dispatch({ type: 'SET_SOUND_ENABLED', payload: !state.soundEnabled })}
                   className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
-                  title={soundEnabled ? 'Sound on' : 'Sound off'}
+                  title={state.soundEnabled ? 'Sound on' : 'Sound off'}
                 >
-                  {soundEnabled ? '🔊' : '🔇'}
+                  {state.soundEnabled ? '🔊' : '🔇'}
                 </button>
                 
                 <TokenCounter 
-                  tokensUsed={tokensUsed} 
-                  tokenBalance={tokenBalance}
+                  tokensUsed={state.tokensUsed} 
+                  tokenBalance={state.tokenBalance}
                 />
               </div>
             </div>
@@ -679,9 +476,9 @@ export default function SanctumPage() {
           <div className="md:hidden relative z-10 flex-shrink-0 sticky top-0 bg-void-black/80 backdrop-blur-sm border-b border-white/[0.08]">
             <div className="flex">
               <button
-                onClick={() => setActivePanel('chat')}
+                onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: 'chat' })}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-all ${
-                  activePanel === 'chat'
+                  state.activePanel === 'chat'
                     ? 'text-purple-400 border-b-2 border-purple-500 bg-purple-500/10'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
@@ -690,9 +487,9 @@ export default function SanctumPage() {
                 Chat
               </button>
               <button
-                onClick={() => setActivePanel('code')}
+                onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: 'code' })}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-all ${
-                  activePanel === 'code'
+                  state.activePanel === 'code'
                     ? 'text-near-green border-b-2 border-near-green bg-near-green/10'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
@@ -713,8 +510,8 @@ export default function SanctumPage() {
                   {/* Chat - fills remaining space */}
                   <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     <SanctumChat 
-                      category={selectedCategory}
-                      customPrompt={customPrompt}
+                      category={state.selectedCategory}
+                      customPrompt={state.customPrompt}
                       onCodeGenerated={handleCodeGenerated}
                       onTokensUsed={handleTokensUsed}
                       onTaskUpdate={handleTaskUpdate}
@@ -738,38 +535,38 @@ export default function SanctumPage() {
                       <div className="flex items-center gap-2">
                         <button 
                           className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
-                          onClick={() => navigator.clipboard.writeText(generatedCode)}
-                          disabled={!generatedCode}
+                          onClick={() => navigator.clipboard.writeText(state.generatedCode)}
+                          disabled={!state.generatedCode}
                           title="Copy code"
                         >
                           <Code2 className="w-4 h-4" />
                         </button>
-                        <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} />
+                        <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} />
                         <FileStructureToggle 
-                          code={generatedCode} 
-                          contractName={selectedCategory || 'my-contract'}
-                          isOpen={showFileStructure}
-                          onToggle={() => setShowFileStructure(!showFileStructure)}
+                          code={state.generatedCode} 
+                          contractName={state.selectedCategory || 'my-contract'}
+                          isOpen={state.showFileStructure}
+                          onToggle={() => dispatch({ type: 'SET_SHOW_FILE_STRUCTURE', payload: !state.showFileStructure })}
                         />
                         <button 
                           className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-blue-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-blue-500/30 disabled:opacity-50"
-                          onClick={() => setShowComparison(true)}
-                          disabled={!generatedCode}
+                          onClick={() => dispatch({ type: 'SET_SHOW_COMPARISON', payload: true })}
+                          disabled={!state.generatedCode}
                           title="Compare versions"
                         >
                           <GitCompare className="w-4 h-4" />
                         </button>
                         <button 
                           className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-green-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-green-500/30 disabled:opacity-50"
-                          onClick={() => setShowSimulation(true)}
-                          disabled={!generatedCode}
+                          onClick={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: true })}
+                          disabled={!state.generatedCode}
                           title="Test in sandbox"
                         >
                           <Play className="w-4 h-4" />
                         </button>
                         <button 
                           className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-pink-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-pink-500/30"
-                          onClick={() => setShowPairProgramming(true)}
+                          onClick={() => dispatch({ type: 'SET_SHOW_PAIR_PROGRAMMING', payload: true })}
                           title="Pair programming"
                         >
                           <Users className="w-4 h-4" />
@@ -777,7 +574,7 @@ export default function SanctumPage() {
                         <button 
                           className="px-3 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
                           onClick={handleShare}
-                          disabled={!generatedCode}
+                          disabled={!state.generatedCode}
                           title="Share contract"
                         >
                           <Share2 className="w-4 h-4" />
@@ -785,15 +582,15 @@ export default function SanctumPage() {
                         <button 
                           className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
                           onClick={handleDeploy}
-                          disabled={!generatedCode || sanctumStage === 'thinking'}
+                          disabled={!state.generatedCode || state.sanctumStage === 'thinking'}
                         >
                           <Rocket className="w-4 h-4" />
                           Deploy
                         </button>
                         <button 
                           className="px-4 py-2 text-sm bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-cyan-500/20"
-                          onClick={() => setShowWebappBuilder(true)}
-                          disabled={!generatedCode}
+                          onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
+                          disabled={!state.generatedCode}
                           title="Generate webapp for this contract"
                         >
                           <Globe className="w-4 h-4" />
@@ -802,26 +599,34 @@ export default function SanctumPage() {
                       </div>
                     </div>
                     {/* Task progress row */}
-                    <TaskProgressInline task={currentTask} isThinking={isThinking} />
+                    <TaskProgressInline task={state.currentTask} isThinking={state.isThinking} />
                   </div>
 
+                  {/* Error banner - Desktop */}
+                  {state.deployError && (
+                    <div className="mx-4 mt-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center justify-between">
+                      <span className="text-sm text-red-400">{state.deployError}</span>
+                      <button onClick={() => dispatch({ type: 'SET_DEPLOY_ERROR', payload: null })} className="text-red-400 hover:text-red-300 ml-2">✕</button>
+                    </div>
+                  )}
+
                   {/* File Structure Panel */}
-                  {showFileStructure && generatedCode && (
+                  {state.showFileStructure && state.generatedCode && (
                     <div className="p-4 border-b border-white/[0.08]">
                       <FileStructure 
-                        code={generatedCode} 
-                        contractName={selectedCategory || 'my-contract'}
+                        code={state.generatedCode} 
+                        contractName={state.selectedCategory || 'my-contract'}
                       />
                     </div>
                   )}
 
                   {/* Sanctum Visualization */}
-                  {!generatedCode && (
+                  {!state.generatedCode && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8">
                       <SanctumVisualization
-                        isGenerating={isGenerating}
+                        isGenerating={state.isGenerating}
                         progress={0}
-                        stage={sanctumStage}
+                        stage={state.sanctumStage}
                       />
                       <p className="mt-6 text-text-muted text-center max-w-sm">
                         Start chatting with Sanctum to generate your smart contract code.
@@ -831,23 +636,23 @@ export default function SanctumPage() {
                   )}
 
                   {/* Code with typing animation */}
-                  {generatedCode && (
+                  {state.generatedCode && (
                     <div className="flex-1 min-h-0 overflow-auto">
                       <TypewriterCode 
-                        code={generatedCode}
+                        code={state.generatedCode}
                         speed={8}
-                        onComplete={() => setSanctumStage('complete')}
+                        onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
                       />
                     </div>
                   )}
 
                   {/* Contract DNA + Gas + File info */}
-                  {generatedCode && (
+                  {state.generatedCode && (
                     <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
                       {/* DNA and Gas row */}
                       <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
-                        <ContractDNA code={generatedCode} size="sm" showLabel={true} />
-                        <GasEstimatorCompact code={generatedCode} />
+                        <ContractDNA code={state.generatedCode} size="sm" showLabel={true} />
+                        <GasEstimatorCompact code={state.generatedCode} />
                       </div>
                       {/* File info row */}
                       <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
@@ -855,7 +660,7 @@ export default function SanctumPage() {
                           <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
                           contract.rs
                         </span>
-                        <span>{generatedCode.split('\n').length} lines • {generatedCode.length} chars</span>
+                        <span>{state.generatedCode.split('\n').length} lines • {state.generatedCode.length} chars</span>
                       </div>
                     </div>
                   )}
@@ -866,13 +671,13 @@ export default function SanctumPage() {
             {/* Mobile Layout: Stacked with tabs */}
             <div className="md:hidden flex-1 flex flex-col overflow-hidden">
               {/* Chat Panel */}
-              {activePanel === 'chat' && (
+              {state.activePanel === 'chat' && (
                 <div className="flex-1 p-3 overflow-hidden">
                   <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                       <SanctumChat 
-                        category={selectedCategory}
-                        customPrompt={customPrompt}
+                        category={state.selectedCategory}
+                        customPrompt={state.customPrompt}
                         onCodeGenerated={handleCodeGenerated}
                         onTokensUsed={handleTokensUsed}
                         onTaskUpdate={handleTaskUpdate}
@@ -884,7 +689,7 @@ export default function SanctumPage() {
               )}
 
               {/* Code Panel */}
-              {activePanel === 'code' && (
+              {state.activePanel === 'code' && (
                 <div className="flex-1 flex flex-col overflow-hidden">
                   <div className="flex-1 p-3 overflow-hidden">
                     <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
@@ -898,35 +703,43 @@ export default function SanctumPage() {
                           <div className="flex items-center gap-2">
                             <button 
                               className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2"
-                              onClick={() => navigator.clipboard.writeText(generatedCode)}
-                              disabled={!generatedCode}
+                              onClick={() => navigator.clipboard.writeText(state.generatedCode)}
+                              disabled={!state.generatedCode}
                               title="Copy"
                             >
                               <Code2 className="w-4 h-4" />
                             </button>
-                            <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} />
+                            <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} />
                           </div>
                         </div>
-                        <TaskProgressInline task={currentTask} isThinking={isThinking} />
+                        <TaskProgressInline task={state.currentTask} isThinking={state.isThinking} />
                       </div>
 
+                      {/* Error banner - Mobile */}
+                      {state.deployError && (
+                        <div className="mx-4 mt-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center justify-between">
+                          <span className="text-sm text-red-400">{state.deployError}</span>
+                          <button onClick={() => dispatch({ type: 'SET_DEPLOY_ERROR', payload: null })} className="text-red-400 hover:text-red-300 ml-2">✕</button>
+                        </div>
+                      )}
+
                       {/* File Structure Panel */}
-                      {showFileStructure && generatedCode && (
+                      {state.showFileStructure && state.generatedCode && (
                         <div className="p-4 border-b border-white/[0.08]">
                           <FileStructure 
-                            code={generatedCode} 
-                            contractName={selectedCategory || 'my-contract'}
+                            code={state.generatedCode} 
+                            contractName={state.selectedCategory || 'my-contract'}
                           />
                         </div>
                       )}
 
                       {/* Sanctum Visualization */}
-                      {!generatedCode && (
+                      {!state.generatedCode && (
                         <div className="flex-1 flex flex-col items-center justify-center p-6">
                           <SanctumVisualization
-                            isGenerating={isGenerating}
+                            isGenerating={state.isGenerating}
                             progress={0}
-                            stage={sanctumStage}
+                            stage={state.sanctumStage}
                           />
                           <p className="mt-4 text-text-muted text-center text-sm">
                             Switch to Chat to start building your contract.
@@ -935,29 +748,29 @@ export default function SanctumPage() {
                       )}
 
                       {/* Code with typing animation */}
-                      {generatedCode && (
+                      {state.generatedCode && (
                         <div className="flex-1 min-h-0 overflow-auto">
                           <TypewriterCode 
-                            code={generatedCode}
+                            code={state.generatedCode}
                             speed={8}
-                            onComplete={() => setSanctumStage('complete')}
+                            onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
                           />
                         </div>
                       )}
 
                       {/* Contract info footer */}
-                      {generatedCode && (
+                      {state.generatedCode && (
                         <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
                           <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
-                            <ContractDNA code={generatedCode} size="sm" showLabel={false} />
-                            <GasEstimatorCompact code={generatedCode} />
+                            <ContractDNA code={state.generatedCode} size="sm" showLabel={false} />
+                            <GasEstimatorCompact code={state.generatedCode} />
                           </div>
                           <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
                             <span className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
                               contract.rs
                             </span>
-                            <span>{generatedCode.split('\n').length} lines</span>
+                            <span>{state.generatedCode.split('\n').length} lines</span>
                           </div>
                         </div>
                       )}
@@ -974,23 +787,23 @@ export default function SanctumPage() {
               <button 
                 className="flex items-center gap-2 px-3 py-2 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
                 onClick={handleShare}
-                disabled={!generatedCode}
+                disabled={!state.generatedCode}
               >
                 <Share2 className="w-4 h-4" />
                 Share
               </button>
               <button 
                 className="flex items-center gap-2 px-3 py-2 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg border border-blue-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-                onClick={() => setShowComparison(true)}
-                disabled={!generatedCode}
+                onClick={() => dispatch({ type: 'SET_SHOW_COMPARISON', payload: true })}
+                disabled={!state.generatedCode}
               >
                 <GitCompare className="w-4 h-4" />
                 Compare
               </button>
               <button 
                 className="flex items-center gap-2 px-3 py-2 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-                onClick={() => setShowSimulation(true)}
-                disabled={!generatedCode}
+                onClick={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: true })}
+                disabled={!state.generatedCode}
               >
                 <Play className="w-4 h-4" />
                 Test
@@ -998,15 +811,15 @@ export default function SanctumPage() {
               <button 
                 className="flex items-center gap-2 px-4 py-2 text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-50 whitespace-nowrap font-medium"
                 onClick={handleDeploy}
-                disabled={!generatedCode || sanctumStage === 'thinking'}
+                disabled={!state.generatedCode || state.sanctumStage === 'thinking'}
               >
                 <Rocket className="w-4 h-4" />
                 Deploy
               </button>
               <button 
                 className="flex items-center gap-2 px-3 py-2 text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-                onClick={() => setShowWebappBuilder(true)}
-                disabled={!generatedCode}
+                onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
+                disabled={!state.generatedCode}
               >
                 <Globe className="w-4 h-4" />
                 Webapp

@@ -427,6 +427,28 @@ export default function LearnPage() {
           </div>
         </ScrollReveal>
 
+        {/* Data Sources */}
+        <ScrollReveal delay={0.23}>
+          <div className="mt-8 p-4 rounded-xl bg-near-green/5 border border-near-green/10">
+            <p className="text-[10px] text-text-muted uppercase tracking-widest mb-3 font-mono text-center">Powered by Real Ecosystem Data</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {[
+                { name: 'NearBlocks', desc: 'Chain metrics' },
+                { name: 'DeFiLlama', desc: 'TVL & DeFi' },
+                { name: 'GitHub', desc: 'Developer activity' },
+                { name: 'FastNEAR', desc: 'On-chain data' },
+                { name: 'Pikespeak', desc: 'Wallet analytics' },
+                { name: 'Ecosystem', desc: 'Project registry' },
+              ].map((source) => (
+                <div key={source.name} className="text-center p-2 rounded-lg bg-near-green/5 border border-near-green/10">
+                  <p className="text-xs font-mono text-near-green/70">{source.name}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{source.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+
         {/* CTA */}
         <ScrollReveal delay={0.25}>
           <Card variant="glass" padding="lg" className="text-center">

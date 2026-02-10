@@ -40,9 +40,11 @@ export function OnboardingOverlay() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    // Check if user has already been onboarded
-    const hasBeenOnboarded = localStorage.getItem('voidspace_onboarded');
-    if (!hasBeenOnboarded) {
+    // Check if user has already been onboarded (localStorage OR cookie)
+    const hasBeenOnboardedLocal = localStorage.getItem('voidspace_onboarded');
+    const hasBeenOnboardedCookie = document.cookie.includes('voidspace_onboarded=true');
+    
+    if (!hasBeenOnboardedLocal && !hasBeenOnboardedCookie) {
       setIsVisible(true);
     }
   }, []);
@@ -57,11 +59,13 @@ export function OnboardingOverlay() {
 
   const handleSkip = () => {
     localStorage.setItem('voidspace_onboarded', 'true');
+    document.cookie = 'voidspace_onboarded=true; max-age=31536000; path=/; SameSite=Lax';
     setIsVisible(false);
   };
 
   const handleComplete = () => {
     localStorage.setItem('voidspace_onboarded', 'true');
+    document.cookie = 'voidspace_onboarded=true; max-age=31536000; path=/; SameSite=Lax';
     setIsVisible(false);
   };
 

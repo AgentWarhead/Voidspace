@@ -1,12 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-import { Search } from 'lucide-react';
-import { Container, Card } from '@/components/ui';
+import { Container } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GradientText } from '@/components/effects/GradientText';
 import { GridPattern } from '@/components/effects/GridPattern';
-import { ScanLine } from '@/components/effects/ScanLine';
 import { SearchResults } from '@/components/search/SearchResults';
+import { SearchInput } from '@/components/search/SearchInput';
 import { searchAll } from '@/lib/queries';
 
 interface Props {
@@ -49,29 +48,8 @@ export default async function SearchPage({ searchParams }: Props) {
             Search across projects, voids, and categories in the NEAR ecosystem.
           </p>
 
-          {/* Search Form */}
-          <form action="/search" method="GET" className="mt-6 max-w-xl mx-auto">
-            <Card variant="glass" padding="none" className="relative overflow-hidden transition-shadow duration-300 focus-within:ring-1 focus-within:ring-cyan-400/50 focus-within:shadow-[0_0_20px_rgba(0,212,255,0.15)]">
-              <ScanLine />
-              <div className="relative z-10 flex items-center">
-                <Search className="w-5 h-5 text-text-muted ml-4 shrink-0" />
-                <input
-                  type="text"
-                  name="q"
-                  defaultValue={query}
-                  placeholder="Search projects, voids, categories..."
-                  className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted px-4 py-3 text-sm outline-none"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-3 text-sm font-medium text-near-green hover:bg-near-green/10 transition-colors"
-                >
-                  Search
-                </button>
-              </div>
-            </Card>
-          </form>
+          {/* Search Input with Client-Side Debounce */}
+          <SearchInput initialQuery={query} />
 
           {query && (
             <p className="text-sm text-text-muted mt-4 font-mono">

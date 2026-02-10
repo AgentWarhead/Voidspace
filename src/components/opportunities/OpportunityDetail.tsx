@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock, Sparkles } from 'lucide-react';
+import { ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock, Sparkles, ChevronRight } from 'lucide-react';
 import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
@@ -36,14 +36,38 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Back link */}
-      <Link
-        href="/opportunities"
-        className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Voids
-      </Link>
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb">
+        <div className="flex items-center gap-2 text-sm">
+          <Link
+            href="/"
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
+            Home
+          </Link>
+          <ChevronRight className="w-3 h-3 text-text-muted" />
+          <Link
+            href="/opportunities"
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
+            Voids
+          </Link>
+          <ChevronRight className="w-3 h-3 text-text-muted" />
+          <Link
+            href={`/opportunities?category=${category.slug}`}
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
+            {category.name}
+          </Link>
+          <ChevronRight className="w-3 h-3 text-text-muted" />
+          <span className="text-text-primary">
+            {opportunity.title.length > 40 
+              ? `${opportunity.title.substring(0, 40)}...` 
+              : opportunity.title
+            }
+          </span>
+        </div>
+      </nav>
 
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-xl">

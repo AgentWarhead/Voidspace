@@ -107,10 +107,11 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/search"
-              className="p-2 text-text-secondary hover:text-cyan-400 transition-all duration-200 hover:drop-shadow-[0_0_6px_rgba(0,212,255,0.5)]"
+              className="flex items-center gap-1 p-2 text-text-secondary hover:text-cyan-400 transition-all duration-200 hover:drop-shadow-[0_0_6px_rgba(0,212,255,0.5)]"
               aria-label="Search"
             >
               <Search className="w-4 h-4" />
+              <span className="text-xs text-text-muted font-mono">⌘K</span>
             </Link>
             <ConnectWalletButton />
           </div>

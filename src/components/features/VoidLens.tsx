@@ -161,16 +161,16 @@ export function VoidLens() {
 
           {/* Example Wallets */}
           <div className="space-y-2">
-            <p className="text-xs text-text-muted">Try an example:</p>
+            <p className="text-xs text-text-muted">Try these:</p>
             <div className="flex flex-wrap gap-2">
-              {['aurora.near', 'ref-finance.near', 'app.nearcrowd.near', 'v2.ref-finance.near'].map((example) => (
+              {['aurora.near', 'ref-finance.near', 'linear-protocol.near'].map((example) => (
                 <button
                   key={example}
                   onClick={() => {
                     setAddress(example);
                     setTimeout(() => handleAnalyze(), 100);
                   }}
-                  className="px-2.5 py-1 text-xs font-mono rounded-md bg-surface border border-border text-text-secondary hover:border-near-green/30 hover:text-text-primary transition-colors"
+                  className="text-xs px-2 py-1 bg-surface border border-border rounded-full hover:border-near-green/30 cursor-pointer transition-colors"
                 >
                   {example}
                 </button>

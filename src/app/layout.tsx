@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { SearchShortcut } from '@/components/layout/SearchShortcut';
 import { Providers } from '@/components/providers/Providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col">
         <Providers>
+          <SearchShortcut />
           <Header />
           <main className="flex-1">
             <ErrorBoundary>

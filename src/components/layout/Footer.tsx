@@ -66,9 +66,6 @@ export function Footer() {
             <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Learn
             </Link>
-            <Link href="/ecosystem" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
-              Ecosystem
-            </Link>
           </div>
 
           {/* Competition badge */}
