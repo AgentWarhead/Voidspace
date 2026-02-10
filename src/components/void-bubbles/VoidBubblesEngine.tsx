@@ -529,19 +529,35 @@ export function VoidBubblesEngine() {
 
   // X-ray mode toggle
   useEffect(() => {
+    if (!svgRef.current) return;
     const svg = d3.select(svgRef.current);
-    svg.selectAll('.xray-ring')
-      .transition().duration(400)
-      .attr('r', (d: unknown) => xrayMode ? ((d as BubbleNode).targetRadius + 6) : 0)
-      .attr('opacity', xrayMode ? 0.8 : 0);
+    const rings = svg.selectAll('.xray-ring');
+    const skulls = svg.selectAll('.skull-overlay');
+    
+    // Only proceed if elements exist
+    if (rings.empty()) return;
+    
+    // Iterate over xray rings and toggle visibility
+    (rings.nodes() as Element[]).forEach((el) => {
+      if (!el?.parentNode) return;
+      const d = d3.select(el.parentNode as Element).datum() as BubbleNode;
+      d3.select(el)
+        .transition().duration(400)
+        .attr('r', xrayMode ? (d.targetRadius + 6) : 0)
+        .attr('opacity', xrayMode ? 0.8 : 0);
+    });
 
-    svg.selectAll('.skull-overlay')
-      .transition().duration(400)
-      .attr('opacity', (d: unknown) => {
-        const node = d as BubbleNode;
-        return (xrayMode && (node.token.riskLevel === 'critical' || node.token.riskLevel === 'high')) ? 0.9 : 
-               (!xrayMode && node.token.riskLevel === 'critical') ? 0.7 : 0;
-      });
+    // Iterate over skull overlays and toggle visibility
+    (skulls.nodes() as Element[]).forEach((el) => {
+      if (!el?.parentNode) return;
+      const d = d3.select(el.parentNode as Element).datum() as BubbleNode;
+      let opacity = 0;
+      if (xrayMode && (d.token.riskLevel === 'critical' || d.token.riskLevel === 'high')) opacity = 0.9;
+      else if (!xrayMode && d.token.riskLevel === 'critical') opacity = 0.7;
+      d3.select(el)
+        .transition().duration(400)
+        .attr('opacity', opacity);
+    });
   }, [xrayMode]);
 
   // Sound toggle
@@ -763,7 +779,7 @@ export function VoidBubblesEngine() {
     if (whaleAlerts.length === 0) return null;
 
     return (
-      <div className="absolute bottom-4 left-4 z-20 space-y-1.5 max-w-[280px]">
+      <div className="absolute bottom-14 sm:bottom-14 left-2 sm:left-4 z-20 space-y-1.5 max-w-[260px] sm:max-w-[280px]">
         <AnimatePresence mode="popLayout">
           {whaleAlerts.slice(0, 3).map(alert => (
             <motion.div
