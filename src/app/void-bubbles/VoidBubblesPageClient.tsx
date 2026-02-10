@@ -113,11 +113,11 @@ export function VoidBubblesPageClient() {
         <HotStrip />
       </div>
 
-      {/* Main Visualization — takes all remaining space */}
-      <section className="flex-1 min-h-0 py-1 relative z-10">
-        <Container size="xl" className="h-full">
+      {/* Main Visualization — takes all remaining space, full width */}
+      <section className="flex-1 min-h-0 relative z-10">
+        <div className="h-full w-full">
           <VoidBubblesEngine />
-        </Container>
+        </div>
       </section>
     </div>
   );

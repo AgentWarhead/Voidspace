@@ -1699,7 +1699,7 @@ export function VoidBubblesEngine() {
   }
 
   return (
-    <div className="flex-1 relative overflow-hidden">
+    <div className="flex-1 relative overflow-hidden h-full w-full">
       {/* Power Bar — Desktop */}
       <div className="hidden sm:block absolute top-4 left-4 z-20">
         <div className="bg-surface/95 backdrop-blur-xl border border-border rounded-lg shadow-xl p-3">
@@ -2094,7 +2094,7 @@ export function VoidBubblesEngine() {
           </div>
           <div className="hidden sm:block">
             <span className="text-xs text-text-muted">
-              © 2024 Voidspace
+              © 2026 Voidspace
             </span>
           </div>
         </div>
