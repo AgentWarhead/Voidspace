@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, RotateCcw, Clock, Activity, Zap, X,
-  TrendingUp, TrendingDown, Shield, Search,
+  TrendingUp, TrendingDown, Shield, Search, Settings,
 } from 'lucide-react';
 // These icons exist but TS types are broken in v0.453 RSC mode
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
@@ -175,6 +175,8 @@ export function VoidBubblesEngine() {
   const [period, setPeriod] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d');
   const [sizeMetric, setSizeMetric] = useState<'marketCap' | 'volume' | 'performance'>('marketCap');
   const [bubbleContent, setBubbleContent] = useState<'performance' | 'price' | 'volume' | 'marketCap'>('performance');
+  // Power Bar state - mobile panel
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
   // Spotlight Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -1450,8 +1452,43 @@ export function VoidBubblesEngine() {
 
   return (
     <div className="relative w-full h-full min-h-0 bg-background rounded-xl border border-border overflow-hidden">
-      {/* Top Controls — single row on desktop, stacked on mobile */}
-      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+      {/* Power Bar - Responsive Controls */}
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20">
+        {/* Mobile Power Bar (< 768px) */}
+        <div className="md:hidden flex items-center justify-between gap-2">
+          {/* Critical timeframe selector stays visible */}
+          <div className="flex items-center gap-0.5 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-0.5 flex-shrink-0">
+            {(['1h', '4h', '1d', '7d', '30d'] as const).map(p => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={cn(
+                  'px-2 py-1.5 rounded-md text-[10px] font-mono font-bold transition-all uppercase',
+                  'min-w-[32px] touch-manipulation',
+                  period === p
+                    ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                    : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+
+          {/* Settings gear opens mobile panel */}
+          <button
+            onClick={() => setShowMobilePanel(true)}
+            className={cn(
+              'relative p-2.5 rounded-lg border transition-all group overflow-hidden bg-surface/80 border-border text-text-muted',
+              'min-w-[44px] min-h-[44px] touch-manipulation flex items-center justify-center'
+            )}
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Desktop Full Controls (>= 768px) */}
+        <div className="hidden md:flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
         {/* Timeframe selector and filters */}
         <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
           {/* Timeframe selector - FIRST element */}
@@ -1661,7 +1698,197 @@ export function VoidBubblesEngine() {
             </div>
           </button>
         </div>
+        </div>
       </div>
+
+      {/* Mobile Settings Panel */}
+      <AnimatePresence>
+        {showMobilePanel && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setShowMobilePanel(false)}
+            />
+            
+            {/* Slide-up Panel */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-border rounded-t-xl z-50 md:hidden"
+            >
+              <div className="p-4 max-h-[80vh] overflow-y-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-mono font-bold text-text-primary">Settings</h3>
+                  <button
+                    onClick={() => setShowMobilePanel(false)}
+                    className="p-1 rounded-md hover:bg-surface-hover transition-colors"
+                  >
+                    <X className="w-4 h-4 text-text-muted" />
+                  </button>
+                </div>
+
+                {/* Category Filters */}
+                <div className="mb-6">
+                  <h4 className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">Filters</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Gainers/Losers */}
+                    <button
+                      onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+                      className={cn(
+                        'px-3 py-2 rounded-md text-xs font-mono transition-all',
+                        highlightMode === 'gainers'
+                          ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                          : 'bg-surface text-text-muted border border-border'
+                      )}
+                    >
+                      🔥 Gainers
+                    </button>
+                    <button
+                      onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+                      className={cn(
+                        'px-3 py-2 rounded-md text-xs font-mono transition-all',
+                        highlightMode === 'losers'
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          : 'bg-surface text-text-muted border border-border'
+                      )}
+                    >
+                      💀 Losers
+                    </button>
+                  </div>
+                  {/* Categories */}
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {categories.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setFilterCategory(cat)}
+                        className={cn(
+                          'px-3 py-2 rounded-md text-xs font-mono transition-all',
+                          filterCategory === cat
+                            ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                            : 'bg-surface text-text-muted border border-border'
+                        )}
+                      >
+                        {cat === 'all' ? 'ALL' : cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Size Metric */}
+                <div className="mb-6">
+                  <h4 className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">Bubble Size</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { key: 'marketCap', label: 'Market Cap' },
+                      { key: 'volume', label: 'Volume' },
+                      { key: 'performance', label: 'Performance' },
+                    ].map(opt => (
+                      <button 
+                        key={opt.key} 
+                        onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
+                        className={cn(
+                          'px-3 py-2 rounded-md text-xs font-mono transition-all',
+                          sizeMetric === opt.key
+                            ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                            : 'bg-surface text-text-muted border border-border'
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bubble Content */}
+                <div className="mb-6">
+                  <h4 className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">Bubble Content</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { key: 'performance', label: 'Performance %' },
+                      { key: 'price', label: 'Price $' },
+                      { key: 'volume', label: 'Volume' },
+                      { key: 'marketCap', label: 'Market Cap' },
+                    ].map(opt => (
+                      <button 
+                        key={opt.key} 
+                        onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
+                        className={cn(
+                          'px-3 py-2 rounded-md text-xs font-mono transition-all',
+                          bubbleContent === opt.key
+                            ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                            : 'bg-surface text-text-muted border border-border'
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Toggles */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setXrayMode(!xrayMode)}
+                    className={cn(
+                      'flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all font-mono text-sm',
+                      xrayMode
+                        ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
+                        : 'bg-surface border-border text-text-muted'
+                    )}
+                  >
+                    {xrayMode ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    X-Ray
+                  </button>
+
+                  <button
+                    onClick={() => setSoundEnabled(!soundEnabled)}
+                    className={cn(
+                      'flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all font-mono text-sm',
+                      soundEnabled
+                        ? 'bg-near-green/20 border-near-green/30 text-near-green'
+                        : 'bg-surface border-border text-text-muted'
+                    )}
+                  >
+                    {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                    Sound
+                  </button>
+
+                  <button
+                    onClick={handleSnapshot}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border bg-surface border-border text-text-muted transition-all font-mono text-sm"
+                  >
+                    <Camera className="w-4 h-4" />
+                    Camera
+                  </button>
+
+                  <button
+                    onClick={handleShareX}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border bg-surface border-border text-text-muted transition-all font-mono text-sm"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+
+                  <button
+                    onClick={() => initSimulation()}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border bg-surface border-border text-text-muted transition-all font-mono text-sm col-span-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Reset Visualization
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Branding Bar — always visible at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-20">
