@@ -223,7 +223,7 @@ export function VoidBubblesEngine() {
   const simulationRef = useRef<d3.Simulation<BubbleNode, undefined> | null>(null);
   const nodesRef = useRef<BubbleNode[]>([]);
   const sonicRef = useRef(new SonicEngine());
-  const animFrameRef = useRef<number>(0);
+  const animFrameRef = useRef<number | null>(null);
 
   // Categories from data
   const categories = useMemo(() => {
@@ -722,6 +722,16 @@ export function VoidBubblesEngine() {
   const initSimulation = useCallback(() => {
     if (!svgRef.current || !containerRef.current || filteredTokens.length === 0) return;
 
+    // Clean up previous simulation before creating new one
+    if (simulationRef.current) {
+      simulationRef.current.stop();
+      simulationRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+
     const rect = containerRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -756,7 +766,6 @@ export function VoidBubblesEngine() {
 
     // Create nodes
     const nodes: BubbleNode[] = filteredTokens.map((token, i) => {
-      const angle = (i / filteredTokens.length) * 2 * Math.PI;
       const spread = Math.min(width, height) * 0.3;
       const r = radiusScale(getMetricValue(token));
       
@@ -789,8 +798,10 @@ export function VoidBubblesEngine() {
         glowColor = '#FF4444';
       }
 
-      // Spiral spawn for even distribution
-      const spiralR = spread * 0.3 + (i / filteredTokens.length) * spread * 0.5;
+      // Golden-angle spiral for even distribution across the viewport
+      const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
+      const spiralAngle = i * goldenAngle;
+      const spiralR = spread * 0.15 + Math.sqrt(i / filteredTokens.length) * spread * 0.7;
       return {
         id: token.id,
         token,
@@ -798,8 +809,8 @@ export function VoidBubblesEngine() {
         targetRadius: r,
         color: bubbleColor,
         glowColor,
-        x: centerX + Math.cos(angle * 3) * spiralR,
-        y: centerY + Math.sin(angle * 3) * spiralR,
+        x: centerX + Math.cos(spiralAngle) * spiralR,
+        y: centerY + Math.sin(spiralAngle) * spiralR,
       };
     });
 
@@ -1218,32 +1229,25 @@ export function VoidBubblesEngine() {
 
     // Force simulation — enhanced spacing for better mobile UX
     const isMobile = width < 768;
-    const spacingMultiplier = isMobile ? 1.8 : 1.4; // More spacing on mobile
-    const repulsionStrength = isMobile ? -50 : -40; // Stronger repulsion on mobile
+    const spacingMultiplier = isMobile ? 1.6 : 1.3;
+    const repulsionStrength = isMobile ? -35 : -25;
     
     const simulation = d3.forceSimulation(nodes)
-      .force('center', d3.forceCenter(centerX, centerY).strength(0.04))
+      // Strong centering to keep bubbles in viewport
+      .force('x', d3.forceX<BubbleNode>(centerX).strength(0.08))
+      .force('y', d3.forceY<BubbleNode>(centerY).strength(0.08))
       .force('charge', d3.forceManyBody()
         .strength(repulsionStrength)
-        .distanceMax(200)
+        .distanceMax(Math.min(width, height) * 0.5)
       )
       .force('collision', d3.forceCollide<BubbleNode>()
-        .radius(d => (d.targetRadius + 5) * spacingMultiplier)
-        .strength(0.8)
+        .radius(d => (d.targetRadius + 4) * spacingMultiplier)
+        .strength(0.9)
+        .iterations(3) // Multiple iterations for tighter packing
       )
-      // Category clustering force
-      .force('category', d3.forceX<BubbleNode>()
-        .x(d => {
-          // Distribute categories in a rough circle around the center
-          const categoryIndex = categories.indexOf(d.token.category);
-          const totalCategories = categories.length - 1; // exclude 'all'
-          const angle = (categoryIndex / totalCategories) * 2 * Math.PI;
-          return centerX + Math.cos(angle) * Math.min(width, height) * 0.15;
-        })
-        .strength(0.02)
-      )
-      .alphaDecay(0.02)
-      .velocityDecay(0.3);
+      .alphaDecay(0.025) // Slightly faster settling
+      .alpha(0.8) // Start with high energy for good spread
+      .velocityDecay(0.35);
 
     // Store simulation reference
     simulationRef.current = simulation;
@@ -1255,6 +1259,14 @@ export function VoidBubblesEngine() {
 
     const tick = (currentTime: number) => {
       if (currentTime - lastFrameTime >= frameInterval) {
+        // Enforce boundary containment — keep bubbles inside viewport
+        const padding = 20;
+        nodes.forEach(d => {
+          const r = d.targetRadius;
+          if (d.x !== undefined) d.x = Math.max(r + padding, Math.min(width - r - padding, d.x));
+          if (d.y !== undefined) d.y = Math.max(r + padding, Math.min(height - r - padding, d.y));
+        });
+
         // Update bubble positions
         bubbleGroups
           .attr('transform', d => `translate(${d.x || 0}, ${d.y || 0})`);
@@ -1378,20 +1390,24 @@ export function VoidBubblesEngine() {
       }
     });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredTokens, sizeMetric, bubbleContent, xrayMode, pulseMode, period, getCurrentPriceChange, handleShowPopup, selectedToken, categories]);
 
-  // Handle window resize
+  // Handle window resize with proper debounce
   useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      // Debounce resize for performance
-      clearTimeout(animFrameRef.current);
-      setTimeout(() => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
         initSimulation();
-      }, 150);
+      }, 200);
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [initSimulation]);
 
   // Initialize on mount and when dependencies change

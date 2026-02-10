@@ -15,7 +15,7 @@ export function VoidBubblesPageClient() {
   }, []);
 
   return (
-    <div className="flex flex-col overflow-hidden relative" style={{ height: 'calc(100vh - 4rem)' }}>
+    <div className="flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
       {/* ── Full-Viewport Voidspace Background ── */}
       <div className="absolute inset-0 z-0 bg-[#04060b]">
         {/* Deep space gradient layers */}
