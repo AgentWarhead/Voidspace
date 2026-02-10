@@ -713,39 +713,73 @@ export function VoidBubblesEngine() {
     // Defs for gradients and filters
     const defs = svg.append('defs');
 
-    // Glow filter — soft, premium outer glow (enhanced for more visibility)
+    // Enhanced cinematic glow filter — dramatic multi-layer outer glow
     const glowFilter = defs.append('filter').attr('id', 'bubble-glow')
-      .attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
-    glowFilter.append('feGaussianBlur').attr('stdDeviation', '8').attr('result', 'blur');
+      .attr('x', '-100%').attr('y', '-100%').attr('width', '300%').attr('height', '300%');
+    
+    // Large soft glow layer
+    glowFilter.append('feGaussianBlur')
+      .attr('stdDeviation', '12')
+      .attr('result', 'blur-large');
+      
+    // Medium glow layer for brightness
+    glowFilter.append('feGaussianBlur')
+      .attr('stdDeviation', '6')
+      .attr('result', 'blur-medium');
+      
+    // Small tight glow for definition
+    glowFilter.append('feGaussianBlur')
+      .attr('stdDeviation', '3')
+      .attr('result', 'blur-small');
+    
+    // Merge all glow layers for dramatic effect
     glowFilter.append('feMerge')
       .selectAll('feMergeNode')
-      .data(['blur', 'SourceGraphic'])
+      .data(['blur-large', 'blur-medium', 'blur-small', 'SourceGraphic'])
       .enter().append('feMergeNode')
       .attr('in', d => d);
 
-    // X-ray ring filter
-    const xrayFilter = defs.append('filter').attr('id', 'xray-glow');
-    xrayFilter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur');
+    // Enhanced X-ray ring filter with dramatic pulse effect
+    const xrayFilter = defs.append('filter').attr('id', 'xray-glow')
+      .attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
+    
+    // Multiple blur layers for X-ray depth
+    xrayFilter.append('feGaussianBlur').attr('stdDeviation', '8').attr('result', 'blur-outer');
+    xrayFilter.append('feGaussianBlur').attr('stdDeviation', '4').attr('result', 'blur-mid');
+    xrayFilter.append('feGaussianBlur').attr('stdDeviation', '1.5').attr('result', 'blur-inner');
+    
+    // Enhanced merge for more dramatic X-ray effect
     xrayFilter.append('feMerge')
       .selectAll('feMergeNode')
-      .data(['blur', 'SourceGraphic'])
+      .data(['blur-outer', 'blur-mid', 'blur-inner', 'SourceGraphic'])
       .enter().append('feMergeNode')
       .attr('in', d => d);
 
-    // Create radial gradients per node — brighter to darker version of bubble color (no white)
+    // Create cinematic radial gradients per node with deeper contrast and 3D effect
     nodes.forEach(node => {
       const base = d3.hsl(node.color);
       const highlight = d3.hsl(node.color);
-      highlight.l = Math.min(base.l + 0.2, 0.8); // brighter version
+      highlight.l = Math.min(base.l + 0.35, 0.85); // brighter highlight
+      highlight.s = Math.min(base.s + 0.15, 1.0); // more saturated highlight
+      
+      const midtone = d3.hsl(node.color);
+      midtone.l = base.l + 0.1;
+      midtone.s = base.s + 0.05;
+      
       const shadow = d3.hsl(node.color);
-      shadow.l = Math.max(base.l - 0.2, 0.05); // darker version
+      shadow.l = Math.max(base.l - 0.35, 0.02); // much darker shadow
+      shadow.s = Math.max(base.s - 0.1, 0.3); // slightly desaturated shadow
 
       const grad = defs.append('radialGradient')
         .attr('id', `grad-${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
-        .attr('cx', '30%').attr('cy', '30%').attr('r', '70%');
-      grad.append('stop').attr('offset', '0%').attr('stop-color', highlight.formatRgb());
-      grad.append('stop').attr('offset', '70%').attr('stop-color', node.color);
-      grad.append('stop').attr('offset', '100%').attr('stop-color', shadow.formatRgb());
+        .attr('cx', '25%').attr('cy', '25%').attr('r', '85%'); // shifted light source for 3D effect
+      
+      // Create more stops for smoother gradient
+      grad.append('stop').attr('offset', '0%').attr('stop-color', highlight.formatRgb()).attr('stop-opacity', '1');
+      grad.append('stop').attr('offset', '15%').attr('stop-color', midtone.formatRgb()).attr('stop-opacity', '1');
+      grad.append('stop').attr('offset', '65%').attr('stop-color', node.color).attr('stop-opacity', '1');
+      grad.append('stop').attr('offset', '90%').attr('stop-color', shadow.formatRgb()).attr('stop-opacity', '1');
+      grad.append('stop').attr('offset', '100%').attr('stop-color', shadow.formatRgb()).attr('stop-opacity', '0.95'); // slight transparency at edge
     });
 
     // Category grouping — gentle nudge, not tight clustering
@@ -758,52 +792,74 @@ export function VoidBubblesEngine() {
     const catX = (cat: string) => centerX + Math.cos(catAngle(cat)) * clusterRadius;
     const catY = (cat: string) => centerY + Math.sin(catAngle(cat)) * clusterRadius;
 
-    // Enhanced Voidspace void grid pattern
+    // Enhanced Voidspace void grid pattern with cinematic depth
     const gridPattern = defs.append('pattern')
       .attr('id', 'void-grid')
       .attr('width', 40)
       .attr('height', 40)
       .attr('patternUnits', 'userSpaceOnUse');
     
-    gridPattern.append('rect')
+    // Deep void background with subtle gradient
+    const gridBg = gridPattern.append('rect')
       .attr('width', 40)
       .attr('height', 40)
-      .attr('fill', '#0a0a0f');
+      .attr('fill', 'url(#grid-bg-gradient)');
+      
+    // Create background gradient for grid cells
+    const gridBgGradient = defs.append('radialGradient')
+      .attr('id', 'grid-bg-gradient')
+      .attr('cx', '50%')
+      .attr('cy', '50%')
+      .attr('r', '70%');
+    gridBgGradient.append('stop').attr('offset', '0%').attr('stop-color', '#0e1419').attr('stop-opacity', '1');
+    gridBgGradient.append('stop').attr('offset', '100%').attr('stop-color', '#0a0a0f').attr('stop-opacity', '1');
     
-    // Primary grid lines (near-green)
+    // Primary grid lines with enhanced glow (near-green)
     gridPattern.append('path')
       .attr('d', 'M 40 0 L 0 0 0 40')
       .attr('fill', 'none')
       .attr('stroke', '#00EC97')
-      .attr('stroke-width', 0.5)
-      .attr('opacity', 0.08);
+      .attr('stroke-width', 0.8)
+      .attr('opacity', 0.12)
+      .style('filter', 'drop-shadow(0 0 2px #00EC9740)');
     
-    // Secondary grid lines (accent cyan) for depth
+    // Secondary grid lines with soft glow (accent cyan) for depth
     gridPattern.append('path')
       .attr('d', 'M 20 0 L 20 40 M 0 20 L 40 20')
       .attr('fill', 'none')
       .attr('stroke', '#00D4FF')
-      .attr('stroke-width', 0.3)
-      .attr('opacity', 0.04);
+      .attr('stroke-width', 0.4)
+      .attr('opacity', 0.08)
+      .style('filter', 'drop-shadow(0 0 1px #00D4FF30)');
     
-    // Grid intersection dots for extra detail
+    // Enhanced grid intersection dots with varied sizes
+    const intersectionData = [
+      {x: 0, y: 0, r: 0.8, opacity: 0.1}, 
+      {x: 20, y: 20, r: 1.2, opacity: 0.08}, 
+      {x: 40, y: 40, r: 0.6, opacity: 0.06},
+      {x: 40, y: 0, r: 0.4, opacity: 0.04},
+      {x: 0, y: 40, r: 0.4, opacity: 0.04}
+    ];
+    
     gridPattern.selectAll('.grid-dot')
-      .data([{x: 0, y: 0}, {x: 20, y: 20}, {x: 40, y: 40}])
+      .data(intersectionData)
       .enter().append('circle')
       .attr('class', 'grid-dot')
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
-      .attr('r', 0.5)
+      .attr('r', d => d.r)
       .attr('fill', '#00EC97')
-      .attr('opacity', 0.06);
+      .attr('opacity', d => d.opacity)
+      .style('filter', 'drop-shadow(0 0 2px #00EC9730)');
 
-    // Background with grid - also handles click outside to collapse bubbles
+    // Background with enhanced grid and subtle nebula effect
     svg.append('rect')
       .attr('width', width)
       .attr('height', height)
       .attr('fill', 'url(#void-grid)')
       .attr('class', 'void-grid-bg')
       .style('cursor', 'pointer')
+      .style('filter', 'contrast(1.1) brightness(0.95)') // Subtle enhancement
       .on('click', () => {
         // Collapse any expanded bubble when clicking background
         if (expandedBubble) {
@@ -813,6 +869,7 @@ export function VoidBubblesEngine() {
             const bubbleGroup = svg.select(`g[data-bubble-id="${expandedBubble}"]`);
             bubbleGroup.select('.bubble-main')
               .transition().duration(300)
+              .ease(d3.easeBackOut.overshoot(1.1))
               .attr('r', node.targetRadius);
             bubbleGroup.select('.bubble-glow')
               .transition().duration(300)
@@ -820,35 +877,82 @@ export function VoidBubblesEngine() {
             bubbleGroup.select('.bubble-outer-ring')
               .transition().duration(300)
               .attr('r', node.targetRadius + 8);
-            bubbleGroup.selectAll('.expanded-content').remove();
+            bubbleGroup.selectAll('.expanded-content')
+              .transition().duration(200)
+              .attr('opacity', 0)
+              .remove();
             simulationRef.current?.alpha(0.2).restart();
           }
         }
       });
 
-    // Enhanced Voidspace star-field particles for depth
+    // Cinematic Voidspace star-field with dynamic depth layers
     const starLayer = svg.append('g').attr('class', 'star-layer');
-    for (let i = 0; i < 80; i++) {
-      const sx = Math.random() * width;
-      const sy = Math.random() * height;
-      const sr = 0.5 + Math.random() * 1.5;
+    
+    // Create multiple depth layers for parallax effect
+    for (let layer = 0; layer < 3; layer++) {
+      const starCount = layer === 0 ? 120 : layer === 1 ? 60 : 30; // more stars in background
+      const layerGroup = starLayer.append('g').attr('class', `star-layer-${layer}`);
       
-      // More varied star colors with Voidspace brand palette
-      const colorChance = Math.random();
-      const starColor = colorChance > 0.7 ? '#00EC97' : colorChance > 0.4 ? '#00D4FF' : '#9D4EDD';
-      const shouldPulse = Math.random() > 0.6;
-      
-      const star = starLayer.append('circle')
-        .attr('cx', sx).attr('cy', sy).attr('r', sr)
-        .attr('fill', starColor)
-        .attr('opacity', 0.06 + Math.random() * 0.12);
+      for (let i = 0; i < starCount; i++) {
+        const sx = Math.random() * width;
+        const sy = Math.random() * height;
         
-      if (shouldPulse) {
-        star.append('animateTransform')
-          .attr('attributeName', 'opacity')
-          .attr('values', `${0.06 + Math.random() * 0.08};${0.18 + Math.random() * 0.08};${0.06 + Math.random() * 0.08}`)
-          .attr('dur', `${2.5 + Math.random() * 5}s`)
-          .attr('repeatCount', 'indefinite');
+        // Varied star sizes based on layer (background stars smaller)
+        const baseSize = layer === 0 ? 0.3 : layer === 1 ? 0.8 : 1.5;
+        const sr = baseSize + Math.random() * (layer === 0 ? 0.5 : layer === 1 ? 1.0 : 2.0);
+        
+        // Enhanced star color distribution with more dramatic variety
+        const colorChance = Math.random();
+        let starColor, starOpacity;
+        
+        if (colorChance > 0.8) {
+          starColor = '#00EC97'; // Near green (brightest)
+          starOpacity = layer === 2 ? 0.25 : layer === 1 ? 0.15 : 0.08;
+        } else if (colorChance > 0.6) {
+          starColor = '#00D4FF'; // Cyan
+          starOpacity = layer === 2 ? 0.20 : layer === 1 ? 0.12 : 0.06;
+        } else if (colorChance > 0.4) {
+          starColor = '#9D4EDD'; // Purple
+          starOpacity = layer === 2 ? 0.18 : layer === 1 ? 0.10 : 0.05;
+        } else if (colorChance > 0.2) {
+          starColor = '#FFB800'; // Gold (rare)
+          starOpacity = layer === 2 ? 0.15 : layer === 1 ? 0.08 : 0.04;
+        } else {
+          starColor = '#FFFFFF'; // Pure white (rarest)
+          starOpacity = layer === 2 ? 0.12 : layer === 1 ? 0.06 : 0.03;
+        }
+        
+        const shouldPulse = Math.random() > (0.7 - layer * 0.1); // more pulsing in foreground
+        const shouldTwinkle = Math.random() > 0.85; // rare twinkling stars
+        
+        const star = layerGroup.append('circle')
+          .attr('cx', sx).attr('cy', sy).attr('r', sr)
+          .attr('fill', starColor)
+          .attr('opacity', starOpacity)
+          .style('filter', layer === 2 ? 'drop-shadow(0 0 2px currentColor)' : 'none'); // glow on foreground stars
+          
+        if (shouldTwinkle) {
+          // Dramatic twinkling with size and opacity changes
+          star.append('animateTransform')
+            .attr('attributeName', 'opacity')
+            .attr('values', `${starOpacity};${starOpacity * 3};${starOpacity * 0.3};${starOpacity * 2.5};${starOpacity}`)
+            .attr('dur', `${1.5 + Math.random() * 3}s`)
+            .attr('repeatCount', 'indefinite');
+            
+          star.append('animateTransform')
+            .attr('attributeName', 'r')
+            .attr('values', `${sr};${sr * 1.4};${sr * 0.8};${sr * 1.2};${sr}`)
+            .attr('dur', `${1.5 + Math.random() * 3}s`)
+            .attr('repeatCount', 'indefinite');
+        } else if (shouldPulse) {
+          // Gentle pulsing
+          star.append('animateTransform')
+            .attr('attributeName', 'opacity')
+            .attr('values', `${starOpacity};${starOpacity * 1.8};${starOpacity}`)
+            .attr('dur', `${3 + Math.random() * 6}s`)
+            .attr('repeatCount', 'indefinite');
+        }
       }
     }
     
@@ -881,9 +985,10 @@ export function VoidBubblesEngine() {
     // Shockwave layer
     svg.append('g').attr('class', 'shockwave-layer');
 
-    // Animated scan line layer
+    // Enhanced cinematic scan line layer with multiple beams
     const scanLineGroup = svg.append('g').attr('class', 'scan-line-layer');
     
+    // Primary scan line gradient (bright)
     const scanLineGradient = defs.append('linearGradient')
       .attr('id', 'scan-line-gradient')
       .attr('x1', '0%').attr('y1', '0%')
@@ -893,42 +998,96 @@ export function VoidBubblesEngine() {
       .attr('offset', '0%')
       .attr('stop-color', 'transparent');
     scanLineGradient.append('stop')
+      .attr('offset', '30%')
+      .attr('stop-color', '#00EC97')
+      .attr('stop-opacity', '0.05');
+    scanLineGradient.append('stop')
       .attr('offset', '50%')
       .attr('stop-color', '#00EC97')
-      .attr('stop-opacity', '0.15');
+      .attr('stop-opacity', '0.25'); // Brighter center
+    scanLineGradient.append('stop')
+      .attr('offset', '70%')
+      .attr('stop-color', '#00D4FF')
+      .attr('stop-opacity', '0.08');
     scanLineGradient.append('stop')
       .attr('offset', '100%')
       .attr('stop-color', 'transparent');
     
+    // Secondary scan line gradient (trail effect)
+    const scanLineTrail = defs.append('linearGradient')
+      .attr('id', 'scan-line-trail')
+      .attr('x1', '0%').attr('y1', '0%')
+      .attr('x2', '100%').attr('y2', '0%');
+    
+    scanLineTrail.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', 'transparent');
+    scanLineTrail.append('stop')
+      .attr('offset', '50%')
+      .attr('stop-color', '#9D4EDD')
+      .attr('stop-opacity', '0.08');
+    scanLineTrail.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'transparent');
+    
+    // Main scan line (thicker and brighter)
     const scanLine = scanLineGroup.append('rect')
       .attr('x', 0)
-      .attr('y', -2)
+      .attr('y', -3)
+      .attr('width', width)
+      .attr('height', 4) // Thicker for more impact
+      .attr('fill', 'url(#scan-line-gradient)')
+      .attr('opacity', 0)
+      .style('filter', 'drop-shadow(0 0 6px #00EC9750)'); // Added glow
+    
+    // Trail line (follows behind main line)
+    const trailLine = scanLineGroup.append('rect')
+      .attr('x', 0)
+      .attr('y', -1)
       .attr('width', width)
       .attr('height', 2)
-      .attr('fill', 'url(#scan-line-gradient)')
+      .attr('fill', 'url(#scan-line-trail)')
       .attr('opacity', 0);
     
-    // Animate scan line
+    // Enhanced scan line animation
     const animateScanLine = () => {
+      // Main scan line
       scanLine
-        .attr('y', -2)
+        .attr('y', -3)
         .attr('opacity', 0)
         .transition()
-        .duration(200)
+        .duration(300) // Slower fade in
         .attr('opacity', 1)
         .transition()
-        .duration(8000)
+        .duration(10000) // Slower traverse
         .ease(d3.easeLinear)
         .attr('y', height)
         .transition()
-        .duration(200)
+        .duration(400) // Slower fade out
         .attr('opacity', 0)
         .on('end', () => {
-          setTimeout(animateScanLine, 2000);
+          setTimeout(animateScanLine, 8000); // Longer interval between scans
         });
+      
+      // Trail line (delayed start)
+      setTimeout(() => {
+        trailLine
+          .attr('y', -20)
+          .attr('opacity', 0)
+          .transition()
+          .duration(200)
+          .attr('opacity', 0.6)
+          .transition()
+          .duration(10000)
+          .ease(d3.easeLinear)
+          .attr('y', height)
+          .transition()
+          .duration(300)
+          .attr('opacity', 0);
+      }, 800); // Delayed start for trail effect
     };
     
-    setTimeout(animateScanLine, 2000);
+    setTimeout(animateScanLine, 3000); // Delayed initial start
 
     // Category zone labels removed - replaced with colored bubble borders
 
@@ -941,24 +1100,41 @@ export function VoidBubblesEngine() {
       .attr('data-bubble-id', d => d.token.id)
       .style('cursor', 'pointer');
 
-    // Outer glow circle — soft colored halo (enhanced visibility)
+    // Enhanced outer glow circle — dramatic colored halo with dynamic opacity
     bubbleGroups.append('circle')
       .attr('class', 'bubble-glow')
       .attr('r', 0)
       .attr('fill', 'none')
       .attr('stroke', d => d.glowColor)
-      .attr('stroke-width', 2.5)
-      .attr('opacity', 0.35)
+      .attr('stroke-width', 3.5) // Thicker stroke for more dramatic effect
+      .attr('opacity', (d: BubbleNode) => {
+        // Dynamic opacity based on bubble size and performance
+        const currentChange = getCurrentPriceChange(d.token);
+        const baseOpacity = 0.45;
+        const performanceBonus = Math.min(Math.abs(currentChange) / 50, 0.2);
+        const sizeBonus = Math.min(d.targetRadius / 100, 0.15);
+        return Math.min(baseOpacity + performanceBonus + sizeBonus, 0.8);
+      })
       .attr('filter', 'url(#bubble-glow)');
 
-    // Subtle outer ring on ALL bubbles
+    // Enhanced subtle outer ring with premium stroke styling
     bubbleGroups.append('circle')
       .attr('class', 'bubble-outer-ring')
       .attr('r', 0)
       .attr('fill', 'none')
       .attr('stroke', d => d.glowColor)
-      .attr('stroke-width', 1)
-      .attr('opacity', 0.15);
+      .attr('stroke-width', 1.5) // Slightly thicker for more definition
+      .attr('opacity', (d: BubbleNode) => {
+        // Vary opacity based on token importance
+        const healthScore = d.token.healthScore;
+        const baseOpacity = 0.18;
+        const healthBonus = healthScore >= 75 ? 0.12 : healthScore >= 50 ? 0.06 : 0;
+        return baseOpacity + healthBonus;
+      })
+      .attr('stroke-dasharray', (d: BubbleNode) => {
+        // Solid rings for healthy tokens, dashed for risky ones
+        return d.token.riskLevel === 'critical' ? '3,2' : d.token.riskLevel === 'high' ? '5,3' : 'none';
+      });
 
     // X-ray concentration rings (hidden by default) - now using health-based colors
     bubbleGroups.append('circle')
@@ -1014,49 +1190,60 @@ export function VoidBubblesEngine() {
       .attr('opacity', 0)
       .text('💀');
 
-    // Symbol labels — all bubbles ≥8px radius get a label (lower threshold for mobile)
+    // Enhanced symbol labels with premium typography
     bubbleGroups.filter(d => d.targetRadius >= 8)
       .append('text')
       .attr('class', 'bubble-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('dy', d => d.targetRadius >= 26 ? '-0.35em' : '0')
-      .attr('fill', '#fff')
+      .attr('fill', '#ffffff')
       .attr('font-size', d => {
         const symbolLen = d.token.symbol.length;
-        const baseMultiplier = width < 768 ? 1.8 : 1.7; // Larger text on mobile
+        const baseMultiplier = width < 768 ? 1.9 : 1.8; // Enhanced size scaling
         const fitFont = (d.targetRadius * baseMultiplier) / Math.max(symbolLen, 2);
-        return Math.max(Math.min(fitFont, 18), 8); // Increased max font size
+        return Math.max(Math.min(fitFont, 22), 9); // Larger range for better hierarchy
       })
-      .attr('font-weight', '700')
-      .attr('font-family', "'JetBrains Mono', monospace")
+      .attr('font-weight', '800') // Heavier weight for more impact
+      .attr('font-family', "'JetBrains Mono', 'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace")
+      .attr('letter-spacing', '0.02em') // Subtle letter spacing for premium feel
       .attr('pointer-events', 'none')
       .attr('opacity', 1)
-      .style('text-shadow', '0 2px 6px rgba(0,0,0,0.9)') // Stronger shadow for better readability
+      .style('text-shadow', `
+        0 0 8px rgba(0,236,151,0.4),
+        0 2px 4px rgba(0,0,0,0.9),
+        0 4px 8px rgba(0,0,0,0.7),
+        0 1px 0px rgba(255,255,255,0.1)
+      `) // Multi-layer shadow with subtle glow and highlight
       .text(d => d.token.symbol);
 
-    // Secondary label (on bubbles ≥20px radius) - content based on bubbleContent selection - reduced threshold for mobile
+    // Enhanced secondary label with premium typography matching primary label
     bubbleGroups.filter(d => d.targetRadius >= 20)
       .append('text')
       .attr('class', 'bubble-secondary')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('dy', '0.6em')
+      .attr('dy', '0.65em')
       .attr('fill', d => {
         if (bubbleContent === 'performance') {
           const currentChange = getCurrentPriceChange(d.token);
           return currentChange >= 0 ? '#00EC97' : '#FF3366';
         }
-        return '#d1d5db'; // neutral color for non-performance displays
+        return '#e5e7eb'; // slightly brighter neutral
       })
       .attr('font-size', d => {
-        const mobileMultiplier = width < 768 ? 0.4 : 0.36; // Larger on mobile
-        return Math.max(Math.min(d.targetRadius * mobileMultiplier, 14), 9); // Better size range
+        const mobileMultiplier = width < 768 ? 0.42 : 0.38; // Enhanced mobile scaling
+        return Math.max(Math.min(d.targetRadius * mobileMultiplier, 16), 10); // Better range
       })
-      .attr('font-weight', '700') // Bolder for better visibility
-      .attr('font-family', "'JetBrains Mono', monospace")
+      .attr('font-weight', '700') // Consistent bold weight
+      .attr('font-family', "'JetBrains Mono', 'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace")
+      .attr('letter-spacing', '0.01em') // Subtle spacing for readability
       .attr('pointer-events', 'none')
-      .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)') // Stronger shadow
+      .style('text-shadow', `
+        0 2px 6px rgba(0,0,0,0.9),
+        0 4px 12px rgba(0,0,0,0.6),
+        0 1px 0px rgba(255,255,255,0.08)
+      `) // Enhanced multi-layer shadow
       .text(d => {
         switch (bubbleContent) {
           case 'performance':
@@ -1082,35 +1269,115 @@ export function VoidBubblesEngine() {
       .attr('cy', d => -d.targetRadius - 6)
       .attr('opacity', d => watchlist.has(d.token.id) ? 1 : 0);
 
-    // Hover events
+    // Enhanced hover events with premium micro-interactions
     bubbleGroups
       .on('mouseenter', function(event, d) {
         setHoveredToken(d.token);
         setHoverPos({ x: event.clientX, y: event.clientY });
 
-        d3.select(this).select('.bubble-main')
-          .transition().duration(200)
-          .attr('stroke-width', 2)
-          .attr('opacity', 1);
+        const bubbleGroup = d3.select(this);
+        
+        // Enhanced bubble scale and glow on hover
+        bubbleGroup.select('.bubble-main')
+          .transition().duration(250)
+          .ease(d3.easeBackOut.overshoot(1.1))
+          .attr('r', d.targetRadius * 1.08) // Subtle scale up
+          .attr('stroke-width', 3) // Thicker border
+          .attr('opacity', 1)
+          .attr('stroke-opacity', 0.8); // Brighter border
 
-        d3.select(this).select('.bubble-glow')
+        // Dramatic glow enhancement
+        bubbleGroup.select('.bubble-glow')
+          .transition().duration(250)
+          .attr('r', (d.targetRadius * 1.08) + 6) // Sync with main bubble
+          .attr('opacity', 0.85) // Much brighter glow
+          .attr('stroke-width', 4.5); // Thicker glow
+
+        // Outer ring enhancement
+        bubbleGroup.select('.bubble-outer-ring')
+          .transition().duration(250)
+          .attr('r', (d.targetRadius * 1.08) + 10) // Sync with main bubble
+          .attr('opacity', 0.6) // More visible
+          .attr('stroke-width', 2.5); // Thicker ring
+
+        // Subtle label enhancement
+        bubbleGroup.select('.bubble-label')
           .transition().duration(200)
-          .attr('opacity', 0.7);
+          .style('text-shadow', `
+            0 0 12px rgba(0,236,151,0.8),
+            0 2px 4px rgba(0,0,0,0.9),
+            0 4px 8px rgba(0,0,0,0.7),
+            0 1px 0px rgba(255,255,255,0.2)
+          `);
+
+        bubbleGroup.select('.bubble-secondary')
+          .transition().duration(200)
+          .style('text-shadow', `
+            0 2px 8px rgba(0,0,0,0.9),
+            0 4px 16px rgba(0,0,0,0.6),
+            0 1px 0px rgba(255,255,255,0.15)
+          `);
       })
       .on('mousemove', (event) => {
         setHoverPos({ x: event.clientX, y: event.clientY });
       })
-      .on('mouseleave', function() {
+      .on('mouseleave', function(event, d) {
         setHoveredToken(null);
 
-        d3.select(this).select('.bubble-main')
-          .transition().duration(200)
-          .attr('stroke-width', 0.5)
-          .attr('opacity', 0.9);
+        const bubbleGroup = d3.select(this);
 
-        d3.select(this).select('.bubble-glow')
-          .transition().duration(200)
-          .attr('opacity', 0.35);
+        // Smooth return to normal state
+        bubbleGroup.select('.bubble-main')
+          .transition().duration(300)
+          .ease(d3.easeBackOut.overshoot(1.05))
+          .attr('r', d.targetRadius) // Back to original size
+          .attr('stroke-width', 2) // Normal border
+          .attr('opacity', 0.92)
+          .attr('stroke-opacity', 0.4); // Normal border opacity
+
+        // Glow return
+        bubbleGroup.select('.bubble-glow')
+          .transition().duration(300)
+          .attr('r', d.targetRadius + 4) // Back to normal
+          .attr('opacity', (node: BubbleNode) => {
+            // Return to dynamic opacity
+            const currentChange = getCurrentPriceChange(node.token);
+            const baseOpacity = 0.45;
+            const performanceBonus = Math.min(Math.abs(currentChange) / 50, 0.2);
+            const sizeBonus = Math.min(node.targetRadius / 100, 0.15);
+            return Math.min(baseOpacity + performanceBonus + sizeBonus, 0.8);
+          })
+          .attr('stroke-width', 3.5); // Back to normal
+
+        // Outer ring return
+        bubbleGroup.select('.bubble-outer-ring')
+          .transition().duration(300)
+          .attr('r', d.targetRadius + 8) // Back to normal
+          .attr('opacity', (node: BubbleNode) => {
+            const healthScore = node.token.healthScore;
+            const baseOpacity = 0.18;
+            const healthBonus = healthScore >= 75 ? 0.12 : healthScore >= 50 ? 0.06 : 0;
+            return baseOpacity + healthBonus;
+          })
+          .attr('stroke-width', 1.5); // Back to normal
+
+        // Label return to normal
+        bubbleGroup.select('.bubble-label')
+          .transition().duration(250)
+          .style('text-shadow', `
+            0 0 8px rgba(0,236,151,0.4),
+            0 2px 4px rgba(0,0,0,0.9),
+            0 4px 8px rgba(0,0,0,0.7),
+            0 1px 0px rgba(255,255,255,0.1)
+          `);
+
+        bubbleGroup.select('.bubble-secondary')
+          .transition().duration(250)
+          .style('text-shadow', `
+            0 2px 6px rgba(0,0,0,0.9),
+            0 4px 12px rgba(0,0,0,0.6),
+            0 1px 0px rgba(255,255,255,0.08)
+          `);
       })
       .on('click', (event, d) => {
         event.stopPropagation();
@@ -2482,13 +2749,18 @@ export function VoidBubblesEngine() {
         </div>
       </div>
 
-      {/* SVG Canvas */}
+      {/* SVG Canvas with Enhanced Cosmic Background */}
       <div ref={containerRef} className="w-full h-full">
         <svg
           ref={svgRef}
           className="w-full h-full"
           style={{ 
-            background: 'radial-gradient(ellipse at 50% 45%, #0d1a15 0%, #0a0f14 30%, #0a0a0f 60%, #080809 100%)',
+            background: `
+              radial-gradient(ellipse 120% 80% at 30% 20%, rgba(157, 78, 221, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse 100% 60% at 70% 80%, rgba(0, 212, 255, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse 150% 100% at 50% 45%, rgba(0, 236, 151, 0.04) 0%, rgba(13, 26, 21, 0.6) 25%, rgba(10, 15, 20, 0.8) 60%, rgba(8, 8, 9, 1) 100%),
+              linear-gradient(135deg, #0a0f14 0%, #0d1119 25%, #0a0a0f 50%, #0c0e14 75%, #080809 100%)
+            `,
           }}
         />
       </div>
