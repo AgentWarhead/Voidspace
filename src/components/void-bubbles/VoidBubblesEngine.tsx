@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, RotateCcw, Clock, Activity, X, Copy, ExternalLink,
-  TrendingUp, TrendingDown, Shield, Search, Settings, Brain, Link,
+  TrendingUp, TrendingDown, Search, Settings, Brain, Link,
 } from 'lucide-react';
 // These icons exist but TS types are broken in v0.453 RSC mode
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
@@ -14,7 +14,7 @@ const { EyeOff, Camera, Volume2, VolumeX, Share2, AlertTriangle } = require('luc
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
-import { FeatureTip } from '@/components/ui/FeatureTip';
+// import { FeatureTip } from '@/components/ui/FeatureTip';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 import { cn } from '@/lib/utils';
 
@@ -165,10 +165,6 @@ function formatCompact(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
   return `$${n.toFixed(0)}`;
-}
-
-function daysSince(dateStr: string): number {
-  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function formatDate(dateStr: string): string {
@@ -329,7 +325,7 @@ export function VoidBubblesEngine() {
   }, [period]);
 
   // **NEW: Popup Card Handler** - shows floating card instead of expanding bubble
-  const handleShowPopup = useCallback((tokenId: string, event: any) => {
+  const handleShowPopup = useCallback((tokenId: string, event: { clientX: number; clientY: number }) => {
     const token = tokens.find(t => t.id === tokenId);
     if (!token || !containerRef.current) return;
 
