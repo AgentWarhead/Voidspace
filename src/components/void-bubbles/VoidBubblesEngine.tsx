@@ -442,7 +442,7 @@ export function VoidBubblesEngine() {
     const catX = (cat: string) => centerX + Math.cos(catAngle(cat)) * clusterRadius;
     const catY = (cat: string) => centerY + Math.sin(catAngle(cat)) * clusterRadius;
 
-    // Void grid pattern
+    // Enhanced Voidspace void grid pattern
     const gridPattern = defs.append('pattern')
       .attr('id', 'void-grid')
       .attr('width', 40)
@@ -452,14 +452,34 @@ export function VoidBubblesEngine() {
     gridPattern.append('rect')
       .attr('width', 40)
       .attr('height', 40)
-      .attr('fill', 'transparent');
+      .attr('fill', '#0a0a0f');
     
+    // Primary grid lines (near-green)
     gridPattern.append('path')
       .attr('d', 'M 40 0 L 0 0 0 40')
       .attr('fill', 'none')
       .attr('stroke', '#00EC97')
       .attr('stroke-width', 0.5)
+      .attr('opacity', 0.08);
+    
+    // Secondary grid lines (accent cyan) for depth
+    gridPattern.append('path')
+      .attr('d', 'M 20 0 L 20 40 M 0 20 L 40 20')
+      .attr('fill', 'none')
+      .attr('stroke', '#00D4FF')
+      .attr('stroke-width', 0.3)
       .attr('opacity', 0.04);
+    
+    // Grid intersection dots for extra detail
+    gridPattern.selectAll('.grid-dot')
+      .data([{x: 0, y: 0}, {x: 20, y: 20}, {x: 40, y: 40}])
+      .enter().append('circle')
+      .attr('class', 'grid-dot')
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('r', 0.5)
+      .attr('fill', '#00EC97')
+      .attr('opacity', 0.06);
 
     // Background with grid
     svg.append('rect')
@@ -468,28 +488,57 @@ export function VoidBubblesEngine() {
       .attr('fill', 'url(#void-grid)')
       .attr('class', 'void-grid-bg');
 
-    // Ambient star-field particles for depth (green/cyan tinted)
+    // Enhanced Voidspace star-field particles for depth
     const starLayer = svg.append('g').attr('class', 'star-layer');
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 80; i++) {
       const sx = Math.random() * width;
       const sy = Math.random() * height;
-      const sr = 0.5 + Math.random() * 1.2;
-      const starColor = Math.random() > 0.5 ? '#00EC97' : '#00D4FF';
-      const shouldPulse = Math.random() > 0.7;
+      const sr = 0.5 + Math.random() * 1.5;
+      
+      // More varied star colors with Voidspace brand palette
+      const colorChance = Math.random();
+      const starColor = colorChance > 0.7 ? '#00EC97' : colorChance > 0.4 ? '#00D4FF' : '#9D4EDD';
+      const shouldPulse = Math.random() > 0.6;
       
       const star = starLayer.append('circle')
         .attr('cx', sx).attr('cy', sy).attr('r', sr)
         .attr('fill', starColor)
-        .attr('opacity', 0.05 + Math.random() * 0.15);
+        .attr('opacity', 0.06 + Math.random() * 0.12);
         
       if (shouldPulse) {
         star.append('animateTransform')
           .attr('attributeName', 'opacity')
-          .attr('values', `${0.05 + Math.random() * 0.1};${0.15 + Math.random() * 0.1};${0.05 + Math.random() * 0.1}`)
-          .attr('dur', `${3 + Math.random() * 4}s`)
+          .attr('values', `${0.06 + Math.random() * 0.08};${0.18 + Math.random() * 0.08};${0.06 + Math.random() * 0.08}`)
+          .attr('dur', `${2.5 + Math.random() * 5}s`)
           .attr('repeatCount', 'indefinite');
       }
     }
+    
+    // Add subtle Voidspace logo constellation in background
+    const logoConstellation = starLayer.append('g').attr('class', 'logo-constellation');
+    const logoX = centerX + (Math.random() - 0.5) * 200;
+    const logoY = centerY + (Math.random() - 0.5) * 200;
+    
+    // Draw a subtle version of the Voidspace logo as connected stars
+    const logoStars = [
+      {x: logoX, y: logoY, r: 1.2}, // center
+      {x: logoX - 20, y: logoY - 15, r: 0.8}, // top-left
+      {x: logoX + 20, y: logoY + 15, r: 0.8}, // bottom-right
+      {x: logoX - 15, y: logoY + 10, r: 0.6}, // bottom-left
+      {x: logoX + 15, y: logoY - 10, r: 0.6}, // top-right
+    ];
+    
+    logoStars.forEach(star => {
+      logoConstellation.append('circle')
+        .attr('cx', star.x).attr('cy', star.y).attr('r', star.r)
+        .attr('fill', '#00EC97')
+        .attr('opacity', 0.04)
+        .append('animateTransform')
+        .attr('attributeName', 'opacity')
+        .attr('values', '0.04;0.12;0.04')
+        .attr('dur', '8s')
+        .attr('repeatCount', 'indefinite');
+    });
 
     // Shockwave layer
     svg.append('g').attr('class', 'shockwave-layer');
@@ -728,11 +777,11 @@ export function VoidBubblesEngine() {
         if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
       });
 
-    // Force simulation — balanced spacing with category hints
+    // Force simulation — balanced spacing with category hints (enhanced bubble spacing)
     const simulation = d3.forceSimulation(nodes)
       .force('center', d3.forceCenter(centerX, centerY).strength(0.05))
-      .force('charge', d3.forceManyBody().strength(-15))
-      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 5).strength(0.9).iterations(4))
+      .force('charge', d3.forceManyBody().strength(-25))
+      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 8).strength(0.9).iterations(4))
       .force('x', d3.forceX<BubbleNode>(d => catX(d.token.category)).strength(0.02))
       .force('y', d3.forceY<BubbleNode>(d => catY(d.token.category)).strength(0.02))
       .alphaDecay(0.015)
@@ -1370,45 +1419,29 @@ export function VoidBubblesEngine() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/5 to-transparent opacity-30" />
           
           {/* Gainers/Losers filter buttons */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
-              className={cn(
-                'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
-                highlightMode === 'gainers'
-                  ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
-                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
-              )}
-            >
-              <span className="relative z-10">🔥 Gainers</span>
-            </button>
-            <FeatureTip
-              tip="Highlights the top 15 gainers in the selected timeframe. Everything else dims so you can focus on what's pumping."
-              title="🔥 TOP GAINERS"
-              position="top"
-              className="ml-1"
-            />
-          </div>
+          <button
+            onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+            className={cn(
+              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              highlightMode === 'gainers'
+                ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
+                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+            )}
+          >
+            <span className="relative z-10">🔥 Gainers</span>
+          </button>
           
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
-              className={cn(
-                'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
-                highlightMode === 'losers'
-                  ? 'bg-red-500/20 text-red-400 border border-red-500/30 border-l-2 border-l-red-500'
-                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
-              )}
-            >
-              <span className="relative z-10">💀 Losers</span>
-            </button>
-            <FeatureTip
-              tip="Highlights the top 15 losers. Great for finding potential bounce plays or identifying tokens to avoid."
-              title="💀 TOP LOSERS"
-              position="top"
-              className="ml-1"
-            />
-          </div>
+          <button
+            onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+            className={cn(
+              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              highlightMode === 'losers'
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30 border-l-2 border-l-red-500'
+                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+            )}
+          >
+            <span className="relative z-10">💀 Losers</span>
+          </button>
           
           {/* Divider */}
           <div className="w-px h-4 bg-border mx-1" />
@@ -1619,7 +1652,7 @@ export function VoidBubblesEngine() {
           ref={svgRef}
           className="w-full h-full"
           style={{ 
-            background: 'radial-gradient(ellipse at 50% 45%, #0d1a15 0%, #0a0f14 40%, #08080c 100%)',
+            background: 'radial-gradient(ellipse at 50% 45%, #0d1a15 0%, #0a0f14 30%, #0a0a0f 60%, #080809 100%)',
           }}
         />
       </div>
