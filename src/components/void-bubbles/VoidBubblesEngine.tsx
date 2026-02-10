@@ -40,6 +40,10 @@ interface VoidBubbleToken {
   dexScreenerUrl?: string;
   refFinanceUrl?: string;
   contractAddress: string;
+  // Social links
+  website?: string;
+  twitter?: string;
+  telegram?: string;
 }
 
 interface BubbleNode extends d3.SimulationNodeDatum {
@@ -75,6 +79,25 @@ const RISK_COLORS = {
   medium: '#FFA502',
   high: '#FF6B6B',
   critical: '#FF4757',
+};
+
+// Enhanced X-Ray Mode health-based colors
+const HEALTH_COLORS = {
+  healthy: '#00FF88',    // Bright vivid GREEN for health > 70
+  medium: '#FFAA00',     // YELLOW/AMBER for health 40-70  
+  unhealthy: '#FF2244',  // Bright RED for health < 40
+};
+
+const getHealthStatus = (healthScore: number) => {
+  if (healthScore > 70) return 'healthy';
+  if (healthScore >= 40) return 'medium';
+  return 'unhealthy';
+};
+
+const getHealthIcon = (healthScore: number) => {
+  if (healthScore > 70) return '✅';
+  if (healthScore >= 40) return '⚠️';
+  return '❌';
 };
 
 // ────────────────────── Sonic Engine (Web Audio API) ──────────────────────
@@ -514,7 +537,11 @@ export function VoidBubblesEngine() {
           .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
           .text(`MC: ${formatCompact(token.marketCap)}`);
         
-        // Health score
+        // Health score with color-coded text and icon
+        const healthStatus = getHealthStatus(token.healthScore);
+        const healthColor = HEALTH_COLORS[healthStatus];
+        const healthIcon = getHealthIcon(token.healthScore);
+        
         contentGroup.append('text')
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'central')
@@ -522,9 +549,76 @@ export function VoidBubblesEngine() {
           .attr('font-family', 'JetBrains Mono, monospace')
           .attr('font-size', Math.min(expandedRadius * 0.1, 10))
           .attr('font-weight', 'normal')
-          .attr('fill', RISK_COLORS[token.riskLevel])
+          .attr('fill', healthColor)
           .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
-          .text(`Health: ${token.healthScore}/100`);
+          .text(`${healthIcon} Health: ${token.healthScore}/100`);
+
+        // DexScreener and Ref Finance links (if contract address available)
+        if (token.contractAddress && token.contractAddress !== 'N/A') {
+          const linkY = expandedRadius * 0.85;
+          
+          // DexScreener link
+          const dexLink = contentGroup.append('g')
+            .attr('class', 'dex-link')
+            .style('cursor', 'pointer')
+            .attr('transform', `translate(${-expandedRadius * 0.4}, ${linkY})`);
+          
+          dexLink.append('rect')
+            .attr('x', -25)
+            .attr('y', -8)
+            .attr('width', 50)
+            .attr('height', 16)
+            .attr('rx', 8)
+            .attr('fill', '#1a1a1a')
+            .attr('stroke', '#00EC97')
+            .attr('stroke-width', 1)
+            .attr('opacity', 0.8);
+          
+          dexLink.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .attr('font-family', 'JetBrains Mono, monospace')
+            .attr('font-size', '8')
+            .attr('font-weight', 'bold')
+            .attr('fill', '#00EC97')
+            .text('📊 Dex');
+
+          dexLink.on('click', (event) => {
+            event.stopPropagation();
+            window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank');
+          });
+          
+          // Ref Finance link
+          const refLink = contentGroup.append('g')
+            .attr('class', 'ref-link')
+            .style('cursor', 'pointer')
+            .attr('transform', `translate(${expandedRadius * 0.4}, ${linkY})`);
+          
+          refLink.append('rect')
+            .attr('x', -25)
+            .attr('y', -8)
+            .attr('width', 50)
+            .attr('height', 16)
+            .attr('rx', 8)
+            .attr('fill', '#1a1a1a')
+            .attr('stroke', '#00D4FF')
+            .attr('stroke-width', 1)
+            .attr('opacity', 0.8);
+          
+          refLink.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .attr('font-family', 'JetBrains Mono, monospace')
+            .attr('font-size', '8')
+            .attr('font-weight', 'bold')
+            .attr('fill', '#00D4FF')
+            .text('💱 Ref');
+
+          refLink.on('click', (event) => {
+            event.stopPropagation();
+            window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank');
+          });
+        }
 
         // Fade in the content
         contentGroup.attr('opacity', 0)
@@ -881,15 +975,38 @@ export function VoidBubblesEngine() {
       .attr('stroke-width', 1)
       .attr('opacity', 0.15);
 
-    // X-ray concentration rings (hidden by default)
+    // X-ray concentration rings (hidden by default) - now using health-based colors
     bubbleGroups.append('circle')
       .attr('class', 'xray-ring')
       .attr('r', 0)
       .attr('fill', 'none')
-      .attr('stroke', d => RISK_COLORS[d.token.riskLevel])
-      .attr('stroke-width', d => d.token.riskLevel === 'critical' ? 4 : d.token.riskLevel === 'high' ? 3 : 2)
+      .attr('stroke', d => {
+        if (xrayMode) {
+          const healthStatus = getHealthStatus(d.token.healthScore);
+          return HEALTH_COLORS[healthStatus];
+        }
+        return RISK_COLORS[d.token.riskLevel];
+      })
+      .attr('stroke-width', d => {
+        if (xrayMode) {
+          const healthStatus = getHealthStatus(d.token.healthScore);
+          return healthStatus === 'unhealthy' ? 4 : healthStatus === 'medium' ? 3 : 2;
+        }
+        return d.token.riskLevel === 'critical' ? 4 : d.token.riskLevel === 'high' ? 3 : 2;
+      })
       .attr('opacity', 0)
       .attr('filter', 'url(#xray-glow)');
+
+    // Health indicator icon (only visible in X-ray mode)
+    bubbleGroups.append('text')
+      .attr('class', 'health-indicator')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('y', d => -d.targetRadius - 15)
+      .attr('font-size', '14')
+      .attr('opacity', 0)
+      .style('pointer-events', 'none')
+      .text(d => getHealthIcon(d.token.healthScore));
 
     // Main bubble — clean, vibrant orb with category-colored border
     bubbleGroups.append('circle')
@@ -1214,19 +1331,92 @@ export function VoidBubblesEngine() {
     const svg = d3.select(svgRef.current);
     const rings = svg.selectAll('.xray-ring');
     const skulls = svg.selectAll('.skull-overlay');
+    const healthIndicators = svg.selectAll('.health-indicator');
+    const bubbleGroups = svg.selectAll('.bubble-group');
     
     // Only proceed if elements exist
     if (rings.empty()) return;
     
-    // Iterate over xray rings and toggle visibility
+    // Iterate over xray rings and toggle visibility with enhanced health-based styling
     (rings.nodes() as Element[]).forEach((el) => {
       if (!el?.parentNode) return;
       const d = d3.select(el.parentNode as Element).datum() as BubbleNode;
+      const healthStatus = getHealthStatus(d.token.healthScore);
+      
       d3.select(el)
         .transition().duration(400)
-        .attr('r', xrayMode ? (d.targetRadius + 6) : 0)
-        .attr('opacity', xrayMode ? 0.8 : 0);
+        .attr('r', xrayMode ? (d.targetRadius + 8) : 0) // Slightly larger for more visibility
+        .attr('opacity', xrayMode ? 0.9 : 0)
+        .attr('stroke', xrayMode ? HEALTH_COLORS[healthStatus] : RISK_COLORS[d.token.riskLevel])
+        .attr('stroke-width', xrayMode ? 
+          (healthStatus === 'unhealthy' ? 5 : healthStatus === 'medium' ? 4 : 3) : 
+          (d.token.riskLevel === 'critical' ? 4 : d.token.riskLevel === 'high' ? 3 : 2)
+        );
     });
+
+    // Toggle health indicator icons
+    (healthIndicators.nodes() as Element[]).forEach((el) => {
+      d3.select(el)
+        .transition().duration(400)
+        .attr('opacity', xrayMode ? 1 : 0);
+    });
+
+    // Add pulsing effect for unhealthy tokens in X-ray mode
+    if (xrayMode) {
+      (bubbleGroups.nodes() as Element[]).forEach((groupEl) => {
+        const d = d3.select(groupEl).datum() as BubbleNode;
+        const healthStatus = getHealthStatus(d.token.healthScore);
+        
+        if (healthStatus === 'unhealthy') {
+          // Add dramatic pulsing glow for unhealthy tokens
+          const mainBubble = d3.select(groupEl).select('.bubble-main');
+          const glow = d3.select(groupEl).select('.bubble-glow');
+          
+          const pulseLoop = () => {
+            if (!xrayMode) return;
+            
+            mainBubble
+              .transition().duration(800)
+              .attr('opacity', 0.7)
+              .transition().duration(800)
+              .attr('opacity', 1)
+              .on('end', pulseLoop);
+              
+            glow
+              .transition().duration(800)
+              .attr('opacity', 0.4)
+              .attr('stroke', HEALTH_COLORS.unhealthy)
+              .transition().duration(800)
+              .attr('opacity', 0.8)
+              .on('end', pulseLoop);
+          };
+          
+          setTimeout(pulseLoop, Math.random() * 500);
+        } else if (healthStatus === 'healthy') {
+          // Bright steady glow for healthy tokens
+          const glow = d3.select(groupEl).select('.bubble-glow');
+          glow.transition().duration(400)
+            .attr('stroke', HEALTH_COLORS.healthy)
+            .attr('opacity', 0.6);
+        } else if (healthStatus === 'medium') {
+          // Warning amber glow for medium tokens
+          const glow = d3.select(groupEl).select('.bubble-glow');
+          glow.transition().duration(400)
+            .attr('stroke', HEALTH_COLORS.medium)
+            .attr('opacity', 0.5);
+        }
+      });
+    } else {
+      // Return to normal category-based coloring when X-ray is off
+      (bubbleGroups.nodes() as Element[]).forEach((groupEl) => {
+        const d = d3.select(groupEl).datum() as BubbleNode;
+        const glow = d3.select(groupEl).select('.bubble-glow');
+        
+        glow.transition().duration(400)
+          .attr('stroke', d.glowColor)
+          .attr('opacity', 0.35);
+      });
+    }
 
     // Iterate over skull overlays and toggle visibility
     (skulls.nodes() as Element[]).forEach((el) => {
@@ -1502,14 +1692,15 @@ export function VoidBubblesEngine() {
             </div>
           </div>
 
-          {/* Health Score */}
+          {/* Health Score with enhanced X-ray styling */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-mono text-text-muted uppercase tracking-wider">Health Score</span>
               <div className="flex items-center gap-2">
                 {selectedToken.riskLevel === 'critical' && <span className="text-lg">💀</span>}
-                <span className={cn('text-2xl font-bold font-mono', `text-[${RISK_COLORS[selectedToken.riskLevel]}]`)}
-                  style={{ color: RISK_COLORS[selectedToken.riskLevel] }}
+                <span className="text-sm">{getHealthIcon(selectedToken.healthScore)}</span>
+                <span className="text-2xl font-bold font-mono"
+                  style={{ color: HEALTH_COLORS[getHealthStatus(selectedToken.healthScore)] }}
                 >
                   {selectedToken.healthScore}
                 </span>
@@ -1520,13 +1711,25 @@ export function VoidBubblesEngine() {
               <motion.div
                 className="h-full rounded-full"
                 style={{ 
-                  backgroundColor: RISK_COLORS[selectedToken.riskLevel],
-                  boxShadow: `0 0 8px ${RISK_COLORS[selectedToken.riskLevel]}40`
+                  backgroundColor: HEALTH_COLORS[getHealthStatus(selectedToken.healthScore)],
+                  boxShadow: `0 0 8px ${HEALTH_COLORS[getHealthStatus(selectedToken.healthScore)]}40`
                 }}
                 initial={{ width: 0 }}
                 animate={{ width: `${selectedToken.healthScore}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
               />
+            </div>
+            {/* Health status text */}
+            <div className="mt-1">
+              <span 
+                className="text-xs font-mono font-bold"
+                style={{ color: HEALTH_COLORS[getHealthStatus(selectedToken.healthScore)] }}
+              >
+                {getHealthStatus(selectedToken.healthScore).toUpperCase()} 
+                {getHealthStatus(selectedToken.healthScore) === 'healthy' && ' - GOOD TO GO'}
+                {getHealthStatus(selectedToken.healthScore) === 'medium' && ' - PROCEED WITH CAUTION'}
+                {getHealthStatus(selectedToken.healthScore) === 'unhealthy' && ' - DANGER ZONE'}
+              </span>
             </div>
           </div>
 
@@ -1549,26 +1752,72 @@ export function VoidBubblesEngine() {
           </div>
           
           {/* External Links */}
-          <div className="mb-4 flex gap-2">
-            {selectedToken.dexScreenerUrl && (
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="flex-1 text-xs"
-                onClick={() => window.open(selectedToken.dexScreenerUrl, '_blank')}
-              >
-                🔗 DexScreener
-              </Button>
+          <div className="mb-4">
+            <p className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">External Links</p>
+            
+            {/* DexScreener and Ref Finance links (if contract address available) */}
+            {selectedToken.contractAddress && selectedToken.contractAddress !== 'N/A' && (
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="text-xs h-10 bg-surface hover:bg-surface-hover border-near-green/30"
+                  onClick={() => window.open(`https://dexscreener.com/near/${selectedToken.contractAddress}`, '_blank')}
+                >
+                  📊 DexScreener
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="text-xs h-10 bg-surface hover:bg-surface-hover border-accent-cyan/30"
+                  onClick={() => window.open(`https://app.ref.finance/#near|${selectedToken.contractAddress}`, '_blank')}
+                >
+                  💱 Trade on Ref
+                </Button>
+              </div>
             )}
-            {selectedToken.refFinanceUrl && (
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="flex-1 text-xs"
-                onClick={() => window.open(selectedToken.refFinanceUrl, '_blank')}
-              >
-                🔗 Trade on Ref
-              </Button>
+            
+            {/* Social Links */}
+            {(selectedToken.website || selectedToken.twitter || selectedToken.telegram) && (
+              <div className="flex gap-2 flex-wrap">
+                {selectedToken.website && (
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="text-xs h-8 px-2 min-w-[44px]"
+                    onClick={() => window.open(selectedToken.website, '_blank')}
+                  >
+                    🌐
+                  </Button>
+                )}
+                {selectedToken.twitter && (
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="text-xs h-8 px-2 min-w-[44px]"
+                    onClick={() => window.open(selectedToken.twitter, '_blank')}
+                  >
+                    🐦
+                  </Button>
+                )}
+                {selectedToken.telegram && (
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="text-xs h-8 px-2 min-w-[44px]"
+                    onClick={() => window.open(selectedToken.telegram, '_blank')}
+                  >
+                    📱
+                  </Button>
+                )}
+              </div>
+            )}
+            
+            {/* Message if no contract address */}
+            {(!selectedToken.contractAddress || selectedToken.contractAddress === 'N/A') && (
+              <p className="text-xs text-text-muted italic">
+                Trading links unavailable - contract address not found
+              </p>
             )}
           </div>
           
