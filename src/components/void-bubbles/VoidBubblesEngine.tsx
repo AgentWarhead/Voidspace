@@ -575,8 +575,7 @@ export function VoidBubblesEngine() {
 
       // Get the bounding box of actual bubble content to crop tightly
       const bubblesLayer = svgRef.current.querySelector('.bubbles-layer');
-      const shockwaveLayer = svgRef.current.querySelector('.shockwave-layer');
-
+      // shockwaveLayer included via innerContent automatically
       // Use the bubbles layer bbox to determine content bounds
       let contentBBox = { x: 0, y: 0, width: 0, height: 0 };
       if (bubblesLayer && (bubblesLayer as SVGGraphicsElement).getBBox) {
