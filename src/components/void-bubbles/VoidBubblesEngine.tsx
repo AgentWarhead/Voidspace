@@ -464,36 +464,18 @@ export function VoidBubblesEngine() {
         // Create content group
         const contentGroup = bubbleGroup.append('g').attr('class', 'expanded-content');
         
-        // Close button at top-right
-        const closeButton = contentGroup.append('g')
-          .attr('class', 'close-button')
-          .style('cursor', 'pointer')
-          .attr('transform', `translate(${expandedRadius * 0.7}, ${-expandedRadius * 0.7})`);
+        // Calculate proper Y positions based on expanded radius
+        const lineHeight = Math.max(18, expandedRadius * 0.12); // Minimum 18px between lines
+        const startY = -expandedRadius * 0.4; // Start from top quarter of bubble
         
-        closeButton.append('circle')
-          .attr('r', 12)
-          .attr('fill', '#FF3366')
-          .attr('opacity', 0.8);
+        // Determine how many lines to show based on bubble size
+        const showAllLines = expandedRadius >= 40;
         
-        closeButton.append('text')
-          .attr('text-anchor', 'middle')
-          .attr('dominant-baseline', 'central')
-          .attr('font-family', 'JetBrains Mono, monospace')
-          .attr('font-size', '12')
-          .attr('font-weight', 'bold')
-          .attr('fill', 'white')
-          .text('×');
-
-        closeButton.on('click', (event) => {
-          event.stopPropagation();
-          handleBubblePop(tokenId);
-        });
-        
-        // Large symbol in center
+        // Symbol at the top (larger font)
         contentGroup.append('text')
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'central')
-          .attr('dy', '-0.8em')
+          .attr('y', startY)
           .attr('font-family', 'JetBrains Mono, monospace')
           .attr('font-size', Math.min(expandedRadius * 0.4, 24))
           .attr('font-weight', 'bold')
@@ -505,7 +487,7 @@ export function VoidBubblesEngine() {
         contentGroup.append('text')
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'central')
-          .attr('dy', '-0.1em')
+          .attr('y', startY + lineHeight * 1.5)
           .attr('font-family', 'JetBrains Mono, monospace')
           .attr('font-size', Math.min(expandedRadius * 0.15, 14))
           .attr('font-weight', 'bold')
@@ -517,7 +499,7 @@ export function VoidBubblesEngine() {
         contentGroup.append('text')
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'central')
-          .attr('dy', '0.6em')
+          .attr('y', startY + lineHeight * 2.5)
           .attr('font-family', 'JetBrains Mono, monospace')
           .attr('font-size', Math.min(expandedRadius * 0.12, 12))
           .attr('font-weight', 'bold')
@@ -525,48 +507,51 @@ export function VoidBubblesEngine() {
           .style('text-shadow', '0 2px 6px rgba(0,0,0,0.9)')
           .text(`${currentChange >= 0 ? '+' : ''}${currentChange.toFixed(1)}%`);
         
-        // Market cap
-        contentGroup.append('text')
-          .attr('text-anchor', 'middle')
-          .attr('dominant-baseline', 'central')
-          .attr('dy', '1.2em')
-          .attr('font-family', 'JetBrains Mono, monospace')
-          .attr('font-size', Math.min(expandedRadius * 0.1, 10))
-          .attr('font-weight', 'normal')
-          .attr('fill', '#9ca3af')
-          .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
-          .text(`MC: ${formatCompact(token.marketCap)}`);
-        
-        // Health score with color-coded text and icon
-        const healthStatus = getHealthStatus(token.healthScore);
-        const healthColor = HEALTH_COLORS[healthStatus];
-        const healthIcon = getHealthIcon(token.healthScore);
-        
-        contentGroup.append('text')
-          .attr('text-anchor', 'middle')
-          .attr('dominant-baseline', 'central')
-          .attr('dy', '1.7em')
-          .attr('font-family', 'JetBrains Mono, monospace')
-          .attr('font-size', Math.min(expandedRadius * 0.1, 10))
-          .attr('font-weight', 'normal')
-          .attr('fill', healthColor)
-          .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
-          .text(`${healthIcon} Health: ${token.healthScore}/100`);
+        // Only show market cap and health score if bubble is large enough
+        if (showAllLines) {
+          // Market cap
+          contentGroup.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .attr('y', startY + lineHeight * 3.5)
+            .attr('font-family', 'JetBrains Mono, monospace')
+            .attr('font-size', Math.min(expandedRadius * 0.1, 10))
+            .attr('font-weight', 'normal')
+            .attr('fill', '#9ca3af')
+            .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
+            .text(`MC: ${formatCompact(token.marketCap)}`);
+          
+          // Health score with enhanced X-ray coloring and icon
+          const healthStatus = getHealthStatus(token.healthScore);
+          const healthColor = HEALTH_COLORS[healthStatus];
+          const healthIcon = getHealthIcon(token.healthScore);
+          
+          contentGroup.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .attr('y', startY + lineHeight * 4.5)
+            .attr('font-family', 'JetBrains Mono, monospace')
+            .attr('font-size', Math.min(expandedRadius * 0.1, 10))
+            .attr('font-weight', 'normal')
+            .attr('fill', healthColor)
+            .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
+            .text(`${healthIcon} Health: ${token.healthScore}/100`);
+        }
 
         // DexScreener and Ref Finance links (if contract address available)
-        if (token.contractAddress && token.contractAddress !== 'N/A') {
-          const linkY = expandedRadius * 0.85;
+        if (token.contractAddress && token.contractAddress !== 'N/A' && expandedRadius >= 35) {
+          const linkY = startY + lineHeight * (showAllLines ? 6 : 4);
           
           // DexScreener link
           const dexLink = contentGroup.append('g')
             .attr('class', 'dex-link')
             .style('cursor', 'pointer')
-            .attr('transform', `translate(${-expandedRadius * 0.4}, ${linkY})`);
+            .attr('transform', `translate(${-expandedRadius * 0.35}, ${linkY})`);
           
           dexLink.append('rect')
-            .attr('x', -25)
+            .attr('x', -22)
             .attr('y', -8)
-            .attr('width', 50)
+            .attr('width', 44)
             .attr('height', 16)
             .attr('rx', 8)
             .attr('fill', '#1a1a1a')
@@ -592,12 +577,12 @@ export function VoidBubblesEngine() {
           const refLink = contentGroup.append('g')
             .attr('class', 'ref-link')
             .style('cursor', 'pointer')
-            .attr('transform', `translate(${expandedRadius * 0.4}, ${linkY})`);
+            .attr('transform', `translate(${expandedRadius * 0.35}, ${linkY})`);
           
           refLink.append('rect')
-            .attr('x', -25)
+            .attr('x', -22)
             .attr('y', -8)
-            .attr('width', 50)
+            .attr('width', 44)
             .attr('height', 16)
             .attr('rx', 8)
             .attr('fill', '#1a1a1a')
