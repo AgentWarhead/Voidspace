@@ -58,15 +58,15 @@ type FilterCategory = 'all' | string;
 // ────────────────────── Constants ──────────────────────
 
 const CATEGORY_COLORS: Record<string, string> = {
-  DeFi: '#00EC97',
-  Stablecoin: '#00D4FF',
-  Infrastructure: '#9D4EDD',
-  Meme: '#FF6B6B',
-  Gaming: '#FFA502',
-  NFT: '#FF69B4',
-  'Move-to-Earn': '#00CED1',
-  AI: '#7B68EE',
-  Other: '#888888',
+  DeFi: '#00EC97',        // Voidspace near-green (flagship)
+  Stablecoin: '#00D4FF',  // Voidspace cyan
+  Infrastructure: '#9D4EDD', // Voidspace purple  
+  Meme: '#FF3366',        // Hot pink-red (was #FF6B6B, too muted)
+  Gaming: '#FFB800',      // Bold gold (was #FFA502, too orange-muted)
+  NFT: '#FF69B4',         // Keep hot pink
+  'Move-to-Earn': '#00E5CC', // Bright teal (was #00CED1)
+  AI: '#8B5CF6',          // Vivid violet (was #7B68EE, too muted)
+  Other: '#64748B',       // Slate gray (was #888888)
 };
 
 const RISK_COLORS = {
@@ -160,6 +160,7 @@ export function VoidBubblesEngine() {
   const [xrayMode, setXrayMode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
+  const [highlightMode, setHighlightMode] = useState<'none' | 'gainers' | 'losers'>('none');
   const [whaleAlerts, setWhaleAlerts] = useState<WhaleAlert[]>([]);
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [, setLastUpdated] = useState<string>('');
@@ -311,16 +312,18 @@ export function VoidBubblesEngine() {
       const spread = Math.min(width, height) * 0.3;
       const r = radiusScale(token.marketCap);
       const catColor = CATEGORY_COLORS[token.category] || '#888888';
-      // Category color as base, with luminance shift for price change
-      // Pumping = brighter/more saturated, dumping = darker/desaturated
-      const pctAbs = Math.min(Math.abs(token.priceChange24h) / 25, 1);
+      // NEW COLOR MODEL: Category color is ALWAYS dominant and vivid
+      // Base color = category color, ALWAYS vivid and recognizable
+      const pctAbs = Math.min(Math.abs(token.priceChange24h) / 20, 1);
       const hsl = d3.hsl(catColor);
+      // Always keep high saturation — category color is king
+      hsl.s = Math.max(hsl.s, 0.7);
       if (token.priceChange24h >= 0) {
-        hsl.l = Math.min(0.45 + pctAbs * 0.2, 0.65);
-        hsl.s = Math.min(hsl.s + pctAbs * 0.3, 1);
+        // Gainers: brighter, more luminous
+        hsl.l = 0.45 + pctAbs * 0.15; // 0.45 base → 0.60 for big gainers
       } else {
-        hsl.l = Math.max(0.25 - pctAbs * 0.1, 0.15);
-        hsl.s = Math.max(hsl.s - pctAbs * 0.4, 0.2);
+        // Losers: darker, but still saturated
+        hsl.l = 0.40 - pctAbs * 0.12; // 0.40 base → 0.28 for big losers
       }
       const changeColor = hsl.formatRgb();
 
@@ -347,10 +350,10 @@ export function VoidBubblesEngine() {
     // Defs for gradients and filters
     const defs = svg.append('defs');
 
-    // Glow filter — soft, premium outer glow
+    // Glow filter — soft, premium outer glow (enhanced for more visibility)
     const glowFilter = defs.append('filter').attr('id', 'bubble-glow')
       .attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
-    glowFilter.append('feGaussianBlur').attr('stdDeviation', '6').attr('result', 'blur');
+    glowFilter.append('feGaussianBlur').attr('stdDeviation', '8').attr('result', 'blur');
     glowFilter.append('feMerge')
       .selectAll('feMergeNode')
       .data(['blur', 'SourceGraphic'])
@@ -523,15 +526,24 @@ export function VoidBubblesEngine() {
       .attr('class', 'bubble-group')
       .style('cursor', 'pointer');
 
-    // Outer glow circle — soft colored halo
+    // Outer glow circle — soft colored halo (enhanced visibility)
     bubbleGroups.append('circle')
       .attr('class', 'bubble-glow')
       .attr('r', 0)
       .attr('fill', 'none')
       .attr('stroke', d => d.glowColor)
       .attr('stroke-width', 2.5)
-      .attr('opacity', 0.2)
+      .attr('opacity', 0.35)
       .attr('filter', 'url(#bubble-glow)');
+
+    // Subtle outer ring on ALL bubbles
+    bubbleGroups.append('circle')
+      .attr('class', 'bubble-outer-ring')
+      .attr('r', 0)
+      .attr('fill', 'none')
+      .attr('stroke', d => d.glowColor)
+      .attr('stroke-width', 1)
+      .attr('opacity', 0.15);
 
     // X-ray concentration rings (hidden by default)
     bubbleGroups.append('circle')
@@ -554,7 +566,7 @@ export function VoidBubblesEngine() {
         s.l = Math.min(s.l + 0.1, 0.7);
         return s.formatRgb();
       })
-      .attr('stroke-width', d => d.targetRadius > 30 ? 1.5 : d.targetRadius > 16 ? 1 : 0.5)
+      .attr('stroke-width', d => d.targetRadius > 30 ? 2 : d.targetRadius > 16 ? 1.5 : 0.5)
       .attr('opacity', 0.92);
 
     // Skull overlay for critical risk
@@ -623,7 +635,7 @@ export function VoidBubblesEngine() {
 
         d3.select(this).select('.bubble-glow')
           .transition().duration(200)
-          .attr('opacity', 0.6);
+          .attr('opacity', 0.7);
       })
       .on('mousemove', (event) => {
         setHoverPos({ x: event.clientX, y: event.clientY });
@@ -638,7 +650,7 @@ export function VoidBubblesEngine() {
 
         d3.select(this).select('.bubble-glow')
           .transition().duration(200)
-          .attr('opacity', 0.3);
+          .attr('opacity', 0.35);
       })
       .on('click', (_event, d) => {
         setSelectedToken(d.token);
@@ -676,6 +688,10 @@ export function VoidBubblesEngine() {
           .transition().duration(600).delay(100)
           .attr('r', node.targetRadius + 4);
 
+        d3.select(bubbleGroups.nodes()[i]).select('.bubble-outer-ring')
+          .transition().duration(600).delay(150)
+          .attr('r', node.targetRadius + 8);
+
         // Skulls fade in for risky tokens
         d3.select(bubbleGroups.nodes()[i]).select('.skull-overlay')
           .transition().duration(800).delay(400)
@@ -683,22 +699,22 @@ export function VoidBubblesEngine() {
       }, delay);
     });
 
-    // Momentum pulse — elegant breathing glow for significant movers
+    // Momentum pulse — elegant breathing glow for significant movers (enhanced visibility)
     const pulseHighMomentum = () => {
       nodes.forEach((node, i) => {
         const absPct = Math.abs(node.token.priceChange24h);
-        if (absPct < 10) return; // Only pulse big movers
-        const pulseExtra = Math.min(absPct / 50, 0.2) * node.targetRadius; // subtle
+        if (absPct < 5) return; // Lower threshold - pulse 5%+ movers (was 10%)
+        const pulseExtra = Math.min(absPct / 30, 0.4) * node.targetRadius; // more visible
         const duration = 2000 - Math.min(absPct * 15, 700);
         const glowSel = d3.select(bubbleGroups.nodes()[i]).select('.bubble-glow');
         const pulseLoop = () => {
           glowSel
             .transition().duration(duration).ease(d3.easeSinInOut)
-            .attr('r', node.targetRadius + 6 + pulseExtra)
-            .attr('opacity', 0.35)
+            .attr('r', node.targetRadius + 10 + pulseExtra) // +4 → +10
+            .attr('opacity', 0.5) // 0.35 → 0.5
             .transition().duration(duration).ease(d3.easeSinInOut)
             .attr('r', node.targetRadius + 4)
-            .attr('opacity', 0.15)
+            .attr('opacity', 0.2) // 0.15 → 0.2
             .on('end', pulseLoop);
         };
         setTimeout(pulseLoop, entryDelay + i * 80);
@@ -768,6 +784,52 @@ export function VoidBubblesEngine() {
     if (soundEnabled) sonicRef.current.enable();
     else sonicRef.current.disable();
   }, [soundEnabled]);
+
+  // Gainers/Losers highlight mode effect
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const svg = d3.select(svgRef.current);
+    const groups = svg.selectAll('.bubble-group');
+    
+    if (highlightMode === 'none') {
+      // Reset all bubbles to normal
+      groups.select('.bubble-main').transition().duration(300).attr('opacity', 0.92);
+      groups.select('.bubble-glow').transition().duration(300).attr('opacity', 0.35);
+      groups.select('.bubble-label').transition().duration(300).attr('opacity', 1);
+      groups.select('.bubble-change').transition().duration(300).attr('opacity', 1);
+      return;
+    }
+    
+    // Sort tokens by price change
+    const sorted = [...filteredTokens].sort((a, b) => 
+      highlightMode === 'gainers' 
+        ? b.priceChange24h - a.priceChange24h 
+        : a.priceChange24h - b.priceChange24h
+    );
+    const topIds = new Set(sorted.slice(0, 15).map(t => t.id));
+    
+    groups.each(function() {
+      const el = d3.select(this);
+      const d = el.datum() as BubbleNode;
+      const isHighlighted = topIds.has(d.token.id);
+      
+      el.select('.bubble-main')
+        .transition().duration(400)
+        .attr('opacity', isHighlighted ? 1 : 0.15);
+      
+      el.select('.bubble-glow')
+        .transition().duration(400)
+        .attr('opacity', isHighlighted ? 0.7 : 0.05);
+      
+      el.select('.bubble-label')
+        .transition().duration(400)
+        .attr('opacity', isHighlighted ? 1 : 0.1);
+      
+      el.select('.bubble-change')
+        .transition().duration(400)
+        .attr('opacity', isHighlighted ? 1 : 0.1);
+    });
+  }, [highlightMode, filteredTokens]);
 
   // ────────────────────── Snapshot & Share ──────────────────────
 
@@ -1155,6 +1217,34 @@ export function VoidBubblesEngine() {
           {/* Scan line glow behind control row */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/5 to-transparent opacity-30" />
           
+          {/* Gainers/Losers filter buttons */}
+          <button
+            onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+            className={cn(
+              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              highlightMode === 'gainers'
+                ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
+                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+            )}
+          >
+            <span className="relative z-10">🔥 Gainers</span>
+          </button>
+          
+          <button
+            onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+            className={cn(
+              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+              highlightMode === 'losers'
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30 border-l-2 border-l-red-500'
+                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+            )}
+          >
+            <span className="relative z-10">💀 Losers</span>
+          </button>
+          
+          {/* Divider */}
+          <div className="w-px h-4 bg-border mx-1" />
+          
           {categories.map(cat => (
             <button
               key={cat}
@@ -1286,7 +1376,7 @@ export function VoidBubblesEngine() {
           ref={svgRef}
           className="w-full h-full"
           style={{ 
-            background: 'radial-gradient(ellipse at 50% 45%, #141420 0%, #0c0c14 40%, #08080c 100%)',
+            background: 'radial-gradient(ellipse at 50% 45%, #0d1a15 0%, #0a0f14 40%, #08080c 100%)',
           }}
         />
       </div>
