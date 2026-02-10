@@ -353,6 +353,58 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
     svg.call(zoom);
     zoomRef.current = zoom;
 
+    // Add branding watermark (logo + URL) — bottom-right, fixed position
+    const branding = svg.append('g')
+      .attr('class', 'voidspace-branding')
+      .attr('transform', `translate(${width - 170}, ${height - 50})`);
+
+    // Voidspace logo (static version of VoidspaceLogo component)
+    const logoG = branding.append('g')
+      .attr('transform', 'scale(0.3) translate(0, -40)');
+
+    // Outer broken ring
+    logoG.append('path')
+      .attr('d', 'M 85 50 A 35 35 0 1 1 65 18.4')
+      .attr('stroke', '#00EC97')
+      .attr('stroke-width', 4)
+      .attr('stroke-linecap', 'round')
+      .attr('fill', 'none');
+
+    // Inner arc
+    logoG.append('path')
+      .attr('d', 'M 68 50 A 18 18 0 1 1 50 32')
+      .attr('stroke', '#00EC97')
+      .attr('stroke-width', 2.5)
+      .attr('stroke-linecap', 'round')
+      .attr('fill', 'none')
+      .attr('opacity', 0.3);
+
+    // Diagonal scan line
+    logoG.append('line')
+      .attr('x1', 25).attr('y1', 75)
+      .attr('x2', 75).attr('y2', 25)
+      .attr('stroke', '#00D4FF')
+      .attr('stroke-width', 2)
+      .attr('stroke-linecap', 'round')
+      .attr('opacity', 0.7);
+
+    // Center dot
+    logoG.append('circle')
+      .attr('cx', 50).attr('cy', 50).attr('r', 3)
+      .attr('fill', '#00EC97');
+
+    // "voidspace.io" text
+    branding.append('text')
+      .attr('x', 38)
+      .attr('y', 2)
+      .attr('fill', '#00EC97')
+      .attr('font-family', "'Inter', 'SF Pro Display', sans-serif")
+      .attr('font-size', '14px')
+      .attr('font-weight', '600')
+      .attr('letter-spacing', '1.5px')
+      .attr('opacity', 0.7)
+      .text('voidspace.io');
+
     // Entrance animation: Fade in after 300ms delay
     setTimeout(() => {
       svg.transition()

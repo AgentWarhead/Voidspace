@@ -5,96 +5,25 @@
  * background, padding, and logo placement.
  */
 
-/**
- * Static Voidspace logo SVG (no framer-motion animations)
- * Premium branding group with logo + VOIDSPACE + voidspace.io
- */
-const VoidspaceLogoSVG = `
-<g opacity="0.5">
-  <!-- Background subtle glow for premium feel -->
-  <rect
-    x="-2"
-    y="-2"
-    width="104"
-    height="26"
-    fill="rgba(0,236,151,0.05)"
-    rx="4"
-    ry="4"
-  />
-  
-  <!-- Logo symbol -->
-  <g transform="translate(2,3)">
-    <!-- Outer broken ring -->
-    <path
-      d="M 17 10 A 7 7 0 1 1 13 3.68"
-      stroke="#00EC97"
-      stroke-width="1.4"
-      stroke-linecap="round"
-      fill="none"
-    />
-    
-    <!-- Inner arc -->
-    <path
-      d="M 13.6 10 A 3.6 3.6 0 1 1 10 6.4"
-      stroke="#00EC97"
-      stroke-width="0.9"
-      stroke-linecap="round"
-      fill="none"
-      opacity="0.4"
-    />
-    
-    <!-- Diagonal scan line -->
-    <line
-      x1="5"
-      y1="15"
-      x2="15"
-      y2="5"
-      stroke="#00D4FF"
-      stroke-width="0.7"
-      stroke-linecap="round"
-      opacity="0.8"
-    />
-    
-    <!-- Center dot -->
-    <circle
-      cx="10"
-      cy="10"
-      r="0.9"
-      fill="#00EC97"
-    />
-  </g>
-  
-  <!-- Brand name: VOIDSPACE -->
-  <text
-    x="26"
-    y="12"
-    font-family="'JetBrains Mono', monospace"
-    font-size="8.5"
-    font-weight="700"
-    fill="#00EC97"
-    letter-spacing="1.2"
-  >
-    VOIDSPACE
-  </text>
-  
-  <!-- Website URL: voidspace.io -->
-  <text
-    x="26"
-    y="20.5"
-    font-family="'JetBrains Mono', monospace"
-    font-size="6"
-    font-weight="500"
-    fill="#00EC97"
-    letter-spacing="0.5"
-    opacity="0.7"
-  >
-    voidspace.io
-  </text>
-</g>
-`;
+/* Logo SVG string removed — branding now rendered via canvas for reliable PNG export */
 
 /**
- * Export SVG with proper framing and logo
+ * Branding SVG snippet — logo + VOIDSPACE.io + tagline.
+ * Uses only 'monospace' generic font to ensure it renders everywhere.
+ */
+const BRANDING_SVG = `
+<g opacity="0.7">
+  <path d="M 38 22 A 16 16 0 1 1 29 8.4" stroke="#00EC97" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M 31 22 A 9 9 0 1 1 22 13" stroke="#00EC97" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.35"/>
+  <line x1="11" y1="33" x2="33" y2="11" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+  <circle cx="22" cy="22" r="2.5" fill="#00EC97"/>
+  <text x="50" y="20" fill="#00EC97" font-family="monospace" font-size="18" font-weight="bold">VOIDSPACE<tspan fill="#00D4FF" font-weight="normal">.io</tspan></text>
+  <text x="50" y="36" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="9">NEAR ECOSYSTEM INTELLIGENCE</text>
+</g>`;
+
+/**
+ * Export chart as branded SVG with Voidspace branding.
+ * Uses flat SVG structure (no nested <svg>) for reliable rendering.
  */
 export function exportSVG(
   svgElement: SVGElement,
@@ -113,75 +42,55 @@ export function exportSVG(
     logoPosition = 'bottom-right'
   } = options;
 
-  // Parse original viewBox
-  const [minX, minY, width, height] = originalViewBox.split(' ').map(Number);
-  
-  // Calculate new viewBox with padding
-  const newWidth = width + (padding * 2);
-  const newHeight = height + (padding * 2);
-  const newViewBox = `0 0 ${newWidth} ${newHeight}`;
+  const [, , width, height] = originalViewBox.split(' ').map(Number);
+  const BRAND_H = 60;
+  const totalW = width + padding * 2;
+  const totalH = height + padding * 2 + BRAND_H;
 
-  // Clone the original SVG content
-  const clonedElement = svgElement.cloneNode(true) as SVGElement;
-  
-  // Remove animation elements and interactive attributes
-  const elementsToClean = clonedElement.querySelectorAll('*');
-  elementsToClean.forEach(el => {
-    // Remove animation elements
-    const animationElements = el.querySelectorAll('animateTransform, animate, animateMotion');
-    animationElements.forEach(anim => anim.remove());
-    
-    // Remove interactive attributes
+  // Clone and clean SVG
+  const clone = svgElement.cloneNode(true) as SVGElement;
+  clone.querySelectorAll('animateTransform, animate, animateMotion').forEach(el => el.remove());
+  clone.querySelectorAll('*').forEach(el => {
     el.removeAttribute('onMouseEnter');
     el.removeAttribute('onMouseLeave');
     el.removeAttribute('onClick');
     el.removeAttribute('style');
-    
-    // Remove cursor pointer styles that might be in classes
     if (el.hasAttribute('class')) {
-      const classes = el.getAttribute('class') || '';
-      el.setAttribute('class', classes.replace(/cursor-pointer/g, ''));
+      el.setAttribute('class', (el.getAttribute('class') || '').replace(/cursor-pointer/g, ''));
     }
   });
 
-  // Get the SVG content as string
-  const svgContent = clonedElement.innerHTML;
+  // Extract inner content (not the <svg> wrapper itself)
+  const svgContent = clone.innerHTML;
 
-  // Calculate logo position (updated for enhanced branding)
+  // Calculate logo position
+  const brandY = height + padding * 2 + 8;
   let logoTransform = '';
   switch (logoPosition) {
     case 'bottom-right':
-      logoTransform = `translate(${newWidth - 130}, ${newHeight - 35})`;
+      logoTransform = `translate(${totalW - 280}, ${brandY})`;
       break;
     case 'bottom-left':
-      logoTransform = `translate(20, ${newHeight - 35})`;
+      logoTransform = `translate(${padding}, ${brandY})`;
       break;
     case 'top-right':
-      logoTransform = `translate(${newWidth - 130}, 20)`;
+      logoTransform = `translate(${totalW - 280}, ${padding + 5})`;
       break;
     case 'top-left':
-      logoTransform = `translate(20, 20)`;
+      logoTransform = `translate(${padding}, ${padding + 5})`;
       break;
   }
 
-  // Create the final SVG with background, padding, and logo
   const finalSVG = `<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="${newViewBox}" width="${newWidth}" height="${newHeight}" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="100%" height="100%" fill="${backgroundColor}"/>
-  
-  <!-- Chart content with padding offset -->
+<svg viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${totalW}" height="${totalH}" fill="${backgroundColor}"/>
   <g transform="translate(${padding}, ${padding})">
     ${svgContent}
   </g>
-  
-  <!-- Voidspace logo -->
-  <g transform="${logoTransform}">
-    ${VoidspaceLogoSVG}
-  </g>
+  <line x1="${padding}" y1="${brandY - 6}" x2="${totalW - padding}" y2="${brandY - 6}" stroke="rgba(0,236,151,0.2)" stroke-width="1"/>
+  <g transform="${logoTransform}">${BRANDING_SVG}</g>
 </svg>`;
 
-  // Create and download the file
   const blob = new Blob([finalSVG], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');

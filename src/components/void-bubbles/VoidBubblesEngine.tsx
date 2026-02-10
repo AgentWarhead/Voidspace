@@ -568,196 +568,76 @@ export function VoidBubblesEngine() {
 
   // ────────────────────── Snapshot & Share ──────────────────────
 
-  const handleSnapshot = useCallback(async () => {
+  const handleSnapshot = useCallback(() => {
     if (!svgRef.current || !containerRef.current) return;
     try {
-      const originalSvg = svgRef.current;
-      const { width: cw, height: ch } = containerRef.current.getBoundingClientRect();
-
-      // Padding & branding zone
-      const PAD = 50;
-      const BRAND_H = 90;
-      const totalW = cw + PAD * 2;
-      const totalH = ch + PAD * 2 + BRAND_H;
-
-      // Clone the live SVG content
-      const clone = originalSvg.cloneNode(true) as SVGSVGElement;
-      // Strip CSS-only background (we'll paint it ourselves)
-      clone.removeAttribute('style');
-      clone.removeAttribute('class');
-      clone.setAttribute('x', String(PAD));
-      clone.setAttribute('y', String(PAD));
-      clone.setAttribute('width', String(cw));
-      clone.setAttribute('height', String(ch));
-
-      // Remove animations for static export
-      clone.querySelectorAll('animateTransform, animate, animateMotion').forEach(el => el.remove());
-
-      // Build the wrapper SVG
-      const ns = 'http://www.w3.org/2000/svg';
-      const wrapper = document.createElementNS(ns, 'svg');
-      wrapper.setAttribute('xmlns', ns);
-      wrapper.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
-      wrapper.setAttribute('width', String(totalW));
-      wrapper.setAttribute('height', String(totalH));
-
-      // Background — dark gradient matching the site
-      const defs = document.createElementNS(ns, 'defs');
-      const radGrad = document.createElementNS(ns, 'radialGradient');
-      radGrad.setAttribute('id', 'vb-bg');
-      radGrad.setAttribute('cx', '50%');
-      radGrad.setAttribute('cy', '45%');
-      radGrad.setAttribute('r', '60%');
-      const stop1 = document.createElementNS(ns, 'stop');
-      stop1.setAttribute('offset', '0%');
-      stop1.setAttribute('stop-color', '#111111');
-      const stop2 = document.createElementNS(ns, 'stop');
-      stop2.setAttribute('offset', '100%');
-      stop2.setAttribute('stop-color', '#0a0a0a');
-      radGrad.appendChild(stop1);
-      radGrad.appendChild(stop2);
-      defs.appendChild(radGrad);
-      wrapper.appendChild(defs);
-
-      // Background rect
-      const bgRect = document.createElementNS(ns, 'rect');
-      bgRect.setAttribute('width', '100%');
-      bgRect.setAttribute('height', '100%');
-      bgRect.setAttribute('fill', 'url(#vb-bg)');
-      wrapper.appendChild(bgRect);
-
-      // Subtle border frame
-      const frame = document.createElementNS(ns, 'rect');
-      frame.setAttribute('x', String(PAD - 1));
-      frame.setAttribute('y', String(PAD - 1));
-      frame.setAttribute('width', String(cw + 2));
-      frame.setAttribute('height', String(ch + 2));
-      frame.setAttribute('rx', '8');
-      frame.setAttribute('fill', 'none');
-      frame.setAttribute('stroke', 'rgba(0,236,151,0.12)');
-      frame.setAttribute('stroke-width', '1');
-      wrapper.appendChild(frame);
-
-      // Add the chart content
-      wrapper.appendChild(clone);
-
-      // ── Branding zone (bottom) ──
-      const brandY = ch + PAD * 2 + 16;
-      const brandG = document.createElementNS(ns, 'g');
-      brandG.setAttribute('opacity', '0.6');
-
-      // Voidspace logo — broken ring
-      const logoX = totalW - 260;
-      const logoG = document.createElementNS(ns, 'g');
-      logoG.setAttribute('transform', `translate(${logoX}, ${brandY})`);
-
-      // Outer ring arc
-      const outerRing = document.createElementNS(ns, 'path');
-      outerRing.setAttribute('d', 'M 38 22 A 16 16 0 1 1 29 8.4');
-      outerRing.setAttribute('stroke', '#00EC97');
-      outerRing.setAttribute('stroke-width', '2.5');
-      outerRing.setAttribute('stroke-linecap', 'round');
-      outerRing.setAttribute('fill', 'none');
-      logoG.appendChild(outerRing);
-
-      // Inner ring
-      const innerRing = document.createElementNS(ns, 'path');
-      innerRing.setAttribute('d', 'M 31 22 A 9 9 0 1 1 22 13');
-      innerRing.setAttribute('stroke', '#00EC97');
-      innerRing.setAttribute('stroke-width', '1.5');
-      innerRing.setAttribute('stroke-linecap', 'round');
-      innerRing.setAttribute('fill', 'none');
-      innerRing.setAttribute('opacity', '0.35');
-      logoG.appendChild(innerRing);
-
-      // Scan line
-      const scanLine = document.createElementNS(ns, 'line');
-      scanLine.setAttribute('x1', '11');
-      scanLine.setAttribute('y1', '33');
-      scanLine.setAttribute('x2', '33');
-      scanLine.setAttribute('y2', '11');
-      scanLine.setAttribute('stroke', '#00D4FF');
-      scanLine.setAttribute('stroke-width', '1.5');
-      scanLine.setAttribute('stroke-linecap', 'round');
-      scanLine.setAttribute('opacity', '0.7');
-      logoG.appendChild(scanLine);
-
-      // Center dot
-      const dot = document.createElementNS(ns, 'circle');
-      dot.setAttribute('cx', '22');
-      dot.setAttribute('cy', '22');
-      dot.setAttribute('r', '2');
-      dot.setAttribute('fill', '#00EC97');
-      logoG.appendChild(dot);
-
-      // "VOIDSPACE" brand text
-      const brandText = document.createElementNS(ns, 'text');
-      brandText.setAttribute('x', '48');
-      brandText.setAttribute('y', '19');
-      brandText.setAttribute('fill', '#00EC97');
-      brandText.setAttribute('font-family', "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace");
-      brandText.setAttribute('font-size', '16');
-      brandText.setAttribute('font-weight', '700');
-      brandText.setAttribute('letter-spacing', '3');
-      brandText.textContent = 'VOIDSPACE';
-
-      // ".io" suffix
-      const ioText = document.createElementNS(ns, 'tspan');
-      ioText.setAttribute('fill', '#00D4FF');
-      ioText.setAttribute('font-weight', '400');
-      ioText.setAttribute('letter-spacing', '0');
-      ioText.textContent = '.io';
-      brandText.appendChild(ioText);
-      logoG.appendChild(brandText);
-
-      // Tagline
-      const tagline = document.createElementNS(ns, 'text');
-      tagline.setAttribute('x', '48');
-      tagline.setAttribute('y', '36');
-      tagline.setAttribute('fill', 'rgba(255,255,255,0.35)');
-      tagline.setAttribute('font-family', "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace");
-      tagline.setAttribute('font-size', '9');
-      tagline.setAttribute('letter-spacing', '2');
-      tagline.textContent = 'NEAR ECOSYSTEM INTELLIGENCE';
-      logoG.appendChild(tagline);
-
-      brandG.appendChild(logoG);
-
-      // Left side — date & stats
-      const infoText = document.createElementNS(ns, 'text');
-      infoText.setAttribute('x', String(PAD));
-      infoText.setAttribute('y', String(brandY + 26));
-      infoText.setAttribute('fill', 'rgba(255,255,255,0.25)');
-      infoText.setAttribute('font-family', "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace");
-      infoText.setAttribute('font-size', '10');
-      infoText.setAttribute('letter-spacing', '1');
       const today = new Date().toISOString().split('T')[0];
-      infoText.textContent = `VOID BUBBLES · ${tokens.length} TOKENS · ${today}`;
-      brandG.appendChild(infoText);
 
-      // Decorative line separator
-      const sepLine = document.createElementNS(ns, 'line');
-      sepLine.setAttribute('x1', String(PAD));
-      sepLine.setAttribute('y1', String(brandY - 4));
-      sepLine.setAttribute('x2', String(totalW - PAD));
-      sepLine.setAttribute('y2', String(brandY - 4));
-      sepLine.setAttribute('stroke', 'rgba(0,236,151,0.15)');
-      sepLine.setAttribute('stroke-width', '1');
-      brandG.appendChild(sepLine);
+      // Get the bounding box of actual bubble content to crop tightly
+      const bubblesLayer = svgRef.current.querySelector('.bubbles-layer');
+      const shockwaveLayer = svgRef.current.querySelector('.shockwave-layer');
 
-      wrapper.appendChild(brandG);
+      // Use the bubbles layer bbox to determine content bounds
+      let contentBBox = { x: 0, y: 0, width: 0, height: 0 };
+      if (bubblesLayer && (bubblesLayer as SVGGraphicsElement).getBBox) {
+        const bbox = (bubblesLayer as SVGGraphicsElement).getBBox();
+        contentBBox = { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height };
+      } else {
+        // Fallback to container dimensions
+        const rect = containerRef.current.getBoundingClientRect();
+        contentBBox = { x: 0, y: 0, width: rect.width, height: rect.height };
+      }
 
-      // Serialize and download
-      const svgData = new XMLSerializer().serializeToString(wrapper);
-      const blob = new Blob([svgData], { type: 'image/svg+xml' });
+      // Add margin around the content
+      const MARGIN = 60;
+      const BRAND_H = 80;
+      const contentW = Math.round(contentBBox.width + MARGIN * 2);
+      const contentH = Math.round(contentBBox.height + MARGIN * 2);
+      const totalW = Math.max(contentW, 800); // min width for branding
+      const totalH = contentH + BRAND_H;
+
+      // Offset to center the bubbles in the export
+      const offsetX = Math.round(-contentBBox.x + MARGIN + (totalW - contentW) / 2);
+      const offsetY = Math.round(-contentBBox.y + MARGIN);
+
+      // Get the SVG inner content
+      const innerContent = svgRef.current.innerHTML;
+
+      // Branding positions
+      const brandY = totalH - BRAND_H + 15;
+      const logoX = totalW - 280;
+
+      const svgString = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}">
+  <rect width="${totalW}" height="${totalH}" fill="#0a0a0a"/>
+  <g transform="translate(${offsetX},${offsetY})">
+    ${innerContent}
+  </g>
+  <rect x="0" y="${totalH - BRAND_H}" width="${totalW}" height="${BRAND_H}" fill="#0a0a0a"/>
+  <line x1="40" y1="${brandY - 12}" x2="${totalW - 40}" y2="${brandY - 12}" stroke="rgba(0,236,151,0.15)" stroke-width="1"/>
+  <g transform="translate(${logoX},${brandY})" opacity="0.7">
+    <path d="M 38 22 A 16 16 0 1 1 29 8.4" stroke="#00EC97" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M 31 22 A 9 9 0 1 1 22 13" stroke="#00EC97" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.35"/>
+    <line x1="11" y1="33" x2="33" y2="11" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="22" cy="22" r="2.5" fill="#00EC97"/>
+    <text x="50" y="20" fill="#00EC97" font-family="monospace" font-size="18" font-weight="bold">VOIDSPACE<tspan fill="#00D4FF" font-weight="normal">.io</tspan></text>
+    <text x="50" y="36" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="9">NEAR ECOSYSTEM INTELLIGENCE</text>
+  </g>
+  <text x="40" y="${brandY + 8}" fill="rgba(255,255,255,0.25)" font-family="monospace" font-size="10">VOID BUBBLES  ·  ${tokens.length} TOKENS  ·  ${today}</text>
+</svg>`;
+
+      const blob = new Blob([svgString], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `voidspace-bubbles-${today}.svg`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Snapshot failed:', e);
+      alert('Snapshot failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
     }
   }, [tokens.length]);
 
