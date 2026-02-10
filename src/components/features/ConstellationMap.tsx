@@ -666,7 +666,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
           <div className="flex gap-4">
             <div className="flex-1">
               <Input
-                placeholder="Enter NEAR wallet address (e.g., alice.near)"
+                placeholder="Enter NEAR wallet address (e.g., alex.near)"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -694,7 +694,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
           <div className="space-y-2">
             <p className="text-xs text-text-muted">Try an example:</p>
             <div className="flex flex-wrap gap-2">
-              {['root.near', 'zavodil.near', 'chadoh.near'].map((example) => (
+              {['starpause.near', 'mob.near', 'sweat_welcome.near'].map((example) => (
                 <button
                   key={example}
                   onClick={() => {

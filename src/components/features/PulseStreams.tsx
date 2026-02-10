@@ -360,7 +360,7 @@ export function PulseStreams({ initialAddress }: PulseStreamsProps = {}) {
               <Input
                 value={accountInput}
                 onChange={(e) => setAccountInput(e.target.value)}
-                placeholder="Enter account ID (e.g., alice.near)"
+                placeholder="Enter account ID (e.g., alex.near)"
                 onKeyPress={(e) => e.key === 'Enter' && addAccount()}
               />
               <Button onClick={addAccount} size="sm">Add</Button>

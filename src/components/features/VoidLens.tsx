@@ -446,7 +446,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
             <Input
-              placeholder="Enter NEAR wallet address (e.g., alice.near)"
+              placeholder="Enter NEAR wallet address (e.g., alex.near)"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               className="pl-10"
@@ -458,7 +458,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
           <div className="space-y-2">
             <p className="text-xs text-text-muted">Try these:</p>
             <div className="flex flex-wrap gap-2">
-              {['root.near', 'zavodil.near', 'chadoh.near'].map((example) => (
+              {['alex.near', 'mob.near', 'root.near'].map((example) => (
                 <button
                   key={example}
                   onClick={() => {
