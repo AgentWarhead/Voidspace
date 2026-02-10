@@ -894,7 +894,7 @@ export function VoidBubblesEngine() {
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-140px)] min-h-[500px] bg-background rounded-xl border border-border overflow-hidden">
+    <div className="relative w-full h-full min-h-0 bg-background rounded-xl border border-border overflow-hidden">
       {/* Top Controls — single row on desktop, stacked on mobile */}
       <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
         {/* Category filters — scrollable on mobile */}
