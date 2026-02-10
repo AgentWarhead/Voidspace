@@ -346,12 +346,14 @@ export function VoidBubblesEngine() {
     const intelBrief = generateIntelBrief(token);
     const supplyConcentration = getSupplyConcentration(token);
     const volLiqRatio = token.liquidity > 0 ? token.volume24h / token.liquidity : 0;
+    const isPositive = currentChange >= 0;
+    const accentColor = isPositive ? '#00EC97' : '#FF3366';
+    const accentBg = isPositive ? 'rgba(0,236,151,' : 'rgba(255,51,102,';
 
     // Position the card (mobile = centered, desktop = near bubble)
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    // Clamp position so card doesn't overflow viewport
     const clampedX = Math.min(position.x + 20, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 420);
-    const clampedY = Math.max(20, Math.min(position.y - 200, (typeof window !== 'undefined' ? window.innerHeight : 800) - 500));
+    const clampedY = Math.max(20, Math.min(position.y - 200, (typeof window !== 'undefined' ? window.innerHeight : 800) - 600));
     const cardStyle: React.CSSProperties = isMobile 
       ? { left: '1rem', right: '1rem', top: '50%', transform: 'translateY(-50%)' }
       : { left: clampedX, top: clampedY };
@@ -359,222 +361,231 @@ export function VoidBubblesEngine() {
     return (
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', duration: 0.3 }}
-          className="fixed z-50 max-w-sm"
+          initial={{ opacity: 0, scale: 0.9, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 10 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="fixed z-50 w-[380px]"
           style={cardStyle}
           onClick={(e) => e.stopPropagation()}
         >
-          <Card className="bg-[#0a0a0f]/95 backdrop-blur-xl border-[#00EC97]/30 shadow-2xl shadow-[#00EC97]/10">
-            <div className="p-4 space-y-4">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge variant="default" className="text-xs font-mono">
-                    {token.category}
-                  </Badge>
-                  <button
-                    onClick={() => setPopupCard(null)}
-                    className="text-text-muted hover:text-text-primary transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-bold text-white">{token.name}</h3>
-                <p className="text-text-muted font-mono text-sm">{token.symbol}</p>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-white">{formatPrice(token.price)}</span>
-                  <Badge 
-                    variant="default"
-                    className="font-mono text-xs"
-                  >
-                    {currentChange >= 0 ? '+' : ''}{currentChange.toFixed(1)}%
-                  </Badge>
-                </div>
-
-                {/* Price Performance Row */}
-                <div className="flex gap-1">
-                  <Badge variant="glass" className="text-xs font-mono">
-                    1H: {token.priceChange1h >= 0 ? '+' : ''}{token.priceChange1h.toFixed(1)}%
-                  </Badge>
-                  <Badge variant="glass" className="text-xs font-mono">
-                    6H: {token.priceChange6h >= 0 ? '+' : ''}{token.priceChange6h.toFixed(1)}%
-                  </Badge>
-                  <Badge variant="glass" className="text-xs font-mono">
-                    24H: {token.priceChange24h >= 0 ? '+' : ''}{token.priceChange24h.toFixed(1)}%
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Market Data Grid */}
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-text-muted">Market Cap</p>
-                  <p className="font-mono font-semibold">{formatCompact(token.marketCap)}</p>
-                </div>
-                <div>
-                  <p className="text-text-muted">24h Volume</p>
-                  <p className="font-mono font-semibold">{formatCompact(token.volume24h)}</p>
-                </div>
-                <div>
-                  <p className="text-text-muted">Liquidity</p>
-                  <p className="font-mono font-semibold">{formatCompact(token.liquidity)}</p>
-                </div>
-                <div>
-                  <p className="text-text-muted">Vol/Liq Ratio</p>
-                  <p className="font-mono font-semibold">{volLiqRatio.toFixed(2)}</p>
-                </div>
-              </div>
-
-              {/* Health & Risk Section */}
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Health Score</span>
-                    <span className={cn("font-bold", {
-                      'text-green-400': healthStatus === 'healthy',
-                      'text-yellow-400': healthStatus === 'medium',
-                      'text-red-400': healthStatus === 'unhealthy'
-                    })}>
-                      {token.healthScore}/100
+          {/* Outer glow */}
+          <div className="absolute -inset-px rounded-2xl opacity-60" style={{
+            background: `linear-gradient(135deg, ${accentBg}0.3), ${accentBg}0.1), transparent, ${accentBg}0.2))`,
+          }} />
+          
+          <div className="relative bg-[#080b11]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.08] overflow-hidden">
+            {/* Top accent line */}
+            <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, transparent)` }} />
+            
+            {/* Header — token identity with momentum indicator */}
+            <div className="p-4 pb-0">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                      style={{ 
+                        borderColor: `${accentBg}0.2)`, 
+                        backgroundColor: `${accentBg}0.08)`,
+                        color: accentColor 
+                      }}>
+                      {token.category}
+                    </span>
+                    <span className="text-[10px] font-mono text-text-muted">
+                      {token.symbol}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={cn("h-2 rounded-full transition-all", {
-                        'bg-green-400': healthStatus === 'healthy',
-                        'bg-yellow-400': healthStatus === 'medium',
-                        'bg-red-400': healthStatus === 'unhealthy'
-                      })}
-                      style={{ width: `${token.healthScore}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-text-muted mt-1">
-                    {healthStatus === 'healthy' ? 'Healthy' : healthStatus === 'medium' ? 'Caution' : 'Danger'}
-                  </p>
+                  <h3 className="text-xl font-bold text-white tracking-tight">{token.name}</h3>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Badge variant='default'>
-                    Risk: {token.riskLevel.charAt(0).toUpperCase() + token.riskLevel.slice(1)}
-                  </Badge>
-                </div>
-
-                {token.riskFactors.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {token.riskFactors.map((factor, i) => (
-                      <Badge key={i} variant="glass" className="text-xs">
-                        {factor}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                <button
+                  onClick={() => setPopupCard(null)}
+                  className="p-1.5 rounded-lg hover:bg-white/[0.06] text-text-muted hover:text-white transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
+            </div>
 
-              {/* AI Intelligence Brief */}
-              <div className="border border-[#00EC97]/20 rounded-lg p-3 bg-[#00EC97]/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-4 h-4 text-[#00EC97]" />
-                  <span className="text-sm font-semibold text-[#00EC97]">AI Intelligence</span>
+            {/* Price hero section */}
+            <div className="px-4 pt-3 pb-4">
+              <div className="flex items-end gap-3">
+                <span className="text-3xl font-bold text-white font-mono tracking-tight">
+                  {formatPrice(token.price)}
+                </span>
+                <motion.span 
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  className="text-lg font-bold font-mono mb-0.5"
+                  style={{ color: accentColor }}
+                >
+                  {isPositive ? '▲' : '▼'} {Math.abs(currentChange).toFixed(1)}%
+                </motion.span>
+              </div>
+              
+              {/* Timeframe pills */}
+              <div className="flex gap-1.5 mt-3">
+                {[
+                  { label: '1H', value: token.priceChange1h },
+                  { label: '6H', value: token.priceChange6h },
+                  { label: '24H', value: token.priceChange24h },
+                ].map(({ label, value }) => (
+                  <div key={label} className={cn(
+                    "flex-1 text-center py-1.5 rounded-lg font-mono text-[11px] font-semibold border",
+                    value >= 0 
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                      : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                  )}>
+                    {label}: {value >= 0 ? '+' : ''}{value.toFixed(1)}%
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider with glow */}
+            <div className="h-px mx-4" style={{ background: `linear-gradient(90deg, transparent, ${accentBg}0.15), transparent)` }} />
+
+            {/* Market metrics grid */}
+            <div className="grid grid-cols-2 gap-px bg-white/[0.03] mx-4 my-3 rounded-xl overflow-hidden border border-white/[0.04]">
+              {[
+                { label: 'Market Cap', value: formatCompact(token.marketCap), icon: '◆' },
+                { label: '24h Volume', value: formatCompact(token.volume24h), icon: '◈' },
+                { label: 'Liquidity', value: formatCompact(token.liquidity), icon: '◇' },
+                { label: 'Vol/Liq', value: volLiqRatio.toFixed(2), icon: '⟡', warn: volLiqRatio > 2 },
+              ].map(({ label, value, icon, warn }) => (
+                <div key={label} className="bg-[#0a0f14]/60 p-3">
+                  <div className="text-[10px] text-text-muted font-mono uppercase tracking-wider">{icon} {label}</div>
+                  <div className={cn("text-sm font-mono font-bold mt-0.5", warn ? "text-amber-400" : "text-white")}>
+                    {value}
+                  </div>
                 </div>
-                <p className="text-sm text-text-secondary leading-relaxed">
+              ))}
+            </div>
+
+            {/* Health Score — animated bar */}
+            <div className="mx-4 mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Health Score</span>
+                <span className={cn("text-sm font-bold font-mono", {
+                  'text-emerald-400': healthStatus === 'healthy',
+                  'text-amber-400': healthStatus === 'medium',
+                  'text-rose-400': healthStatus === 'unhealthy'
+                })}>
+                  {token.healthScore}<span className="text-text-muted font-normal">/100</span>
+                </span>
+              </div>
+              <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${token.healthScore}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className={cn("h-full rounded-full", {
+                    'bg-gradient-to-r from-emerald-500 to-emerald-400': healthStatus === 'healthy',
+                    'bg-gradient-to-r from-amber-500 to-yellow-400': healthStatus === 'medium',
+                    'bg-gradient-to-r from-rose-600 to-rose-400': healthStatus === 'unhealthy'
+                  })}
+                />
+              </div>
+              {/* Risk tags */}
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded border", {
+                  'border-emerald-500/20 text-emerald-400 bg-emerald-500/10': token.riskLevel === 'low',
+                  'border-amber-500/20 text-amber-400 bg-amber-500/10': token.riskLevel === 'medium',
+                  'border-rose-500/20 text-rose-400 bg-rose-500/10': token.riskLevel === 'high',
+                  'border-rose-500/30 text-rose-300 bg-rose-500/20': token.riskLevel === 'critical',
+                })}>
+                  {token.riskLevel.toUpperCase()} RISK
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.06] text-text-muted bg-white/[0.02]">
+                  Supply: {supplyConcentration}
+                </span>
+                {token.riskFactors.slice(0, 2).map((factor, i) => (
+                  <span key={i} className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.06] text-text-muted bg-white/[0.02]">
+                    {factor}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Intelligence — premium card */}
+            <div className="mx-4 mb-3 rounded-xl overflow-hidden border border-[#00EC97]/15">
+              <div className="bg-gradient-to-br from-[#00EC97]/[0.08] to-transparent p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-5 h-5 rounded-md bg-[#00EC97]/20 flex items-center justify-center">
+                    <Brain className="w-3 h-3 text-[#00EC97]" />
+                  </div>
+                  <span className="text-xs font-semibold text-[#00EC97] tracking-wide">AI Intelligence Brief</span>
+                </div>
+                <p className="text-[12px] text-text-secondary leading-relaxed">
                   {intelBrief}
                 </p>
               </div>
+            </div>
 
-              {/* Supply Concentration Indicator */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-muted">Supply Concentration:</span>
-                <Badge 
-                  variant='default'
-                  className="text-xs"
-                >
-                  {supplyConcentration}
-                  {volLiqRatio < 0.05 && token.marketCap > 1000000 && (
-                    <span className="ml-1">⚠️</span>
-                  )}
-                </Badge>
-              </div>
-
-              {/* Quick Links Row */}
-              <div className="flex flex-wrap gap-2">
-                <Button 
-                  size="sm" 
-                  variant="ghost"
+            {/* Action buttons — prominent CTAs */}
+            <div className="px-4 pb-3">
+              <div className="flex gap-2">
+                <button
                   onClick={() => window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank')}
-                  className="text-xs"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold bg-[#00EC97]/15 border border-[#00EC97]/25 text-[#00EC97] hover:bg-[#00EC97]/25 transition-all"
                 >
-                  <ExternalLink className="w-3 h-3 mr-1" />
+                  <ExternalLink className="w-3 h-3" />
                   DexScreener
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost"
+                </button>
+                <button
                   onClick={() => window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank')}
-                  className="text-xs"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold bg-white/[0.04] border border-white/[0.08] text-text-secondary hover:bg-white/[0.08] hover:text-white transition-all"
                 >
-                  <ExternalLink className="w-3 h-3 mr-1" />
+                  <ExternalLink className="w-3 h-3" />
                   Ref Finance
-                </Button>
-                {token.website && (
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => window.open(token.website, '_blank')}
-                    className="text-xs"
-                  >
-                    <Link className="w-3 h-3 mr-1" />
-                    Website
-                  </Button>
-                )}
-                {token.twitter && (
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => window.open(token.twitter, '_blank')}
-                    className="text-xs"
-                  >
-                    <ExternalLink className="w-3 h-3 mr-1" />
-                    Twitter
-                  </Button>
-                )}
+                </button>
               </div>
-
-              {/* Contract Address */}
-              <div className="border-t border-border pt-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-text-muted">Contract:</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-mono">
-                      {token.contractAddress.slice(0, 6)}...{token.contractAddress.slice(-4)}
-                    </span>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => copyToClipboard(token.contractAddress)}
-                      className="h-6 w-6 p-0"
+              {(token.website || token.twitter) && (
+                <div className="flex gap-2 mt-2">
+                  {token.website && (
+                    <button
+                      onClick={() => window.open(token.website, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
                     >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                  </div>
+                      <Link className="w-3 h-3" />
+                      Website
+                    </button>
+                  )}
+                  {token.twitter && (
+                    <button
+                      onClick={() => window.open(token.twitter, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Twitter
+                    </button>
+                  )}
                 </div>
-              </div>
+              )}
+            </div>
 
-              {/* Footer */}
-              <div className="text-xs text-text-muted border-t border-border pt-2">
-                <p>First detected: {formatDate(token.detectedAt)}</p>
-                <p>Category: {token.category}</p>
+            {/* Contract footer */}
+            <div className="px-4 py-2.5 bg-white/[0.02] border-t border-white/[0.04]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-text-muted">
+                    {token.contractAddress.slice(0, 8)}...{token.contractAddress.slice(-6)}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(token.contractAddress)}
+                    className="p-1 rounded hover:bg-white/[0.06] text-text-muted hover:text-[#00EC97] transition-all"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                </div>
+                <span className="text-[9px] font-mono text-text-muted/50">
+                  {formatDate(token.detectedAt)}
+                </span>
               </div>
             </div>
-          </Card>
+
+            {/* Bottom accent */}
+            <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}30, transparent)` }} />
+          </div>
         </motion.div>
       </AnimatePresence>
     );
@@ -991,19 +1002,6 @@ export function VoidBubblesEngine() {
       })
       .attr('filter', 'url(#bubble-glow)');
 
-    // **NEW: Whale Activity Pulse - Add whale indicator for high volume tokens**
-    bubbleGroups.filter(d => d.token.volume24h > d.token.liquidity * 2)
-      .append('text')
-      .attr('class', 'whale-indicator')
-      .attr('x', d => d.targetRadius + 8)
-      .attr('y', d => -d.targetRadius - 5)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '12')
-      .attr('opacity', 0)
-      .text('🐋')
-      .transition().duration(1000)
-      .attr('opacity', 0.8);
-
     // Enhanced subtle outer ring with premium stroke styling + danger pulse
     bubbleGroups.append('circle')
       .attr('class', d => `bubble-outer-ring ${d.token.riskLevel === 'critical' || d.token.healthScore < 20 ? `danger-pulse-${d.id}` : ''}`)
@@ -1224,9 +1222,9 @@ export function VoidBubblesEngine() {
         .distanceMax(Math.min(width, height) * 0.4)
       )
       .force('collision', d3.forceCollide<BubbleNode>()
-        .radius(d => d.targetRadius + (isMobile ? 6 : 4))
-        .strength(0.85)
-        .iterations(2)
+        .radius(d => d.targetRadius + (isMobile ? 10 : 8))
+        .strength(0.9)
+        .iterations(3)
       )
       .alphaDecay(0.015) // Slow decay for organic settling
       .alpha(0.6)
@@ -1317,7 +1315,6 @@ export function VoidBubblesEngine() {
             .attr('opacity', function() {
               const className = d3.select(this).attr('class');
               if (className?.includes('skull-overlay')) return d.token.riskLevel === 'critical' ? 0.7 : 0.4;
-              if (className?.includes('whale-indicator')) return 0.8;
               return 1;
             });
         }, 200);
