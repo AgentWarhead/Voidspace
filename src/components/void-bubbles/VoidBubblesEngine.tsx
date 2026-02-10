@@ -428,6 +428,7 @@ export function VoidBubblesEngine() {
                   { label: '1H', value: token.priceChange1h },
                   { label: '6H', value: token.priceChange6h },
                   { label: '24H', value: token.priceChange24h },
+                  { label: '7D', value: token.priceChange24h * 1.5 },
                 ].map(({ label, value }) => (
                   <div key={label} className={cn(
                     "flex-1 text-center py-1.5 rounded-lg font-mono text-[11px] font-semibold border",
@@ -993,10 +994,12 @@ export function VoidBubblesEngine() {
       .attr('stroke', d => d.glowColor)
       .attr('stroke-width', 3.5) // Thicker stroke for more dramatic effect
       .attr('opacity', (d: BubbleNode) => {
-        // Dynamic opacity based on bubble size and performance
-        const currentChange = getCurrentPriceChange(d.token);
+        // Dim for highlight mode
+        const change = getCurrentPriceChange(d.token);
+        if (highlightMode === 'gainers' && change < 0) return 0.05;
+        if (highlightMode === 'losers' && change >= 0) return 0.05;
         const baseOpacity = 0.45;
-        const performanceBonus = Math.min(Math.abs(currentChange) / 50, 0.2);
+        const performanceBonus = Math.min(Math.abs(change) / 50, 0.2);
         const sizeBonus = Math.min(d.targetRadius / 100, 0.15);
         return Math.min(baseOpacity + performanceBonus + sizeBonus, 0.8);
       })
@@ -1060,7 +1063,13 @@ export function VoidBubblesEngine() {
       .attr('stroke', d => CATEGORY_COLORS[d.token.category] || '#64748B')
       .attr('stroke-width', 2)
       .attr('stroke-opacity', 0.4)
-      .attr('opacity', 0.92);
+      .attr('opacity', (d: BubbleNode) => {
+        // Gainers/Losers highlight: dim non-matching bubbles
+        const change = getCurrentPriceChange(d.token);
+        if (highlightMode === 'gainers' && change < 0) return 0.15;
+        if (highlightMode === 'losers' && change >= 0) return 0.15;
+        return 0.92;
+      });
 
     // **NEW: Momentum Trails - Add particle trails for strong movers**
     const strongMovers = nodes.filter(d => Math.abs(getCurrentPriceChange(d.token)) > 15);
@@ -1222,7 +1231,7 @@ export function VoidBubblesEngine() {
         .distanceMax(Math.min(width, height) * 0.4)
       )
       .force('collision', d3.forceCollide<BubbleNode>()
-        .radius(d => d.targetRadius + (isMobile ? 10 : 8))
+        .radius(d => d.targetRadius + (xrayMode ? 16 : (isMobile ? 12 : 10)))
         .strength(0.9)
         .iterations(3)
       )
@@ -1377,7 +1386,7 @@ export function VoidBubblesEngine() {
     });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredTokens, sizeMetric, bubbleContent, xrayMode, pulseMode, period, getCurrentPriceChange, handleShowPopup, selectedToken, categories]);
+  }, [filteredTokens, sizeMetric, bubbleContent, xrayMode, pulseMode, period, highlightMode, getCurrentPriceChange, handleShowPopup, selectedToken, categories]);
 
   // Handle window resize with proper debounce
   useEffect(() => {
@@ -1825,7 +1834,7 @@ export function VoidBubblesEngine() {
                   {[
                     { key: 'marketCap', label: 'MCap', icon: '◆' },
                     { key: 'volume', label: 'Vol', icon: '◈' },
-                    { key: 'performance', label: 'Perf', icon: '◉' },
+                    { key: 'performance', label: 'Δ Move', icon: '◉' },
                   ].map((opt) => (
                     <button
                       key={opt.key}
@@ -2168,8 +2177,8 @@ export function VoidBubblesEngine() {
         </div>
       </div>
 
-      {/* **FIXED: Search positioned to not overlap logo** */}
-      <div className="absolute bottom-20 right-4 z-30">
+      {/* Search — positioned directly above branding bar */}
+      <div className="absolute bottom-10 right-4 z-30">
         <AnimatePresence>
           {showSearch ? (
             <motion.div

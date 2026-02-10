@@ -17,44 +17,91 @@ export function VoidBubblesPageClient() {
   return (
     <div className="flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
       {/* ── Full-Viewport Voidspace Background ── */}
-      <div className="absolute inset-0 z-0 bg-[#04060b]">
-        {/* Deep space gradient layers */}
+      <div className="absolute inset-0 z-0 bg-[#030508]">
+        {/* Deep space gradient layers — enhanced intensity */}
         <div
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 120% 80% at 20% 10%, rgba(0,236,151,0.06) 0%, transparent 50%),
-              radial-gradient(ellipse 100% 60% at 80% 90%, rgba(0,212,255,0.05) 0%, transparent 50%),
-              radial-gradient(ellipse 80% 80% at 50% 50%, rgba(157,78,221,0.04) 0%, transparent 60%),
-              radial-gradient(circle at 50% 50%, rgba(0,236,151,0.02) 0%, transparent 80%)
+              radial-gradient(ellipse 120% 80% at 15% 10%, rgba(0,236,151,0.10) 0%, transparent 50%),
+              radial-gradient(ellipse 100% 60% at 85% 85%, rgba(0,212,255,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse 80% 80% at 50% 50%, rgba(157,78,221,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 70% 20%, rgba(255,51,102,0.04) 0%, transparent 50%)
             `,
           }}
         />
-        {/* Animated nebula pulse */}
+        {/* Animated nebula pulse — two layers */}
         <div
           className="absolute inset-0 animate-pulse"
           style={{
             animationDuration: '8s',
             background: `
-              radial-gradient(ellipse 60% 40% at 30% 70%, rgba(0,236,151,0.03) 0%, transparent 70%),
-              radial-gradient(ellipse 50% 50% at 70% 30%, rgba(0,212,255,0.03) 0%, transparent 70%)
+              radial-gradient(ellipse 60% 40% at 25% 70%, rgba(0,236,151,0.06) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 50% at 75% 25%, rgba(0,212,255,0.05) 0%, transparent 70%)
+            `,
+          }}
+        />
+        <div
+          className="absolute inset-0 animate-pulse"
+          style={{
+            animationDuration: '12s',
+            animationDelay: '4s',
+            background: `
+              radial-gradient(ellipse 40% 60% at 80% 60%, rgba(157,78,221,0.04) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 30% at 20% 40%, rgba(0,236,151,0.03) 0%, transparent 60%)
+            `,
+          }}
+        />
+        {/* Star field — CSS dot pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: `
+              radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
+              radial-gradient(1px 1px at 30% 65%, rgba(255,255,255,0.6) 0%, transparent 100%),
+              radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+              radial-gradient(1px 1px at 75% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+              radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.6) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 20% 85%, rgba(0,236,151,0.9) 0%, transparent 100%),
+              radial-gradient(1.5px 1.5px at 65% 35%, rgba(0,212,255,0.8) 0%, transparent 100%),
+              radial-gradient(1px 1px at 45% 55%, rgba(255,255,255,0.4) 0%, transparent 100%),
+              radial-gradient(1px 1px at 85% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+              radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.3) 0%, transparent 100%)
+            `,
+          }}
+        />
+        {/* Finer star layer */}
+        <div
+          className="absolute inset-0 opacity-[0.2]"
+          style={{
+            backgroundImage: `
+              radial-gradient(0.5px 0.5px at 12% 33%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 28% 72%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 42% 18%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 58% 88%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 72% 52%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 88% 28%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 35% 45%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 62% 68%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 95% 55%, white 0%, transparent 100%),
+              radial-gradient(0.5px 0.5px at 8% 92%, white 0%, transparent 100%)
             `,
           }}
         />
         {/* Fine grid overlay */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(0,236,151,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,236,151,0.3) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
+              'linear-gradient(rgba(0,236,151,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(0,236,151,0.4) 1px, transparent 1px)',
+            backgroundSize: '80px 80px',
           }}
         />
-        {/* Vignette */}
+        {/* Deep vignette */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(4,6,11,0.7) 100%)',
+            background: 'radial-gradient(ellipse at center, transparent 30%, rgba(3,5,8,0.8) 100%)',
           }}
         />
         {/* Horizontal scan line (slow sweep) */}
@@ -62,7 +109,7 @@ export function VoidBubblesPageClient() {
           <div
             className="absolute w-full h-px"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(0,236,151,0.15) 20%, rgba(0,212,255,0.2) 50%, rgba(0,236,151,0.15) 80%, transparent 100%)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(0,236,151,0.2) 20%, rgba(0,212,255,0.25) 50%, rgba(0,236,151,0.2) 80%, transparent 100%)',
               animation: 'void-bg-scan 12s linear infinite',
             }}
           />
