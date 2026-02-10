@@ -323,6 +323,8 @@ export function VoidBubblesEngine() {
       }
       const changeColor = hsl.formatRgb();
 
+      // Spiral spawn for even distribution
+      const spiralR = spread * 0.3 + (i / filteredTokens.length) * spread * 0.5;
       return {
         id: token.id,
         token,
@@ -330,8 +332,8 @@ export function VoidBubblesEngine() {
         targetRadius: r,
         color: changeColor,
         glowColor: catColor,
-        x: centerX + Math.cos(angle) * spread * 0.5,
-        y: centerY + Math.sin(angle) * spread * 0.5,
+        x: centerX + Math.cos(angle) * spiralR,
+        y: centerY + Math.sin(angle) * spiralR,
       };
     });
 
@@ -558,15 +560,15 @@ export function VoidBubblesEngine() {
         if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
       });
 
-    // Force simulation — gentle category clustering with generous spacing
+    // Force simulation — balanced spacing with category hints
     const simulation = d3.forceSimulation(nodes)
-      .force('center', d3.forceCenter(centerX, centerY).strength(0.012))
-      .force('charge', d3.forceManyBody().strength(-8))
-      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 4).strength(0.85).iterations(3))
-      .force('x', d3.forceX<BubbleNode>(d => catX(d.token.category)).strength(0.03))
-      .force('y', d3.forceY<BubbleNode>(d => catY(d.token.category)).strength(0.03))
-      .alphaDecay(0.012)
-      .velocityDecay(0.4)
+      .force('center', d3.forceCenter(centerX, centerY).strength(0.05))
+      .force('charge', d3.forceManyBody().strength(-15))
+      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 5).strength(0.9).iterations(4))
+      .force('x', d3.forceX<BubbleNode>(d => catX(d.token.category)).strength(0.02))
+      .force('y', d3.forceY<BubbleNode>(d => catY(d.token.category)).strength(0.02))
+      .alphaDecay(0.015)
+      .velocityDecay(0.45)
       .on('tick', () => {
         bubbleGroups.attr('transform', d => `translate(${d.x},${d.y})`);
       });
