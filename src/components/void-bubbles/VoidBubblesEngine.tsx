@@ -758,6 +758,7 @@ export function VoidBubblesEngine() {
     
     const centerX = width / 2;
     const centerY = height / 2;
+    const isMobile = width < 768;
 
     // Scale radius by selected size metric — log scale for balanced distribution
     const getMetricValue = (token: VoidBubbleToken) => {
@@ -771,9 +772,10 @@ export function VoidBubblesEngine() {
     const values = filteredTokens.map(t => getMetricValue(t)).filter(v => v > 0);
     const minValue = Math.min(...values, 1);
     const maxValue = Math.max(...values, 1);
+    const maxRadius = isMobile ? Math.min(width, height) * 0.07 : Math.min(width, height) * 0.065;
     const radiusScale = d3.scaleLog()
       .domain([minValue, maxValue])
-      .range([10, Math.min(width, height) * 0.09])
+      .range([8, maxRadius])
       .clamp(true);
 
     // Create nodes
@@ -1204,12 +1206,10 @@ export function VoidBubblesEngine() {
       });
 
     // Force simulation — enhanced spacing for better mobile UX
-    const isMobile = width < 768;
-    
     // Build category cluster positions — arrange categories in a circle around center
     const activeCategories = Array.from(new Set(filteredTokens.map(t => t.category)));
     const categoryPositions: Record<string, { x: number; y: number }> = {};
-    const clusterRadius = Math.min(width, height) * 0.25;
+    const clusterRadius = Math.min(width, height) * 0.3;
     activeCategories.forEach((cat, i) => {
       const angle = (i / activeCategories.length) * 2 * Math.PI - Math.PI / 2;
       categoryPositions[cat] = {
@@ -1224,16 +1224,16 @@ export function VoidBubblesEngine() {
     
     const simulation = d3.forceSimulation(nodes)
       // Gentle centering — keeps the cloud roughly centered
-      .force('x', d3.forceX<BubbleNode>(d => categoryPositions[d.token.category]?.x ?? centerX).strength(0.04))
-      .force('y', d3.forceY<BubbleNode>(d => categoryPositions[d.token.category]?.y ?? centerY).strength(0.04))
+      .force('x', d3.forceX<BubbleNode>(d => categoryPositions[d.token.category]?.x ?? centerX).strength(0.03))
+      .force('y', d3.forceY<BubbleNode>(d => categoryPositions[d.token.category]?.y ?? centerY).strength(0.03))
       .force('charge', d3.forceManyBody()
         .strength(isMobile ? -20 : -15)
         .distanceMax(Math.min(width, height) * 0.4)
       )
       .force('collision', d3.forceCollide<BubbleNode>()
-        .radius(d => d.targetRadius + (xrayMode ? 16 : (isMobile ? 12 : 10)))
-        .strength(0.9)
-        .iterations(3)
+        .radius(d => d.targetRadius * (xrayMode ? 1.5 : 1.35) + 6)
+        .strength(0.95)
+        .iterations(4)
       )
       .alphaDecay(0.015) // Slow decay for organic settling
       .alpha(0.6)
