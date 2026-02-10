@@ -725,6 +725,15 @@ export function VoidBubblesEngine() {
     const rect = containerRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
+    
+    // Guard: if container has zero dimensions during re-render, schedule a retry
+    if (width === 0 || height === 0) {
+      requestAnimationFrame(() => {
+        initSimulation();
+      });
+      return;
+    }
+    
     const centerX = width / 2;
     const centerY = height / 2;
 
@@ -1345,6 +1354,22 @@ export function VoidBubblesEngine() {
       });
     }
 
+    // Enhanced zoom behavior with double-click reset
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.3, 5])
+      .on('zoom', (event) => {
+        svg.select('.bubbles-layer').attr('transform', event.transform);
+        svg.select('.shockwave-layer').attr('transform', event.transform);
+      });
+
+    svg.call(zoom)
+      .on('dblclick.zoom', () => {
+        // Double-click to reset zoom
+        svg.transition()
+          .duration(750)
+          .call(zoom.transform, d3.zoomIdentity);
+      });
+
     // Click outside to collapse any expanded bubbles or close popup
     svg.on('click', () => {
       setPopupCard(null); // Close popup card
@@ -1702,7 +1727,7 @@ export function VoidBubblesEngine() {
     <div className="flex-1 relative overflow-hidden h-full w-full">
       {/* Power Bar — Desktop */}
       <div className="hidden sm:block absolute top-4 left-4 z-20">
-        <div className="bg-surface/95 backdrop-blur-xl border border-border rounded-lg shadow-xl p-3">
+        <div className="bg-surface/60 backdrop-blur-xl border border-white/5 rounded-lg shadow-xl p-3 hover:bg-surface/80 transition-colors duration-300">
           <div className="flex flex-col gap-3">
             {/* Time Period Selector */}
             <div className="flex gap-1">
@@ -1878,7 +1903,7 @@ export function VoidBubblesEngine() {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 20 }}
-            className="sm:hidden fixed top-0 left-0 h-full w-80 z-50 bg-surface/95 backdrop-blur-xl border-r border-border shadow-2xl overflow-y-auto"
+            className="sm:hidden fixed top-0 left-0 h-full w-80 z-50 bg-surface/70 backdrop-blur-xl border-r border-white/5 shadow-2xl overflow-y-auto"
           >
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -2064,7 +2089,7 @@ export function VoidBubblesEngine() {
       {/* Branding Bar — always visible at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-20">
         <div className="h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent" />
-        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-[#04060b]/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-[#04060b]/60 backdrop-blur-xl">
           {/* Left: Stats */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
@@ -2109,7 +2134,7 @@ export function VoidBubblesEngine() {
               animate={{ width: 280, opacity: 1 }}
               exit={{ width: 44, opacity: 0.8 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="flex items-center gap-2 bg-surface/95 backdrop-blur-xl border border-border rounded-lg p-2 shadow-xl"
+              className="flex items-center gap-2 bg-surface/60 backdrop-blur-xl border border-white/10 rounded-lg p-2 shadow-xl"
             >
               <Search className="w-4 h-4 text-near-green shrink-0" />
               <input
@@ -2143,7 +2168,7 @@ export function VoidBubblesEngine() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowSearch(true)}
-              className="flex items-center justify-center w-11 h-11 bg-surface/95 backdrop-blur-xl border border-border rounded-lg shadow-xl hover:border-near-green/30 transition-all group"
+              className="flex items-center justify-center w-11 h-11 bg-surface/60 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl hover:border-near-green/30 transition-all group"
             >
               <Search className="w-4 h-4 text-near-green group-hover:text-near-green" />
             </motion.button>
