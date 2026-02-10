@@ -161,7 +161,7 @@ export function VoidBubblesEngine() {
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
   const [whaleAlerts, setWhaleAlerts] = useState<WhaleAlert[]>([]);
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
-  const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [, setLastUpdated] = useState<string>('');
 
   // Refs
   const svgRef = useRef<SVGSVGElement>(null);
@@ -295,11 +295,11 @@ export function VoidBubblesEngine() {
     const centerX = width / 2;
     const centerY = height / 2;
 
-    // Scale radius by market cap
+    // Scale radius by market cap — dramatic range so big tokens dominate
     const maxCap = Math.max(...filteredTokens.map(t => t.marketCap), 1);
     const radiusScale = d3.scaleSqrt()
       .domain([0, maxCap])
-      .range([8, Math.min(width, height) * 0.08]);
+      .range([6, Math.min(width, height) * 0.16]);
 
     // Create nodes
     const nodes: BubbleNode[] = filteredTokens.map((token, i) => {
@@ -307,9 +307,11 @@ export function VoidBubblesEngine() {
       const spread = Math.min(width, height) * 0.3;
       const r = radiusScale(token.marketCap);
       const catColor = CATEGORY_COLORS[token.category] || '#888888';
+      // Vivid solid fill: intensity scales with price change magnitude
+      const intensity = Math.min(Math.abs(token.priceChange24h) / 20, 1);
       const changeColor = token.priceChange24h >= 0
-        ? `rgba(0, 236, 151, ${Math.min(Math.abs(token.priceChange24h) / 30, 1) * 0.8 + 0.2})`
-        : `rgba(255, 71, 87, ${Math.min(Math.abs(token.priceChange24h) / 30, 1) * 0.8 + 0.2})`;
+        ? `rgba(0, ${Math.round(180 + intensity * 75)}, ${Math.round(80 + intensity * 71)}, ${0.7 + intensity * 0.3})`
+        : `rgba(${Math.round(180 + intensity * 75)}, ${Math.round(40 + intensity * 31)}, ${Math.round(50 + intensity * 37)}, ${0.7 + intensity * 0.3})`;
 
       return {
         id: token.id,
@@ -350,18 +352,48 @@ export function VoidBubblesEngine() {
       .enter().append('feMergeNode')
       .attr('in', d => d);
 
-    // Create radial gradients per node
+    // Create radial gradients per node — solid fills with subtle 3D highlight
     nodes.forEach(node => {
       const grad = defs.append('radialGradient')
         .attr('id', `grad-${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
-        .attr('cx', '35%').attr('cy', '35%');
-      grad.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(255,255,255,0.25)');
-      grad.append('stop').attr('offset', '50%').attr('stop-color', node.color);
-      grad.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(0,0,0,0.3)');
+        .attr('cx', '35%').attr('cy', '30%');
+      grad.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(255,255,255,0.35)');
+      grad.append('stop').attr('offset', '35%').attr('stop-color', node.color);
+      grad.append('stop').attr('offset', '100%').attr('stop-color', node.color);
     });
+
+    // Category clustering — assign positions in a circle around center
+    const uniqueCats = Array.from(new Set(filteredTokens.map(t => t.category))).sort();
+    const catAngle = (cat: string) => {
+      const idx = uniqueCats.indexOf(cat);
+      return (idx / uniqueCats.length) * 2 * Math.PI - Math.PI / 2;
+    };
+    const clusterRadius = Math.min(width, height) * 0.22;
+    const catX = (cat: string) => centerX + Math.cos(catAngle(cat)) * clusterRadius;
+    const catY = (cat: string) => centerY + Math.sin(catAngle(cat)) * clusterRadius;
 
     // Shockwave layer
     svg.append('g').attr('class', 'shockwave-layer');
+
+    // Category zone labels (subtle, behind bubbles)
+    const labelLayer = svg.append('g').attr('class', 'category-labels');
+    if (filterCategory === 'all' && uniqueCats.length > 1) {
+      uniqueCats.forEach(cat => {
+        const lx = catX(cat);
+        const ly = catY(cat) - clusterRadius * 0.45;
+        labelLayer.append('text')
+          .attr('x', lx)
+          .attr('y', ly)
+          .attr('text-anchor', 'middle')
+          .attr('fill', CATEGORY_COLORS[cat] || '#888')
+          .attr('font-size', 11)
+          .attr('font-family', "'JetBrains Mono', monospace")
+          .attr('font-weight', '600')
+          .attr('opacity', 0.25)
+          .attr('text-transform', 'uppercase')
+          .text(cat.toUpperCase());
+      });
+    }
 
     // Bubble groups
     const bubbleGroups = svg.append('g').attr('class', 'bubbles-layer')
@@ -391,15 +423,15 @@ export function VoidBubblesEngine() {
       .attr('opacity', 0)
       .attr('filter', 'url(#xray-glow)');
 
-    // Main bubble
+    // Main bubble — solid, bold, unmistakable
     bubbleGroups.append('circle')
       .attr('class', 'bubble-main')
       .attr('data-id', d => d.token.id)
       .attr('r', 0)
       .attr('fill', d => `url(#grad-${d.id.replace(/[^a-zA-Z0-9]/g, '_')})`)
       .attr('stroke', d => d.glowColor)
-      .attr('stroke-width', 0.5)
-      .attr('opacity', 0.9);
+      .attr('stroke-width', d => d.targetRadius > 20 ? 1.5 : 0.8)
+      .attr('opacity', 0.95);
 
     // Skull overlay for critical risk
     bubbleGroups.filter(d => d.token.riskLevel === 'critical' || d.token.riskLevel === 'high')
@@ -411,18 +443,38 @@ export function VoidBubblesEngine() {
       .attr('opacity', 0)
       .text('💀');
 
-    // Symbol labels (only for larger bubbles)
-    bubbleGroups.filter(d => d.targetRadius > 15)
-      .append('text')
+    // Symbol labels on ALL bubbles — scaled to fit
+    bubbleGroups.append('text')
       .attr('class', 'bubble-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
+      .attr('dy', d => d.targetRadius >= 22 ? '-0.35em' : '0')
       .attr('fill', '#fff')
-      .attr('font-size', d => Math.max(Math.min(d.targetRadius * 0.4, 14), 8))
+      .attr('font-size', d => {
+        const maxFont = d.targetRadius * 0.55;
+        const symbolLen = d.token.symbol.length;
+        const fitFont = (d.targetRadius * 1.6) / symbolLen;
+        return Math.max(Math.min(maxFont, fitFont, 16), 5);
+      })
+      .attr('font-weight', '700')
+      .attr('font-family', "'JetBrains Mono', monospace")
+      .attr('pointer-events', 'none')
+      .attr('opacity', d => d.targetRadius < 10 ? 0.7 : 1)
+      .text(d => d.targetRadius < 8 ? d.token.symbol.slice(0, 3) : d.token.symbol);
+
+    // Price change % label (only on bubbles large enough to fit)
+    bubbleGroups.filter(d => d.targetRadius >= 22)
+      .append('text')
+      .attr('class', 'bubble-change')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('dy', '0.7em')
+      .attr('fill', d => d.token.priceChange24h >= 0 ? '#b8ffd9' : '#ffb3b8')
+      .attr('font-size', d => Math.max(Math.min(d.targetRadius * 0.32, 11), 6))
       .attr('font-weight', '600')
       .attr('font-family', "'JetBrains Mono', monospace")
       .attr('pointer-events', 'none')
-      .text(d => d.token.symbol);
+      .text(d => `${d.token.priceChange24h >= 0 ? '+' : ''}${d.token.priceChange24h.toFixed(1)}%`);
 
     // Watchlist indicator
     bubbleGroups.append('circle')
@@ -469,15 +521,15 @@ export function VoidBubblesEngine() {
         if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
       });
 
-    // Force simulation
+    // Force simulation with category clustering
     const simulation = d3.forceSimulation(nodes)
-      .force('center', d3.forceCenter(centerX, centerY).strength(0.02))
-      .force('charge', d3.forceManyBody().strength(d => -(d as BubbleNode).targetRadius * 1.5))
-      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 3).strength(0.8))
-      .force('x', d3.forceX(centerX).strength(0.015))
-      .force('y', d3.forceY(centerY).strength(0.015))
-      .alphaDecay(0.01)
-      .velocityDecay(0.3)
+      .force('center', d3.forceCenter(centerX, centerY).strength(0.008))
+      .force('charge', d3.forceManyBody().strength(d => -(d as BubbleNode).targetRadius * 2))
+      .force('collision', d3.forceCollide<BubbleNode>().radius(d => d.targetRadius + 2).strength(0.9))
+      .force('x', d3.forceX<BubbleNode>(d => catX(d.token.category)).strength(0.06))
+      .force('y', d3.forceY<BubbleNode>(d => catY(d.token.category)).strength(0.06))
+      .alphaDecay(0.008)
+      .velocityDecay(0.35)
       .on('tick', () => {
         bubbleGroups.attr('transform', d => `translate(${d.x},${d.y})`);
       });
@@ -505,12 +557,37 @@ export function VoidBubblesEngine() {
       }, delay);
     });
 
+    // Momentum pulse — tokens with big moves get a breathing glow
+    const pulseHighMomentum = () => {
+      nodes.forEach((node, i) => {
+        const absPct = Math.abs(node.token.priceChange24h);
+        if (absPct < 8) return; // Only pulse significant movers
+        const pulseScale = 1 + Math.min(absPct / 60, 0.25); // up to 25% pulse
+        const duration = 1500 - Math.min(absPct * 20, 600); // faster for bigger moves
+        const glowSel = d3.select(bubbleGroups.nodes()[i]).select('.bubble-glow');
+        const pulseLoop = () => {
+          glowSel
+            .transition().duration(duration).ease(d3.easeSinInOut)
+            .attr('r', node.targetRadius * pulseScale + 6)
+            .attr('opacity', 0.6)
+            .transition().duration(duration).ease(d3.easeSinInOut)
+            .attr('r', node.targetRadius + 4)
+            .attr('opacity', 0.25)
+            .on('end', pulseLoop);
+        };
+        setTimeout(pulseLoop, delay + i * 50);
+      });
+    };
+    const delay = nodes.length * 15 + 700;
+    setTimeout(pulseHighMomentum, delay);
+
     // Zoom behavior
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.3, 4])
       .on('zoom', (event) => {
         svg.select('.bubbles-layer').attr('transform', event.transform);
         svg.select('.shockwave-layer').attr('transform', event.transform);
+        svg.select('.category-labels').attr('transform', event.transform);
       });
 
     svg.call(zoom);
