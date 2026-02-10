@@ -590,7 +590,7 @@ export function VoidBubblesEngine() {
 
       // Add margin around the content
       const MARGIN = 60;
-      const BRAND_H = 80;
+      const BRAND_H = 100;
       const contentW = Math.round(contentBBox.width + MARGIN * 2);
       const contentH = Math.round(contentBBox.height + MARGIN * 2);
       const totalW = Math.max(contentW, 800); // min width for branding
@@ -604,7 +604,7 @@ export function VoidBubblesEngine() {
       const innerContent = svgRef.current.innerHTML;
 
       // Branding positions
-      const brandY = totalH - BRAND_H + 15;
+      const brandY = totalH - BRAND_H + 18;
       const logoX = totalW - 280;
 
       const svgString = `<?xml version="1.0" encoding="UTF-8"?>
