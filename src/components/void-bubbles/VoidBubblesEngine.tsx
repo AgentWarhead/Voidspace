@@ -299,6 +299,20 @@ export function VoidBubblesEngine() {
     simulationRef.current?.alpha(0.3).restart();
   }, []);
 
+  // Get current period's price change for a token
+  const getCurrentPriceChange = useCallback((token: VoidBubbleToken) => {
+    switch (period) {
+      case '1h': return token.priceChange1h;
+      case '4h': return token.priceChange6h; // closest available
+      case '1d': return token.priceChange24h;
+      case '7d':
+      case '30d':
+        // For 7d/30d, the API already simulates this in priceChange24h when period is set
+        return token.priceChange24h;
+      default: return token.priceChange24h;
+    }
+  }, [period]);
+
   const initSimulation = useCallback(() => {
     if (!svgRef.current || !containerRef.current || filteredTokens.length === 0) return;
 
@@ -312,7 +326,7 @@ export function VoidBubblesEngine() {
     const getMetricValue = (token: VoidBubbleToken) => {
       switch (sizeMetric) {
         case 'volume': return token.volume24h;
-        case 'performance': return Math.abs(token.priceChange24h) * 1000; // scale up for visibility
+        case 'performance': return Math.abs(getCurrentPriceChange(token)) * 1000; // scale up for visibility
         default: return token.marketCap;
       }
     };
@@ -332,8 +346,8 @@ export function VoidBubblesEngine() {
       const r = radiusScale(getMetricValue(token));
       
       // Performance-based color: GREEN = up, RED = down
-      // Intensity scales with magnitude of change
-      const change = token.priceChange24h; // will become dynamic based on selected period
+      // Intensity scales with magnitude of change - using CURRENT PERIOD's data
+      const change = getCurrentPriceChange(token);
       const absChange = Math.min(Math.abs(change), 30); // cap at 30% for color scaling
       const intensity = absChange / 30; // 0-1 scale
 
@@ -641,7 +655,8 @@ export function VoidBubblesEngine() {
       .attr('dy', '0.65em')
       .attr('fill', d => {
         if (bubbleContent === 'performance') {
-          return d.token.priceChange24h >= 0 ? '#b8ffd9' : '#ffb3b8';
+          const currentChange = getCurrentPriceChange(d.token);
+          return currentChange >= 0 ? '#b8ffd9' : '#ffb3b8';
         }
         return '#d1d5db'; // neutral color for non-performance displays
       })
@@ -653,7 +668,8 @@ export function VoidBubblesEngine() {
       .text(d => {
         switch (bubbleContent) {
           case 'performance':
-            return `${d.token.priceChange24h >= 0 ? '+' : ''}${d.token.priceChange24h.toFixed(1)}%`;
+            const currentChange = getCurrentPriceChange(d.token);
+            return `${currentChange >= 0 ? '+' : ''}${currentChange.toFixed(1)}%`;
           case 'price':
             return formatPrice(d.token.price);
           case 'volume':
@@ -661,7 +677,8 @@ export function VoidBubblesEngine() {
           case 'marketCap':
             return formatCompact(d.token.marketCap);
           default:
-            return `${d.token.priceChange24h >= 0 ? '+' : ''}${d.token.priceChange24h.toFixed(1)}%`;
+            const defaultChange = getCurrentPriceChange(d.token);
+            return `${defaultChange >= 0 ? '+' : ''}${defaultChange.toFixed(1)}%`;
         }
       });
 
@@ -705,8 +722,9 @@ export function VoidBubblesEngine() {
       })
       .on('click', (_event, d) => {
         setSelectedToken(d.token);
-        if (d.token.priceChange24h > 5) sonicRef.current.playPump(Math.min(d.token.priceChange24h / 30, 1));
-        else if (d.token.priceChange24h < -5) sonicRef.current.playDump(Math.min(Math.abs(d.token.priceChange24h) / 30, 1));
+        const currentChange = getCurrentPriceChange(d.token);
+        if (currentChange > 5) sonicRef.current.playPump(Math.min(currentChange / 30, 1));
+        else if (currentChange < -5) sonicRef.current.playDump(Math.min(Math.abs(currentChange) / 30, 1));
         if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
       });
 
@@ -753,7 +771,8 @@ export function VoidBubblesEngine() {
     // Momentum pulse — elegant breathing glow for significant movers (enhanced visibility)
     const pulseHighMomentum = () => {
       nodes.forEach((node, i) => {
-        const absPct = Math.abs(node.token.priceChange24h);
+        const currentChange = getCurrentPriceChange(node.token);
+        const absPct = Math.abs(currentChange);
         if (absPct < 5) return; // Lower threshold - pulse 5%+ movers (was 10%)
         const pulseExtra = Math.min(absPct / 30, 0.4) * node.targetRadius; // more visible
         const duration = 2000 - Math.min(absPct * 15, 700);
@@ -790,7 +809,7 @@ export function VoidBubblesEngine() {
       cancelAnimationFrame(animFrameRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredTokens, watchlist, sizeMetric, bubbleContent]);
+  }, [filteredTokens, watchlist, sizeMetric, bubbleContent, getCurrentPriceChange]);
 
   useEffect(() => {
     const cleanup = initSimulation();
@@ -851,11 +870,11 @@ export function VoidBubblesEngine() {
       return;
     }
     
-    // Sort tokens by price change
+    // Sort tokens by price change using current period's data
     const sorted = [...filteredTokens].sort((a, b) => 
       highlightMode === 'gainers' 
-        ? b.priceChange24h - a.priceChange24h 
-        : a.priceChange24h - b.priceChange24h
+        ? getCurrentPriceChange(b) - getCurrentPriceChange(a)
+        : getCurrentPriceChange(a) - getCurrentPriceChange(b)
     );
     const topIds = new Set(sorted.slice(0, 15).map(t => t.id));
     
@@ -880,7 +899,7 @@ export function VoidBubblesEngine() {
         .transition().duration(400)
         .attr('opacity', isHighlighted ? 1 : 0.1);
     });
-  }, [highlightMode, filteredTokens]);
+  }, [highlightMode, filteredTokens, getCurrentPriceChange]);
 
   // ────────────────────── Snapshot & Share ──────────────────────
 
@@ -1032,12 +1051,12 @@ export function VoidBubblesEngine() {
               <p className="text-lg font-bold font-mono text-text-primary">{formatPrice(selectedToken.price)}</p>
             </div>
             <div className="bg-surface rounded-lg p-3">
-              <p className="text-[10px] uppercase tracking-wider text-text-muted font-mono">24h Change</p>
+              <p className="text-[10px] uppercase tracking-wider text-text-muted font-mono">{period} Change</p>
               <p className={cn('text-lg font-bold font-mono flex items-center gap-1',
-                selectedToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'
+                getCurrentPriceChange(selectedToken) >= 0 ? 'text-near-green' : 'text-error'
               )}>
-                {selectedToken.priceChange24h >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                {selectedToken.priceChange24h >= 0 ? '+' : ''}{selectedToken.priceChange24h.toFixed(1)}%
+                {getCurrentPriceChange(selectedToken) >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                {getCurrentPriceChange(selectedToken) >= 0 ? '+' : ''}{getCurrentPriceChange(selectedToken).toFixed(1)}%
               </p>
             </div>
             <div className="bg-surface rounded-lg p-3">
@@ -1081,16 +1100,18 @@ export function VoidBubblesEngine() {
           {/* All Timeframe Changes */}
           <div className="mb-4">
             <p className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">All Timeframes</p>
-            <div className="text-xs font-mono text-text-secondary">
-              <span className="mr-3">1H: <span className={selectedToken.priceChange1h >= 0 ? 'text-near-green' : 'text-error'}>
-                {selectedToken.priceChange1h >= 0 ? '+' : ''}{selectedToken.priceChange1h.toFixed(1)}%
-              </span></span>
-              <span className="mr-3">6H: <span className={selectedToken.priceChange6h >= 0 ? 'text-near-green' : 'text-error'}>
-                {selectedToken.priceChange6h >= 0 ? '+' : ''}{selectedToken.priceChange6h.toFixed(1)}%
-              </span></span>
-              <span>24H: <span className={selectedToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'}>
-                {selectedToken.priceChange24h >= 0 ? '+' : ''}{selectedToken.priceChange24h.toFixed(1)}%
-              </span></span>
+            <div className="text-xs font-mono text-text-secondary space-y-1">
+              <div>
+                <span className="mr-3">1H: <span className={selectedToken.priceChange1h >= 0 ? 'text-near-green' : 'text-error'}>
+                  {selectedToken.priceChange1h >= 0 ? '+' : ''}{selectedToken.priceChange1h.toFixed(1)}%
+                </span></span>
+                <span className="mr-3">6H: <span className={selectedToken.priceChange6h >= 0 ? 'text-near-green' : 'text-error'}>
+                  {selectedToken.priceChange6h >= 0 ? '+' : ''}{selectedToken.priceChange6h.toFixed(1)}%
+                </span></span>
+                <span>24H: <span className={selectedToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'}>
+                  {selectedToken.priceChange24h >= 0 ? '+' : ''}{selectedToken.priceChange24h.toFixed(1)}%
+                </span></span>
+              </div>
             </div>
           </div>
           
@@ -1208,8 +1229,8 @@ export function VoidBubblesEngine() {
               <span className={cn('text-xs font-mono font-bold', verdictColor)}>{verdict}</span>
             </div>
             <div className="text-xs text-text-muted font-mono">
-              {formatPrice(hoveredToken.price)} · <span className={hoveredToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'}>
-                {hoveredToken.priceChange24h >= 0 ? '+' : ''}{hoveredToken.priceChange24h.toFixed(1)}%
+              {formatPrice(hoveredToken.price)} · <span className={getCurrentPriceChange(hoveredToken) >= 0 ? 'text-near-green' : 'text-error'}>
+                {getCurrentPriceChange(hoveredToken) >= 0 ? '+' : ''}{getCurrentPriceChange(hoveredToken).toFixed(1)}%
               </span>
             </div>
             {hoveredToken.riskLevel === 'critical' && (
