@@ -215,7 +215,7 @@ export function VoidBubblesEngine() {
   const pulseMode = true;
   
   // Click timing for double-click detection
-  const [clickTimeouts, setClickTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map());
+  // clickTimeouts removed — single click now opens popup immediately
 
   // Refs
   const svgRef = useRef<SVGSVGElement>(null);
@@ -1098,7 +1098,8 @@ export function VoidBubblesEngine() {
       .text(d => d.token.symbol);
 
     // Enhanced floating content — price/volume/performance based on bubbleContent setting
-    bubbleGroups.filter(d => d.targetRadius >= 18)
+    // Only show on larger bubbles to keep smaller ones clean
+    bubbleGroups.filter(d => d.targetRadius >= 30)
       .append('text')
       .attr('class', 'bubble-content')
       .attr('text-anchor', 'middle')
@@ -1196,43 +1197,14 @@ export function VoidBubblesEngine() {
       })
       .on('click', (event, d) => {
         event.stopPropagation();
-        const tokenId = d.token.id;
+        // Single click = open popup card immediately (no double-click delay)
+        handleShowPopup(d.token.id, event);
         
-        // Check for existing timeout (double-click detection)
-        const existingTimeout = clickTimeouts.get(tokenId);
-        if (existingTimeout) {
-          // Double-click detected - open side panel
-          clearTimeout(existingTimeout);
-          setClickTimeouts(prev => {
-            const newMap = new Map(prev);
-            newMap.delete(tokenId);
-            return newMap;
-          });
-          
-          setSelectedToken(d.token);
-          
-          // Play sounds for double-click
-          const currentChange = getCurrentPriceChange(d.token);
-          if (currentChange > 5) sonicRef.current.playPump(Math.min(currentChange / 30, 1));
-          else if (currentChange < -5) sonicRef.current.playDump(Math.min(Math.abs(currentChange) / 30, 1));
-          if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
-        } else {
-          // **NEW: Single-click - Show popup card instead of expanding bubble**
-          const timeout = setTimeout(() => {
-            handleShowPopup(tokenId, event);
-            setClickTimeouts(prev => {
-              const newMap = new Map(prev);
-              newMap.delete(tokenId);
-              return newMap;
-            });
-          }, 250); // 250ms window for double-click
-          
-          setClickTimeouts(prev => {
-            const newMap = new Map(prev);
-            newMap.set(tokenId, timeout);
-            return newMap;
-          });
-        }
+        // Play sounds based on token state
+        const currentChange = getCurrentPriceChange(d.token);
+        if (currentChange > 5) sonicRef.current.playPump(Math.min(currentChange / 30, 1));
+        else if (currentChange < -5) sonicRef.current.playDump(Math.min(Math.abs(currentChange) / 30, 1));
+        if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
       });
 
     // Force simulation — enhanced spacing for better mobile UX
@@ -2129,7 +2101,7 @@ export function VoidBubblesEngine() {
       </div>
 
       {/* **FIXED: Search positioned to not overlap logo** */}
-      <div className="absolute bottom-16 right-4 z-30">
+      <div className="absolute bottom-20 right-4 z-30">
         <AnimatePresence>
           {showSearch ? (
             <motion.div
@@ -2179,6 +2151,14 @@ export function VoidBubblesEngine() {
         </AnimatePresence>
       </div>
 
+      {/* Click outside handler for popup card (z-40 backdrop, below popup z-50) */}
+      {popupCard && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setPopupCard(null)}
+        />
+      )}
+
       {/* **NEW: Popup Card** */}
       {renderPopupCard()}
 
@@ -2187,14 +2167,6 @@ export function VoidBubblesEngine() {
         {renderHoverTooltip()}
         {renderTokenAnatomy()}
       </AnimatePresence>
-
-      {/* Click outside handler for popup card */}
-      {popupCard && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setPopupCard(null)}
-        />
-      )}
     </div>
   );
 }
