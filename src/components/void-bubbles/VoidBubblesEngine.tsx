@@ -965,26 +965,41 @@ export function VoidBubblesEngine() {
         </div>
       </div>
 
-      {/* Stats Bar */}
-      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-auto right-2 sm:right-4 z-20 flex items-center justify-center sm:justify-end gap-3 bg-surface/80 backdrop-blur-xl rounded-lg border border-border px-3 py-1.5 sm:py-2">
-        <div className="flex items-center gap-1.5">
-          <Activity className="w-3 h-3 text-near-green" />
-          <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
-            {filteredTokens.length} tokens
-          </span>
-        </div>
-        <div className="w-px h-3 bg-border" />
-        <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
-          {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : 'Live'}
-        </span>
-        {xrayMode && (
-          <>
-            <div className="w-px h-3 bg-border" />
-            <span className="text-[10px] sm:text-[11px] font-mono text-accent-cyan flex items-center gap-1">
-              <Eye className="w-3 h-3" /> X-RAY
+      {/* Branding Bar — always visible at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent" />
+        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-background/90 backdrop-blur-xl">
+          {/* Left: Stats */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <Activity className="w-3 h-3 text-near-green" />
+              <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
+                VOID BUBBLES · {filteredTokens.length} TOKENS
+              </span>
+            </div>
+            {xrayMode && (
+              <>
+                <div className="w-px h-3 bg-border" />
+                <span className="text-[10px] sm:text-[11px] font-mono text-accent-cyan flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> X-RAY
+                </span>
+              </>
+            )}
+          </div>
+          {/* Right: Voidspace logo */}
+          <div className="flex items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 44 44" className="opacity-70">
+              <path d="M 38 22 A 16 16 0 1 1 29 8.4" stroke="#00EC97" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+              <path d="M 31 22 A 9 9 0 1 1 22 13" stroke="#00EC97" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.35"/>
+              <line x1="11" y1="33" x2="33" y2="11" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <circle cx="22" cy="22" r="2.5" fill="#00EC97"/>
+            </svg>
+            <span className="text-[11px] sm:text-xs font-mono">
+              <span className="text-near-green font-bold">VOIDSPACE</span>
+              <span className="text-accent-cyan">.io</span>
             </span>
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
       {/* SVG Canvas */}
