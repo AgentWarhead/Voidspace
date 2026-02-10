@@ -574,157 +574,157 @@ export function VoidBubblesEngine() {
       const originalSvg = svgRef.current;
       const { width: cw, height: ch } = containerRef.current.getBoundingClientRect();
 
-      // Dimensions for final image
-      const SCALE = 2; // 2x for retina-quality PNG
       const PAD = 50;
-      const BRAND_H = 80;
+      const BRAND_H = 70;
       const totalW = cw + PAD * 2;
       const totalH = ch + PAD * 2 + BRAND_H;
+      const today = new Date().toISOString().split('T')[0];
 
-      // Create offscreen canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = totalW * SCALE;
-      canvas.height = totalH * SCALE;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.scale(SCALE, SCALE);
+      const ns = 'http://www.w3.org/2000/svg';
 
-      // ── Background ──
-      const bgGrad = ctx.createRadialGradient(totalW / 2, totalH * 0.45, 0, totalW / 2, totalH * 0.45, totalW * 0.6);
-      bgGrad.addColorStop(0, '#111111');
-      bgGrad.addColorStop(1, '#0a0a0a');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, totalW, totalH);
+      // Clone the live SVG and extract its INNER content (not the <svg> element itself)
+      const clone = originalSvg.cloneNode(true) as SVGSVGElement;
+      clone.querySelectorAll('animateTransform, animate, animateMotion').forEach(el => el.remove());
 
-      // ── Subtle border frame ──
-      ctx.strokeStyle = 'rgba(0,236,151,0.12)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(PAD - 1, PAD - 1, cw + 2, ch + 2, 8);
-      ctx.stroke();
+      // Build a flat wrapper SVG (no nested <svg> — avoids viewport clipping issues)
+      const wrapper = document.createElementNS(ns, 'svg');
+      wrapper.setAttribute('xmlns', ns);
+      wrapper.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+      wrapper.setAttribute('width', String(totalW));
+      wrapper.setAttribute('height', String(totalH));
 
-      // ── Render the SVG chart onto canvas ──
-      const svgClone = originalSvg.cloneNode(true) as SVGSVGElement;
-      svgClone.removeAttribute('class');
-      svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      svgClone.setAttribute('width', String(cw));
-      svgClone.setAttribute('height', String(ch));
-      // Inline the background style as an attribute
-      svgClone.setAttribute('style', `background: radial-gradient(ellipse at center, #111111 0%, #0a0a0a 70%)`);
-      // Remove animation elements
-      svgClone.querySelectorAll('animateTransform, animate, animateMotion').forEach(el => el.remove());
+      // Background rect
+      const bgRect = document.createElementNS(ns, 'rect');
+      bgRect.setAttribute('width', String(totalW));
+      bgRect.setAttribute('height', String(totalH));
+      bgRect.setAttribute('fill', '#0a0a0a');
+      wrapper.appendChild(bgRect);
 
-      const svgData = new XMLSerializer().serializeToString(svgClone);
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
+      // Copy <defs> from original SVG into wrapper
+      const originalDefs = clone.querySelector('defs');
+      if (originalDefs) {
+        wrapper.appendChild(originalDefs.cloneNode(true));
+      }
 
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
+      // Extract all child groups and place them with padding offset
+      const chartGroup = document.createElementNS(ns, 'g');
+      chartGroup.setAttribute('transform', `translate(${PAD}, ${PAD})`);
+      // Move all child elements (except defs) from clone into chartGroup
+      while (clone.childNodes.length > 0) {
+        const child = clone.childNodes[0];
+        if (child.nodeName === 'defs') {
+          clone.removeChild(child);
+          continue;
+        }
+        chartGroup.appendChild(child);
+      }
+      wrapper.appendChild(chartGroup);
 
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          ctx.drawImage(img, PAD, PAD, cw, ch);
-          URL.revokeObjectURL(svgUrl);
-          resolve();
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(svgUrl);
-          reject(new Error('Failed to render SVG to canvas'));
-        };
-        img.src = svgUrl;
-      });
+      // ── Branding zone ──
+      const brandY = ch + PAD * 2 + 10;
 
-      // ── Branding zone (bottom) ──
-      const brandY = ch + PAD * 2 + 12;
+      // Separator line
+      const sepLine = document.createElementNS(ns, 'line');
+      sepLine.setAttribute('x1', String(PAD));
+      sepLine.setAttribute('y1', String(brandY - 6));
+      sepLine.setAttribute('x2', String(totalW - PAD));
+      sepLine.setAttribute('y2', String(brandY - 6));
+      sepLine.setAttribute('stroke', 'rgba(0,236,151,0.2)');
+      sepLine.setAttribute('stroke-width', '1');
+      wrapper.appendChild(sepLine);
 
-      // Decorative separator line
-      ctx.strokeStyle = 'rgba(0,236,151,0.2)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(PAD, brandY - 8);
-      ctx.lineTo(totalW - PAD, brandY - 8);
-      ctx.stroke();
-
-      // ── Voidspace logo (drawn with canvas paths) ──
+      // Logo group (bottom-right)
       const logoX = totalW - 280;
-
-      ctx.save();
-      ctx.translate(logoX, brandY);
-      ctx.globalAlpha = 0.7;
+      const logoG = document.createElementNS(ns, 'g');
+      logoG.setAttribute('transform', `translate(${logoX}, ${brandY})`);
+      logoG.setAttribute('opacity', '0.7');
 
       // Outer broken ring
-      ctx.strokeStyle = '#00EC97';
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.arc(22, 22, 16, -0.52, 4.76, false); // broken ring (~270°)
-      ctx.stroke();
+      const outerRing = document.createElementNS(ns, 'path');
+      outerRing.setAttribute('d', 'M 38 22 A 16 16 0 1 1 29 8.4');
+      outerRing.setAttribute('stroke', '#00EC97');
+      outerRing.setAttribute('stroke-width', '2.5');
+      outerRing.setAttribute('stroke-linecap', 'round');
+      outerRing.setAttribute('fill', 'none');
+      logoG.appendChild(outerRing);
 
       // Inner arc
-      ctx.globalAlpha = 0.3;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(22, 22, 9, -0.52, 3.67, false); // inner arc (~240°)
-      ctx.stroke();
+      const innerRing = document.createElementNS(ns, 'path');
+      innerRing.setAttribute('d', 'M 31 22 A 9 9 0 1 1 22 13');
+      innerRing.setAttribute('stroke', '#00EC97');
+      innerRing.setAttribute('stroke-width', '1.5');
+      innerRing.setAttribute('stroke-linecap', 'round');
+      innerRing.setAttribute('fill', 'none');
+      innerRing.setAttribute('opacity', '0.35');
+      logoG.appendChild(innerRing);
 
-      // Diagonal scan line
-      ctx.globalAlpha = 0.6;
-      ctx.strokeStyle = '#00D4FF';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(11, 33);
-      ctx.lineTo(33, 11);
-      ctx.stroke();
+      // Scan line
+      const scanLine = document.createElementNS(ns, 'line');
+      scanLine.setAttribute('x1', '11');
+      scanLine.setAttribute('y1', '33');
+      scanLine.setAttribute('x2', '33');
+      scanLine.setAttribute('y2', '11');
+      scanLine.setAttribute('stroke', '#00D4FF');
+      scanLine.setAttribute('stroke-width', '1.5');
+      scanLine.setAttribute('stroke-linecap', 'round');
+      scanLine.setAttribute('opacity', '0.7');
+      logoG.appendChild(scanLine);
 
       // Center dot
-      ctx.globalAlpha = 0.8;
-      ctx.fillStyle = '#00EC97';
-      ctx.beginPath();
-      ctx.arc(22, 22, 2.5, 0, Math.PI * 2);
-      ctx.fill();
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('cx', '22');
+      dot.setAttribute('cy', '22');
+      dot.setAttribute('r', '2.5');
+      dot.setAttribute('fill', '#00EC97');
+      logoG.appendChild(dot);
 
-      // "VOIDSPACE" text
-      ctx.globalAlpha = 0.8;
-      ctx.fillStyle = '#00EC97';
-      ctx.font = "bold 18px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-      ctx.letterSpacing = '3px';
-      ctx.fillText('VOIDSPACE', 50, 22);
-
-      // ".io" suffix
-      const vsWidth = ctx.measureText('VOIDSPACE').width;
-      ctx.fillStyle = '#00D4FF';
-      ctx.font = "500 18px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-      ctx.letterSpacing = '0px';
-      ctx.fillText('.io', 50 + vsWidth + 4, 22);
+      // "VOIDSPACE.io" text
+      const brandText = document.createElementNS(ns, 'text');
+      brandText.setAttribute('x', '50');
+      brandText.setAttribute('y', '20');
+      brandText.setAttribute('fill', '#00EC97');
+      brandText.setAttribute('font-family', 'monospace');
+      brandText.setAttribute('font-size', '18');
+      brandText.setAttribute('font-weight', 'bold');
+      brandText.textContent = 'VOIDSPACE';
+      const ioSpan = document.createElementNS(ns, 'tspan');
+      ioSpan.setAttribute('fill', '#00D4FF');
+      ioSpan.setAttribute('font-weight', 'normal');
+      ioSpan.textContent = '.io';
+      brandText.appendChild(ioSpan);
+      logoG.appendChild(brandText);
 
       // Tagline
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = "500 9px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-      ctx.letterSpacing = '2px';
-      ctx.fillText('NEAR ECOSYSTEM INTELLIGENCE', 50, 38);
+      const tagline = document.createElementNS(ns, 'text');
+      tagline.setAttribute('x', '50');
+      tagline.setAttribute('y', '36');
+      tagline.setAttribute('fill', 'rgba(255,255,255,0.35)');
+      tagline.setAttribute('font-family', 'monospace');
+      tagline.setAttribute('font-size', '9');
+      tagline.textContent = 'NEAR ECOSYSTEM INTELLIGENCE';
+      logoG.appendChild(tagline);
 
-      ctx.restore();
+      wrapper.appendChild(logoG);
 
       // Left side — date & stats
-      const today = new Date().toISOString().split('T')[0];
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = "500 11px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-      ctx.letterSpacing = '1px';
-      ctx.fillText(`VOID BUBBLES · ${tokens.length} TOKENS · ${today}`, PAD, brandY + 28);
-      ctx.globalAlpha = 1;
+      const infoText = document.createElementNS(ns, 'text');
+      infoText.setAttribute('x', String(PAD));
+      infoText.setAttribute('y', String(brandY + 28));
+      infoText.setAttribute('fill', 'rgba(255,255,255,0.3)');
+      infoText.setAttribute('font-family', 'monospace');
+      infoText.setAttribute('font-size', '11');
+      infoText.textContent = `VOID BUBBLES  ·  ${tokens.length} TOKENS  ·  ${today}`;
+      wrapper.appendChild(infoText);
 
-      // ── Download as PNG ──
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `voidspace-bubbles-${today}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/png', 1.0);
+      // Serialize and download
+      const svgData = new XMLSerializer().serializeToString(wrapper);
+      const blob = new Blob([svgData], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `voidspace-bubbles-${today}.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
 
     } catch (e) {
       console.error('Snapshot failed:', e);

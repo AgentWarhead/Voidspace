@@ -8,71 +8,22 @@
 /* Logo SVG string removed — branding now rendered via canvas for reliable PNG export */
 
 /**
- * Draw the Voidspace logo + branding onto a canvas context.
- * Call after positioning with ctx.translate().
+ * Branding SVG snippet — logo + VOIDSPACE.io + tagline.
+ * Uses only 'monospace' generic font to ensure it renders everywhere.
  */
-function drawBrandingOnCanvas(ctx: CanvasRenderingContext2D) {
-  ctx.save();
-  ctx.globalAlpha = 0.7;
-
-  // Outer broken ring
-  ctx.strokeStyle = '#00EC97';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(22, 22, 16, -0.52, 4.76, false);
-  ctx.stroke();
-
-  // Inner arc
-  ctx.globalAlpha = 0.3;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(22, 22, 9, -0.52, 3.67, false);
-  ctx.stroke();
-
-  // Diagonal scan line
-  ctx.globalAlpha = 0.6;
-  ctx.strokeStyle = '#00D4FF';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(11, 33);
-  ctx.lineTo(33, 11);
-  ctx.stroke();
-
-  // Center dot
-  ctx.globalAlpha = 0.8;
-  ctx.fillStyle = '#00EC97';
-  ctx.beginPath();
-  ctx.arc(22, 22, 2.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // "VOIDSPACE" text
-  ctx.globalAlpha = 0.8;
-  ctx.fillStyle = '#00EC97';
-  ctx.font = "bold 16px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-  ctx.letterSpacing = '2px';
-  ctx.fillText('VOIDSPACE', 50, 20);
-
-  // ".io" suffix
-  const vsWidth = ctx.measureText('VOIDSPACE').width;
-  ctx.fillStyle = '#00D4FF';
-  ctx.font = "500 16px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-  ctx.letterSpacing = '0px';
-  ctx.fillText('.io', 50 + vsWidth + 3, 20);
-
-  // Tagline
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = '#ffffff';
-  ctx.font = "500 8px 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
-  ctx.letterSpacing = '2px';
-  ctx.fillText('NEAR ECOSYSTEM INTELLIGENCE', 50, 35);
-
-  ctx.restore();
-}
+const BRANDING_SVG = `
+<g opacity="0.7">
+  <path d="M 38 22 A 16 16 0 1 1 29 8.4" stroke="#00EC97" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M 31 22 A 9 9 0 1 1 22 13" stroke="#00EC97" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.35"/>
+  <line x1="11" y1="33" x2="33" y2="11" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+  <circle cx="22" cy="22" r="2.5" fill="#00EC97"/>
+  <text x="50" y="20" fill="#00EC97" font-family="monospace" font-size="18" font-weight="bold">VOIDSPACE<tspan fill="#00D4FF" font-weight="normal">.io</tspan></text>
+  <text x="50" y="36" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="9">NEAR ECOSYSTEM INTELLIGENCE</text>
+</g>`;
 
 /**
- * Export chart as branded PNG (renders SVG → canvas → PNG).
- * Guarantees fonts and branding render correctly in all viewers.
+ * Export chart as branded SVG with Voidspace branding.
+ * Uses flat SVG structure (no nested <svg>) for reliable rendering.
  */
 export function exportSVG(
   svgElement: SVGElement,
@@ -91,110 +42,64 @@ export function exportSVG(
     logoPosition = 'bottom-right'
   } = options;
 
-  // Parse original viewBox
   const [, , width, height] = originalViewBox.split(' ').map(Number);
-
-  const SCALE = 2;
   const BRAND_H = 60;
   const totalW = width + padding * 2;
   const totalH = height + padding * 2 + BRAND_H;
 
-  // Create canvas
-  const canvas = document.createElement('canvas');
-  canvas.width = totalW * SCALE;
-  canvas.height = totalH * SCALE;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  ctx.scale(SCALE, SCALE);
-
-  // Background
-  ctx.fillStyle = backgroundColor;
-  ctx.fillRect(0, 0, totalW, totalH);
-
-  // Clone and prepare SVG for rendering
-  const clonedElement = svgElement.cloneNode(true) as SVGSVGElement;
-  clonedElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  clonedElement.setAttribute('width', String(width));
-  clonedElement.setAttribute('height', String(height));
-  // Remove animations
-  clonedElement.querySelectorAll('animateTransform, animate, animateMotion').forEach(el => el.remove());
-  clonedElement.querySelectorAll('*').forEach(el => {
+  // Clone and clean SVG
+  const clone = svgElement.cloneNode(true) as SVGElement;
+  clone.querySelectorAll('animateTransform, animate, animateMotion').forEach(el => el.remove());
+  clone.querySelectorAll('*').forEach(el => {
     el.removeAttribute('onMouseEnter');
     el.removeAttribute('onMouseLeave');
     el.removeAttribute('onClick');
+    el.removeAttribute('style');
     if (el.hasAttribute('class')) {
       el.setAttribute('class', (el.getAttribute('class') || '').replace(/cursor-pointer/g, ''));
     }
   });
 
-  // Render SVG to canvas via Image
-  const svgData = new XMLSerializer().serializeToString(clonedElement);
-  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  const svgUrl = URL.createObjectURL(svgBlob);
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
+  // Extract inner content (not the <svg> wrapper itself)
+  const svgContent = clone.innerHTML;
 
-  img.onload = () => {
-    ctx.drawImage(img, padding, padding, width, height);
-    URL.revokeObjectURL(svgUrl);
+  // Calculate logo position
+  const brandY = height + padding * 2 + 8;
+  let logoTransform = '';
+  switch (logoPosition) {
+    case 'bottom-right':
+      logoTransform = `translate(${totalW - 280}, ${brandY})`;
+      break;
+    case 'bottom-left':
+      logoTransform = `translate(${padding}, ${brandY})`;
+      break;
+    case 'top-right':
+      logoTransform = `translate(${totalW - 280}, ${padding + 5})`;
+      break;
+    case 'top-left':
+      logoTransform = `translate(${padding}, ${padding + 5})`;
+      break;
+  }
 
-    // Separator line
-    const brandY = height + padding * 2 + 8;
-    ctx.strokeStyle = 'rgba(0,236,151,0.2)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(padding, brandY - 6);
-    ctx.lineTo(totalW - padding, brandY - 6);
-    ctx.stroke();
+  const finalSVG = `<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${totalW}" height="${totalH}" fill="${backgroundColor}"/>
+  <g transform="translate(${padding}, ${padding})">
+    ${svgContent}
+  </g>
+  <line x1="${padding}" y1="${brandY - 6}" x2="${totalW - padding}" y2="${brandY - 6}" stroke="rgba(0,236,151,0.2)" stroke-width="1"/>
+  <g transform="${logoTransform}">${BRANDING_SVG}</g>
+</svg>`;
 
-    // Draw branding
-    let logoX = 0;
-    let logoY = 0;
-    switch (logoPosition) {
-      case 'bottom-right':
-        logoX = totalW - 260;
-        logoY = brandY;
-        break;
-      case 'bottom-left':
-        logoX = padding;
-        logoY = brandY;
-        break;
-      case 'top-right':
-        logoX = totalW - 260;
-        logoY = padding + 10;
-        break;
-      case 'top-left':
-        logoX = padding;
-        logoY = padding + 10;
-        break;
-    }
-
-    ctx.save();
-    ctx.translate(logoX, logoY);
-    drawBrandingOnCanvas(ctx);
-    ctx.restore();
-
-    // Download as PNG
-    const pngFilename = filename.replace(/\.svg$/i, '.png');
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = pngFilename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 'image/png', 1.0);
-  };
-
-  img.onerror = () => {
-    URL.revokeObjectURL(svgUrl);
-    console.error('Failed to render chart SVG to canvas');
-  };
-
-  img.src = svgUrl;
+  const blob = new Blob([finalSVG], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 /**
