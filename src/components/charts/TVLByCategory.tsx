@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Download } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { ChartLegend } from './ChartLegend';
+import { exportSVG, getSVGElement } from '@/lib/svg-export';
 import type { CategoryWithStats } from '@/types';
 
 interface TVLByCategoryProps {
@@ -42,6 +44,19 @@ function voidColor(score: number): string {
 export function TVLByCategory({ categories }: TVLByCategoryProps) {
   const [hovered, setHovered] = useState<number | null>(null);
   const router = useRouter();
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = () => {
+    const svgElement = getSVGElement(chartRef);
+    if (svgElement) {
+      exportSVG(svgElement, 'voidspace-capital-gravity.svg', {
+        originalViewBox: '0 0 800 520',
+        backgroundColor: '#0a0a0a',
+        padding: 40,
+        logoPosition: 'bottom-right'
+      });
+    }
+  };
 
   const totalTVL = categories.reduce((s, c) => s + c.totalTVL, 0);
 
@@ -94,7 +109,17 @@ export function TVLByCategory({ categories }: TVLByCategoryProps) {
 
   return (
     <div>
-      <div className="relative" style={{ height: 520 }}>
+      <div ref={chartRef} className="relative group" style={{ height: 520 }}>
+        {/* Download button */}
+        <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={handleDownload}
+            className="backdrop-blur-md bg-surface/90 hover:bg-surface border border-white/10 hover:border-near-green/30 rounded-lg p-2 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-200 hover:scale-105"
+            title="Save as SVG"
+          >
+            <Download className="w-4 h-4 text-text-muted hover:text-near-green transition-colors" />
+          </button>
+        </div>
         <svg viewBox="0 0 800 520" className="w-full h-full">
           <defs>
             <filter id="gw-glow" x="-50%" y="-50%" width="200%" height="200%">
