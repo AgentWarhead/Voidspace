@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Eye, RotateCcw, Clock, Activity, Zap, X,
+  Eye, RotateCcw, Clock, Activity, X,
   TrendingUp, TrendingDown, Shield, Search, Settings,
 } from 'lucide-react';
 // These icons exist but TS types are broken in v0.453 RSC mode
@@ -51,13 +51,7 @@ interface BubbleNode extends d3.SimulationNodeDatum {
   targetRadius: number;
 }
 
-interface WhaleAlert {
-  id: string;
-  token: VoidBubbleToken;
-  amount: number;
-  type: 'buy' | 'sell';
-  timestamp: number;
-}
+// WhaleAlert interface removed - whale activity now shows as visual effects on bubbles
 
 // type ViewMode = 'market' | 'anatomy'; // Phase 2: Token Anatomy drill-down
 type FilterCategory = 'all' | string;
@@ -168,7 +162,6 @@ export function VoidBubblesEngine() {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
   const [highlightMode, setHighlightMode] = useState<'none' | 'gainers' | 'losers'>('none');
-  const [whaleAlerts, setWhaleAlerts] = useState<WhaleAlert[]>([]);
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [, setLastUpdated] = useState<string>('');
   // New state for the enhanced features
@@ -180,6 +173,12 @@ export function VoidBubblesEngine() {
   // Spotlight Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  // Bubble Pop state - expanded bubble
+  const [expandedBubble, setExpandedBubble] = useState<string | null>(null);
+  // Pulse Mode state - volume-based pulsing (always enabled for now)
+  const pulseMode = true;
+  // Click timing for double-click detection
+  const [clickTimeouts, setClickTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map());
 
   // Refs
   const svgRef = useRef<SVGSVGElement>(null);
@@ -224,85 +223,7 @@ export function VoidBubblesEngine() {
     return () => clearInterval(interval);
   }, [fetchTokens, period]);
 
-  // ────────────────────── Whale Alerts (simulated) ──────────────────────
-
-  useEffect(() => {
-    if (tokens.length === 0) return;
-
-    const generateWhaleAlert = () => {
-      const token = tokens[Math.floor(Math.random() * Math.min(tokens.length, 20))];
-      const amount = 10000 + Math.random() * 90000;
-      const alert: WhaleAlert = {
-        id: `whale-${Date.now()}`,
-        token,
-        amount,
-        type: Math.random() > 0.5 ? 'buy' : 'sell',
-        timestamp: Date.now(),
-      };
-      setWhaleAlerts(prev => [alert, ...prev].slice(0, 5));
-      sonicRef.current.playWhaleAlert();
-
-      // Trigger shockwave on the bubble
-      triggerShockwave(token.id, amount);
-    };
-
-    const interval = setInterval(generateWhaleAlert, 20000 + Math.random() * 25000);
-    // First alert after 5 seconds
-    const firstTimeout = setTimeout(generateWhaleAlert, 5000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(firstTimeout);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokens]);
-
   // ────────────────────── D3 Force Simulation ──────────────────────
-
-  const triggerShockwave = useCallback((tokenId: string, amount: number) => {
-    const svg = d3.select(svgRef.current);
-    const node = nodesRef.current.find(n => n.token.id === tokenId);
-    if (!node || !node.x || !node.y) return;
-
-    // Pulse the bubble
-    svg.select(`circle[data-id="${tokenId}"]`)
-      .transition().duration(200)
-      .attr('r', (node.radius || 20) * 1.5)
-      .transition().duration(500)
-      .attr('r', node.radius || 20);
-
-    // Shockwave ring
-    const intensity = Math.min(amount / 50000, 1);
-    const maxRadius = 80 + intensity * 120;
-    svg.select('.shockwave-layer')
-      .append('circle')
-      .attr('cx', node.x)
-      .attr('cy', node.y)
-      .attr('r', node.radius || 20)
-      .attr('fill', 'none')
-      .attr('stroke', intensity > 0.5 ? '#FF6B6B' : '#00EC97')
-      .attr('stroke-width', 2)
-      .attr('opacity', 0.8)
-      .transition().duration(1000)
-      .attr('r', maxRadius)
-      .attr('opacity', 0)
-      .remove();
-
-    // Push nearby bubbles
-    nodesRef.current.forEach(other => {
-      if (other.id === tokenId || !other.x || !other.y || !node.x || !node.y) return;
-      const dx = other.x - node.x;
-      const dy = other.y - node.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < maxRadius && dist > 0) {
-        const force = (1 - dist / maxRadius) * intensity * 30;
-        other.vx = (other.vx || 0) + (dx / dist) * force;
-        other.vy = (other.vy || 0) + (dy / dist) * force;
-      }
-    });
-
-    simulationRef.current?.alpha(0.3).restart();
-  }, []);
 
   // Get current period's price change for a token
   const getCurrentPriceChange = useCallback((token: VoidBubbleToken) => {
@@ -317,6 +238,317 @@ export function VoidBubblesEngine() {
       default: return token.priceChange24h;
     }
   }, [period]);
+
+  const triggerShockwave = useCallback((tokenId: string, amount: number) => {
+    const svg = d3.select(svgRef.current);
+    const node = nodesRef.current.find(n => n.token.id === tokenId);
+    if (!node || !node.x || !node.y) return;
+
+    // Enhanced dramatic whale splash effects
+    const intensity = Math.min(amount / 50000, 1);
+    const baseRadius = node.targetRadius || 20;
+    const maxRadius = 150 + intensity * 200; // Much larger shockwave
+    
+    // Bubble size pulse (1.3x then back)
+    svg.select(`circle[data-id="${tokenId}"]`)
+      .transition().duration(150)
+      .attr('r', baseRadius * 1.3)
+      .transition().duration(400)
+      .attr('r', baseRadius);
+
+    // Flash the bubble brighter
+    svg.select(`g[data-bubble-id="${tokenId}"] .bubble-main`)
+      .transition().duration(100)
+      .attr('opacity', 1)
+      .attr('stroke-width', 4)
+      .transition().duration(600)
+      .attr('opacity', 0.92)
+      .attr('stroke-width', 2);
+
+    const shockwaveLayer = svg.select('.shockwave-layer');
+    
+    // Multiple concentric rings expanding at different speeds
+    for (let i = 0; i < 3; i++) {
+      const delay = i * 150;
+      const ringColor = amount > 50000 ? (i % 2 === 0 ? '#FF3366' : '#FF4757') : (i % 2 === 0 ? '#00EC97' : '#00D4FF');
+      const ringRadius = maxRadius * (0.6 + i * 0.3);
+      
+      setTimeout(() => {
+        shockwaveLayer
+          .append('circle')
+          .attr('cx', node.x || 0)
+          .attr('cy', node.y || 0)
+          .attr('r', baseRadius)
+          .attr('fill', 'none')
+          .attr('stroke', ringColor)
+          .attr('stroke-width', 3 - i * 0.5)
+          .attr('opacity', 0.9 - i * 0.2)
+          .transition().duration(1200 - i * 200)
+          .attr('r', ringRadius)
+          .attr('opacity', 0)
+          .remove();
+      }, delay);
+    }
+
+    // Particle scatter effect
+    const particleCount = Math.floor(8 + intensity * 12);
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * 2 * Math.PI;
+      const distance = 40 + Math.random() * 60;
+      const particleColor = amount > 50000 ? '#FF3366' : '#00EC97';
+      
+      setTimeout(() => {
+        shockwaveLayer
+          .append('circle')
+          .attr('cx', node.x || 0)
+          .attr('cy', node.y || 0)
+          .attr('r', 2 + Math.random() * 2)
+          .attr('fill', particleColor)
+          .attr('opacity', 0.8)
+          .transition().duration(800 + Math.random() * 400)
+          .attr('cx', (node.x || 0) + Math.cos(angle) * distance)
+          .attr('cy', (node.y || 0) + Math.sin(angle) * distance)
+          .attr('opacity', 0)
+          .attr('r', 0.5)
+          .remove();
+      }, Math.random() * 200);
+    }
+
+    // Whale alert text that fades after 2 seconds
+    const whaleText = shockwaveLayer
+      .append('text')
+      .attr('x', node.x || 0)
+      .attr('y', (node.y || 0) - baseRadius - 20)
+      .attr('text-anchor', 'middle')
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('font-size', '14')
+      .attr('font-weight', 'bold')
+      .attr('fill', amount > 50000 ? '#FF3366' : '#00EC97')
+      .attr('opacity', 0)
+      .style('text-shadow', '0 2px 8px rgba(0,0,0,0.9)')
+      .text(`🐋 $${formatCompact(amount).replace('$', '')} ${amount > 50000 ? 'SELL' : 'BUY'}`);
+    
+    whaleText
+      .transition().duration(200)
+      .attr('opacity', 1)
+      .transition().duration(1800).delay(200)
+      .attr('opacity', 0)
+      .attr('y', (node.y || 0) - baseRadius - 40)
+      .remove();
+
+    // Push nearby bubbles with enhanced force
+    nodesRef.current.forEach(other => {
+      if (other.id === tokenId || !other.x || !other.y || !node.x || !node.y) return;
+      const dx = other.x - node.x;
+      const dy = other.y - node.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < maxRadius && dist > 0) {
+        const force = (1 - dist / maxRadius) * intensity * 50; // Increased force
+        other.vx = (other.vx || 0) + (dx / dist) * force;
+        other.vy = (other.vy || 0) + (dy / dist) * force;
+      }
+    });
+
+    simulationRef.current?.alpha(0.4).restart();
+  }, []);
+
+  // ────────────────────── Whale Alerts (simulated) ──────────────────────
+
+  useEffect(() => {
+    if (tokens.length === 0) return;
+
+    const generateWhaleAlert = () => {
+      const token = tokens[Math.floor(Math.random() * Math.min(tokens.length, 20))];
+      const amount = 10000 + Math.random() * 90000;
+      
+      // Play whale alert sound
+      sonicRef.current.playWhaleAlert();
+
+      // Trigger dramatic visual shockwave effect on the bubble
+      triggerShockwave(token.id, amount);
+    };
+
+    const interval = setInterval(generateWhaleAlert, 20000 + Math.random() * 25000);
+    // First alert after 5 seconds
+    const firstTimeout = setTimeout(generateWhaleAlert, 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(firstTimeout);
+    };
+  }, [tokens, triggerShockwave]);
+
+  // Bubble Pop - expand/collapse bubble in place
+  const handleBubblePop = useCallback((tokenId: string) => {
+    if (expandedBubble === tokenId) {
+      // Collapse
+      setExpandedBubble(null);
+      const node = nodesRef.current.find(n => n.token.id === tokenId);
+      if (!node) return;
+
+      const svg = d3.select(svgRef.current);
+      const bubbleGroup = svg.select(`g[data-bubble-id="${tokenId}"]`);
+      
+      // Animate bubble back to original size
+      bubbleGroup.select('.bubble-main')
+        .transition().duration(400)
+        .ease(d3.easeBackOut.overshoot(1.2))
+        .attr('r', node.targetRadius);
+      
+      bubbleGroup.select('.bubble-glow')
+        .transition().duration(400)
+        .attr('r', node.targetRadius + 4);
+      
+      bubbleGroup.select('.bubble-outer-ring')
+        .transition().duration(400)
+        .attr('r', node.targetRadius + 8);
+
+      // Remove expanded content
+      bubbleGroup.selectAll('.expanded-content').remove();
+      
+      // Restart simulation to re-settle bubbles
+      simulationRef.current?.alpha(0.2).restart();
+    } else {
+      // Expand
+      setExpandedBubble(tokenId);
+      const node = nodesRef.current.find(n => n.token.id === tokenId);
+      if (!node) return;
+
+      const svg = d3.select(svgRef.current);
+      const bubbleGroup = svg.select(`g[data-bubble-id="${tokenId}"]`);
+      const expandedRadius = node.targetRadius * 2.5;
+      
+      // Animate bubble to expanded size
+      bubbleGroup.select('.bubble-main')
+        .transition().duration(600)
+        .ease(d3.easeBackOut.overshoot(1.1))
+        .attr('r', expandedRadius);
+      
+      bubbleGroup.select('.bubble-glow')
+        .transition().duration(600)
+        .attr('r', expandedRadius + 8)
+        .attr('opacity', 0.6);
+      
+      bubbleGroup.select('.bubble-outer-ring')
+        .transition().duration(600)
+        .attr('r', expandedRadius + 12);
+
+      // Add expanded content after animation starts
+      setTimeout(() => {
+        const token = node.token;
+        const currentChange = getCurrentPriceChange(token);
+        
+        // Create content group
+        const contentGroup = bubbleGroup.append('g').attr('class', 'expanded-content');
+        
+        // Close button at top-right
+        const closeButton = contentGroup.append('g')
+          .attr('class', 'close-button')
+          .style('cursor', 'pointer')
+          .attr('transform', `translate(${expandedRadius * 0.7}, ${-expandedRadius * 0.7})`);
+        
+        closeButton.append('circle')
+          .attr('r', 12)
+          .attr('fill', '#FF3366')
+          .attr('opacity', 0.8);
+        
+        closeButton.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', '12')
+          .attr('font-weight', 'bold')
+          .attr('fill', 'white')
+          .text('×');
+
+        closeButton.on('click', (event) => {
+          event.stopPropagation();
+          handleBubblePop(tokenId);
+        });
+        
+        // Large symbol in center
+        contentGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('dy', '-0.8em')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', Math.min(expandedRadius * 0.4, 24))
+          .attr('font-weight', 'bold')
+          .attr('fill', '#fff')
+          .style('text-shadow', '0 2px 8px rgba(0,0,0,0.9)')
+          .text(token.symbol);
+        
+        // Price
+        contentGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('dy', '-0.1em')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', Math.min(expandedRadius * 0.15, 14))
+          .attr('font-weight', 'bold')
+          .attr('fill', '#d1d5db')
+          .style('text-shadow', '0 2px 6px rgba(0,0,0,0.9)')
+          .text(formatPrice(token.price));
+        
+        // Price change
+        contentGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('dy', '0.6em')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', Math.min(expandedRadius * 0.12, 12))
+          .attr('font-weight', 'bold')
+          .attr('fill', currentChange >= 0 ? '#00EC97' : '#FF3366')
+          .style('text-shadow', '0 2px 6px rgba(0,0,0,0.9)')
+          .text(`${currentChange >= 0 ? '+' : ''}${currentChange.toFixed(1)}%`);
+        
+        // Market cap
+        contentGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('dy', '1.2em')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', Math.min(expandedRadius * 0.1, 10))
+          .attr('font-weight', 'normal')
+          .attr('fill', '#9ca3af')
+          .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
+          .text(`MC: ${formatCompact(token.marketCap)}`);
+        
+        // Health score
+        contentGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('dy', '1.7em')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', Math.min(expandedRadius * 0.1, 10))
+          .attr('font-weight', 'normal')
+          .attr('fill', RISK_COLORS[token.riskLevel])
+          .style('text-shadow', '0 2px 4px rgba(0,0,0,0.9)')
+          .text(`Health: ${token.healthScore}/100`);
+
+        // Fade in the content
+        contentGroup.attr('opacity', 0)
+          .transition().duration(300)
+          .attr('opacity', 1);
+      }, 200);
+
+      // Push other bubbles away using the existing force simulation
+      nodesRef.current.forEach(other => {
+        if (other.id === tokenId || !other.x || !other.y || !node.x || !node.y) return;
+        const dx = other.x - node.x;
+        const dy = other.y - node.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = expandedRadius + (other.targetRadius || 20) + 20;
+        if (dist < minDist && dist > 0) {
+          const force = (minDist - dist) / minDist * 80;
+          other.vx = (other.vx || 0) + (dx / dist) * force;
+          other.vy = (other.vy || 0) + (dy / dist) * force;
+        }
+      });
+
+      simulationRef.current?.alpha(0.3).restart();
+    }
+  }, [expandedBubble, getCurrentPriceChange]);
 
   const initSimulation = useCallback(() => {
     if (!svgRef.current || !containerRef.current || filteredTokens.length === 0) return;
@@ -486,12 +718,34 @@ export function VoidBubblesEngine() {
       .attr('fill', '#00EC97')
       .attr('opacity', 0.06);
 
-    // Background with grid
+    // Background with grid - also handles click outside to collapse bubbles
     svg.append('rect')
       .attr('width', width)
       .attr('height', height)
       .attr('fill', 'url(#void-grid)')
-      .attr('class', 'void-grid-bg');
+      .attr('class', 'void-grid-bg')
+      .style('cursor', 'pointer')
+      .on('click', () => {
+        // Collapse any expanded bubble when clicking background
+        if (expandedBubble) {
+          setExpandedBubble(null);
+          const node = nodesRef.current.find(n => n.token.id === expandedBubble);
+          if (node) {
+            const bubbleGroup = svg.select(`g[data-bubble-id="${expandedBubble}"]`);
+            bubbleGroup.select('.bubble-main')
+              .transition().duration(300)
+              .attr('r', node.targetRadius);
+            bubbleGroup.select('.bubble-glow')
+              .transition().duration(300)
+              .attr('r', node.targetRadius + 4);
+            bubbleGroup.select('.bubble-outer-ring')
+              .transition().duration(300)
+              .attr('r', node.targetRadius + 8);
+            bubbleGroup.selectAll('.expanded-content').remove();
+            simulationRef.current?.alpha(0.2).restart();
+          }
+        }
+      });
 
     // Enhanced Voidspace star-field particles for depth
     const starLayer = svg.append('g').attr('class', 'star-layer');
@@ -605,6 +859,7 @@ export function VoidBubblesEngine() {
       .data(nodes)
       .enter().append('g')
       .attr('class', 'bubble-group')
+      .attr('data-bubble-id', d => d.token.id)
       .style('cursor', 'pointer');
 
     // Outer glow circle — soft colored halo (enhanced visibility)
@@ -755,12 +1010,45 @@ export function VoidBubblesEngine() {
           .transition().duration(200)
           .attr('opacity', 0.35);
       })
-      .on('click', (_event, d) => {
-        setSelectedToken(d.token);
-        const currentChange = getCurrentPriceChange(d.token);
-        if (currentChange > 5) sonicRef.current.playPump(Math.min(currentChange / 30, 1));
-        else if (currentChange < -5) sonicRef.current.playDump(Math.min(Math.abs(currentChange) / 30, 1));
-        if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
+      .on('click', (event, d) => {
+        event.stopPropagation();
+        const tokenId = d.token.id;
+        
+        // Check for existing timeout (double-click detection)
+        const existingTimeout = clickTimeouts.get(tokenId);
+        if (existingTimeout) {
+          // Double-click detected - open side panel
+          clearTimeout(existingTimeout);
+          setClickTimeouts(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tokenId);
+            return newMap;
+          });
+          
+          setSelectedToken(d.token);
+          
+          // Play sounds for double-click
+          const currentChange = getCurrentPriceChange(d.token);
+          if (currentChange > 5) sonicRef.current.playPump(Math.min(currentChange / 30, 1));
+          else if (currentChange < -5) sonicRef.current.playDump(Math.min(Math.abs(currentChange) / 30, 1));
+          if (d.token.riskLevel === 'critical') sonicRef.current.playRisk();
+        } else {
+          // Single-click - set timeout for bubble pop
+          const timeout = setTimeout(() => {
+            handleBubblePop(tokenId);
+            setClickTimeouts(prev => {
+              const newMap = new Map(prev);
+              newMap.delete(tokenId);
+              return newMap;
+            });
+          }, 250); // 250ms window for double-click
+          
+          setClickTimeouts(prev => {
+            const newMap = new Map(prev);
+            newMap.set(tokenId, timeout);
+            return newMap;
+          });
+        }
       });
 
     // Force simulation — enhanced spacing for better mobile UX
@@ -807,30 +1095,96 @@ export function VoidBubblesEngine() {
       }, delay);
     });
 
-    // Momentum pulse — elegant breathing glow for significant movers (enhanced visibility)
-    const pulseHighMomentum = () => {
+    // Volume-based pulse mode — physical radius oscillation based on volume/market cap ratio
+    const initVolumePulse = () => {
+      nodes.forEach((node, i) => {
+        if (!pulseMode) return;
+        
+        const token = node.token;
+        const volumeRatio = token.volume24h / Math.max(token.marketCap, 1); // Avoid division by zero
+        
+        // Skip tokens with very low volume activity
+        if (volumeRatio < 0.001) return;
+        
+        // Calculate pulse parameters based on volume ratio
+        const maxRatio = 0.5; // Cap at 50% volume/mcap ratio for scaling
+        const normalizedRatio = Math.min(volumeRatio / maxRatio, 1);
+        
+        // Pulse amplitude: 0-15% of radius based on volume ratio
+        const pulseAmplitude = normalizedRatio * 0.15 * node.targetRadius;
+        
+        // Pulse speed: high ratio = fast (800ms), low ratio = slow (3000ms)
+        const pulseDuration = 3000 - (normalizedRatio * 2200); // 3000ms -> 800ms
+        
+        const bubbleSel = d3.select(bubbleGroups.nodes()[i]).select('.bubble-main');
+        const glowSel = d3.select(bubbleGroups.nodes()[i]).select('.bubble-glow');
+        const outerRingSel = d3.select(bubbleGroups.nodes()[i]).select('.bubble-outer-ring');
+        
+        let pulseDirection = 1; // 1 for expand, -1 for contract
+        
+        const volumePulseLoop = () => {
+          if (!pulseMode) return;
+          
+          const targetRadius = node.targetRadius + (pulseAmplitude * pulseDirection);
+          const targetGlowRadius = targetRadius + 4;
+          const targetRingRadius = targetRadius + 8;
+          
+          // Use sinusoidal easing for smooth breathing effect
+          bubbleSel
+            .transition()
+            .duration(pulseDuration / 2)
+            .ease(d3.easeSinInOut)
+            .attr('r', targetRadius)
+            .on('end', volumePulseLoop);
+          
+          glowSel
+            .transition()
+            .duration(pulseDuration / 2)
+            .ease(d3.easeSinInOut)
+            .attr('r', targetGlowRadius);
+          
+          outerRingSel
+            .transition()
+            .duration(pulseDuration / 2)
+            .ease(d3.easeSinInOut)
+            .attr('r', targetRingRadius);
+          
+          pulseDirection *= -1; // Flip direction for next cycle
+        };
+        
+        // Stagger the start times to avoid synchronization
+        setTimeout(volumePulseLoop, entryDelay + i * 100 + Math.random() * 500);
+      });
+    };
+    
+    // Also keep momentum pulse for price direction (glow only, not size)
+    const initMomentumGlow = () => {
       nodes.forEach((node, i) => {
         const currentChange = getCurrentPriceChange(node.token);
         const absPct = Math.abs(currentChange);
-        if (absPct < 5) return; // Lower threshold - pulse 5%+ movers (was 10%)
-        const pulseExtra = Math.min(absPct / 30, 0.4) * node.targetRadius; // more visible
-        const duration = 2000 - Math.min(absPct * 15, 700);
+        if (absPct < 5) return; // Only significant movers
+        
         const glowSel = d3.select(bubbleGroups.nodes()[i]).select('.bubble-glow');
-        const pulseLoop = () => {
+        const glowIntensity = Math.min(absPct / 30, 0.6);
+        const glowDuration = 2000 - Math.min(absPct * 15, 700);
+        
+        const momentumGlowLoop = () => {
           glowSel
-            .transition().duration(duration).ease(d3.easeSinInOut)
-            .attr('r', node.targetRadius + 10 + pulseExtra) // +4 → +10
-            .attr('opacity', 0.5) // 0.35 → 0.5
-            .transition().duration(duration).ease(d3.easeSinInOut)
-            .attr('r', node.targetRadius + 4)
-            .attr('opacity', 0.2) // 0.15 → 0.2
-            .on('end', pulseLoop);
+            .transition().duration(glowDuration).ease(d3.easeSinInOut)
+            .attr('opacity', 0.4 + glowIntensity)
+            .transition().duration(glowDuration).ease(d3.easeSinInOut)
+            .attr('opacity', 0.2)
+            .on('end', momentumGlowLoop);
         };
-        setTimeout(pulseLoop, entryDelay + i * 80);
+        setTimeout(momentumGlowLoop, entryDelay + i * 80);
       });
     };
+    
     const entryDelay = nodes.length * 15 + 800;
-    setTimeout(pulseHighMomentum, entryDelay);
+    setTimeout(() => {
+      initVolumePulse();
+      initMomentumGlow();
+    }, entryDelay);
 
     // Zoom behavior
     const zoom = d3.zoom<SVGSVGElement, unknown>()
@@ -1350,58 +1704,11 @@ export function VoidBubblesEngine() {
     );
   };
 
-  // ────────────────────── Whale Alert Feed ──────────────────────
+  // ────────────────────── Whale Alert Feed (Removed - replaced with bubble effects) ──────────────────────
 
-  const renderWhaleAlerts = () => {
-    if (whaleAlerts.length === 0) return null;
-
-    return (
-      <div className="hidden sm:block absolute bottom-14 left-4 z-20 space-y-1.5 max-w-[280px]">
-        <AnimatePresence mode="popLayout">
-          {whaleAlerts.slice(0, 3).map(alert => (
-            <motion.div
-              key={alert.id}
-              initial={{ opacity: 0, x: -50, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
-                x: 0, 
-                scale: 1,
-                boxShadow: [
-                  `0 0 0px ${alert.type === 'buy' ? '#00EC97' : '#FF4757'}`,
-                  `0 0 20px ${alert.type === 'buy' ? '#00EC9740' : '#FF475740'}`,
-                  `0 0 0px ${alert.type === 'buy' ? '#00EC97' : '#FF4757'}`
-                ]
-              }}
-              exit={{ opacity: 0, x: -50, scale: 0.8 }}
-              transition={{
-                boxShadow: { duration: 1.5, times: [0, 0.1, 1] },
-                type: "spring",
-                damping: 15,
-                stiffness: 100
-              }}
-              className={cn(
-                "flex items-center gap-2 bg-surface/80 backdrop-blur-xl border rounded-lg px-2.5 py-1.5 shadow-lg",
-                "transform hover:scale-105 transition-transform duration-200",
-                alert.type === 'buy' 
-                  ? 'border-l-2 border-l-near-green border-border/50' 
-                  : 'border-l-2 border-l-error border-border/50'
-              )}
-            >
-              <Zap className={cn('w-3 h-3 shrink-0', alert.type === 'buy' ? 'text-near-green' : 'text-error')} />
-              <div className="min-w-0">
-                <p className="text-[10px] text-text-primary font-mono truncate">
-                  <span className={alert.type === 'buy' ? 'text-near-green' : 'text-error'}>
-                    {alert.type === 'buy' ? '🐋 BUY' : '🐋 SELL'}
-                  </span>
-                  {' '}{formatCompact(alert.amount)} {alert.token.symbol}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-    );
-  };
+  // Whale alerts now show as dramatic visual effects on the bubbles themselves
+  // The renderWhaleAlerts function has been removed - all whale activity is now visualized
+  // directly on the affected bubbles via the enhanced triggerShockwave function
 
   // ────────────────────── Main Render ──────────────────────
 
@@ -1957,7 +2264,6 @@ export function VoidBubblesEngine() {
         {renderHoverTooltip()}
         {renderTokenAnatomy()}
       </AnimatePresence>
-      {renderWhaleAlerts()}
 
       {/* Spotlight Search */}
       <div className="absolute bottom-4 right-4 z-30">
