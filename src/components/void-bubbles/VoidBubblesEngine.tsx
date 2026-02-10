@@ -1149,35 +1149,10 @@ export function VoidBubblesEngine() {
     // **NEW: Updated Click Handler** - Single click shows popup, double click shows side panel
     bubbleGroups
       .on('mouseenter', function(event, d) {
-        // **NEW: Connection Lines on Hover**
-        const sameCategoryNodes = nodes.filter(node => 
-          node.token.category === d.token.category && node.id !== d.id
-        );
-        
-        // Draw connection lines to same category tokens
-        sameCategoryNodes.forEach(targetNode => {
-          if (!d.x || !d.y || !targetNode.x || !targetNode.y) return;
-          
-          connectionLinesLayer
-            .append('line')
-            .attr('class', 'connection-line')
-            .attr('x1', d.x)
-            .attr('y1', d.y)
-            .attr('x2', targetNode.x)
-            .attr('y2', targetNode.y)
-            .attr('stroke', CATEGORY_COLORS[d.token.category] || '#64748B')
-            .attr('stroke-width', 1)
-            .attr('stroke-opacity', 0)
-            .attr('stroke-dasharray', '3,3')
-            .transition().duration(300)
-            .attr('stroke-opacity', 0.3);
-        });
-
-        // Enhanced hover effects
         setHoveredToken(d.token);
         setHoverPos({ x: event.layerX, y: event.layerY });
         
-        // Highlight the bubble
+        // Highlight the bubble — scale up slightly for premium feel
         d3.select(this).select('.bubble-main')
           .transition().duration(150)
           .attr('stroke-width', 3)
@@ -1189,12 +1164,6 @@ export function VoidBubblesEngine() {
           .attr('opacity', 0.9);
       })
       .on('mouseleave', function() {
-        // **NEW: Remove connection lines**
-        connectionLinesLayer.selectAll('.connection-line')
-          .transition().duration(200)
-          .attr('stroke-opacity', 0)
-          .remove();
-
         setHoveredToken(null);
         
         // Reset bubble appearance
@@ -1229,25 +1198,39 @@ export function VoidBubblesEngine() {
 
     // Force simulation — enhanced spacing for better mobile UX
     const isMobile = width < 768;
-    const spacingMultiplier = isMobile ? 1.6 : 1.3;
-    const repulsionStrength = isMobile ? -35 : -25;
+    
+    // Build category cluster positions — arrange categories in a circle around center
+    const activeCategories = Array.from(new Set(filteredTokens.map(t => t.category)));
+    const categoryPositions: Record<string, { x: number; y: number }> = {};
+    const clusterRadius = Math.min(width, height) * 0.25;
+    activeCategories.forEach((cat, i) => {
+      const angle = (i / activeCategories.length) * 2 * Math.PI - Math.PI / 2;
+      categoryPositions[cat] = {
+        x: centerX + Math.cos(angle) * clusterRadius,
+        y: centerY + Math.sin(angle) * clusterRadius,
+      };
+    });
+    // If only one category (filtered), center it
+    if (activeCategories.length === 1) {
+      categoryPositions[activeCategories[0]] = { x: centerX, y: centerY };
+    }
     
     const simulation = d3.forceSimulation(nodes)
-      // Strong centering to keep bubbles in viewport
-      .force('x', d3.forceX<BubbleNode>(centerX).strength(0.08))
-      .force('y', d3.forceY<BubbleNode>(centerY).strength(0.08))
+      // Gentle centering — keeps the cloud roughly centered
+      .force('x', d3.forceX<BubbleNode>(d => categoryPositions[d.token.category]?.x ?? centerX).strength(0.04))
+      .force('y', d3.forceY<BubbleNode>(d => categoryPositions[d.token.category]?.y ?? centerY).strength(0.04))
       .force('charge', d3.forceManyBody()
-        .strength(repulsionStrength)
-        .distanceMax(Math.min(width, height) * 0.5)
+        .strength(isMobile ? -20 : -15)
+        .distanceMax(Math.min(width, height) * 0.4)
       )
       .force('collision', d3.forceCollide<BubbleNode>()
-        .radius(d => (d.targetRadius + 4) * spacingMultiplier)
-        .strength(0.9)
-        .iterations(3) // Multiple iterations for tighter packing
+        .radius(d => d.targetRadius + (isMobile ? 6 : 4))
+        .strength(0.85)
+        .iterations(2)
       )
-      .alphaDecay(0.025) // Slightly faster settling
-      .alpha(0.8) // Start with high energy for good spread
-      .velocityDecay(0.35);
+      .alphaDecay(0.015) // Slow decay for organic settling
+      .alpha(0.6)
+      .velocityDecay(0.4); // Higher friction for floaty feel
 
     // Store simulation reference
     simulationRef.current = simulation;
@@ -1259,12 +1242,18 @@ export function VoidBubblesEngine() {
 
     const tick = (currentTime: number) => {
       if (currentTime - lastFrameTime >= frameInterval) {
-        // Enforce boundary containment — keep bubbles inside viewport
-        const padding = 20;
+        // Soft boundary — gently push bubbles back when they drift out
+        const margin = 40;
         nodes.forEach(d => {
           const r = d.targetRadius;
-          if (d.x !== undefined) d.x = Math.max(r + padding, Math.min(width - r - padding, d.x));
-          if (d.y !== undefined) d.y = Math.max(r + padding, Math.min(height - r - padding, d.y));
+          if (d.x !== undefined) {
+            if (d.x - r < margin) d.vx = (d.vx || 0) + 0.5;
+            if (d.x + r > width - margin) d.vx = (d.vx || 0) - 0.5;
+          }
+          if (d.y !== undefined) {
+            if (d.y - r < margin) d.vy = (d.vy || 0) + 0.5;
+            if (d.y + r > height - margin) d.vy = (d.vy || 0) - 0.5;
+          }
         });
 
         // Update bubble positions
@@ -1741,161 +1730,202 @@ export function VoidBubblesEngine() {
 
   return (
     <div className="flex-1 relative overflow-hidden h-full w-full">
-      {/* Power Bar — Desktop */}
-      <div className="hidden sm:block absolute top-4 left-4 z-20">
-        <div className="bg-surface/60 backdrop-blur-xl border border-white/5 rounded-lg shadow-xl p-3 hover:bg-surface/80 transition-colors duration-300">
-          <div className="flex flex-col gap-3">
-            {/* Time Period Selector */}
-            <div className="flex gap-1">
-              {(['1h', '4h', '1d', '7d', '30d'] as const).map((p) => (
-                <Button
-                  key={p}
-                  size="sm"
-                  variant={period === p ? 'primary' : 'ghost'}
-                  onClick={() => setPeriod(p)}
-                  className="text-xs px-2"
-                >
-                  {p}
-                </Button>
-              ))}
+      {/* Power Bar — Desktop: Premium Glassmorphism Panel */}
+      <div className="hidden sm:block absolute top-4 left-4 z-20 w-56">
+        <div className="bg-[#0a0f14]/80 backdrop-blur-2xl border border-white/[0.06] rounded-2xl shadow-2xl shadow-black/40 overflow-hidden">
+          {/* Accent glow line at top */}
+          <div className="h-px bg-gradient-to-r from-transparent via-near-green/40 to-transparent" />
+          
+          <div className="p-4 space-y-4">
+            {/* Timeframe — pill selector */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Clock className="w-3 h-3 text-near-green/70" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Timeframe</span>
+              </div>
+              <div className="flex bg-white/[0.04] rounded-lg p-0.5">
+                {(['1h', '4h', '1d', '7d', '30d'] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriod(p)}
+                    className={`flex-1 text-[11px] font-mono py-1.5 rounded-md transition-all duration-200 ${
+                      period === p
+                        ? 'bg-near-green/20 text-near-green shadow-sm shadow-near-green/10 font-semibold'
+                        : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Performance toggles */}
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant={highlightMode === 'gainers' ? 'primary' : 'secondary'}
-                onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
-                className="text-xs"
-              >
-                <TrendingUp className="w-3 h-3 mr-1" />
-                Gainers
-              </Button>
-              <Button
-                size="sm"
-                variant={highlightMode === 'losers' ? 'primary' : 'secondary'}
-                onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
-                className="text-xs"
-              >
-                <TrendingDown className="w-3 h-3 mr-1" />
-                Losers
-              </Button>
+            {/* Movers */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Activity className="w-3 h-3 text-near-green/70" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Movers</span>
+              </div>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
+                    highlightMode === 'gainers'
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                      : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-emerald-500/20 hover:text-emerald-400/70'
+                  }`}
+                >
+                  <TrendingUp className="w-3 h-3" />
+                  Gainers
+                </button>
+                <button
+                  onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
+                    highlightMode === 'losers'
+                      ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                      : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-rose-500/20 hover:text-rose-400/70'
+                  }`}
+                >
+                  <TrendingDown className="w-3 h-3" />
+                  Losers
+                </button>
+              </div>
             </div>
+
+            {/* Separator */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
             {/* Category Filter */}
-            <div className="flex flex-wrap gap-1 max-w-xs">
-              {categories.map((cat) => (
-                <Button
-                  key={cat}
-                  size="sm"
-                  variant={filterCategory === cat ? 'primary' : 'ghost'}
-                  onClick={() => setFilterCategory(cat)}
-                  className="text-xs px-2"
-                >
-                  {cat}
-                </Button>
-              ))}
-            </div>
-
-            {/* Size Metric */}
-            <div className="space-y-2">
-              <p className="text-xs text-text-muted uppercase tracking-wide">Size by:</p>
-              <div className="flex flex-col gap-1">
-                {[
-                  { key: 'marketCap', label: 'Market Cap' },
-                  { key: 'volume', label: 'Volume' },
-                  { key: 'performance', label: 'Performance' },
-                ].map((opt) => (
-                  <Button
-                    key={opt.key}
-                    size="sm"
-                    variant={sizeMetric === opt.key ? 'primary' : 'ghost'}
-                    onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
-                    className="text-xs justify-start"
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Category</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilterCategory(cat)}
+                    className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all duration-200 border ${
+                      filterCategory === cat
+                        ? 'bg-near-green/15 border-near-green/30 text-near-green'
+                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-white/10 hover:text-text-secondary'
+                    }`}
                   >
-                    {opt.label}
-                  </Button>
+                    {cat}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Bubble Content */}
-            <div className="space-y-2">
-              <p className="text-xs text-text-muted uppercase tracking-wide">Show:</p>
-              <div className="flex flex-col gap-1">
-                {[
-                  { key: 'performance', label: 'Change %' },
-                  { key: 'price', label: 'Price' },
-                  { key: 'volume', label: 'Volume' },
-                  { key: 'marketCap', label: 'Market Cap' },
-                ].map((opt) => (
-                  <Button
-                    key={opt.key}
-                    size="sm"
-                    variant={bubbleContent === opt.key ? 'primary' : 'ghost'}
-                    onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
-                    className="text-xs justify-start"
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
+            {/* Separator */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+            {/* Size & Display — compact two-column */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted block mb-1.5">Size</span>
+                <div className="space-y-0.5">
+                  {[
+                    { key: 'marketCap', label: 'MCap', icon: '◆' },
+                    { key: 'volume', label: 'Vol', icon: '◈' },
+                    { key: 'performance', label: 'Perf', icon: '◉' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
+                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all duration-150 ${
+                        sizeMetric === opt.key
+                          ? 'text-near-green bg-near-green/10 font-medium'
+                          : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      <span className="mr-1 opacity-50">{opt.icon}</span>{opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted block mb-1.5">Show</span>
+                <div className="space-y-0.5">
+                  {[
+                    { key: 'performance', label: 'Δ%', icon: '▲' },
+                    { key: 'price', label: 'Price', icon: '$' },
+                    { key: 'volume', label: 'Vol', icon: '≋' },
+                    { key: 'marketCap', label: 'MCap', icon: '◆' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
+                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all duration-150 ${
+                        bubbleContent === opt.key
+                          ? 'text-near-green bg-near-green/10 font-medium'
+                          : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      <span className="mr-1 opacity-50 font-mono text-[9px]">{opt.icon}</span>{opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* X-ray Mode */}
-            <div className="border-t border-border pt-3">
-              <Button
-                size="sm"
-                variant={xrayMode ? 'primary' : 'secondary'}
+            {/* Separator */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+            {/* Tools Row */}
+            <div className="flex items-center gap-1">
+              <button
                 onClick={() => setXrayMode(!xrayMode)}
-                className="w-full text-xs"
+                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-mono uppercase tracking-wider transition-all duration-200 border ${
+                  xrayMode
+                    ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10'
+                    : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-cyan-500/20'
+                }`}
               >
-                {xrayMode ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-                {xrayMode ? 'Exit X-Ray' : 'X-Ray Mode'}
-              </Button>
+                {xrayMode ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                X-Ray
+              </button>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className={`p-2 rounded-lg transition-all duration-200 border ${
+                  soundEnabled
+                    ? 'bg-near-green/10 border-near-green/20 text-near-green'
+                    : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:text-text-secondary'
+                }`}
+                title={soundEnabled ? 'Sound On' : 'Sound Off'}
+              >
+                {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              </button>
             </div>
 
-            {/* Sound Toggle */}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => { setSoundEnabled(!soundEnabled); }}
-              className="text-xs"
-            >
-              {soundEnabled ? <Volume2 className="w-3 h-3 mr-1" /> : <VolumeX className="w-3 h-3 mr-1" />}
-              {soundEnabled ? 'Sound On' : 'Sound Off'}
-            </Button>
-
-            {/* Quick Actions */}
-            <div className="border-t border-border pt-3 flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
+            {/* Action Bar */}
+            <div className="flex gap-1">
+              <button
                 onClick={handleSnapshot}
-                className="flex-1 text-xs"
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
               >
-                <Camera className="w-3 h-3 mr-1" />
+                <Camera className="w-3 h-3" />
                 Export
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
+              </button>
+              <button
                 onClick={handleShareX}
-                className="flex-1 text-xs"
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
               >
-                <Share2 className="w-3 h-3 mr-1" />
+                <Share2 className="w-3 h-3" />
                 Share
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => { initSimulation(); }}
-                className="flex-1 text-xs"
+              </button>
+              <button
+                onClick={() => initSimulation()}
+                className="p-1.5 rounded-lg text-text-muted hover:text-near-green bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
+                title="Reset Layout"
               >
                 <RotateCcw className="w-3 h-3" />
-              </Button>
+              </button>
             </div>
           </div>
+          
+          {/* Bottom accent */}
+          <div className="h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent" />
         </div>
       </div>
 
