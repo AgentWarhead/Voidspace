@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Container } from '@/components/ui/Container';
 import { VoidBubblesEngine } from '@/components/void-bubbles/VoidBubblesEngine';
 import { GradientText } from '@/components/effects/GradientText';
+import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 
 export function VoidBubblesPageClient() {
   // Enable immersive mode — hides the site footer
@@ -22,11 +23,17 @@ export function VoidBubblesPageClient() {
             background: 'radial-gradient(ellipse at center, rgba(0,212,255,0.04) 0%, transparent 70%)',
           }}
         />
+        
+        {/* Scan line sweep across hero bar */}
+        <div className="absolute inset-0">
+          <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-near-green/20 to-transparent animate-scan" />
+        </div>
+        
         <Container size="xl" className="relative z-10">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <span className="text-2xl">🫧</span>
+                <VoidspaceLogo size="sm" animate={false} className="opacity-80" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-near-green rounded-full animate-pulse" />
               </div>
               <GradientText as="h1" className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -38,9 +45,9 @@ export function VoidBubblesPageClient() {
               </p>
             </div>
 
-            {/* Live indicator */}
+            {/* Live indicator with void-glow effect */}
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-near-green animate-pulse void-glow" />
               <span className="text-xs font-mono text-near-green uppercase tracking-wider">Live</span>
             </div>
           </div>

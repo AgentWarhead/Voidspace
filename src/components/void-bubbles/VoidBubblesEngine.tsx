@@ -14,6 +14,7 @@ const { EyeOff, Camera, Volume2, VolumeX, Share2, AlertTriangle } = require('luc
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 import { cn } from '@/lib/utils';
 
 // ────────────────────── Types ──────────────────────
@@ -391,20 +392,106 @@ export function VoidBubblesEngine() {
     const catX = (cat: string) => centerX + Math.cos(catAngle(cat)) * clusterRadius;
     const catY = (cat: string) => centerY + Math.sin(catAngle(cat)) * clusterRadius;
 
-    // Ambient star-field particles for depth
+    // Void grid pattern
+    const gridPattern = defs.append('pattern')
+      .attr('id', 'void-grid')
+      .attr('width', 40)
+      .attr('height', 40)
+      .attr('patternUnits', 'userSpaceOnUse');
+    
+    gridPattern.append('rect')
+      .attr('width', 40)
+      .attr('height', 40)
+      .attr('fill', 'transparent');
+    
+    gridPattern.append('path')
+      .attr('d', 'M 40 0 L 0 0 0 40')
+      .attr('fill', 'none')
+      .attr('stroke', '#00EC97')
+      .attr('stroke-width', 0.5)
+      .attr('opacity', 0.04);
+
+    // Background with grid
+    svg.append('rect')
+      .attr('width', width)
+      .attr('height', height)
+      .attr('fill', 'url(#void-grid)')
+      .attr('class', 'void-grid-bg');
+
+    // Ambient star-field particles for depth (green/cyan tinted)
     const starLayer = svg.append('g').attr('class', 'star-layer');
     for (let i = 0; i < 60; i++) {
       const sx = Math.random() * width;
       const sy = Math.random() * height;
       const sr = 0.5 + Math.random() * 1.2;
-      starLayer.append('circle')
+      const starColor = Math.random() > 0.5 ? '#00EC97' : '#00D4FF';
+      const shouldPulse = Math.random() > 0.7;
+      
+      const star = starLayer.append('circle')
         .attr('cx', sx).attr('cy', sy).attr('r', sr)
-        .attr('fill', '#fff')
-        .attr('opacity', 0.05 + Math.random() * 0.1);
+        .attr('fill', starColor)
+        .attr('opacity', 0.05 + Math.random() * 0.15);
+        
+      if (shouldPulse) {
+        star.append('animateTransform')
+          .attr('attributeName', 'opacity')
+          .attr('values', `${0.05 + Math.random() * 0.1};${0.15 + Math.random() * 0.1};${0.05 + Math.random() * 0.1}`)
+          .attr('dur', `${3 + Math.random() * 4}s`)
+          .attr('repeatCount', 'indefinite');
+      }
     }
 
     // Shockwave layer
     svg.append('g').attr('class', 'shockwave-layer');
+
+    // Animated scan line layer
+    const scanLineGroup = svg.append('g').attr('class', 'scan-line-layer');
+    
+    const scanLineGradient = defs.append('linearGradient')
+      .attr('id', 'scan-line-gradient')
+      .attr('x1', '0%').attr('y1', '0%')
+      .attr('x2', '100%').attr('y2', '0%');
+    
+    scanLineGradient.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', 'transparent');
+    scanLineGradient.append('stop')
+      .attr('offset', '50%')
+      .attr('stop-color', '#00EC97')
+      .attr('stop-opacity', '0.15');
+    scanLineGradient.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'transparent');
+    
+    const scanLine = scanLineGroup.append('rect')
+      .attr('x', 0)
+      .attr('y', -2)
+      .attr('width', width)
+      .attr('height', 2)
+      .attr('fill', 'url(#scan-line-gradient)')
+      .attr('opacity', 0);
+    
+    // Animate scan line
+    const animateScanLine = () => {
+      scanLine
+        .attr('y', -2)
+        .attr('opacity', 0)
+        .transition()
+        .duration(200)
+        .attr('opacity', 1)
+        .transition()
+        .duration(8000)
+        .ease(d3.easeLinear)
+        .attr('y', height)
+        .transition()
+        .duration(200)
+        .attr('opacity', 0)
+        .on('end', () => {
+          setTimeout(animateScanLine, 2000);
+        });
+    };
+    
+    setTimeout(animateScanLine, 2000);
 
     // Category zone labels (subtle, behind bubbles)
     const labelLayer = svg.append('g').attr('class', 'category-labels');
@@ -787,14 +874,20 @@ export function VoidBubblesEngine() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="absolute top-16 sm:top-4 left-2 right-2 sm:left-auto sm:right-4 sm:w-[340px] max-h-[calc(100%-5rem)] sm:max-h-[calc(100%-2rem)] overflow-y-auto z-30"
       >
-        <Card variant="glass" padding="lg" className="relative">
+        <Card variant="glass" padding="lg" className="relative animated-border">
+          {/* Void pulse background pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-near-green/3 to-accent-cyan/3 rounded-lg animate-pulse" />
+          
           <button
             onClick={() => setSelectedToken(null)}
-            className="absolute top-3 right-3 p-1 hover:bg-surface-hover rounded transition-colors"
+            className="absolute top-3 right-3 p-1 hover:bg-surface-hover rounded transition-colors z-10"
           >
             <X className="w-4 h-4 text-text-muted" />
           </button>
 
+          {/* Content wrapper to stay above background pattern */}
+          <div className="relative z-10">
+          
           {/* Token Header */}
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-3">
@@ -861,7 +954,10 @@ export function VoidBubblesEngine() {
             <div className="w-full h-2 bg-surface rounded-full overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
-                style={{ backgroundColor: RISK_COLORS[selectedToken.riskLevel] }}
+                style={{ 
+                  backgroundColor: RISK_COLORS[selectedToken.riskLevel],
+                  boxShadow: `0 0 8px ${RISK_COLORS[selectedToken.riskLevel]}40`
+                }}
                 initial={{ width: 0 }}
                 animate={{ width: `${selectedToken.healthScore}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -899,6 +995,8 @@ export function VoidBubblesEngine() {
               <Share2 className="w-3 h-3" />
             </Button>
           </div>
+          
+          </div> {/* End content wrapper */}
         </Card>
       </motion.div>
     );
@@ -925,21 +1023,28 @@ export function VoidBubblesEngine() {
         className="fixed z-50 pointer-events-none"
         style={{ left: hoverPos.x + 16, top: hoverPos.y - 10 }}
       >
-        <div className="bg-surface/95 backdrop-blur-xl border border-border rounded-lg p-3 shadow-2xl min-w-[180px]">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-bold text-text-primary font-mono text-sm">{hoveredToken.symbol}</span>
-            <span className={cn('text-xs font-mono font-bold', verdictColor)}>{verdict}</span>
+        <div className="relative animated-border bg-surface/95 backdrop-blur-xl border border-border rounded-lg p-3 shadow-2xl min-w-[180px]">
+          {/* Scan line sweep effect */}
+          <div className="absolute inset-0 rounded-lg overflow-hidden">
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-near-green/40 to-transparent animate-scan opacity-60" />
           </div>
-          <div className="text-xs text-text-muted font-mono">
-            {formatPrice(hoveredToken.price)} · <span className={hoveredToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'}>
-              {hoveredToken.priceChange24h >= 0 ? '+' : ''}{hoveredToken.priceChange24h.toFixed(1)}%
-            </span>
-          </div>
-          {hoveredToken.riskLevel === 'critical' && (
-            <div className="text-xs text-error mt-1 flex items-center gap-1">
-              💀 High rug risk
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-bold text-text-primary font-mono text-sm">{hoveredToken.symbol}</span>
+              <span className={cn('text-xs font-mono font-bold', verdictColor)}>{verdict}</span>
             </div>
-          )}
+            <div className="text-xs text-text-muted font-mono">
+              {formatPrice(hoveredToken.price)} · <span className={hoveredToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'}>
+                {hoveredToken.priceChange24h >= 0 ? '+' : ''}{hoveredToken.priceChange24h.toFixed(1)}%
+              </span>
+            </div>
+            {hoveredToken.riskLevel === 'critical' && (
+              <div className="text-xs text-error mt-1 flex items-center gap-1">
+                💀 High rug risk
+              </div>
+            )}
+          </div>
         </div>
       </motion.div>
     );
@@ -957,9 +1062,26 @@ export function VoidBubblesEngine() {
             <motion.div
               key={alert.id}
               initial={{ opacity: 0, x: -50, scale: 0.8 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0, 
+                scale: 1,
+                boxShadow: [
+                  `0 0 0px ${alert.type === 'buy' ? '#00EC97' : '#FF4757'}`,
+                  `0 0 20px ${alert.type === 'buy' ? '#00EC9740' : '#FF475740'}`,
+                  `0 0 0px ${alert.type === 'buy' ? '#00EC97' : '#FF4757'}`
+                ]
+              }}
               exit={{ opacity: 0, x: -50, scale: 0.8 }}
-              className="flex items-center gap-2 bg-surface/90 backdrop-blur-xl border border-border rounded-lg px-3 py-2"
+              transition={{
+                boxShadow: { duration: 1.5, times: [0, 0.1, 1] }
+              }}
+              className={cn(
+                "flex items-center gap-2 bg-surface/90 backdrop-blur-xl border rounded-lg px-3 py-2",
+                alert.type === 'buy' 
+                  ? 'border-l-2 border-l-near-green border-border' 
+                  : 'border-l-2 border-l-error border-border'
+              )}
             >
               <Zap className={cn('w-3.5 h-3.5 shrink-0', alert.type === 'buy' ? 'text-near-green' : 'text-error')} />
               <div className="min-w-0">
@@ -981,17 +1103,32 @@ export function VoidBubblesEngine() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[600px] bg-background rounded-xl border border-border">
-        <div className="text-center space-y-4">
-          <motion.div
-            className="w-16 h-16 rounded-full border-2 border-near-green/30 border-t-near-green mx-auto"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-          />
-          <div>
-            <p className="text-text-primary font-semibold">Scanning NEAR Ecosystem</p>
-            <p className="text-text-muted text-sm">Loading {'>'}350 tokens from Ref Finance + DexScreener...</p>
+      <div className="flex items-center justify-center h-[600px] bg-background rounded-xl border border-border relative overflow-hidden">
+        {/* Void grid background */}
+        <div className="absolute inset-0 bg-grid opacity-40" />
+        
+        {/* Animated scan line */}
+        <div className="absolute inset-0">
+          <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-near-green/30 to-transparent animate-scan" />
+        </div>
+        
+        <div className="text-center space-y-6 relative z-10">
+          {/* Voidspace Logo with draw animation */}
+          <div className="mx-auto">
+            <VoidspaceLogo size="lg" animate={true} className="mx-auto" />
           </div>
+          
+          <div className="space-y-2">
+            <p className="text-near-green font-mono font-bold text-lg uppercase tracking-wider">
+              SCANNING THE VOID
+            </p>
+            <p className="text-text-muted text-sm font-mono">
+              Mapping {'>'}350 tokens across the NEAR ecosystem...
+            </p>
+          </div>
+          
+          {/* Additional scan line for loading state */}
+          <div className="w-48 h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent mx-auto animate-pulse" />
         </div>
       </div>
     );
@@ -1013,20 +1150,30 @@ export function VoidBubblesEngine() {
     <div className="relative w-full h-full min-h-0 bg-background rounded-xl border border-border overflow-hidden">
       {/* Top Controls — single row on desktop, stacked on mobile */}
       <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-        {/* Category filters — scrollable on mobile */}
-        <div className="flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full">
+        {/* Category filters — command terminal aesthetic */}
+        <div className="relative flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full">
+          {/* Scan line glow behind control row */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/5 to-transparent opacity-30" />
+          
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setFilterCategory(cat)}
               className={cn(
-                'px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0',
+                'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group',
                 filterCategory === cat
-                  ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                  ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
                   : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
               )}
             >
-              {cat === 'all' ? 'ALL' : cat}
+              {/* Scan line sweep effect on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-full h-full bg-gradient-to-r from-transparent via-near-green/20 to-transparent transform -skew-x-12 animate-pulse" />
+              </div>
+              
+              <span className="relative z-10">
+                {cat === 'all' ? 'ALL' : cat}
+              </span>
             </button>
           ))}
         </div>
@@ -1036,47 +1183,62 @@ export function VoidBubblesEngine() {
           <button
             onClick={() => setXrayMode(!xrayMode)}
             className={cn(
-              'p-1.5 sm:p-2 rounded-lg border transition-all',
+              'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
               xrayMode
                 ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
                 : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
             )}
             title="X-Ray Mode — See concentration risk"
           >
-            {xrayMode ? <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+            <div className="relative z-10">
+              {xrayMode ? <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            </div>
           </button>
           <button
             onClick={() => { setSoundEnabled(!soundEnabled); }}
             className={cn(
-              'p-1.5 sm:p-2 rounded-lg border transition-all',
+              'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
               soundEnabled
                 ? 'bg-near-green/20 border-near-green/30 text-near-green'
                 : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
             )}
             title="Sonic Mode — Hear the market"
           >
-            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+            <div className="relative z-10">
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            </div>
           </button>
           <button
             onClick={handleSnapshot}
-            className="p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
+            className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
             title="Save snapshot"
           >
-            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+            <div className="relative z-10">
+              <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
           </button>
           <button
             onClick={handleShareX}
-            className="p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
+            className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
             title="Share on X"
           >
-            <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+            <div className="relative z-10">
+              <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
           </button>
           <button
             onClick={() => { initSimulation(); }}
-            className="p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
+            className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
             title="Reset view"
           >
-            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+            <div className="relative z-10">
+              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
           </button>
         </div>
       </div>
@@ -1123,7 +1285,9 @@ export function VoidBubblesEngine() {
         <svg
           ref={svgRef}
           className="w-full h-full"
-          style={{ background: 'radial-gradient(ellipse at 50% 45%, #141420 0%, #0c0c14 40%, #08080c 100%)' }}
+          style={{ 
+            background: 'radial-gradient(ellipse at 50% 45%, #141420 0%, #0c0c14 40%, #08080c 100%)',
+          }}
         />
       </div>
 
