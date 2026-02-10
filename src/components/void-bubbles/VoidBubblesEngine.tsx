@@ -1583,7 +1583,7 @@ export function VoidBubblesEngine() {
               <FeatureTip
                 tip="X-Ray Mode reveals concentration risk and rug detection scores. Red rings = high risk. Use this before aping!"
                 title="🔍 X-RAY MODE"
-                position="top"
+                position="bottom"
                 className="ml-1"
               />
             </div>
@@ -1608,7 +1608,7 @@ export function VoidBubblesEngine() {
               <FeatureTip
                 tip="Sonic Mode lets you HEAR the market. Pumps play ascending tones, dumps play low rumbles, and whale alerts get dramatic chimes."
                 title="🔊 SONIC MODE"
-                position="top"
+                position="bottom"
                 className="ml-1"
               />
             </div>
@@ -1672,7 +1672,7 @@ export function VoidBubblesEngine() {
                 <FeatureTip
                   tip="Void Bubbles uses AI health scoring to assess every token's risk level. Click any bubble for the full breakdown."
                   title="🧠 AI-POWERED"
-                  position="top"
+                  position="bottom"
                   className=""
                 />
               </div>
