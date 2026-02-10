@@ -8,6 +8,8 @@ import { TiltCard } from '@/components/effects/TiltCard';
 import { HotTag } from '@/components/effects/HotTag';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { SaveButton } from '@/components/opportunities/SaveButton';
+import { FeasibilitySnapshot } from '@/components/opportunities/FeasibilitySnapshot';
+import { VoidTimer } from '@/components/opportunities/VoidTimer';
 import { HELP_CONTENT } from '@/lib/help-content';
 import type { Opportunity } from '@/types';
 
@@ -29,7 +31,10 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
                   </h3>
                   {opportunity.gap_score >= 85 && <HotTag />}
                 </div>
-                <SaveButton opportunityId={opportunity.id} size="sm" />
+                <div className="flex items-center gap-1">
+                  <FeasibilitySnapshot opportunity={opportunity} />
+                  <SaveButton opportunityId={opportunity.id} size="sm" />
+                </div>
               </div>
               
               {/* Hidden by default, show on hover */}
@@ -75,6 +80,11 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* Void Timer - Shows how long the opportunity has been detected */}
+            <div className="flex justify-start">
+              <VoidTimer createdAt={opportunity.created_at} size="sm" />
             </div>
           </div>
         </GlowCard>

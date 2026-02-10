@@ -50,7 +50,40 @@ export default async function DashboardPage() {
           </section>
         </ScrollReveal>
 
-        {/* Section 4: Ready to build — CTA Footer */}
+        {/* Section 4: Void Bubbles CTA */}
+        <ScrollReveal delay={0.12}>
+          <section>
+            <div className="relative overflow-hidden rounded-2xl border border-accent-cyan/20">
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%)',
+                }}
+              />
+              <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8">
+                <div className="text-5xl sm:text-6xl shrink-0">🫧</div>
+                <div className="flex-1 text-center sm:text-left">
+                  <GradientText as="h2" className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Void Bubbles — Live Ecosystem Visualization
+                  </GradientText>
+                  <p className="text-text-secondary text-sm mt-2 max-w-lg">
+                    Watch every NEAR token breathe in real-time. AI health scores, whale alerts, rug detection,
+                    and sonic feedback — all in one mesmerizing bubble map.
+                  </p>
+                </div>
+                <Link
+                  href="/void-bubbles"
+                  className="shimmer-btn text-background font-semibold px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 shrink-0"
+                >
+                  Launch Bubbles
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* Section 5: Ready to build — CTA Footer */}
         <ScrollReveal delay={0.15}>
           <div className="relative overflow-hidden rounded-2xl">
             <div
@@ -81,8 +114,14 @@ export default async function DashboardPage() {
                   Sanctum
                 </Link>
                 <Link
-                  href="/observatory"
+                  href="/void-bubbles"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 text-cyan-300 rounded-lg transition-colors text-sm"
+                >
+                  🫧 Void Bubbles
+                </Link>
+                <Link
+                  href="/observatory"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface border border-border hover:border-accent-cyan/30 text-text-secondary hover:text-accent-cyan rounded-lg transition-colors text-sm"
                 >
                   <Search className="w-4 h-4" />
                   Observatory

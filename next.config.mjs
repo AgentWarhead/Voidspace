@@ -48,7 +48,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com https://api.coingecko.com https://graph.mintbase.xyz wss://*.near.org",
+              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com https://api.coingecko.com https://graph.mintbase.xyz https://indexer.ref.finance https://api.dexscreener.com wss://*.near.org",
               "base-uri 'self'", // Prevent base tag injection attacks
               "form-action 'self'", // Prevent form hijacking
               "upgrade-insecure-requests", // Force HTTPS

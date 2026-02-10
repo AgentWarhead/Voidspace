@@ -7,7 +7,9 @@ import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { GapScoreBreakdown } from '@/components/opportunities/GapScoreBreakdown';
+import { CrossChainRivalry } from '@/components/opportunities/CrossChainRivalry';
 import { SaveButton } from '@/components/opportunities/SaveButton';
+import { VoidTimer } from '@/components/opportunities/VoidTimer';
 import { BriefGenerator } from '@/components/brief/BriefGenerator';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -105,6 +107,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                     <p>{HELP_CONTENT.competitionLevel.description}</p>
                   </InfoTooltip>
                 </span>
+                <VoidTimer createdAt={opportunity.created_at} size="md" />
               </div>
               <GradientText as="h1" className="text-2xl font-bold">
                 {opportunity.title}
@@ -223,6 +226,14 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </Card>
           {breakdown && <GapScoreBreakdown breakdown={breakdown} />}
         </div>
+      </ScrollReveal>
+
+      {/* Cross-Chain Competition */}
+      <ScrollReveal delay={0.08}>
+        <CrossChainRivalry
+          categorySlug={category.slug}
+          nearProjectCount={relatedProjects.length}
+        />
       </ScrollReveal>
 
       {/* Reasoning */}

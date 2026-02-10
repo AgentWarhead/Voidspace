@@ -5,6 +5,7 @@ import { SearchShortcut } from '@/components/layout/SearchShortcut';
 import { Providers } from '@/components/providers/Providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
+import { VoidPulseNotifications } from '@/components/effects/VoidPulseNotifications';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
             </ErrorBoundary>
           </main>
           <Footer />
+          <VoidPulseNotifications />
         </Providers>
       </body>
     </html>
