@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { Container, Card } from '@/components/ui';
 import { OpportunityFilters } from '@/components/opportunities/OpportunityFilters';
 import { OpportunityList } from '@/components/opportunities/OpportunityList';
@@ -85,6 +86,17 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
           </div>
         </Container>
       </section>
+
+      <Container size="xl" className="py-4">
+        <ScrollReveal>
+          <Link href="/void-bubbles" className="group flex items-center gap-3 px-6 py-4 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
+            <span className="text-2xl">🫧</span>
+            <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
+              Want to see these tokens LIVE? → Launch Void Bubbles
+            </span>
+          </Link>
+        </ScrollReveal>
+      </Container>
 
       <Container size="xl" className="py-8 space-y-6">
         <ScrollReveal>

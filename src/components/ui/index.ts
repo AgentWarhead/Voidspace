@@ -7,3 +7,4 @@ export { Progress } from './Progress';
 export { Container } from './Container';
 export { InfoTooltip } from './InfoTooltip';
 export { VoidEmptyState } from './VoidEmptyState';
+export { FeatureTip } from './FeatureTip';

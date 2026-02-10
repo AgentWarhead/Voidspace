@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
@@ -384,6 +385,16 @@ export default function SanctumPage() {
                   <Rocket className="w-4 h-4 text-cyan-400" />
                   <span>One-Click Deploy</span>
                 </div>
+              </div>
+              
+              {/* Void Bubbles CTA */}
+              <div className="mt-16 max-w-lg mx-auto">
+                <Link href="/void-bubbles" className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
+                  <span className="text-lg">🫧</span>
+                  <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
+                    Track token health in real-time → Void Bubbles
+                  </span>
+                </Link>
               </div>
             </Container>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Network, Activity, Globe, X } from 'lucide-react';
@@ -237,6 +238,16 @@ export default function ObservatoryContent() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Void Bubbles CTA */}
+      <Container className="py-8">
+        <Link href="/void-bubbles" className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
+          <span className="text-lg">🫧</span>
+          <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
+            See the ecosystem at a glance → Void Bubbles
+          </span>
+        </Link>
+      </Container>
     </div>
   );
 }

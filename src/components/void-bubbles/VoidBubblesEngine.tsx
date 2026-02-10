@@ -14,6 +14,7 @@ const { EyeOff, Camera, Volume2, VolumeX, Share2, AlertTriangle } = require('luc
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { FeatureTip } from '@/components/ui/FeatureTip';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +34,12 @@ interface VoidBubbleToken {
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
   riskFactors: string[];
   detectedAt: string;
+  // New fields for timeframe support
+  priceChange1h: number;
+  priceChange6h: number;
+  dexScreenerUrl?: string;
+  refFinanceUrl?: string;
+  contractAddress: string;
 }
 
 interface BubbleNode extends d3.SimulationNodeDatum {
@@ -164,6 +171,10 @@ export function VoidBubblesEngine() {
   const [whaleAlerts, setWhaleAlerts] = useState<WhaleAlert[]>([]);
   const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
   const [, setLastUpdated] = useState<string>('');
+  // New state for the enhanced features
+  const [period, setPeriod] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d');
+  const [sizeMetric, setSizeMetric] = useState<'marketCap' | 'volume' | 'performance'>('marketCap');
+  const [bubbleContent, setBubbleContent] = useState<'performance' | 'price' | 'volume' | 'marketCap'>('performance');
 
   // Refs
   const svgRef = useRef<SVGSVGElement>(null);
@@ -189,7 +200,7 @@ export function VoidBubblesEngine() {
 
   const fetchTokens = useCallback(async () => {
     try {
-      const res = await fetch('/api/void-bubbles');
+      const res = await fetch(`/api/void-bubbles?period=${period}`);
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
       setTokens(data.tokens || []);
@@ -200,13 +211,13 @@ export function VoidBubblesEngine() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [period]);
 
   useEffect(() => {
     fetchTokens();
     const interval = setInterval(fetchTokens, 60000); // Refresh every 60s
     return () => clearInterval(interval);
-  }, [fetchTokens]);
+  }, [fetchTokens, period]);
 
   // ────────────────────── Whale Alerts (simulated) ──────────────────────
 
@@ -297,12 +308,20 @@ export function VoidBubblesEngine() {
     const centerX = width / 2;
     const centerY = height / 2;
 
-    // Scale radius by market cap — log scale for balanced distribution
-    const caps = filteredTokens.map(t => t.marketCap).filter(c => c > 0);
-    const minCap = Math.min(...caps, 1);
-    const maxCap = Math.max(...caps, 1);
+    // Scale radius by selected size metric — log scale for balanced distribution
+    const getMetricValue = (token: VoidBubbleToken) => {
+      switch (sizeMetric) {
+        case 'volume': return token.volume24h;
+        case 'performance': return Math.abs(token.priceChange24h) * 1000; // scale up for visibility
+        default: return token.marketCap;
+      }
+    };
+    
+    const values = filteredTokens.map(t => getMetricValue(t)).filter(v => v > 0);
+    const minValue = Math.min(...values, 1);
+    const maxValue = Math.max(...values, 1);
     const radiusScale = d3.scaleLog()
-      .domain([minCap, maxCap])
+      .domain([minValue, maxValue])
       .range([10, Math.min(width, height) * 0.09])
       .clamp(true);
 
@@ -310,22 +329,36 @@ export function VoidBubblesEngine() {
     const nodes: BubbleNode[] = filteredTokens.map((token, i) => {
       const angle = (i / filteredTokens.length) * 2 * Math.PI;
       const spread = Math.min(width, height) * 0.3;
-      const r = radiusScale(token.marketCap);
-      const catColor = CATEGORY_COLORS[token.category] || '#888888';
-      // NEW COLOR MODEL: Category color is ALWAYS dominant and vivid
-      // Base color = category color, ALWAYS vivid and recognizable
-      const pctAbs = Math.min(Math.abs(token.priceChange24h) / 20, 1);
-      const hsl = d3.hsl(catColor);
-      // Always keep high saturation — category color is king
-      hsl.s = Math.max(hsl.s, 0.7);
-      if (token.priceChange24h >= 0) {
-        // Gainers: brighter, more luminous
-        hsl.l = 0.45 + pctAbs * 0.15; // 0.45 base → 0.60 for big gainers
+      const r = radiusScale(getMetricValue(token));
+      
+      // Performance-based color: GREEN = up, RED = down
+      // Intensity scales with magnitude of change
+      const change = token.priceChange24h; // will become dynamic based on selected period
+      const absChange = Math.min(Math.abs(change), 30); // cap at 30% for color scaling
+      const intensity = absChange / 30; // 0-1 scale
+
+      let bubbleColor: string;
+      let glowColor: string;
+
+      if (Math.abs(change) < 0.5) {
+        // Near-zero: neutral with subtle Voidspace tint
+        bubbleColor = '#2a3a35'; // dark void-green tint
+        glowColor = '#00EC97';
+      } else if (change > 0) {
+        // GREEN spectrum: from muted green to vivid neon green
+        const h = d3.hsl('#00EC97'); // Voidspace near-green as the green
+        h.s = 0.6 + intensity * 0.4; // 0.6 → 1.0
+        h.l = 0.25 + intensity * 0.25; // 0.25 → 0.50
+        bubbleColor = h.formatRgb();
+        glowColor = '#00EC97';
       } else {
-        // Losers: darker, but still saturated
-        hsl.l = 0.40 - pctAbs * 0.12; // 0.40 base → 0.28 for big losers
+        // RED spectrum: from muted red to vivid blood red
+        const h = d3.hsl('#FF3333');
+        h.s = 0.6 + intensity * 0.4;
+        h.l = 0.20 + intensity * 0.20; // darker range for red
+        bubbleColor = h.formatRgb();
+        glowColor = '#FF4444';
       }
-      const changeColor = hsl.formatRgb();
 
       // Spiral spawn for even distribution
       const spiralR = spread * 0.3 + (i / filteredTokens.length) * spread * 0.5;
@@ -334,8 +367,8 @@ export function VoidBubblesEngine() {
         token,
         radius: 0,
         targetRadius: r,
-        color: changeColor,
-        glowColor: catColor,
+        color: bubbleColor,
+        glowColor: glowColor,
         x: centerX + Math.cos(angle) * spiralR,
         y: centerY + Math.sin(angle) * spiralR,
       };
@@ -369,19 +402,19 @@ export function VoidBubblesEngine() {
       .enter().append('feMergeNode')
       .attr('in', d => d);
 
-    // Create radial gradients per node — subtle 3D depth, no white blobs
+    // Create radial gradients per node — brighter to darker version of bubble color (no white)
     nodes.forEach(node => {
       const base = d3.hsl(node.color);
       const highlight = d3.hsl(node.color);
-      highlight.l = Math.min(base.l + 0.15, 0.75);
+      highlight.l = Math.min(base.l + 0.2, 0.8); // brighter version
       const shadow = d3.hsl(node.color);
-      shadow.l = Math.max(base.l - 0.15, 0.05);
+      shadow.l = Math.max(base.l - 0.2, 0.05); // darker version
 
       const grad = defs.append('radialGradient')
         .attr('id', `grad-${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
-        .attr('cx', '40%').attr('cy', '35%').attr('r', '60%');
+        .attr('cx', '30%').attr('cy', '30%').attr('r', '70%');
       grad.append('stop').attr('offset', '0%').attr('stop-color', highlight.formatRgb());
-      grad.append('stop').attr('offset', '60%').attr('stop-color', node.color);
+      grad.append('stop').attr('offset', '70%').attr('stop-color', node.color);
       grad.append('stop').attr('offset', '100%').attr('stop-color', shadow.formatRgb());
     });
 
@@ -599,20 +632,38 @@ export function VoidBubblesEngine() {
       .style('text-shadow', '0 1px 3px rgba(0,0,0,0.7)')
       .text(d => d.token.symbol);
 
-    // Price change % label (on bubbles ≥28px radius)
+    // Secondary label (on bubbles ≥28px radius) - content based on bubbleContent selection
     bubbleGroups.filter(d => d.targetRadius >= 28)
       .append('text')
-      .attr('class', 'bubble-change')
+      .attr('class', 'bubble-secondary')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('dy', '0.65em')
-      .attr('fill', d => d.token.priceChange24h >= 0 ? '#b8ffd9' : '#ffb3b8')
+      .attr('fill', d => {
+        if (bubbleContent === 'performance') {
+          return d.token.priceChange24h >= 0 ? '#b8ffd9' : '#ffb3b8';
+        }
+        return '#d1d5db'; // neutral color for non-performance displays
+      })
       .attr('font-size', d => Math.max(Math.min(d.targetRadius * 0.28, 11), 7))
       .attr('font-weight', '600')
       .attr('font-family', "'JetBrains Mono', monospace")
       .attr('pointer-events', 'none')
       .style('text-shadow', '0 1px 2px rgba(0,0,0,0.6)')
-      .text(d => `${d.token.priceChange24h >= 0 ? '+' : ''}${d.token.priceChange24h.toFixed(1)}%`);
+      .text(d => {
+        switch (bubbleContent) {
+          case 'performance':
+            return `${d.token.priceChange24h >= 0 ? '+' : ''}${d.token.priceChange24h.toFixed(1)}%`;
+          case 'price':
+            return formatPrice(d.token.price);
+          case 'volume':
+            return formatCompact(d.token.volume24h);
+          case 'marketCap':
+            return formatCompact(d.token.marketCap);
+          default:
+            return `${d.token.priceChange24h >= 0 ? '+' : ''}${d.token.priceChange24h.toFixed(1)}%`;
+        }
+      });
 
     // Watchlist indicator
     bubbleGroups.append('circle')
@@ -739,7 +790,7 @@ export function VoidBubblesEngine() {
       cancelAnimationFrame(animFrameRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredTokens, watchlist]);
+  }, [filteredTokens, watchlist, sizeMetric, bubbleContent]);
 
   useEffect(() => {
     const cleanup = initSimulation();
@@ -796,7 +847,7 @@ export function VoidBubblesEngine() {
       groups.select('.bubble-main').transition().duration(300).attr('opacity', 0.92);
       groups.select('.bubble-glow').transition().duration(300).attr('opacity', 0.35);
       groups.select('.bubble-label').transition().duration(300).attr('opacity', 1);
-      groups.select('.bubble-change').transition().duration(300).attr('opacity', 1);
+      groups.select('.bubble-secondary').transition().duration(300).attr('opacity', 1);
       return;
     }
     
@@ -825,7 +876,7 @@ export function VoidBubblesEngine() {
         .transition().duration(400)
         .attr('opacity', isHighlighted ? 1 : 0.1);
       
-      el.select('.bubble-change')
+      el.select('.bubble-secondary')
         .transition().duration(400)
         .attr('opacity', isHighlighted ? 1 : 0.1);
     });
@@ -1027,6 +1078,66 @@ export function VoidBubblesEngine() {
             </div>
           </div>
 
+          {/* All Timeframe Changes */}
+          <div className="mb-4">
+            <p className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">All Timeframes</p>
+            <div className="text-xs font-mono text-text-secondary">
+              <span className="mr-3">1H: <span className={selectedToken.priceChange1h >= 0 ? 'text-near-green' : 'text-error'}>
+                {selectedToken.priceChange1h >= 0 ? '+' : ''}{selectedToken.priceChange1h.toFixed(1)}%
+              </span></span>
+              <span className="mr-3">6H: <span className={selectedToken.priceChange6h >= 0 ? 'text-near-green' : 'text-error'}>
+                {selectedToken.priceChange6h >= 0 ? '+' : ''}{selectedToken.priceChange6h.toFixed(1)}%
+              </span></span>
+              <span>24H: <span className={selectedToken.priceChange24h >= 0 ? 'text-near-green' : 'text-error'}>
+                {selectedToken.priceChange24h >= 0 ? '+' : ''}{selectedToken.priceChange24h.toFixed(1)}%
+              </span></span>
+            </div>
+          </div>
+          
+          {/* External Links */}
+          <div className="mb-4 flex gap-2">
+            {selectedToken.dexScreenerUrl && (
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="flex-1 text-xs"
+                onClick={() => window.open(selectedToken.dexScreenerUrl, '_blank')}
+              >
+                🔗 DexScreener
+              </Button>
+            )}
+            {selectedToken.refFinanceUrl && (
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="flex-1 text-xs"
+                onClick={() => window.open(selectedToken.refFinanceUrl, '_blank')}
+              >
+                🔗 Trade on Ref
+              </Button>
+            )}
+          </div>
+          
+          {/* Contract Address */}
+          <div className="mb-4">
+            <p className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2">Contract</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-xs bg-surface rounded px-2 py-1 font-mono text-text-secondary">
+                {selectedToken.contractAddress.length > 20 
+                  ? `${selectedToken.contractAddress.slice(0, 10)}...${selectedToken.contractAddress.slice(-8)}`
+                  : selectedToken.contractAddress
+                }
+              </code>
+              <button
+                onClick={() => navigator.clipboard.writeText(selectedToken.contractAddress)}
+                className="px-2 py-1 text-xs bg-surface hover:bg-surface-hover rounded transition-colors"
+                title="Copy address"
+              >
+                📋
+              </button>
+            </div>
+          </div>
+
           {/* Risk Factors */}
           <div className="mb-4">
             <p className="text-xs font-mono text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -1212,35 +1323,71 @@ export function VoidBubblesEngine() {
     <div className="relative w-full h-full min-h-0 bg-background rounded-xl border border-border overflow-hidden">
       {/* Top Controls — single row on desktop, stacked on mobile */}
       <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-        {/* Category filters — command terminal aesthetic */}
-        <div className="relative flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full">
+        {/* Timeframe selector and filters */}
+        <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
+          {/* Timeframe selector - FIRST element */}
+          <div className="flex items-center gap-0.5 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-0.5 flex-shrink-0">
+            {(['1h', '4h', '1d', '7d', '30d'] as const).map(p => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={cn(
+                  'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold transition-all uppercase',
+                  period === p
+                    ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                    : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          
+          {/* Category filters — command terminal aesthetic */}
+          <div className="relative flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full min-w-0">
           {/* Scan line glow behind control row */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/5 to-transparent opacity-30" />
           
           {/* Gainers/Losers filter buttons */}
-          <button
-            onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
-            className={cn(
-              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
-              highlightMode === 'gainers'
-                ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
-                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
-            )}
-          >
-            <span className="relative z-10">🔥 Gainers</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+              className={cn(
+                'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+                highlightMode === 'gainers'
+                  ? 'bg-near-green/20 text-near-green border border-near-green/30 border-l-2 border-l-near-green'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+              )}
+            >
+              <span className="relative z-10">🔥 Gainers</span>
+            </button>
+            <FeatureTip
+              tip="Highlights the top 15 gainers in the selected timeframe. Everything else dims so you can focus on what's pumping."
+              title="🔥 TOP GAINERS"
+              position="top"
+              className="ml-1"
+            />
+          </div>
           
-          <button
-            onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
-            className={cn(
-              'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
-              highlightMode === 'losers'
-                ? 'bg-red-500/20 text-red-400 border border-red-500/30 border-l-2 border-l-red-500'
-                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
-            )}
-          >
-            <span className="relative z-10">💀 Losers</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+              className={cn(
+                'relative px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0 group flex items-center gap-1',
+                highlightMode === 'losers'
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30 border-l-2 border-l-red-500'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+              )}
+            >
+              <span className="relative z-10">💀 Losers</span>
+            </button>
+            <FeatureTip
+              tip="Highlights the top 15 losers. Great for finding potential bounce plays or identifying tokens to avoid."
+              title="💀 TOP LOSERS"
+              position="top"
+              className="ml-1"
+            />
+          </div>
           
           {/* Divider */}
           <div className="w-px h-4 bg-border mx-1" />
@@ -1266,40 +1413,103 @@ export function VoidBubblesEngine() {
               </span>
             </button>
           ))}
+          </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons and toggles */}
         <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 self-end sm:self-auto">
-          <button
-            onClick={() => setXrayMode(!xrayMode)}
-            className={cn(
-              'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
-              xrayMode
-                ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
-                : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
-            )}
-            title="X-Ray Mode — See concentration risk"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
-            <div className="relative z-10">
-              {xrayMode ? <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-            </div>
-          </button>
-          <button
-            onClick={() => { setSoundEnabled(!soundEnabled); }}
-            className={cn(
-              'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
-              soundEnabled
-                ? 'bg-near-green/20 border-near-green/30 text-near-green'
-                : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
-            )}
-            title="Sonic Mode — Hear the market"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
-            <div className="relative z-10">
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-            </div>
-          </button>
+          {/* Bubble Size Toggle */}
+          <div className="flex items-center gap-0.5 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-0.5">
+            <span className="text-[9px] font-mono text-text-muted px-1.5 uppercase">Size</span>
+            {[
+              { key: 'marketCap', label: 'Cap' },
+              { key: 'volume', label: 'Vol' },
+              { key: 'performance', label: 'Perf' },
+            ].map(opt => (
+              <button 
+                key={opt.key} 
+                onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
+                className={cn(
+                  'px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-all uppercase',
+                  sizeMetric === opt.key
+                    ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                    : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* Bubble Content Toggle */}
+          <div className="flex items-center gap-0.5 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-0.5">
+            <span className="text-[9px] font-mono text-text-muted px-1.5 uppercase">Show</span>
+            {[
+              { key: 'performance', label: '%' },
+              { key: 'price', label: '$' },
+              { key: 'volume', label: 'Vol' },
+              { key: 'marketCap', label: 'Cap' },
+            ].map(opt => (
+              <button 
+                key={opt.key} 
+                onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
+                className={cn(
+                  'px-2 py-1 rounded-md text-[10px] font-mono font-bold transition-all uppercase',
+                  bubbleContent === opt.key
+                    ? 'bg-near-green/20 text-near-green border border-near-green/30'
+                    : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setXrayMode(!xrayMode)}
+              className={cn(
+                'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
+                xrayMode
+                  ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
+                  : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
+              )}
+              title="X-Ray Mode — See concentration risk"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+              <div className="relative z-10">
+                {xrayMode ? <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              </div>
+            </button>
+            <FeatureTip
+              tip="X-Ray Mode reveals concentration risk and rug detection scores. Red rings = high risk. Use this before aping!"
+              title="🔍 X-RAY MODE"
+              position="top"
+              className="ml-1"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => { setSoundEnabled(!soundEnabled); }}
+              className={cn(
+                'relative p-1.5 sm:p-2 rounded-lg border transition-all group overflow-hidden',
+                soundEnabled
+                  ? 'bg-near-green/20 border-near-green/30 text-near-green'
+                  : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
+              )}
+              title="Sonic Mode — Hear the market"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-near-green/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12" />
+              <div className="relative z-10">
+                {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              </div>
+            </button>
+            <FeatureTip
+              tip="Sonic Mode lets you HEAR the market. Pumps play ascending tones, dumps play low rumbles, and whale alerts get dramatic chimes."
+              title="🔊 SONIC MODE"
+              position="top"
+              className="ml-1"
+            />
+          </div>
           <button
             onClick={handleSnapshot}
             className="relative p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all group overflow-hidden"
@@ -1353,6 +1563,18 @@ export function VoidBubblesEngine() {
                 </span>
               </>
             )}
+            <div className="w-px h-3 bg-border" />
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
+                AI-POWERED
+              </span>
+              <FeatureTip
+                tip="Void Bubbles uses AI health scoring to assess every token's risk level. Click any bubble for the full breakdown."
+                title="🧠 AI-POWERED"
+                position="top"
+                className=""
+              />
+            </div>
           </div>
           {/* Right: Voidspace logo */}
           <div className="flex items-center gap-2">

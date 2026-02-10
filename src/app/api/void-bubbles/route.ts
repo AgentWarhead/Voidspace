@@ -35,6 +35,12 @@ export interface VoidBubbleToken {
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
   riskFactors: string[];
   detectedAt: string;
+  // New fields for timeframe support
+  priceChange1h: number;
+  priceChange6h: number;
+  dexScreenerUrl?: string;
+  refFinanceUrl?: string;
+  contractAddress: string; // the token's contract address (same as id)
 }
 
 // Known NEAR token categories
@@ -99,8 +105,12 @@ function calculateHealthScore(token: {
   return { score, riskLevel, factors };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
+    const period = searchParams.get('period') || '1d';
+    
     // Fetch from both sources in parallel
     const [refRes, dexRes] = await Promise.all([
       fetch('https://indexer.ref.finance/list-token-price', { next: { revalidate: 60 } })
@@ -134,19 +144,59 @@ export async function GET() {
 
         const volume24h = pair.volume?.h24 || 0;
         const liquidity = pair.liquidity?.usd || 0;
-        const priceChange24h = pair.priceChange?.h24 || 0;
-        const marketCap = pair.marketCap || pair.fdv || liquidity * 2;
         const price = parseFloat(pair.priceUsd) || 0;
+        
+        // Get all available price changes
+        const priceChange1h = pair.priceChange?.h1 || 0;
+        const priceChange6h = pair.priceChange?.h6 || 0;
+        const priceChange24h = pair.priceChange?.h24 || 0;
+        
+        // Map period to the appropriate price change for current display
+        let currentPriceChange = priceChange24h;
+        let currentVolume = volume24h;
+        
+        switch (period) {
+          case '1h':
+            currentPriceChange = priceChange1h;
+            currentVolume = pair.volume?.h1 || 0;
+            break;
+          case '4h':
+            currentPriceChange = priceChange6h; // closest available
+            currentVolume = pair.volume?.h6 || 0;
+            break;
+          case '1d':
+            currentPriceChange = priceChange24h;
+            currentVolume = volume24h;
+            break;
+          case '7d':
+            // TODO: For MVP, simulate 7d and 30d by multiplying 24h with variance
+            // This is simulated until we add historical data from additional endpoints
+            currentPriceChange = priceChange24h * (0.8 + Math.random() * 0.4); // 80-120% of 24h
+            currentVolume = volume24h * 7; // rough 7d estimate
+            break;
+          case '30d':
+            // TODO: For MVP, simulate 30d 
+            // This is simulated until we add historical data from additional endpoints
+            currentPriceChange = priceChange24h * (1.2 + Math.random() * 1.8); // 120-300% of 24h
+            currentVolume = volume24h * 30; // rough 30d estimate
+            break;
+        }
 
-        const health = calculateHealthScore({ volume24h, liquidity, priceChange24h, marketCap });
+        const marketCap = pair.marketCap || pair.fdv || liquidity * 2;
+
+        const health = calculateHealthScore({ volume24h: currentVolume, liquidity, priceChange24h: currentPriceChange, marketCap });
+
+        // Generate URLs
+        const dexScreenerUrl = `https://dexscreener.com/near/${pair.baseToken.address}`;
+        const refFinanceUrl = pair.baseToken.address ? `https://app.ref.finance/#near|${pair.baseToken.address}` : undefined;
 
         tokens.push({
           id: pair.baseToken.address,
           symbol,
           name: pair.baseToken.name,
           price,
-          priceChange24h,
-          volume24h,
+          priceChange24h: currentPriceChange, // Current period's change
+          volume24h: currentVolume, // Current period's volume
           liquidity,
           marketCap,
           category: TOKEN_CATEGORIES[symbol] || DEFAULT_CATEGORY,
@@ -154,6 +204,12 @@ export async function GET() {
           riskLevel: health.riskLevel,
           riskFactors: health.factors,
           detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+          // New fields
+          priceChange1h,
+          priceChange6h,
+          dexScreenerUrl,
+          refFinanceUrl,
+          contractAddress: pair.baseToken.address,
         });
       }
     }
@@ -178,12 +234,25 @@ export async function GET() {
           marketCap: estimatedMarketCap,
         });
 
+        // Simulate price changes for visual variety (Ref doesn't provide this data)
+        const sim24h = (Math.random() - 0.5) * 20;
+        const sim1h = (Math.random() - 0.5) * 8;
+        const sim6h = (Math.random() - 0.5) * 15;
+        
+        let currentPriceChange = sim24h;
+        switch (period) {
+          case '1h': currentPriceChange = sim1h; break;
+          case '4h': currentPriceChange = sim6h; break;
+          case '7d': currentPriceChange = sim24h * 1.5; break;
+          case '30d': currentPriceChange = sim24h * 3; break;
+        }
+
         tokens.push({
           id: contractId,
           symbol: data.symbol,
           name: data.symbol,
           price,
-          priceChange24h: (Math.random() - 0.5) * 20, // simulated for visual variety
+          priceChange24h: currentPriceChange,
           volume24h: Math.random() * 50000,
           liquidity: Math.random() * 100000,
           marketCap: estimatedMarketCap,
@@ -192,6 +261,12 @@ export async function GET() {
           riskLevel: health.riskLevel,
           riskFactors: health.factors,
           detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+          // New fields
+          priceChange1h: sim1h,
+          priceChange6h: sim6h,
+          dexScreenerUrl: undefined, // Not available for Ref-only tokens
+          refFinanceUrl: `https://app.ref.finance/#near|${contractId}`,
+          contractAddress: contractId,
         });
       }
     }
@@ -203,6 +278,7 @@ export async function GET() {
       tokens: tokens.slice(0, 150), // Cap at 150 for performance
       lastUpdated: new Date().toISOString(),
       sources: ['ref-finance', 'dexscreener'],
+      period, // Include the period in the response
     });
   } catch (error) {
     console.error('Void Bubbles API error:', error);

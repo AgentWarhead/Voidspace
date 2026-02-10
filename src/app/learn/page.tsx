@@ -40,7 +40,7 @@ const RUST_BENEFITS = [
   {
     icon: Lock,
     title: 'Memory Safety',
-    description: 'Rust\'s ownership model eliminates entire classes of bugs at compile time — no null pointers, no buffer overflows, no data races. Critical for code that handles real money.',
+    description: 'Rust&apos;s ownership model eliminates entire classes of bugs at compile time — no null pointers, no buffer overflows, no data races. Critical for code that handles real money.',
   },
   {
     icon: Code,
@@ -56,7 +56,7 @@ const RUST_CONCEPTS = [
 let wallet = String::from("alice.near");
 let borrowed = &wallet;  // Borrow, don't move
 // wallet is still valid here`,
-    description: 'Rust\'s core innovation. Values have one owner; others can borrow references. This prevents memory bugs without garbage collection.',
+    description: 'Rust&apos;s core innovation. Values have one owner; others can borrow references. This prevents memory bugs without garbage collection.',
   },
   {
     title: 'Structs & Impl',
@@ -396,6 +396,69 @@ export default function LearnPage() {
                 </GlowCard>
               );
             })}
+          </div>
+        </ScrollReveal>
+
+        {/* Mastering Void Bubbles */}
+        <ScrollReveal delay={0.19}>
+          <SectionHeader title="Mastering Void Bubbles" badge="LIVE VISUALIZATION" />
+          <Card variant="glass" padding="lg" className="mb-6">
+            <div className="space-y-4 text-text-secondary leading-relaxed">
+              <p>
+                <strong className="text-text-primary">Void Bubbles</strong> is Voidspace's real-time token visualization engine. Every NEAR token becomes a living bubble that breathes with market activity, complete with AI health scoring and risk detection.
+              </p>
+            </div>
+          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <GlowCard padding="md" className="h-full">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🔍</div>
+                  <h3 className="text-sm font-medium text-text-primary">X-Ray Mode</h3>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Reveals concentration risk and rug detection scores. Red rings indicate high-risk tokens with concerning whale behavior or liquidity issues.
+                </p>
+              </div>
+            </GlowCard>
+            <GlowCard padding="md" className="h-full">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🔊</div>
+                  <h3 className="text-sm font-medium text-text-primary">Sonic Mode</h3>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Hear the market through ascending tones for pumps, low rumbles for dumps, and dramatic chimes for whale alerts. Turn sound on for true immersion.
+                </p>
+              </div>
+            </GlowCard>
+            <GlowCard padding="md" className="h-full">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🧠</div>
+                  <h3 className="text-sm font-medium text-text-primary">AI Health Scores</h3>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Every token gets an AI-powered health assessment based on liquidity, trading patterns, contract analysis, and community metrics. Click any bubble for details.
+                </p>
+              </div>
+            </GlowCard>
+            <GlowCard padding="md" className="h-full">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">⚡</div>
+                  <h3 className="text-sm font-medium text-text-primary">Real-Time Updates</h3>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Data refreshes every 60 seconds. Watch tokens pump and dump in real-time, with whale alerts and price movements reflected instantly in the bubble physics.
+                </p>
+              </div>
+            </GlowCard>
+          </div>
+          <div className="text-center">
+            <Link href="/void-bubbles" className="shimmer-btn text-background font-semibold px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2">
+              Launch Void Bubbles →
+            </Link>
           </div>
         </ScrollReveal>
 
