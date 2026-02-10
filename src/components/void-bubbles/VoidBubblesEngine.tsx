@@ -597,7 +597,7 @@ export function VoidBubblesEngine() {
         animate={{ opacity: 1, x: 0, scale: 1 }}
         exit={{ opacity: 0, x: 300, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="absolute top-4 right-4 w-[340px] max-h-[calc(100%-2rem)] overflow-y-auto z-30"
+        className="absolute top-16 sm:top-4 left-2 right-2 sm:left-auto sm:right-4 sm:w-[340px] max-h-[calc(100%-5rem)] sm:max-h-[calc(100%-2rem)] overflow-y-auto z-30"
       >
         <Card variant="glass" padding="lg" className="relative">
           <button
@@ -823,16 +823,16 @@ export function VoidBubblesEngine() {
 
   return (
     <div className="relative w-full h-[calc(100vh-140px)] min-h-[500px] bg-background rounded-xl border border-border overflow-hidden">
-      {/* Top Controls */}
-      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
-        {/* Category filters */}
-        <div className="flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1">
-          {categories.slice(0, 8).map(cat => (
+      {/* Top Controls — single row on desktop, stacked on mobile */}
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+        {/* Category filters — scrollable on mobile */}
+        <div className="flex items-center gap-1 bg-surface/80 backdrop-blur-xl rounded-lg border border-border p-1 overflow-x-auto scrollbar-hide max-w-full">
+          {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setFilterCategory(cat)}
               className={cn(
-                'px-2.5 py-1 rounded-md text-[11px] font-mono transition-all',
+                'px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono transition-all whitespace-nowrap flex-shrink-0',
                 filterCategory === cat
                   ? 'bg-near-green/20 text-near-green border border-near-green/30'
                   : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -841,82 +841,74 @@ export function VoidBubblesEngine() {
               {cat === 'all' ? 'ALL' : cat}
             </button>
           ))}
-          {categories.length > 8 && (
-            <button
-              onClick={() => setFilterCategory('all')}
-              className="px-2 py-1 text-[11px] text-text-muted hover:text-text-secondary"
-            >
-              +{categories.length - 8}
-            </button>
-          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 self-end sm:self-auto">
+          <button
+            onClick={() => setXrayMode(!xrayMode)}
+            className={cn(
+              'p-1.5 sm:p-2 rounded-lg border transition-all',
+              xrayMode
+                ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
+                : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
+            )}
+            title="X-Ray Mode — See concentration risk"
+          >
+            {xrayMode ? <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+          </button>
+          <button
+            onClick={() => { setSoundEnabled(!soundEnabled); }}
+            className={cn(
+              'p-1.5 sm:p-2 rounded-lg border transition-all',
+              soundEnabled
+                ? 'bg-near-green/20 border-near-green/30 text-near-green'
+                : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
+            )}
+            title="Sonic Mode — Hear the market"
+          >
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+          </button>
+          <button
+            onClick={handleSnapshot}
+            className="p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
+            title="Save snapshot"
+          >
+            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+          <button
+            onClick={handleShareX}
+            className="p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
+            title="Share on X"
+          >
+            <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+          <button
+            onClick={() => { initSimulation(); }}
+            className="p-1.5 sm:p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
+            title="Reset view"
+          >
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
         </div>
       </div>
 
-      {/* Right Controls */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5">
-        <button
-          onClick={() => setXrayMode(!xrayMode)}
-          className={cn(
-            'p-2 rounded-lg border transition-all',
-            xrayMode
-              ? 'bg-accent-cyan/20 border-accent-cyan/30 text-accent-cyan'
-              : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
-          )}
-          title="X-Ray Mode — See concentration risk"
-        >
-          {xrayMode ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-        </button>
-        <button
-          onClick={() => { setSoundEnabled(!soundEnabled); }}
-          className={cn(
-            'p-2 rounded-lg border transition-all',
-            soundEnabled
-              ? 'bg-near-green/20 border-near-green/30 text-near-green'
-              : 'bg-surface/80 border-border text-text-muted hover:text-text-secondary'
-          )}
-          title="Sonic Mode — Hear the market"
-        >
-          {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-        </button>
-        <button
-          onClick={handleSnapshot}
-          className="p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
-          title="Save snapshot"
-        >
-          <Camera className="w-4 h-4" />
-        </button>
-        <button
-          onClick={handleShareX}
-          className="p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
-          title="Share on X"
-        >
-          <Share2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => { initSimulation(); }}
-          className="p-2 rounded-lg border bg-surface/80 border-border text-text-muted hover:text-text-secondary transition-all"
-          title="Reset view"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
-      </div>
-
       {/* Stats Bar */}
-      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-3 bg-surface/80 backdrop-blur-xl rounded-lg border border-border px-3 py-2">
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-auto right-2 sm:right-4 z-20 flex items-center justify-center sm:justify-end gap-3 bg-surface/80 backdrop-blur-xl rounded-lg border border-border px-3 py-1.5 sm:py-2">
         <div className="flex items-center gap-1.5">
           <Activity className="w-3 h-3 text-near-green" />
-          <span className="text-[11px] font-mono text-text-muted">
+          <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
             {filteredTokens.length} tokens
           </span>
         </div>
         <div className="w-px h-3 bg-border" />
-        <span className="text-[11px] font-mono text-text-muted">
+        <span className="text-[10px] sm:text-[11px] font-mono text-text-muted">
           {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : 'Live'}
         </span>
         {xrayMode && (
           <>
             <div className="w-px h-3 bg-border" />
-            <span className="text-[11px] font-mono text-accent-cyan flex items-center gap-1">
+            <span className="text-[10px] sm:text-[11px] font-mono text-accent-cyan flex items-center gap-1">
               <Eye className="w-3 h-3" /> X-RAY
             </span>
           </>
