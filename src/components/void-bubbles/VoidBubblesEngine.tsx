@@ -1746,7 +1746,7 @@ export function VoidBubblesEngine() {
   return (
     <div className="flex-1 relative overflow-hidden h-full w-full">
       {/* ═══ COMMAND NEXUS — Desktop Control Panel ═══ */}
-      <div className="hidden sm:block absolute top-4 left-4 z-20 w-60">
+      <div className="hidden sm:block absolute top-4 left-4 z-20 w-60" style={{ maxHeight: 'calc(100% - 3rem)' }}>
         {/* Outer animated border glow */}
         <div className="relative rounded-2xl p-[1px] overflow-hidden"
           style={{
@@ -1755,7 +1755,7 @@ export function VoidBubblesEngine() {
             animation: 'gradient-shift 8s ease infinite',
           }}
         >
-          <div className="bg-[#060a0f]/90 backdrop-blur-2xl rounded-2xl overflow-hidden shadow-2xl shadow-[#00EC97]/5">
+          <div className="bg-[#060a0f]/90 backdrop-blur-2xl rounded-2xl overflow-y-auto overflow-x-hidden shadow-2xl shadow-[#00EC97]/5" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
             {/* Animated top accent with sweep */}
             <div className="relative h-[2px] overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-[#00EC97]/60 via-[#00D4FF]/80 to-[#9D4EDD]/60" />
@@ -1882,7 +1882,7 @@ export function VoidBubblesEngine() {
                     {[
                       { key: 'marketCap', label: '◆ MCap' },
                       { key: 'volume', label: '◈ Volume' },
-                      { key: 'performance', label: '◉ Δ Move' },
+                      { key: 'performance', label: '◉ Move' },
                     ].map((opt) => (
                       <button
                         key={opt.key}
