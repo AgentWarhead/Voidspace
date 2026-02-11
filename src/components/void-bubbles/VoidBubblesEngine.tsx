@@ -355,7 +355,7 @@ export function VoidBubblesEngine() {
     const clampedX = Math.min(position.x + 20, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 420);
     const clampedY = Math.max(20, Math.min(position.y - 200, (typeof window !== 'undefined' ? window.innerHeight : 800) - 600));
     const cardStyle: React.CSSProperties = isMobile 
-      ? { left: '1rem', right: '1rem', top: '50%', transform: 'translateY(-50%)' }
+      ? { left: '0.75rem', right: '0.75rem', top: '0.75rem', bottom: '0.75rem', maxHeight: 'calc(100dvh - 1.5rem)' }
       : { left: clampedX, top: clampedY };
 
     return (
@@ -365,7 +365,7 @@ export function VoidBubblesEngine() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 10 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed z-50 w-[380px]"
+          className={cn("fixed z-50", isMobile ? "w-auto overflow-y-auto overscroll-contain" : "w-[380px]")}
           style={cardStyle}
           onClick={(e) => e.stopPropagation()}
         >

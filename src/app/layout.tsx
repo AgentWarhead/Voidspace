@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: 'Voidspace',
     images: [
       {
-        url: '/og-image.png',
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Voidspace — NEAR Ecosystem Intelligence',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Voidspace — NEAR Ecosystem Intelligence',
     description: 'AI-powered NEAR ecosystem intelligence tool. Find voids. Build the future.',
-    images: ['/twitter-image.png'],
+    images: ['/twitter-image.jpg'],
     creator: '@VoidSpaceNear',
   },
   robots: {
@@ -72,7 +72,7 @@ export default function RootLayout({
     description: 'AI-powered NEAR ecosystem intelligence tool. Find voids. Build the future.',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Web',
-    image: 'https://voidspace.io/og-image.png',
+    image: 'https://voidspace.io/og-image.jpg',
     logo: 'https://voidspace.io/icon-512.png',
     author: {
       '@type': 'Organization',
