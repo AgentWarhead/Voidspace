@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import {
   Globe,
   Code,
@@ -46,6 +47,7 @@ import { cn } from '@/lib/utils';
 interface Module {
   label: string;
   icon: React.ElementType;
+  slug?: string;
 }
 
 interface Track {
@@ -75,18 +77,21 @@ const TRACKS: Track[] = [
     description:
       'Start from zero. Learn what blockchain is, understand NEAR Protocol, create your first wallet, and make your first on-chain transaction. No coding required.',
     difficulty: 1,
-    duration: '~4 hours',
-    moduleCount: 8,
+    duration: '~6 hours',
+    moduleCount: 11,
     theme: 'green',
     modules: [
-      { label: 'What is Blockchain?', icon: BookOpen },
-      { label: 'What is NEAR?', icon: Sparkles },
-      { label: 'Create a Wallet', icon: Wallet },
-      { label: 'Your First Transaction', icon: Send },
-      { label: 'Understanding dApps', icon: AppWindow },
-      { label: 'Reading Smart Contracts', icon: Eye },
-      { label: 'NEAR Ecosystem Tour', icon: MapPin },
-      { label: 'Choose Your Path', icon: Compass },
+      { label: 'What is Blockchain?', icon: BookOpen, slug: 'what-is-blockchain' },
+      { label: 'What is NEAR?', icon: Sparkles, slug: 'what-is-near' },
+      { label: 'Create a Wallet', icon: Wallet, slug: 'create-a-wallet' },
+      { label: 'Your First Transaction', icon: Send, slug: 'your-first-transaction' },
+      { label: 'Understanding dApps', icon: AppWindow, slug: 'understanding-dapps' },
+      { label: 'Reading Smart Contracts', icon: Eye, slug: 'reading-smart-contracts' },
+      { label: 'NEAR Ecosystem Tour', icon: MapPin, slug: 'near-ecosystem-tour' },
+      { label: 'NEAR vs Other Chains', icon: Globe, slug: 'near-vs-other-chains' },
+      { label: 'Reading the Explorer', icon: Eye, slug: 'reading-the-explorer' },
+      { label: 'DeFi Basics', icon: Sparkles, slug: 'defi-basics' },
+      { label: 'Choose Your Path', icon: Compass, slug: 'choose-your-path' },
     ],
   },
   {
@@ -291,7 +296,7 @@ function ModuleChecklist({
       <div className="pt-4 pb-2 space-y-2">
         {modules.map((mod, i) => {
           const Icon = mod.icon;
-          return (
+          const content = (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -12 }}
@@ -326,6 +331,10 @@ function ModuleChecklist({
               <div className="w-5 h-5 rounded-full border-2 border-border flex-shrink-0" />
             </motion.div>
           );
+          if (mod.slug) {
+            return <Link key={i} href={`/learn/explorer/${mod.slug}`}>{content}</Link>;
+          }
+          return content;
         })}
       </div>
     </motion.div>
