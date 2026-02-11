@@ -154,7 +154,7 @@ export default async function DashboardPage() {
                 {/* CTA — double button */}
                 <div className="text-center space-y-4">
                   <Link
-                    href="/void-bubbles"
+                    href="/observatory?tool=void-bubbles"
                     className="shimmer-btn text-background font-bold px-10 py-4 rounded-xl text-lg inline-flex items-center gap-3 shadow-lg shadow-near-green/20 hover:shadow-near-green/30 transition-shadow"
                   >
                     <span className="w-2.5 h-2.5 rounded-full bg-background animate-pulse" />
@@ -198,12 +198,6 @@ export default async function DashboardPage() {
                 >
                   <Sparkles className="w-4 h-4" />
                   Sanctum
-                </Link>
-                <Link
-                  href="/void-bubbles"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 text-cyan-300 rounded-lg transition-colors text-sm"
-                >
-                  🫧 Void Bubbles
                 </Link>
                 <Link
                   href="/observatory"

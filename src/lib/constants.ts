@@ -42,7 +42,6 @@ export const DIFFICULTY_LABELS = {
 export const NAV_ITEMS = [
   { label: 'Home', href: '/' },
   { label: 'Voids', href: '/opportunities' },
-  { label: 'Void Bubbles', href: '/void-bubbles' },
   { label: 'Sanctum', href: '/sanctum' },
   { label: 'Observatory', href: '/observatory' },
   { label: 'Learn', href: '/learn' },

@@ -47,7 +47,6 @@ export function Header() {
       case 'Voids': return <Target className={iconClass} />;
       case 'Sanctum': return <Sparkles className={iconClass} />;
       case 'Observatory': return <Globe className={iconClass} />;
-      case 'Void Bubbles': return <span className={`text-sm ${isActive ? '' : 'opacity-50'}`}>🫧</span>;
       case 'Learn': return <BookOpen className={iconClass} />;
       case 'Profile': return <User className={iconClass} />;
       default: return null;

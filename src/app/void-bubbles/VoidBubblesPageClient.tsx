@@ -271,7 +271,7 @@ export function VoidBubblesPageClient() {
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        item.href === '/void-bubbles'
+                        item.href === '/observatory'
                           ? 'bg-near-green/15 text-near-green border border-near-green/25'
                           : 'text-text-muted hover:text-white hover:bg-white/[0.06] border border-transparent'
                       }`}
