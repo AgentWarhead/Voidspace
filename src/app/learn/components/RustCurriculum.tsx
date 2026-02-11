@@ -920,7 +920,7 @@ function StatsBanner() {
           <div key={item.label} className="text-center p-3 rounded-lg bg-surface/60 border border-border/50">
             <StatIcon className={cn('w-4 h-4 mx-auto mb-1', item.color)} />
             <div className={cn('text-xl font-bold font-mono', item.color)}>
-              <AnimatedCounter end={item.value} duration={1.5} suffix={item.suffix} />
+              <AnimatedCounter value={item.value} duration={1500} />{item.suffix}
             </div>
             <div className="text-[10px] text-text-muted uppercase tracking-wider">{item.label}</div>
           </div>

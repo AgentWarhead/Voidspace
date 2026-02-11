@@ -427,7 +427,7 @@ function loadProgress(): Set<string> {
 
 function saveProgress(completed: Set<string>) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(completed)));
   } catch {}
 }
 

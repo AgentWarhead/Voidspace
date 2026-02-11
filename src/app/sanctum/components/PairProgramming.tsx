@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// @ts-expect-error - lucide-react 0.453.0 type issues
 import { Users, Copy, Check, Link2, Crown, Eye, Code2 } from 'lucide-react';
 
 interface PairProgrammingProps {

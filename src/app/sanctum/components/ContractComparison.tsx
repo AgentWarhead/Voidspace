@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-// @ts-expect-error - lucide-react 0.453.0 type issues
 import { GitCompare, Plus, Minus, Equal } from 'lucide-react';
 import { ContractDNAInline } from './ContractDNA';
 

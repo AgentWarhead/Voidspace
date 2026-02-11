@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// @ts-expect-error - lucide-react 0.453.0 type issues
 import { Clock, ExternalLink, Copy, Check, Trash2, Star, Share2 } from 'lucide-react';
 
 export interface DeployedContract {

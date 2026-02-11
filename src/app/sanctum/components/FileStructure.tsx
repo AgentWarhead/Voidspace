@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-// @ts-expect-error - lucide-react 0.453.0 type issues
 import { Folder, FolderOpen, FileCode, FileText, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface FileStructureProps {

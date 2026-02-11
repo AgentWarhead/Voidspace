@@ -27,7 +27,6 @@ import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 import { useSanctumState } from './hooks/useSanctumState';
-// @ts-expect-error - lucide-react types issue with TS 5.9
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 

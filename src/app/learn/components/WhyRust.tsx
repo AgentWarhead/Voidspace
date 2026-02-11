@@ -832,7 +832,7 @@ export function WhyRust() {
                     {stat.displayValue ? (
                       stat.displayValue
                     ) : (
-                      <AnimatedCounter end={stat.value} suffix={stat.suffix} duration={1.5} />
+                      <><AnimatedCounter value={stat.value} duration={1500} />{stat.suffix}</>
                     )}
                   </div>
                   <p className="text-xs font-medium text-text-primary mt-1">{stat.label}</p>

@@ -791,7 +791,7 @@ function WalletReadyCheck() {
       } else {
         set.delete('wallet-setup');
       }
-      localStorage.setItem('voidspace-skill-progress', JSON.stringify([...set]));
+      localStorage.setItem('voidspace-skill-progress', JSON.stringify(Array.from(set)));
     } catch {}
   };
 

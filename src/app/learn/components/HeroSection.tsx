@@ -138,7 +138,7 @@ function ConstellationBackground() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: [0.5, 1, 0.5], scale: [0.8, 1, 0.8] }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: 3 + seeded(node.id * 3) * 2,
                 delay: node.delay,
                 repeat: Infinity,
                 ease: 'easeInOut',
@@ -153,6 +153,12 @@ function ConstellationBackground() {
   );
 }
 
+// ─── Deterministic seed for SSR-safe random ───────────────────────────────────
+function seeded(seed: number) {
+  const x = Math.sin(seed + 1) * 10000;
+  return x - Math.floor(x);
+}
+
 // ─── Floating Space Dust Particles ─────────────────────────────────────────────
 
 function SpaceDust() {
@@ -160,12 +166,12 @@ function SpaceDust() {
     () =>
       Array.from({ length: 50 }, (_, i) => ({
         id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 2 + 0.5,
-        duration: Math.random() * 20 + 15,
-        delay: Math.random() * 8,
-        drift: (Math.random() - 0.5) * 40,
+        x: seeded(i * 7 + 1) * 100,
+        y: seeded(i * 7 + 2) * 100,
+        size: seeded(i * 7 + 3) * 2 + 0.5,
+        duration: seeded(i * 7 + 4) * 20 + 15,
+        delay: seeded(i * 7 + 5) * 8,
+        drift: (seeded(i * 7 + 6) - 0.5) * 40,
       })),
     []
   );
@@ -214,7 +220,7 @@ function BuilderCounter() {
   useEffect(() => {
     // Slowly tick up to simulate live growth
     const interval = setInterval(() => {
-      setCount((c) => c + Math.floor(Math.random() * 3));
+      setCount((c) => c + 1);
     }, 8000);
     return () => clearInterval(interval);
   }, []);

@@ -15,7 +15,7 @@ import {
   Wallet,
   Send,
   Eye,
-  Map,
+
   Compass,
   Wrench,
   FileCode,
@@ -34,6 +34,7 @@ import {
   Boxes,
   ChevronDown,
   Clock,
+  MapPin,
 } from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -84,7 +85,7 @@ const TRACKS: Track[] = [
       { label: 'Your First Transaction', icon: Send },
       { label: 'Understanding dApps', icon: AppWindow },
       { label: 'Reading Smart Contracts', icon: Eye },
-      { label: 'NEAR Ecosystem Tour', icon: Map },
+      { label: 'NEAR Ecosystem Tour', icon: MapPin },
       { label: 'Choose Your Path', icon: Compass },
     ],
   },
