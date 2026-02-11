@@ -374,6 +374,10 @@ export function VoidBubblesEngine() {
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="fixed top-0 right-0 h-full w-full sm:w-[400px] z-50 flex flex-col"
           onClick={(e) => e.stopPropagation()}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={{ left: 0, right: 0.5 }}
+          onDragEnd={(_e, info) => { if (info.offset.x > 100) setPopupCard(null); }}
         >
           <div className="h-full flex flex-col bg-[#060a0f]/95 backdrop-blur-2xl border-l border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
             <div className="h-[2px] shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, ${accentColor}40, transparent)` }} />
@@ -574,6 +578,9 @@ export function VoidBubblesEngine() {
                   𝕏 Search on Twitter
                 </button>
               </div>
+
+              {/* Safe area spacer for mobile */}
+              <div className="h-6 sm:h-2" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
             </div>
 
             <div className="h-[2px] shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)` }} />

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SearchShortcut } from '@/components/layout/SearchShortcut';
@@ -7,6 +7,13 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
 import { VoidPulseNotifications } from '@/components/effects/VoidPulseNotifications';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: 'Voidspace — NEAR Ecosystem Gap Scanner',
