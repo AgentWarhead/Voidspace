@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Sparkles, Key, Zap, Bug, BookOpen, BarChart3, ArrowRight } from 'lucide-react';
+import { Sparkles, Key, Zap, Bug, BookOpen, BarChart3, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -69,6 +69,30 @@ const DEEP_DIVE_CARDS = [
     description: 'Free structured course from zero to deployment',
     href: '/learn/rust-curriculum',
     icon: BookOpen,
+  },
+];
+
+const CROSS_CHAIN_CARDS = [
+  {
+    emoji: '🦀',
+    title: 'Rust for Blockchain',
+    description: 'Chain-agnostic Rust skills for any blockchain',
+    href: '/learn/rust-for-blockchain',
+    icon: Code2,
+  },
+  {
+    emoji: '⚡',
+    title: 'Solana vs NEAR',
+    description: 'Honest comparison for developers',
+    href: '/learn/solana-vs-near',
+    icon: GitCompareArrows,
+  },
+  {
+    emoji: '🔄',
+    title: 'For Solana Developers',
+    description: 'Your Rust skills already work here',
+    href: '/learn/for-solana-developers',
+    icon: ArrowRightLeft,
   },
 ];
 
@@ -228,6 +252,36 @@ export default function LearnPage() {
             <SectionHeader title="Deep Dives" badge="EXPLORE" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {DEEP_DIVE_CARDS.map((card) => (
+                <Link key={card.href} href={card.href} className="block group">
+                  <GlowCard className="h-full p-6 flex items-start gap-4 transition-all duration-300 group-hover:scale-[1.02]">
+                    <div className="p-3 rounded-xl bg-near-green/10 group-hover:bg-near-green/20 transition-colors shrink-0">
+                      <card.icon className="w-5 h-5 text-near-green" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-semibold text-text-primary group-hover:text-near-green transition-colors">
+                        {card.emoji} {card.title}
+                      </h3>
+                      <p className="text-sm text-text-muted mt-1">{card.description}</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-near-green group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+                  </GlowCard>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+      </Container>
+
+      {/* Cross-Chain Guides — Solana Harvest */}
+      <Container className="pb-20">
+        <ScrollReveal>
+          <div id="cross-chain">
+            <SectionHeader title="Cross-Chain Guides" badge="MULTI-CHAIN" />
+            <p className="text-sm text-text-muted mb-4">
+              Coming from another Rust blockchain? Your skills transfer directly.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {CROSS_CHAIN_CARDS.map((card) => (
                 <Link key={card.href} href={card.href} className="block group">
                   <GlowCard className="h-full p-6 flex items-start gap-4 transition-all duration-300 group-hover:scale-[1.02]">
                     <div className="p-3 rounded-xl bg-near-green/10 group-hover:bg-near-green/20 transition-colors shrink-0">

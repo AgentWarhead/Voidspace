@@ -6,6 +6,7 @@ const TOC_ITEMS = [
   { id: 'overview', label: 'Overview' },
   { id: 'learning-tracks', label: 'Learning Tracks' },
   { id: 'deep-dives', label: 'Deep Dives' },
+  { id: 'cross-chain', label: 'Cross-Chain' },
   { id: 'near-overview', label: 'NEAR Overview' },
   { id: 'ai-briefs', label: 'AI Briefs' },
   { id: 'ecosystem', label: 'Ecosystem' },
