@@ -840,17 +840,17 @@ export function VoidBubblesEngine() {
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     animFrameRef.current = null;
 
-    // Clear previous
-    d3.select(svgRef.current).selectAll('*').remove();
+    // CRITICAL: Hide SVG BEFORE clearing to prevent flash of empty content
+    const svgEl = d3.select(svgRef.current);
+    svgEl.style('opacity', '0');
 
-    const svg = d3.select(svgRef.current)
+    // Clear previous (now invisible — no flash)
+    svgEl.selectAll('*').remove();
+
+    const svg = svgEl
       .attr('width', width)
       .attr('height', height)
-      .style('overflow', 'visible')
-      .style('opacity', 0);
-    
-    // Single clean fade-in for the whole visualization (no per-bubble stagger)
-    svg.transition().duration(400).ease(d3.easeCubicOut).style('opacity', 1);
+      .style('overflow', 'visible');
 
     // SVG Definitions for gradients and filters
     const defs = svg.append('defs');
@@ -1330,6 +1330,14 @@ export function VoidBubblesEngine() {
       }
       return 1;
     });
+
+    // Let the simulation run a few ticks to position bubbles BEFORE showing anything
+    // This prevents the "seizure" of bubbles spawning at random positions then rearranging
+    for (let i = 0; i < 60; i++) simulation.tick();
+    // Update positions after pre-ticking
+    bubbleGroups.attr('transform', d => `translate(${d.x || 0}, ${d.y || 0})`);
+    // NOW fade in — everything is already in position
+    svg.transition().duration(350).ease(d3.easeCubicOut).style('opacity', 1);
 
     // X-ray mode toggle
     bubbleGroups.selectAll('.xray-ring')
