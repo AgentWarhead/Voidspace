@@ -383,10 +383,6 @@ export function VoidBubblesEngine() {
               <div className="px-5 pt-4 pb-3">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {token.imageUrl && (
-                      <img src={token.imageUrl} alt={token.symbol} className="w-10 h-10 rounded-xl border border-white/[0.08] object-cover" />
-                    )}
                     <div>
                       <h3 className="text-xl font-bold text-white leading-tight">{token.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
