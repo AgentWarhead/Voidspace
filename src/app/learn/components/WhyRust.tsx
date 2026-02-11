@@ -7,7 +7,6 @@ import {
   Shield,
   DollarSign,
   Sparkles,
-  Quote,
   ArrowRight,
   Code2,
   Zap,
@@ -29,7 +28,6 @@ import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GradientText } from '@/components/effects/GradientText';
 import { GlowCard } from '@/components/effects/GlowCard';
-import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -211,30 +209,54 @@ const salaryComparison = [
   { lang: 'Java', salary: 85, growth: 20, color: 'bg-red-400', textColor: 'text-red-400' },
 ];
 
-const testimonials = [
+const topRustProjects = [
   {
-    quote: 'Rust\'s type system and ownership model make it nearly impossible to write smart contracts with common vulnerabilities. It\'s the future of secure blockchain development.',
-    author: 'Illia Polosukhin',
-    role: 'Co-founder, NEAR Protocol',
-    avatar: 'IP',
+    name: 'NEAR Protocol',
+    icon: Globe,
+    fact: 'Core protocol (nearcore) is written entirely in Rust. Smart contracts compile to WASM from Rust.',
+    color: 'text-near-green',
+    bgColor: 'bg-near-green/10',
+    borderColor: 'border-near-green/20',
   },
   {
-    quote: 'Once you learn Rust, you\'ll wonder how you ever wrote code without the borrow checker. It catches so many bugs before they reach production.',
-    author: 'NEAR Core Team',
-    role: 'Protocol Engineers',
-    avatar: 'NC',
+    name: 'Solana',
+    icon: Zap,
+    fact: 'Validator client and runtime built in Rust. On-chain programs (smart contracts) are written in Rust.',
+    color: 'text-purple-400',
+    bgColor: 'bg-purple-400/10',
+    borderColor: 'border-purple-400/20',
   },
   {
-    quote: 'We moved our critical services to Rust and saw 10x performance improvements and virtually eliminated memory-related outages.',
-    author: 'Discord Engineering',
-    role: 'Backend Team',
-    avatar: 'DE',
+    name: 'Polkadot / Substrate',
+    icon: Layers,
+    fact: 'Substrate framework for building blockchains is written in Rust. Powers Polkadot, Kusama, and 100+ parachains.',
+    color: 'text-accent-cyan',
+    bgColor: 'bg-accent-cyan/10',
+    borderColor: 'border-accent-cyan/20',
   },
   {
-    quote: 'The AI coding assistants are incredible at Rust now. Between Claude and the borrow checker, writing safe code is easier than ever before.',
-    author: 'NEAR Builder',
-    role: 'Community Developer',
-    avatar: 'NB',
+    name: 'Discord',
+    icon: Cpu,
+    fact: 'Switched Read States service from Go to Rust, reducing tail latencies and memory usage dramatically. Published results in 2020.',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-400/10',
+    borderColor: 'border-blue-400/20',
+  },
+  {
+    name: 'Cloudflare',
+    icon: Shield,
+    fact: 'Uses Rust for Pingora (their HTTP proxy replacing nginx) and edge compute infrastructure serving millions of requests per second.',
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-400/10',
+    borderColor: 'border-orange-400/20',
+  },
+  {
+    name: 'Dropbox',
+    icon: Lock,
+    fact: 'Rebuilt their core file sync engine in Rust for better performance and reliability, replacing legacy Python code.',
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-400/10',
+    borderColor: 'border-yellow-400/20',
   },
 ];
 
@@ -374,53 +396,44 @@ function colorizeRust(line: string): React.ReactNode {
   });
 }
 
-/* ─── Testimonial Carousel ─────────────────────────────────── */
+/* ─── Why Top Projects Choose Rust ─────────────────────────── */
 
-function TestimonialCarousel() {
-  const [active, setActive] = useState(0);
-
+function TopRustProjectsSection() {
   return (
-    <div className="relative">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card variant="glass" padding="lg" className="relative overflow-hidden">
-            <div className="absolute top-4 right-6 text-6xl font-serif text-near-green/10 leading-none">&ldquo;</div>
-            <Quote className="w-5 h-5 text-near-green/30 mb-3" />
-            <p className="text-text-secondary leading-relaxed italic text-sm relative z-10">
-              &ldquo;{testimonials[active].quote}&rdquo;
-            </p>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-near-green/20 to-accent-cyan/20 border border-near-green/30 flex items-center justify-center">
-                <span className="text-near-green text-xs font-bold">{testimonials[active].avatar}</span>
+    <GlowCard padding="lg">
+      <div className="flex items-center gap-2 mb-5">
+        <Rocket className="w-4 h-4 text-near-green" />
+        <h3 className="text-sm font-bold text-text-primary">Why Top Projects Choose Rust</h3>
+        <span className="text-[10px] text-text-muted ml-auto">Real companies, real results</span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {topRustProjects.map((project, i) => {
+          const ProjectIcon = project.icon;
+          return (
+            <motion.div
+              key={project.name}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.06 }}
+              className="flex items-start gap-3 p-3 rounded-lg bg-surface/30 border border-border/30 hover:border-near-green/20 transition-colors"
+            >
+              <div className={cn(
+                'p-2 rounded-lg border flex-shrink-0',
+                project.bgColor, project.borderColor
+              )}>
+                <ProjectIcon className={cn('w-4 h-4', project.color)} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">{testimonials[active].author}</p>
-                <p className="text-xs text-text-muted">{testimonials[active].role}</p>
+                <span className="text-sm font-bold text-text-primary">{project.name}</span>
+                <p className="text-[11px] text-text-secondary mt-0.5 leading-relaxed">{project.fact}</p>
               </div>
-            </div>
-          </Card>
-        </motion.div>
-      </AnimatePresence>
-
-      <div className="flex items-center justify-center gap-2 mt-4">
-        {testimonials.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setActive(i)}
-            className={cn(
-              'h-2 rounded-full transition-all duration-300',
-              i === active ? 'bg-near-green w-8' : 'bg-border hover:bg-text-muted/30 w-2'
-            )}
-          />
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
-    </div>
+    </GlowCard>
   );
 }
 
@@ -832,7 +845,7 @@ export function WhyRust() {
                     {stat.displayValue ? (
                       stat.displayValue
                     ) : (
-                      <><AnimatedCounter value={stat.value} duration={1500} />{stat.suffix}</>
+                      <>{stat.value}{stat.suffix}</>
                     )}
                   </div>
                   <p className="text-xs font-medium text-text-primary mt-1">{stat.label}</p>
@@ -998,13 +1011,7 @@ export function WhyRust() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Quote className="w-4 h-4 text-near-green" />
-                <h3 className="text-sm font-semibold text-text-primary">What Developers Say</h3>
-              </div>
-              <TestimonialCarousel />
-            </div>
+            <TopRustProjectsSection />
           </ScrollReveal>
         </div>
       </div>

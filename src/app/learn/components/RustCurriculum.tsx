@@ -31,7 +31,6 @@ import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GradientText } from '@/components/effects/GradientText';
 import { GlowCard } from '@/components/effects/GlowCard';
-import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -855,7 +854,7 @@ function CurriculumProgressOverview({
         {/* Info */}
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <GradientText as="h3" className="text-lg font-bold">
+            <GradientText as="p" className="text-lg font-bold">
               {currentModule
                 ? `Module ${currentModule.id} of 10 — ${percent}% Complete`
                 : percent === 100
@@ -920,7 +919,7 @@ function StatsBanner() {
           <div key={item.label} className="text-center p-3 rounded-lg bg-surface/60 border border-border/50">
             <StatIcon className={cn('w-4 h-4 mx-auto mb-1', item.color)} />
             <div className={cn('text-xl font-bold font-mono', item.color)}>
-              <AnimatedCounter value={item.value} duration={1500} />{item.suffix}
+              {item.value}{item.suffix}
             </div>
             <div className="text-[10px] text-text-muted uppercase tracking-wider">{item.label}</div>
           </div>
