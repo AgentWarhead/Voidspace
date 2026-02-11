@@ -49,8 +49,16 @@ interface VoidBubbleToken {
   socials?: { url: string; type: string }[];
   websites?: { url: string; label: string }[];
   txns24h?: { buys: number; sells: number };
+  txns1h?: { buys: number; sells: number };
+  txns6h?: { buys: number; sells: number };
+  volume1h?: number;
+  volume6h?: number;
   dexId?: string;
   pairCreatedAt?: string;
+  pairAddress?: string;
+  quoteToken?: string;
+  fdv?: number;
+  priceChange5m?: number;
 }
 
 interface BubbleNode extends d3.SimulationNodeDatum {
@@ -216,7 +224,7 @@ export function VoidBubblesEngine() {
   const [showSearch, setShowSearch] = useState(false);
   
   // **NEW: Popup Card state - floating overlay**
-  const [popupCard, setPopupCard] = useState<{ token: VoidBubbleToken; position: { x: number; y: number } } | null>(null);
+  const [popupCard, setPopupCard] = useState<{ token: VoidBubbleToken } | null>(null);
   
   // Pulse Mode state - volume-based pulsing (always enabled for now)
   const pulseMode = true;
@@ -334,22 +342,18 @@ export function VoidBubblesEngine() {
   }, [period]);
 
   // **NEW: Popup Card Handler** - shows floating card instead of expanding bubble
-  const handleShowPopup = useCallback((tokenId: string, event: { clientX: number; clientY: number }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleShowPopup = useCallback((tokenId: string, _event?: { clientX: number; clientY: number }) => {
     const token = tokens.find(t => t.id === tokenId);
-    if (!token || !containerRef.current) return;
-
-    // Use viewport coordinates for fixed positioning
-    const x = event.clientX;
-    const y = event.clientY;
-    
-    setPopupCard({ token, position: { x, y } });
+    if (!token) return;
+    setPopupCard({ token });
   }, [tokens]);
 
   // **NEW: Premium Popup Card Component**
   const renderPopupCard = () => {
     if (!popupCard) return null;
 
-    const { token, position } = popupCard;
+    const { token } = popupCard;
     const currentChange = getCurrentPriceChange(token);
     const healthStatus = getHealthStatus(token.healthScore);
     const intelBrief = generateIntelBrief(token);
@@ -357,307 +361,231 @@ export function VoidBubblesEngine() {
     const volLiqRatio = token.liquidity > 0 ? token.volume24h / token.liquidity : 0;
     const isPositive = currentChange >= 0;
     const accentColor = isPositive ? '#00EC97' : '#FF3366';
-    const accentBg = isPositive ? 'rgba(0,236,151,' : 'rgba(255,51,102,';
-
-    // Position the card (mobile = bottom sheet style, desktop = near bubble)
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const clampedX = Math.min(position.x + 20, vw - 420);
-    const clampedY = Math.max(20, Math.min(position.y - 200, vh - 600));
-    const cardStyle: React.CSSProperties = isMobile 
-      ? { left: '0.5rem', right: '0.5rem', bottom: '3.5rem', maxHeight: '70vh' }
-      : { left: clampedX, top: clampedY };
+    const totalTxns24h = token.txns24h ? token.txns24h.buys + token.txns24h.sells : 0;
+    const buyRatio = token.txns24h && totalTxns24h > 0 ? (token.txns24h.buys / totalTxns24h) * 100 : 50;
 
     return (
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 10 }}
+          key={token.id}
+          initial={{ x: '100%', opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed z-50 w-[380px] sm:w-[380px] max-sm:w-auto overflow-y-auto overscroll-contain"
-          style={cardStyle}
+          className="fixed top-0 right-0 h-full w-full sm:w-[400px] z-50 flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Outer glow */}
-          <div className="absolute -inset-px rounded-2xl opacity-60" style={{
-            background: `linear-gradient(135deg, ${accentBg}0.3), ${accentBg}0.1), transparent, ${accentBg}0.2))`,
-          }} />
-          
-          <div className="relative bg-[#080b11]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.08] overflow-hidden">
-            {/* Top accent line */}
-            <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, transparent)` }} />
+          <div className="h-full flex flex-col bg-[#060a0f]/95 backdrop-blur-2xl border-l border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
+            <div className="h-[2px] shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, ${accentColor}40, transparent)` }} />
             
-            {/* Header — token identity with momentum indicator */}
-            <div className="p-4 pb-0">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full border"
-                      style={{ 
-                        borderColor: `${accentBg}0.2)`, 
-                        backgroundColor: `${accentBg}0.08)`,
-                        color: accentColor 
-                      }}>
-                      {token.category}
-                    </span>
-                    <span className="text-[10px] font-mono text-text-muted">
-                      {token.symbol}
-                    </span>
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              {/* Header */}
+              <div className="px-5 pt-4 pb-3">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {token.imageUrl && (
+                      <img src={token.imageUrl} alt={token.symbol} className="w-10 h-10 rounded-xl border border-white/[0.08] object-cover" />
+                    )}
+                    <div>
+                      <h3 className="text-xl font-bold text-white leading-tight">{token.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-sm font-mono text-text-muted">{token.symbol}</span>
+                        {token.quoteToken && <span className="text-[10px] font-mono text-text-muted/50">/ {token.quoteToken}</span>}
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium border"
+                          style={{ backgroundColor: `${CATEGORY_COLORS[token.category] || '#64748B'}12`, color: CATEGORY_COLORS[token.category] || '#64748B', borderColor: `${CATEGORY_COLORS[token.category] || '#64748B'}25` }}>
+                          {token.category}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-white tracking-tight">{token.name}</h3>
-                </div>
-                <button
-                  onClick={() => setPopupCard(null)}
-                  className="p-1.5 rounded-lg hover:bg-white/[0.06] text-text-muted hover:text-white transition-all"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Price hero section */}
-            <div className="px-4 pt-3 pb-4">
-              <div className="flex items-end gap-3">
-                <span className="text-3xl font-bold text-white font-mono tracking-tight">
-                  {formatPrice(token.price)}
-                </span>
-                <motion.span 
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  className="text-lg font-bold font-mono mb-0.5"
-                  style={{ color: accentColor }}
-                >
-                  {isPositive ? '▲' : '▼'} {Math.abs(currentChange).toFixed(1)}%
-                </motion.span>
-              </div>
-              
-              {/* Timeframe pills */}
-              <div className="flex gap-1.5 mt-3">
-                {[
-                  { label: '1H', value: token.priceChange1h },
-                  { label: '6H', value: token.priceChange6h },
-                  { label: '24H', value: token.priceChange24h },
-                  { label: '7D', value: token.priceChange24h * 1.5 },
-                ].map(({ label, value }) => (
-                  <div key={label} className={cn(
-                    "flex-1 text-center py-1.5 rounded-lg font-mono text-[11px] font-semibold border",
-                    value >= 0 
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                      : "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                  )}>
-                    {label}: {value >= 0 ? '+' : ''}{value.toFixed(1)}%
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Divider with glow */}
-            <div className="h-px mx-4" style={{ background: `linear-gradient(90deg, transparent, ${accentBg}0.15), transparent)` }} />
-
-            {/* Market metrics grid */}
-            <div className="grid grid-cols-2 gap-px bg-white/[0.03] mx-4 my-3 rounded-xl overflow-hidden border border-white/[0.04]">
-              {[
-                { label: 'Market Cap', value: formatCompact(token.marketCap), icon: '◆' },
-                { label: '24h Volume', value: formatCompact(token.volume24h), icon: '◈' },
-                { label: 'Liquidity', value: formatCompact(token.liquidity), icon: '◇' },
-                { label: 'Vol/Liq', value: volLiqRatio.toFixed(2), icon: '⟡', warn: volLiqRatio > 2 },
-              ].map(({ label, value, icon, warn }) => (
-                <div key={label} className="bg-[#0a0f14]/60 p-3">
-                  <div className="text-[10px] text-text-muted font-mono uppercase tracking-wider">{icon} {label}</div>
-                  <div className={cn("text-sm font-mono font-bold mt-0.5", warn ? "text-amber-400" : "text-white")}>
-                    {value}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Health Score — animated bar */}
-            <div className="mx-4 mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Health Score</span>
-                <span className={cn("text-sm font-bold font-mono", {
-                  'text-emerald-400': healthStatus === 'healthy',
-                  'text-amber-400': healthStatus === 'medium',
-                  'text-rose-400': healthStatus === 'unhealthy'
-                })}>
-                  {token.healthScore}<span className="text-text-muted font-normal">/100</span>
-                </span>
-              </div>
-              <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${token.healthScore}%` }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                  className={cn("h-full rounded-full", {
-                    'bg-gradient-to-r from-emerald-500 to-emerald-400': healthStatus === 'healthy',
-                    'bg-gradient-to-r from-amber-500 to-yellow-400': healthStatus === 'medium',
-                    'bg-gradient-to-r from-rose-600 to-rose-400': healthStatus === 'unhealthy'
-                  })}
-                />
-              </div>
-              {/* Risk tags */}
-              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded border", {
-                  'border-emerald-500/20 text-emerald-400 bg-emerald-500/10': token.riskLevel === 'low',
-                  'border-amber-500/20 text-amber-400 bg-amber-500/10': token.riskLevel === 'medium',
-                  'border-rose-500/20 text-rose-400 bg-rose-500/10': token.riskLevel === 'high',
-                  'border-rose-500/30 text-rose-300 bg-rose-500/20': token.riskLevel === 'critical',
-                })}>
-                  {token.riskLevel.toUpperCase()} RISK
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.06] text-text-muted bg-white/[0.02]">
-                  Supply: {supplyConcentration}
-                </span>
-                {token.riskFactors.slice(0, 2).map((factor, i) => (
-                  <span key={i} className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.06] text-text-muted bg-white/[0.02]">
-                    {factor}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* AI Intelligence — premium card */}
-            <div className="mx-4 mb-3 rounded-xl overflow-hidden border border-[#00EC97]/15">
-              <div className="bg-gradient-to-br from-[#00EC97]/[0.08] to-transparent p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-5 h-5 rounded-md bg-[#00EC97]/20 flex items-center justify-center">
-                    <Brain className="w-3 h-3 text-[#00EC97]" />
-                  </div>
-                  <span className="text-xs font-semibold text-[#00EC97] tracking-wide">AI Intelligence Brief</span>
-                </div>
-                <p className="text-[12px] text-text-secondary leading-relaxed">
-                  {intelBrief}
-                </p>
-              </div>
-            </div>
-
-            {/* 24h Transaction Activity */}
-            {token.txns24h && (
-              <div className="px-4 pb-2">
-                <div className="flex gap-2">
-                  <div className="flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2 text-center">
-                    <div className="text-[10px] text-emerald-400/70 uppercase tracking-wider">Buys 24h</div>
-                    <div className="text-sm font-bold font-mono text-emerald-400">{token.txns24h.buys.toLocaleString()}</div>
-                  </div>
-                  <div className="flex-1 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2 text-center">
-                    <div className="text-[10px] text-rose-400/70 uppercase tracking-wider">Sells 24h</div>
-                    <div className="text-sm font-bold font-mono text-rose-400">{token.txns24h.sells.toLocaleString()}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action buttons — prominent CTAs */}
-            <div className="px-4 pb-3">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank')}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold bg-[#00EC97]/15 border border-[#00EC97]/25 text-[#00EC97] hover:bg-[#00EC97]/25 transition-all"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  DexScreener
-                </button>
-                <button
-                  onClick={() => window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank')}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold bg-white/[0.04] border border-white/[0.08] text-text-secondary hover:bg-white/[0.08] hover:text-white transition-all"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  Ref Finance
-                </button>
-              </div>
-
-              {/* Social links from DexScreener */}
-              {token.socials && token.socials.length > 0 && (
-                <div className="flex gap-1.5 mt-2">
-                  {token.socials.map((social, i) => (
-                    <button
-                      key={i}
-                      onClick={() => window.open(social.url, '_blank')}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all capitalize"
-                    >
-                      {social.type === 'twitter' ? '𝕏' : social.type === 'telegram' ? '✈️' : social.type === 'discord' ? '💬' : <ExternalLink className="w-3 h-3" />}
-                      <span className="ml-0.5">{social.type}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Website links from DexScreener */}
-              {token.websites && token.websites.length > 0 && (
-                <div className="flex gap-1.5 mt-1.5">
-                  {token.websites.slice(0, 3).map((site, i) => (
-                    <button
-                      key={i}
-                      onClick={() => window.open(site.url, '_blank')}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
-                    >
-                      <Link className="w-3 h-3" />
-                      {site.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Fallback legacy social links */}
-              {!token.socials?.length && (token.website || token.twitter) && (
-                <div className="flex gap-2 mt-2">
-                  {token.website && (
-                    <button
-                      onClick={() => window.open(token.website, '_blank')}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
-                    >
-                      <Link className="w-3 h-3" />
-                      Website
-                    </button>
-                  )}
-                  {token.twitter && (
-                    <button
-                      onClick={() => window.open(token.twitter, '_blank')}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      Twitter
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Contract footer with DEX info */}
-            <div className="px-4 py-2.5 bg-white/[0.02] border-t border-white/[0.04]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono text-text-muted">
-                    {token.contractAddress.slice(0, 8)}...{token.contractAddress.slice(-6)}
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard(token.contractAddress)}
-                    className="p-1 rounded hover:bg-white/[0.06] text-text-muted hover:text-[#00EC97] transition-all"
-                  >
-                    <Copy className="w-3 h-3" />
+                  <button onClick={() => setPopupCard(null)} className="p-2 rounded-xl hover:bg-white/[0.06] text-text-muted hover:text-white transition-all shrink-0">
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  {token.dexId && (
-                    <span className="text-[9px] font-mono text-near-green/50">{token.dexId}</span>
-                  )}
-                  <span className="text-[9px] font-mono text-text-muted/50">
-                    {token.pairCreatedAt ? formatDate(token.pairCreatedAt) : formatDate(token.detectedAt)}
+                <div className="flex items-baseline gap-3 mt-3">
+                  <span className="text-3xl font-bold text-white font-mono tracking-tight">{formatPrice(token.price)}</span>
+                  <span className={`text-base font-bold font-mono ${isPositive ? 'text-[#00EC97]' : 'text-[#FF3366]'}`}>
+                    {isPositive ? '▲' : '▼'} {Math.abs(currentChange).toFixed(2)}%
                   </span>
                 </div>
               </div>
+
+              {/* Multi-timeframe */}
+              <div className="px-5 pb-3">
+                <div className="flex gap-1">
+                  {[
+                    { label: '5M', value: token.priceChange5m ?? 0 },
+                    { label: '1H', value: token.priceChange1h },
+                    { label: '6H', value: token.priceChange6h },
+                    { label: '24H', value: token.priceChange24h },
+                  ].map((tf) => (
+                    <div key={tf.label} className={`flex-1 text-center py-1.5 rounded-lg text-[10px] font-mono font-bold border ${
+                      tf.value >= 0 ? 'bg-emerald-500/10 border-emerald-500/15 text-emerald-400' : 'bg-rose-500/10 border-rose-500/15 text-rose-400'
+                    }`}>
+                      <div className="text-[8px] text-text-muted/50 mb-0.5">{tf.label}</div>
+                      {tf.value >= 0 ? '+' : ''}{tf.value.toFixed(1)}%
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+              {/* Market Data */}
+              <div className="px-5 py-3">
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Market Cap', value: formatCompact(token.marketCap) },
+                    { label: '24h Volume', value: formatCompact(token.volume24h) },
+                    { label: 'Liquidity', value: formatCompact(token.liquidity) },
+                    { label: 'FDV', value: token.fdv ? formatCompact(token.fdv) : '—' },
+                    { label: 'Vol/Liq', value: volLiqRatio.toFixed(2) },
+                    { label: 'Supply Conc.', value: supplyConcentration },
+                  ].map((item) => (
+                    <div key={item.label} className="bg-white/[0.02] rounded-lg px-2.5 py-2 border border-white/[0.03]">
+                      <div className="text-[8px] font-mono uppercase tracking-wider text-text-muted/50">{item.label}</div>
+                      <div className="text-[13px] font-bold font-mono text-white mt-0.5">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+              {/* Transactions — DexScreener style */}
+              {token.txns24h && (
+                <div className="px-5 py-3">
+                  <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-text-muted/50 mb-2">24h Transactions</div>
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div className="text-center"><div className="text-[9px] text-text-muted/50">Txns</div><div className="text-sm font-bold font-mono text-white">{totalTxns24h.toLocaleString()}</div></div>
+                    <div className="text-center"><div className="text-[9px] text-emerald-400/60">Buys</div><div className="text-sm font-bold font-mono text-emerald-400">{token.txns24h.buys.toLocaleString()}</div></div>
+                    <div className="text-center"><div className="text-[9px] text-rose-400/60">Sells</div><div className="text-sm font-bold font-mono text-rose-400">{token.txns24h.sells.toLocaleString()}</div></div>
+                  </div>
+                  <div className="flex h-2 rounded-full overflow-hidden">
+                    <div className="bg-emerald-500 transition-all" style={{ width: `${buyRatio}%` }} />
+                    <div className="bg-rose-500 transition-all" style={{ width: `${100 - buyRatio}%` }} />
+                  </div>
+                  {(token.txns1h || token.txns6h) && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {token.txns1h && (
+                        <div className="bg-white/[0.02] rounded-lg px-2 py-1.5 border border-white/[0.03] text-center">
+                          <div className="text-[8px] text-text-muted/50">1h B/S</div>
+                          <div className="text-[11px] font-mono"><span className="text-emerald-400">{token.txns1h.buys}</span><span className="text-text-muted mx-1">/</span><span className="text-rose-400">{token.txns1h.sells}</span></div>
+                        </div>
+                      )}
+                      {token.txns6h && (
+                        <div className="bg-white/[0.02] rounded-lg px-2 py-1.5 border border-white/[0.03] text-center">
+                          <div className="text-[8px] text-text-muted/50">6h B/S</div>
+                          <div className="text-[11px] font-mono"><span className="text-emerald-400">{token.txns6h.buys}</span><span className="text-text-muted mx-1">/</span><span className="text-rose-400">{token.txns6h.sells}</span></div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+              {/* Health Score */}
+              <div className="px-5 py-3">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted">Health Score</span>
+                  <span className={cn("text-sm font-bold font-mono", { 'text-emerald-400': healthStatus === 'healthy', 'text-amber-400': healthStatus === 'medium', 'text-rose-400': healthStatus === 'unhealthy' })}>{token.healthScore}/100</span>
+                </div>
+                <div className="w-full bg-white/[0.06] rounded-full h-2.5 overflow-hidden">
+                  <div className={cn("h-2.5 rounded-full transition-all duration-500", { 'bg-gradient-to-r from-emerald-600 to-emerald-400': healthStatus === 'healthy', 'bg-gradient-to-r from-amber-600 to-amber-400': healthStatus === 'medium', 'bg-gradient-to-r from-rose-600 to-rose-400': healthStatus === 'unhealthy' })} style={{ width: `${token.healthScore}%` }} />
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-semibold border ${token.riskLevel === 'low' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : token.riskLevel === 'medium' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>{token.riskLevel.toUpperCase()} RISK</span>
+                  {token.riskFactors.filter(f => f !== 'No significant risk factors detected').map((factor, i) => (
+                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/[0.05] text-text-muted">{factor}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-[#00EC97]/15 to-transparent" />
+
+              {/* AI Intel */}
+              <div className="px-5 py-3">
+                <div className="rounded-xl p-3.5 border border-[#00EC97]/15 bg-[#00EC97]/[0.03]">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Brain className="w-4 h-4 text-[#00EC97]" />
+                    <span className="text-[11px] font-bold text-[#00EC97] tracking-wide">AI Intelligence Brief</span>
+                  </div>
+                  <p className="text-[12px] text-text-secondary leading-relaxed">{intelBrief}</p>
+                </div>
+              </div>
+
+              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+              {/* Links */}
+              <div className="px-5 py-3">
+                <div className="flex gap-2 mb-2">
+                  <button onClick={() => window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-semibold bg-[#00EC97]/12 border border-[#00EC97]/20 text-[#00EC97] hover:bg-[#00EC97]/20 transition-all">
+                    <ExternalLink className="w-3.5 h-3.5" /> DexScreener
+                  </button>
+                  <button onClick={() => window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-semibold bg-white/[0.03] border border-white/[0.06] text-text-secondary hover:bg-white/[0.06] hover:text-white transition-all">
+                    <ExternalLink className="w-3.5 h-3.5" /> Ref Finance
+                  </button>
+                </div>
+                {token.socials && token.socials.length > 0 && (
+                  <div className="flex gap-1.5 mb-2">
+                    {token.socials.map((social, i) => (
+                      <button key={i} onClick={() => window.open(social.url, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-medium text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] transition-all capitalize">
+                        {social.type === 'twitter' ? '𝕏' : social.type === 'telegram' ? '✈️' : social.type === 'discord' ? '💬' : '🔗'} {social.type}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {token.websites && token.websites.length > 0 && (
+                  <div className="flex gap-1.5">
+                    {token.websites.slice(0, 3).map((site, i) => (
+                      <button key={i} onClick={() => window.open(site.url, '_blank')} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all">
+                        <Link className="w-3 h-3" /> {site.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!token.socials?.length && (token.website || token.twitter) && (
+                  <div className="flex gap-2">
+                    {token.website && <button onClick={() => window.open(token.website, '_blank')} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"><Link className="w-3 h-3" /> Website</button>}
+                    {token.twitter && <button onClick={() => window.open(token.twitter, '_blank')} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all">𝕏 Twitter</button>}
+                  </div>
+                )}
+              </div>
+
+              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+              {/* Contract Info */}
+              <div className="px-5 py-3 space-y-2">
+                <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-text-muted/50 mb-1">Contract Info</div>
+                {token.pairCreatedAt && (
+                  <div className="flex items-center justify-between"><span className="text-[11px] text-text-muted">Pair Created</span><span className="text-[11px] font-mono text-text-secondary">{formatDate(token.pairCreatedAt)}</span></div>
+                )}
+                {token.dexId && (
+                  <div className="flex items-center justify-between"><span className="text-[11px] text-text-muted">DEX</span><span className="text-[11px] font-mono text-[#00EC97]/70 capitalize">{token.dexId.replace('-', ' ')}</span></div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-text-muted">Contract</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono text-text-secondary">{token.contractAddress.slice(0, 10)}...{token.contractAddress.slice(-6)}</span>
+                    <button onClick={() => copyToClipboard(token.contractAddress)} className="p-1 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-[#00EC97] transition-all"><Copy className="w-3 h-3" /></button>
+                    <button onClick={() => window.open(`https://nearblocks.io/address/${token.contractAddress}`, '_blank')} className="p-1 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-white transition-all" title="NearBlocks"><ExternalLink className="w-3 h-3" /></button>
+                  </div>
+                </div>
+                <button onClick={() => window.open(`https://x.com/search?q=$${token.symbol}+NEAR&src=typed_query&f=live`, '_blank')} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-medium text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all mt-2">
+                  𝕏 Search on Twitter
+                </button>
+              </div>
             </div>
 
-            {/* Bottom accent */}
-            <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}30, transparent)` }} />
+            <div className="h-[2px] shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)` }} />
           </div>
         </motion.div>
       </AnimatePresence>
     );
   };
-
   const triggerShockwave = useCallback((tokenId: string, amount: number) => {
     const svg = d3.select(svgRef.current);
     const node = nodesRef.current.find(n => n.token.id === tokenId);

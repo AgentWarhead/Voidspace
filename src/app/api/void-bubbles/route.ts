@@ -14,12 +14,13 @@ interface DexPair {
   quoteToken: { address: string; name: string; symbol: string };
   priceUsd: string;
   volume: { h24: number; h6: number; h1: number };
-  priceChange: { h24: number; h6: number; h1: number };
+  priceChange: { h24: number; h6: number; h1: number; m5?: number };
   liquidity: { usd: number };
   marketCap?: number;
   fdv?: number;
   chainId: string;
   dexId?: string;
+  pairAddress?: string;
   pairCreatedAt?: number;
   txns?: {
     h24: { buys: number; sells: number };
@@ -58,8 +59,16 @@ export interface VoidBubbleToken {
   socials?: { url: string; type: string }[];
   websites?: { url: string; label: string }[];
   txns24h?: { buys: number; sells: number };
+  txns1h?: { buys: number; sells: number };
+  txns6h?: { buys: number; sells: number };
+  volume1h?: number;
+  volume6h?: number;
   dexId?: string;
   pairCreatedAt?: string;
+  pairAddress?: string;
+  quoteToken?: string;
+  fdv?: number;
+  priceChange5m?: number;
 }
 
 // Known NEAR token categories
@@ -234,8 +243,16 @@ export async function GET(request: Request) {
           socials: pair.info?.socials,
           websites: pair.info?.websites,
           txns24h: pair.txns?.h24,
+          txns1h: pair.txns?.h1,
+          txns6h: pair.txns?.h6,
+          volume1h: pair.volume?.h1 || 0,
+          volume6h: pair.volume?.h6 || 0,
           dexId: pair.dexId,
           pairCreatedAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
+          pairAddress: pair.pairAddress,
+          quoteToken: pair.quoteToken?.symbol,
+          fdv: pair.fdv,
+          priceChange5m: pair.priceChange?.m5 ?? undefined,
         });
       }
     }
