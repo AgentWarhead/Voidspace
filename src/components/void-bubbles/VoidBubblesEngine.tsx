@@ -40,25 +40,10 @@ interface VoidBubbleToken {
   dexScreenerUrl?: string;
   refFinanceUrl?: string;
   contractAddress: string;
-  // Social links (legacy)
+  // Social links
   website?: string;
   twitter?: string;
   telegram?: string;
-  // Rich DexScreener data
-  imageUrl?: string;
-  socials?: { url: string; type: string }[];
-  websites?: { url: string; label: string }[];
-  txns24h?: { buys: number; sells: number };
-  txns1h?: { buys: number; sells: number };
-  txns6h?: { buys: number; sells: number };
-  volume1h?: number;
-  volume6h?: number;
-  dexId?: string;
-  pairCreatedAt?: string;
-  pairAddress?: string;
-  quoteToken?: string;
-  fdv?: number;
-  priceChange5m?: number;
 }
 
 interface BubbleNode extends d3.SimulationNodeDatum {
@@ -224,7 +209,7 @@ export function VoidBubblesEngine() {
   const [showSearch, setShowSearch] = useState(false);
   
   // **NEW: Popup Card state - floating overlay**
-  const [popupCard, setPopupCard] = useState<{ token: VoidBubbleToken } | null>(null);
+  const [popupCard, setPopupCard] = useState<{ token: VoidBubbleToken; position: { x: number; y: number } } | null>(null);
   
   // Pulse Mode state - volume-based pulsing (always enabled for now)
   const pulseMode = true;
@@ -239,8 +224,6 @@ export function VoidBubblesEngine() {
   const nodesRef = useRef<BubbleNode[]>([]);
   const sonicRef = useRef(new SonicEngine());
   const animFrameRef = useRef<number | null>(null);
-  const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const injectedStylesRef = useRef<HTMLStyleElement[]>([]);
 
   // Categories from data
   const categories = useMemo(() => {
@@ -271,12 +254,9 @@ export function VoidBubblesEngine() {
     }
   }, [period]);
 
-  // Track whether this is the initial load vs a refresh
-  const isInitialLoadRef = useRef(true);
-
   useEffect(() => {
-    fetchTokens().then(() => { isInitialLoadRef.current = false; });
-    const interval = setInterval(fetchTokens, 120000); // Refresh every 120s (was 60s — reduces flashing)
+    fetchTokens();
+    const interval = setInterval(fetchTokens, 60000); // Refresh every 60s
     return () => clearInterval(interval);
   }, [fetchTokens, period]);
 
@@ -345,18 +325,22 @@ export function VoidBubblesEngine() {
   }, [period]);
 
   // **NEW: Popup Card Handler** - shows floating card instead of expanding bubble
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleShowPopup = useCallback((tokenId: string, _event?: { clientX: number; clientY: number }) => {
+  const handleShowPopup = useCallback((tokenId: string, event: { clientX: number; clientY: number }) => {
     const token = tokens.find(t => t.id === tokenId);
-    if (!token) return;
-    setPopupCard({ token });
+    if (!token || !containerRef.current) return;
+
+    // Use viewport coordinates for fixed positioning
+    const x = event.clientX;
+    const y = event.clientY;
+    
+    setPopupCard({ token, position: { x, y } });
   }, [tokens]);
 
   // **NEW: Premium Popup Card Component**
   const renderPopupCard = () => {
     if (!popupCard) return null;
 
-    const { token } = popupCard;
+    const { token, position } = popupCard;
     const currentChange = getCurrentPriceChange(token);
     const healthStatus = getHealthStatus(token.healthScore);
     const intelBrief = generateIntelBrief(token);
@@ -364,234 +348,250 @@ export function VoidBubblesEngine() {
     const volLiqRatio = token.liquidity > 0 ? token.volume24h / token.liquidity : 0;
     const isPositive = currentChange >= 0;
     const accentColor = isPositive ? '#00EC97' : '#FF3366';
-    const totalTxns24h = token.txns24h ? token.txns24h.buys + token.txns24h.sells : 0;
-    const buyRatio = token.txns24h && totalTxns24h > 0 ? (token.txns24h.buys / totalTxns24h) * 100 : 50;
+    const accentBg = isPositive ? 'rgba(0,236,151,' : 'rgba(255,51,102,';
+
+    // Position the card (mobile = centered, desktop = near bubble)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const clampedX = Math.min(position.x + 20, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 420);
+    const clampedY = Math.max(20, Math.min(position.y - 200, (typeof window !== 'undefined' ? window.innerHeight : 800) - 600));
+    const cardStyle: React.CSSProperties = isMobile 
+      ? { left: '1rem', right: '1rem', top: '50%', transform: 'translateY(-50%)' }
+      : { left: clampedX, top: clampedY };
 
     return (
       <AnimatePresence>
         <motion.div
-          key={token.id}
-          initial={{ x: '100%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: '100%', opacity: 0 }}
+          initial={{ opacity: 0, scale: 0.9, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 10 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-0 right-0 h-full w-full sm:w-[400px] z-50 flex flex-col"
+          className="fixed z-50 w-[380px]"
+          style={cardStyle}
           onClick={(e) => e.stopPropagation()}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={{ left: 0, right: 0.5 }}
-          onDragEnd={(_e, info) => { if (info.offset.x > 100) setPopupCard(null); }}
         >
-          <div className="h-full flex flex-col bg-[#060a0f]/95 backdrop-blur-2xl border-l border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
-            <div className="h-[2px] shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, ${accentColor}40, transparent)` }} />
+          {/* Outer glow */}
+          <div className="absolute -inset-px rounded-2xl opacity-60" style={{
+            background: `linear-gradient(135deg, ${accentBg}0.3), ${accentBg}0.1), transparent, ${accentBg}0.2))`,
+          }} />
+          
+          <div className="relative bg-[#080b11]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.08] overflow-hidden">
+            {/* Top accent line */}
+            <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}60, transparent)` }} />
             
-            <div className="flex-1 overflow-y-auto overscroll-contain">
-              {/* Header */}
-              <div className="px-5 pt-4 pb-3">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <div>
-                      <h3 className="text-xl font-bold text-white leading-tight">{token.name}</h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-sm font-mono text-text-muted">{token.symbol}</span>
-                        {token.quoteToken && <span className="text-[10px] font-mono text-text-muted/50">/ {token.quoteToken}</span>}
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium border"
-                          style={{ backgroundColor: `${CATEGORY_COLORS[token.category] || '#64748B'}12`, color: CATEGORY_COLORS[token.category] || '#64748B', borderColor: `${CATEGORY_COLORS[token.category] || '#64748B'}25` }}>
-                          {token.category}
-                        </span>
-                      </div>
-                    </div>
+            {/* Header — token identity with momentum indicator */}
+            <div className="p-4 pb-0">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                      style={{ 
+                        borderColor: `${accentBg}0.2)`, 
+                        backgroundColor: `${accentBg}0.08)`,
+                        color: accentColor 
+                      }}>
+                      {token.category}
+                    </span>
+                    <span className="text-[10px] font-mono text-text-muted">
+                      {token.symbol}
+                    </span>
                   </div>
-                  <button onClick={() => setPopupCard(null)} className="p-2 rounded-xl hover:bg-white/[0.06] text-text-muted hover:text-white transition-all shrink-0">
-                    <X className="w-5 h-5" />
-                  </button>
+                  <h3 className="text-xl font-bold text-white tracking-tight">{token.name}</h3>
                 </div>
-                <div className="flex items-baseline gap-3 mt-3">
-                  <span className="text-3xl font-bold text-white font-mono tracking-tight">{formatPrice(token.price)}</span>
-                  <span className={`text-base font-bold font-mono ${isPositive ? 'text-[#00EC97]' : 'text-[#FF3366]'}`}>
-                    {isPositive ? '▲' : '▼'} {Math.abs(currentChange).toFixed(2)}%
+                <button
+                  onClick={() => setPopupCard(null)}
+                  className="p-1.5 rounded-lg hover:bg-white/[0.06] text-text-muted hover:text-white transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Price hero section */}
+            <div className="px-4 pt-3 pb-4">
+              <div className="flex items-end gap-3">
+                <span className="text-3xl font-bold text-white font-mono tracking-tight">
+                  {formatPrice(token.price)}
+                </span>
+                <motion.span 
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  className="text-lg font-bold font-mono mb-0.5"
+                  style={{ color: accentColor }}
+                >
+                  {isPositive ? '▲' : '▼'} {Math.abs(currentChange).toFixed(1)}%
+                </motion.span>
+              </div>
+              
+              {/* Timeframe pills */}
+              <div className="flex gap-1.5 mt-3">
+                {[
+                  { label: '1H', value: token.priceChange1h },
+                  { label: '6H', value: token.priceChange6h },
+                  { label: '24H', value: token.priceChange24h },
+                  { label: '7D', value: token.priceChange24h * 1.5 },
+                ].map(({ label, value }) => (
+                  <div key={label} className={cn(
+                    "flex-1 text-center py-1.5 rounded-lg font-mono text-[11px] font-semibold border",
+                    value >= 0 
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                      : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                  )}>
+                    {label}: {value >= 0 ? '+' : ''}{value.toFixed(1)}%
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider with glow */}
+            <div className="h-px mx-4" style={{ background: `linear-gradient(90deg, transparent, ${accentBg}0.15), transparent)` }} />
+
+            {/* Market metrics grid */}
+            <div className="grid grid-cols-2 gap-px bg-white/[0.03] mx-4 my-3 rounded-xl overflow-hidden border border-white/[0.04]">
+              {[
+                { label: 'Market Cap', value: formatCompact(token.marketCap), icon: '◆' },
+                { label: '24h Volume', value: formatCompact(token.volume24h), icon: '◈' },
+                { label: 'Liquidity', value: formatCompact(token.liquidity), icon: '◇' },
+                { label: 'Vol/Liq', value: volLiqRatio.toFixed(2), icon: '⟡', warn: volLiqRatio > 2 },
+              ].map(({ label, value, icon, warn }) => (
+                <div key={label} className="bg-[#0a0f14]/60 p-3">
+                  <div className="text-[10px] text-text-muted font-mono uppercase tracking-wider">{icon} {label}</div>
+                  <div className={cn("text-sm font-mono font-bold mt-0.5", warn ? "text-amber-400" : "text-white")}>
+                    {value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Health Score — animated bar */}
+            <div className="mx-4 mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Health Score</span>
+                <span className={cn("text-sm font-bold font-mono", {
+                  'text-emerald-400': healthStatus === 'healthy',
+                  'text-amber-400': healthStatus === 'medium',
+                  'text-rose-400': healthStatus === 'unhealthy'
+                })}>
+                  {token.healthScore}<span className="text-text-muted font-normal">/100</span>
+                </span>
+              </div>
+              <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${token.healthScore}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className={cn("h-full rounded-full", {
+                    'bg-gradient-to-r from-emerald-500 to-emerald-400': healthStatus === 'healthy',
+                    'bg-gradient-to-r from-amber-500 to-yellow-400': healthStatus === 'medium',
+                    'bg-gradient-to-r from-rose-600 to-rose-400': healthStatus === 'unhealthy'
+                  })}
+                />
+              </div>
+              {/* Risk tags */}
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded border", {
+                  'border-emerald-500/20 text-emerald-400 bg-emerald-500/10': token.riskLevel === 'low',
+                  'border-amber-500/20 text-amber-400 bg-amber-500/10': token.riskLevel === 'medium',
+                  'border-rose-500/20 text-rose-400 bg-rose-500/10': token.riskLevel === 'high',
+                  'border-rose-500/30 text-rose-300 bg-rose-500/20': token.riskLevel === 'critical',
+                })}>
+                  {token.riskLevel.toUpperCase()} RISK
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.06] text-text-muted bg-white/[0.02]">
+                  Supply: {supplyConcentration}
+                </span>
+                {token.riskFactors.slice(0, 2).map((factor, i) => (
+                  <span key={i} className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.06] text-text-muted bg-white/[0.02]">
+                    {factor}
                   </span>
-                </div>
+                ))}
               </div>
+            </div>
 
-              {/* Multi-timeframe */}
-              <div className="px-5 pb-3">
-                <div className="flex gap-1">
-                  {[
-                    { label: '5M', value: token.priceChange5m ?? 0 },
-                    { label: '1H', value: token.priceChange1h },
-                    { label: '6H', value: token.priceChange6h },
-                    { label: '24H', value: token.priceChange24h },
-                  ].map((tf) => (
-                    <div key={tf.label} className={`flex-1 text-center py-1.5 rounded-lg text-[10px] font-mono font-bold border ${
-                      tf.value >= 0 ? 'bg-emerald-500/10 border-emerald-500/15 text-emerald-400' : 'bg-rose-500/10 border-rose-500/15 text-rose-400'
-                    }`}>
-                      <div className="text-[8px] text-text-muted/50 mb-0.5">{tf.label}</div>
-                      {tf.value >= 0 ? '+' : ''}{tf.value.toFixed(1)}%
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-              {/* Market Data */}
-              <div className="px-5 py-3">
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { label: 'Market Cap', value: formatCompact(token.marketCap) },
-                    { label: '24h Volume', value: formatCompact(token.volume24h) },
-                    { label: 'Liquidity', value: formatCompact(token.liquidity) },
-                    { label: 'FDV', value: token.fdv ? formatCompact(token.fdv) : '—' },
-                    { label: 'Vol/Liq', value: volLiqRatio.toFixed(2) },
-                    { label: 'Supply Conc.', value: supplyConcentration },
-                  ].map((item) => (
-                    <div key={item.label} className="bg-white/[0.02] rounded-lg px-2.5 py-2 border border-white/[0.03]">
-                      <div className="text-[8px] font-mono uppercase tracking-wider text-text-muted/50">{item.label}</div>
-                      <div className="text-[13px] font-bold font-mono text-white mt-0.5">{item.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-              {/* Transactions — DexScreener style */}
-              {token.txns24h && (
-                <div className="px-5 py-3">
-                  <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-text-muted/50 mb-2">24h Transactions</div>
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    <div className="text-center"><div className="text-[9px] text-text-muted/50">Txns</div><div className="text-sm font-bold font-mono text-white">{totalTxns24h.toLocaleString()}</div></div>
-                    <div className="text-center"><div className="text-[9px] text-emerald-400/60">Buys</div><div className="text-sm font-bold font-mono text-emerald-400">{token.txns24h.buys.toLocaleString()}</div></div>
-                    <div className="text-center"><div className="text-[9px] text-rose-400/60">Sells</div><div className="text-sm font-bold font-mono text-rose-400">{token.txns24h.sells.toLocaleString()}</div></div>
+            {/* AI Intelligence — premium card */}
+            <div className="mx-4 mb-3 rounded-xl overflow-hidden border border-[#00EC97]/15">
+              <div className="bg-gradient-to-br from-[#00EC97]/[0.08] to-transparent p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-5 h-5 rounded-md bg-[#00EC97]/20 flex items-center justify-center">
+                    <Brain className="w-3 h-3 text-[#00EC97]" />
                   </div>
-                  <div className="flex h-2 rounded-full overflow-hidden">
-                    <div className="bg-emerald-500 transition-all" style={{ width: `${buyRatio}%` }} />
-                    <div className="bg-rose-500 transition-all" style={{ width: `${100 - buyRatio}%` }} />
-                  </div>
-                  {(token.txns1h || token.txns6h) && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      {token.txns1h && (
-                        <div className="bg-white/[0.02] rounded-lg px-2 py-1.5 border border-white/[0.03] text-center">
-                          <div className="text-[8px] text-text-muted/50">1h B/S</div>
-                          <div className="text-[11px] font-mono"><span className="text-emerald-400">{token.txns1h.buys}</span><span className="text-text-muted mx-1">/</span><span className="text-rose-400">{token.txns1h.sells}</span></div>
-                        </div>
-                      )}
-                      {token.txns6h && (
-                        <div className="bg-white/[0.02] rounded-lg px-2 py-1.5 border border-white/[0.03] text-center">
-                          <div className="text-[8px] text-text-muted/50">6h B/S</div>
-                          <div className="text-[11px] font-mono"><span className="text-emerald-400">{token.txns6h.buys}</span><span className="text-text-muted mx-1">/</span><span className="text-rose-400">{token.txns6h.sells}</span></div>
-                        </div>
-                      )}
-                    </div>
+                  <span className="text-xs font-semibold text-[#00EC97] tracking-wide">AI Intelligence Brief</span>
+                </div>
+                <p className="text-[12px] text-text-secondary leading-relaxed">
+                  {intelBrief}
+                </p>
+              </div>
+            </div>
+
+            {/* Action buttons — prominent CTAs */}
+            <div className="px-4 pb-3">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank')}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold bg-[#00EC97]/15 border border-[#00EC97]/25 text-[#00EC97] hover:bg-[#00EC97]/25 transition-all"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  DexScreener
+                </button>
+                <button
+                  onClick={() => window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank')}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold bg-white/[0.04] border border-white/[0.08] text-text-secondary hover:bg-white/[0.08] hover:text-white transition-all"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Ref Finance
+                </button>
+              </div>
+              {(token.website || token.twitter) && (
+                <div className="flex gap-2 mt-2">
+                  {token.website && (
+                    <button
+                      onClick={() => window.open(token.website, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
+                    >
+                      <Link className="w-3 h-3" />
+                      Website
+                    </button>
+                  )}
+                  {token.twitter && (
+                    <button
+                      onClick={() => window.open(token.twitter, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Twitter
+                    </button>
                   )}
                 </div>
               )}
-
-              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-              {/* Health Score */}
-              <div className="px-5 py-3">
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted">Health Score</span>
-                  <span className={cn("text-sm font-bold font-mono", { 'text-emerald-400': healthStatus === 'healthy', 'text-amber-400': healthStatus === 'medium', 'text-rose-400': healthStatus === 'unhealthy' })}>{token.healthScore}/100</span>
-                </div>
-                <div className="w-full bg-white/[0.06] rounded-full h-2.5 overflow-hidden">
-                  <div className={cn("h-2.5 rounded-full transition-all duration-500", { 'bg-gradient-to-r from-emerald-600 to-emerald-400': healthStatus === 'healthy', 'bg-gradient-to-r from-amber-600 to-amber-400': healthStatus === 'medium', 'bg-gradient-to-r from-rose-600 to-rose-400': healthStatus === 'unhealthy' })} style={{ width: `${token.healthScore}%` }} />
-                </div>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-semibold border ${token.riskLevel === 'low' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : token.riskLevel === 'medium' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>{token.riskLevel.toUpperCase()} RISK</span>
-                  {token.riskFactors.filter(f => f !== 'No significant risk factors detected').map((factor, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/[0.05] text-text-muted">{factor}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-[#00EC97]/15 to-transparent" />
-
-              {/* AI Intel */}
-              <div className="px-5 py-3">
-                <div className="rounded-xl p-3.5 border border-[#00EC97]/15 bg-[#00EC97]/[0.03]">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <Brain className="w-4 h-4 text-[#00EC97]" />
-                    <span className="text-[11px] font-bold text-[#00EC97] tracking-wide">AI Intelligence Brief</span>
-                  </div>
-                  <p className="text-[12px] text-text-secondary leading-relaxed">{intelBrief}</p>
-                </div>
-              </div>
-
-              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-              {/* Links */}
-              <div className="px-5 py-3">
-                <div className="flex gap-2 mb-2">
-                  <button onClick={() => window.open(`https://dexscreener.com/near/${token.contractAddress}`, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-semibold bg-[#00EC97]/12 border border-[#00EC97]/20 text-[#00EC97] hover:bg-[#00EC97]/20 transition-all">
-                    <ExternalLink className="w-3.5 h-3.5" /> DexScreener
-                  </button>
-                  <button onClick={() => window.open(`https://app.ref.finance/#near|${token.contractAddress}`, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-semibold bg-white/[0.03] border border-white/[0.06] text-text-secondary hover:bg-white/[0.06] hover:text-white transition-all">
-                    <ExternalLink className="w-3.5 h-3.5" /> Ref Finance
-                  </button>
-                </div>
-                {token.socials && token.socials.length > 0 && (
-                  <div className="flex gap-1.5 mb-2">
-                    {token.socials.map((social, i) => (
-                      <button key={i} onClick={() => window.open(social.url, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-medium text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] transition-all capitalize">
-                        {social.type === 'twitter' ? '𝕏' : social.type === 'telegram' ? '✈️' : social.type === 'discord' ? '💬' : '🔗'} {social.type}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {token.websites && token.websites.length > 0 && (
-                  <div className="flex gap-1.5">
-                    {token.websites.slice(0, 3).map((site, i) => (
-                      <button key={i} onClick={() => window.open(site.url, '_blank')} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all">
-                        <Link className="w-3 h-3" /> {site.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {!token.socials?.length && (token.website || token.twitter) && (
-                  <div className="flex gap-2">
-                    {token.website && <button onClick={() => window.open(token.website, '_blank')} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"><Link className="w-3 h-3" /> Website</button>}
-                    {token.twitter && <button onClick={() => window.open(token.twitter, '_blank')} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all">𝕏 Twitter</button>}
-                  </div>
-                )}
-              </div>
-
-              <div className="h-px mx-5 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-              {/* Contract Info */}
-              <div className="px-5 py-3 space-y-2">
-                <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-text-muted/50 mb-1">Contract Info</div>
-                {token.pairCreatedAt && (
-                  <div className="flex items-center justify-between"><span className="text-[11px] text-text-muted">Pair Created</span><span className="text-[11px] font-mono text-text-secondary">{formatDate(token.pairCreatedAt)}</span></div>
-                )}
-                {token.dexId && (
-                  <div className="flex items-center justify-between"><span className="text-[11px] text-text-muted">DEX</span><span className="text-[11px] font-mono text-[#00EC97]/70 capitalize">{token.dexId.replace('-', ' ')}</span></div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-text-muted">Contract</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-mono text-text-secondary">{token.contractAddress.slice(0, 10)}...{token.contractAddress.slice(-6)}</span>
-                    <button onClick={() => copyToClipboard(token.contractAddress)} className="p-1 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-[#00EC97] transition-all"><Copy className="w-3 h-3" /></button>
-                    <button onClick={() => window.open(`https://nearblocks.io/address/${token.contractAddress}`, '_blank')} className="p-1 rounded-md hover:bg-white/[0.06] text-text-muted hover:text-white transition-all" title="NearBlocks"><ExternalLink className="w-3 h-3" /></button>
-                  </div>
-                </div>
-                <button onClick={() => window.open(`https://x.com/search?q=$${token.symbol}+NEAR&src=typed_query&f=live`, '_blank')} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-medium text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all mt-2">
-                  𝕏 Search on Twitter
-                </button>
-              </div>
-
-              {/* Safe area spacer for mobile */}
-              <div className="h-6 sm:h-2" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
             </div>
 
-            <div className="h-[2px] shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)` }} />
+            {/* Contract footer */}
+            <div className="px-4 py-2.5 bg-white/[0.02] border-t border-white/[0.04]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-text-muted">
+                    {token.contractAddress.slice(0, 8)}...{token.contractAddress.slice(-6)}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(token.contractAddress)}
+                    className="p-1 rounded hover:bg-white/[0.06] text-text-muted hover:text-[#00EC97] transition-all"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                </div>
+                <span className="text-[9px] font-mono text-text-muted/50">
+                  {formatDate(token.detectedAt)}
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom accent */}
+            <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}30, transparent)` }} />
           </div>
         </motion.div>
       </AnimatePresence>
     );
   };
+
   const triggerShockwave = useCallback((tokenId: string, amount: number) => {
     const svg = d3.select(svgRef.current);
     const node = nodesRef.current.find(n => n.token.id === tokenId);
@@ -689,20 +689,24 @@ export function VoidBubblesEngine() {
       .attr('y', (node.y || 0) - baseRadius - 40)
       .remove();
 
-    // Push nearby bubbles with enhanced force
+    // Push nearby bubbles — gentle on mobile to prevent seizure-like chaos
+    const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
+    const forceMultiplier = isMobileDevice ? 8 : 25; // Much gentler on mobile
+    const pushRadius = isMobileDevice ? maxRadius * 0.6 : maxRadius; // Smaller push radius on mobile
     nodesRef.current.forEach(other => {
       if (other.id === tokenId || !other.x || !other.y || !node.x || !node.y) return;
       const dx = other.x - node.x;
       const dy = other.y - node.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < maxRadius && dist > 0) {
-        const force = (1 - dist / maxRadius) * intensity * 50; // Increased force
+      if (dist < pushRadius && dist > 0) {
+        const force = (1 - dist / pushRadius) * intensity * forceMultiplier;
         other.vx = (other.vx || 0) + (dx / dist) * force;
         other.vy = (other.vy || 0) + (dy / dist) * force;
       }
     });
 
-    simulationRef.current?.alpha(0.4).restart();
+    // Gentle alpha bump — enough to animate but not cause seizures
+    simulationRef.current?.alpha(isMobileDevice ? 0.1 : 0.2).restart();
   }, []);
 
   // ────────────────────── Whale Alerts (simulated) ──────────────────────
@@ -721,9 +725,13 @@ export function VoidBubblesEngine() {
       triggerShockwave(token.id, amount);
     };
 
-    const interval = setInterval(generateWhaleAlert, 20000 + Math.random() * 25000);
-    // First alert after 5 seconds
-    const firstTimeout = setTimeout(generateWhaleAlert, 5000);
+    // Less frequent on mobile to prevent overwhelming small screens
+    const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
+    const baseInterval = isMobileDevice ? 40000 : 20000;
+    const randomRange = isMobileDevice ? 30000 : 25000;
+    const interval = setInterval(generateWhaleAlert, baseInterval + Math.random() * randomRange);
+    // First alert after a calm delay
+    const firstTimeout = setTimeout(generateWhaleAlert, isMobileDevice ? 10000 : 5000);
 
     return () => {
       clearInterval(interval);
@@ -830,24 +838,10 @@ export function VoidBubblesEngine() {
 
     nodesRef.current = nodes;
 
-    // Clean up previously injected styles to prevent memory leak
-    injectedStylesRef.current.forEach(style => style.remove());
-    injectedStylesRef.current = [];
+    // Clear previous
+    d3.select(svgRef.current).selectAll('*').remove();
 
-    // Stop previous simulation and animation frame
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (simulationRef.current as any)?.stop?.();
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    animFrameRef.current = null;
-
-    // CRITICAL: Hide SVG BEFORE clearing to prevent flash of empty content
-    const svgEl = d3.select(svgRef.current);
-    svgEl.style('opacity', '0');
-
-    // Clear previous (now invisible — no flash)
-    svgEl.selectAll('*').remove();
-
-    const svg = svgEl
+    const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
       .style('overflow', 'visible');
@@ -1000,7 +994,6 @@ export function VoidBubblesEngine() {
         }
       `;
       document.head.appendChild(style);
-      injectedStylesRef.current.push(style);
     });
 
     // Enhanced outer glow circle — dramatic colored halo with dynamic opacity
@@ -1250,9 +1243,9 @@ export function VoidBubblesEngine() {
         .strength(0.95)
         .iterations(4)
       )
-      .alphaDecay(0.025) // Faster settling to reduce movement time
-      .alpha(0.5)
-      .velocityDecay(0.45); // Higher friction for quicker stabilization
+      .alphaDecay(isMobile ? 0.025 : 0.015) // Faster settling on mobile
+      .alpha(0.6)
+      .velocityDecay(isMobile ? 0.55 : 0.4); // More friction on mobile to prevent chaos
 
     // Store simulation reference
     simulationRef.current = simulation;
@@ -1265,16 +1258,21 @@ export function VoidBubblesEngine() {
     const tick = (currentTime: number) => {
       if (currentTime - lastFrameTime >= frameInterval) {
         // Soft boundary — gently push bubbles back when they drift out
+        // Use proportional force (not constant) to prevent oscillation on mobile
         const margin = 40;
         nodes.forEach(d => {
           const r = d.targetRadius;
           if (d.x !== undefined) {
-            if (d.x - r < margin) d.vx = (d.vx || 0) + 0.5;
-            if (d.x + r > width - margin) d.vx = (d.vx || 0) - 0.5;
+            const leftOverlap = margin - (d.x - r);
+            const rightOverlap = (d.x + r) - (width - margin);
+            if (leftOverlap > 0) d.vx = (d.vx || 0) + leftOverlap * 0.05;
+            if (rightOverlap > 0) d.vx = (d.vx || 0) - rightOverlap * 0.05;
           }
           if (d.y !== undefined) {
-            if (d.y - r < margin) d.vy = (d.vy || 0) + 0.5;
-            if (d.y + r > height - margin) d.vy = (d.vy || 0) - 0.5;
+            const topOverlap = margin - (d.y - r);
+            const bottomOverlap = (d.y + r) - (height - margin);
+            if (topOverlap > 0) d.vy = (d.vy || 0) + topOverlap * 0.05;
+            if (bottomOverlap > 0) d.vy = (d.vy || 0) - bottomOverlap * 0.05;
           }
         });
 
@@ -1307,37 +1305,43 @@ export function VoidBubblesEngine() {
       }
     });
 
-    // Set all bubble radii immediately (no staggered entrance — prevents mobile flashing)
-    bubbleGroups.selectAll('circle').each(function() {
-      const el = d3.select(this);
-      const className = el.attr('class') || '';
-      const parentData = d3.select((this as SVGElement).parentNode as Element).datum() as BubbleNode;
-      if (!parentData) return;
-      const r = parentData.targetRadius;
-      if (className.includes('bubble-main')) el.attr('r', r);
-      else if (className.includes('bubble-glow')) el.attr('r', r + 4);
-      else if (className.includes('bubble-outer-ring')) el.attr('r', r + 8);
-      else if (className.includes('xray-ring')) el.attr('r', r + 12);
-      else el.attr('r', r);
+    // Animate bubbles in with staggered entrance
+    bubbleGroups.each(function(d, i) {
+      const group = d3.select(this);
+      
+      // Delay based on distance from center for ripple effect
+      const delay = i * 30; // Faster stagger for premium feel
+      
+      setTimeout(() => {
+        // Animate radius growth
+        group.selectAll('circle')
+          .transition()
+          .duration(800)
+          .ease(d3.easeElasticOut.amplitude(1).period(0.3))
+          .attr('r', function() {
+            const className = d3.select(this).attr('class');
+            if (className?.includes('bubble-main')) return d.targetRadius;
+            if (className?.includes('bubble-glow')) return d.targetRadius + 4;
+            if (className?.includes('bubble-outer-ring')) return d.targetRadius + 8;
+            if (className?.includes('xray-ring')) return d.targetRadius + 12;
+            return d.targetRadius;
+          });
+        
+        // Animate labels with slight delay for premium cascade effect
+        setTimeout(() => {
+          group.selectAll('text')
+            .attr('opacity', 0)
+            .transition()
+            .duration(400)
+            .ease(d3.easeCubicOut)
+            .attr('opacity', function() {
+              const className = d3.select(this).attr('class');
+              if (className?.includes('skull-overlay')) return d.token.riskLevel === 'critical' ? 0.7 : 0.4;
+              return 1;
+            });
+        }, 200);
+      }, delay);
     });
-
-    // Labels start visible immediately
-    bubbleGroups.selectAll('text').attr('opacity', function() {
-      const className = d3.select(this).attr('class') || '';
-      if (className.includes('skull-overlay')) {
-        const parentData = d3.select((this as SVGElement).parentNode as Element).datum() as BubbleNode;
-        return parentData?.token.riskLevel === 'critical' ? 0.7 : 0.4;
-      }
-      return 1;
-    });
-
-    // Let the simulation run a few ticks to position bubbles BEFORE showing anything
-    // This prevents the "seizure" of bubbles spawning at random positions then rearranging
-    for (let i = 0; i < 60; i++) simulation.tick();
-    // Update positions after pre-ticking
-    bubbleGroups.attr('transform', d => `translate(${d.x || 0}, ${d.y || 0})`);
-    // NOW fade in — everything is already in position
-    svg.transition().duration(350).ease(d3.easeCubicOut).style('opacity', 1);
 
     // X-ray mode toggle
     bubbleGroups.selectAll('.xray-ring')
@@ -1362,7 +1366,6 @@ export function VoidBubblesEngine() {
         }
       `;
       document.head.appendChild(style);
-      injectedStylesRef.current.push(style);
       
       highVolTokens.forEach(d => {
         bubbleGroups.filter(node => node.id === d.id)
@@ -1396,7 +1399,7 @@ export function VoidBubblesEngine() {
     });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredTokens, sizeMetric, bubbleContent, xrayMode, pulseMode, period, highlightMode, getCurrentPriceChange, handleShowPopup, selectedToken, categories]);
+  }, [filteredTokens, sizeMetric, bubbleContent, xrayMode, pulseMode, period, highlightMode, getCurrentPriceChange, handleShowPopup]);
 
   // Handle window resize with proper debounce
   useEffect(() => {
@@ -1408,53 +1411,29 @@ export function VoidBubblesEngine() {
       }, 200);
     };
 
-    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('resize', handleResize);
     return () => {
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
   }, [initSimulation]);
 
-  // Track token IDs to detect real structural changes vs. just data refresh
-  const prevTokenIdsRef = useRef<string>('');
-
   // Initialize on mount and when dependencies change
   useEffect(() => {
-    if (filteredTokens.length === 0) return;
-    
-    // Build a key from token IDs + filter settings to detect structural changes
-    const tokenKey = filteredTokens.map(t => t.id).sort().join(',');
-    const structuralKey = `${tokenKey}|${filterCategory}|${sizeMetric}|${bubbleContent}|${xrayMode}|${period}|${highlightMode}`;
-    
-    if (prevTokenIdsRef.current === '' || prevTokenIdsRef.current !== structuralKey) {
-      // First load or structural change — full re-init
-      prevTokenIdsRef.current = structuralKey;
+    if (filteredTokens.length > 0) {
       initSimulation();
     }
-    // Data-only refresh (same tokens, same filters) — skip re-init to prevent flashing
-  }, [initSimulation, filteredTokens, filterCategory, sizeMetric, bubbleContent, xrayMode, period, highlightMode]);
+  }, [initSimulation]);
 
-  // Listen for token open events from HotStrip / Header ticker
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (detail?.tokenId) {
-        handleShowPopup(detail.tokenId);
-      }
-    };
-    window.addEventListener('voidspace:open-token', handler);
-    return () => window.removeEventListener('voidspace:open-token', handler);
-  }, [handleShowPopup]);
-
-  // Cleanup on unmount
+  // Cleanup
   useEffect(() => {
     return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (simulationRef.current) simulationRef.current.stop();
-      if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current);
-      // Remove all injected CSS styles
-      injectedStylesRef.current.forEach(style => style.remove());
-      injectedStylesRef.current = [];
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
     };
   }, []);
 
@@ -1770,292 +1749,220 @@ export function VoidBubblesEngine() {
 
   return (
     <div className="flex-1 relative overflow-hidden h-full w-full">
-      {/* ═══ COMMAND NEXUS — Desktop Control Panel ═══ */}
-      <div className="hidden sm:block absolute top-4 left-4 z-20 w-60" style={{ maxHeight: 'calc(100% - 3rem)' }}>
-        {/* Outer animated border glow */}
-        <div className="relative rounded-2xl p-[1px] overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(0,236,151,0.3), rgba(0,212,255,0.15), rgba(157,78,221,0.2), rgba(0,236,151,0.3))',
-            backgroundSize: '300% 300%',
-            animation: 'gradient-shift 8s ease infinite',
-          }}
-        >
-          <div className="bg-[#060a0f]/90 backdrop-blur-2xl rounded-2xl overflow-y-auto overflow-x-hidden shadow-2xl shadow-[#00EC97]/5" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
-            {/* Animated top accent with sweep */}
-            <div className="relative h-[2px] overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#00EC97]/60 via-[#00D4FF]/80 to-[#9D4EDD]/60" />
-              <div className="absolute inset-0" style={{ 
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-                animation: 'shimmer-sweep 3s ease-in-out infinite',
-                backgroundSize: '200% 100%',
-              }} />
+      {/* Power Bar — Desktop: Premium Glassmorphism Panel */}
+      <div className="hidden sm:block absolute top-4 left-4 z-20 w-56">
+        <div className="bg-[#0a0f14]/80 backdrop-blur-2xl border border-white/[0.06] rounded-2xl shadow-2xl shadow-black/40 overflow-hidden">
+          {/* Accent glow line at top */}
+          <div className="h-px bg-gradient-to-r from-transparent via-near-green/40 to-transparent" />
+          
+          <div className="p-4 space-y-4">
+            {/* Timeframe — pill selector */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Clock className="w-3 h-3 text-near-green/70" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Timeframe</span>
+              </div>
+              <div className="flex bg-white/[0.04] rounded-lg p-0.5">
+                {(['1h', '4h', '1d', '7d', '30d'] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriod(p)}
+                    className={`flex-1 text-[11px] font-mono py-1.5 rounded-md transition-all duration-200 ${
+                      period === p
+                        ? 'bg-near-green/20 text-near-green shadow-sm shadow-near-green/10 font-semibold'
+                        : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Panel Header */}
-            <div className="px-4 pt-3 pb-2 flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg bg-[#00EC97]/15 border border-[#00EC97]/25 flex items-center justify-center">
-                <Brain className="w-3 h-3 text-[#00EC97]" />
+            {/* Movers */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Activity className="w-3 h-3 text-near-green/70" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Movers</span>
               </div>
-              <div>
-                <span className="text-[11px] font-semibold text-white tracking-wide">Command Nexus</span>
-                <span className="text-[8px] font-mono text-[#00EC97]/60 block -mt-0.5">VOID://CONTROL.MATRIX</span>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
+                    highlightMode === 'gainers'
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                      : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-emerald-500/20 hover:text-emerald-400/70'
+                  }`}
+                >
+                  <TrendingUp className="w-3 h-3" />
+                  Gainers
+                </button>
+                <button
+                  onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
+                    highlightMode === 'losers'
+                      ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                      : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-rose-500/20 hover:text-rose-400/70'
+                  }`}
+                >
+                  <TrendingDown className="w-3 h-3" />
+                  Losers
+                </button>
               </div>
             </div>
-            
-            <div className="px-4 pb-4 space-y-3">
-              {/* ── Timeframe ── */}
+
+            {/* Separator */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+            {/* Category Filter */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Category</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilterCategory(cat)}
+                    className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all duration-200 border ${
+                      filterCategory === cat
+                        ? 'bg-near-green/15 border-near-green/30 text-near-green'
+                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-white/10 hover:text-text-secondary'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Separator */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+            {/* Size & Display — compact two-column */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Clock className="w-3 h-3 text-[#00D4FF]/70" />
-                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/70">Temporal Range</span>
-                </div>
-                <div className="flex bg-white/[0.03] rounded-xl p-[3px] border border-white/[0.04]">
-                  {(['1h', '4h', '1d', '7d', '30d'] as const).map((p) => (
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted block mb-1.5">Size</span>
+                <div className="space-y-0.5">
+                  {[
+                    { key: 'marketCap', label: 'MCap', icon: '◆' },
+                    { key: 'volume', label: 'Vol', icon: '◈' },
+                    { key: 'performance', label: 'Δ Move', icon: '◉' },
+                  ].map((opt) => (
                     <button
-                      key={p}
-                      onClick={() => setPeriod(p)}
-                      className={`flex-1 text-[11px] font-mono py-1.5 rounded-lg transition-all duration-300 ${
-                        period === p
-                          ? 'bg-gradient-to-b from-[#00EC97]/25 to-[#00EC97]/10 text-[#00EC97] shadow-lg shadow-[#00EC97]/10 font-bold border border-[#00EC97]/20'
-                          : 'text-text-muted hover:text-white hover:bg-white/[0.04]'
+                      key={opt.key}
+                      onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
+                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all duration-150 ${
+                        sizeMetric === opt.key
+                          ? 'text-near-green bg-near-green/10 font-medium'
+                          : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
                       }`}
                     >
-                      {p}
+                      <span className="mr-1 opacity-50">{opt.icon}</span>{opt.label}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* ── Momentum Scanners ── */}
               <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Activity className="w-3 h-3 text-[#00D4FF]/70" />
-                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/70">Momentum Scanner</span>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted block mb-1.5">Show</span>
+                <div className="space-y-0.5">
+                  {[
+                    { key: 'performance', label: 'Δ%', icon: '▲' },
+                    { key: 'price', label: 'Price', icon: '$' },
+                    { key: 'volume', label: 'Vol', icon: '≋' },
+                    { key: 'marketCap', label: 'MCap', icon: '◆' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
+                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all duration-150 ${
+                        bubbleContent === opt.key
+                          ? 'text-near-green bg-near-green/10 font-medium'
+                          : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      <span className="mr-1 opacity-50 font-mono text-[9px]">{opt.icon}</span>{opt.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-300 border ${
-                      highlightMode === 'gainers'
-                        ? 'bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 border-emerald-400/40 text-emerald-300 shadow-lg shadow-emerald-500/10'
-                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-emerald-500/20 hover:text-emerald-400/70'
-                    }`}
-                  >
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    🔥 Gainers
-                  </button>
-                  <button
-                    onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-300 border ${
-                      highlightMode === 'losers'
-                        ? 'bg-gradient-to-b from-rose-500/20 to-rose-500/5 border-rose-400/40 text-rose-300 shadow-lg shadow-rose-500/10'
-                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-rose-500/20 hover:text-rose-400/70'
-                    }`}
-                  >
-                    <TrendingDown className="w-3.5 h-3.5" />
-                    💀 Losers
-                  </button>
-                </div>
-              </div>
-
-              {/* ── Separator with glow ── */}
-              <div className="relative h-px">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00EC97]/20 to-transparent" />
-              </div>
-
-              {/* ── Sector Filter ── */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#9D4EDD]/70">Sector Filter</span>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {categories.map((cat) => {
-                    const catColor = cat !== 'all' ? (CATEGORY_COLORS[cat] || '#64748B') : '#00EC97';
-                    return (
-                      <button
-                        key={cat}
-                        onClick={() => setFilterCategory(cat)}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 border ${
-                          filterCategory === cat
-                            ? 'font-semibold shadow-sm'
-                            : 'bg-white/[0.02] border-white/[0.03] text-text-muted hover:border-white/10 hover:text-text-secondary'
-                        }`}
-                        style={filterCategory === cat ? {
-                          backgroundColor: `${catColor}15`,
-                          borderColor: `${catColor}40`,
-                          color: catColor,
-                          boxShadow: `0 0 12px ${catColor}15`,
-                        } : undefined}
-                      >
-                        {cat === 'all' ? '⚡ All' : cat}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ── Separator ── */}
-              <div className="relative h-px">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00D4FF]/15 to-transparent" />
-              </div>
-
-              {/* ── Dimension Controls ── */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/60 block mb-1.5">◇ Bubble Size</span>
-                  <div className="space-y-0.5">
-                    {[
-                      { key: 'marketCap', label: '◆ MCap' },
-                      { key: 'volume', label: '◈ Volume' },
-                      { key: 'performance', label: '◉ Move' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
-                        className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] transition-all duration-200 ${
-                          sizeMetric === opt.key
-                            ? 'text-[#00EC97] bg-[#00EC97]/10 font-semibold border border-[#00EC97]/15'
-                            : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03] border border-transparent'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/60 block mb-1.5">◇ Data Layer</span>
-                  <div className="space-y-0.5">
-                    {[
-                      { key: 'performance', label: '▲ Change %' },
-                      { key: 'price', label: '$ Price' },
-                      { key: 'volume', label: '≋ Volume' },
-                      { key: 'marketCap', label: '◆ MCap' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
-                        className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] transition-all duration-200 ${
-                          bubbleContent === opt.key
-                            ? 'text-[#00EC97] bg-[#00EC97]/10 font-semibold border border-[#00EC97]/15'
-                            : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03] border border-transparent'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Separator ── */}
-              <div className="relative h-px">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
-              </div>
-
-              {/* ── Intelligence Tools ── */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setXrayMode(!xrayMode)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[10px] font-mono uppercase tracking-wider transition-all duration-300 border ${
-                    xrayMode
-                      ? 'bg-gradient-to-b from-cyan-500/20 to-cyan-500/5 border-cyan-400/40 text-cyan-300 shadow-lg shadow-cyan-500/15'
-                      : 'bg-white/[0.03] border-white/[0.05] text-text-muted hover:border-cyan-500/20 hover:text-cyan-400/70'
-                  }`}
-                >
-                  {xrayMode ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                  {xrayMode ? '⚡ X-Ray ON' : '◎ X-Ray'}
-                </button>
-                <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  className={`p-2.5 rounded-xl transition-all duration-300 border ${
-                    soundEnabled
-                      ? 'bg-[#00EC97]/10 border-[#00EC97]/20 text-[#00EC97]'
-                      : 'bg-white/[0.03] border-white/[0.05] text-text-muted hover:text-text-secondary'
-                  }`}
-                  title={soundEnabled ? 'Sonic: Active' : 'Sonic: Muted'}
-                >
-                  {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-
-              {/* ── Quick Actions ── */}
-              <div className="flex gap-1.5">
-                <button
-                  onClick={handleSnapshot}
-                  className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-200"
-                >
-                  <Camera className="w-3 h-3" />
-                  Capture
-                </button>
-                <button
-                  onClick={handleShareX}
-                  className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-200"
-                >
-                  <Share2 className="w-3 h-3" />
-                  Share
-                </button>
-                <button
-                  onClick={() => initSimulation()}
-                  className="p-2 rounded-xl text-text-muted hover:text-[#00EC97] bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] hover:border-[#00EC97]/20 transition-all duration-200"
-                  title="Reset Void Matrix"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                </button>
-              </div>
-
-              {/* ── Powered By Footer ── */}
-              <div className="flex items-center justify-center gap-1 pt-1">
-                <span className="text-[8px] font-mono text-text-muted/40 uppercase tracking-widest">Powered by</span>
-                <span className="text-[8px] font-mono text-[#00EC97]/50 uppercase tracking-widest font-semibold">Voidspace AI</span>
               </div>
             </div>
-            
-            {/* Animated bottom accent */}
-            <div className="relative h-[2px] overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#9D4EDD]/40 via-[#00D4FF]/60 to-[#00EC97]/40" />
+
+            {/* Separator */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+            {/* Tools Row */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setXrayMode(!xrayMode)}
+                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-mono uppercase tracking-wider transition-all duration-200 border ${
+                  xrayMode
+                    ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10'
+                    : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-cyan-500/20'
+                }`}
+              >
+                {xrayMode ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                X-Ray
+              </button>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className={`p-2 rounded-lg transition-all duration-200 border ${
+                  soundEnabled
+                    ? 'bg-near-green/10 border-near-green/20 text-near-green'
+                    : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:text-text-secondary'
+                }`}
+                title={soundEnabled ? 'Sound On' : 'Sound Off'}
+              >
+                {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {/* Action Bar */}
+            <div className="flex gap-1">
+              <button
+                onClick={handleSnapshot}
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
+              >
+                <Camera className="w-3 h-3" />
+                Export
+              </button>
+              <button
+                onClick={handleShareX}
+                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
+              >
+                <Share2 className="w-3 h-3" />
+                Share
+              </button>
+              <button
+                onClick={() => initSimulation()}
+                className="p-1.5 rounded-lg text-text-muted hover:text-near-green bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
+                title="Reset Layout"
+              >
+                <RotateCcw className="w-3 h-3" />
+              </button>
             </div>
           </div>
+          
+          {/* Bottom accent */}
+          <div className="h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent" />
         </div>
-
-        {/* CSS Animations for panel */}
-        <style jsx>{`
-          @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-          }
-          @keyframes shimmer-sweep {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-          }
-        `}</style>
       </div>
 
-      {/* Mobile Panel Toggle — 44px min touch target */}
+      {/* Mobile Panel Toggle */}
       <div className="sm:hidden absolute top-4 left-4 z-20">
         <Button
           size="sm"
           variant="secondary"
           onClick={() => setShowMobilePanel(true)}
-          className="min-h-[44px] min-w-[44px] px-3"
         >
           <Settings className="w-4 h-4 mr-1" />
           Controls
         </Button>
       </div>
 
-      {/* Mobile Panel + Backdrop */}
+      {/* Mobile Panel */}
       <AnimatePresence>
         {showMobilePanel && (
-          <>
-          {/* Tap-outside backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="sm:hidden fixed inset-0 z-40 bg-black/50"
-            onClick={() => setShowMobilePanel(false)}
-          />
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
@@ -2085,8 +1992,8 @@ export function VoidBubblesEngine() {
                         key={p}
                         size="sm"
                         variant={period === p ? 'primary' : 'ghost'}
-                        onClick={() => { setPeriod(p); setShowMobilePanel(false); }}
-                        className="text-xs min-h-[44px] min-w-[44px]"
+                        onClick={() => setPeriod(p)}
+                        className="text-xs"
                       >
                         {p}
                       </Button>
@@ -2101,8 +2008,8 @@ export function VoidBubblesEngine() {
                     <Button
                       size="sm"
                       variant={highlightMode === 'gainers' ? 'primary' : 'secondary'}
-                      onClick={() => { setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers'); setShowMobilePanel(false); }}
-                      className="text-xs flex-1 min-h-[44px]"
+                      onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+                      className="text-xs flex-1"
                     >
                       <TrendingUp className="w-3 h-3 mr-1" />
                       Gainers
@@ -2110,8 +2017,8 @@ export function VoidBubblesEngine() {
                     <Button
                       size="sm"
                       variant={highlightMode === 'losers' ? 'primary' : 'secondary'}
-                      onClick={() => { setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers'); setShowMobilePanel(false); }}
-                      className="text-xs flex-1 min-h-[44px]"
+                      onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+                      className="text-xs flex-1"
                     >
                       <TrendingDown className="w-3 h-3 mr-1" />
                       Losers
@@ -2128,8 +2035,8 @@ export function VoidBubblesEngine() {
                         key={cat}
                         size="sm"
                         variant={filterCategory === cat ? 'primary' : 'ghost'}
-                        onClick={() => { setFilterCategory(cat); setShowMobilePanel(false); }}
-                        className="text-xs min-h-[44px]"
+                        onClick={() => setFilterCategory(cat)}
+                        className="text-xs"
                       >
                         {cat}
                       </Button>
@@ -2150,8 +2057,8 @@ export function VoidBubblesEngine() {
                         key={opt.key}
                         size="sm"
                         variant={sizeMetric === opt.key ? 'primary' : 'ghost'}
-                        onClick={() => { setSizeMetric(opt.key as typeof sizeMetric); setShowMobilePanel(false); }}
-                        className="text-xs justify-start min-h-[44px]"
+                        onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
+                        className="text-xs justify-start"
                       >
                         {opt.label}
                       </Button>
@@ -2173,8 +2080,8 @@ export function VoidBubblesEngine() {
                         key={opt.key}
                         size="sm"
                         variant={bubbleContent === opt.key ? 'primary' : 'ghost'}
-                        onClick={() => { setBubbleContent(opt.key as typeof bubbleContent); setShowMobilePanel(false); }}
-                        className="text-xs justify-start min-h-[44px]"
+                        onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
+                        className="text-xs justify-start"
                       >
                         {opt.label}
                       </Button>
@@ -2236,13 +2143,12 @@ export function VoidBubblesEngine() {
               </div>
             </div>
           </motion.div>
-          </>
         )}
       </AnimatePresence>
 
       {/* Main Visualization Area */}
-      <div ref={containerRef} className="w-full h-full touch-manipulation">
-        <svg ref={svgRef} className="w-full h-full" style={{ willChange: 'transform' }} />
+      <div ref={containerRef} className="w-full h-full">
+        <svg ref={svgRef} className="w-full h-full" />
       </div>
 
       {/* Branding Bar — always visible at bottom */}
