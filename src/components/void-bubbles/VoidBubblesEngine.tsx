@@ -849,8 +849,8 @@ export function VoidBubblesEngine() {
       .style('overflow', 'visible')
       .style('opacity', 0);
     
-    // Smooth fade-in to prevent flash on mobile
-    svg.transition().duration(600).style('opacity', 1);
+    // Single clean fade-in for the whole visualization (no per-bubble stagger)
+    svg.transition().duration(400).ease(d3.easeCubicOut).style('opacity', 1);
 
     // SVG Definitions for gradients and filters
     const defs = svg.append('defs');
@@ -1250,9 +1250,9 @@ export function VoidBubblesEngine() {
         .strength(0.95)
         .iterations(4)
       )
-      .alphaDecay(0.015) // Slow decay for organic settling
-      .alpha(0.6)
-      .velocityDecay(0.4); // Higher friction for floaty feel
+      .alphaDecay(0.025) // Faster settling to reduce movement time
+      .alpha(0.5)
+      .velocityDecay(0.45); // Higher friction for quicker stabilization
 
     // Store simulation reference
     simulationRef.current = simulation;
@@ -1307,42 +1307,28 @@ export function VoidBubblesEngine() {
       }
     });
 
-    // Animate bubbles in with staggered entrance
-    bubbleGroups.each(function(d, i) {
-      const group = d3.select(this);
-      
-      // Delay based on distance from center for ripple effect
-      const delay = i * 30; // Faster stagger for premium feel
-      
-      setTimeout(() => {
-        // Animate radius growth
-        group.selectAll('circle')
-          .transition()
-          .duration(800)
-          .ease(d3.easeElasticOut.amplitude(1).period(0.3))
-          .attr('r', function() {
-            const className = d3.select(this).attr('class');
-            if (className?.includes('bubble-main')) return d.targetRadius;
-            if (className?.includes('bubble-glow')) return d.targetRadius + 4;
-            if (className?.includes('bubble-outer-ring')) return d.targetRadius + 8;
-            if (className?.includes('xray-ring')) return d.targetRadius + 12;
-            return d.targetRadius;
-          });
-        
-        // Animate labels with slight delay for premium cascade effect
-        setTimeout(() => {
-          group.selectAll('text')
-            .attr('opacity', 0)
-            .transition()
-            .duration(400)
-            .ease(d3.easeCubicOut)
-            .attr('opacity', function() {
-              const className = d3.select(this).attr('class');
-              if (className?.includes('skull-overlay')) return d.token.riskLevel === 'critical' ? 0.7 : 0.4;
-              return 1;
-            });
-        }, 200);
-      }, delay);
+    // Set all bubble radii immediately (no staggered entrance — prevents mobile flashing)
+    bubbleGroups.selectAll('circle').each(function() {
+      const el = d3.select(this);
+      const className = el.attr('class') || '';
+      const parentData = d3.select((this as SVGElement).parentNode as Element).datum() as BubbleNode;
+      if (!parentData) return;
+      const r = parentData.targetRadius;
+      if (className.includes('bubble-main')) el.attr('r', r);
+      else if (className.includes('bubble-glow')) el.attr('r', r + 4);
+      else if (className.includes('bubble-outer-ring')) el.attr('r', r + 8);
+      else if (className.includes('xray-ring')) el.attr('r', r + 12);
+      else el.attr('r', r);
+    });
+
+    // Labels start visible immediately
+    bubbleGroups.selectAll('text').attr('opacity', function() {
+      const className = d3.select(this).attr('class') || '';
+      if (className.includes('skull-overlay')) {
+        const parentData = d3.select((this as SVGElement).parentNode as Element).datum() as BubbleNode;
+        return parentData?.token.riskLevel === 'critical' ? 0.7 : 0.4;
+      }
+      return 1;
     });
 
     // X-ray mode toggle
