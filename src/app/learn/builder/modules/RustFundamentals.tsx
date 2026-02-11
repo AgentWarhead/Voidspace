@@ -95,12 +95,12 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                     Rust&apos;s ownership system is what makes it safe without garbage collection. Every value has exactly one owner, and when the owner goes out of scope, the value is dropped.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Ownership moves — s1 is no longer valid after this</div>
+                    <div className="text-text-muted">{'// Ownership moves — s1 is no longer valid after this'}</div>
                     <div><span className="text-purple-400">let</span> s1 = <span className="text-near-green">String::from</span>(<span className="text-yellow-300">&quot;hello&quot;</span>);</div>
-                    <div><span className="text-purple-400">let</span> s2 = s1; <span className="text-text-muted">// s1 is moved to s2</span></div>
-                    <div className="mt-3 text-text-muted">// Borrowing — read access without taking ownership</div>
+                    <div><span className="text-purple-400">let</span> s2 = s1; <span className="text-text-muted">{'// s1 is moved to s2'}</span></div>
+                    <div className="mt-3 text-text-muted">{'// Borrowing — read access without taking ownership'}</div>
                     <div><span className="text-purple-400">let</span> s3 = <span className="text-near-green">String::from</span>(<span className="text-yellow-300">&quot;world&quot;</span>);</div>
-                    <div><span className="text-purple-400">let</span> len = calculate_length(<span className="text-purple-400">&amp;</span>s3); <span className="text-text-muted">// s3 is borrowed, not moved</span></div>
+                    <div><span className="text-purple-400">let</span> len = calculate_length(<span className="text-purple-400">&amp;</span>s3); <span className="text-text-muted">{'// s3 is borrowed, not moved'}</span></div>
                     <div className="mt-3"><span className="text-purple-400">fn</span> <span className="text-near-green">calculate_length</span>(s: <span className="text-purple-400">&amp;</span>String) -&gt; <span className="text-cyan-400">usize</span> {'{'}</div>
                     <div>    s.len()</div>
                     <div>{'}'}</div>
@@ -120,11 +120,11 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                     Rust is strongly typed. Structs are your primary way to define data models in NEAR contracts.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Basic types</div>
-                    <div><span className="text-purple-400">let</span> amount: <span className="text-cyan-400">u128</span> = 1_000_000_000_000_000_000_000_000; <span className="text-text-muted">// 1 NEAR</span></div>
+                    <div className="text-text-muted">{'// Basic types'}</div>
+                    <div><span className="text-purple-400">let</span> amount: <span className="text-cyan-400">u128</span> = 1_000_000_000_000_000_000_000_000; <span className="text-text-muted">{'// 1 NEAR'}</span></div>
                     <div><span className="text-purple-400">let</span> name: <span className="text-cyan-400">String</span> = <span className="text-yellow-300">&quot;alice.near&quot;</span>.to_string();</div>
                     <div><span className="text-purple-400">let</span> is_active: <span className="text-cyan-400">bool</span> = <span className="text-purple-400">true</span>;</div>
-                    <div className="mt-3 text-text-muted">// Struct — your contract state</div>
+                    <div className="mt-3 text-text-muted">{'// Struct — your contract state'}</div>
                     <div><span className="text-purple-400">#[near(contract_state)]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Counter</span> {'{'}</div>
                     <div>    count: <span className="text-cyan-400">i32</span>,</div>
@@ -166,10 +166,10 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                     Rust uses <code className="text-purple-400 bg-purple-500/10 px-1 rounded">Result&lt;T, E&gt;</code> and <code className="text-purple-400 bg-purple-500/10 px-1 rounded">Option&lt;T&gt;</code> instead of exceptions. In NEAR contracts, you&apos;ll use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">require!</code> and <code className="text-purple-400 bg-purple-500/10 px-1 rounded">env::panic_str()</code>.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Option — value might not exist</div>
+                    <div className="text-text-muted">{'// Option — value might not exist'}</div>
                     <div><span className="text-purple-400">let</span> value: <span className="text-cyan-400">Option</span>&lt;<span className="text-cyan-400">u32</span>&gt; = Some(42);</div>
                     <div><span className="text-purple-400">let</span> missing: <span className="text-cyan-400">Option</span>&lt;<span className="text-cyan-400">u32</span>&gt; = None;</div>
-                    <div className="mt-3 text-text-muted">// In NEAR contracts — assert conditions</div>
+                    <div className="mt-3 text-text-muted">{'// In NEAR contracts — assert conditions'}</div>
                     <div><span className="text-purple-400">require!</span>(</div>
                     <div>    env::predecessor_account_id() == self.owner,</div>
                     <div>    <span className="text-yellow-300">&quot;Only the owner can call this&quot;</span></div>
@@ -186,11 +186,11 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                     Standard collections work in Rust, but NEAR has special persistent collections for on-chain storage:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Standard Rust</div>
+                    <div className="text-text-muted">{'// Standard Rust'}</div>
                     <div><span className="text-purple-400">let</span> <span className="text-purple-400">mut</span> scores: Vec&lt;<span className="text-cyan-400">u32</span>&gt; = vec![10, 20, 30];</div>
                     <div>scores.push(40);</div>
                     <div><span className="text-purple-400">let</span> total: <span className="text-cyan-400">u32</span> = scores.iter().sum();</div>
-                    <div className="mt-3 text-text-muted">// NEAR persistent collections (stored on-chain)</div>
+                    <div className="mt-3 text-text-muted">{'// NEAR persistent collections (stored on-chain)'}</div>
                     <div><span className="text-purple-400">use</span> near_sdk::store::{'{'}LookupMap, Vector{'}'};</div>
                     <div className="mt-1"><span className="text-purple-400">#[near(contract_state)]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Registry</span> {'{'}</div>
@@ -211,11 +211,11 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
                     <div><span className="text-purple-400">#[near]</span></div>
                     <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Counter</span> {'{'}</div>
-                    <div>    <span className="text-text-muted">// View method — reads state, costs no gas</span></div>
+                    <div>    <span className="text-text-muted">{'// View method — reads state, costs no gas'}</span></div>
                     <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_count</span>(&amp;self) -&gt; <span className="text-cyan-400">i32</span> {'{'}</div>
                     <div>        self.count</div>
                     <div>    {'}'}</div>
-                    <div className="mt-2">    <span className="text-text-muted">// Change method — modifies state, costs gas</span></div>
+                    <div className="mt-2">    <span className="text-text-muted">{'// Change method — modifies state, costs gas'}</span></div>
                     <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">increment</span>(&amp;<span className="text-purple-400">mut</span> self) {'{'}</div>
                     <div>        self.count += 1;</div>
                     <div>        log!(<span className="text-yellow-300">&quot;Count: {'{'}{'}'}&quot;</span>, self.count);</div>
@@ -240,7 +240,7 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">main</span>() {'{'}</div>
                     <div>    <span className="text-purple-400">let</span> s = <span className="text-near-green">String::from</span>(<span className="text-yellow-300">&quot;hello&quot;</span>);</div>
                     <div>    <span className="text-purple-400">let</span> s2 = s;</div>
-                    <div>    println!(<span className="text-yellow-300">&quot;{'{'}{'}'}&quot;</span>, s); <span className="text-text-muted">// ❌ Won&apos;t compile! Fix it.</span></div>
+                    <div>    println!(<span className="text-yellow-300">&quot;{'{'}{'}'}&quot;</span>, s); <span className="text-text-muted">{'// ❌ Won&apos;t compile! Fix it.'}</span></div>
                     <div>{'}'}</div>
                   </div>
                   <p className="text-text-muted text-xs mt-2">💡 Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">.clone()</code> or borrowing to fix it.</p>
@@ -259,7 +259,7 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
                     <div>    owner: String,</div>
                     <div>    balance: <span className="text-cyan-400">u128</span>,</div>
                     <div>{'}'}</div>
-                    <div className="text-text-muted mt-1">// Implement deposit(), withdraw(), and get_balance()</div>
+                    <div className="text-text-muted mt-1">{'// Implement deposit(), withdraw(), and get_balance()'}</div>
                   </div>
                   <p className="text-text-muted text-xs mt-2">💡 Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">&amp;mut self</code> for deposit/withdraw, <code className="text-purple-400 bg-purple-500/10 px-1 rounded">&amp;self</code> for get_balance.</p>
                 </Card>

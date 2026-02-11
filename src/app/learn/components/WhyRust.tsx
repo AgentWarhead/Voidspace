@@ -794,7 +794,7 @@ export function WhyRust() {
       {/* Hero intro */}
       <ScrollReveal>
         <div className="max-w-4xl space-y-4">
-          <GradientText as="h2" animated className="text-2xl md:text-3xl font-bold">
+          <GradientText as="p" animated className="text-2xl md:text-3xl font-bold mt-2">
             The Most Loved Language. The Safest Code. Your Unfair Advantage.
           </GradientText>
           <p className="text-lg text-text-secondary leading-relaxed">

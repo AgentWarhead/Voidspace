@@ -122,7 +122,7 @@ const NepStandardsDeepDive: React.FC<NepStandardsDeepDiveProps> = ({ isActive, o
                     Defines how users register and pay for storage on your contract. Essential for any token contract.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Required methods</div>
+                    <div className="text-text-muted">{'// Required methods'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">storage_deposit</span>(&amp;<span className="text-purple-400">mut</span> self, account_id: Option&lt;AccountId&gt;, registration_only: Option&lt;bool&gt;);</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">storage_withdraw</span>(&amp;<span className="text-purple-400">mut</span> self, amount: Option&lt;U128&gt;) -&gt; U128;</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">storage_unregister</span>(&amp;<span className="text-purple-400">mut</span> self, force: Option&lt;bool&gt;) -&gt; bool;</div>
@@ -145,12 +145,12 @@ const NepStandardsDeepDive: React.FC<NepStandardsDeepDiveProps> = ({ isActive, o
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
                     <div><span className="text-purple-400">struct</span> <span className="text-cyan-400">FungibleTokenMetadata</span> {'{'}</div>
-                    <div>    spec: String,            <span className="text-text-muted">// &quot;ft-1.0.0&quot;</span></div>
-                    <div>    name: String,             <span className="text-text-muted">// &quot;Wrapped NEAR&quot;</span></div>
-                    <div>    symbol: String,           <span className="text-text-muted">// &quot;wNEAR&quot;</span></div>
-                    <div>    icon: Option&lt;String&gt;,     <span className="text-text-muted">// data:image/svg+xml,...</span></div>
-                    <div>    reference: Option&lt;String&gt;, <span className="text-text-muted">// Off-chain metadata URL</span></div>
-                    <div>    decimals: u8,             <span className="text-text-muted">// 24 (1 NEAR = 10^24 yocto)</span></div>
+                    <div>    spec: String,            <span className="text-text-muted">{'// &quot;ft-1.0.0&quot;'}</span></div>
+                    <div>    name: String,             <span className="text-text-muted">{'// &quot;Wrapped NEAR&quot;'}</span></div>
+                    <div>    symbol: String,           <span className="text-text-muted">{'// &quot;wNEAR&quot;'}</span></div>
+                    <div>    icon: Option&lt;String&gt;,     <span className="text-text-muted">{'// data:image/svg+xml,...'}</span></div>
+                    <div>    reference: Option&lt;String&gt;, <span className="text-text-muted">{'// Off-chain metadata URL'}</span></div>
+                    <div>    decimals: u8,             <span className="text-text-muted">{'// 24 (1 NEAR = 10^24 yocto)'}</span></div>
                     <div>{'}'}</div>
                   </div>
                 </section>
@@ -164,16 +164,16 @@ const NepStandardsDeepDive: React.FC<NepStandardsDeepDiveProps> = ({ isActive, o
                     Allows NFT owners to approve other accounts (like marketplaces) to transfer their tokens:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Owner approves marketplace to transfer their NFT</div>
+                    <div className="text-text-muted">{'// Owner approves marketplace to transfer their NFT'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">nft_approve</span>(</div>
                     <div>    &amp;<span className="text-purple-400">mut</span> self,</div>
                     <div>    token_id: TokenId,</div>
                     <div>    account_id: AccountId,</div>
-                    <div>    msg: Option&lt;String&gt;,  <span className="text-text-muted">// Optional: triggers cross-contract call</span></div>
+                    <div>    msg: Option&lt;String&gt;,  <span className="text-text-muted">{'// Optional: triggers cross-contract call'}</span></div>
                     <div>);</div>
-                    <div className="mt-2 text-text-muted">// Check if an account is approved</div>
+                    <div className="mt-2 text-text-muted">{'// Check if an account is approved'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">nft_is_approved</span>(&amp;self, token_id: TokenId, approved_account_id: AccountId) -&gt; bool;</div>
-                    <div className="mt-2 text-text-muted">// Revoke approval</div>
+                    <div className="mt-2 text-text-muted">{'// Revoke approval'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">nft_revoke</span>(&amp;<span className="text-purple-400">mut</span> self, token_id: TokenId, account_id: AccountId);</div>
                   </div>
                 </section>
@@ -186,7 +186,7 @@ const NepStandardsDeepDive: React.FC<NepStandardsDeepDiveProps> = ({ isActive, o
                     Standard event format for indexers and explorers to track contract activity:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Emit a standard event log</div>
+                    <div className="text-text-muted">{'// Emit a standard event log'}</div>
                     <div>env::log_str(&amp;format!(</div>
                     <div>    <span className="text-yellow-300">&quot;EVENT_JSON:{'{'}{'}'}&quot;</span>,</div>
                     <div>    json!({'{'}</div>

@@ -95,7 +95,7 @@ const YourFirstContract: React.FC<YourFirstContractProps> = ({ isActive, onToggl
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Greeting</span> {'{'}</div>
                     <div>    greeting: <span className="text-cyan-400">String</span>,</div>
                     <div>{'}'}</div>
-                    <div className="mt-2 text-text-muted">// Default state when contract is first deployed</div>
+                    <div className="mt-2 text-text-muted">{'// Default state when contract is first deployed'}</div>
                     <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Default</span> <span className="text-purple-400">for</span> <span className="text-cyan-400">Greeting</span> {'{'}</div>
                     <div>    <span className="text-purple-400">fn</span> <span className="text-near-green">default</span>() -&gt; Self {'{'}</div>
                     <div>        Self {'{'} greeting: <span className="text-yellow-300">&quot;Hello, NEAR!&quot;</span>.to_string() {'}'}</div>
@@ -115,11 +115,11 @@ const YourFirstContract: React.FC<YourFirstContractProps> = ({ isActive, onToggl
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
                     <div><span className="text-purple-400">#[near]</span></div>
                     <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Greeting</span> {'{'}</div>
-                    <div>    <span className="text-text-muted">// VIEW method — &amp;self (immutable reference)</span></div>
+                    <div>    <span className="text-text-muted">{'// VIEW method — &amp;self (immutable reference)'}</span></div>
                     <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_greeting</span>(&amp;self) -&gt; &amp;<span className="text-cyan-400">String</span> {'{'}</div>
                     <div>        &amp;self.greeting</div>
                     <div>    {'}'}</div>
-                    <div className="mt-2">    <span className="text-text-muted">// CHANGE method — &amp;mut self (mutable reference)</span></div>
+                    <div className="mt-2">    <span className="text-text-muted">{'// CHANGE method — &amp;mut self (mutable reference)'}</span></div>
                     <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">set_greeting</span>(&amp;<span className="text-purple-400">mut</span> self, greeting: String) {'{'}</div>
                     <div>        log!(<span className="text-yellow-300">&quot;Changing greeting to {'{'}{'}'}&quot;</span>, greeting);</div>
                     <div>        self.greeting = greeting;</div>

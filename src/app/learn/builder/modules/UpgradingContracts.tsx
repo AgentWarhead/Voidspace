@@ -118,30 +118,30 @@ const UpgradingContracts: React.FC<UpgradingContractsProps> = ({ isActive, onTog
                     When you need to change the contract struct, use a migration method:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Old contract state (v1)</div>
+                    <div className="text-text-muted">{'// Old contract state (v1)'}</div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">ContractV1</span> {'{'}</div>
                     <div>    owner: AccountId,</div>
                     <div>    greeting: String,</div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// New contract state (v2) — added a field</div>
+                    <div className="mt-3 text-text-muted">{'// New contract state (v2) — added a field'}</div>
                     <div><span className="text-purple-400">#[near(contract_state)]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Contract</span> {'{'}</div>
                     <div>    owner: AccountId,</div>
                     <div>    greeting: String,</div>
-                    <div>    visit_count: <span className="text-cyan-400">u64</span>,  <span className="text-text-muted">// ← new field</span></div>
+                    <div>    visit_count: <span className="text-cyan-400">u64</span>,  <span className="text-text-muted">{'// ← new field'}</span></div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// Migration method — called once after redeployment</div>
+                    <div className="mt-3 text-text-muted">{'// Migration method — called once after redeployment'}</div>
                     <div><span className="text-purple-400">#[near]</span></div>
                     <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Contract</span> {'{'}</div>
                     <div>    <span className="text-purple-400">#[init(ignore_state)]</span></div>
                     <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">migrate</span>() -&gt; Self {'{'}</div>
-                    <div>        <span className="text-text-muted">// Load old state</span></div>
+                    <div>        <span className="text-text-muted">{'// Load old state'}</span></div>
                     <div>        <span className="text-purple-400">let</span> old: ContractV1 = env::state_read().unwrap();</div>
-                    <div>        <span className="text-text-muted">// Return new state with migrated data</span></div>
+                    <div>        <span className="text-text-muted">{'// Return new state with migrated data'}</span></div>
                     <div>        Self {'{'}</div>
                     <div>            owner: old.owner,</div>
                     <div>            greeting: old.greeting,</div>
-                    <div>            visit_count: 0, <span className="text-text-muted">// Initialize new field</span></div>
+                    <div>            visit_count: 0, <span className="text-text-muted">{'// Initialize new field'}</span></div>
                     <div>        {'}'}</div>
                     <div>    {'}'}</div>
                     <div>{'}'}</div>
@@ -160,7 +160,7 @@ const UpgradingContracts: React.FC<UpgradingContractsProps> = ({ isActive, onTog
                     <div><span className="text-purple-400">enum</span> <span className="text-cyan-400">VersionedContract</span> {'{'}</div>
                     <div>    V1(ContractV1),</div>
                     <div>    V2(ContractV2),</div>
-                    <div>    V3(ContractV3), <span className="text-text-muted">// Latest</span></div>
+                    <div>    V3(ContractV3), <span className="text-text-muted">{'// Latest'}</span></div>
                     <div>{'}'}</div>
                     <div className="mt-2"><span className="text-purple-400">impl</span> <span className="text-cyan-400">VersionedContract</span> {'{'}</div>
                     <div>    <span className="text-purple-400">fn</span> <span className="text-near-green">migrate_to_latest</span>(self) -&gt; ContractV3 {'{'}</div>

@@ -108,7 +108,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     Initialize the Wallet Selector with your supported wallets:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// lib/near.ts</div>
+                    <div className="text-text-muted">{'// lib/near.ts'}</div>
                     <div><span className="text-purple-400">import</span> {'{'} setupWalletSelector {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/core&quot;</span>;</div>
                     <div><span className="text-purple-400">import</span> {'{'} setupMyNearWallet {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/my-near-wallet&quot;</span>;</div>
                     <div><span className="text-purple-400">import</span> {'{'} setupModal {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/modal-ui&quot;</span>;</div>
@@ -134,14 +134,14 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     Wrap your app with a NEAR context so any component can access the wallet:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// context/NearContext.tsx</div>
+                    <div className="text-text-muted">{'// context/NearContext.tsx'}</div>
                     <div><span className="text-purple-400">import</span> {'{'} createContext, useContext, useEffect, useState {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;react&quot;</span>;</div>
                     <div className="mt-2"><span className="text-purple-400">const</span> NearContext = createContext&lt;any&gt;(null);</div>
                     <div className="mt-2"><span className="text-purple-400">export function</span> <span className="text-near-green">NearProvider</span>({'{'} children {'}'}) {'{'}</div>
                     <div>  <span className="text-purple-400">const</span> [wallet, setWallet] = useState(null);</div>
                     <div>  <span className="text-purple-400">const</span> [accountId, setAccountId] = useState(<span className="text-yellow-300">&quot;&quot;</span>);</div>
                     <div className="mt-2">  useEffect(() =&gt; {'{'}</div>
-                    <div>    <span className="text-text-muted">// Initialize wallet selector on mount</span></div>
+                    <div>    <span className="text-text-muted">{'// Initialize wallet selector on mount'}</span></div>
                     <div>    initNear().then(({'{'} selector {'}'}) =&gt; {'{'}</div>
                     <div>      selector.store.observable.subscribe((state) =&gt; {'{'}</div>
                     <div>        <span className="text-purple-400">const</span> accounts = state.accounts;</div>
@@ -166,7 +166,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     Call view and change methods from your frontend:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// View call — free, no wallet needed</div>
+                    <div className="text-text-muted">{'// View call — free, no wallet needed'}</div>
                     <div><span className="text-purple-400">const</span> provider = <span className="text-purple-400">new</span> providers.JsonRpcProvider({'{'}</div>
                     <div>  url: <span className="text-yellow-300">&quot;https://rpc.testnet.near.org&quot;</span></div>
                     <div>{'}'});</div>
@@ -177,7 +177,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     <div>  args_base64: btoa(JSON.stringify({'{'}{'}'})),</div>
                     <div>  finality: <span className="text-yellow-300">&quot;final&quot;</span>,</div>
                     <div>{'}'});</div>
-                    <div className="mt-4 text-text-muted">// Change call — requires wallet signature</div>
+                    <div className="mt-4 text-text-muted">{'// Change call — requires wallet signature'}</div>
                     <div><span className="text-purple-400">const</span> wallet = <span className="text-purple-400">await</span> selector.wallet();</div>
                     <div><span className="text-purple-400">await</span> wallet.signAndSendTransaction({'{'}</div>
                     <div>  receiverId: CONTRACT_ID,</div>
@@ -186,7 +186,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     <div>    params: {'{'}</div>
                     <div>      methodName: <span className="text-yellow-300">&quot;set_greeting&quot;</span>,</div>
                     <div>      args: {'{'} greeting: <span className="text-yellow-300">&quot;Hello from React!&quot;</span> {'}'},</div>
-                    <div>      gas: <span className="text-yellow-300">&quot;30000000000000&quot;</span>, <span className="text-text-muted">// 30 Tgas</span></div>
+                    <div>      gas: <span className="text-yellow-300">&quot;30000000000000&quot;</span>, <span className="text-text-muted">{'// 30 Tgas'}</span></div>
                     <div>      deposit: <span className="text-yellow-300">&quot;0&quot;</span>,</div>
                     <div>    {'}'},</div>
                     <div>  {'}'}],</div>
@@ -206,7 +206,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     <div><span className="text-purple-400">function</span> <span className="text-near-green">GreetingApp</span>() {'{'}</div>
                     <div>  <span className="text-purple-400">const</span> [greeting, setGreeting] = useState(<span className="text-yellow-300">&quot;&quot;</span>);</div>
                     <div>  <span className="text-purple-400">const</span> [newGreeting, setNewGreeting] = useState(<span className="text-yellow-300">&quot;&quot;</span>);</div>
-                    <div className="mt-2">  <span className="text-text-muted">// Fetch greeting on load</span></div>
+                    <div className="mt-2">  <span className="text-text-muted">{'// Fetch greeting on load'}</span></div>
                     <div>  useEffect(() =&gt; {'{'}</div>
                     <div>    fetchGreeting().then(setGreeting);</div>
                     <div>  {'}'}, []);</div>

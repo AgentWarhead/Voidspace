@@ -10,9 +10,9 @@ import { GlowCard } from '@/components/effects/GlowCard';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import {
-  BookOpen, Clock, CheckCircle2, Trophy, Star,
+  BookOpen, Clock, CheckCircle2, Trophy,
   Code, Zap, ArrowRight, Sparkles, Rocket,
-  Globe, Brain, Shield, Target,
+  Globe, Brain, Target,
 } from 'lucide-react';
 
 // ─── Progress Summary ──────────────────────────────────────────────────────────

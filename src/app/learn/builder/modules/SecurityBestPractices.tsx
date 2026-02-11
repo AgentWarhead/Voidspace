@@ -94,23 +94,23 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
                     Always verify who is calling your contract. Never trust input blindly.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// ✅ Owner-only check</div>
+                    <div className="text-text-muted">{'// ✅ Owner-only check'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">assert_owner</span>(&amp;self) {'{'}</div>
                     <div>    require!(</div>
                     <div>        env::predecessor_account_id() == self.owner,</div>
                     <div>        <span className="text-yellow-300">&quot;Only the owner can call this method&quot;</span></div>
                     <div>    );</div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// ✅ Self-only check (for callbacks)</div>
+                    <div className="mt-3 text-text-muted">{'// ✅ Self-only check (for callbacks)'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">assert_self</span>() {'{'}</div>
                     <div>    require!(</div>
                     <div>        env::predecessor_account_id() == env::current_account_id(),</div>
                     <div>        <span className="text-yellow-300">&quot;This method can only be called by the contract itself&quot;</span></div>
                     <div>    );</div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// ❌ NEVER do this — anyone can call</div>
+                    <div className="mt-3 text-text-muted">{'// ❌ NEVER do this — anyone can call'}</div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">withdraw_all</span>(&amp;<span className="text-purple-400">mut</span> self) {'{'}</div>
-                    <div>    <span className="text-text-muted">// Missing access control! Anyone can drain funds</span></div>
+                    <div>    <span className="text-text-muted">{'// Missing access control! Anyone can drain funds'}</span></div>
                     <div>    Promise::new(env::predecessor_account_id()).transfer(self.balance);</div>
                     <div>{'}'}</div>
                   </div>
@@ -125,12 +125,12 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
                     NEAR&apos;s async execution model means cross-contract calls execute in the <strong>next block</strong>. State changes before the callback persist even if the callback fails.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// ❌ DANGEROUS — state changed before callback</div>
+                    <div className="text-text-muted">{'// ❌ DANGEROUS — state changed before callback'}</div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">withdraw</span>(&amp;<span className="text-purple-400">mut</span> self, amount: U128) -&gt; Promise {'{'}</div>
-                    <div>    self.balance -= amount.0; <span className="text-text-muted">// Changed BEFORE transfer completes</span></div>
+                    <div>    self.balance -= amount.0; <span className="text-text-muted">{'// Changed BEFORE transfer completes'}</span></div>
                     <div>    Promise::new(env::predecessor_account_id()).transfer(NearToken::from_yoctonear(amount.0))</div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// ✅ SAFE — use callback to confirm</div>
+                    <div className="mt-3 text-text-muted">{'// ✅ SAFE — use callback to confirm'}</div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">withdraw</span>(&amp;<span className="text-purple-400">mut</span> self, amount: U128) -&gt; Promise {'{'}</div>
                     <div>    <span className="text-purple-400">let</span> account = env::predecessor_account_id();</div>
                     <div>    self.pending_withdrawals.insert(&amp;account, &amp;amount.0);</div>
@@ -139,10 +139,10 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
                     <div>        .then(Promise::new(env::current_account_id())</div>
                     <div>            .function_call(<span className="text-yellow-300">&quot;on_withdraw&quot;</span>.into(), ...))</div>
                     <div>{'}'}</div>
-                    <div className="mt-2"><span className="text-purple-400">#[private]</span> <span className="text-text-muted">// Only callable by self</span></div>
+                    <div className="mt-2"><span className="text-purple-400">#[private]</span> <span className="text-text-muted">{'// Only callable by self'}</span></div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">on_withdraw</span>(&amp;<span className="text-purple-400">mut</span> self) {'{'}</div>
                     <div>    <span className="text-purple-400">if</span> env::promise_results_count() == 1 {'{'}</div>
-                    <div>        <span className="text-text-muted">// Check if transfer succeeded</span></div>
+                    <div>        <span className="text-text-muted">{'// Check if transfer succeeded'}</span></div>
                     <div>        <span className="text-purple-400">match</span> env::promise_result(0) {'{'}</div>
                     <div>            PromiseResult::Successful(_) =&gt; {'{'} <span className="text-text-muted">/* deduct balance */</span> {'}'}</div>
                     <div>            _ =&gt; {'{'} <span className="text-text-muted">/* revert pending withdrawal */</span> {'}'}</div>
@@ -160,12 +160,12 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
                     Rust panics on overflow in debug mode, but wraps in release mode. Always use checked arithmetic:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// ❌ Can overflow silently in release</div>
+                    <div className="text-text-muted">{'// ❌ Can overflow silently in release'}</div>
                     <div><span className="text-purple-400">let</span> total = balance + amount;</div>
-                    <div className="mt-2 text-text-muted">// ✅ Safe — panics with a clear error</div>
+                    <div className="mt-2 text-text-muted">{'// ✅ Safe — panics with a clear error'}</div>
                     <div><span className="text-purple-400">let</span> total = balance.checked_add(amount)</div>
                     <div>    .unwrap_or_else(|| env::panic_str(<span className="text-yellow-300">&quot;Balance overflow&quot;</span>));</div>
-                    <div className="mt-2 text-text-muted">// ✅ Also safe</div>
+                    <div className="mt-2 text-text-muted">{'// ✅ Also safe'}</div>
                     <div><span className="text-purple-400">let</span> remaining = balance.checked_sub(amount)</div>
                     <div>    .unwrap_or_else(|| env::panic_str(<span className="text-yellow-300">&quot;Insufficient balance&quot;</span>));</div>
                   </div>
@@ -180,7 +180,7 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
                     Always validate attached deposits. Mark payable methods explicitly:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Require exactly 1 yoctoNEAR (confirms user intent)</div>
+                    <div className="text-text-muted">{'// Require exactly 1 yoctoNEAR (confirms user intent)'}</div>
                     <div><span className="text-purple-400">#[payable]</span></div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">ft_transfer</span>(&amp;<span className="text-purple-400">mut</span> self, ...) {'{'}</div>
                     <div>    require!(</div>
@@ -188,9 +188,9 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
                     <div>        <span className="text-yellow-300">&quot;Requires exactly 1 yoctoNEAR attached&quot;</span></div>
                     <div>    );</div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// Require NO deposit (prevent accidental fund loss)</div>
+                    <div className="mt-3 text-text-muted">{'// Require NO deposit (prevent accidental fund loss)'}</div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">get_greeting</span>(&amp;self) -&gt; String {'{'}</div>
-                    <div>    <span className="text-text-muted">// View methods automatically reject deposits</span></div>
+                    <div>    <span className="text-text-muted">{'// View methods automatically reject deposits'}</span></div>
                     <div>{'}'}</div>
                   </div>
                 </section>

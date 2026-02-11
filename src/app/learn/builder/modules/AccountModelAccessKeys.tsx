@@ -166,7 +166,7 @@ const AccountModelAccessKeys: React.FC<AccountModelAccessKeysProps> = ({ isActiv
                     When a user connects to a dApp, the wallet creates a Function Call key scoped to that app&apos;s contract. This means:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Adding a Function Call key via CLI</div>
+                    <div className="text-text-muted">{'// Adding a Function Call key via CLI'}</div>
                     <div className="text-near-green">near account add-key your-account.testnet \</div>
                     <div className="text-near-green">  grant-function-call-access \</div>
                     <div className="text-near-green">  --allowance &apos;1 NEAR&apos; \</div>
@@ -196,7 +196,7 @@ const AccountModelAccessKeys: React.FC<AccountModelAccessKeysProps> = ({ isActiv
                     Contracts can programmatically add and remove keys using Promises:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Add a Function Call key from within a contract</div>
+                    <div className="text-text-muted">{'// Add a Function Call key from within a contract'}</div>
                     <div><span className="text-purple-400">use</span> near_sdk::{'{'}Promise, PublicKey{'}'};</div>
                     <div className="mt-2"><span className="text-purple-400">pub fn</span> <span className="text-near-green">grant_access</span>(&amp;<span className="text-purple-400">mut</span> self, public_key: PublicKey) {'{'}</div>
                     <div>    Promise::new(env::current_account_id())</div>

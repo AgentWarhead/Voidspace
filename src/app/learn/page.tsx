@@ -17,9 +17,30 @@ import { ResourceHub } from './components/ResourceHub';
 import BottomCTA from './components/BottomCTA';
 
 export const metadata: Metadata = {
-  title: 'Learn — From Zero to NEAR Builder | Voidspace',
+  title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
   description:
-    'Learn NEAR Protocol, master Rust, and build your first smart contract. Choose your path: Explorer, Builder, or Hacker. Free interactive lessons with AI assistance.',
+    'Master Rust, build smart contracts, and ship dApps on NEAR Protocol. Free, self-paced, AI-powered learning tracks for beginners to advanced developers.',
+  keywords:
+    'learn NEAR Protocol, NEAR developer tutorial, Rust smart contract tutorial, blockchain course free, Web3 developer guide, learn Rust blockchain, Solana Rust developer',
+  alternates: {
+    canonical: 'https://voidspace.io/learn',
+  },
+  openGraph: {
+    title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
+    description:
+      'Master Rust, build smart contracts, and ship dApps on NEAR Protocol. Free, self-paced, AI-powered learning tracks.',
+    url: 'https://voidspace.io/learn',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
+    description:
+      'Master Rust, build smart contracts, and ship dApps. Free, AI-powered tracks from beginner to advanced.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function LearnPage() {

@@ -121,18 +121,18 @@ const Optimization: React.FC<OptimizationProps> = ({ isActive, onToggle }) => {
                     Storage costs ~0.00001 NEAR per byte. Optimize what you store:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// ❌ Wasteful — storing redundant data</div>
+                    <div className="text-text-muted">{'// ❌ Wasteful — storing redundant data'}</div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Token</span> {'{'}</div>
                     <div>    owner: AccountId,</div>
-                    <div>    owner_str: String,  <span className="text-text-muted">// Same as owner!</span></div>
-                    <div>    created_at: String,  <span className="text-text-muted">// Use u64 timestamp instead</span></div>
-                    <div>    description: String, <span className="text-text-muted">// Store on IPFS, not on-chain</span></div>
+                    <div>    owner_str: String,  <span className="text-text-muted">{'// Same as owner!'}</span></div>
+                    <div>    created_at: String,  <span className="text-text-muted">{'// Use u64 timestamp instead'}</span></div>
+                    <div>    description: String, <span className="text-text-muted">{'// Store on IPFS, not on-chain'}</span></div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// ✅ Optimized — minimal on-chain data</div>
+                    <div className="mt-3 text-text-muted">{'// ✅ Optimized — minimal on-chain data'}</div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Token</span> {'{'}</div>
                     <div>    owner: AccountId,</div>
                     <div>    created_at: <span className="text-cyan-400">u64</span>,</div>
-                    <div>    metadata_url: String, <span className="text-text-muted">// IPFS/Arweave CID</span></div>
+                    <div>    metadata_url: String, <span className="text-text-muted">{'// IPFS/Arweave CID'}</span></div>
                     <div>{'}'}</div>
                   </div>
                   <div className="bg-black/30 rounded-lg p-4 border border-border mt-3">

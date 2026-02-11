@@ -89,15 +89,15 @@ const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle })
                     Every smart contract has its own storage — a key-value store backed by a trie data structure. When your contract runs, the SDK automatically serializes your struct to storage and deserializes it when loaded.
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Your contract state — automatically persisted</div>
+                    <div className="text-text-muted">{'// Your contract state — automatically persisted'}</div>
                     <div><span className="text-purple-400">#[near(contract_state)]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">MyContract</span> {'{'}</div>
                     <div>    owner: <span className="text-cyan-400">AccountId</span>,</div>
                     <div>    total_supply: <span className="text-cyan-400">u128</span>,</div>
                     <div>    is_paused: <span className="text-cyan-400">bool</span>,</div>
                     <div>{'}'}</div>
-                    <div className="mt-2 text-text-muted">// After every change method, the SDK writes this back to storage</div>
-                    <div className="text-text-muted">// After every view method, the state is loaded but NOT written back</div>
+                    <div className="mt-2 text-text-muted">{'// After every change method, the SDK writes this back to storage'}</div>
+                    <div className="text-text-muted">{'// After every view method, the state is loaded but NOT written back'}</div>
                   </div>
                 </section>
 
@@ -135,7 +135,7 @@ const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle })
                     <div><span className="text-purple-400">use</span> near_sdk::store::{'{'}LookupMap, Vector{'}'};</div>
                     <div className="mt-2"><span className="text-purple-400">#[near(contract_state)]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">TokenRegistry</span> {'{'}</div>
-                    <div>    <span className="text-text-muted">// Each collection needs a unique prefix (storage key)</span></div>
+                    <div>    <span className="text-text-muted">{'// Each collection needs a unique prefix (storage key)'}</span></div>
                     <div>    balances: LookupMap&lt;AccountId, <span className="text-cyan-400">u128</span>&gt;,</div>
                     <div>    holders: Vector&lt;AccountId&gt;,</div>
                     <div>{'}'}</div>
@@ -183,12 +183,12 @@ const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle })
                     For contracts where users store data (like NFT or FT contracts), use the Storage Management standard (NEP-145) so users pay for their own storage:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// User registers and deposits NEAR to cover storage</div>
+                    <div className="text-text-muted">{'// User registers and deposits NEAR to cover storage'}</div>
                     <div><span className="text-purple-400">#[payable]</span></div>
                     <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">storage_deposit</span>(&amp;<span className="text-purple-400">mut</span> self) {'{'}</div>
                     <div>    <span className="text-purple-400">let</span> account_id = env::predecessor_account_id();</div>
                     <div>    <span className="text-purple-400">let</span> deposit = env::attached_deposit();</div>
-                    <div>    <span className="text-text-muted">// Register user &amp; lock deposit for storage</span></div>
+                    <div>    <span className="text-text-muted">{'// Register user &amp; lock deposit for storage'}</span></div>
                     <div>    require!(deposit &gt;= STORAGE_COST, <span className="text-yellow-300">&quot;Insufficient deposit&quot;</span>);</div>
                     <div>    self.accounts.insert(&amp;account_id, &amp;0u128);</div>
                     <div>{'}'}</div>

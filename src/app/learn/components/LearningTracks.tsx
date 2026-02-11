@@ -143,6 +143,26 @@ const TRACKS: Track[] = [
       { label: 'Production Patterns', icon: Boxes },
     ],
   },
+  {
+    id: 'founder',
+    icon: Send,
+    emoji: '🟣',
+    title: 'Founder',
+    subtitle: 'I want to build a business on NEAR',
+    description:
+      'Turn your dApp into a real business. Learn tokenomics design, revenue models, grant applications, pitching, and building in public.',
+    difficulty: 3,
+    duration: '~6 hours',
+    moduleCount: 5,
+    theme: 'purple',
+    modules: [
+      { label: 'Building in Public', icon: Globe },
+      { label: 'NEAR Grants & Funding', icon: Wallet },
+      { label: 'Pitching Your Project', icon: Sparkles },
+      { label: 'Revenue Models for dApps', icon: Coins },
+      { label: 'Tokenomics Design', icon: Compass },
+    ],
+  },
 ];
 
 // ─── Theme Styles ──────────────────────────────────────────────────────────────
@@ -502,8 +522,8 @@ export function LearningTracks() {
           </p>
         </ScrollReveal>
 
-        {/* Track cards — horizontal on desktop, stacked on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Track cards — 2x2 grid on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {TRACKS.map((track, i) => (
             <ScrollReveal key={track.id} delay={i * 0.12}>
               <TrackCard track={track} />

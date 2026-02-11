@@ -1045,7 +1045,7 @@ export function RustCurriculum() {
       {/* Intro */}
       <ScrollReveal>
         <div className="max-w-3xl space-y-3">
-          <GradientText as="h2" animated className="text-xl md:text-2xl font-bold">
+          <GradientText as="p" animated className="text-xl md:text-2xl font-bold mt-2">
             From Zero Rust to Mainnet Deployment
           </GradientText>
           <p className="text-text-secondary leading-relaxed text-sm md:text-base">

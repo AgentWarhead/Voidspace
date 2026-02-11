@@ -397,7 +397,7 @@ export default function ProjectTemplates() {
 
       <ScrollReveal>
         <div className="max-w-3xl space-y-3">
-          <GradientText as="h2" animated className="text-xl md:text-2xl font-bold">
+          <GradientText as="p" animated className="text-xl md:text-2xl font-bold mt-2">
             Production-Ready Templates. Clone, Customize, Deploy.
           </GradientText>
           <p className="text-text-secondary text-base leading-relaxed">

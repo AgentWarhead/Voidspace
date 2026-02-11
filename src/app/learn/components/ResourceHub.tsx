@@ -211,7 +211,7 @@ export function ResourceHub() {
 
       <ScrollReveal>
         <div className="max-w-3xl space-y-3">
-          <GradientText as="h2" animated className="text-xl md:text-2xl font-bold">
+          <GradientText as="p" animated className="text-xl md:text-2xl font-bold mt-2">
             Everything You Need, Organized and Curated
           </GradientText>
           <p className="text-text-secondary text-base leading-relaxed">

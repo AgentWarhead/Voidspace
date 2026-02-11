@@ -126,9 +126,9 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
                     <div><span className="text-purple-400">use</span> near_sdk::{'{'}near, env, Promise, Gas, NearToken{'}'};</div>
                     <div className="mt-2"><span className="text-purple-400">#[near]</span></div>
                     <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">VotingContract</span> {'{'}</div>
-                    <div>    <span className="text-text-muted">// Cross-contract call to check user&apos;s token balance</span></div>
+                    <div>    <span className="text-text-muted">{'// Cross-contract call to check user&apos;s token balance'}</span></div>
                     <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">vote</span>(&amp;<span className="text-purple-400">mut</span> self, poll_id: u64, option: u8) -&gt; Promise {'{'}</div>
-                    <div>        <span className="text-text-muted">// Step 1: Call the token contract</span></div>
+                    <div>        <span className="text-text-muted">{'// Step 1: Call the token contract'}</span></div>
                     <div>        Promise::new(<span className="text-yellow-300">&quot;token.near&quot;</span>.parse().unwrap())</div>
                     <div>            .function_call(</div>
                     <div>                <span className="text-yellow-300">&quot;ft_balance_of&quot;</span>.to_string(),</div>
@@ -136,7 +136,7 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
                     <div>                NearToken::from_near(0),</div>
                     <div>                Gas::from_tgas(5),</div>
                     <div>            )</div>
-                    <div>            <span className="text-text-muted">// Step 2: Handle the result in a callback</span></div>
+                    <div>            <span className="text-text-muted">{'// Step 2: Handle the result in a callback'}</span></div>
                     <div>            .then(</div>
                     <div>                Promise::new(env::current_account_id())</div>
                     <div>                    .function_call(</div>
@@ -165,12 +165,12 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
                     Let&apos;s build a real dApp — a decentralized polling/voting system:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Contract state</div>
+                    <div className="text-text-muted">{'// Contract state'}</div>
                     <div><span className="text-purple-400">#[near(contract_state)]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">VotingApp</span> {'{'}</div>
                     <div>    owner: AccountId,</div>
                     <div>    polls: Vector&lt;Poll&gt;,</div>
-                    <div>    votes: LookupMap&lt;(u64, AccountId), u8&gt;, <span className="text-text-muted">// (poll_id, voter) → option</span></div>
+                    <div>    votes: LookupMap&lt;(u64, AccountId), u8&gt;, <span className="text-text-muted">{'// (poll_id, voter) → option'}</span></div>
                     <div>{'}'}</div>
                     <div className="mt-2"><span className="text-purple-400">#[near(serializers = [borsh, json])]</span></div>
                     <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Poll</span> {'{'}</div>
@@ -178,9 +178,9 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
                     <div>    question: String,</div>
                     <div>    options: Vec&lt;String&gt;,</div>
                     <div>    vote_counts: Vec&lt;<span className="text-cyan-400">u64</span>&gt;,</div>
-                    <div>    end_time: <span className="text-cyan-400">u64</span>, <span className="text-text-muted">// nanoseconds timestamp</span></div>
+                    <div>    end_time: <span className="text-cyan-400">u64</span>, <span className="text-text-muted">{'// nanoseconds timestamp'}</span></div>
                     <div>{'}'}</div>
-                    <div className="mt-2 text-text-muted">// Methods: create_poll, vote, get_poll, get_results</div>
+                    <div className="mt-2 text-text-muted">{'// Methods: create_poll, vote, get_poll, get_results'}</div>
                   </div>
                 </section>
 
@@ -217,12 +217,12 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
                     Connect the voting contract to a React frontend:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Fetch all polls</div>
+                    <div className="text-text-muted">{'// Fetch all polls'}</div>
                     <div><span className="text-purple-400">async function</span> <span className="text-near-green">getPolls</span>() {'{'}</div>
                     <div>  <span className="text-purple-400">const</span> polls = <span className="text-purple-400">await</span> viewMethod(CONTRACT_ID, <span className="text-yellow-300">&quot;get_polls&quot;</span>, {'{'}{'}'}); </div>
                     <div>  <span className="text-purple-400">return</span> polls;</div>
                     <div>{'}'}</div>
-                    <div className="mt-3 text-text-muted">// Cast a vote</div>
+                    <div className="mt-3 text-text-muted">{'// Cast a vote'}</div>
                     <div><span className="text-purple-400">async function</span> <span className="text-near-green">castVote</span>(pollId: number, option: number) {'{'}</div>
                     <div>  <span className="text-purple-400">const</span> wallet = <span className="text-purple-400">await</span> selector.wallet();</div>
                     <div>  <span className="text-purple-400">await</span> wallet.signAndSendTransaction({'{'}</div>

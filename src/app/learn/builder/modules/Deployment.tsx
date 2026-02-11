@@ -161,7 +161,7 @@ const Deployment: React.FC<DeploymentProps> = ({ isActive, onToggle }) => {
                     <Card variant="default" padding="md" className="border-green-500/10">
                       <h5 className="text-sm font-semibold text-text-primary mb-2">Pattern 2: Explicit Init (Required)</h5>
                       <div className="bg-black/40 rounded-lg p-3 font-mono text-xs text-text-secondary border border-border">
-                        <div><span className="text-purple-400">#[derive(PanicOnDefault)]</span> <span className="text-text-muted">// ← Prevents use without init</span></div>
+                        <div><span className="text-purple-400">#[derive(PanicOnDefault)]</span> <span className="text-text-muted">{'// ← Prevents use without init'}</span></div>
                         <div><span className="text-purple-400">#[init]</span></div>
                         <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">new</span>(owner_id: AccountId) -&gt; Self {'{'} ... {'}'}</div>
                       </div>

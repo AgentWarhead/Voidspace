@@ -89,7 +89,7 @@ const TokenStandards: React.FC<TokenStandardsProps> = ({ isActive, onToggle }) =
                     Fungible tokens (FTs) are interchangeable — like USDC, wNEAR, or any ERC-20 equivalent. NEP-141 defines the standard interface:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Core FT interface methods</div>
+                    <div className="text-text-muted">{'// Core FT interface methods'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">ft_transfer</span>(&amp;<span className="text-purple-400">mut</span> self, receiver_id: AccountId, amount: U128, memo: Option&lt;String&gt;);</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">ft_transfer_call</span>(&amp;<span className="text-purple-400">mut</span> self, receiver_id: AccountId, amount: U128, memo: Option&lt;String&gt;, msg: String) -&gt; PromiseOrValue&lt;U128&gt;;</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">ft_total_supply</span>(&amp;self) -&gt; U128;</div>
@@ -145,16 +145,16 @@ const TokenStandards: React.FC<TokenStandardsProps> = ({ isActive, onToggle }) =
                     NFTs are unique tokens — each has a distinct ID and metadata. NEP-171 is NEAR&apos;s NFT standard:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// Core NFT interface</div>
+                    <div className="text-text-muted">{'// Core NFT interface'}</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">nft_transfer</span>(&amp;<span className="text-purple-400">mut</span> self, receiver_id: AccountId, token_id: TokenId, ...);</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">nft_transfer_call</span>(&amp;<span className="text-purple-400">mut</span> self, receiver_id: AccountId, token_id: TokenId, msg: String, ...) -&gt; PromiseOrValue&lt;bool&gt;;</div>
                     <div><span className="text-purple-400">fn</span> <span className="text-near-green">nft_token</span>(&amp;self, token_id: TokenId) -&gt; Option&lt;Token&gt;;</div>
-                    <div className="mt-3 text-text-muted">// Metadata (NEP-177)</div>
+                    <div className="mt-3 text-text-muted">{'// Metadata (NEP-177)'}</div>
                     <div><span className="text-purple-400">struct</span> <span className="text-cyan-400">TokenMetadata</span> {'{'}</div>
-                    <div>    title: Option&lt;String&gt;,        <span className="text-text-muted">// &quot;Cosmic Penguin #42&quot;</span></div>
-                    <div>    description: Option&lt;String&gt;,  <span className="text-text-muted">// &quot;A rare cosmic penguin&quot;</span></div>
-                    <div>    media: Option&lt;String&gt;,        <span className="text-text-muted">// IPFS/Arweave URL</span></div>
-                    <div>    copies: Option&lt;<span className="text-cyan-400">u64</span>&gt;,        <span className="text-text-muted">// Number of copies</span></div>
+                    <div>    title: Option&lt;String&gt;,        <span className="text-text-muted">{'// &quot;Cosmic Penguin #42&quot;'}</span></div>
+                    <div>    description: Option&lt;String&gt;,  <span className="text-text-muted">{'// &quot;A rare cosmic penguin&quot;'}</span></div>
+                    <div>    media: Option&lt;String&gt;,        <span className="text-text-muted">{'// IPFS/Arweave URL'}</span></div>
+                    <div>    copies: Option&lt;<span className="text-cyan-400">u64</span>&gt;,        <span className="text-text-muted">{'// Number of copies'}</span></div>
                     <div>{'}'}</div>
                   </div>
                 </section>

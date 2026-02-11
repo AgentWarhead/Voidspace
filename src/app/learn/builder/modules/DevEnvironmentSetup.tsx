@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Terminal, Download, CheckCircle, ExternalLink, Settings, FolderOpen } from 'lucide-react';
+import { ChevronDown, ChevronUp, Terminal, CheckCircle, ExternalLink, Settings, FolderOpen } from 'lucide-react';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 

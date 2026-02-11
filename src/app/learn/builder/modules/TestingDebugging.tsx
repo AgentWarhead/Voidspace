@@ -101,7 +101,7 @@ const TestingDebugging: React.FC<TestingDebuggingProps> = ({ isActive, onToggle 
                     <div>    {'}'}</div>
                     <div className="mt-2">    <span className="text-purple-400">#[test]</span></div>
                     <div>    <span className="text-purple-400">fn</span> <span className="text-near-green">test_set_greeting</span>() {'{'}</div>
-                    <div>        <span className="text-text-muted">// Set up test context</span></div>
+                    <div>        <span className="text-text-muted">{'// Set up test context'}</span></div>
                     <div>        <span className="text-purple-400">let</span> context = VMContextBuilder::new()</div>
                     <div>            .predecessor_account_id(<span className="text-yellow-300">&quot;alice.near&quot;</span>.parse().unwrap())</div>
                     <div>            .build();</div>
@@ -127,23 +127,23 @@ const TestingDebugging: React.FC<TestingDebuggingProps> = ({ isActive, onToggle 
                     Integration tests run against a real sandbox blockchain. They test your contract as it actually behaves on-chain:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// tests/sandbox.rs</div>
+                    <div className="text-text-muted">{'// tests/sandbox.rs'}</div>
                     <div><span className="text-purple-400">use</span> near_workspaces::types::NearToken;</div>
                     <div><span className="text-purple-400">use</span> serde_json::json;</div>
                     <div className="mt-2"><span className="text-purple-400">#[tokio::test]</span></div>
                     <div><span className="text-purple-400">async fn</span> <span className="text-near-green">test_greeting_contract</span>() -&gt; anyhow::Result&lt;()&gt; {'{'}</div>
-                    <div>    <span className="text-text-muted">// Spin up a local sandbox</span></div>
+                    <div>    <span className="text-text-muted">{'// Spin up a local sandbox'}</span></div>
                     <div>    <span className="text-purple-400">let</span> sandbox = near_workspaces::sandbox().await?;</div>
-                    <div className="mt-2">    <span className="text-text-muted">// Deploy the contract</span></div>
+                    <div className="mt-2">    <span className="text-text-muted">{'// Deploy the contract'}</span></div>
                     <div>    <span className="text-purple-400">let</span> wasm = std::fs::read(<span className="text-yellow-300">&quot;target/near/greeting.wasm&quot;</span>)?;</div>
                     <div>    <span className="text-purple-400">let</span> contract = sandbox.dev_deploy(&amp;wasm).await?;</div>
-                    <div className="mt-2">    <span className="text-text-muted">// Create a test user</span></div>
+                    <div className="mt-2">    <span className="text-text-muted">{'// Create a test user'}</span></div>
                     <div>    <span className="text-purple-400">let</span> alice = sandbox.dev_create_account().await?;</div>
-                    <div className="mt-2">    <span className="text-text-muted">// Call a change method</span></div>
+                    <div className="mt-2">    <span className="text-text-muted">{'// Call a change method'}</span></div>
                     <div>    alice.call(contract.id(), <span className="text-yellow-300">&quot;set_greeting&quot;</span>)</div>
                     <div>        .args_json(json!({'{&quot;greeting&quot;: &quot;Hello from test!&quot;}'}))</div>
                     <div>        .transact().await?.into_result()?;</div>
-                    <div className="mt-2">    <span className="text-text-muted">// Call a view method</span></div>
+                    <div className="mt-2">    <span className="text-text-muted">{'// Call a view method'}</span></div>
                     <div>    <span className="text-purple-400">let</span> result: String = contract.view(<span className="text-yellow-300">&quot;get_greeting&quot;</span>)</div>
                     <div>        .await?.json()?;</div>
                     <div>    assert_eq!(result, <span className="text-yellow-300">&quot;Hello from test!&quot;</span>);</div>
@@ -184,9 +184,9 @@ const TestingDebugging: React.FC<TestingDebuggingProps> = ({ isActive, onToggle 
                     Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">env::log_str()</code> or the <code className="text-purple-400 bg-purple-500/10 px-1 rounded">log!</code> macro in your contract to emit debug info:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">// In your contract</div>
+                    <div className="text-text-muted">{'// In your contract'}</div>
                     <div>log!(<span className="text-yellow-300">&quot;Caller: {'{'}{'}'}, Amount: {'{'}{'}'}&quot;</span>, env::predecessor_account_id(), amount);</div>
-                    <div className="mt-3 text-text-muted">// In your integration test — check logs</div>
+                    <div className="mt-3 text-text-muted">{'// In your integration test — check logs'}</div>
                     <div><span className="text-purple-400">let</span> result = alice.call(contract.id(), <span className="text-yellow-300">&quot;my_method&quot;</span>)</div>
                     <div>    .transact().await?;</div>
                     <div>println!(<span className="text-yellow-300">&quot;Logs: {'{:?}'}&quot;</span>, result.logs());</div>
