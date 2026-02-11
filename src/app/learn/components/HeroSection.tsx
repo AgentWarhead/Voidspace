@@ -8,7 +8,6 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/ui';
 import { Rocket, ChevronRight, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 // ─── Constellation Background ─────────────────────────────────────────────────
 // Animated skill-tree nodes connected by glowing lines, gently pulsing

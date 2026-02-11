@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Coins, Image, Vote, BarChart3, Box, Bot,
-  Clock, ArrowRight, Sparkles, Filter,
+  ArrowRight, Sparkles, Filter,
   ChevronRight, Code2, Zap, Copy,
   BookOpen, Github, FileCode,
 } from 'lucide-react';

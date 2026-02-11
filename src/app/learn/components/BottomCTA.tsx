@@ -2,9 +2,9 @@
 
 import { useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Rocket, Sparkles, ArrowRight, Zap, Users, Target,
+  Sparkles, ArrowRight, Zap, Users, Target,
   BookOpen, Eye,
 } from 'lucide-react';
 import { GradientText } from '@/components/effects/GradientText';

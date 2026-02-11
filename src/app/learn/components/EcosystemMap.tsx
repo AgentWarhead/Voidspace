@@ -4,7 +4,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Brain, Gamepad2, Users, Wrench, Globe,
-  ArrowRight, ExternalLink, Sparkles, Zap, Target,
+  ArrowRight, Sparkles, Zap, Target,
   ChevronRight, AlertCircle,
 } from 'lucide-react';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';

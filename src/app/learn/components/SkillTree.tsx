@@ -9,7 +9,6 @@ import {
   FileCode,
   FlaskConical,
   Rocket,
-  Sparkles,
   Lock,
   CheckCircle,
   ChevronRight,
@@ -32,8 +31,6 @@ import {
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GlowCard } from '@/components/effects/GlowCard';
-import { GradientText } from '@/components/effects/GradientText';
-import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
