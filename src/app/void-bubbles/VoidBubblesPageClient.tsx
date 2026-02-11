@@ -1,13 +1,48 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Container } from '@/components/ui/Container';
 import { VoidBubblesEngine } from '@/components/void-bubbles/VoidBubblesEngine';
 import { HotStrip } from '@/components/void-bubbles/HotStrip';
 import { GradientText } from '@/components/effects/GradientText';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 
+interface EcosystemStats {
+  totalTokens: number;
+  totalMarketCap: number;
+  totalVolume24h: number;
+  totalLiquidity: number;
+  gainersCount: number;
+  losersCount: number;
+  avgHealthScore: number;
+}
+
+function formatStatValue(n: number): string {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+}
+
 export function VoidBubblesPageClient() {
+  const [stats, setStats] = useState<EcosystemStats | null>(null);
+
+  // Fetch aggregate stats for header
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/void-bubbles?period=1d');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.stats) setStats(data.stats);
+        }
+      } catch { /* silent */ }
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Enable immersive mode — hides the site footer
   useEffect(() => {
     document.body.setAttribute('data-immersive', '');
@@ -116,43 +151,90 @@ export function VoidBubblesPageClient() {
         </div>
       </div>
 
-      {/* Compact Hero */}
-      <section className="relative py-2 border-b border-border shrink-0 overflow-hidden z-10">
+      {/* ── Premium Header Bar ── */}
+      <section className="relative py-2 border-b border-white/[0.06] shrink-0 overflow-hidden z-10">
         <div
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(0,212,255,0.04) 0%, transparent 70%)',
-          }}
+          className="absolute inset-0 bg-[#030508]/80 backdrop-blur-xl"
         />
+        {/* Animated accent line at top */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00EC97]/40 to-transparent" />
         
         {/* Scan line sweep across hero bar */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-near-green/20 to-transparent animate-scan" />
         </div>
         
         <Container size="xl" className="relative z-10">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+            {/* Left: Branding */}
+            <div className="flex items-center gap-3 shrink-0">
               <div className="relative">
                 <VoidspaceLogo size="sm" animate={false} className="opacity-80" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-near-green rounded-full animate-pulse" />
               </div>
-              <GradientText as="h1" className="text-xl sm:text-2xl font-bold tracking-tight">
-                Void Bubbles
-              </GradientText>
-              <span className="hidden sm:inline text-text-muted text-xs">—</span>
-              <p className="hidden sm:inline text-text-secondary text-xs max-w-md truncate">
-                Live NEAR ecosystem visualization · size = market cap · color = momentum · AI health scores
-              </p>
+              <div>
+                <GradientText as="h1" className="text-lg sm:text-xl font-bold tracking-tight leading-none">
+                  Void Bubbles
+                </GradientText>
+                <p className="hidden sm:block text-[10px] text-text-muted font-mono mt-0.5">
+                  NEAR Protocol Ecosystem Intelligence
+                </p>
+              </div>
             </div>
 
-            {/* Live indicator with void-glow effect */}
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 shrink-0">
+            {/* Center: Live Stats — desktop only */}
+            {stats && (
+              <div className="hidden md:flex items-center gap-4 lg:gap-6">
+                <div className="text-center">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Total MCap</div>
+                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalMarketCap)}</div>
+                </div>
+                <div className="w-px h-6 bg-white/[0.06]" />
+                <div className="text-center">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">24h Volume</div>
+                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalVolume24h)}</div>
+                </div>
+                <div className="w-px h-6 bg-white/[0.06]" />
+                <div className="text-center">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Liquidity</div>
+                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalLiquidity)}</div>
+                </div>
+                <div className="w-px h-6 bg-white/[0.06]" />
+                <div className="text-center">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Tokens</div>
+                  <div className="text-sm font-bold font-mono text-white">{stats.totalTokens}</div>
+                </div>
+                <div className="w-px h-6 bg-white/[0.06]" />
+                <div className="text-center">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Gainers/Losers</div>
+                  <div className="text-sm font-bold font-mono">
+                    <span className="text-emerald-400">{stats.gainersCount}</span>
+                    <span className="text-text-muted mx-1">/</span>
+                    <span className="text-rose-400">{stats.losersCount}</span>
+                  </div>
+                </div>
+                <div className="w-px h-6 bg-white/[0.06]" />
+                <div className="text-center">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Avg Health</div>
+                  <div className={`text-sm font-bold font-mono ${
+                    stats.avgHealthScore > 60 ? 'text-emerald-400' : stats.avgHealthScore > 40 ? 'text-amber-400' : 'text-rose-400'
+                  }`}>
+                    {stats.avgHealthScore}/100
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Right: Live indicator */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 shrink-0">
               <span className="w-2 h-2 rounded-full bg-near-green animate-pulse void-glow" />
-              <span className="text-xs font-mono text-near-green uppercase tracking-wider">Live</span>
+              <span className="text-[10px] font-mono text-near-green uppercase tracking-widest font-semibold">Live</span>
             </div>
           </div>
         </Container>
+        
+        {/* Bottom accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00EC97]/20 to-transparent" />
       </section>
 
       {/* Hot Strip - Live Market Movers */}

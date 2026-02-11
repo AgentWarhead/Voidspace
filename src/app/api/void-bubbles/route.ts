@@ -19,6 +19,18 @@ interface DexPair {
   marketCap?: number;
   fdv?: number;
   chainId: string;
+  dexId?: string;
+  pairCreatedAt?: number;
+  txns?: {
+    h24: { buys: number; sells: number };
+    h6: { buys: number; sells: number };
+    h1: { buys: number; sells: number };
+  };
+  info?: {
+    imageUrl?: string;
+    websites?: { url: string; label: string }[];
+    socials?: { url: string; type: string }[];
+  } | null;
 }
 
 export interface VoidBubbleToken {
@@ -40,7 +52,14 @@ export interface VoidBubbleToken {
   priceChange6h: number;
   dexScreenerUrl?: string;
   refFinanceUrl?: string;
-  contractAddress: string; // the token's contract address (same as id)
+  contractAddress: string;
+  // Rich data from DexScreener
+  imageUrl?: string;
+  socials?: { url: string; type: string }[];
+  websites?: { url: string; label: string }[];
+  txns24h?: { buys: number; sells: number };
+  dexId?: string;
+  pairCreatedAt?: string;
 }
 
 // Known NEAR token categories
@@ -210,6 +229,13 @@ export async function GET(request: Request) {
           dexScreenerUrl,
           refFinanceUrl,
           contractAddress: pair.baseToken.address,
+          // Rich DexScreener data
+          imageUrl: pair.info?.imageUrl,
+          socials: pair.info?.socials,
+          websites: pair.info?.websites,
+          txns24h: pair.txns?.h24,
+          dexId: pair.dexId,
+          pairCreatedAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
         });
       }
     }
@@ -274,8 +300,30 @@ export async function GET(request: Request) {
     // Sort by market cap descending
     tokens.sort((a, b) => b.marketCap - a.marketCap);
 
+    // Aggregate stats for header
+    const cappedTokens = tokens.slice(0, 150);
+    const totalMarketCap = cappedTokens.reduce((sum, t) => sum + t.marketCap, 0);
+    const totalVolume24h = cappedTokens.reduce((sum, t) => sum + t.volume24h, 0);
+    const totalLiquidity = cappedTokens.reduce((sum, t) => sum + t.liquidity, 0);
+    const gainersCount = cappedTokens.filter(t => t.priceChange24h > 0).length;
+    const losersCount = cappedTokens.filter(t => t.priceChange24h < 0).length;
+    const avgHealthScore = Math.round(cappedTokens.reduce((sum, t) => sum + t.healthScore, 0) / cappedTokens.length);
+    // Category breakdown
+    const categoryBreakdown: Record<string, number> = {};
+    cappedTokens.forEach(t => { categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + 1; });
+
     return NextResponse.json({
-      tokens: tokens.slice(0, 150), // Cap at 150 for performance
+      tokens: cappedTokens,
+      stats: {
+        totalTokens: cappedTokens.length,
+        totalMarketCap,
+        totalVolume24h,
+        totalLiquidity,
+        gainersCount,
+        losersCount,
+        avgHealthScore,
+        categoryBreakdown,
+      },
       lastUpdated: new Date().toISOString(),
       sources: ['ref-finance', 'dexscreener'],
       period,

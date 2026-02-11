@@ -40,10 +40,17 @@ interface VoidBubbleToken {
   dexScreenerUrl?: string;
   refFinanceUrl?: string;
   contractAddress: string;
-  // Social links
+  // Social links (legacy)
   website?: string;
   twitter?: string;
   telegram?: string;
+  // Rich DexScreener data
+  imageUrl?: string;
+  socials?: { url: string; type: string }[];
+  websites?: { url: string; label: string }[];
+  txns24h?: { buys: number; sells: number };
+  dexId?: string;
+  pairCreatedAt?: string;
 }
 
 interface BubbleNode extends d3.SimulationNodeDatum {
@@ -526,6 +533,22 @@ export function VoidBubblesEngine() {
               </div>
             </div>
 
+            {/* 24h Transaction Activity */}
+            {token.txns24h && (
+              <div className="px-4 pb-2">
+                <div className="flex gap-2">
+                  <div className="flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2 text-center">
+                    <div className="text-[10px] text-emerald-400/70 uppercase tracking-wider">Buys 24h</div>
+                    <div className="text-sm font-bold font-mono text-emerald-400">{token.txns24h.buys.toLocaleString()}</div>
+                  </div>
+                  <div className="flex-1 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2 text-center">
+                    <div className="text-[10px] text-rose-400/70 uppercase tracking-wider">Sells 24h</div>
+                    <div className="text-sm font-bold font-mono text-rose-400">{token.txns24h.sells.toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Action buttons — prominent CTAs */}
             <div className="px-4 pb-3">
               <div className="flex gap-2">
@@ -544,7 +567,41 @@ export function VoidBubblesEngine() {
                   Ref Finance
                 </button>
               </div>
-              {(token.website || token.twitter) && (
+
+              {/* Social links from DexScreener */}
+              {token.socials && token.socials.length > 0 && (
+                <div className="flex gap-1.5 mt-2">
+                  {token.socials.map((social, i) => (
+                    <button
+                      key={i}
+                      onClick={() => window.open(social.url, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all capitalize"
+                    >
+                      {social.type === 'twitter' ? '𝕏' : social.type === 'telegram' ? '✈️' : social.type === 'discord' ? '💬' : <ExternalLink className="w-3 h-3" />}
+                      <span className="ml-0.5">{social.type}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Website links from DexScreener */}
+              {token.websites && token.websites.length > 0 && (
+                <div className="flex gap-1.5 mt-1.5">
+                  {token.websites.slice(0, 3).map((site, i) => (
+                    <button
+                      key={i}
+                      onClick={() => window.open(site.url, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all"
+                    >
+                      <Link className="w-3 h-3" />
+                      {site.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Fallback legacy social links */}
+              {!token.socials?.length && (token.website || token.twitter) && (
                 <div className="flex gap-2 mt-2">
                   {token.website && (
                     <button
@@ -568,7 +625,7 @@ export function VoidBubblesEngine() {
               )}
             </div>
 
-            {/* Contract footer */}
+            {/* Contract footer with DEX info */}
             <div className="px-4 py-2.5 bg-white/[0.02] border-t border-white/[0.04]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -582,9 +639,14 @@ export function VoidBubblesEngine() {
                     <Copy className="w-3 h-3" />
                   </button>
                 </div>
-                <span className="text-[9px] font-mono text-text-muted/50">
-                  {formatDate(token.detectedAt)}
-                </span>
+                <div className="flex items-center gap-2">
+                  {token.dexId && (
+                    <span className="text-[9px] font-mono text-near-green/50">{token.dexId}</span>
+                  )}
+                  <span className="text-[9px] font-mono text-text-muted/50">
+                    {token.pairCreatedAt ? formatDate(token.pairCreatedAt) : formatDate(token.detectedAt)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1752,203 +1814,265 @@ export function VoidBubblesEngine() {
 
   return (
     <div className="flex-1 relative overflow-hidden h-full w-full">
-      {/* Power Bar — Desktop: Premium Glassmorphism Panel */}
-      <div className="hidden sm:block absolute top-4 left-4 z-20 w-56">
-        <div className="bg-[#0a0f14]/80 backdrop-blur-2xl border border-white/[0.06] rounded-2xl shadow-2xl shadow-black/40 overflow-hidden">
-          {/* Accent glow line at top */}
-          <div className="h-px bg-gradient-to-r from-transparent via-near-green/40 to-transparent" />
-          
-          <div className="p-4 space-y-4">
-            {/* Timeframe — pill selector */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Clock className="w-3 h-3 text-near-green/70" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Timeframe</span>
-              </div>
-              <div className="flex bg-white/[0.04] rounded-lg p-0.5">
-                {(['1h', '4h', '1d', '7d', '30d'] as const).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPeriod(p)}
-                    className={`flex-1 text-[11px] font-mono py-1.5 rounded-md transition-all duration-200 ${
-                      period === p
-                        ? 'bg-near-green/20 text-near-green shadow-sm shadow-near-green/10 font-semibold'
-                        : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
+      {/* ═══ COMMAND NEXUS — Desktop Control Panel ═══ */}
+      <div className="hidden sm:block absolute top-4 left-4 z-20 w-60">
+        {/* Outer animated border glow */}
+        <div className="relative rounded-2xl p-[1px] overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,236,151,0.3), rgba(0,212,255,0.15), rgba(157,78,221,0.2), rgba(0,236,151,0.3))',
+            backgroundSize: '300% 300%',
+            animation: 'gradient-shift 8s ease infinite',
+          }}
+        >
+          <div className="bg-[#060a0f]/90 backdrop-blur-2xl rounded-2xl overflow-hidden shadow-2xl shadow-[#00EC97]/5">
+            {/* Animated top accent with sweep */}
+            <div className="relative h-[2px] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00EC97]/60 via-[#00D4FF]/80 to-[#9D4EDD]/60" />
+              <div className="absolute inset-0" style={{ 
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                animation: 'shimmer-sweep 3s ease-in-out infinite',
+                backgroundSize: '200% 100%',
+              }} />
             </div>
 
-            {/* Movers */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Activity className="w-3 h-3 text-near-green/70" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Movers</span>
+            {/* Panel Header */}
+            <div className="px-4 pt-3 pb-2 flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg bg-[#00EC97]/15 border border-[#00EC97]/25 flex items-center justify-center">
+                <Brain className="w-3 h-3 text-[#00EC97]" />
               </div>
+              <div>
+                <span className="text-[11px] font-semibold text-white tracking-wide">Command Nexus</span>
+                <span className="text-[8px] font-mono text-[#00EC97]/60 block -mt-0.5">VOID://CONTROL.MATRIX</span>
+              </div>
+            </div>
+            
+            <div className="px-4 pb-4 space-y-3">
+              {/* ── Timeframe ── */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Clock className="w-3 h-3 text-[#00D4FF]/70" />
+                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/70">Temporal Range</span>
+                </div>
+                <div className="flex bg-white/[0.03] rounded-xl p-[3px] border border-white/[0.04]">
+                  {(['1h', '4h', '1d', '7d', '30d'] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPeriod(p)}
+                      className={`flex-1 text-[11px] font-mono py-1.5 rounded-lg transition-all duration-300 ${
+                        period === p
+                          ? 'bg-gradient-to-b from-[#00EC97]/25 to-[#00EC97]/10 text-[#00EC97] shadow-lg shadow-[#00EC97]/10 font-bold border border-[#00EC97]/20'
+                          : 'text-text-muted hover:text-white hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Momentum Scanners ── */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Activity className="w-3 h-3 text-[#00D4FF]/70" />
+                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/70">Momentum Scanner</span>
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-300 border ${
+                      highlightMode === 'gainers'
+                        ? 'bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 border-emerald-400/40 text-emerald-300 shadow-lg shadow-emerald-500/10'
+                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-emerald-500/20 hover:text-emerald-400/70'
+                    }`}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    🔥 Gainers
+                  </button>
+                  <button
+                    onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-300 border ${
+                      highlightMode === 'losers'
+                        ? 'bg-gradient-to-b from-rose-500/20 to-rose-500/5 border-rose-400/40 text-rose-300 shadow-lg shadow-rose-500/10'
+                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-rose-500/20 hover:text-rose-400/70'
+                    }`}
+                  >
+                    <TrendingDown className="w-3.5 h-3.5" />
+                    💀 Losers
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Separator with glow ── */}
+              <div className="relative h-px">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00EC97]/20 to-transparent" />
+              </div>
+
+              {/* ── Sector Filter ── */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#9D4EDD]/70">Sector Filter</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {categories.map((cat) => {
+                    const catColor = cat !== 'all' ? (CATEGORY_COLORS[cat] || '#64748B') : '#00EC97';
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setFilterCategory(cat)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 border ${
+                          filterCategory === cat
+                            ? 'font-semibold shadow-sm'
+                            : 'bg-white/[0.02] border-white/[0.03] text-text-muted hover:border-white/10 hover:text-text-secondary'
+                        }`}
+                        style={filterCategory === cat ? {
+                          backgroundColor: `${catColor}15`,
+                          borderColor: `${catColor}40`,
+                          color: catColor,
+                          boxShadow: `0 0 12px ${catColor}15`,
+                        } : undefined}
+                      >
+                        {cat === 'all' ? '⚡ All' : cat}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Separator ── */}
+              <div className="relative h-px">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00D4FF]/15 to-transparent" />
+              </div>
+
+              {/* ── Dimension Controls ── */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/60 block mb-1.5">◇ Bubble Size</span>
+                  <div className="space-y-0.5">
+                    {[
+                      { key: 'marketCap', label: '◆ MCap' },
+                      { key: 'volume', label: '◈ Volume' },
+                      { key: 'performance', label: '◉ Δ Move' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
+                        className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] transition-all duration-200 ${
+                          sizeMetric === opt.key
+                            ? 'text-[#00EC97] bg-[#00EC97]/10 font-semibold border border-[#00EC97]/15'
+                            : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03] border border-transparent'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#00D4FF]/60 block mb-1.5">◇ Data Layer</span>
+                  <div className="space-y-0.5">
+                    {[
+                      { key: 'performance', label: '▲ Change %' },
+                      { key: 'price', label: '$ Price' },
+                      { key: 'volume', label: '≋ Volume' },
+                      { key: 'marketCap', label: '◆ MCap' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
+                        className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] transition-all duration-200 ${
+                          bubbleContent === opt.key
+                            ? 'text-[#00EC97] bg-[#00EC97]/10 font-semibold border border-[#00EC97]/15'
+                            : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03] border border-transparent'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Separator ── */}
+              <div className="relative h-px">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
+              </div>
+
+              {/* ── Intelligence Tools ── */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setXrayMode(!xrayMode)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[10px] font-mono uppercase tracking-wider transition-all duration-300 border ${
+                    xrayMode
+                      ? 'bg-gradient-to-b from-cyan-500/20 to-cyan-500/5 border-cyan-400/40 text-cyan-300 shadow-lg shadow-cyan-500/15'
+                      : 'bg-white/[0.03] border-white/[0.05] text-text-muted hover:border-cyan-500/20 hover:text-cyan-400/70'
+                  }`}
+                >
+                  {xrayMode ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  {xrayMode ? '⚡ X-Ray ON' : '◎ X-Ray'}
+                </button>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  className={`p-2.5 rounded-xl transition-all duration-300 border ${
+                    soundEnabled
+                      ? 'bg-[#00EC97]/10 border-[#00EC97]/20 text-[#00EC97]'
+                      : 'bg-white/[0.03] border-white/[0.05] text-text-muted hover:text-text-secondary'
+                  }`}
+                  title={soundEnabled ? 'Sonic: Active' : 'Sonic: Muted'}
+                >
+                  {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* ── Quick Actions ── */}
               <div className="flex gap-1.5">
                 <button
-                  onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
-                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
-                    highlightMode === 'gainers'
-                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                      : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-emerald-500/20 hover:text-emerald-400/70'
-                  }`}
+                  onClick={handleSnapshot}
+                  className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-200"
                 >
-                  <TrendingUp className="w-3 h-3" />
-                  Gainers
+                  <Camera className="w-3 h-3" />
+                  Capture
                 </button>
                 <button
-                  onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
-                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
-                    highlightMode === 'losers'
-                      ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-                      : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-rose-500/20 hover:text-rose-400/70'
-                  }`}
+                  onClick={handleShareX}
+                  className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-200"
                 >
-                  <TrendingDown className="w-3 h-3" />
-                  Losers
+                  <Share2 className="w-3 h-3" />
+                  Share
+                </button>
+                <button
+                  onClick={() => initSimulation()}
+                  className="p-2 rounded-xl text-text-muted hover:text-[#00EC97] bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] hover:border-[#00EC97]/20 transition-all duration-200"
+                  title="Reset Void Matrix"
+                >
+                  <RotateCcw className="w-3 h-3" />
                 </button>
               </div>
-            </div>
 
-            {/* Separator */}
-            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-            {/* Category Filter */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Category</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setFilterCategory(cat)}
-                    className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all duration-200 border ${
-                      filterCategory === cat
-                        ? 'bg-near-green/15 border-near-green/30 text-near-green'
-                        : 'bg-white/[0.02] border-white/[0.04] text-text-muted hover:border-white/10 hover:text-text-secondary'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+              {/* ── Powered By Footer ── */}
+              <div className="flex items-center justify-center gap-1 pt-1">
+                <span className="text-[8px] font-mono text-text-muted/40 uppercase tracking-widest">Powered by</span>
+                <span className="text-[8px] font-mono text-[#00EC97]/50 uppercase tracking-widest font-semibold">Voidspace AI</span>
               </div>
             </div>
-
-            {/* Separator */}
-            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-            {/* Size & Display — compact two-column */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted block mb-1.5">Size</span>
-                <div className="space-y-0.5">
-                  {[
-                    { key: 'marketCap', label: 'MCap', icon: '◆' },
-                    { key: 'volume', label: 'Vol', icon: '◈' },
-                    { key: 'performance', label: 'Δ Move', icon: '◉' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.key}
-                      onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
-                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all duration-150 ${
-                        sizeMetric === opt.key
-                          ? 'text-near-green bg-near-green/10 font-medium'
-                          : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
-                      }`}
-                    >
-                      <span className="mr-1 opacity-50">{opt.icon}</span>{opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted block mb-1.5">Show</span>
-                <div className="space-y-0.5">
-                  {[
-                    { key: 'performance', label: 'Δ%', icon: '▲' },
-                    { key: 'price', label: 'Price', icon: '$' },
-                    { key: 'volume', label: 'Vol', icon: '≋' },
-                    { key: 'marketCap', label: 'MCap', icon: '◆' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.key}
-                      onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
-                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all duration-150 ${
-                        bubbleContent === opt.key
-                          ? 'text-near-green bg-near-green/10 font-medium'
-                          : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
-                      }`}
-                    >
-                      <span className="mr-1 opacity-50 font-mono text-[9px]">{opt.icon}</span>{opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Separator */}
-            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-            {/* Tools Row */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setXrayMode(!xrayMode)}
-                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-mono uppercase tracking-wider transition-all duration-200 border ${
-                  xrayMode
-                    ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10'
-                    : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:border-cyan-500/20'
-                }`}
-              >
-                {xrayMode ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                X-Ray
-              </button>
-              <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`p-2 rounded-lg transition-all duration-200 border ${
-                  soundEnabled
-                    ? 'bg-near-green/10 border-near-green/20 text-near-green'
-                    : 'bg-white/[0.03] border-white/[0.06] text-text-muted hover:text-text-secondary'
-                }`}
-                title={soundEnabled ? 'Sound On' : 'Sound Off'}
-              >
-                {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-
-            {/* Action Bar */}
-            <div className="flex gap-1">
-              <button
-                onClick={handleSnapshot}
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
-              >
-                <Camera className="w-3 h-3" />
-                Export
-              </button>
-              <button
-                onClick={handleShareX}
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-text-secondary bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
-              >
-                <Share2 className="w-3 h-3" />
-                Share
-              </button>
-              <button
-                onClick={() => initSimulation()}
-                className="p-1.5 rounded-lg text-text-muted hover:text-near-green bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-all duration-200"
-                title="Reset Layout"
-              >
-                <RotateCcw className="w-3 h-3" />
-              </button>
+            
+            {/* Animated bottom accent */}
+            <div className="relative h-[2px] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#9D4EDD]/40 via-[#00D4FF]/60 to-[#00EC97]/40" />
             </div>
           </div>
-          
-          {/* Bottom accent */}
-          <div className="h-px bg-gradient-to-r from-transparent via-near-green/20 to-transparent" />
         </div>
+
+        {/* CSS Animations for panel */}
+        <style jsx>{`
+          @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+          }
+          @keyframes shimmer-sweep {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+        `}</style>
       </div>
 
       {/* Mobile Panel Toggle — 44px min touch target */}
