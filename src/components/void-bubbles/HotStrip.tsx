@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, memo } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,17 +29,31 @@ interface HotStripProps {
   onTokenClick?: (tokenId: string) => void;
 }
 
-export function HotStrip({ onTokenClick }: HotStripProps) {
-  const [tokens, setTokens] = useState<VoidBubbleToken[]>([]);
-  const [loading, setLoading] = useState(true);
+// Simple in-memory cache to deduplicate API calls (HotStrip + VoidBubblesEngine both fetch /api/void-bubbles)
+let cachedTokens: VoidBubbleToken[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 30_000; // 30s
+
+function HotStripInner({ onTokenClick }: HotStripProps) {
+  const [tokens, setTokens] = useState<VoidBubbleToken[]>(cachedTokens || []);
+  const [loading, setLoading] = useState(!cachedTokens);
   const stripRef = useRef<HTMLDivElement>(null);
 
   const fetchTokens = async () => {
+    // Return cache if still fresh
+    if (cachedTokens && Date.now() - cacheTimestamp < CACHE_TTL) {
+      setTokens(cachedTokens);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch('/api/void-bubbles');
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
-      setTokens(data.tokens || []);
+      const newTokens = data.tokens || [];
+      cachedTokens = newTokens;
+      cacheTimestamp = Date.now();
+      setTokens(newTokens);
     } catch (error) {
       console.error('Failed to fetch tokens for hot strip:', error);
     } finally {
@@ -159,3 +173,5 @@ export function HotStrip({ onTokenClick }: HotStripProps) {
     </div>
   );
 }
+
+export const HotStrip = memo(HotStripInner);

@@ -224,6 +224,8 @@ export function VoidBubblesEngine() {
   const nodesRef = useRef<BubbleNode[]>([]);
   const sonicRef = useRef(new SonicEngine());
   const animFrameRef = useRef<number | null>(null);
+  const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const injectedStylesRef = useRef<HTMLStyleElement[]>([]);
 
   // Categories from data
   const categories = useMemo(() => {
@@ -350,12 +352,14 @@ export function VoidBubblesEngine() {
     const accentColor = isPositive ? '#00EC97' : '#FF3366';
     const accentBg = isPositive ? 'rgba(0,236,151,' : 'rgba(255,51,102,';
 
-    // Position the card (mobile = centered, desktop = near bubble)
+    // Position the card (mobile = bottom sheet style, desktop = near bubble)
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const clampedX = Math.min(position.x + 20, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 420);
-    const clampedY = Math.max(20, Math.min(position.y - 200, (typeof window !== 'undefined' ? window.innerHeight : 800) - 600));
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const clampedX = Math.min(position.x + 20, vw - 420);
+    const clampedY = Math.max(20, Math.min(position.y - 200, vh - 600));
     const cardStyle: React.CSSProperties = isMobile 
-      ? { left: '1rem', right: '1rem', top: '50%', transform: 'translateY(-50%)' }
+      ? { left: '0.5rem', right: '0.5rem', bottom: '3.5rem', maxHeight: '70vh' }
       : { left: clampedX, top: clampedY };
 
     return (
@@ -365,7 +369,7 @@ export function VoidBubblesEngine() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 10 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed z-50 w-[380px]"
+          className="fixed z-50 w-[380px] sm:w-[380px] max-sm:w-auto overflow-y-auto overscroll-contain"
           style={cardStyle}
           onClick={(e) => e.stopPropagation()}
         >
@@ -830,6 +834,16 @@ export function VoidBubblesEngine() {
 
     nodesRef.current = nodes;
 
+    // Clean up previously injected styles to prevent memory leak
+    injectedStylesRef.current.forEach(style => style.remove());
+    injectedStylesRef.current = [];
+
+    // Stop previous simulation and animation frame
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (simulationRef.current as any)?.stop?.();
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    animFrameRef.current = null;
+
     // Clear previous
     d3.select(svgRef.current).selectAll('*').remove();
 
@@ -986,6 +1000,7 @@ export function VoidBubblesEngine() {
         }
       `;
       document.head.appendChild(style);
+      injectedStylesRef.current.push(style);
     });
 
     // Enhanced outer glow circle — dramatic colored halo with dynamic opacity
@@ -1353,6 +1368,7 @@ export function VoidBubblesEngine() {
         }
       `;
       document.head.appendChild(style);
+      injectedStylesRef.current.push(style);
       
       highVolTokens.forEach(d => {
         bubbleGroups.filter(node => node.id === d.id)
@@ -1398,7 +1414,7 @@ export function VoidBubblesEngine() {
       }, 200);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => {
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
@@ -1412,15 +1428,15 @@ export function VoidBubblesEngine() {
     }
   }, [initSimulation]);
 
-  // Cleanup
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-      if (simulationRef.current) {
-        simulationRef.current.stop();
-      }
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (simulationRef.current) simulationRef.current.stop();
+      if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current);
+      // Remove all injected CSS styles
+      injectedStylesRef.current.forEach(style => style.remove());
+      injectedStylesRef.current = [];
     };
   }, []);
 
@@ -1935,21 +1951,31 @@ export function VoidBubblesEngine() {
         </div>
       </div>
 
-      {/* Mobile Panel Toggle */}
+      {/* Mobile Panel Toggle — 44px min touch target */}
       <div className="sm:hidden absolute top-4 left-4 z-20">
         <Button
           size="sm"
           variant="secondary"
           onClick={() => setShowMobilePanel(true)}
+          className="min-h-[44px] min-w-[44px] px-3"
         >
           <Settings className="w-4 h-4 mr-1" />
           Controls
         </Button>
       </div>
 
-      {/* Mobile Panel */}
+      {/* Mobile Panel + Backdrop */}
       <AnimatePresence>
         {showMobilePanel && (
+          <>
+          {/* Tap-outside backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="sm:hidden fixed inset-0 z-40 bg-black/50"
+            onClick={() => setShowMobilePanel(false)}
+          />
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
@@ -1979,8 +2005,8 @@ export function VoidBubblesEngine() {
                         key={p}
                         size="sm"
                         variant={period === p ? 'primary' : 'ghost'}
-                        onClick={() => setPeriod(p)}
-                        className="text-xs"
+                        onClick={() => { setPeriod(p); setShowMobilePanel(false); }}
+                        className="text-xs min-h-[44px] min-w-[44px]"
                       >
                         {p}
                       </Button>
@@ -1995,8 +2021,8 @@ export function VoidBubblesEngine() {
                     <Button
                       size="sm"
                       variant={highlightMode === 'gainers' ? 'primary' : 'secondary'}
-                      onClick={() => setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers')}
-                      className="text-xs flex-1"
+                      onClick={() => { setHighlightMode(highlightMode === 'gainers' ? 'none' : 'gainers'); setShowMobilePanel(false); }}
+                      className="text-xs flex-1 min-h-[44px]"
                     >
                       <TrendingUp className="w-3 h-3 mr-1" />
                       Gainers
@@ -2004,8 +2030,8 @@ export function VoidBubblesEngine() {
                     <Button
                       size="sm"
                       variant={highlightMode === 'losers' ? 'primary' : 'secondary'}
-                      onClick={() => setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers')}
-                      className="text-xs flex-1"
+                      onClick={() => { setHighlightMode(highlightMode === 'losers' ? 'none' : 'losers'); setShowMobilePanel(false); }}
+                      className="text-xs flex-1 min-h-[44px]"
                     >
                       <TrendingDown className="w-3 h-3 mr-1" />
                       Losers
@@ -2022,8 +2048,8 @@ export function VoidBubblesEngine() {
                         key={cat}
                         size="sm"
                         variant={filterCategory === cat ? 'primary' : 'ghost'}
-                        onClick={() => setFilterCategory(cat)}
-                        className="text-xs"
+                        onClick={() => { setFilterCategory(cat); setShowMobilePanel(false); }}
+                        className="text-xs min-h-[44px]"
                       >
                         {cat}
                       </Button>
@@ -2044,8 +2070,8 @@ export function VoidBubblesEngine() {
                         key={opt.key}
                         size="sm"
                         variant={sizeMetric === opt.key ? 'primary' : 'ghost'}
-                        onClick={() => setSizeMetric(opt.key as typeof sizeMetric)}
-                        className="text-xs justify-start"
+                        onClick={() => { setSizeMetric(opt.key as typeof sizeMetric); setShowMobilePanel(false); }}
+                        className="text-xs justify-start min-h-[44px]"
                       >
                         {opt.label}
                       </Button>
@@ -2067,8 +2093,8 @@ export function VoidBubblesEngine() {
                         key={opt.key}
                         size="sm"
                         variant={bubbleContent === opt.key ? 'primary' : 'ghost'}
-                        onClick={() => setBubbleContent(opt.key as typeof bubbleContent)}
-                        className="text-xs justify-start"
+                        onClick={() => { setBubbleContent(opt.key as typeof bubbleContent); setShowMobilePanel(false); }}
+                        className="text-xs justify-start min-h-[44px]"
                       >
                         {opt.label}
                       </Button>
@@ -2130,12 +2156,13 @@ export function VoidBubblesEngine() {
               </div>
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
 
       {/* Main Visualization Area */}
-      <div ref={containerRef} className="w-full h-full">
-        <svg ref={svgRef} className="w-full h-full" />
+      <div ref={containerRef} className="w-full h-full touch-manipulation">
+        <svg ref={svgRef} className="w-full h-full" style={{ willChange: 'transform' }} />
       </div>
 
       {/* Branding Bar — always visible at bottom */}

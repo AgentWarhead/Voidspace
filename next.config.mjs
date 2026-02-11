@@ -1,6 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@near-wallet-selector/modal-ui'],
+
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
+
+  // Bundle optimization — tree-shake lucide-react
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+  },
   
   // Redirect legacy tool routes to Observatory
   async redirects() {

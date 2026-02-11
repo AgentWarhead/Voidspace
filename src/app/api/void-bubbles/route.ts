@@ -278,7 +278,11 @@ export async function GET(request: Request) {
       tokens: tokens.slice(0, 150), // Cap at 150 for performance
       lastUpdated: new Date().toISOString(),
       sources: ['ref-finance', 'dexscreener'],
-      period, // Include the period in the response
+      period,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+      },
     });
   } catch (error) {
     console.error('Void Bubbles API error:', error);
