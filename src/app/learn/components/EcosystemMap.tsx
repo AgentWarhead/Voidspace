@@ -11,7 +11,6 @@ import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GradientText } from '@/components/effects/GradientText';
 import { GlowCard } from '@/components/effects/GlowCard';
-import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -84,7 +83,7 @@ const CATEGORIES: EcoCategory[] = [
     projects: 34,
     opportunities: 18,
     saturation: 'growing',
-    growth: '+45% YoY',
+    growth: 'Steady growth',
     color: 'cyan',
     subcategories: [
       { name: 'DEX & Aggregators', projects: 8, saturation: 'competitive' },
@@ -106,7 +105,7 @@ const CATEGORIES: EcoCategory[] = [
     projects: 43,
     opportunities: 16,
     saturation: 'growing',
-    growth: '+30% YoY',
+    growth: 'Growing fast',
     color: 'purple',
     subcategories: [
       { name: 'Marketplaces', projects: 5, saturation: 'competitive' },
@@ -127,7 +126,7 @@ const CATEGORIES: EcoCategory[] = [
     projects: 28,
     opportunities: 22,
     saturation: 'wide-open',
-    growth: '+60% YoY',
+    growth: 'High demand',
     color: 'green',
     subcategories: [
       { name: 'Oracles', projects: 2, saturation: 'wide-open' },
@@ -148,7 +147,7 @@ const CATEGORIES: EcoCategory[] = [
     projects: 27,
     opportunities: 19,
     saturation: 'wide-open',
-    growth: '+50% YoY',
+    growth: 'Emerging',
     color: 'green',
     subcategories: [
       { name: 'Social Platforms', projects: 4, saturation: 'wide-open' },
@@ -169,7 +168,7 @@ const CATEGORIES: EcoCategory[] = [
     projects: 21,
     opportunities: 27,
     saturation: 'wide-open',
-    growth: '+200% YoY',
+    growth: 'Hottest sector',
     color: 'green',
     subcategories: [
       { name: 'Agents & Autonomy', projects: 8, saturation: 'wide-open' },
@@ -190,7 +189,7 @@ const CATEGORIES: EcoCategory[] = [
     projects: 15,
     opportunities: 12,
     saturation: 'growing',
-    growth: '+40% YoY',
+    growth: 'Key need',
     color: 'cyan',
     subcategories: [
       { name: 'SDKs & Libraries', projects: 4, saturation: 'growing' },
@@ -612,14 +611,14 @@ export function EcosystemMap() {
             { label: 'Total Projects', value: totalProjects, color: 'text-accent-cyan', icon: Globe },
             { label: 'Open Voids', value: totalOpportunities, color: 'text-near-green', icon: Target },
             { label: 'Wide Open Sectors', value: CATEGORIES.filter(c => c.saturation === 'wide-open').length, color: 'text-near-green', icon: Sparkles },
-            { label: 'Active Builders', value: 380, color: 'text-purple-400', icon: Users },
+            { label: 'Categories', value: CATEGORIES.length, color: 'text-purple-400', icon: Users },
           ].map((stat) => {
             const StatIcon = stat.icon;
             return (
               <div key={stat.label} className="text-center py-3 rounded-lg bg-surface/60 border border-border/50 backdrop-blur-sm">
                 <StatIcon className={cn('w-4 h-4 mx-auto mb-1', stat.color)} />
                 <div className={cn('text-xl font-bold font-mono', stat.color)}>
-                  <AnimatedCounter value={stat.value} />
+                  {stat.value}
                 </div>
                 <div className="text-[10px] text-text-muted mt-0.5 uppercase tracking-wider">{stat.label}</div>
               </div>
@@ -680,7 +679,7 @@ export function EcosystemMap() {
             >
               <Zap className="w-6 h-6 text-near-green" />
             </motion.div>
-            <GradientText as="h3" animated className="text-lg font-bold">
+            <GradientText as="p" animated className="text-lg font-bold">
               There Are More Voids Than Builders
             </GradientText>
             <p className="text-sm text-text-secondary max-w-lg">
