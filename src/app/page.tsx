@@ -104,7 +104,7 @@ export default async function DashboardPage() {
 
                 {/* Hero headline */}
                 <div className="text-center mb-10">
-                  <GradientText as="h2" className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+                  <GradientText as="h2" className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-snug pb-1">
                     See the entire NEAR ecosystem.
                     <br />
                     <span className="text-white/90">In one living, breathing map.</span>
