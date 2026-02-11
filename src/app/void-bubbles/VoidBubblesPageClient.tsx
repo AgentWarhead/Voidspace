@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Menu, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Container } from '@/components/ui/Container';
 import { VoidBubblesEngine } from '@/components/void-bubbles/VoidBubblesEngine';
 import { HotStrip } from '@/components/void-bubbles/HotStrip';
 import { GradientText } from '@/components/effects/GradientText';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
+import { NAV_ITEMS } from '@/lib/constants';
 
 interface EcosystemStats {
   totalTokens: number;
@@ -26,6 +30,7 @@ function formatStatValue(n: number): string {
 
 export function VoidBubblesPageClient() {
   const [stats, setStats] = useState<EcosystemStats | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch aggregate stats for header
   useEffect(() => {
@@ -166,8 +171,8 @@ export function VoidBubblesPageClient() {
         
         <Container size="xl" className="relative z-10">
           <div className="flex items-center justify-between gap-4">
-            {/* Left: Branding */}
-            <div className="flex items-center gap-3 shrink-0">
+            {/* Left: Branding — clickable to home */}
+            <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-90 transition-opacity">
               <div className="relative">
                 <VoidspaceLogo size="sm" animate={false} className="opacity-80" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-near-green rounded-full animate-pulse" />
@@ -180,7 +185,7 @@ export function VoidBubblesPageClient() {
                   NEAR Protocol Ecosystem Intelligence
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* Center: Live Stats — desktop only */}
             {stats && (
@@ -225,10 +230,20 @@ export function VoidBubblesPageClient() {
               </div>
             )}
 
-            {/* Right: Live indicator */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-near-green animate-pulse void-glow" />
-              <span className="text-[10px] font-mono text-near-green uppercase tracking-widest font-semibold">Live</span>
+            {/* Right: Live indicator + hamburger */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-near-green/10 border border-near-green/20">
+                <span className="w-2 h-2 rounded-full bg-near-green animate-pulse void-glow" />
+                <span className="text-[10px] font-mono text-near-green uppercase tracking-widest font-semibold">Live</span>
+              </div>
+              {/* Hamburger menu — visible on mobile & desktop */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5 text-text-secondary" /> : <Menu className="w-5 h-5 text-text-secondary" />}
+              </button>
             </div>
           </div>
         </Container>
@@ -236,6 +251,40 @@ export function VoidBubblesPageClient() {
         {/* Bottom accent */}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00EC97]/20 to-transparent" />
       </section>
+
+      {/* ── Navigation Menu Dropdown ── */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="relative z-30 overflow-hidden border-b border-white/[0.06]"
+          >
+            <div className="bg-[#060a0f]/95 backdrop-blur-2xl">
+              <Container size="xl">
+                <nav className="py-3 flex flex-wrap gap-1.5">
+                  {NAV_ITEMS.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        item.href === '/void-bubbles'
+                          ? 'bg-near-green/15 text-near-green border border-near-green/25'
+                          : 'text-text-muted hover:text-white hover:bg-white/[0.06] border border-transparent'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </Container>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hot Strip - Live Market Movers */}
       <div className="relative z-10">
