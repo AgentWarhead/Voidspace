@@ -271,9 +271,12 @@ export function VoidBubblesEngine() {
     }
   }, [period]);
 
+  // Track whether this is the initial load vs a refresh
+  const isInitialLoadRef = useRef(true);
+
   useEffect(() => {
-    fetchTokens();
-    const interval = setInterval(fetchTokens, 60000); // Refresh every 60s
+    fetchTokens().then(() => { isInitialLoadRef.current = false; });
+    const interval = setInterval(fetchTokens, 120000); // Refresh every 120s (was 60s — reduces flashing)
     return () => clearInterval(interval);
   }, [fetchTokens, period]);
 
@@ -843,7 +846,11 @@ export function VoidBubblesEngine() {
     const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
-      .style('overflow', 'visible');
+      .style('overflow', 'visible')
+      .style('opacity', 0);
+    
+    // Smooth fade-in to prevent flash on mobile
+    svg.transition().duration(600).style('opacity', 1);
 
     // SVG Definitions for gradients and filters
     const defs = svg.append('defs');
@@ -1414,12 +1421,36 @@ export function VoidBubblesEngine() {
     };
   }, [initSimulation]);
 
+  // Track token IDs to detect real structural changes vs. just data refresh
+  const prevTokenIdsRef = useRef<string>('');
+
   // Initialize on mount and when dependencies change
   useEffect(() => {
-    if (filteredTokens.length > 0) {
+    if (filteredTokens.length === 0) return;
+    
+    // Build a key from token IDs + filter settings to detect structural changes
+    const tokenKey = filteredTokens.map(t => t.id).sort().join(',');
+    const structuralKey = `${tokenKey}|${filterCategory}|${sizeMetric}|${bubbleContent}|${xrayMode}|${period}|${highlightMode}`;
+    
+    if (prevTokenIdsRef.current === '' || prevTokenIdsRef.current !== structuralKey) {
+      // First load or structural change — full re-init
+      prevTokenIdsRef.current = structuralKey;
       initSimulation();
     }
-  }, [initSimulation]);
+    // Data-only refresh (same tokens, same filters) — skip re-init to prevent flashing
+  }, [initSimulation, filteredTokens, filterCategory, sizeMetric, bubbleContent, xrayMode, period, highlightMode]);
+
+  // Listen for token open events from HotStrip / Header ticker
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.tokenId) {
+        handleShowPopup(detail.tokenId);
+      }
+    };
+    window.addEventListener('voidspace:open-token', handler);
+    return () => window.removeEventListener('voidspace:open-token', handler);
+  }, [handleShowPopup]);
 
   // Cleanup on unmount
   useEffect(() => {

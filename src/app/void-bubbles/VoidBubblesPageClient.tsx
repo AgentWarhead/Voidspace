@@ -39,7 +39,7 @@ export function VoidBubblesPageClient() {
       } catch { /* silent */ }
     };
     fetchStats();
-    const interval = setInterval(fetchStats, 60000);
+    const interval = setInterval(fetchStats, 120000); // 2 min refresh to reduce load
     return () => clearInterval(interval);
   }, []);
 

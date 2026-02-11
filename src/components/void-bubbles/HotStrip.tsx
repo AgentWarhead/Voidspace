@@ -77,6 +77,8 @@ function HotStripInner({ onTokenClick }: HotStripProps) {
 
   const handleTokenClick = (tokenId: string) => {
     onTokenClick?.(tokenId);
+    // Dispatch custom event so VoidBubblesEngine can open the popup card
+    window.dispatchEvent(new CustomEvent('voidspace:open-token', { detail: { tokenId } }));
   };
 
   if (loading) {
@@ -109,7 +111,7 @@ function HotStripInner({ onTokenClick }: HotStripProps) {
         ref={stripRef}
         className="relative flex items-center whitespace-nowrap"
         style={{
-          animation: 'scroll-left 45s linear infinite',
+          animation: 'scroll-left 25s linear infinite',
         }}
       >
         {tickerItems.map((token, index) => {
