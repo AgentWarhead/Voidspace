@@ -363,7 +363,7 @@ function TrackCard({ track }: { track: Track }) {
       {/* Hover glow */}
       <motion.div
         className={cn(
-          'absolute -inset-1 bg-gradient-to-b rounded-2xl blur-lg opacity-0',
+          'absolute -inset-1 bg-gradient-to-b rounded-2xl blur-lg opacity-0 pointer-events-none',
           styles.glowBg
         )}
         whileHover={{ opacity: 0.5 }}
