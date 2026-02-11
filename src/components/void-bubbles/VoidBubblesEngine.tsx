@@ -777,7 +777,7 @@ export function VoidBubblesEngine() {
     const values = filteredTokens.map(t => getMetricValue(t)).filter(v => v > 0);
     const minValue = Math.min(...values, 1);
     const maxValue = Math.max(...values, 1);
-    const maxRadius = isMobile ? Math.min(width, height) * 0.07 : Math.min(width, height) * 0.065;
+    const maxRadius = isMobile ? Math.min(width, height) * 0.055 : Math.min(width, height) * 0.065;
     const radiusScale = d3.scaleLog()
       .domain([minValue, maxValue])
       .range([8, maxRadius])
@@ -1251,9 +1251,14 @@ export function VoidBubblesEngine() {
         .distanceMax(Math.min(width, height) * 0.4)
       )
       .force('collision', d3.forceCollide<BubbleNode>()
-        .radius(d => d.targetRadius * (xrayMode ? 1.5 : 1.35) + 6)
+        .radius(d => {
+          // X-ray rings need more space, but less on mobile to prevent overflow
+          const xrayPad = isMobile ? 1.25 : 1.5;
+          const normalPad = isMobile ? 1.2 : 1.35;
+          return d.targetRadius * (xrayMode ? xrayPad : normalPad) + (isMobile ? 3 : 6);
+        })
         .strength(0.95)
-        .iterations(4)
+        .iterations(isMobile ? 6 : 4) // More iterations on mobile for tighter packing
       )
       .alphaDecay(isMobile ? 0.03 : 0.025) // Even faster settling on mobile
       .alpha(0.5)
@@ -1324,9 +1329,9 @@ export function VoidBubblesEngine() {
       if (!parentData) return;
       const r = parentData.targetRadius;
       if (className.includes('bubble-main')) el.attr('r', r);
-      else if (className.includes('bubble-glow')) el.attr('r', r + 4);
-      else if (className.includes('bubble-outer-ring')) el.attr('r', r + 8);
-      else if (className.includes('xray-ring')) el.attr('r', r + 12);
+      else if (className.includes('bubble-glow')) el.attr('r', r + (isMobile ? 2 : 4));
+      else if (className.includes('bubble-outer-ring')) el.attr('r', r + (isMobile ? 4 : 8));
+      else if (className.includes('xray-ring')) el.attr('r', r + (isMobile ? 6 : 12));
       else el.attr('r', r);
     });
 
