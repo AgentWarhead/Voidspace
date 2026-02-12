@@ -169,7 +169,146 @@ export default async function DashboardPage() {
           </section>
         </ScrollReveal>
 
-        {/* Section 5: Ready to build — CTA Footer */}
+        {/* Section 5: Learn NEAR — The Academy */}
+        <ScrollReveal delay={0.14}>
+          <section>
+            <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 shadow-2xl shadow-purple-500/5">
+              {/* Multi-layer cinematic background — purple/blue theme for learning */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `
+                    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(157,78,221,0.15) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 80% at 30% 80%, rgba(0,212,255,0.10) 0%, transparent 60%),
+                    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0,236,151,0.04) 0%, transparent 70%),
+                    linear-gradient(180deg, rgba(3,5,8,0.95) 0%, rgba(6,10,15,0.98) 100%)
+                  `,
+                }}
+              />
+              {/* Animated grid overlay */}
+              <div
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: 'linear-gradient(rgba(157,78,221,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(157,78,221,0.5) 1px, transparent 1px)',
+                  backgroundSize: '50px 50px',
+                }}
+              />
+              {/* Floating particles */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute w-2 h-2 rounded-full bg-purple-400/30 animate-pulse" style={{ top: '12%', left: '8%', animationDelay: '0s', animationDuration: '3s' }} />
+                <div className="absolute w-1.5 h-1.5 rounded-full bg-accent-cyan/30 animate-pulse" style={{ top: '20%', right: '12%', animationDelay: '1s', animationDuration: '4s' }} />
+                <div className="absolute w-3 h-3 rounded-full bg-purple-500/15 animate-pulse" style={{ bottom: '25%', left: '15%', animationDelay: '2s', animationDuration: '5s' }} />
+                <div className="absolute w-1 h-1 rounded-full bg-near-green/30 animate-pulse" style={{ top: '55%', right: '20%', animationDelay: '0.5s', animationDuration: '3.5s' }} />
+                <div className="absolute w-2 h-2 rounded-full bg-accent-cyan/20 animate-pulse" style={{ bottom: '15%', right: '8%', animationDelay: '1.5s', animationDuration: '4.5s' }} />
+              </div>
+
+              <div className="relative z-10 p-8 sm:p-14 lg:p-16">
+                {/* Badge */}
+                <div className="text-center mb-6">
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-mono uppercase tracking-widest font-semibold">
+                    <BookOpen className="w-3 h-3" />
+                    43 Modules · 4 Tracks · Free Forever
+                  </span>
+                </div>
+
+                {/* Hero headline */}
+                <div className="text-center mb-10">
+                  <GradientText as="h2" className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-snug pb-1">
+                    Go from zero to NEAR builder.
+                    <br />
+                    <span className="text-white/90">At your own pace. For free.</span>
+                  </GradientText>
+                  <p className="text-text-secondary text-base sm:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
+                    The most comprehensive NEAR Protocol learning platform on the internet.
+                    Master Rust, smart contracts, DeFi security, and dApp architecture through
+                    4 structured tracks — from your first wallet to your first grant application.
+                    AI-powered. Self-paced. No signup required.
+                  </p>
+                </div>
+
+                {/* Learning Tracks — 2x2 grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-10 max-w-4xl mx-auto">
+                  <div className="group p-5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-near-green/20 hover:bg-near-green/[0.04] transition-all duration-300">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="text-2xl">🧭</div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">Explorer Track</h3>
+                        <span className="text-[10px] text-text-muted font-mono">11 modules · Beginner</span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed">Wallets, staking, DeFi basics, ecosystem tour, DAO governance — everything you need to navigate NEAR with confidence.</p>
+                  </div>
+                  <div className="group p-5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-accent-cyan/20 hover:bg-accent-cyan/[0.04] transition-all duration-300">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="text-2xl">🏗️</div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">Builder Track</h3>
+                        <span className="text-[10px] text-text-muted font-mono">16 modules · Intermediate</span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed">Rust fundamentals → smart contracts → frontend integration → full-stack dApps. The complete developer journey.</p>
+                  </div>
+                  <div className="group p-5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-rose-500/20 hover:bg-rose-500/[0.04] transition-all duration-300">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="text-2xl">🔓</div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">Hacker Track</h3>
+                        <span className="text-[10px] text-text-muted font-mono">11 modules · Advanced</span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed">DeFi security, MEV, cross-chain exploits, audit methodologies — become the person who finds the bugs before they&apos;re exploited.</p>
+                  </div>
+                  <div className="group p-5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-purple-500/20 hover:bg-purple-500/[0.04] transition-all duration-300">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="text-2xl">🚀</div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">Founder Track</h3>
+                        <span className="text-[10px] text-text-muted font-mono">5 modules · All Levels</span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed">Tokenomics, revenue models, grant writing, pitch decks — turn your NEAR project from idea to funded venture.</p>
+                  </div>
+                </div>
+
+                {/* Extra features row */}
+                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-10 max-w-3xl mx-auto">
+                  <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-near-green" />
+                    Verifiable certificates
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan" />
+                    Capstone projects
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                    Cross-chain deep dives
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    Solana → NEAR guides
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center space-y-4">
+                  <Link
+                    href="/learn"
+                    className="inline-flex items-center gap-3 px-10 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-purple-500 to-accent-cyan text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-shadow"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Start Learning
+                  </Link>
+                  <p className="text-[11px] text-text-muted font-mono">
+                    No account required · Self-paced · Works on mobile
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* Section 6: Ready to build — CTA Footer */}
         <ScrollReveal delay={0.15}>
           <div className="relative overflow-hidden rounded-2xl">
             <div
