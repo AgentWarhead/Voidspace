@@ -217,6 +217,19 @@ const COMPETITORS: CrossChainCompetitor[] = [
 
   // Social
   {
+    name: 'Dialect',
+    chain: 'Solana',
+    category: 'social',
+    tvl: '$15M',
+    description: 'Smart messaging protocol enabling wallet-to-wallet communication on Solana'
+  },
+  {
+    name: 'Blinks & Actions',
+    chain: 'Solana',
+    category: 'social',
+    description: 'Solana social commerce framework for shareable on-chain actions'
+  },
+  {
     name: 'Lens Protocol',
     chain: 'Polygon',
     category: 'social',
@@ -337,6 +350,27 @@ const COMPETITORS: CrossChainCompetitor[] = [
 
   // AI/ML
   {
+    name: 'Render Network',
+    chain: 'Solana',
+    category: 'ai',
+    tvl: '$2.1B',
+    description: 'Decentralized GPU rendering network — migrated from Ethereum to Solana'
+  },
+  {
+    name: 'io.net',
+    chain: 'Solana',
+    category: 'ai',
+    tvl: '$180M',
+    description: 'Decentralized GPU network aggregating compute for AI/ML workloads'
+  },
+  {
+    name: 'Nosana',
+    chain: 'Solana',
+    category: 'ai',
+    tvl: '$45M',
+    description: 'Decentralized compute marketplace for AI inference on Solana'
+  },
+  {
     name: 'Bittensor',
     chain: 'Ethereum',
     category: 'ai',
@@ -366,6 +400,20 @@ const COMPETITORS: CrossChainCompetitor[] = [
   },
 
   // Privacy
+  {
+    name: 'Light Protocol',
+    chain: 'Solana',
+    category: 'privacy',
+    tvl: '$50M',
+    description: 'ZK compression protocol enabling private state on Solana'
+  },
+  {
+    name: 'Elusiv',
+    chain: 'Solana',
+    category: 'privacy',
+    tvl: '$15M',
+    description: 'Privacy transactions on Solana using zero-knowledge proofs'
+  },
   {
     name: 'Tornado Cash',
     chain: 'Ethereum',

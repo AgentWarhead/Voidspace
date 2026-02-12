@@ -111,9 +111,15 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
             </div>
           </motion.div>
 
-          {/* Competitors by Chain */}
+          {/* Competitors by Chain — Solana first, then alphabetical */}
           <div className="space-y-3">
-            {Object.entries(competitorsByChain).map(([chain, chainCompetitors]) => (
+            {Object.entries(competitorsByChain)
+              .sort(([a], [b]) => {
+                if (a === 'Solana') return -1;
+                if (b === 'Solana') return 1;
+                return a.localeCompare(b);
+              })
+              .map(([chain, chainCompetitors]) => (
               <motion.div
                 key={chain}
                 className="space-y-2"
