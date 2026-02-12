@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Home, Target, Sparkles, Globe, BookOpen, User, Zap } from 'lucide-react';
+import { Menu, X, Search, Target, Sparkles, Globe, BookOpen, User, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
@@ -43,10 +43,9 @@ export function Header() {
   const getNavIcon = (label: string, isActive: boolean) => {
     const iconClass = `w-4 h-4 ${isActive ? 'text-near-green' : 'text-text-muted'}`;
     switch (label) {
-      case 'Home': return <Home className={iconClass} />;
       case 'Voids': return <Target className={iconClass} />;
-      case 'Sanctum': return <Sparkles className={iconClass} />;
       case 'Observatory': return <Globe className={iconClass} />;
+      case 'Sanctum': return <Sparkles className={iconClass} />;
       case 'Learn': return <BookOpen className={iconClass} />;
       case 'Pricing': return <Zap className={iconClass} />;
       case 'Profile': return <User className={iconClass} />;
@@ -106,15 +105,6 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            {isConnected && (
-              <Link
-                href="/pricing"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-near-green/10 border border-near-green/20 hover:border-near-green/40 transition-all text-xs font-medium text-near-green"
-              >
-                <Zap className="w-3 h-3" />
-                <span>Pricing</span>
-              </Link>
-            )}
             <Link
               href="/search"
               className="flex items-center gap-1 p-2 text-text-secondary hover:text-cyan-400 transition-all duration-200 hover:drop-shadow-[0_0_6px_rgba(0,212,255,0.5)]"
@@ -167,18 +157,6 @@ export function Header() {
                   );
                 })}
               </nav>
-              {isConnected && (
-                <div className="mt-2 px-3">
-                  <Link
-                    href="/pricing"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 hover:border-near-green/40 transition-all text-xs font-medium text-near-green w-fit"
-                  >
-                    <Zap className="w-3 h-3" />
-                    <span>Pricing</span>
-                  </Link>
-                </div>
-              )}
               <div className="mt-3 px-3">
                 <ConnectWalletButton />
               </div>
