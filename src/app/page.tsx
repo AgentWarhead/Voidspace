@@ -343,31 +343,93 @@ export default async function DashboardPage() {
 
               <div className="relative z-10 p-8 sm:p-12">
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-xs font-mono mb-4">
                     <BookOpen className="w-3 h-3" />
-                    STRUCTURED LEARNING
+                    THE MOST COMPREHENSIVE NEAR CURRICULUM — FREE
                   </div>
-                  <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
-                    Learn NEAR Protocol
+                  <GradientText as="h2" className="text-3xl sm:text-4xl font-bold tracking-tight">
+                    Master NEAR Development
                   </GradientText>
-                  <p className="text-text-secondary text-base mt-3 max-w-2xl mx-auto">
-                    From zero to shipping on NEAR. Interactive modules, hands-on exercises, and AI-assisted learning across 4 tracks.
+                  <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
+                    43 interactive modules across 4 structured tracks. From your first Rust line to deploying production dApps — with AI guidance at every step.
                   </p>
                 </div>
 
-                {/* Track cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+                {/* Track cards — detailed */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-4xl mx-auto">
                   {[
-                    { emoji: '🏗️', title: 'Builder Fundamentals', modules: '12 modules' },
-                    { emoji: '📜', title: 'Smart Contracts', modules: '11 modules' },
-                    { emoji: '🌐', title: 'Frontend & dApps', modules: '10 modules' },
-                    { emoji: '🔬', title: 'Advanced Topics', modules: '10 modules' },
+                    {
+                      emoji: '🧭',
+                      title: 'Explorer',
+                      modules: 11,
+                      desc: 'Wallet setup, key concepts, ecosystem overview',
+                      color: 'emerald',
+                      borderClass: 'border-emerald-500/15 hover:border-emerald-500/30',
+                      bgClass: 'bg-emerald-500/10',
+                      textClass: 'text-emerald-400',
+                      tagClass: 'bg-emerald-500/10 text-emerald-400/70 border-emerald-500/10',
+                    },
+                    {
+                      emoji: '🏗️',
+                      title: 'Builder',
+                      modules: 16,
+                      desc: 'Rust fundamentals, smart contracts, testing, deployment',
+                      color: 'cyan',
+                      borderClass: 'border-cyan-500/15 hover:border-cyan-500/30',
+                      bgClass: 'bg-cyan-500/10',
+                      textClass: 'text-cyan-400',
+                      tagClass: 'bg-cyan-500/10 text-cyan-400/70 border-cyan-500/10',
+                    },
+                    {
+                      emoji: '⚡',
+                      title: 'Hacker',
+                      modules: 11,
+                      desc: 'Cross-chain patterns, security auditing, DeFi architecture',
+                      color: 'purple',
+                      borderClass: 'border-purple-500/15 hover:border-purple-500/30',
+                      bgClass: 'bg-purple-500/10',
+                      textClass: 'text-purple-400',
+                      tagClass: 'bg-purple-500/10 text-purple-400/70 border-purple-500/10',
+                    },
+                    {
+                      emoji: '🚀',
+                      title: 'Founder',
+                      modules: 5,
+                      desc: 'Tokenomics, DAO governance, go-to-market strategy',
+                      color: 'amber',
+                      borderClass: 'border-amber-500/15 hover:border-amber-500/30',
+                      bgClass: 'bg-amber-500/10',
+                      textClass: 'text-amber-400',
+                      tagClass: 'bg-amber-500/10 text-amber-400/70 border-amber-500/10',
+                    },
                   ].map((track) => (
-                    <div key={track.title} className="text-center p-4 bg-surface/50 rounded-lg border border-border hover:border-near-green/20 transition-colors">
-                      <div className="text-2xl mb-2">{track.emoji}</div>
-                      <p className="text-sm font-medium text-text-primary">{track.title}</p>
-                      <p className="text-xs font-mono text-text-muted mt-1">{track.modules}</p>
+                    <div key={track.title} className={`group p-5 bg-surface/50 rounded-xl border ${track.borderClass} transition-all duration-300`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">{track.emoji}</span>
+                        <div>
+                          <h3 className="text-base font-semibold text-text-primary">{track.title} Track</h3>
+                          <span className={`text-[10px] font-mono ${track.textClass}`}>{track.modules} modules</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-text-secondary">{track.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Differentiators */}
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 mb-8 max-w-3xl mx-auto">
+                  {[
+                    { icon: '🤖', text: 'AI explains every concept' },
+                    { icon: '🔨', text: 'Build real projects, not toy examples' },
+                    { icon: '🎯', text: 'Skill constellation tracks progress' },
+                    { icon: '📜', text: 'Earn completion certificates' },
+                    { icon: '🌉', text: 'Cross-chain deep dives (Solana, ETH)' },
+                    { icon: '💰', text: '100% free, forever' },
+                  ].map((item) => (
+                    <div key={item.text} className="flex items-center gap-2 text-sm text-text-secondary">
+                      <span>{item.icon}</span>
+                      <span>{item.text}</span>
                     </div>
                   ))}
                 </div>
@@ -379,10 +441,10 @@ export default async function DashboardPage() {
                     className="shimmer-btn text-background font-semibold px-8 py-4 rounded-lg text-base inline-flex items-center gap-2 mb-3"
                   >
                     <BookOpen className="w-4 h-4" />
-                    Start Learning →
+                    Start Your Journey →
                   </Link>
                   <p className="text-xs text-text-muted font-mono">
-                    4 tracks · 43 modules · Free forever
+                    No prerequisites · No paywall · No time limit
                   </p>
                 </div>
               </div>
