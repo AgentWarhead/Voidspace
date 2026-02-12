@@ -109,7 +109,7 @@ export function HackerModuleLayout({
 
       {/* ── Module Content ── */}
       <main className="py-12 md:py-16">
-        {ModuleComponent && <ModuleComponent />}
+        {ModuleComponent && <ModuleComponent isActive={true} onToggle={() => {}} />}
       </main>
 
       {/* ── Related Content ── */}

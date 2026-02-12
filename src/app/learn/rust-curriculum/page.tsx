@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { Container } from '@/components/ui';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { RustCurriculum } from '../components/RustCurriculum';
+import { RustLearningPathway } from './RustLearningPathway';
 
 export const metadata: Metadata = {
   title: 'Rust Smart Contract Curriculum — Free Course | Voidspace',
@@ -61,7 +61,7 @@ export default function RustCurriculumPage() {
         </nav>
       </Container>
       <Container className="pb-20">
-        <RustCurriculum />
+        <RustLearningPathway />
       </Container>
     </div>
   );

@@ -11,6 +11,11 @@ import { RelatedContent } from '../../components/RelatedContent';
 import {
   DevEnvironmentSetup,
   RustFundamentals,
+  OwnershipBorrowing,
+  StructsEnums,
+  ErrorHandling,
+  TraitsGenerics,
+  CollectionsIterators,
   YourFirstContract,
   AccountModelAccessKeys,
   StateManagement,
@@ -25,6 +30,12 @@ import {
   Deployment,
   Optimization,
   LaunchChecklist,
+  BuildingAnNftContract,
+  BuildingADaoContract,
+  DefiContractPatterns,
+  AuroraEvmCompatibility,
+  WalletSelectorIntegration,
+  NearSocialBos,
 } from '../modules';
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
@@ -32,6 +43,11 @@ import {
 const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
   'dev-environment-setup': DevEnvironmentSetup,
   'rust-fundamentals': RustFundamentals,
+  'ownership-borrowing': OwnershipBorrowing,
+  'structs-enums': StructsEnums,
+  'error-handling': ErrorHandling,
+  'traits-generics': TraitsGenerics,
+  'collections-iterators': CollectionsIterators,
   'your-first-contract': YourFirstContract,
   'account-model-access-keys': AccountModelAccessKeys,
   'state-management': StateManagement,
@@ -46,6 +62,12 @@ const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
   'deployment': Deployment,
   'optimization': Optimization,
   'launch-checklist': LaunchChecklist,
+  'building-an-nft-contract': BuildingAnNftContract,
+  'building-a-dao-contract': BuildingADaoContract,
+  'defi-contract-patterns': DefiContractPatterns,
+  'aurora-evm-compatibility': AuroraEvmCompatibility,
+  'wallet-selector-integration': WalletSelectorIntegration,
+  'near-social-bos': NearSocialBos,
 };
 
 // ─── Layout Props ──────────────────────────────────────────────────────────────
@@ -109,7 +131,7 @@ export function BuilderModuleLayout({
 
       {/* ── Module Content ── */}
       <main className="py-12 md:py-16">
-        {ModuleComponent && <ModuleComponent />}
+        {ModuleComponent && <ModuleComponent isActive={true} onToggle={() => {}} />}
       </main>
 
       {/* ── Related Content ── */}
