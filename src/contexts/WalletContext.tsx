@@ -41,10 +41,31 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(false);
 
+  // Try to restore session from existing cookie (no signature needed)
+  const tryRestoreSession = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+          return true;
+        }
+      }
+    } catch {
+      // Session restore failed silently — will fall through to sign
+    }
+    return false;
+  }, []);
+
   // Authenticate user via signed message (NEP-413) and create/fetch in Supabase
   const authenticateUser = useCallback(async (nearAccountId: string, walletSelector: WalletSelector) => {
     setUserLoading(true);
     try {
+      // First, try to restore existing session (avoids re-signing)
+      const restored = await tryRestoreSession();
+      if (restored) return;
+
       const wallet = await walletSelector.wallet();
 
       // Check if wallet supports signMessage (NEP-413)
@@ -92,7 +113,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUserLoading(false);
     }
-  }, []);
+  }, [tryRestoreSession]);
 
   const refetchUser = useCallback(async () => {
     if (accountId && selector) {
