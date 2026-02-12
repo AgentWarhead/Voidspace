@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { ChevronRight, BookOpen, Search, Sparkles } from 'lucide-react';
+import { ChevronRight, BookOpen, Search, Sparkles, Zap, Shield, BarChart3, GraduationCap } from 'lucide-react';
 import { Container } from '@/components/ui';
 import { HeroSection } from '@/components/hero/HeroSection';
 import { PriorityVoids } from '@/components/dashboard/PriorityVoids';
@@ -28,30 +28,60 @@ export default async function DashboardPage() {
       {/* Section 1: Hero — The Void Portal */}
       <HeroSection stats={stats} totalOpportunities={opportunities.length} />
 
+      {/* Section 2: Social Proof Stats Bar */}
+      <div className="relative border-y border-border/50 bg-surface/30 backdrop-blur-sm">
+        <Container size="xl">
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 py-4">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <BarChart3 className="w-4 h-4 text-near-green" />
+              <span className="text-text-muted">150+</span>
+              <span className="text-text-secondary font-medium">Live Tokens</span>
+            </div>
+            <div className="hidden sm:block w-px h-4 bg-border" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <GraduationCap className="w-4 h-4 text-purple-400" />
+              <span className="text-text-muted">43</span>
+              <span className="text-text-secondary font-medium">Learning Modules</span>
+            </div>
+            <div className="hidden sm:block w-px h-4 bg-border" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Search className="w-4 h-4 text-accent-cyan" />
+              <span className="text-text-muted">20+</span>
+              <span className="text-text-secondary font-medium">Project Categories</span>
+            </div>
+            <div className="hidden sm:block w-px h-4 bg-border" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Zap className="w-4 h-4 text-amber-400" />
+              <span className="text-text-secondary font-medium">100% Free</span>
+            </div>
+          </div>
+        </Container>
+      </div>
+
       <Container size="xl" className="py-8 space-y-16">
-        {/* Section 2: Here's what NEAR needs — Combined Void Detection + Priority Voids */}
+        {/* Section 3: Explore the Voids — Merged section */}
         <ScrollReveal>
           <section>
-            <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
+            <SectionHeader title="Explore the voids" badge="AI ANALYZED" />
             <div className="mb-8">
               <p className="text-text-secondary max-w-3xl mx-auto text-center">
-                Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
+                Our AI scans the NEAR ecosystem to find where innovation is needed most.
+                These voids are your highest-impact opportunities — pick one and start building.
               </p>
             </div>
-            <PriorityVoids categories={categories} />
-          </section>
-        </ScrollReveal>
 
-        {/* Section 3: Pick your path — Voids For Every Builder */}
-        <ScrollReveal delay={0.1}>
-          <section>
-            <SectionHeader title="Pick your path" badge="FOR EVERY BUILDER" />
-            <VoidsForEveryBuilder opportunities={opportunities} />
+            {/* Priority categories */}
+            <PriorityVoids categories={categories} />
+
+            {/* Difficulty-based opportunities */}
+            <div className="mt-12">
+              <VoidsForEveryBuilder opportunities={opportunities} />
+            </div>
           </section>
         </ScrollReveal>
 
         {/* Section 4: Void Bubbles CTA — The Showstopper */}
-        <ScrollReveal delay={0.12}>
+        <ScrollReveal delay={0.1}>
           <section>
             <div className="relative overflow-hidden rounded-3xl border border-near-green/20 shadow-2xl shadow-near-green/5">
               {/* Multi-layer cinematic background */}
@@ -151,7 +181,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
 
-                {/* CTA — double button */}
+                {/* CTA */}
                 <div className="text-center space-y-4">
                   <Link
                     href="/observatory?tool=void-bubbles"
@@ -170,10 +200,10 @@ export default async function DashboardPage() {
         </ScrollReveal>
 
         {/* Section 5: Learn NEAR — The Academy */}
-        <ScrollReveal delay={0.14}>
+        <ScrollReveal delay={0.12}>
           <section>
             <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 shadow-2xl shadow-purple-500/5">
-              {/* Multi-layer cinematic background — purple/blue theme for learning */}
+              {/* Multi-layer cinematic background — purple/blue theme */}
               <div
                 className="absolute inset-0"
                 style={{
@@ -309,7 +339,7 @@ export default async function DashboardPage() {
         </ScrollReveal>
 
         {/* Section 6: Ready to build — CTA Footer */}
-        <ScrollReveal delay={0.15}>
+        <ScrollReveal delay={0.14}>
           <div className="relative overflow-hidden rounded-2xl">
             <div
               className="absolute inset-0"
