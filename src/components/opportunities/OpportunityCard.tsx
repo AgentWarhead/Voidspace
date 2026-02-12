@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Sparkles } from 'lucide-react';
 import { Badge, InfoTooltip } from '@/components/ui';
 import { GlowCard } from '@/components/effects/GlowCard';
 import { TiltCard } from '@/components/effects/TiltCard';
@@ -32,6 +32,10 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
                   {opportunity.gap_score >= 85 && <HotTag />}
                 </div>
                 <div className="flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-near-green bg-near-green/10 border border-near-green/20">
+                    <Sparkles className="w-3 h-3" />
+                    Build Plan
+                  </span>
                   <FeasibilitySnapshot opportunity={opportunity} />
                   <SaveButton opportunityId={opportunity.id} size="sm" />
                 </div>

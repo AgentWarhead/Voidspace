@@ -6,6 +6,7 @@ import { Container, Card } from '@/components/ui';
 import { OpportunityFilters } from '@/components/opportunities/OpportunityFilters';
 import { OpportunityList } from '@/components/opportunities/OpportunityList';
 import { Skeleton } from '@/components/ui';
+import { Sparkles } from 'lucide-react';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GradientText } from '@/components/effects/GradientText';
@@ -71,6 +72,15 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
           <p className="text-text-secondary mt-3 max-w-lg mx-auto">
             Explore voids in the NEAR ecosystem. Higher Void Scores mean deeper opportunities.
           </p>
+
+          {/* Build Plan tagline */}
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-near-green/20 bg-near-green/5">
+            <Sparkles className="w-4 h-4 text-near-green animate-pulse" />
+            <span className="text-sm text-text-secondary">
+              Every project comes with an AI-powered{' '}
+              <span className="text-near-green font-medium">Build Plan</span>
+            </span>
+          </div>
 
           {/* Summary Stats */}
           <div className="flex items-center justify-center gap-6 sm:gap-10 mt-6">
