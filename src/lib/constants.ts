@@ -45,6 +45,7 @@ export const NAV_ITEMS = [
   { label: 'Sanctum', href: '/sanctum' },
   { label: 'Observatory', href: '/observatory' },
   { label: 'Learn', href: '/learn' },
+  { label: 'Pricing', href: '/pricing' },
 ] as const;
 
 // Observatory tool tabs
