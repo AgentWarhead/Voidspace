@@ -147,60 +147,73 @@ export default async function DashboardPage() {
                 <div className="text-center mb-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono mb-4">
                     <Sparkles className="w-3 h-3" />
-                    AI-POWERED BUILDER SUITE
+                    VIBE-CODE ON NEAR
                   </div>
                   <h2 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-300 via-violet-300 to-purple-400 bg-clip-text text-transparent">
                     The Sanctum
                   </h2>
-                  <p className="text-text-secondary text-base mt-3 max-w-2xl mx-auto">
-                    Vibe-code on NEAR with Claude Opus at your side. From quick questions to full contract builds — the Sanctum is your AI command center.
+                  <p className="text-text-secondary text-lg mt-3 max-w-2xl mx-auto leading-relaxed">
+                    AI-powered development studio for NEAR Protocol.<br />
+                    <span className="text-accent-green font-medium">Contracts, webapps, deployment</span> — all through conversation.
                   </p>
                 </div>
 
-                {/* 4 Mode Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10 max-w-4xl mx-auto">
-                  {[
-                    {
-                      icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>,
-                      emoji: '💬',
-                      title: 'Chat',
-                      desc: 'Ask anything about NEAR. Get instant, sourced answers.',
-                      color: 'purple',
-                    },
-                    {
-                      icon: <Flame className="w-5 h-5" />,
-                      emoji: '🔥',
-                      title: 'Roast',
-                      desc: 'Paste your contract. Get a brutally honest audit.',
-                      color: 'red',
-                    },
-                    {
-                      icon: <Palette className="w-5 h-5" />,
-                      emoji: '🎨',
-                      title: 'Visual Generator',
-                      desc: 'Describe it. AI creates it. Logos, diagrams, mockups.',
-                      color: 'pink',
-                    },
-                    {
-                      icon: <Users className="w-5 h-5" />,
-                      emoji: '👥',
-                      title: 'Pair Programming',
-                      desc: 'Build smart contracts with AI side-by-side.',
-                      color: 'violet',
-                    },
-                  ].map((mode) => (
-                    <div
-                      key={mode.title}
-                      className="group relative p-5 rounded-xl bg-surface/50 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
-                    >
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-violet-500/5 transition-all duration-300" />
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{mode.emoji}</span>
-                          <h3 className="text-base font-semibold text-text-primary">{mode.title}</h3>
-                        </div>
-                        <p className="text-sm text-text-secondary">{mode.desc}</p>
+                {/* Two Focus Areas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 max-w-4xl mx-auto">
+                  {/* Build */}
+                  <div className="group relative p-6 rounded-xl bg-surface/50 border border-accent-green/20 hover:border-accent-green/40 transition-all duration-300">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-green/0 to-accent-green/0 group-hover:from-accent-green/5 group-hover:to-emerald-500/5 transition-all duration-300" />
+                    <div className="relative z-10">
+                      <div className="w-10 h-10 rounded-lg bg-accent-green/10 border border-accent-green/20 flex items-center justify-center mb-4">
+                        <svg className="w-5 h-5 text-accent-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                       </div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-2">Build NEAR Projects</h3>
+                      <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                        Describe what you want to build. AI walks you through creating Rust smart contracts and web frontends — step by step, from idea to deployment.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {['Smart Contracts', 'Web Apps', 'Code Audit', 'Deploy'].map((tag) => (
+                          <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded bg-accent-green/10 text-accent-green/80 border border-accent-green/10">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Learn */}
+                  <div className="group relative p-6 rounded-xl bg-surface/50 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-violet-500/5 transition-all duration-300" />
+                    <div className="relative z-10">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4">
+                        <BookOpen className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-2">Learn Rust as You Build</h3>
+                      <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                        No Rust experience? No problem. The AI teaches you as you create — explaining every line, every pattern, every NEAR concept in real time.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {['Rust', 'NEAR SDK', 'Testing', 'Best Practices'].map((tag) => (
+                          <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400/80 border border-purple-500/10">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* How it works */}
+                <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 mb-10 text-sm text-text-muted">
+                  {[
+                    { step: '1', text: 'Describe your idea' },
+                    { step: '2', text: 'AI builds with you' },
+                    { step: '3', text: 'Learn as you create' },
+                    { step: '4', text: 'Deploy to NEAR' },
+                  ].map((item) => (
+                    <div key={item.step} className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-mono flex items-center justify-center">{item.step}</span>
+                      <span>{item.text}</span>
                     </div>
                   ))}
                 </div>
@@ -212,11 +225,11 @@ export default async function DashboardPage() {
                     className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300"
                   >
                     <Sparkles className="w-4 h-4" />
-                    Enter the Sanctum
+                    Start Building
                     <ChevronRight className="w-4 h-4" />
                   </Link>
                   <p className="text-xs text-text-muted font-mono mt-3">
-                    Powered by Claude Opus · Credit-gated · Free to try
+                    Powered by Claude Opus · $2.50 free credits to start · No Rust experience needed
                   </p>
                 </div>
               </div>
