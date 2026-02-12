@@ -76,7 +76,7 @@ export const env = {
   // Public variables (available on client)
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-  NEXT_PUBLIC_NEAR_NETWORK: (process.env.NEXT_PUBLIC_NEAR_NETWORK || 'testnet') as 'mainnet' | 'testnet',
+  NEXT_PUBLIC_NEAR_NETWORK: (process.env.NEXT_PUBLIC_NEAR_NETWORK || 'mainnet') as 'mainnet' | 'testnet',
   
   // Server-only variables (these will be undefined on client)
   ...(typeof window === 'undefined' && {
