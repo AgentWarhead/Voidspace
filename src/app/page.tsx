@@ -94,24 +94,20 @@ export default async function DashboardPage() {
         {/* ═══════════════════════════════════════════════════════════════
             SECTION 3: Here's What NEAR Needs — Priority Voids (MOVED UP)
             ═══════════════════════════════════════════════════════════════ */}
-        <ScrollReveal>
-          <section>
-            <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
-            <div className="mb-8">
-              <p className="text-text-secondary max-w-3xl mx-auto text-center">
-                Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
-              </p>
-            </div>
-            <PriorityVoids categories={categories} />
-          </section>
-        </ScrollReveal>
+        <section>
+          <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
+          <div className="mb-8">
+            <p className="text-text-secondary max-w-3xl mx-auto text-center">
+              Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
+            </p>
+          </div>
+          <PriorityVoids categories={categories} />
+        </section>
 
-        <ScrollReveal delay={0.05}>
-          <section>
-            <SectionHeader title="Pick your path" badge="FOR EVERY BUILDER" />
-            <VoidsForEveryBuilder opportunities={opportunities} />
-          </section>
-        </ScrollReveal>
+        <section>
+          <SectionHeader title="Pick your path" badge="FOR EVERY BUILDER" />
+          <VoidsForEveryBuilder opportunities={opportunities} />
+        </section>
 
         {/* ═══════════════════════════════════════════════════════════════
             SECTION 4: Build Plans — AI-Powered Mission Briefs (NEW)

@@ -33,29 +33,34 @@ export function AnimatedCounter({
     // Reset when value changes so counter re-animates
     hasAnimatedRef.current = false;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimatedRef.current) {
-          hasAnimatedRef.current = true;
-          startTimeRef.current = null;
+    const startAnimation = () => {
+      if (hasAnimatedRef.current) return;
+      hasAnimatedRef.current = true;
+      startTimeRef.current = null;
 
-          const animate = (timestamp: number) => {
-            if (!startTimeRef.current) startTimeRef.current = timestamp;
-            const elapsed = timestamp - startTimeRef.current;
-            const progress = Math.min(elapsed / duration, 1);
-            const easedProgress = easeOutExpo(progress);
+      const animate = (timestamp: number) => {
+        if (!startTimeRef.current) startTimeRef.current = timestamp;
+        const elapsed = timestamp - startTimeRef.current;
+        const progress = Math.min(elapsed / duration, 1);
+        const easedProgress = easeOutExpo(progress);
 
-            setDisplayValue(Math.round(easedProgress * value));
+        setDisplayValue(Math.round(easedProgress * value));
 
-            if (progress < 1) {
-              rafRef.current = requestAnimationFrame(animate);
-            }
-          };
-
+        if (progress < 1) {
           rafRef.current = requestAnimationFrame(animate);
         }
+      };
+
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startAnimation();
+        }
       },
-      { threshold: 0.3 }
+      { threshold: 0.1 }
     );
 
     observer.observe(el);

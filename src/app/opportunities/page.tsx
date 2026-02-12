@@ -100,26 +100,22 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
 
       {/* 2. Filters + Voids Grid */}
       <Container size="xl" className="py-6 space-y-6">
-        <ScrollReveal>
-          <Card variant="glass" padding="md">
-            <Suspense fallback={<Skeleton variant="rectangular" height="40px" />}>
-              <OpportunityFilters categories={categories} />
-            </Suspense>
-          </Card>
-        </ScrollReveal>
+        <Card variant="glass" padding="md">
+          <Suspense fallback={<Skeleton variant="rectangular" height="40px" />}>
+            <OpportunityFilters categories={categories} />
+          </Suspense>
+        </Card>
 
-        <ScrollReveal delay={0.1}>
-          <section>
-            <div id="voids-list" />
-            <SectionHeader title="All Voids" count={total} badge="HOT" />
-            <OpportunityList
-              opportunities={opportunities}
-              total={total}
-              page={page}
-              pageSize={pageSize}
-            />
-          </section>
-        </ScrollReveal>
+        <section>
+          <div id="voids-list" />
+          <SectionHeader title="All Voids" count={total} badge="HOT" />
+          <OpportunityList
+            opportunities={opportunities}
+            total={total}
+            page={page}
+            pageSize={pageSize}
+          />
+        </section>
       </Container>
 
       {/* 3. Custom Brief Section */}
