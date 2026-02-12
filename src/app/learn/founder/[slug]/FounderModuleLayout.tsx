@@ -14,6 +14,13 @@ import {
   BuildingInPublic,
   PitchingYourProject,
   RevenueModelsForDapps,
+  CommunityBuilding,
+  GoToMarket,
+  LegalRegulatoryBasics,
+  TreasuryManagement,
+  MetricsThatMatter,
+  MarketingForWeb3,
+  InvestorRelations,
 } from '../modules';
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
@@ -24,6 +31,13 @@ const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
   'building-in-public': BuildingInPublic,
   'pitching-your-project': PitchingYourProject,
   'revenue-models-for-dapps': RevenueModelsForDapps,
+  'community-building': CommunityBuilding,
+  'go-to-market': GoToMarket,
+  'legal-regulatory-basics': LegalRegulatoryBasics,
+  'treasury-management': TreasuryManagement,
+  'metrics-that-matter': MetricsThatMatter,
+  'marketing-for-web3': MarketingForWeb3,
+  'investor-relations': InvestorRelations,
 };
 
 // ─── Layout Props ──────────────────────────────────────────────────────────────

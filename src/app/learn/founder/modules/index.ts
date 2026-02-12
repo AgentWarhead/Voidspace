@@ -7,3 +7,6 @@ export { default as CommunityBuilding } from './CommunityBuilding';
 export { default as GoToMarket } from './GoToMarket';
 export { default as LegalRegulatoryBasics } from './LegalRegulatoryBasics';
 export { default as TreasuryManagement } from './TreasuryManagement';
+export { default as MetricsThatMatter } from './MetricsThatMatter';
+export { default as MarketingForWeb3 } from './MarketingForWeb3';
+export { default as InvestorRelations } from './InvestorRelations';
