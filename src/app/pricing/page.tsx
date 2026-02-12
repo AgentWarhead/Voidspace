@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Zap, Crown, Rocket, Code2, Sparkles, ChevronRight } from 'lucide-react';
+import { Check, Zap, Crown, Rocket, Code2, Sparkles, ChevronRight, Wallet } from 'lucide-react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { Button } from '@/components/ui/Button';
 import { SANCTUM_TIERS, TOPUP_PACKS, type SanctumTier } from '@/lib/sanctum-tiers';
+import { useWallet } from '@/hooks/useWallet';
+import { truncateAddress } from '@/lib/utils';
 
 const tierIcons: Record<SanctumTier, React.ReactNode> = {
   shade: <Code2 className="w-6 h-6" />,
@@ -21,17 +23,31 @@ export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [loadingPack, setLoadingPack] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const { user, isConnected, isLoading: walletLoading, userLoading, openModal, accountId } = useWallet();
 
   async function handleSubscribe(tier: SanctumTier) {
     if (tier === 'shade') return;
+    setCheckoutError(null);
+
+    // If wallet not connected, prompt to connect
+    if (!isConnected) {
+      openModal();
+      return;
+    }
+
+    // If user is still loading, wait
+    if (userLoading || !user?.id) {
+      return;
+    }
+
     setLoadingTier(tier);
     try {
-      // TODO: Get userId from auth context
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: '', // Will be filled from auth context
           type: 'subscription',
           tier,
           billingPeriod,
@@ -40,22 +56,37 @@ export default function PricingPage() {
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else if (data.error) {
+        setCheckoutError(data.error);
       }
     } catch (err) {
       console.error('Checkout error:', err);
+      setCheckoutError('Failed to start checkout. Please try again.');
     } finally {
       setLoadingTier(null);
     }
   }
 
   async function handleTopUp(packSlug: string) {
+    setCheckoutError(null);
+
+    // If wallet not connected, prompt to connect
+    if (!isConnected) {
+      openModal();
+      return;
+    }
+
+    // If user is still loading, wait
+    if (userLoading || !user?.id) {
+      return;
+    }
+
     setLoadingPack(packSlug);
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: '', // Will be filled from auth context
           type: 'topup',
           packSlug,
         }),
@@ -63,9 +94,12 @@ export default function PricingPage() {
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else if (data.error) {
+        setCheckoutError(data.error);
       }
     } catch (err) {
       console.error('Top-up error:', err);
+      setCheckoutError('Failed to start checkout. Please try again.');
     } finally {
       setLoadingPack(null);
     }
@@ -79,6 +113,53 @@ export default function PricingPage() {
       <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-accent-cyan/5 rounded-full blur-[100px] pointer-events-none" />
 
       <Container className="relative z-10 py-16 md:py-24">
+        {/* Connect Wallet Banner (shown when not connected) */}
+        <AnimatePresence>
+          {!walletLoading && !isConnected && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-8"
+            >
+              <div className="flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl border border-near-green/20 bg-near-green/5 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <Wallet className="w-5 h-5 text-near-green flex-shrink-0" />
+                  <p className="text-sm text-text-secondary">
+                    <span className="text-near-green font-medium">Connect your NEAR wallet</span>{' '}
+                    to subscribe or purchase credits
+                  </p>
+                </div>
+                <Button variant="primary" size="sm" onClick={openModal}>
+                  Connect Wallet
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Checkout error banner */}
+        <AnimatePresence>
+          {checkoutError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6"
+            >
+              <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-red-500/20 bg-red-500/5">
+                <p className="text-sm text-red-400">{checkoutError}</p>
+                <button
+                  onClick={() => setCheckoutError(null)}
+                  className="ml-auto text-red-400/60 hover:text-red-400 text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header */}
         <motion.div
           className="text-center mb-16"
@@ -102,36 +183,46 @@ export default function PricingPage() {
           </p>
         </motion.div>
 
-        {/* Billing Toggle */}
+        {/* Billing Toggle + Wallet Status */}
         <motion.div
-          className="flex items-center justify-center gap-4 mb-12"
+          className="flex flex-col items-center gap-3 mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <button
-            onClick={() => setBillingPeriod('monthly')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              billingPeriod === 'monthly'
-                ? 'bg-surface border border-near-green/30 text-white shadow-[0_0_10px_rgba(0,236,151,0.15)]'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setBillingPeriod('annual')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-              billingPeriod === 'annual'
-                ? 'bg-surface border border-near-green/30 text-white shadow-[0_0_10px_rgba(0,236,151,0.15)]'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            Annual
-            <span className="text-xs bg-near-green/20 text-near-green px-2 py-0.5 rounded-full">
-              2 months free
-            </span>
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setBillingPeriod('monthly')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                billingPeriod === 'monthly'
+                  ? 'bg-surface border border-near-green/30 text-white shadow-[0_0_10px_rgba(0,236,151,0.15)]'
+                  : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingPeriod('annual')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                billingPeriod === 'annual'
+                  ? 'bg-surface border border-near-green/30 text-white shadow-[0_0_10px_rgba(0,236,151,0.15)]'
+                  : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              Annual
+              <span className="text-xs bg-near-green/20 text-near-green px-2 py-0.5 rounded-full">
+                2 months free
+              </span>
+            </button>
+          </div>
+
+          {/* Connected wallet address (subtle) */}
+          {isConnected && accountId && (
+            <div className="flex items-center gap-1.5 text-xs text-text-muted">
+              <Wallet className="w-3 h-3" />
+              <span>{truncateAddress(accountId)}</span>
+            </div>
+          )}
         </motion.div>
 
         {/* Tier Cards */}
@@ -266,6 +357,7 @@ export default function PricingPage() {
                         size="lg"
                         className="w-full"
                         isLoading={loadingTier === tierKey}
+                        disabled={userLoading && isConnected}
                         onClick={() => handleSubscribe(tierKey)}
                         style={
                           !tier.popular
@@ -273,8 +365,19 @@ export default function PricingPage() {
                             : undefined
                         }
                       >
-                        Subscribe
-                        <ChevronRight className="w-4 h-4" />
+                        {!isConnected ? (
+                          <>
+                            Connect to Subscribe
+                            <Wallet className="w-4 h-4" />
+                          </>
+                        ) : userLoading ? (
+                          'Loading...'
+                        ) : (
+                          <>
+                            Subscribe
+                            <ChevronRight className="w-4 h-4" />
+                          </>
+                        )}
                       </Button>
                     )}
                   </div>
@@ -329,10 +432,22 @@ export default function PricingPage() {
                   size="md"
                   className="w-full border-accent-cyan/20 hover:border-accent-cyan/40"
                   isLoading={loadingPack === pack.slug}
+                  disabled={userLoading && isConnected}
                   onClick={() => handleTopUp(pack.slug)}
                 >
-                  <Zap className="w-4 h-4 text-accent-cyan" />
-                  Buy Pack
+                  {!isConnected ? (
+                    <>
+                      <Wallet className="w-4 h-4 text-accent-cyan" />
+                      Connect to Buy
+                    </>
+                  ) : userLoading ? (
+                    'Loading...'
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 text-accent-cyan" />
+                      Buy Pack
+                    </>
+                  )}
                 </Button>
               </motion.div>
             ))}

@@ -1,27 +1,85 @@
 // ============================================================
 // Stripe Checkout Session API
 // Creates checkout sessions for subscriptions and top-up packs
+// Server-side session authentication — never trusts client userId
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SANCTUM_TIERS, TOPUP_PACKS, type SanctumTier } from '@/lib/sanctum-tiers';
+import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/auth/session';
+import { createRateLimiter } from '@/lib/auth/rate-limit';
+
+// Persistent rate limiter: 5 checkout attempts per minute per user
+const checkoutLimiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
+
+/**
+ * Verify that the request Origin matches our site domain (CSRF protection).
+ */
+function verifyCsrf(request: NextRequest): boolean {
+  const origin = request.headers.get('origin');
+  const referer = request.headers.get('referer');
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://voidspace.io';
+  const siteDomain = new URL(siteUrl).origin;
+
+  // In development, also allow localhost origins
+  const allowedOrigins = [siteDomain];
+  if (process.env.NODE_ENV !== 'production') {
+    allowedOrigins.push('http://localhost:3000', 'http://localhost:3001');
+  }
+
+  // Check origin first, fall back to referer
+  if (origin) {
+    return allowedOrigins.some((allowed) => origin === allowed);
+  }
+  if (referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      return allowedOrigins.some((allowed) => refererOrigin === allowed);
+    } catch {
+      return false;
+    }
+  }
+
+  // No origin or referer — block
+  return false;
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // --- CSRF protection ---
+    if (!verifyCsrf(request)) {
+      return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+    }
+
+    // --- Authenticate via session cookie (never trust body) ---
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const session = verifySessionToken(sessionCookie);
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid or expired session' }, { status: 401 });
+    }
+
+    const userId = session.userId;
+
+    // --- Rate limiting (per userId) ---
+    const rl = checkoutLimiter.rateLimit(`checkout:${userId}`);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many checkout requests. Please wait.' }, { status: 429 });
+    }
+
+    // --- Parse body (userId is intentionally ignored from body) ---
     const body = await request.json();
-    const { userId, type, tier, packSlug, billingPeriod = 'monthly' } = body as {
-      userId: string;
+    const { type, tier, packSlug, billingPeriod = 'monthly' } = body as {
       type: 'subscription' | 'topup';
       tier?: SanctumTier;
       packSlug?: string;
       billingPeriod?: 'monthly' | 'annual';
     };
-
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
-    }
 
     const stripe = getStripe();
     const supabase = createAdminClient();
@@ -29,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Get user info
     const { data: user } = await supabase
       .from('users')
-      .select('id, near_account_id, email')
+      .select('id, near_account_id, email, tier')
       .eq('id', userId)
       .single();
 
@@ -76,6 +134,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
       }
 
+      // Prevent subscribing to the same tier the user is already on
+      if (user.tier === tier) {
+        return NextResponse.json(
+          { error: `You are already subscribed to the ${tierConfig.name} tier` },
+          { status: 400 }
+        );
+      }
+
       const priceId = billingPeriod === 'annual'
         ? tierConfig.stripePriceIdAnnual
         : tierConfig.stripePriceIdMonthly;
@@ -84,7 +150,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Stripe price not configured for this tier' }, { status: 400 });
       }
 
-      const session = await stripe.checkout.sessions.create({
+      const checkoutSession = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
         mode: 'subscription',
         payment_method_types: ['card'],
@@ -107,7 +173,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ url: session.url });
+      return NextResponse.json({ url: checkoutSession.url });
     }
 
     if (type === 'topup' && packSlug) {
@@ -116,7 +182,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid top-up pack' }, { status: 400 });
       }
 
-      const session = await stripe.checkout.sessions.create({
+      const checkoutSession = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
         mode: 'payment',
         payment_method_types: ['card'],
@@ -131,7 +197,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ url: session.url });
+      return NextResponse.json({ url: checkoutSession.url });
     }
 
     return NextResponse.json({ error: 'Invalid request type' }, { status: 400 });
