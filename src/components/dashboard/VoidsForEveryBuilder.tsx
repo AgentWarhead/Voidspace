@@ -63,7 +63,7 @@ const item = {
 
 export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProps) {
   const [collapsedMobile, setCollapsedMobile] = useState<Record<Difficulty, boolean>>({
-    beginner: false,
+    beginner: true,
     intermediate: true,
     advanced: true,
   });
@@ -104,7 +104,7 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
                 onClick={() =>
                   setCollapsedMobile((prev) => ({ ...prev, [diff]: !prev[diff] }))
                 }
-                className="md:cursor-default w-full"
+                className="w-full cursor-pointer"
               >
                 <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${meta.bgColor} ${meta.borderColor}`}>
                   <div className="flex items-center gap-2">
@@ -116,21 +116,21 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
                       ({totalCount})
                     </span>
                   </div>
-                  <span className="md:hidden text-text-muted text-xs">
+                  <span className="text-text-muted text-xs">
                     {isCollapsed ? '▼' : '▲'}
                   </span>
                 </div>
               </button>
 
-              {/* Cards — always visible on desktop, collapsible on mobile */}
+              {/* Cards — collapsible on all screen sizes */}
               <AnimatePresence initial={false}>
-                {(!isCollapsed || typeof window === 'undefined') && (
+                {!isCollapsed && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="overflow-hidden md:!opacity-100 md:!h-auto space-y-2"
+                    className="overflow-hidden space-y-2"
                   >
                     <motion.div
                       variants={container}
