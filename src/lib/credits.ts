@@ -249,6 +249,30 @@ export async function resetMonthlyCredits(
 }
 
 /**
+ * Estimate credit cost from Anthropic token usage with 3x markup.
+ * Returns cost in dollars (credits = dollars).
+ * 
+ * Model pricing (per MTok):
+ *   - opus:   $15 input / $75 output
+ *   - sonnet: $3 input / $15 output
+ *   - haiku:  $0.25 input / $1.25 output
+ */
+export function estimateCreditCost(
+  tokensInput: number,
+  tokensOutput: number,
+  model: 'opus' | 'sonnet' | 'haiku' = 'sonnet'
+): number {
+  const pricing = {
+    opus:   { input: 15,   output: 75 },
+    sonnet: { input: 3,    output: 15 },
+    haiku:  { input: 0.25, output: 1.25 },
+  };
+  const p = pricing[model];
+  const rawCost = (tokensInput / 1_000_000) * p.input + (tokensOutput / 1_000_000) * p.output;
+  return Math.round(rawCost * 3 * 10000) / 10000; // 3x markup, 4 decimal precision
+}
+
+/**
  * Get recent credit transactions for a user
  */
 export async function getTransactions(
