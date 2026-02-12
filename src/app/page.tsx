@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - lucide-react 0.453 has broken type exports (icons declared but not exported in .d.ts)
-import { ChevronRight, BookOpen, Search, Sparkles, Flame, Palette, Users, Telescope, Zap } from 'lucide-react';
+import { ChevronRight, BookOpen, Search, Sparkles, Flame, Palette, Users, Telescope, Zap, Target, FileText, BarChart3, Code2, CalendarCheck } from 'lucide-react';
 import { Container } from '@/components/ui';
 import { HeroSection } from '@/components/hero/HeroSection';
 import { PriorityVoids } from '@/components/dashboard/PriorityVoids';
@@ -55,9 +55,106 @@ export default async function DashboardPage() {
 
       <Container size="xl" className="py-8 space-y-16">
         {/* ═══════════════════════════════════════════════════════════════
-            SECTION 3: Void Bubbles — Live Ecosystem Visualization (MOVED UP)
+            SECTION 3: Here's What NEAR Needs — Priority Voids (MOVED UP)
             ═══════════════════════════════════════════════════════════════ */}
         <ScrollReveal>
+          <section>
+            <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
+            <div className="mb-8">
+              <p className="text-text-secondary max-w-3xl mx-auto text-center">
+                Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
+              </p>
+            </div>
+            <PriorityVoids categories={categories} />
+          </section>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.05}>
+          <section>
+            <SectionHeader title="Pick your path" badge="FOR EVERY BUILDER" />
+            <VoidsForEveryBuilder opportunities={opportunities} />
+          </section>
+        </ScrollReveal>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 4: Build Plans — AI-Powered Mission Briefs (NEW)
+            ═══════════════════════════════════════════════════════════════ */}
+        <ScrollReveal delay={0.08}>
+          <section>
+            <div className="relative overflow-hidden rounded-2xl border border-near-green/20">
+              {/* Background glow */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'radial-gradient(ellipse at 50% 50%, rgba(0,236,151,0.1) 0%, rgba(0,212,255,0.06) 40%, transparent 80%)',
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-near-green/5 to-accent-cyan/3" />
+              {/* Grid pattern overlay */}
+              <div
+                className="absolute inset-0 opacity-10"
+                style={{
+                  backgroundImage: 'linear-gradient(rgba(0,236,151,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0,236,151,0.2) 1px, transparent 1px)',
+                  backgroundSize: '32px 32px',
+                }}
+              />
+
+              <div className="relative z-10 p-8 sm:p-10">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-xs font-mono mb-4">
+                    <Target className="w-3 h-3" />
+                    AI-POWERED MISSION BRIEFS
+                  </div>
+                  <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
+                    Found Your Void? Plan Your Attack.
+                  </GradientText>
+                  <p className="text-text-secondary text-base mt-3 max-w-2xl mx-auto leading-relaxed">
+                    Get your AI-powered Build Plan — market analysis, tech specs, NEAR integration strategy, and your first week&apos;s action plan. In 60 seconds.
+                  </p>
+                </div>
+
+                {/* What's inside preview */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 max-w-3xl mx-auto">
+                  {[
+                    { icon: BarChart3, label: 'Market Analysis', desc: 'Competition & opportunity sizing' },
+                    { icon: Code2, label: 'Tech Architecture', desc: 'Stack, contracts & integrations' },
+                    { icon: FileText, label: 'NEAR Strategy', desc: 'Protocol fit & grant alignment' },
+                    { icon: CalendarCheck, label: 'Week 1 Plan', desc: 'Day-by-day action steps' },
+                  ].map((item) => (
+                    <div key={item.label} className="group p-3 rounded-lg bg-surface/60 border border-border hover:border-near-green/30 transition-all text-center">
+                      <div className="w-8 h-8 rounded-lg bg-near-green/10 border border-near-green/15 flex items-center justify-center mx-auto mb-2">
+                        <item.icon className="w-4 h-4 text-near-green" />
+                      </div>
+                      <p className="text-xs font-semibold text-text-primary">{item.label}</p>
+                      <p className="text-[10px] text-text-muted mt-0.5">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <div className="text-center">
+                  <Link
+                    href="/opportunities"
+                    className="shimmer-btn text-background font-semibold px-8 py-3.5 rounded-lg text-base inline-flex items-center gap-2 mb-3"
+                  >
+                    <Target className="w-4 h-4" />
+                    Generate Your Build Plan
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                  <p className="text-xs text-text-muted font-mono">
+                    Powered by Claude AI · Pick any void · Full strategic brief in 60s
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 5: Void Bubbles — Live Ecosystem Visualization
+            ═══════════════════════════════════════════════════════════════ */}
+        <ScrollReveal delay={0.1}>
           <section>
             <div className="relative overflow-hidden rounded-2xl border border-accent-cyan/20">
               {/* Enhanced dramatic background */}
@@ -120,9 +217,98 @@ export default async function DashboardPage() {
         </ScrollReveal>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECTION 4: The Sanctum — AI-Powered Builder Suite (NEW)
+            SECTION 6: Intelligence Tools — Observatory, Pulse Streams, Void Lens
             ═══════════════════════════════════════════════════════════════ */}
-        <ScrollReveal delay={0.1}>
+        <ScrollReveal delay={0.12}>
+          <section>
+            <SectionHeader title="Intelligence Tools" badge="DEEP ANALYSIS" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Observatory Card */}
+              <Link href="/observatory" className="group">
+                <div className="relative p-6 rounded-xl border border-cyan-500/15 bg-surface/30 hover:border-cyan-500/40 transition-all duration-300 h-full">
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/5 group-hover:to-blue-500/5 transition-all duration-300" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                        <Telescope className="w-5 h-5 text-cyan-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary">Observatory</h3>
+                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-sm text-text-secondary">
+                      Deep-dive any NEAR project. Health scores, team analysis, contract audits.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {['Health Score', 'Team Intel', 'Contract Audit', 'Risk Analysis'].map((tag) => (
+                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400/70 border border-cyan-500/10">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Pulse Streams Card */}
+              <Link href="/pulse-streams" className="group">
+                <div className="relative p-6 rounded-xl border border-emerald-500/15 bg-surface/30 hover:border-emerald-500/40 transition-all duration-300 h-full">
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-300" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                        <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary">Pulse Streams</h3>
+                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-sm text-text-secondary">
+                      Real-time NEAR ecosystem activity. Track transactions, contracts, and network health live.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {['Live Feed', 'Transactions', 'Network Health', 'Real-Time'].map((tag) => (
+                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/10">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Void Lens Card */}
+              <Link href="/void-lens" className="group">
+                <div className="relative p-6 rounded-xl border border-blue-500/15 bg-surface/30 hover:border-blue-500/40 transition-all duration-300 h-full">
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-300" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <Zap className="w-5 h-5 text-blue-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary">Void Lens</h3>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-near-green/10 text-near-green border border-near-green/20">FREE</span>
+                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-sm text-text-secondary">
+                      AI-powered project analysis in 60 seconds. Instant insights, zero cost.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {['60s Analysis', 'AI Summary', 'Opportunity Score', 'Free Forever'].map((tag) => (
+                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400/70 border border-blue-500/10">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECTION 7: The Sanctum — AI-Powered Builder Suite
+            ═══════════════════════════════════════════════════════════════ */}
+        <ScrollReveal delay={0.13}>
           <section>
             <div className="relative overflow-hidden rounded-2xl border border-purple-500/20">
               {/* Dramatic purple background */}
@@ -238,98 +424,9 @@ export default async function DashboardPage() {
         </ScrollReveal>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECTION 5: Observatory + Void Lens (NEW — compact two-card)
+            SECTION 8: Learn NEAR — Cinematic Education Section
             ═══════════════════════════════════════════════════════════════ */}
-        <ScrollReveal delay={0.12}>
-          <section>
-            <SectionHeader title="Intelligence Tools" badge="DEEP ANALYSIS" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Observatory Card */}
-              <Link href="/observatory" className="group">
-                <div className="relative p-6 rounded-xl border border-cyan-500/15 bg-surface/30 hover:border-cyan-500/40 transition-all duration-300 h-full">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/5 group-hover:to-blue-500/5 transition-all duration-300" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                        <Telescope className="w-5 h-5 text-cyan-400" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-text-primary">Observatory</h3>
-                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="text-sm text-text-secondary">
-                      Deep-dive any NEAR project. Health scores, team analysis, contract audits.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {['Health Score', 'Team Intel', 'Contract Audit', 'Risk Analysis'].map((tag) => (
-                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400/70 border border-cyan-500/10">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Pulse Streams Card */}
-              <Link href="/pulse-streams" className="group">
-                <div className="relative p-6 rounded-xl border border-emerald-500/15 bg-surface/30 hover:border-emerald-500/40 transition-all duration-300 h-full">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-300" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                        <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                      </div>
-                      <h3 className="text-lg font-semibold text-text-primary">Pulse Streams</h3>
-                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="text-sm text-text-secondary">
-                      Real-time NEAR ecosystem activity. Track transactions, contracts, and network health live.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {['Live Feed', 'Transactions', 'Network Health', 'Real-Time'].map((tag) => (
-                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/10">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Void Lens Card */}
-              <Link href="/void-lens" className="group">
-                <div className="relative p-6 rounded-xl border border-blue-500/15 bg-surface/30 hover:border-blue-500/40 transition-all duration-300 h-full">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-300" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                        <Zap className="w-5 h-5 text-blue-400" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-text-primary">Void Lens</h3>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-near-green/10 text-near-green border border-near-green/20">FREE</span>
-                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="text-sm text-text-secondary">
-                      AI-powered project analysis in 60 seconds. Instant insights, zero cost.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {['60s Analysis', 'AI Summary', 'Opportunity Score', 'Free Forever'].map((tag) => (
-                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400/70 border border-blue-500/10">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION 6: Learn NEAR — Cinematic Education Section
-            ═══════════════════════════════════════════════════════════════ */}
-        <ScrollReveal delay={0.13}>
+        <ScrollReveal delay={0.14}>
           <section>
             <div className="relative overflow-hidden rounded-2xl border border-near-green/20">
               {/* Background */}
@@ -453,29 +550,7 @@ export default async function DashboardPage() {
         </ScrollReveal>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECTION 7: Explore the Voids — Priority Voids + Voids For Every Builder (MOVED DOWN)
-            ═══════════════════════════════════════════════════════════════ */}
-        <ScrollReveal delay={0.14}>
-          <section>
-            <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
-            <div className="mb-8">
-              <p className="text-text-secondary max-w-3xl mx-auto text-center">
-                Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
-              </p>
-            </div>
-            <PriorityVoids categories={categories} />
-          </section>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.15}>
-          <section>
-            <SectionHeader title="Pick your path" badge="FOR EVERY BUILDER" />
-            <VoidsForEveryBuilder opportunities={opportunities} />
-          </section>
-        </ScrollReveal>
-
-        {/* ═══════════════════════════════════════════════════════════════
-            SECTION 8: Bottom CTA — Ready to Build (ENHANCED)
+            SECTION 9: Bottom CTA — Ready to Build
             ═══════════════════════════════════════════════════════════════ */}
         <ScrollReveal delay={0.16}>
           <div className="relative overflow-hidden rounded-2xl">
