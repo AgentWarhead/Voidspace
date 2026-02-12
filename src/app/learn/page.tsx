@@ -4,17 +4,42 @@ import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GlowCard } from '@/components/effects/GlowCard';
+import dynamic from 'next/dynamic';
 import { HeroSection } from './components/HeroSection';
 import { SocialProof } from './components/SocialProof';
 import { LearningTracks } from './components/LearningTracks';
-import { EcosystemMap } from './components/EcosystemMap';
-import ProjectTemplates from './components/ProjectTemplates';
-import { ResourceHub } from './components/ResourceHub';
-import BottomCTA from './components/BottomCTA';
 import { TableOfContents } from './components/TableOfContents';
-import { SanctumPreview } from './components/SanctumPreview';
-import { CapstoneProjects } from './components/CapstoneProjects';
 import Link from 'next/link';
+
+// ─── Lazy-loaded below-fold components ─────────────────────────────────────────
+
+const EcosystemMap = dynamic(() => import('./components/EcosystemMap').then(m => ({ default: m.EcosystemMap })), {
+  loading: () => <div className="h-96 animate-pulse bg-surface rounded-xl" />,
+});
+
+const ProjectTemplates = dynamic(() => import('./components/ProjectTemplates'), {
+  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
+});
+
+const ResourceHub = dynamic(() => import('./components/ResourceHub').then(m => ({ default: m.ResourceHub })), {
+  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
+});
+
+const BottomCTA = dynamic(() => import('./components/BottomCTA'), {
+  loading: () => <div className="h-48 animate-pulse bg-surface rounded-xl" />,
+});
+
+const SanctumPreview = dynamic(() => import('./components/SanctumPreview').then(m => ({ default: m.SanctumPreview })), {
+  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
+});
+
+const CapstoneProjects = dynamic(() => import('./components/CapstoneProjects').then(m => ({ default: m.CapstoneProjects })), {
+  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
+});
+
+const FAQ = dynamic(() => import('./components/FAQ').then(m => ({ default: m.FAQ })), {
+  loading: () => <div className="h-48 animate-pulse bg-surface rounded-xl" />,
+});
 
 export const metadata: Metadata = {
   title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
@@ -163,6 +188,38 @@ export default function LearnPage() {
                 acceptedAnswer: {
                   '@type': 'Answer',
                   text: 'You will be able to build and deploy Rust smart contracts on NEAR, create full-stack dApps with frontend integration, work with NEAR\'s chain abstraction features like Intents and Chain Signatures, and contribute to the NEAR ecosystem.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How long does it take to complete?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'The Explorer track takes about 6 hours. The Builder track is the most comprehensive at around 20 hours. The Hacker track takes about 8 hours, and the Founder track around 6 hours. All tracks are self-paced.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is Rust hard to learn?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Rust has a steeper learning curve than JavaScript or Python, but our Builder track starts from zero Rust experience. The strict compiler actually helps you write safer code — it catches bugs before they reach production.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How does NEAR compare to Solana?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Both use Rust for smart contracts, but NEAR offers human-readable account names, built-in chain abstraction, and a sharded architecture. NEAR focuses on usability and cross-chain interoperability, while Solana optimizes for raw throughput.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is Chain Abstraction?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Chain Abstraction is NEAR\'s approach to making blockchain invisible to users. With technologies like Intents, Chain Signatures, and Shade Agents, users can interact across multiple blockchains from a single NEAR account without switching networks.',
                 },
               },
             ],
@@ -445,6 +502,11 @@ export default function LearnPage() {
             <ResourceHub />
           </div>
         </ScrollReveal>
+      </Container>
+
+      {/* FAQ */}
+      <Container className="pb-20">
+        <FAQ />
       </Container>
 
       {/* Bottom CTA */}

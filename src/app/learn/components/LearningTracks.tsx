@@ -104,22 +104,26 @@ const TRACKS: Track[] = [
       'The complete developer journey. Set up your environment, learn Rust from scratch, build and deploy smart contracts, integrate frontends, and ship a real dApp to mainnet.',
     difficulty: 2,
     duration: '~20 hours',
-    moduleCount: 12,
+    moduleCount: 16,
     theme: 'cyan',
     popular: true,
     modules: [
-      { label: 'Dev Environment Setup', icon: Wrench },
-      { label: 'Rust Fundamentals', icon: FileCode },
-      { label: 'Your First Contract', icon: Terminal },
-      { label: 'State Management', icon: Database },
-      { label: 'Testing & Debugging', icon: Bug },
-      { label: 'Frontend Integration', icon: Layout },
-      { label: 'Token Standards', icon: Coins },
-      { label: 'Building a dApp', icon: AppWindow },
-      { label: 'Security Best Practices', icon: Shield },
-      { label: 'Deployment', icon: Upload },
-      { label: 'Optimization', icon: Gauge },
-      { label: 'Launch Checklist', icon: ListChecks },
+      { label: 'Dev Environment Setup', icon: Wrench, slug: 'dev-environment-setup' },
+      { label: 'Rust Fundamentals', icon: FileCode, slug: 'rust-fundamentals' },
+      { label: 'Your First Contract', icon: Terminal, slug: 'your-first-contract' },
+      { label: 'Account Model & Access Keys', icon: KeyRound, slug: 'account-model-access-keys' },
+      { label: 'State Management', icon: Database, slug: 'state-management' },
+      { label: 'NEAR CLI Mastery', icon: Terminal, slug: 'near-cli-mastery' },
+      { label: 'Testing & Debugging', icon: Bug, slug: 'testing-debugging' },
+      { label: 'Frontend Integration', icon: Layout, slug: 'frontend-integration' },
+      { label: 'Token Standards', icon: Coins, slug: 'token-standards' },
+      { label: 'NEP Standards Deep Dive', icon: FileCode, slug: 'nep-standards-deep-dive' },
+      { label: 'Building a dApp', icon: AppWindow, slug: 'building-a-dapp' },
+      { label: 'Security Best Practices', icon: Shield, slug: 'security-best-practices' },
+      { label: 'Upgrading Contracts', icon: Upload, slug: 'upgrading-contracts' },
+      { label: 'Deployment', icon: Upload, slug: 'deployment' },
+      { label: 'Optimization', icon: Gauge, slug: 'optimization' },
+      { label: 'Launch Checklist', icon: ListChecks, slug: 'launch-checklist' },
     ],
   },
   {
@@ -132,15 +136,20 @@ const TRACKS: Track[] = [
       'For experienced developers. Deep-dive into NEAR architecture, cross-contract calls, advanced storage patterns, chain signatures, and production-grade patterns.',
     difficulty: 3,
     duration: '~8 hours',
-    moduleCount: 6,
+    moduleCount: 11,
     theme: 'purple',
     modules: [
-      { label: 'NEAR Architecture Deep Dive', icon: Network },
-      { label: 'Cross-Contract Calls', icon: Puzzle },
-      { label: 'Advanced Storage', icon: HardDrive },
-      { label: 'Chain Signatures', icon: KeyRound },
-      { label: 'AI Agent Integration', icon: Bot },
-      { label: 'Production Patterns', icon: Boxes },
+      { label: 'NEAR Architecture Deep Dive', icon: Network, slug: 'near-architecture-deep-dive' },
+      { label: 'Cross-Contract Calls', icon: Puzzle, slug: 'cross-contract-calls' },
+      { label: 'Advanced Storage', icon: HardDrive, slug: 'advanced-storage' },
+      { label: 'Chain Signatures', icon: KeyRound, slug: 'chain-signatures' },
+      { label: 'Intents & Chain Abstraction', icon: Boxes, slug: 'intents-chain-abstraction' },
+      { label: 'Shade Agents', icon: Bot, slug: 'shade-agents' },
+      { label: 'AI Agent Integration', icon: Bot, slug: 'ai-agent-integration' },
+      { label: 'MEV & Transaction Ordering', icon: Zap, slug: 'mev-transaction-ordering' },
+      { label: 'Building an Indexer', icon: Database, slug: 'building-an-indexer' },
+      { label: 'Multi-Chain with NEAR', icon: Network, slug: 'multi-chain-with-near' },
+      { label: 'Production Patterns', icon: Boxes, slug: 'production-patterns' },
     ],
   },
   {
@@ -156,11 +165,11 @@ const TRACKS: Track[] = [
     moduleCount: 5,
     theme: 'purple',
     modules: [
-      { label: 'Building in Public', icon: Globe },
-      { label: 'NEAR Grants & Funding', icon: Wallet },
-      { label: 'Pitching Your Project', icon: Sparkles },
-      { label: 'Revenue Models for dApps', icon: Coins },
-      { label: 'Tokenomics Design', icon: Compass },
+      { label: 'NEAR Grants & Funding', icon: Wallet, slug: 'near-grants-funding' },
+      { label: 'Tokenomics Design', icon: Compass, slug: 'tokenomics-design' },
+      { label: 'Building in Public', icon: Globe, slug: 'building-in-public' },
+      { label: 'Pitching Your Project', icon: Sparkles, slug: 'pitching-your-project' },
+      { label: 'Revenue Models for dApps', icon: Coins, slug: 'revenue-models-for-dapps' },
     ],
   },
 ];
@@ -299,9 +308,11 @@ function ProgressRing({
 function ModuleChecklist({
   modules,
   theme,
+  trackId,
 }: {
   modules: Module[];
   theme: 'green' | 'cyan' | 'purple';
+  trackId: string;
 }) {
   const styles = themeStyles[theme];
 
@@ -352,7 +363,7 @@ function ModuleChecklist({
             </motion.div>
           );
           if (mod.slug) {
-            return <Link key={i} href={`/learn/explorer/${mod.slug}`}>{content}</Link>;
+            return <Link key={i} href={`/learn/${trackId}/${mod.slug}`}>{content}</Link>;
           }
           return content;
         })}
@@ -473,7 +484,7 @@ function TrackCard({ track }: { track: Track }) {
           {/* Expand / Collapse modules */}
           <AnimatePresence>
             {isExpanded && (
-              <ModuleChecklist modules={track.modules} theme={track.theme} />
+              <ModuleChecklist modules={track.modules} theme={track.theme} trackId={track.id} />
             )}
           </AnimatePresence>
 
