@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { User, Search as SearchIcon, Filter, Bookmark } from 'lucide-react';
+import { User, Search as SearchIcon, Filter, Bookmark, BarChart3, ArrowRight } from 'lucide-react';
 import { Card, Button, VoidEmptyState } from '@/components/ui';
 import { PageTransition } from '@/components/effects/PageTransition';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -216,6 +216,30 @@ export function ProfileContent() {
           lastSanctumVoid={lastBuildingMission?.opportunity_id}
           accountId={accountId || ''}
         />
+      </ScrollReveal>
+
+      {/* Skill Constellation Link */}
+      <ScrollReveal delay={0.07}>
+        <Link href="/profile/skills" className="block group" id="skills">
+          <Card variant="glass" padding="lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-near-green/10 group-hover:bg-near-green/20 transition-colors">
+                  <BarChart3 className="w-6 h-6 text-near-green" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary group-hover:text-near-green transition-colors">
+                    🌟 Skill Constellation
+                  </h3>
+                  <p className="text-sm text-text-muted mt-0.5">
+                    View your learning progress across 43 modules, earn XP, and level up
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-text-muted group-hover:text-near-green group-hover:translate-x-1 transition-all" />
+            </div>
+          </Card>
+        </Link>
       </ScrollReveal>
 
       {/* Missions Section */}

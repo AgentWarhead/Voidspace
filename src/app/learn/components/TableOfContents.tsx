@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 
 const TOC_ITEMS = [
   { id: 'overview', label: 'Overview' },
+  { id: 'quick-start', label: 'Quick Start' },
   { id: 'learning-tracks', label: 'Learning Tracks' },
+  { id: 'sanctum-preview', label: 'Sanctum AI' },
+  { id: 'capstones', label: 'Capstones' },
+  { id: 'certificates', label: 'Certificates' },
   { id: 'deep-dives', label: 'Deep Dives' },
   { id: 'cross-chain', label: 'Cross-Chain' },
   { id: 'near-overview', label: 'NEAR Overview' },

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Sparkles, Key, Zap, Bug, BookOpen, BarChart3, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft } from 'lucide-react';
+import { Sparkles, Key, Zap, Bug, BookOpen, BarChart3, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft, Rocket, Award } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -12,6 +12,8 @@ import ProjectTemplates from './components/ProjectTemplates';
 import { ResourceHub } from './components/ResourceHub';
 import BottomCTA from './components/BottomCTA';
 import { TableOfContents } from './components/TableOfContents';
+import { SanctumPreview } from './components/SanctumPreview';
+import { CapstoneProjects } from './components/CapstoneProjects';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -181,15 +183,46 @@ export default function LearnPage() {
         <SocialProof />
       </Container>
 
+      {/* Quick Start CTA */}
+      <Container className="pb-12">
+        <ScrollReveal>
+          <div id="quick-start">
+            <Link href="/learn/quick-start" className="block group">
+              <GlowCard className="p-6 md:p-8 transition-all duration-300 group-hover:scale-[1.01]">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-near-green/20 to-accent-cyan/20 border border-near-green/20 flex-shrink-0">
+                    <Rocket className="w-8 h-8 text-near-green" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-xl font-bold text-text-primary group-hover:text-near-green transition-colors">
+                      ⚡ Your First Transaction in 3 Minutes
+                    </h3>
+                    <p className="text-sm text-text-muted mt-1">
+                      Create a wallet, get testnet tokens, make a transfer, and see it on-chain. Hands-on, no code required.
+                    </p>
+                  </div>
+                  <ArrowRight className="w-6 h-6 text-text-muted group-hover:text-near-green group-hover:translate-x-2 transition-all flex-shrink-0" />
+                </div>
+              </GlowCard>
+            </Link>
+          </div>
+        </ScrollReveal>
+      </Container>
+
       {/* Learning Tracks — Explorer / Builder / Hacker */}
       <div id="learning-tracks">
         <LearningTracks />
       </div>
 
-      {/* Track Your Progress — compact CTA replacing SkillTree */}
+      {/* Sanctum AI Preview */}
+      <Container className="py-12">
+        <SanctumPreview />
+      </Container>
+
+      {/* Track Your Progress — compact CTA */}
       <Container className="py-12">
         <ScrollReveal>
-          <Link href="/profile#skills" className="block group">
+          <Link href="/profile/skills" className="block group">
             <Card variant="glass" padding="lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -201,7 +234,7 @@ export default function LearnPage() {
                       📊 Track Your Progress
                     </h3>
                     <p className="text-sm text-text-muted mt-0.5">
-                      View your skill tree and learning roadmap
+                      View your skill constellation and learning roadmap
                     </p>
                   </div>
                 </div>
@@ -209,6 +242,37 @@ export default function LearnPage() {
               </div>
             </Card>
           </Link>
+        </ScrollReveal>
+      </Container>
+
+      {/* Capstone Projects */}
+      <Container className="pb-20">
+        <CapstoneProjects />
+      </Container>
+
+      {/* Earn Your Certificate */}
+      <Container className="pb-20">
+        <ScrollReveal>
+          <div id="certificates">
+            <Link href="/learn/certificate" className="block group">
+              <GlowCard className="p-6 md:p-8 transition-all duration-300 group-hover:scale-[1.01]">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-amber-500/20 border border-yellow-400/20 flex-shrink-0">
+                    <Award className="w-8 h-8 text-yellow-400" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-xl font-bold text-text-primary group-hover:text-near-green transition-colors">
+                      🏆 Earn Your Certificate
+                    </h3>
+                    <p className="text-sm text-text-muted mt-1">
+                      Complete a learning track to earn a shareable NEAR certificate. Explorer, Builder, Hacker, Founder — or all four for Legend status.
+                    </p>
+                  </div>
+                  <ArrowRight className="w-6 h-6 text-text-muted group-hover:text-near-green group-hover:translate-x-2 transition-all flex-shrink-0" />
+                </div>
+              </GlowCard>
+            </Link>
+          </div>
         </ScrollReveal>
       </Container>
 
