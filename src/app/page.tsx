@@ -243,7 +243,7 @@ export default async function DashboardPage() {
         <ScrollReveal delay={0.12}>
           <section>
             <SectionHeader title="Intelligence Tools" badge="DEEP ANALYSIS" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Observatory Card */}
               <Link href="/observatory" className="group">
                 <div className="relative p-6 rounded-xl border border-cyan-500/15 bg-surface/30 hover:border-cyan-500/40 transition-all duration-300 h-full">
@@ -262,6 +262,32 @@ export default async function DashboardPage() {
                     <div className="flex flex-wrap gap-2 mt-3">
                       {['Health Score', 'Team Intel', 'Contract Audit', 'Risk Analysis'].map((tag) => (
                         <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400/70 border border-cyan-500/10">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Pulse Streams Card */}
+              <Link href="/pulse-streams" className="group">
+                <div className="relative p-6 rounded-xl border border-emerald-500/15 bg-surface/30 hover:border-emerald-500/40 transition-all duration-300 h-full">
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-300" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                        <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary">Pulse Streams</h3>
+                      <ChevronRight className="w-4 h-4 text-text-muted ml-auto group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-sm text-text-secondary">
+                      Real-time NEAR ecosystem activity. Track transactions, contracts, and network health live.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {['Live Feed', 'Transactions', 'Network Health', 'Real-Time'].map((tag) => (
+                        <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/10">
                           {tag}
                         </span>
                       ))}
