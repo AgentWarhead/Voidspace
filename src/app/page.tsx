@@ -101,7 +101,7 @@ export default async function DashboardPage() {
               Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
             </p>
           </div>
-          <PriorityVoids categories={categories} />
+          <PriorityVoids categories={categories} opportunities={opportunities} />
         </section>
 
         <section>
