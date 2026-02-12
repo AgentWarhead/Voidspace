@@ -140,6 +140,41 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      // ── Invoice payment failed ──────────────────────────
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = (
+          invoice.parent?.subscription_details?.subscription
+            ? (typeof invoice.parent.subscription_details.subscription === 'string'
+                ? invoice.parent.subscription_details.subscription
+                : invoice.parent.subscription_details.subscription.id)
+            : null
+        );
+
+        if (!subscriptionId) break;
+
+        // Find user by subscription ID
+        const { data: failedSub } = await supabase
+          .from('subscriptions')
+          .select('user_id, tier')
+          .eq('stripe_subscription_id', subscriptionId)
+          .single();
+
+        if (!failedSub) {
+          console.warn(`[Stripe Webhook] No subscription found for failed invoice ${subscriptionId}`);
+          break;
+        }
+
+        // Mark subscription as past_due
+        await supabase
+          .from('subscriptions')
+          .update({ status: 'past_due' })
+          .eq('user_id', failedSub.user_id);
+
+        console.warn(`[Stripe Webhook] Payment failed — user=${failedSub.user_id} tier=${failedSub.tier} — marked past_due`);
+        break;
+      }
+
       // ── Subscription canceled ────────────────────────────
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;

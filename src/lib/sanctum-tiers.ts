@@ -64,8 +64,8 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     ],
     color: '#00EC97',
     glowColor: 'rgba(0, 236, 151, 0.3)',
-    stripePriceIdMonthly: 'price_sanctum_builder_monthly',
-    stripePriceIdAnnual: 'price_sanctum_builder_annual',
+    stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZwHUVPdiA',
+    stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZ90gXTP4Q',
     popular: true,
   },
   hacker: {
@@ -85,8 +85,8 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     ],
     color: '#00D4FF',
     glowColor: 'rgba(0, 212, 255, 0.3)',
-    stripePriceIdMonthly: 'price_sanctum_hacker_monthly',
-    stripePriceIdAnnual: 'price_sanctum_hacker_annual',
+    stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZSfnTGo4G',
+    stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZVfWYySmG',
   },
   founder: {
     name: 'Founder',
@@ -105,8 +105,8 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     ],
     color: '#9D4EDD',
     glowColor: 'rgba(157, 78, 221, 0.3)',
-    stripePriceIdMonthly: 'price_sanctum_founder_monthly',
-    stripePriceIdAnnual: 'price_sanctum_founder_annual',
+    stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZxGegM9EZ',
+    stripePriceIdAnnual: 'price_1SzsDV0chTjWbsnZx0gHg5id',
   },
 };
 
@@ -117,7 +117,7 @@ export const TOPUP_PACKS: TopUpPack[] = [
     price: 5,
     credits: 5,
     bonus: '',
-    stripePriceId: 'price_topup_spark',
+    stripePriceId: 'price_1SzsDc0chTjWbsnZ3nzxmGSt',
   },
   {
     name: 'Boost',
@@ -125,7 +125,7 @@ export const TOPUP_PACKS: TopUpPack[] = [
     price: 20,
     credits: 22,
     bonus: '10% bonus',
-    stripePriceId: 'price_topup_boost',
+    stripePriceId: 'price_1SzsDc0chTjWbsnZGRWYiVEz',
   },
   {
     name: 'Surge',
@@ -133,7 +133,7 @@ export const TOPUP_PACKS: TopUpPack[] = [
     price: 50,
     credits: 58,
     bonus: '16% bonus',
-    stripePriceId: 'price_topup_surge',
+    stripePriceId: 'price_1SzsDc0chTjWbsnZ6QJyY8fN',
   },
   {
     name: 'Overload',
@@ -141,7 +141,7 @@ export const TOPUP_PACKS: TopUpPack[] = [
     price: 100,
     credits: 120,
     bonus: '20% bonus',
-    stripePriceId: 'price_topup_overload',
+    stripePriceId: 'price_1SzsDc0chTjWbsnZNBC3OzZR',
   },
 ];
 

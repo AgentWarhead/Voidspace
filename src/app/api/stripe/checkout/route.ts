@@ -87,9 +87,12 @@ export async function POST(request: NextRequest) {
       const session = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
         mode: 'subscription',
+        payment_method_types: ['card'],
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: `${baseUrl}/sanctum?checkout=success`,
         cancel_url: `${baseUrl}/pricing?checkout=canceled`,
+        allow_promotion_codes: true,
+        tax_id_collection: { enabled: true },
         metadata: {
           userId,
           type: 'subscription',
@@ -116,6 +119,7 @@ export async function POST(request: NextRequest) {
       const session = await stripe.checkout.sessions.create({
         customer: stripeCustomerId,
         mode: 'payment',
+        payment_method_types: ['card'],
         line_items: [{ price: pack.stripePriceId, quantity: 1 }],
         success_url: `${baseUrl}/sanctum?topup=success`,
         cancel_url: `${baseUrl}/pricing?topup=canceled`,

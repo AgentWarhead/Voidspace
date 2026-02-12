@@ -84,6 +84,8 @@ export const env = {
     SESSION_SECRET: process.env.SESSION_SECRET || '',
     SYNC_API_KEY: process.env.SYNC_API_KEY || '',
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
   }),
 } as const;
 
