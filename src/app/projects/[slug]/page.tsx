@@ -15,6 +15,32 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { GradientText } from '@/components/effects/GradientText';
 import { getProjectBySlug } from '@/lib/queries';
 import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
+import { TokenMarketCard } from '@/components/projects/TokenMarketCard';
+
+/**
+ * Known mapping from project name/slug → token symbol.
+ * Used when the project doesn't have a dedicated token_symbol field.
+ */
+const PROJECT_TOKEN_MAP: Record<string, string> = {
+  'ref-finance': 'REF',
+  'linear-protocol': 'LINEAR',
+  'burrow': 'BRRR',
+  'meta-pool': 'META',
+  'jumbo-exchange': 'JUMP',
+  'pembrock-finance': 'PEM',
+  'paras': 'PARAS',
+  'sweat-economy': 'SWEAT',
+  'aurora': 'AURORA',
+  'here-wallet': 'HERE',
+  'hot-protocol': 'HOT',
+  'shitzu': 'SHITZU',
+  'lonk': 'LONK',
+  'blackdragon': 'BLACKDRAGON',
+  'nearvidia': 'NEARVIDIA',
+  'intel': 'INTEL',
+  'neko': 'NEKO',
+  'gear': 'GEAR',
+};
 
 interface Props {
   params: { slug: string };
@@ -119,6 +145,18 @@ export default async function ProjectDetailPage({ params }: Props) {
       </section>
 
       <Container size="lg" className="py-8 space-y-8">
+        {/* Token Market Data — shown when a matching token exists */}
+        {(() => {
+          const tokenSymbol = PROJECT_TOKEN_MAP[project.slug] || null;
+          if (!tokenSymbol) return null;
+          return (
+            <ScrollReveal>
+              <SectionHeader title="Token Market Data" badge="DEXSCREENER" />
+              <TokenMarketCard symbol={tokenSymbol} />
+            </ScrollReveal>
+          );
+        })()}
+
         {/* Financial / DeFiLlama Section */}
         <ScrollReveal>
           <SectionHeader title="Financial" badge="DEFILLAMA" />

@@ -9,6 +9,7 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { ChainHealth } from '@/components/dashboard/ChainHealth';
 import { GitHubPulse } from '@/components/dashboard/GitHubPulse';
 import { HotWalletsTable } from '@/components/ecosystem/HotWalletsTable';
+import { DeFiIntelligence } from '@/components/ecosystem/DeFiIntelligence';
 import { ScanLine } from '@/components/effects/ScanLine';
 import {
   getLatestChainStats,
@@ -112,6 +113,9 @@ export default async function EcosystemPage() {
           </section>
         </ScrollReveal>
 
+        {/* DeFi Market Intelligence (DexScreener) */}
+        <DeFiIntelligence />
+
         {/* GitHub Ecosystem Pulse */}
         <ScrollReveal delay={0.1}>
           <section>
@@ -152,13 +156,14 @@ export default async function EcosystemPage() {
               <p className="text-[10px] text-text-muted uppercase tracking-widest mb-3 font-mono">
                 Data Sources
               </p>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
                 {[
                   { name: 'NearBlocks', desc: 'Chain metrics' },
                   { name: 'DeFiLlama', desc: 'TVL & DeFi' },
                   { name: 'GitHub', desc: 'Developer activity' },
                   { name: 'FastNEAR', desc: 'On-chain data' },
                   { name: 'Pikespeak', desc: 'Wallet analytics' },
+                  { name: 'DexScreener', desc: 'DeFi markets' },
                   { name: 'Ecosystem', desc: 'Project registry' },
                 ].map((source) => (
                   <div
