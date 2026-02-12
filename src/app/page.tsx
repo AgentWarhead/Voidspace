@@ -52,7 +52,9 @@ export default async function DashboardPage() {
             <div className="hidden sm:block w-px h-4 bg-border" />
             <div className="flex items-center gap-2 text-xs sm:text-sm">
               <Zap className="w-4 h-4 text-amber-400" />
-              <span className="text-text-secondary font-medium">100% Free</span>
+              <Link href="/pricing" className="text-text-secondary font-medium hover:text-near-green transition-colors">
+                Free to Start
+              </Link>
             </div>
           </div>
         </Container>

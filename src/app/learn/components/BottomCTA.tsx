@@ -338,6 +338,11 @@ export default function BottomCTA() {
             <Sparkles className="w-5 h-5 mr-1.5" />
             Enter the Sanctum
           </PulsingButton>
+
+          <PulsingButton href="/pricing" variant="ghost">
+            <Zap className="w-5 h-5 mr-1.5" />
+            View Plans
+          </PulsingButton>
         </motion.div>
 
         {/* Fine print */}
@@ -348,7 +353,7 @@ export default function BottomCTA() {
           viewport={{ once: true }}
           transition={{ delay: 0.7 }}
         >
-          Free to start · 3 Void Briefs per month · No credit card required · AI-powered by Claude
+          Free to start · $2.50 starter credits · Upgrade from $25/mo · AI-powered by Claude Opus
         </motion.p>
       </motion.div>
     </section>

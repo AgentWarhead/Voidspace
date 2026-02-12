@@ -209,13 +209,20 @@ export function SanctumPreview() {
           {/* CTA */}
           <div className="px-4 py-4 border-t border-border/50 bg-surface/30 flex items-center justify-between">
             <p className="text-xs text-text-muted">
-              Sanctum generates real, deployable smart contracts with AI
+              Start free with $2.50 in credits · Upgrade for unlimited building
             </p>
-            <Link href="/sanctum">
-              <Button variant="primary" size="sm" className="group">
-                Try Sanctum <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/sanctum">
+                <Button variant="primary" size="sm" className="group">
+                  Try Sanctum <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button variant="ghost" size="sm" className="text-text-muted hover:text-near-green">
+                  See Plans <ArrowRight className="w-3 h-3 ml-1" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </Card>
       </div>
