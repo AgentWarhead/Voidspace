@@ -62,14 +62,16 @@ export async function POST(request: NextRequest) {
 
     // Build enhanced prompt based on type
     // Each prompt is optimized for Gemini image generation with consistent Voidspace branding
-    const BRAND = `STRICT VISUAL STYLE:
-- Background: deep black (#0A0A0F) to dark charcoal (#12121A) gradient
-- Primary accent: vivid teal/cyan (#00EC97) for highlights, borders, glows, and key elements
-- Secondary accents: electric purple (#8B5CF6) sparingly for depth, white (#F0F0F0) for text
-- Typography: clean sans-serif, bold headings, high contrast against dark background
-- Aesthetic: premium Web3/fintech — glass morphism panels, subtle glow effects, sharp edges
-- NO bright white backgrounds. NO clip-art. NO cartoonish elements.
-- Output: high resolution, 16:9 landscape aspect ratio, production-ready quality`;
+    const BRAND = `STRICT VISUAL QUALITY STANDARDS:
+- Premium, modern design — looks like it was made by a top-tier design agency
+- Dark or rich background preferred (not plain white) — deep blacks, dark gradients, or sophisticated color palettes
+- Clean sans-serif typography, bold headings, high contrast for readability
+- Subtle depth effects: glass morphism, soft glows, layered shadows, gradient accents
+- Sharp, crisp lines and edges — nothing blurry or low-quality
+- Color palette: use colors that match the USER'S project or topic. If none specified, default to a sophisticated dark theme with vibrant accent colors
+- NO clip-art. NO cartoonish or amateur elements. NO stock-photo aesthetic.
+- Output: high resolution, 16:9 landscape aspect ratio, production-ready quality
+- This should look like something worth paying for.`;
 
     let enhancedPrompt = '';
     const ctx = projectContext ? `\nProject context: ${projectContext}` : '';
@@ -81,13 +83,13 @@ export async function POST(request: NextRequest) {
 ${BRAND}
 
 DIAGRAM REQUIREMENTS:
-- Show system components as labeled glass-morphism cards/boxes with teal (#00EC97) borders
-- Connect components with clean directional arrows (white or teal, with subtle glow)
-- Group related services visually (frontend, backend, blockchain layer, external APIs)
+- Show system components as labeled glass-morphism cards/boxes with glowing accent borders
+- Connect components with clean directional arrows with subtle glow effects
+- Group related services visually (frontend, backend, data layer, external APIs)
 - Include small icons or symbols inside each component box to aid recognition
 - Label all connections with brief protocol/method names (REST, RPC, WebSocket, etc.)
 - Arrange in a clear top-to-bottom or left-to-right hierarchy — no overlapping
-- Add a subtle grid or dot pattern on the dark background for depth
+- Add a subtle grid or dot pattern on the background for depth
 - This should look like it belongs in a $10M startup pitch deck
 
 WHAT TO DIAGRAM: ${prompt}${ctx}`;
@@ -99,14 +101,13 @@ WHAT TO DIAGRAM: ${prompt}${ctx}`;
 ${BRAND}
 
 FLOW REQUIREMENTS:
-- Each step is a rounded rectangle with teal (#00EC97) border and glass-morphism fill
+- Each step is a rounded rectangle with accent-colored border and glass-morphism fill
 - Number each step clearly (01, 02, 03...) in the top-left corner of each box
-- Connect steps with smooth curved arrows with directional arrowheads (glowing teal)
-- Decision points use diamond shapes with purple (#8B5CF6) accent
-- Start node: filled teal circle. End node: filled teal circle with ring
-- Include a brief label inside each step box (action verb + noun: "Connect Wallet", "Select Token")
+- Connect steps with smooth curved arrows with directional arrowheads
+- Decision points use diamond shapes with a contrasting accent color
+- Start node: filled accent circle. End node: filled accent circle with ring
+- Include a brief label inside each step box (action verb + noun: "Connect Wallet", "Submit Form")
 - Arrange left-to-right or top-to-bottom with consistent spacing
-- Add a subtle "VOIDSPACE" watermark in bottom-right corner, very low opacity
 - Clean, scannable at a glance — no clutter
 
 FLOW TO SHOW: ${prompt}${ctx}`;
@@ -118,13 +119,13 @@ FLOW TO SHOW: ${prompt}${ctx}`;
 ${BRAND}
 
 INFOGRAPHIC REQUIREMENTS:
-- Bold headline at the top in large white text with teal (#00EC97) accent word
+- Bold headline at the top in large text with an accent-colored keyword
 - Divide content into 3-5 clear sections with visual hierarchy (top to bottom)
 - Use icons, small illustrations, and data visualizations (charts, progress bars, comparisons)
-- Key numbers/stats should be LARGE and teal-colored to draw the eye
-- Include brief explanatory text (2-3 lines max per section) in light gray
+- Key numbers/stats should be LARGE and accent-colored to draw the eye
+- Include brief explanatory text (2-3 lines max per section)
 - Use divider lines or subtle section backgrounds to separate topics
-- Bottom section: key takeaway or call-to-action in a highlighted teal box
+- Bottom section: key takeaway or call-to-action in a highlighted accent box
 - Optimized for sharing — readable at both full size and thumbnail
 - Professional enough for a conference presentation, engaging enough for Twitter
 
@@ -139,12 +140,12 @@ ${BRAND}
 SOCIAL GRAPHIC REQUIREMENTS:
 - Aspect ratio: 16:9 (1200x675px equivalent) — Twitter card format
 - Massive, bold headline text taking up 40-50% of the image — impossible to scroll past
-- Teal (#00EC97) gradient highlight or underline on the most important word(s)
+- Gradient highlight or underline on the most important word(s)
 - Subtle abstract background elements: mesh gradients, geometric shapes, particle effects
 - If announcing a feature: show a minimal mockup/icon representing it
 - If announcing a launch: add urgency elements (date, "LIVE NOW", countdown feel)
 - Include space for a small logo/brand mark in the corner
-- NO stock photo feel. This should look like it was designed by a top-tier Web3 design agency.
+- NO stock photo feel. This should look like it was designed by a top-tier design agency.
 - The image alone should make someone stop scrolling and want to learn more.
 
 ANNOUNCEMENT: ${prompt}${ctx}`;
