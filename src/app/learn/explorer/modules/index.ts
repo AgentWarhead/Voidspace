@@ -9,3 +9,8 @@ export { NearVsOtherChains } from './NearVsOtherChains';
 export { ReadingTheExplorer } from './ReadingTheExplorer';
 export { DefiBasics } from './DefiBasics';
 export { ChooseYourPath } from './ChooseYourPath';
+export { NFTBasicsOnNear } from './NFTBasicsOnNear';
+export { StakingAndValidators } from './StakingAndValidators';
+export { DAOsOnNear } from './DAOsOnNear';
+export { StayingSafeInWeb3 } from './StayingSafeInWeb3';
+export { NearDataTools } from './NearDataTools';

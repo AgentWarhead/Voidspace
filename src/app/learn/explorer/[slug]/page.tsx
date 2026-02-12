@@ -24,6 +24,11 @@ export const EXPLORER_MODULES: ExplorerModule[] = [
   { slug: 'reading-the-explorer', title: 'Reading the Explorer', description: 'Become a chain detective — decode blocks, transactions, and accounts on NearBlocks.', readTime: '12 min', order: 9 },
   { slug: 'defi-basics', title: 'DeFi Basics on NEAR', description: 'Swapping, staking, lending — unlock the financial layer of the decentralized world.', readTime: '15 min', order: 10 },
   { slug: 'choose-your-path', title: 'Choose Your Path', description: 'You\'ve explored the void. Now choose your destiny — Builder or Hacker?', readTime: '8 min', order: 11 },
+  { slug: 'nft-basics-on-near', title: 'NFT Basics on NEAR', description: 'Unique digital assets — how NFTs work on NEAR, marketplaces, minting, and royalties.', readTime: '14 min', order: 12 },
+  { slug: 'staking-and-validators', title: 'Staking & Validators', description: 'Earn rewards by securing the network — delegation, liquid staking, and validator selection.', readTime: '15 min', order: 13 },
+  { slug: 'daos-on-near', title: 'DAOs on NEAR', description: 'Community-governed organizations — proposals, voting, treasury, and how to participate.', readTime: '14 min', order: 14 },
+  { slug: 'staying-safe-in-web3', title: 'Staying Safe in Web3', description: 'Protect yourself from scams, phishing, and social engineering in the decentralized world.', readTime: '15 min', order: 15 },
+  { slug: 'near-data-tools', title: 'NEAR Data Tools', description: 'On-chain intelligence — explore, analyze, and understand the NEAR ecosystem with data tools.', readTime: '13 min', order: 16 },
 ];
 
 // ─── Static Params ─────────────────────────────────────────────────────────────

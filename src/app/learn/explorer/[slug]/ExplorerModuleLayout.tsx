@@ -20,6 +20,11 @@ import {
   ReadingTheExplorer,
   DefiBasics,
   ChooseYourPath,
+  NFTBasicsOnNear,
+  StakingAndValidators,
+  DAOsOnNear,
+  StayingSafeInWeb3,
+  NearDataTools,
 } from '../modules';
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
@@ -36,6 +41,11 @@ const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
   'reading-the-explorer': ReadingTheExplorer,
   'defi-basics': DefiBasics,
   'choose-your-path': ChooseYourPath,
+  'nft-basics-on-near': NFTBasicsOnNear,
+  'staking-and-validators': StakingAndValidators,
+  'daos-on-near': DAOsOnNear,
+  'staying-safe-in-web3': StayingSafeInWeb3,
+  'near-data-tools': NearDataTools,
 };
 
 // ─── Layout Props ──────────────────────────────────────────────────────────────

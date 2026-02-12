@@ -3,3 +3,7 @@ export { default as TokenomicsDesign } from './TokenomicsDesign';
 export { default as BuildingInPublic } from './BuildingInPublic';
 export { default as PitchingYourProject } from './PitchingYourProject';
 export { default as RevenueModelsForDapps } from './RevenueModelsForDapps';
+export { default as CommunityBuilding } from './CommunityBuilding';
+export { default as GoToMarket } from './GoToMarket';
+export { default as LegalRegulatoryBasics } from './LegalRegulatoryBasics';
+export { default as TreasuryManagement } from './TreasuryManagement';
