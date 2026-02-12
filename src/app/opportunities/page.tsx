@@ -6,7 +6,7 @@ import { Container, Card } from '@/components/ui';
 import { OpportunityFilters } from '@/components/opportunities/OpportunityFilters';
 import { OpportunityList } from '@/components/opportunities/OpportunityList';
 import { Skeleton } from '@/components/ui';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Lightbulb } from 'lucide-react';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GradientText } from '@/components/effects/GradientText';
@@ -80,6 +80,17 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
               Every project comes with an AI-powered{' '}
               <span className="text-near-green font-medium">Build Plan</span>
             </span>
+          </div>
+
+          {/* Bring Your Own Idea CTA */}
+          <div className="mt-3">
+            <Link
+              href="/sanctum?mode=brief"
+              className="inline-flex items-center gap-2 text-sm text-accent-cyan hover:text-accent-cyan/80 transition-colors"
+            >
+              <Lightbulb className="w-3.5 h-3.5" />
+              Have your own idea? Get a custom Build Plan →
+            </Link>
           </div>
 
           {/* Summary Stats */}
