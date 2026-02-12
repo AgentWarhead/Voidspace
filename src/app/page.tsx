@@ -153,7 +153,7 @@ export default async function DashboardPage() {
 
                   {/* Path 2: Bring Your Own Idea */}
                   <Link
-                    href="/sanctum?mode=brief"
+                    href="/opportunities#custom-brief"
                     className="group relative p-5 rounded-xl bg-surface/60 border border-accent-cyan/20 hover:border-accent-cyan/50 transition-all text-center"
                   >
                     <div className="w-10 h-10 rounded-lg bg-accent-cyan/10 border border-accent-cyan/15 flex items-center justify-center mx-auto mb-3">
