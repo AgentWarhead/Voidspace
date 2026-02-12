@@ -1,72 +1,44 @@
 'use client';
 
-import { Sparkles, Target, Lightbulb, ArrowRight, BarChart3, Cpu, Shield, Coins, Calendar, Rocket, Lock } from 'lucide-react';
+import { BarChart3, Cpu, Shield, Coins, Calendar, Rocket, Lock, Lightbulb } from 'lucide-react';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
+import { GradientText } from '@/components/effects/GradientText';
 import { CustomBriefForm } from './CustomBriefForm';
 
 export function BuildPlansSection() {
   return (
-    <div>
+    <div id="custom-brief">
+      {/* Gradient divider */}
+      <div className="relative py-2 mb-8">
+        <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-near-green/30 to-transparent" />
+        <div className="absolute inset-x-0 top-1/2 translate-y-px h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent blur-sm" />
+      </div>
+
+      {/* Section header */}
       <ScrollReveal>
-        <div className="text-center mb-6">
-          <h2 className="text-xl font-bold text-text-primary">
-            Get Your <span className="text-near-green">Build Plan</span>
-          </h2>
-          <p className="text-sm text-text-secondary mt-1">
-            Every build plan includes market analysis, tech architecture, NEAR strategy, monetization, and a week-by-week roadmap.
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/5 mb-4">
+            <Lightbulb className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-cyan-400 font-medium uppercase tracking-wider">Custom Build Plan</span>
+          </div>
+          <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Don&apos;t See What You Need?
+          </GradientText>
+          <p className="text-sm text-text-secondary mt-2 max-w-lg mx-auto">
+            Describe your own idea and get a full AI-powered blueprint — market analysis, architecture, NEAR strategy, and a week-by-week roadmap.
           </p>
         </div>
       </ScrollReveal>
 
-      <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-        <ScrollReveal delay={0.1}>
-          <a href="#voids-list" className="block h-full group">
-            <div className="h-full p-6 rounded-xl border border-near-green/20 bg-near-green/5 hover:border-near-green/40 hover:bg-near-green/10 transition-all">
-              <div className="flex flex-col items-center text-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-near-green/10 border border-near-green/20 flex items-center justify-center">
-                  <Target className="w-6 h-6 text-near-green" />
-                </div>
-                <h3 className="text-lg font-semibold text-text-primary">Explore Voids</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  Browse AI-detected gaps in the NEAR ecosystem and generate a build plan for any void.
-                </p>
-                <span className="inline-flex items-center gap-1 text-near-green text-sm font-medium mt-1 group-hover:gap-2 transition-all">
-                  Browse Below <ArrowRight className="w-4 h-4" />
-                </span>
-              </div>
-            </div>
-          </a>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.2}>
-          <a href="#custom-brief" className="block h-full group">
-            <div className="h-full p-6 rounded-xl border border-cyan-400/20 bg-cyan-400/5 hover:border-cyan-400/40 hover:bg-cyan-400/10 transition-all">
-              <div className="flex flex-col items-center text-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center">
-                  <Lightbulb className="w-6 h-6 text-cyan-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-text-primary">Bring Your Own Idea</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  Describe your project idea and get a full blueprint — market analysis, architecture, and roadmap.
-                </p>
-                <span className="inline-flex items-center gap-1 text-cyan-400 text-sm font-medium mt-1 group-hover:gap-2 transition-all">
-                  Describe Below <ArrowRight className="w-4 h-4" />
-                </span>
-              </div>
-            </div>
-          </a>
-        </ScrollReveal>
-      </div>
-
       {/* Custom Brief Form */}
-      <ScrollReveal delay={0.25}>
-        <div className="max-w-3xl mx-auto mt-6">
+      <ScrollReveal delay={0.1}>
+        <div className="max-w-3xl mx-auto">
           <CustomBriefForm />
         </div>
       </ScrollReveal>
 
       {/* What's in a Build Plan — 6 section preview */}
-      <ScrollReveal delay={0.3}>
+      <ScrollReveal delay={0.2}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-3xl mx-auto mt-6">
           {[
             { icon: BarChart3, title: 'Market Analysis', color: 'text-near-green' },

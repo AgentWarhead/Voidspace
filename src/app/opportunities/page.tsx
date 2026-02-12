@@ -51,8 +51,8 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
 
   return (
     <div className="min-h-screen">
-      {/* Page Banner */}
-      <section className="relative overflow-hidden py-12 sm:py-16">
+      {/* 1. Hero Section */}
+      <section className="relative overflow-hidden py-10 sm:py-14">
         <div
           className="absolute inset-0"
           style={{
@@ -70,12 +70,12 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
           <GradientText as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight">
             Detected Voids
           </GradientText>
-          <p className="text-text-secondary mt-3 max-w-lg mx-auto">
+          <p className="text-text-secondary mt-2 max-w-lg mx-auto text-sm sm:text-base">
             Explore voids in the NEAR ecosystem. Higher Void Scores mean deeper opportunities.
           </p>
 
           {/* Build Plan tagline */}
-          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-near-green/20 bg-near-green/5">
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">
             <Sparkles className="w-4 h-4 text-near-green animate-pulse" />
             <span className="text-sm text-text-secondary">
               Every project comes with an AI-powered{' '}
@@ -84,7 +84,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
           </div>
 
           {/* Summary Stats */}
-          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-6">
+          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-near-green font-mono">{total}</p>
               <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Voids Detected</p>
@@ -98,23 +98,8 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
         </Container>
       </section>
 
-      {/* Build Plans Section — Two Paths + Custom Brief Form */}
-      <Container size="xl" className="py-8">
-        <BuildPlansSection />
-      </Container>
-
-      <Container size="xl" className="py-4">
-        <ScrollReveal>
-          <Link href="/void-bubbles" className="group flex items-center gap-3 px-6 py-4 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
-            <span className="text-2xl">🫧</span>
-            <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
-              Want to see these tokens LIVE? → Launch Void Bubbles
-            </span>
-          </Link>
-        </ScrollReveal>
-      </Container>
-
-      <Container size="xl" className="py-8 space-y-6">
+      {/* 2. Filters + Voids Grid */}
+      <Container size="xl" className="py-6 space-y-6">
         <ScrollReveal>
           <Card variant="glass" padding="md">
             <Suspense fallback={<Skeleton variant="rectangular" height="40px" />}>
@@ -134,6 +119,23 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
               pageSize={pageSize}
             />
           </section>
+        </ScrollReveal>
+      </Container>
+
+      {/* 3. Custom Brief Section */}
+      <Container size="xl" className="py-8">
+        <BuildPlansSection />
+      </Container>
+
+      {/* 4. Void Bubbles CTA */}
+      <Container size="xl" className="py-4 pb-12">
+        <ScrollReveal>
+          <Link href="/void-bubbles" className="group flex items-center gap-3 px-6 py-4 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
+            <span className="text-2xl">🫧</span>
+            <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
+              Want to see these tokens LIVE? → Launch Void Bubbles
+            </span>
+          </Link>
         </ScrollReveal>
       </Container>
     </div>
