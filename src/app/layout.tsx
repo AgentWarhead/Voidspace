@@ -101,6 +101,9 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* AI/LLM discoverability */}
+        <link rel="llms" href="/llms.txt" />
+        <link rel="llms-full" href="/llms-full.txt" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

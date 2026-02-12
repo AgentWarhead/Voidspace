@@ -1,0 +1,136 @@
+# Voidspace — NEAR Ecosystem Intelligence (Full Reference)
+
+> AI-powered ecosystem intelligence tool for the NEAR Protocol blockchain. Find market gaps ("voids"), explore the ecosystem, learn to build on NEAR, and discover opportunities.
+
+## What is Voidspace?
+
+Voidspace is a comprehensive intelligence platform for the NEAR Protocol ecosystem. It combines real-time data analysis, interactive visualizations, and a structured learning platform to help developers, founders, investors, and researchers understand and build on NEAR.
+
+The name "Voidspace" refers to finding the "voids" — market gaps and underserved niches — in the blockchain ecosystem.
+
+## Core Tools
+
+### Void Lens (https://voidspace.io/observatory?tool=void-lens)
+AI-powered gap analysis tool that identifies underserved categories and opportunities in the NEAR ecosystem. Analyzes project density, funding patterns, and market demand to surface where builders should focus.
+
+### Constellation Map (https://voidspace.io/observatory?tool=constellation)
+Interactive network visualization showing relationships between NEAR ecosystem projects. Displays connections, dependencies, and collaboration patterns across the ecosystem.
+
+### Pulse Streams (https://voidspace.io/observatory?tool=pulse-streams)
+Real-time activity monitoring across the NEAR ecosystem. Tracks trending projects, development activity, social signals, and ecosystem health metrics.
+
+## Ecosystem Data
+
+### Categories (https://voidspace.io/categories)
+Voidspace tracks 20 ecosystem categories:
+1. DeFi (Decentralized Finance)
+2. NFTs & Digital Collectibles
+3. Gaming & Metaverse
+4. Infrastructure & Tooling
+5. DAOs & Governance
+6. Social & Community
+7. Identity & Reputation
+8. Data & Analytics
+9. Privacy & Security
+10. Bridges & Interoperability
+11. Wallets & Account Management
+12. Developer Tools & SDKs
+13. Education & Onboarding
+14. Real World Assets (RWA)
+15. AI & Machine Learning
+16. Storage & Data Availability
+17. Payments & Commerce
+18. Media & Content
+19. Enterprise & B2B
+20. Sustainability & Impact
+
+### Sanctum (https://voidspace.io/sanctum)
+Smart contract building tool with guided templates. Allows users to build and deploy NEAR smart contracts using pre-built templates across all 20 categories. Each template includes starter code, deployment guides, and best practices.
+
+## Learning Platform (https://voidspace.io/learn)
+
+Voidspace offers a comprehensive NEAR development curriculum with 43 learning modules organized into 4 progressive tracks.
+
+### Explorer Track (11 Modules) — For Beginners
+Perfect for newcomers to blockchain and NEAR:
+1. What is Blockchain — Fundamentals of distributed ledger technology
+2. What is NEAR — NEAR Protocol overview, architecture, and unique features
+3. Create a Wallet — Setting up your first NEAR wallet
+4. Your First Transaction — Sending and receiving NEAR tokens
+5. Understanding dApps — What decentralized applications are and how they work
+6. Reading Smart Contracts — How to read and understand contract code
+7. NEAR Ecosystem Tour — Overview of major NEAR projects and categories
+8. NEAR vs Other Chains — How NEAR compares to Ethereum, Solana, etc.
+9. Reading the Explorer — Using NEAR Explorer to track transactions
+10. DeFi Basics — Introduction to decentralized finance concepts
+11. Choose Your Path — Guidance on which advanced track to pursue next
+
+### Builder Track (16 Modules) — For Developers
+Hands-on smart contract development:
+1. Dev Environment Setup — Installing Rust, NEAR CLI, and development tools
+2. Rust Fundamentals — Core Rust concepts needed for NEAR development
+3. Your First Contract — Writing and deploying a basic smart contract
+4. Account Model & Access Keys — NEAR's unique account system
+5. State Management — Storing and managing on-chain data efficiently
+6. NEAR CLI Mastery — Advanced CLI commands and workflows
+7. Testing & Debugging — Unit tests, integration tests, and debugging strategies
+8. Frontend Integration — Connecting a web app to NEAR contracts
+9. Token Standards — NEP-141 (fungible) and NEP-171 (non-fungible) tokens
+10. NEP Standards Deep Dive — Understanding NEAR Enhancement Proposals
+11. Building a dApp — End-to-end decentralized application development
+12. Security Best Practices — Common vulnerabilities and how to prevent them
+13. Upgrading Contracts — Safe contract migration strategies
+14. Deployment — Production deployment workflows and best practices
+15. Optimization — Gas optimization and storage efficiency techniques
+16. Launch Checklist — Pre-launch verification and deployment readiness
+
+### Hacker Track (11 Modules) — For Advanced Developers
+Cutting-edge NEAR capabilities:
+1. NEAR Architecture Deep Dive — Nightshade sharding, chunk production, consensus
+2. Cross-Contract Calls — Building composable multi-contract systems
+3. Advanced Storage — Efficient on-chain data structures and patterns
+4. Chain Signatures — Multi-chain signing without bridges
+5. Intents & Chain Abstraction — NEAR's chain abstraction layer
+6. Shade Agents — Building autonomous on-chain agents
+7. AI Agent Integration — Connecting AI systems with NEAR smart contracts
+8. MEV & Transaction Ordering — Understanding and mitigating MEV on NEAR
+9. Building an Indexer — Custom indexing solutions for NEAR data
+10. Multi-Chain with NEAR — Cross-chain development patterns
+11. Production Patterns — Battle-tested patterns for production systems
+
+### Founder Track (5 Modules) — For Entrepreneurs
+Business and strategy for NEAR builders:
+1. NEAR Grants & Funding — How to get funded in the NEAR ecosystem
+2. Tokenomics Design — Designing sustainable token economies
+3. Building in Public — Community building and transparent development
+4. Pitching Your Project — How to pitch to investors and ecosystem funds
+5. Revenue Models for dApps — Monetization strategies for decentralized apps
+
+## Cross-Chain Resources
+
+### Rust for Blockchain (https://voidspace.io/learn/rust-for-blockchain)
+Comprehensive guide on why Rust is the dominant language for blockchain development. Covers memory safety, performance, and ecosystem support across NEAR, Solana, Polkadot, and others.
+
+### Solana vs NEAR (https://voidspace.io/learn/solana-vs-near)
+Technical comparison covering consensus mechanisms, programming models, account systems, transaction fees, developer experience, and ecosystem maturity.
+
+### For Solana Developers (https://voidspace.io/learn/for-solana-developers)
+Migration guide for Solana developers exploring NEAR. Covers key differences in account models, smart contract patterns, and development workflows.
+
+## Technical Details
+
+### About NEAR Protocol
+- **Type:** Layer-1 Proof-of-Stake blockchain
+- **Sharding:** Nightshade (dynamically sharded)
+- **Finality:** ~1-2 seconds
+- **Transaction Fees:** Sub-cent (fractions of a penny)
+- **Smart Contract Language:** Rust (primary), JavaScript/TypeScript (secondary via JS SDK)
+- **Account Model:** Human-readable names (e.g., alice.near) with access key system
+- **Key Features:** Chain abstraction, chain signatures (multi-chain without bridges), Aurora (EVM compatibility), Rainbow Bridge (Ethereum bridge)
+
+### About Voidspace
+- **URL:** https://voidspace.io
+- **Built with:** Next.js, TypeScript, Tailwind CSS
+- **Data:** Real-time ecosystem analysis
+- **Target audience:** Developers, founders, investors, and researchers interested in the NEAR ecosystem
+- **Status:** Live and actively developed
