@@ -17,11 +17,29 @@ export async function POST(request: NextRequest) {
     const auth = getAuthenticatedUser(request);
     const userId = auth?.userId || null;
 
-    const { opportunityId } = await request.json();
+    const { opportunityId, customIdea } = await request.json();
 
-    if (!opportunityId || !isValidUUID(opportunityId)) {
+    // Validate: require EITHER opportunityId OR customIdea, not both, not neither
+    const hasOpportunity = opportunityId && isValidUUID(opportunityId);
+    const hasCustomIdea = typeof customIdea === 'string' && customIdea.trim().length > 0;
+
+    if (!hasOpportunity && !hasCustomIdea) {
       return NextResponse.json(
-        { error: 'Valid opportunityId is required' },
+        { error: 'Either a valid opportunityId or a customIdea is required' },
+        { status: 400 }
+      );
+    }
+
+    if (hasOpportunity && hasCustomIdea) {
+      return NextResponse.json(
+        { error: 'Provide either opportunityId or customIdea, not both' },
+        { status: 400 }
+      );
+    }
+
+    if (hasCustomIdea && customIdea.trim().length > 2000) {
+      return NextResponse.json(
+        { error: 'customIdea must be 2000 characters or less' },
         { status: 400 }
       );
     }
@@ -92,7 +110,11 @@ export async function POST(request: NextRequest) {
 
     // Call the Supabase Edge Function (which has the ANTHROPIC_API_KEY secret)
     const { data, error } = await supabase.functions.invoke('generate-brief', {
-      body: { opportunityId, userId },
+      body: {
+        opportunityId: hasOpportunity ? opportunityId : null,
+        userId,
+        customIdea: hasCustomIdea ? customIdea.trim() : null,
+      },
     });
 
     if (error) {
@@ -123,11 +145,14 @@ export async function POST(request: NextRequest) {
 
     // Log usage and deduct credits
     if (userId) {
-      const { error: usageError } = await supabase.from('usage').insert({
+      const usageRecord: Record<string, unknown> = {
         user_id: userId,
         action: 'brief_generated',
-        opportunity_id: opportunityId,
-      });
+      };
+      if (hasOpportunity) {
+        usageRecord.opportunity_id = opportunityId;
+      }
+      const { error: usageError } = await supabase.from('usage').insert(usageRecord);
       if (usageError) {
         console.error('Failed to log usage:', usageError.message, usageError.details);
       }
