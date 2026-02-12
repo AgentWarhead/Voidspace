@@ -35,7 +35,7 @@ function validateEnvironment() {
   const allEnvVars = Object.keys(process.env);
   const dangerousVars = allEnvVars.filter(varName => 
     varName.startsWith('NEXT_PUBLIC_') && 
-    !['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_NEAR_NETWORK'].includes(varName) &&
+    !['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_NEAR_NETWORK', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SITE_URL'].includes(varName) &&
     (varName.toLowerCase().includes('key') || 
      varName.toLowerCase().includes('secret') || 
      varName.toLowerCase().includes('private'))
