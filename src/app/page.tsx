@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - lucide-react 0.453 has broken type exports (icons declared but not exported in .d.ts)
-import { ChevronRight, BookOpen, Search, Sparkles, Flame, Palette, Users, Telescope, Zap, Target, FileText, BarChart3, Code2, CalendarCheck } from 'lucide-react';
+import { ChevronRight, BookOpen, Search, Sparkles, Flame, Palette, Users, Telescope, Zap, Target, FileText, BarChart3, Code2, CalendarCheck, Lightbulb } from 'lucide-react';
 import { Container } from '@/components/ui';
 import { HeroSection } from '@/components/hero/HeroSection';
 import { PriorityVoids } from '@/components/dashboard/PriorityVoids';
@@ -132,20 +132,45 @@ export default async function DashboardPage() {
                   ))}
                 </div>
 
-                {/* CTA */}
-                <div className="text-center">
+                {/* Two CTA paths */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                  {/* Path 1: Explore Voids */}
                   <Link
                     href="/opportunities"
-                    className="shimmer-btn text-background font-semibold px-8 py-3.5 rounded-lg text-base inline-flex items-center gap-2 mb-3"
+                    className="group relative p-5 rounded-xl bg-surface/60 border border-near-green/20 hover:border-near-green/50 transition-all text-center"
                   >
-                    <Target className="w-4 h-4" />
-                    Generate Your Build Plan
-                    <ChevronRight className="w-4 h-4" />
+                    <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/15 flex items-center justify-center mx-auto mb-3">
+                      <Search className="w-5 h-5 text-near-green" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-1.5">Explore Voids</h3>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Browse AI-detected gaps in the NEAR ecosystem and generate a build plan for any of them
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-near-green mt-3">
+                      Browse Opportunities <ChevronRight className="w-3 h-3" />
+                    </span>
                   </Link>
-                  <p className="text-xs text-text-muted font-mono">
-                    Powered by Claude AI · Pick any void · Full strategic brief in 60s
-                  </p>
+
+                  {/* Path 2: Bring Your Own Idea */}
+                  <Link
+                    href="/sanctum?mode=brief"
+                    className="group relative p-5 rounded-xl bg-surface/60 border border-accent-cyan/20 hover:border-accent-cyan/50 transition-all text-center"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-accent-cyan/10 border border-accent-cyan/15 flex items-center justify-center mx-auto mb-3">
+                      <Lightbulb className="w-5 h-5 text-accent-cyan" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-1.5">Bring Your Own Idea</h3>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      Have your own project idea? Describe it and get a full AI-powered build plan
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent-cyan mt-3">
+                      Start Building <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </Link>
                 </div>
+                <p className="text-xs text-text-muted font-mono text-center mt-4">
+                  Powered by Claude AI · Full strategic brief in 60s
+                </p>
               </div>
             </div>
           </section>

@@ -1,57 +1,59 @@
 'use client';
 
 import { Lock, Sparkles } from 'lucide-react';
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import type { ProjectBrief } from '@/types';
 
 interface BriefPreviewProps {
   brief: ProjectBrief;
 }
 
+/** Truncate text to the first N sentences (splits on `. `). */
+function truncateToSentences(text: string, n: number): string {
+  const sentences = text.split('. ');
+  if (sentences.length <= n) return text;
+  return sentences.slice(0, n).join('. ') + '...';
+}
+
 export function BriefPreview({ brief }: BriefPreviewProps) {
   return (
     <div className="space-y-4">
-      {/* Visible sections — 5 sections to hook the user */}
+      {/* Visible teaser — just enough to tantalize */}
       <div className="space-y-3">
         <div>
           <h4 className="text-sm font-semibold text-text-primary mb-1">Problem Statement</h4>
-          <p className="text-sm text-text-secondary">{brief.problemStatement}</p>
+          <p className="text-sm text-text-secondary">
+            {truncateToSentences(brief.problemStatement, 2)}
+          </p>
         </div>
         <div>
           <h4 className="text-sm font-semibold text-text-primary mb-1">Solution Overview</h4>
-          <p className="text-sm text-text-secondary">{brief.solutionOverview}</p>
+          <p className="text-sm text-text-secondary">
+            {truncateToSentences(brief.solutionOverview, 1)}
+          </p>
         </div>
-        {brief.whyNow && (
-          <div>
-            <h4 className="text-sm font-semibold text-text-primary mb-1">Why Now</h4>
-            <p className="text-sm text-text-secondary">{brief.whyNow}</p>
-          </div>
-        )}
-        <div>
-          <h4 className="text-sm font-semibold text-text-primary mb-1">Target Users</h4>
-          <ul className="space-y-1">
-            {brief.targetUsers.map((user, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
-                <span className="text-near-green mt-1">-</span>
-                {user}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-sm font-semibold text-text-primary mb-1">Key Features</h4>
-          <div className="flex flex-wrap gap-2">
-            {brief.keyFeatures.map((feature, i) => (
-              <Badge key={i} variant="default">{feature.name}</Badge>
-            ))}
-          </div>
-          <p className="text-xs text-text-muted mt-1.5">Upgrade to see full feature descriptions and priorities.</p>
-        </div>
+
+        {/* Hint about locked content */}
+        <p className="text-xs text-text-muted italic pt-1">
+          Plus 10 more sections: Why Now, Target Users, Key Features, Technical Requirements, NEAR Strategy, Monetization, Week 1 Plan, Funding Opportunities...
+        </p>
       </div>
 
-      {/* Blurred/locked sections */}
+      {/* Blurred/locked sections — taller to convey lots of hidden value */}
       <div className="relative">
-        <div className="space-y-3 blur-sm select-none pointer-events-none">
+        <div className="space-y-3 blur-sm select-none pointer-events-none min-h-[360px]">
+          <div className="p-3 bg-surface-hover rounded-lg">
+            <h4 className="text-sm font-semibold text-text-primary mb-1">Why Now</h4>
+            <p className="text-sm text-text-secondary">Market timing analysis and ecosystem readiness signals...</p>
+          </div>
+          <div className="p-3 bg-surface-hover rounded-lg">
+            <h4 className="text-sm font-semibold text-text-primary mb-1">Target Users</h4>
+            <p className="text-sm text-text-secondary">Primary user personas and market segments...</p>
+          </div>
+          <div className="p-3 bg-surface-hover rounded-lg">
+            <h4 className="text-sm font-semibold text-text-primary mb-1">Key Features</h4>
+            <p className="text-sm text-text-secondary">Full feature breakdown with priorities and descriptions...</p>
+          </div>
           <div className="p-3 bg-surface-hover rounded-lg">
             <h4 className="text-sm font-semibold text-text-primary mb-1">Technical Requirements</h4>
             <p className="text-sm text-text-secondary">Frontend, backend, and blockchain stack...</p>
@@ -63,6 +65,10 @@ export function BriefPreview({ brief }: BriefPreviewProps) {
           <div className="p-3 bg-surface-hover rounded-lg">
             <h4 className="text-sm font-semibold text-text-primary mb-1">Monetization & Next Steps</h4>
             <p className="text-sm text-text-secondary">Revenue models, week 1 actions, funding...</p>
+          </div>
+          <div className="p-3 bg-surface-hover rounded-lg">
+            <h4 className="text-sm font-semibold text-text-primary mb-1">Week 1 Action Plan</h4>
+            <p className="text-sm text-text-secondary">Day-by-day execution roadmap...</p>
           </div>
         </div>
 
