@@ -207,9 +207,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid request type' }, { status: 400 });
   } catch (error) {
-    console.error('[Stripe Checkout] Error:', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('[Stripe Checkout] Error:', errMsg);
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: 'Failed to create checkout session', detail: errMsg },
       { status: 500 }
     );
   }
