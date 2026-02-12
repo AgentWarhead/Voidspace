@@ -1,460 +1,435 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { calculateGapScore, getCompetitionLevel, getDifficulty } from '@/lib/gap-score';
+import { fetchNearTokens, getAggregateStats } from '@/lib/dexscreener';
+import type { TokenData } from '@/lib/dexscreener';
 
-interface OpportunityTemplate {
+// --- Interfaces ---
+
+interface CategorySnapshot {
+  name: string;
+  slug: string;
+  isStrategic: boolean;
+  strategicMultiplier: number;
+  projects: {
+    name: string;
+    description: string | null;
+    tvlUsd: number;
+    githubStars: number;
+    githubForks: number;
+    lastCommit: string | null;
+    isActive: boolean;
+    has24hVolume: boolean;
+    volume24h: number;
+    liquidityUsd: number;
+  }[];
+  aggregates: {
+    totalProjects: number;
+    activeProjects: number;
+    totalTVL: number;
+    avgGithubStars: number;
+    projectsWithRecentCommits: number;
+    projectsWithVolume: number;
+  };
+}
+
+interface ClaudeVoid {
+  categorySlug: string;
   title: string;
   description: string;
-  features: string[];
+  reasoning: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  /** Adjust gap score relative to category base: 1.0 = same, 0.9 = slightly lower */
-  scoreMultiplier: number;
+  competitionLevel: 'low' | 'medium' | 'high';
+  suggestedFeatures: string[];
+  evidenceProjects: string[];
 }
 
-const categoryOpportunities: Record<string, OpportunityTemplate[]> = {
-  'ai-agents': [
-    {
-      title: 'Autonomous AI Agent Marketplace',
-      description: 'A decentralized marketplace for discovering, deploying, and monetizing autonomous AI agents built on NEAR Shade Agents with TEE-based execution.',
-      features: ['Agent discovery and rating system', 'TEE-based secure execution via Shade Agents', 'Pay-per-use agent monetization', 'Multi-model orchestration dashboard'],
-      difficulty: 'advanced',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'AI-Powered Smart Contract Auditor',
-      description: 'An AI agent that automatically audits NEAR smart contracts for vulnerabilities, gas optimization opportunities, and best practice violations.',
-      features: ['Automated vulnerability scanning', 'Gas optimization suggestions', 'Natural language audit reports', 'CI/CD integration for pre-deploy checks'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.95,
-    },
-    {
-      title: 'On-Chain AI Inference Network',
-      description: 'A decentralized compute network for running AI model inference on-chain, enabling trustless AI predictions for DeFi, gaming, and governance.',
-      features: ['Decentralized GPU compute marketplace', 'Verifiable inference proofs', 'Model registry and versioning', 'API gateway for dApp integration'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.9,
-    },
-  ],
-  'privacy': [
-    {
-      title: 'Private DeFi Protocol',
-      description: 'A privacy-preserving DeFi suite enabling confidential swaps, lending, and yield farming using zero-knowledge proofs on NEAR.',
-      features: ['ZK-proof based private swaps', 'Confidential lending pools', 'Shielded yield vaults', 'Compliance-friendly selective disclosure'],
-      difficulty: 'advanced',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Decentralized Identity & Credentials',
-      description: 'A self-sovereign identity platform on NEAR that lets users prove credentials (age, KYC, membership) without revealing personal data.',
-      features: ['ZK credential verification', 'Selective disclosure proofs', 'Cross-chain identity portability', 'Verifiable credential issuance tools'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'intents': [
-    {
-      title: 'Intent Solver Network',
-      description: 'A competitive solver network for NEAR Intents that finds optimal execution paths for user transactions across multiple chains and protocols.',
-      features: ['Multi-chain intent resolution', 'Solver competition framework', 'Gas-optimized routing', 'Intent composability engine'],
-      difficulty: 'advanced',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Cross-Chain Asset Bridge',
-      description: 'A seamless bridge leveraging NEAR Chain Signatures for trustless asset transfers between NEAR, Ethereum, Bitcoin, and other chains.',
-      features: ['Chain Signatures integration', 'Multi-chain liquidity pools', 'Real-time bridging status', 'Automated slippage protection'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.95,
-    },
-    {
-      title: 'Universal Account Abstraction Layer',
-      description: 'An account abstraction SDK that lets users interact with any blockchain using a single NEAR account, powered by Chain Abstraction.',
-      features: ['Single-account multi-chain access', 'Social recovery and session keys', 'Gas sponsorship for new users', 'SDK for dApp developers'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.9,
-    },
-  ],
-  'rwa': [
-    {
-      title: 'Real Estate Tokenization Platform',
-      description: 'A platform for fractional ownership of real estate through NEAR-based tokens, with automated rental income distribution.',
-      features: ['Property tokenization framework', 'Automated dividend distribution', 'Secondary market trading', 'Legal compliance oracle'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Supply Chain Verification System',
-      description: 'An end-to-end supply chain tracking system using NEAR for provenance verification, from raw materials to consumer products.',
-      features: ['IoT device integration', 'Immutable provenance records', 'QR-based consumer verification', 'Multi-party attestation'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-    {
-      title: 'NEAR-Native Payments Gateway',
-      description: 'A merchant payment processor enabling businesses to accept NEAR and stablecoin payments with instant fiat off-ramps.',
-      features: ['POS integration SDK', 'Instant stablecoin settlement', 'Multi-currency support', 'Invoice and billing automation'],
-      difficulty: 'beginner',
-      scoreMultiplier: 0.9,
-    },
-  ],
-  'data-analytics': [
-    {
-      title: 'NEAR Ecosystem Intelligence Dashboard',
-      description: 'A comprehensive analytics platform tracking NEAR ecosystem health: TVL flows, developer activity, user growth, and protocol metrics.',
-      features: ['Real-time TVL tracking', 'Developer activity heatmaps', 'Cross-protocol comparison tools', 'Custom alert system'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'On-Chain Data Indexing Service',
-      description: 'A high-performance indexing service for NEAR blockchain data, providing GraphQL APIs for dApp developers to query historical and real-time data.',
-      features: ['Sub-second query latency', 'GraphQL and REST APIs', 'Custom indexer deployment', 'WebSocket real-time subscriptions'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'defi': [
-    {
-      title: 'Cross-Chain Yield Aggregator',
-      description: 'An intelligent yield optimization platform that automatically moves assets across NEAR and other chains to maximize returns.',
-      features: ['Auto-compounding vaults', 'Risk-adjusted strategy selection', 'Cross-chain yield routing', 'Portfolio analytics dashboard'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Undercollateralized Lending Protocol',
-      description: 'A reputation-based lending protocol on NEAR that uses on-chain credit scoring to offer reduced collateral requirements.',
-      features: ['On-chain credit scoring', 'Graduated collateral tiers', 'Flash loan prevention', 'Liquidation insurance pool'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.95,
-    },
-    {
-      title: 'Structured DeFi Products',
-      description: 'A platform for creating and trading structured financial products like options, perpetuals, and yield tranches on NEAR.',
-      features: ['Options pricing engine', 'Perpetual futures with NEAR-native settlement', 'Yield tranching (senior/junior)', 'Risk analytics dashboard'],
-      difficulty: 'advanced',
-      scoreMultiplier: 0.9,
-    },
-  ],
-  'dex-trading': [
-    {
-      title: 'NEAR-Native Order Book DEX',
-      description: 'A high-performance central limit order book DEX leveraging NEAR sub-second finality for a CEX-like trading experience.',
-      features: ['On-chain order book with sub-600ms matching', 'Advanced order types (limit, stop, trailing)', 'Trading API for bots', 'Real-time depth charts'],
-      difficulty: 'advanced',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'DEX Aggregator & Best Execution Router',
-      description: 'A trade routing engine that splits orders across multiple NEAR DEXs to find the best price with minimal slippage.',
-      features: ['Multi-DEX price comparison', 'Smart order routing', 'MEV protection', 'Transaction cost estimation'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'gaming': [
-    {
-      title: 'Blockchain Gaming SDK for NEAR',
-      description: 'A game developer SDK that makes it easy to integrate NEAR wallets, NFT items, and token economies into Unity and Unreal Engine games.',
-      features: ['Unity and Unreal Engine plugins', 'In-game wallet integration', 'NFT item minting and trading', 'Player progression on-chain'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Play-to-Earn Game Platform',
-      description: 'A gaming platform where players earn NEAR tokens and NFTs through skill-based gameplay, with anti-bot measures and fair reward distribution.',
-      features: ['Skill-based reward distribution', 'Anti-bot Sybil resistance', 'Tournament and leaderboard system', 'NFT crafting and evolution'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-    {
-      title: 'Metaverse World Builder',
-      description: 'A no-code platform for creating and deploying 3D metaverse experiences on NEAR with land ownership, social features, and a creator economy.',
-      features: ['Drag-and-drop 3D editor', 'Land NFT ownership', 'Avatar customization system', 'In-world commerce and events'],
-      difficulty: 'beginner',
-      scoreMultiplier: 0.9,
-    },
-  ],
-  'nfts': [
-    {
-      title: 'AI-Generative NFT Platform',
-      description: 'An NFT creation platform that uses AI to help artists generate, remix, and mint unique digital art with provable on-chain provenance.',
-      features: ['AI art generation tools', 'On-chain provenance and royalties', 'Collaborative creation features', 'Auction and fixed-price marketplace'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Dynamic NFT Framework',
-      description: 'A framework for creating NFTs that evolve over time based on on-chain events, oracles, or user interactions — living digital assets.',
-      features: ['Event-driven NFT mutations', 'Oracle-connected dynamic traits', 'Composable NFT standards', 'Visual evolution timeline'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'daos': [
-    {
-      title: 'DAO Operating System',
-      description: 'A full-stack DAO management platform for NEAR with proposal creation, voting, treasury management, and contributor compensation.',
-      features: ['Proposal templates and workflows', 'Quadratic and conviction voting', 'Treasury multi-sig with spending limits', 'Contributor reputation tracking'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Cross-DAO Collaboration Hub',
-      description: 'A platform enabling DAOs on NEAR to collaborate on shared initiatives, pool resources, and coordinate governance across organizations.',
-      features: ['Inter-DAO proposal system', 'Shared treasury pools', 'Cross-DAO delegate voting', 'Collaboration analytics'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'social': [
-    {
-      title: 'Decentralized Social Media Platform',
-      description: 'A censorship-resistant social platform on NEAR where users own their content, social graph, and earn from engagement.',
-      features: ['User-owned content and social graph', 'Token-gated communities', 'Creator tipping and subscriptions', 'Content moderation DAO'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Creator Monetization Toolkit',
-      description: 'A suite of tools for content creators to monetize on NEAR: memberships, digital products, tipping, and revenue sharing with collaborators.',
-      features: ['Subscription NFT memberships', 'Digital product storefront', 'Revenue splitting contracts', 'Fan engagement analytics'],
-      difficulty: 'beginner',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'dev-tools': [
-    {
-      title: 'NEAR Smart Contract IDE',
-      description: 'A browser-based IDE for writing, testing, and deploying NEAR smart contracts in Rust and JavaScript with built-in debugging and simulation.',
-      features: ['Browser-based code editor with LSP', 'Contract simulation sandbox', 'One-click testnet deployment', 'Gas profiling and optimization hints'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Smart Contract Testing Framework',
-      description: 'A comprehensive testing framework for NEAR contracts with property-based testing, fuzzing, gas benchmarking, and CI integration.',
-      features: ['Property-based testing', 'Automated fuzzing', 'Gas benchmarking suite', 'GitHub Actions integration'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-    {
-      title: 'No-Code dApp Builder',
-      description: 'A visual builder that lets non-developers create NEAR dApps by connecting pre-built components — smart contracts, UI, and wallet auth.',
-      features: ['Drag-and-drop UI builder', 'Pre-built contract templates', 'Wallet connection wizard', 'One-click mainnet deployment'],
-      difficulty: 'beginner',
-      scoreMultiplier: 0.9,
-    },
-  ],
-  'wallets': [
-    {
-      title: 'Social Recovery Smart Wallet',
-      description: 'A next-gen NEAR wallet with social recovery, session keys, and biometric auth — no seed phrases needed.',
-      features: ['Social recovery via trusted contacts', 'Biometric authentication', 'Session keys for dApp interactions', 'Transaction simulation previews'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'Multi-Chain Portfolio Manager',
-      description: 'A unified portfolio app that tracks assets across NEAR and other chains via Chain Signatures, with DeFi position management.',
-      features: ['Cross-chain asset tracking', 'DeFi position aggregation', 'Profit/loss analytics', 'Tax reporting export'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'education': [
-    {
-      title: 'Learn-to-Earn NEAR Academy',
-      description: 'An interactive learning platform where developers earn NEAR tokens and NFT credentials by completing courses on NEAR development.',
-      features: ['Interactive coding challenges', 'NFT completion certificates', 'Token rewards for course completion', 'Peer review system'],
-      difficulty: 'beginner',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'NEAR Developer Onboarding Portal',
-      description: 'A guided onboarding experience for new NEAR developers with project scaffolding, tutorials, and a path from zero to deployed dApp.',
-      features: ['Step-by-step guided tutorials', 'Project template generator', 'Testnet faucet integration', 'Community mentorship matching'],
-      difficulty: 'beginner',
-      scoreMultiplier: 0.95,
-    },
-  ],
-  'infrastructure': [
-    {
-      title: 'Decentralized RPC Network',
-      description: 'A decentralized, incentivized RPC node network for NEAR that provides high-availability endpoints with geographic load balancing.',
-      features: ['Incentivized node operators', 'Geographic load balancing', 'Rate limiting and API key management', 'Uptime monitoring dashboard'],
-      difficulty: 'advanced',
-      scoreMultiplier: 1.0,
-    },
-    {
-      title: 'NEAR Block Explorer 2.0',
-      description: 'A next-generation block explorer with advanced search, contract verification, token analytics, and developer-friendly API.',
-      features: ['Advanced transaction search', 'Smart contract source verification', 'Token holder analytics', 'REST and WebSocket APIs'],
-      difficulty: 'intermediate',
-      scoreMultiplier: 0.95,
-    },
-  ],
-};
+// --- Helpers ---
 
-function generateReasoning(
-  categoryName: string,
-  activeCount: number,
-  totalTVL: number,
-  isStrategic: boolean,
-  template: OpportunityTemplate,
-): string {
-  const tvlStr = totalTVL > 0
-    ? `$${(totalTVL / 1_000_000).toFixed(1)}M in TVL`
-    : 'minimal TVL';
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-  const strategic = isStrategic
-    ? ' This is a strategic priority area for NEAR Protocol, attracting extra ecosystem support.'
-    : '';
-
-  return `The ${categoryName} category on NEAR has ${activeCount} active project${activeCount !== 1 ? 's' : ''} with ${tvlStr}.${strategic} "${template.title}" addresses a specific gap: ${template.description.split('.')[0].toLowerCase()}.`;
+/**
+ * Match project names/tokens to DexScreener token data.
+ * Uses fuzzy name matching (lowercase substring).
+ */
+function matchProjectToToken(
+  projectName: string,
+  tokens: TokenData[],
+): TokenData | null {
+  const lower = projectName.toLowerCase().trim();
+  return (
+    tokens.find(
+      (t) =>
+        t.name.toLowerCase() === lower ||
+        t.symbol.toLowerCase() === lower ||
+        t.name.toLowerCase().includes(lower) ||
+        lower.includes(t.name.toLowerCase()),
+    ) ?? null
+  );
 }
 
-export async function generateOpportunities(supabase: SupabaseClient) {
-  let created = 0;
-  let updated = 0;
-
-  // Fetch all categories
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*');
-
-  if (!categories) throw new Error('No categories found');
-
-  // Pre-compute cross-category context for accurate gap scores
-  const allCategoryActiveProjects: number[] = [];
-  const allCategoryTVLs: number[] = [];
-
-  for (const cat of categories) {
-    const { count: catActive } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('category_id', cat.id)
-      .eq('is_active', true);
-
-    const { data: catProjects } = await supabase
-      .from('projects')
-      .select('tvl_usd')
-      .eq('category_id', cat.id);
-
-    allCategoryActiveProjects.push(catActive || 0);
-    allCategoryTVLs.push(
-      (catProjects || []).reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0)
-    );
+/**
+ * Call Claude API to detect voids in the NEAR ecosystem.
+ */
+async function detectVoidsWithClaude(
+  categorySnapshots: CategorySnapshot[],
+  chainStats: Record<string, unknown>,
+): Promise<ClaudeVoid[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY not configured');
   }
 
-  const ecosystemAverageTVL = allCategoryTVLs.length > 0
-    ? allCategoryTVLs.reduce((s, v) => s + v, 0) / allCategoryTVLs.length
-    : 0;
+  const systemPrompt = `You are an ecosystem analyst for NEAR Protocol. Your job is to identify REAL, VERIFIED gaps (voids) in the ecosystem based on actual project data. Every void you identify must be supported by evidence from the data provided. Never invent or hallucinate opportunities — only report what the data shows is missing.`;
 
-  for (const category of categories) {
-    // Count total and active projects in this category
-    const { count: totalCount } = await supabase
+  const userPrompt = `Analyze the following NEAR Protocol ecosystem data and identify legitimate voids (gaps where builders could create value).
+
+RULES:
+1. Every void MUST reference specific real projects in its reasoning (e.g., "Ref Finance and Jumbo Exchange are both AMM-based. No order book DEX exists on NEAR.")
+2. Identify what EXISTS vs what's MISSING — the gap between them is the void
+3. Check for: empty categories, abandoned projects (no commits >90 days), missing subcategories, feature gaps within populated categories, tooling gaps
+4. Difficulty levels: beginner (integrate/build on existing tools, <4 weeks), intermediate (new protocol/tool with known patterns, 4-12 weeks), advanced (novel cryptography/infrastructure, 12+ weeks)
+5. Competition level per-void: low (0-1 similar projects), medium (2-3 similar), high (4+)
+6. Aim for ~60-80 total voids across all categories, distributed: ~30% beginner, ~45% intermediate, ~25% advanced
+7. Beginner voids should be practical — tools, dashboards, integrations, bots, UIs that leverage existing infrastructure
+8. Every void must be something a builder could ACTUALLY start building on NEAR today
+9. Do NOT suggest voids that are already well-served by existing active projects with significant TVL/usage
+10. For categories with 0 projects: identify 3-4 foundational voids
+11. For categories with active projects: identify specific FEATURE gaps and COMPLEMENTARY tools
+
+[ECOSYSTEM DATA]
+${JSON.stringify(categorySnapshots, null, 2)}
+
+[CHAIN STATS]
+${JSON.stringify(chainStats)}
+
+Return a JSON array of voids:
+[
+  {
+    "categorySlug": "defi",
+    "title": "Specific, Descriptive Title",
+    "description": "2-3 sentences. What is this? Why does NEAR need it? Be specific about the gap.",
+    "reasoning": "Evidence-based. Reference real projects by name. Explain what exists and what's missing.",
+    "difficulty": "beginner|intermediate|advanced",
+    "competitionLevel": "low|medium|high",
+    "suggestedFeatures": ["Feature 1", "Feature 2", "Feature 3", "Feature 4"],
+    "evidenceProjects": ["Project Name 1", "Project Name 2"]
+  }
+]
+
+Return ONLY valid JSON. No markdown, no explanation.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 16000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Claude API error (${response.status}): ${errorText}`);
+  }
+
+  const result = await response.json();
+  const content = result?.content?.[0]?.text;
+
+  if (!content) {
+    throw new Error('Claude API returned empty content');
+  }
+
+  // Parse JSON — handle potential markdown fencing
+  let jsonStr = content.trim();
+  if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  }
+
+  const parsed = JSON.parse(jsonStr);
+
+  if (!Array.isArray(parsed)) {
+    throw new Error('Claude response is not a JSON array');
+  }
+
+  return parsed;
+}
+
+/**
+ * Validate a single void from Claude's response.
+ */
+function isValidVoid(v: unknown): v is ClaudeVoid {
+  if (!v || typeof v !== 'object') return false;
+  const obj = v as Record<string, unknown>;
+  return (
+    typeof obj.categorySlug === 'string' &&
+    typeof obj.title === 'string' &&
+    typeof obj.description === 'string' &&
+    typeof obj.reasoning === 'string' &&
+    ['beginner', 'intermediate', 'advanced'].includes(obj.difficulty as string) &&
+    ['low', 'medium', 'high'].includes(obj.competitionLevel as string) &&
+    Array.isArray(obj.suggestedFeatures) &&
+    Array.isArray(obj.evidenceProjects)
+  );
+}
+
+// --- Main Export ---
+
+export async function generateOpportunities(
+  supabase: SupabaseClient,
+): Promise<{ created: number; updated: number; error?: string }> {
+  // Step 1: Fetch DexScreener data (once, cached)
+  let dexTokens: TokenData[] = [];
+  let dexStats: { totalVolume24h: number; totalLiquidity: number } | null = null;
+  try {
+    dexTokens = await fetchNearTokens();
+    const stats = await getAggregateStats();
+    dexStats = {
+      totalVolume24h: stats.totalVolume24h,
+      totalLiquidity: stats.totalLiquidity,
+    };
+  } catch (err) {
+    console.warn('DexScreener fetch failed, continuing without market data:', err);
+  }
+
+  // Step 2: Fetch all categories
+  const { data: categories } = await supabase.from('categories').select('*');
+  if (!categories || categories.length === 0) {
+    return { created: 0, updated: 0, error: 'No categories found' };
+  }
+
+  // Build category slug → id map
+  const categorySlugToId = new Map<string, string>();
+  for (const cat of categories) {
+    categorySlugToId.set(cat.slug, cat.id);
+  }
+
+  // Step 3: Build category snapshots
+  const categorySnapshots: CategorySnapshot[] = [];
+  const allCategoryActiveProjects: number[] = [];
+  const allCategoryTVLs: number[] = [];
+  const now = Date.now();
+
+  for (const cat of categories) {
+    const { data: projects } = await supabase
       .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('category_id', category.id);
+      .select(
+        'name, description, tvl_usd, github_stars, github_forks, github_open_issues, last_github_commit, is_active, website_url',
+      )
+      .eq('category_id', cat.id);
 
-    const { count: activeCount } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('category_id', category.id)
-      .eq('is_active', true);
+    const catProjects = projects || [];
+    const activeProjects = catProjects.filter((p) => p.is_active);
+    const totalTVL = catProjects.reduce(
+      (sum, p) => sum + (Number(p.tvl_usd) || 0),
+      0,
+    );
 
-    // Fetch per-project stats for this category
+    allCategoryActiveProjects.push(activeProjects.length);
+    allCategoryTVLs.push(totalTVL);
+
+    // Match projects to DexScreener tokens
+    const projectSnapshots = catProjects.map((p) => {
+      const token = matchProjectToToken(p.name, dexTokens);
+      return {
+        name: p.name,
+        description: p.description,
+        tvlUsd: Number(p.tvl_usd) || 0,
+        githubStars: p.github_stars || 0,
+        githubForks: p.github_forks || 0,
+        lastCommit: p.last_github_commit || null,
+        isActive: p.is_active,
+        has24hVolume: token ? token.volume24h > 0 : false,
+        volume24h: token?.volume24h || 0,
+        liquidityUsd: token?.liquidity || 0,
+      };
+    });
+
+    const totalStars = catProjects.reduce(
+      (sum, p) => sum + (p.github_stars || 0),
+      0,
+    );
+    const projectsWithRecentCommits = catProjects.filter((p) => {
+      if (!p.last_github_commit) return false;
+      return now - new Date(p.last_github_commit).getTime() <= THIRTY_DAYS_MS;
+    }).length;
+    const projectsWithVolume = projectSnapshots.filter(
+      (p) => p.has24hVolume,
+    ).length;
+
+    categorySnapshots.push({
+      name: cat.name,
+      slug: cat.slug,
+      isStrategic: cat.is_strategic,
+      strategicMultiplier: Number(cat.strategic_multiplier),
+      projects: projectSnapshots,
+      aggregates: {
+        totalProjects: catProjects.length,
+        activeProjects: activeProjects.length,
+        totalTVL,
+        avgGithubStars:
+          catProjects.length > 0
+            ? Math.round(totalStars / catProjects.length)
+            : 0,
+        projectsWithRecentCommits,
+        projectsWithVolume,
+      },
+    });
+  }
+
+  // Step 4: Fetch chain stats for context
+  const { data: chainStatsRows } = await supabase
+    .from('chain_stats')
+    .select('*')
+    .order('fetched_at', { ascending: false })
+    .limit(1);
+
+  const chainStats = chainStatsRows?.[0] || {};
+
+  // Step 5: Call Claude to detect voids
+  let claudeVoids: ClaudeVoid[];
+  try {
+    const rawVoids = await detectVoidsWithClaude(categorySnapshots, {
+      ...chainStats,
+      dexScreener: dexStats,
+    });
+
+    // Validate each void
+    claudeVoids = rawVoids.filter(isValidVoid);
+
+    // Filter out voids referencing non-existent categories
+    claudeVoids = claudeVoids.filter((v) => categorySlugToId.has(v.categorySlug));
+
+    // Cap at 100 voids (safety limit)
+    if (claudeVoids.length > 100) {
+      claudeVoids = claudeVoids.slice(0, 100);
+    }
+
+    console.log(
+      `Claude detected ${rawVoids.length} voids, ${claudeVoids.length} valid after filtering`,
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Claude void detection failed:', message);
+    return { created: 0, updated: 0, error: message };
+  }
+
+  if (claudeVoids.length === 0) {
+    return { created: 0, updated: 0, error: 'Claude returned 0 valid voids' };
+  }
+
+  // Step 6: Compute gap scores for each void
+  const ecosystemAverageTVL =
+    allCategoryTVLs.length > 0
+      ? allCategoryTVLs.reduce((s, v) => s + v, 0) / allCategoryTVLs.length
+      : 0;
+
+  // Build per-category data lookup for gap scoring
+  const categoryDataMap = new Map<
+    string,
+    {
+      totalProjects: number;
+      activeProjects: number;
+      totalTVL: number;
+      isStrategic: boolean;
+      strategicMultiplier: number;
+      projectTVLs: number[];
+      projectGithubStats: {
+        stars: number;
+        forks: number;
+        openIssues: number;
+        lastCommit: string | null;
+        isActive: boolean;
+      }[];
+    }
+  >();
+
+  for (let i = 0; i < categories.length; i++) {
+    const cat = categories[i];
+    const snapshot = categorySnapshots[i];
     const { data: projectStats } = await supabase
       .from('projects')
-      .select('tvl_usd, github_stars, github_forks, github_open_issues, last_github_commit, is_active')
-      .eq('category_id', category.id);
+      .select(
+        'tvl_usd, github_stars, github_forks, github_open_issues, last_github_commit, is_active',
+      )
+      .eq('category_id', cat.id);
 
-    const categoryProjects = projectStats || [];
-    const totalTVL = categoryProjects.reduce((sum, p) => sum + (Number(p.tvl_usd) || 0), 0);
-
-    // Calculate base gap score
-    const baseGapScore = calculateGapScore({
-      categorySlug: category.slug,
-      totalProjects: totalCount || 0,
-      activeProjects: activeCount || 0,
-      totalTVL,
-      isStrategic: category.is_strategic,
-      strategicMultiplier: Number(category.strategic_multiplier),
-      projectTVLs: categoryProjects.map((p) => Number(p.tvl_usd) || 0),
-      projectGithubStats: categoryProjects.map((p) => ({
+    const catProjects = projectStats || [];
+    categoryDataMap.set(cat.slug, {
+      totalProjects: snapshot.aggregates.totalProjects,
+      activeProjects: snapshot.aggregates.activeProjects,
+      totalTVL: snapshot.aggregates.totalTVL,
+      isStrategic: cat.is_strategic,
+      strategicMultiplier: Number(cat.strategic_multiplier),
+      projectTVLs: catProjects.map((p) => Number(p.tvl_usd) || 0),
+      projectGithubStats: catProjects.map((p) => ({
         stars: p.github_stars || 0,
         forks: p.github_forks || 0,
         openIssues: p.github_open_issues || 0,
         lastCommit: p.last_github_commit,
         isActive: p.is_active,
       })),
+    });
+  }
+
+  // Step 7: Delete all existing opportunities (clean slate)
+  const { error: deleteError } = await supabase
+    .from('opportunities')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000'); // delete all rows
+
+  if (deleteError) {
+    console.error('Failed to delete existing opportunities:', deleteError.message);
+  }
+
+  // Step 8: Insert new voids
+  let created = 0;
+
+  for (const v of claudeVoids) {
+    const categoryId = categorySlugToId.get(v.categorySlug);
+    if (!categoryId) continue;
+
+    const catData = categoryDataMap.get(v.categorySlug);
+    if (!catData) continue;
+
+    const gapScore = calculateGapScore({
+      categorySlug: v.categorySlug,
+      totalProjects: catData.totalProjects,
+      activeProjects: catData.activeProjects,
+      totalTVL: catData.totalTVL,
+      isStrategic: catData.isStrategic,
+      strategicMultiplier: catData.strategicMultiplier,
+      projectTVLs: catData.projectTVLs,
+      projectGithubStats: catData.projectGithubStats,
       allCategoryActiveProjects,
       ecosystemAverageTVL,
     });
 
-    const competitionLevel = getCompetitionLevel(activeCount || 0);
+    const demandScore = Math.round(Math.log10(catData.totalTVL + 1) * 10) / 10;
 
-    // Get templates for this category (or generate a default one)
-    const templates = categoryOpportunities[category.slug] || [
-      {
-        title: `Build on ${category.name} — NEAR`,
-        description: `An opportunity to build innovative solutions in the ${category.name} space on NEAR Protocol.`,
-        features: ['Core protocol feature', 'User dashboard', 'API integration', 'Analytics'],
-        difficulty: getDifficulty(category.slug),
-        scoreMultiplier: 1.0,
-      },
-    ];
+    const { error: insertError } = await supabase.from('opportunities').insert({
+      category_id: categoryId,
+      title: v.title,
+      description: v.description,
+      gap_score: Math.min(gapScore, 100),
+      demand_score: demandScore,
+      competition_level: v.competitionLevel,
+      reasoning: v.reasoning,
+      suggested_features: v.suggestedFeatures,
+      difficulty: v.difficulty,
+    });
 
-    // Fetch existing opportunities for this category
-    const { data: existingOpps } = await supabase
-      .from('opportunities')
-      .select('id, title')
-      .eq('category_id', category.id);
-
-    const existingByTitle = new Map(
-      (existingOpps || []).map((o) => [o.title, o.id])
-    );
-
-    for (const template of templates) {
-      const gapScore = Math.min(
-        Math.round(baseGapScore * template.scoreMultiplier),
-        100
-      );
-
-      const opportunityData = {
-        category_id: category.id,
-        title: template.title,
-        description: template.description,
-        gap_score: gapScore,
-        demand_score: Math.log10(totalTVL + 1),
-        competition_level: competitionLevel,
-        reasoning: generateReasoning(
-          category.name,
-          activeCount || 0,
-          totalTVL,
-          category.is_strategic,
-          template,
-        ),
-        suggested_features: template.features,
-        difficulty: template.difficulty,
-      };
-
-      const existingId = existingByTitle.get(template.title);
-
-      if (existingId) {
-        await supabase
-          .from('opportunities')
-          .update(opportunityData)
-          .eq('id', existingId);
-        updated++;
-      } else {
-        await supabase
-          .from('opportunities')
-          .insert(opportunityData);
-        created++;
-      }
+    if (insertError) {
+      console.error(`Failed to insert void "${v.title}":`, insertError.message);
+    } else {
+      created++;
     }
   }
 
-  return { created, updated };
+  return { created, updated: 0 };
 }
