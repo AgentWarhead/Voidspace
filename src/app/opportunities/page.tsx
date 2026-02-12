@@ -12,12 +12,13 @@ import { BuildPlansSection } from '@/components/brief/BuildPlansSection';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GradientText } from '@/components/effects/GradientText';
 import { GridPattern } from '@/components/effects/GridPattern';
-import { getOpportunities, getAllCategories } from '@/lib/queries';
+import { getOpportunities, getAllCategories, getTotalOpportunitiesCount } from '@/lib/queries';
 
 interface Props {
   searchParams: {
     category?: string;
     difficulty?: string;
+    competition?: string;
     sort?: string;
     minScore?: string;
     maxScore?: string;
@@ -27,31 +28,33 @@ interface Props {
 }
 
 export const metadata = {
-  title: 'Voids — Voidspace',
+  title: 'Explore the Voids — Voidspace',
   description: 'Discover voids in the NEAR ecosystem. Find your next build.',
 };
 
 export default async function OpportunitiesPage({ searchParams }: Props) {
-  const page = parseInt(searchParams.page || '1', 10);
+  const page = parseInt(searchParams?.page || '1', 10);
   const pageSize = 12;
 
-  const [{ data: opportunities, total }, categories] = await Promise.all([
+  const [{ data: opportunities, total: filteredTotal }, categories, totalCount] = await Promise.all([
     getOpportunities({
-      category: searchParams.category,
-      difficulty: searchParams.difficulty,
-      sort: searchParams.sort || 'gap_score',
-      minScore: searchParams.minScore ? parseInt(searchParams.minScore) : undefined,
-      maxScore: searchParams.maxScore ? parseInt(searchParams.maxScore) : undefined,
-      search: searchParams.q,
+      category: searchParams?.category,
+      difficulty: searchParams?.difficulty,
+      competition: searchParams?.competition,
+      sort: searchParams?.sort || 'gap_score',
+      minScore: searchParams?.minScore ? parseInt(searchParams.minScore) : undefined,
+      maxScore: searchParams?.maxScore ? parseInt(searchParams.maxScore) : undefined,
+      search: searchParams?.q,
       page,
       pageSize,
     }),
     getAllCategories(),
+    getTotalOpportunitiesCount(),
   ]);
 
   return (
     <div className="min-h-screen">
-      {/* 1. Hero Section */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden py-10 sm:py-14">
         <div
           className="absolute inset-0"
@@ -68,17 +71,16 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
         />
         <Container size="xl" className="relative z-10 text-center">
           <GradientText as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight">
-            Detected Voids
+            Explore the Voids
           </GradientText>
           <p className="text-text-secondary mt-2 max-w-lg mx-auto text-sm sm:text-base">
-            Explore voids in the NEAR ecosystem. Higher Void Scores mean deeper opportunities.
+            Ecosystem gaps waiting to be filled. Higher scores = deeper opportunities.
           </p>
 
-          {/* Build Plan tagline */}
           <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">
             <Sparkles className="w-4 h-4 text-near-green animate-pulse" />
             <span className="text-sm text-text-secondary">
-              Every project comes with an AI-powered{' '}
+              Every void includes an AI-powered{' '}
               <span className="text-near-green font-medium">Build Plan</span>
             </span>
           </div>
@@ -86,7 +88,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
           {/* Summary Stats */}
           <div className="flex items-center justify-center gap-6 sm:gap-10 mt-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-near-green font-mono">{total}</p>
+              <p className="text-2xl font-bold text-near-green font-mono">{totalCount}</p>
               <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Voids Detected</p>
             </div>
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
@@ -98,32 +100,32 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
         </Container>
       </section>
 
-      {/* 2. Filters + Voids Grid */}
+      {/* Filters + Voids Grid */}
       <Container size="xl" className="py-6 space-y-6">
         <Card variant="glass" padding="md">
           <Suspense fallback={<Skeleton variant="rectangular" height="40px" />}>
-            <OpportunityFilters categories={categories} />
+            <OpportunityFilters categories={categories} total={totalCount} filteredTotal={filteredTotal} />
           </Suspense>
         </Card>
 
         <section>
           <div id="voids-list" />
-          <SectionHeader title="All Voids" count={total} badge="HOT" />
+          <SectionHeader title="All Voids" count={filteredTotal} badge="HOT" />
           <OpportunityList
             opportunities={opportunities}
-            total={total}
+            total={filteredTotal}
             page={page}
             pageSize={pageSize}
           />
         </section>
       </Container>
 
-      {/* 3. Custom Brief Section */}
+      {/* Custom Brief Section */}
       <Container size="xl" className="py-8">
         <BuildPlansSection />
       </Container>
 
-      {/* 4. Void Bubbles CTA */}
+      {/* Void Bubbles CTA */}
       <Container size="xl" className="py-4 pb-12">
         <ScrollReveal>
           <Link href="/void-bubbles" className="group flex items-center gap-3 px-6 py-4 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">

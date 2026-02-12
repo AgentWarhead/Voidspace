@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { OpportunityCard } from '@/components/opportunities/OpportunityCard';
 import { VoidEmptyState } from '@/components/ui/VoidEmptyState';
+// @ts-ignore
+import { Filter } from 'lucide-react';
 import type { Opportunity } from '@/types';
 
 interface OpportunityListProps {
@@ -28,8 +30,8 @@ export function OpportunityList({
       <VoidEmptyState
         icon={Filter}
         title="No voids match your filters"
-        description="Try adjusting your filters or search terms"
-        actionLabel={onClearFilters ? "Clear Filters" : undefined}
+        description="Try adjusting your filters or broadening your search to discover more ecosystem gaps."
+        actionLabel={onClearFilters ? 'Clear Filters' : undefined}
         actionOnClick={onClearFilters}
       />
     );
@@ -37,23 +39,29 @@ export function OpportunityList({
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-text-muted font-mono">
-        {total} {total === 1 ? 'opportunity' : 'opportunities'} found
-      </p>
-
+      {/* Stagger-animated grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {opportunities.map((opp) => (
-          <OpportunityCard key={opp.id} opportunity={opp} />
+        {opportunities.map((opp, i) => (
+          <div
+            key={opp.id}
+            className="animate-fade-in opacity-0"
+            style={{
+              animationDelay: `${i * 60}ms`,
+              animationFillMode: 'forwards',
+            }}
+          >
+            <OpportunityCard opportunity={opp} index={i} />
+          </div>
         ))}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 pt-2">
           {page > 1 ? (
             <Link
               href={`${baseUrl}?page=${page - 1}`}
-              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/60 border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               Previous
@@ -72,7 +80,7 @@ export function OpportunityList({
           {page < totalPages ? (
             <Link
               href={`${baseUrl}?page=${page + 1}`}
-              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/60 border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
             >
               Next
               <ChevronRight className="w-4 h-4" />

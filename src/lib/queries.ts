@@ -163,6 +163,14 @@ export async function getRecentSyncLogs(limit: number = 5): Promise<SyncLog[]> {
 
 // --- Category Queries ---
 
+export async function getTotalOpportunitiesCount(): Promise<number> {
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from('opportunities')
+    .select('id', { count: 'exact', head: true });
+  return count || 0;
+}
+
 export async function getAllCategories(): Promise<Category[]> {
   const supabase = createAdminClient();
 
@@ -260,6 +268,7 @@ export async function getCategoryProjectStats(categoryId: string): Promise<{
 export async function getOpportunities(options: {
   category?: string;
   difficulty?: string;
+  competition?: string;
   sort?: string;
   search?: string;
   minScore?: number;
@@ -271,6 +280,7 @@ export async function getOpportunities(options: {
   const {
     category,
     difficulty,
+    competition,
     sort = 'gap_score',
     search,
     minScore,
@@ -303,6 +313,10 @@ export async function getOpportunities(options: {
     query = query.eq('difficulty', difficulty);
   }
 
+  if (competition) {
+    query = query.eq('competition_level', competition);
+  }
+
   if (minScore !== undefined) {
     query = query.gte('gap_score', minScore);
   }
@@ -320,6 +334,9 @@ export async function getOpportunities(options: {
       break;
     case 'demand':
       query = query.order('demand_score', { ascending: false });
+      break;
+    case 'difficulty_asc':
+      query = query.order('difficulty', { ascending: true });
       break;
     default:
       query = query.order('gap_score', { ascending: false });
