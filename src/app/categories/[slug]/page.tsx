@@ -14,6 +14,7 @@ import {
   getCategoryProjectStats,
 } from '@/lib/queries';
 import { calculateGapScore } from '@/lib/gap-score';
+import { CategoryTokenStats } from '@/components/categories/CategoryTokenStats';
 
 interface Props {
   params: { slug: string };
@@ -94,6 +95,15 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
       </section>
 
       <Container size="xl" className="py-8 space-y-8">
+        <ScrollReveal>
+          <section>
+            <CategoryTokenStats
+              categoryName={category.name}
+              categorySlug={category.slug}
+            />
+          </section>
+        </ScrollReveal>
+
         <ScrollReveal>
           <section>
             <SectionHeader title="Category Statistics" badge="AI ANALYZED" />
