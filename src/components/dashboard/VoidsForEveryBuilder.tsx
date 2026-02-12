@@ -38,13 +38,8 @@ const item = {
 export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProps) {
   const [activeTab, setActiveTab] = useState<Difficulty>('beginner');
 
-  // Prioritize non-filled voids with highest gap scores for display
-  const bestOpps = opportunities
-    .filter((o) => o.competition_level !== 'high')
-    .sort((a, b) => b.gap_score - a.gap_score);
-
-  // Fall back to all opportunities sorted by score if every void is filled
-  const displayOpps = bestOpps.length > 0 ? bestOpps : [...opportunities].sort((a, b) => b.gap_score - a.gap_score);
+  // Show all voids sorted by gap score — competition level is displayed on cards, not used as a filter
+  const displayOpps = [...opportunities].sort((a, b) => b.gap_score - a.gap_score);
 
   const counts: Record<Difficulty, number> = {
     beginner: opportunities.filter((o) => o.difficulty === 'beginner').length,
