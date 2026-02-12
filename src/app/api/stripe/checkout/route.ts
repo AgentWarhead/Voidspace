@@ -23,8 +23,13 @@ function verifyCsrf(request: NextRequest): boolean {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://voidspace.io';
   const siteDomain = new URL(siteUrl).origin;
 
-  // In development, also allow localhost origins
-  const allowedOrigins = [siteDomain];
+  // Allow both www and non-www variants + localhost in dev
+  const siteHost = new URL(siteUrl).hostname;
+  const allowedOrigins = [
+    siteDomain,
+    `https://www.${siteHost}`,  // handle www variant
+    `https://${siteHost.replace(/^www\./, '')}`,  // handle non-www variant
+  ];
   if (process.env.NODE_ENV !== 'production') {
     allowedOrigins.push('http://localhost:3000', 'http://localhost:3001');
   }
