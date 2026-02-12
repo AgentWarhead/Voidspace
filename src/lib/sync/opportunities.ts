@@ -79,7 +79,9 @@ async function detectVoidsWithClaude(
     throw new Error('ANTHROPIC_API_KEY not configured');
   }
 
-  const systemPrompt = `You are an ecosystem analyst for NEAR Protocol. Your job is to identify REAL, VERIFIED gaps (voids) in the ecosystem based on actual project data. Every void you identify must be supported by evidence from the data provided. Never invent or hallucinate opportunities — only report what the data shows is missing.`;
+  const systemPrompt = `You are an ecosystem analyst for NEAR Protocol. Your job is to identify REAL, VERIFIED gaps (voids) in the ecosystem based on actual project data. Every void you identify must be supported by evidence from the data provided. Never invent or hallucinate opportunities — only report what the data shows is missing.
+
+Your audience is builders of ALL skill levels — from weekend hackers to protocol architects. The best ecosystem intelligence surfaces opportunities everyone can act on, not just PhD-level cryptography projects. Think: "What could someone build THIS WEEKEND that would genuinely help the NEAR ecosystem?" alongside bigger plays.`;
 
   const userPrompt = `Analyze the following NEAR Protocol ecosystem data and identify legitimate voids (gaps where builders could create value).
 
@@ -87,14 +89,29 @@ RULES:
 1. Every void MUST reference specific real projects in its reasoning (e.g., "Ref Finance and Jumbo Exchange are both AMM-based. No order book DEX exists on NEAR.")
 2. Identify what EXISTS vs what's MISSING — the gap between them is the void
 3. Check for: empty categories, abandoned projects (no commits >90 days), missing subcategories, feature gaps within populated categories, tooling gaps
-4. Difficulty levels: beginner (integrate/build on existing tools, <4 weeks), intermediate (new protocol/tool with known patterns, 4-12 weeks), advanced (novel cryptography/infrastructure, 12+ weeks)
+4. Difficulty levels:
+   - BEGINNER: Build on existing tools/APIs. Dashboards, bots, browser extensions, notification services, analytics UIs, aggregator frontends, developer utilities, monitoring tools. Could be built in a weekend to 4 weeks by a solo dev.
+   - INTERMEDIATE: New protocol or tool using known patterns. Requires smart contract development or complex backend. 4-12 weeks, small team.
+   - ADVANCED: Novel cryptography, consensus mechanisms, or infrastructure. Research-grade. 12+ weeks, experienced team.
 5. Competition level per-void: low (0-1 similar projects), medium (2-3 similar), high (4+)
-6. Aim for ~60-80 total voids across all categories, distributed: ~30% beginner, ~45% intermediate, ~25% advanced
-7. Beginner voids should be practical — tools, dashboards, integrations, bots, UIs that leverage existing infrastructure
+6. CRITICAL DISTRIBUTION — aim for 70-90 total voids: ~40% beginner, ~40% intermediate, ~20% advanced. This is mandatory.
+7. BEGINNER VOIDS ARE THE PRIORITY. These are what bring new builders into the ecosystem. Think:
+   - Telegram/Discord bots (price alerts, whale watchers, DAO vote notifiers)
+   - Browser extensions (portfolio viewer, gas tracker, tx decoder)
+   - Dashboards and visualizations (validator stats, token flow maps, DeFi comparison tools)
+   - Developer utilities (contract templates, deployment scripts, testing tools)
+   - API wrappers and SDKs (simplify existing infrastructure for new devs)
+   - Notification and monitoring services (wallet activity alerts, protocol health monitors)
+   - Data aggregation tools (combine existing APIs into useful views)
+   - Educational/interactive tools (learn-by-doing tutorials, sandbox environments)
+   Each beginner void should make someone think: "I could actually build that. Let me start."
 8. Every void must be something a builder could ACTUALLY start building on NEAR today
 9. Do NOT suggest voids that are already well-served by existing active projects with significant TVL/usage
-10. For categories with 0 projects: identify 3-4 foundational voids
+10. For categories with 0 projects: identify 3-4 foundational voids (mix of beginner and intermediate)
 11. For categories with active projects: identify specific FEATURE gaps and COMPLEMENTARY tools
+12. NEAR-SPECIFIC: Focus on gaps unique to NEAR's architecture (named accounts, access keys, sharding, chain signatures, intents). Generic blockchain ideas that apply to any chain are less valuable.
+13. AVOID GENERIC: Don't suggest "Decentralized Social Media" or "Algorithmic Stablecoin" — these exist on every chain. What does NEAR specifically lack given its unique tech?
+14. ACTIONABLE DESCRIPTIONS: Each description should hint at HOW to build it. Mention specific APIs, protocols, or tools the builder would use.
 
 [ECOSYSTEM DATA]
 ${JSON.stringify(categorySnapshots, null, 2)}
@@ -127,7 +144,7 @@ Return ONLY valid JSON. No markdown, no explanation.`;
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 16000,
+      max_tokens: 32000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     }),
