@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { checkBalance, deductCredits } from '@/lib/credits';
 
-// NOTE: This endpoint uses Gemini (Google) for image generation, not Claude.
-// AI budget tracking is only for Claude (Anthropic) usage.
-
-// Nano Banana Pro integration for visual generation
-// Uses Gemini 2.0 Flash for image generation
+// Visual generation via Gemini. Credit-gated to prevent abuse.
+// Flat fee: $0.05 per generation (3x markup on ~$0.015 Gemini cost).
+const VISUAL_CREDIT_COST = 0.05;
 
 interface VisualRequest {
   prompt: string;
@@ -27,6 +26,15 @@ export async function POST(request: NextRequest) {
     const rateKey = `visual:${user.userId}`;
     if (!rateLimit(rateKey, 3, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    // Credit gate — check before burning Gemini API cost
+    const hasCredits = await checkBalance(user.userId, VISUAL_CREDIT_COST);
+    if (!hasCredits) {
+      return NextResponse.json(
+        { error: 'Insufficient credits. Top up your Sanctum balance to generate visuals.' },
+        { status: 402 }
+      );
     }
 
     const { prompt, type, projectContext }: VisualRequest = await request.json();
@@ -134,6 +142,11 @@ Make it suitable for Twitter/X, professional but exciting.`;
     );
 
     if (imagePart?.inlineData) {
+      // Deduct credits AFTER successful generation (don't charge for failures)
+      await deductCredits(user.userId, VISUAL_CREDIT_COST, 'Sanctum visual generation', {
+        sessionId: type,
+      });
+
       return NextResponse.json({
         success: true,
         image: {
