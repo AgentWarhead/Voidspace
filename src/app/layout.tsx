@@ -6,6 +6,7 @@ import { Providers } from '@/components/providers/Providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
 import { VoidPulseNotifications } from '@/components/effects/VoidPulseNotifications';
+import { BackToTopButton } from '@/components/landing/BackToTopButton';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -119,6 +120,7 @@ export default function RootLayout({
             </ErrorBoundary>
           </main>
           <Footer />
+          <BackToTopButton />
           <VoidPulseNotifications />
         </Providers>
       </body>
