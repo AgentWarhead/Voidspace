@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-// @ts-expect-error - lucide-react 0.453.0 type issues
 import { Share2, Copy, Check, Link2, Send } from 'lucide-react';
 
 interface ShareContractProps {

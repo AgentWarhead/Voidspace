@@ -14,11 +14,24 @@ interface DexPair {
   quoteToken: { address: string; name: string; symbol: string };
   priceUsd: string;
   volume: { h24: number; h6: number; h1: number };
-  priceChange: { h24: number; h6: number; h1: number };
+  priceChange: { h24: number; h6: number; h1: number; m5?: number };
   liquidity: { usd: number };
   marketCap?: number;
   fdv?: number;
   chainId: string;
+  dexId?: string;
+  pairAddress?: string;
+  pairCreatedAt?: number;
+  txns?: {
+    h24: { buys: number; sells: number };
+    h6: { buys: number; sells: number };
+    h1: { buys: number; sells: number };
+  };
+  info?: {
+    imageUrl?: string;
+    websites?: { url: string; label: string }[];
+    socials?: { url: string; type: string }[];
+  } | null;
 }
 
 export interface VoidBubbleToken {
@@ -40,7 +53,22 @@ export interface VoidBubbleToken {
   priceChange6h: number;
   dexScreenerUrl?: string;
   refFinanceUrl?: string;
-  contractAddress: string; // the token's contract address (same as id)
+  contractAddress: string;
+  // Rich data from DexScreener
+  imageUrl?: string;
+  socials?: { url: string; type: string }[];
+  websites?: { url: string; label: string }[];
+  txns24h?: { buys: number; sells: number };
+  txns1h?: { buys: number; sells: number };
+  txns6h?: { buys: number; sells: number };
+  volume1h?: number;
+  volume6h?: number;
+  dexId?: string;
+  pairCreatedAt?: string;
+  pairAddress?: string;
+  quoteToken?: string;
+  fdv?: number;
+  priceChange5m?: number;
 }
 
 // Known NEAR token categories
@@ -210,6 +238,21 @@ export async function GET(request: Request) {
           dexScreenerUrl,
           refFinanceUrl,
           contractAddress: pair.baseToken.address,
+          // Rich DexScreener data
+          imageUrl: pair.info?.imageUrl,
+          socials: pair.info?.socials,
+          websites: pair.info?.websites,
+          txns24h: pair.txns?.h24,
+          txns1h: pair.txns?.h1,
+          txns6h: pair.txns?.h6,
+          volume1h: pair.volume?.h1 || 0,
+          volume6h: pair.volume?.h6 || 0,
+          dexId: pair.dexId,
+          pairCreatedAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
+          pairAddress: pair.pairAddress,
+          quoteToken: pair.quoteToken?.symbol,
+          fdv: pair.fdv,
+          priceChange5m: pair.priceChange?.m5 ?? undefined,
         });
       }
     }
@@ -274,11 +317,37 @@ export async function GET(request: Request) {
     // Sort by market cap descending
     tokens.sort((a, b) => b.marketCap - a.marketCap);
 
+    // Aggregate stats for header
+    const cappedTokens = tokens.slice(0, 150);
+    const totalMarketCap = cappedTokens.reduce((sum, t) => sum + t.marketCap, 0);
+    const totalVolume24h = cappedTokens.reduce((sum, t) => sum + t.volume24h, 0);
+    const totalLiquidity = cappedTokens.reduce((sum, t) => sum + t.liquidity, 0);
+    const gainersCount = cappedTokens.filter(t => t.priceChange24h > 0).length;
+    const losersCount = cappedTokens.filter(t => t.priceChange24h < 0).length;
+    const avgHealthScore = Math.round(cappedTokens.reduce((sum, t) => sum + t.healthScore, 0) / cappedTokens.length);
+    // Category breakdown
+    const categoryBreakdown: Record<string, number> = {};
+    cappedTokens.forEach(t => { categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + 1; });
+
     return NextResponse.json({
-      tokens: tokens.slice(0, 150), // Cap at 150 for performance
+      tokens: cappedTokens,
+      stats: {
+        totalTokens: cappedTokens.length,
+        totalMarketCap,
+        totalVolume24h,
+        totalLiquidity,
+        gainersCount,
+        losersCount,
+        avgHealthScore,
+        categoryBreakdown,
+      },
       lastUpdated: new Date().toISOString(),
       sources: ['ref-finance', 'dexscreener'],
-      period, // Include the period in the response
+      period,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+      },
     });
   } catch (error) {
     console.error('Void Bubbles API error:', error);

@@ -6,7 +6,7 @@ import { ImportedContract } from '../components/ImportContract';
 import { generateSessionId } from '../components/PairProgramming';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
-type SanctumMode = 'build' | 'roast' | 'webapp';
+type SanctumMode = 'build' | 'roast' | 'webapp' | 'visual';
 
 export interface SanctumState {
   mode: SanctumMode;

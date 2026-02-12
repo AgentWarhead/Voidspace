@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
+import { checkBalance, deductCredits } from '@/lib/credits';
 
-// NOTE: This endpoint uses Gemini (Google) for image generation, not Claude.
-// AI budget tracking is only for Claude (Anthropic) usage.
-
-// Nano Banana Pro integration for visual generation
-// Uses Gemini 2.0 Flash for image generation
+// Visual generation via Gemini. Credit-gated to prevent abuse.
+// Flat fee: $0.05 per generation (3x markup on ~$0.015 Gemini cost).
+const VISUAL_CREDIT_COST = 0.05;
 
 interface VisualRequest {
   prompt: string;
@@ -27,6 +26,15 @@ export async function POST(request: NextRequest) {
     const rateKey = `visual:${user.userId}`;
     if (!rateLimit(rateKey, 3, 60_000).allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    // Credit gate — check before burning Gemini API cost
+    const hasCredits = await checkBalance(user.userId, VISUAL_CREDIT_COST);
+    if (!hasCredits) {
+      return NextResponse.json(
+        { error: 'Insufficient credits. Top up your Sanctum balance to generate visuals.' },
+        { status: 402 }
+      );
     }
 
     const { prompt, type, projectContext }: VisualRequest = await request.json();
@@ -53,39 +61,94 @@ export async function POST(request: NextRequest) {
     }
 
     // Build enhanced prompt based on type
+    // Each prompt is optimized for Gemini image generation with consistent Voidspace branding
+    const BRAND = `STRICT VISUAL QUALITY STANDARDS:
+- Premium, modern design — looks like it was made by a top-tier design agency
+- Dark or rich background preferred (not plain white) — deep blacks, dark gradients, or sophisticated color palettes
+- Clean sans-serif typography, bold headings, high contrast for readability
+- Subtle depth effects: glass morphism, soft glows, layered shadows, gradient accents
+- Sharp, crisp lines and edges — nothing blurry or low-quality
+- Color palette: use colors that match the USER'S project or topic. If none specified, default to a sophisticated dark theme with vibrant accent colors
+- NO clip-art. NO cartoonish or amateur elements. NO stock-photo aesthetic.
+- Output: high resolution, 16:9 landscape aspect ratio, production-ready quality
+- This should look like something worth paying for.`;
+
     let enhancedPrompt = '';
+    const ctx = projectContext ? `\nProject context: ${projectContext}` : '';
     
     switch (type) {
       case 'architecture':
-        enhancedPrompt = `Create a clean, professional architecture diagram for a blockchain project. 
-Style: Dark theme, modern, tech startup aesthetic. Colors: Use teal/cyan (#00EC97) as accent color on dark background.
-Show: ${prompt}
-${projectContext ? `Context: ${projectContext}` : ''}
-Make it clear, minimal, and suitable for a pitch deck.`;
+        enhancedPrompt = `Generate a professional software architecture diagram.
+
+${BRAND}
+
+DIAGRAM REQUIREMENTS:
+- Show system components as labeled glass-morphism cards/boxes with glowing accent borders
+- Connect components with clean directional arrows with subtle glow effects
+- Group related services visually (frontend, backend, data layer, external APIs)
+- Include small icons or symbols inside each component box to aid recognition
+- Label all connections with brief protocol/method names (REST, RPC, WebSocket, etc.)
+- Arrange in a clear top-to-bottom or left-to-right hierarchy — no overlapping
+- Add a subtle grid or dot pattern on the background for depth
+- This should look like it belongs in a $10M startup pitch deck
+
+WHAT TO DIAGRAM: ${prompt}${ctx}`;
         break;
         
       case 'flow':
-        enhancedPrompt = `Create a user flow / process diagram for a blockchain application.
-Style: Dark theme with neon accents, modern fintech aesthetic. Primary color: teal/cyan (#00EC97).
-Show the flow: ${prompt}
-${projectContext ? `Context: ${projectContext}` : ''}
-Use arrows to show direction, keep it simple and readable.`;
+        enhancedPrompt = `Generate a user flow diagram showing a step-by-step process.
+
+${BRAND}
+
+FLOW REQUIREMENTS:
+- Each step is a rounded rectangle with accent-colored border and glass-morphism fill
+- Number each step clearly (01, 02, 03...) in the top-left corner of each box
+- Connect steps with smooth curved arrows with directional arrowheads
+- Decision points use diamond shapes with a contrasting accent color
+- Start node: filled accent circle. End node: filled accent circle with ring
+- Include a brief label inside each step box (action verb + noun: "Connect Wallet", "Submit Form")
+- Arrange left-to-right or top-to-bottom with consistent spacing
+- Clean, scannable at a glance — no clutter
+
+FLOW TO SHOW: ${prompt}${ctx}`;
         break;
         
       case 'infographic':
-        enhancedPrompt = `Create an infographic explaining a blockchain concept.
-Style: Dark theme, professional, suitable for social media and presentations. Accent: teal (#00EC97).
-Explain: ${prompt}
-${projectContext ? `Context: ${projectContext}` : ''}
-Make it educational but visually engaging.`;
+        enhancedPrompt = `Generate an educational infographic that explains a technical concept visually.
+
+${BRAND}
+
+INFOGRAPHIC REQUIREMENTS:
+- Bold headline at the top in large text with an accent-colored keyword
+- Divide content into 3-5 clear sections with visual hierarchy (top to bottom)
+- Use icons, small illustrations, and data visualizations (charts, progress bars, comparisons)
+- Key numbers/stats should be LARGE and accent-colored to draw the eye
+- Include brief explanatory text (2-3 lines max per section)
+- Use divider lines or subtle section backgrounds to separate topics
+- Bottom section: key takeaway or call-to-action in a highlighted accent box
+- Optimized for sharing — readable at both full size and thumbnail
+- Professional enough for a conference presentation, engaging enough for Twitter
+
+TOPIC TO EXPLAIN: ${prompt}${ctx}`;
         break;
         
       case 'social':
-        enhancedPrompt = `Create a social media announcement graphic for a blockchain project launch.
-Style: Dark theme, bold, eye-catching. Use teal/cyan (#00EC97) as primary accent.
-Message: ${prompt}
-${projectContext ? `Project: ${projectContext}` : ''}
-Make it suitable for Twitter/X, professional but exciting.`;
+        enhancedPrompt = `Generate a social media announcement graphic optimized for Twitter/X.
+
+${BRAND}
+
+SOCIAL GRAPHIC REQUIREMENTS:
+- Aspect ratio: 16:9 (1200x675px equivalent) — Twitter card format
+- Massive, bold headline text taking up 40-50% of the image — impossible to scroll past
+- Gradient highlight or underline on the most important word(s)
+- Subtle abstract background elements: mesh gradients, geometric shapes, particle effects
+- If announcing a feature: show a minimal mockup/icon representing it
+- If announcing a launch: add urgency elements (date, "LIVE NOW", countdown feel)
+- Include space for a small logo/brand mark in the corner
+- NO stock photo feel. This should look like it was designed by a top-tier design agency.
+- The image alone should make someone stop scrolling and want to learn more.
+
+ANNOUNCEMENT: ${prompt}${ctx}`;
         break;
         
       default:
@@ -134,6 +197,11 @@ Make it suitable for Twitter/X, professional but exciting.`;
     );
 
     if (imagePart?.inlineData) {
+      // Deduct credits AFTER successful generation (don't charge for failures)
+      await deductCredits(user.userId, VISUAL_CREDIT_COST, 'Sanctum visual generation', {
+        sessionId: type,
+      });
+
       return NextResponse.json({
         success: true,
         image: {

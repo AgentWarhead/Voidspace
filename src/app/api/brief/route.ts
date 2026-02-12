@@ -4,6 +4,7 @@ import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidUUID } from '@/lib/auth/validate';
 import { canGenerateBrief } from '@/lib/tiers';
+import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 import type { TierName } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -76,6 +77,17 @@ export async function POST(request: NextRequest) {
           { status: 403 }
         );
       }
+
+      // Primary gate: credit balance check
+      // Estimate ~1500 input + ~2500 output tokens for a brief generation
+      const estimatedCost = estimateCreditCost(1500, 2500);
+      const hasCredits = await checkBalance(userId, estimatedCost);
+      if (!hasCredits) {
+        return NextResponse.json(
+          { error: 'Insufficient credits. Top up your Sanctum balance to generate briefs.' },
+          { status: 402 }
+        );
+      }
     }
 
     // Call the Supabase Edge Function (which has the ANTHROPIC_API_KEY secret)
@@ -109,7 +121,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log usage
+    // Log usage and deduct credits
     if (userId) {
       const { error: usageError } = await supabase.from('usage').insert({
         user_id: userId,
@@ -118,6 +130,19 @@ export async function POST(request: NextRequest) {
       });
       if (usageError) {
         console.error('Failed to log usage:', usageError.message, usageError.details);
+      }
+
+      // Deduct credits based on actual usage if available, otherwise estimate
+      const inputTokens = data?.usage?.input_tokens || 1500;
+      const outputTokens = data?.usage?.output_tokens || 2500;
+      const creditCost = estimateCreditCost(inputTokens, outputTokens);
+      
+      const deduction = await deductCredits(userId, creditCost, 'Brief generation', {
+        tokensInput: inputTokens,
+        tokensOutput: outputTokens,
+      });
+      if (!deduction.success) {
+        console.error('Failed to deduct credits for brief:', deduction.error);
       }
     }
 

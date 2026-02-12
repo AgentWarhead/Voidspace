@@ -124,6 +124,14 @@ body::before {
   100% { top: 100%; opacity: 0; }
 }
 
+/* Void Bubbles full-viewport background scan */
+@keyframes void-bg-scan {
+  0% { top: -1px; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
 /* Rotating gradient border */
 @property --angle {
   syntax: '<angle>';

@@ -1,12 +1,12 @@
+import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { VoidBubblesPageClient } from './VoidBubblesPageClient';
 
 export const metadata: Metadata = {
-  title: 'Void Bubbles — Live NEAR Ecosystem Visualization | Voidspace',
-  description: 'Watch the NEAR ecosystem breathe in real-time. Every token as a living bubble — price action, health scores, whale alerts, and rug detection. Powered by Ref Finance + DexScreener.',
-  keywords: ['NEAR', 'tokens', 'visualization', 'DeFi', 'bubbles', 'real-time', 'crypto', 'market', 'whale alerts'],
+  title: 'Void Bubbles — Voidspace Observatory',
+  description: 'Live NEAR Protocol ecosystem visualization. 150+ tokens as living, breathing bubbles with AI health scores, whale alerts, and real-time market data.',
+  keywords: ['NEAR', 'bubble map', 'cryptocurrency', 'market cap', 'DeFi', 'token visualization'],
 };
 
 export default function VoidBubblesPage() {
-  return <VoidBubblesPageClient />;
+  redirect('/observatory?tool=void-bubbles');
 }

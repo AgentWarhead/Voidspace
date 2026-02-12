@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-// @ts-expect-error - lucide-react types issue with TS 5.9
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { PersonaSelector } from './PersonaSelector';
 import { PERSONAS, Persona, getPersona } from '../lib/personas';
+import { UpgradeModal } from '@/components/credits/UpgradeModal';
 
 interface AttachedFile {
   name: string;
@@ -86,6 +86,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
@@ -387,6 +388,15 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
       );
       onTaskUpdate?.({ ...task });
 
+      // Handle 402 — credits depleted
+      if (response.status === 402) {
+        setShowUpgradeModal(true);
+        setIsLoading(false);
+        onThinkingChange?.(false);
+        onTaskUpdate?.(null);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.error) {
@@ -543,6 +553,12 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
+
       {/* Persona selector header */}
       <div className="flex-shrink-0 p-3 border-b border-border-subtle bg-void-black/30 flex items-center justify-between">
         <PersonaSelector 

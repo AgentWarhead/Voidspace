@@ -1,0 +1,47 @@
+# Voidspace — NEAR Ecosystem Intelligence
+
+> AI-powered ecosystem intelligence tool for the NEAR Protocol blockchain. Find market gaps ("voids"), explore the ecosystem, learn to build on NEAR, and discover opportunities.
+
+Voidspace helps developers, founders, and researchers understand the NEAR Protocol ecosystem through data-driven analysis and interactive tools.
+
+## Key Pages
+
+- [Home](https://voidspace.io): Overview of Voidspace and the NEAR ecosystem
+- [Observatory](https://voidspace.io/observatory): Unified dashboard for ecosystem analysis tools (Void Lens, Constellation Map, Pulse Streams)
+- [Ecosystem](https://voidspace.io/ecosystem): Browse and explore NEAR ecosystem projects by category
+- [Categories](https://voidspace.io/categories): 20 ecosystem categories covering DeFi, NFTs, Gaming, Infrastructure, DAOs, and more
+- [Sanctum](https://voidspace.io/sanctum): Build and deploy smart contracts on NEAR with guided templates
+- [Opportunities](https://voidspace.io/opportunities): Real-time ecosystem opportunities and market gaps
+- [Learn](https://voidspace.io/learn): Comprehensive NEAR development learning platform with 43 modules across 4 tracks
+
+## Learning Tracks
+
+- [Explorer Track](https://voidspace.io/learn): 11 modules — blockchain basics, NEAR fundamentals, wallets, dApps, DeFi
+- [Builder Track](https://voidspace.io/learn): 16 modules — Rust, smart contracts, testing, deployment, token standards
+- [Hacker Track](https://voidspace.io/learn): 11 modules — advanced architecture, cross-contract calls, chain signatures, AI agents
+- [Founder Track](https://voidspace.io/learn): 5 modules — grants, tokenomics, building in public, pitching, revenue models
+
+## Deep Dive Articles
+
+- [Rust for Blockchain Development](https://voidspace.io/learn/rust-for-blockchain): Why Rust is the language of choice for blockchain
+- [Solana vs NEAR](https://voidspace.io/learn/solana-vs-near): Technical comparison of two major Rust-based L1 blockchains
+- [For Solana Developers](https://voidspace.io/learn/for-solana-developers): Migration guide from Solana to NEAR
+- [NEAR Key Technologies](https://voidspace.io/learn/key-technologies): Nightshade sharding, Aurora, Rainbow Bridge, chain abstraction
+- [Why Rust for NEAR](https://voidspace.io/learn/why-rust): Rust's role in NEAR smart contract development
+- [Wallet Setup Guide](https://voidspace.io/learn/wallet-setup): How to create and manage a NEAR wallet
+- [Rust Curriculum](https://voidspace.io/learn/rust-curriculum): Structured path to learning Rust for NEAR development
+- [Quick Start](https://voidspace.io/learn/quick-start): Get started with NEAR development in minutes
+
+## Tools
+
+- **Void Lens**: AI-powered gap analysis — identifies underserved niches in the NEAR ecosystem
+- **Constellation Map**: Interactive visualization of ecosystem project relationships
+- **Pulse Streams**: Real-time activity feeds and trending metrics across the ecosystem
+
+## About
+
+Voidspace is built for the NEAR Protocol ecosystem. NEAR is a layer-1 blockchain using Nightshade sharding, with human-readable account names, ~1 second finality, and sub-cent transaction fees. Voidspace provides intelligence and education tools to help builders find and fill gaps in this ecosystem.
+
+## Full Documentation
+
+For detailed content about all pages: [llms-full.txt](https://voidspace.io/llms-full.txt)

@@ -111,11 +111,10 @@ async function generateReputationAnalysis(walletData: WalletData, userId?: strin
       return generateBasicAnalysis(walletData);
     }
 
-    // Check AI budget if userId provided (for authenticated users)
+    // Safety net: daily AI usage budget
     if (userId) {
       const budget = await checkAiBudget(userId);
       if (!budget.allowed) {
-        // Fall back to basic analysis if budget exceeded
         console.log(`AI budget exceeded for user ${userId}, using basic analysis`);
         return generateBasicAnalysis(walletData);
       }

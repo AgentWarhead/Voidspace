@@ -66,6 +66,9 @@ export function Footer() {
             <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
               Learn
             </Link>
+            <Link href="/pricing" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+              Pricing
+            </Link>
           </div>
 
           {/* Competition badge */}

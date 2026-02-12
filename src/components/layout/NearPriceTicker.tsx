@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,7 @@ export function NearPriceTicker() {
   const [data, setData] = useState<PriceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const router = useRouter();
 
   const fetchPrice = async () => {
     try {
@@ -67,12 +69,13 @@ export function NearPriceTicker() {
   return (
     <div 
       className={cn(
-        "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-colors",
+        "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-colors cursor-pointer",
         isPositive 
           ? "bg-near-green/5 border-near-green/20 hover:bg-near-green/10" 
           : "bg-error/5 border-error/20 hover:bg-error/10"
       )}
-      title={`Market Cap: $${(data!.marketCap / 1e9).toFixed(2)}B`}
+      title={`Market Cap: $${(data!.marketCap / 1e9).toFixed(2)}B — Click to open Void Bubbles`}
+      onClick={() => router.push('/void-bubbles')}
     >
       {/* NEAR Logo */}
       <svg 

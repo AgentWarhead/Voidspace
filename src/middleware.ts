@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRateLimiter } from '@/lib/auth/rate-limit';
 import { logAbuseEvent } from '@/lib/auth/abuse-detection';
 
+// Legitimate bot User-Agent patterns (allow these through)
+const ALLOWED_BOTS = [
+  'googlebot',
+  'google-inspectiontool',
+  'bingbot',
+  'slurp',        // Yahoo
+  'duckduckbot',
+  'baiduspider',
+  'yandexbot',
+  'facebookexternalhit',
+  'twitterbot',
+  'linkedinbot',
+  'discordbot',
+  'telegrambot',
+  'whatsapp',
+  'applebot',
+];
+
 // Suspicious User-Agent patterns
 const SUSPICIOUS_USER_AGENTS = [
   '', // Empty user agent
@@ -59,16 +77,20 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Block suspicious User-Agents
+  // 2. Block suspicious User-Agents (but allow legitimate search/social bots)
   const lowerUserAgent = userAgent.toLowerCase();
-  const isSuspicious = SUSPICIOUS_USER_AGENTS.some(pattern => 
-    pattern === '' ? userAgent === '' : lowerUserAgent.includes(pattern)
-  );
+  const isAllowedBot = ALLOWED_BOTS.some(bot => lowerUserAgent.includes(bot));
+  
+  if (!isAllowedBot) {
+    const isSuspicious = SUSPICIOUS_USER_AGENTS.some(pattern => 
+      pattern === '' ? userAgent === '' : lowerUserAgent.includes(pattern)
+    );
 
-  if (isSuspicious) {
-    console.log(`🚫 UA: Blocked suspicious user agent "${userAgent}" from ${ip}`);
-    logAbuseEvent({ type: 'suspicious_ua', ip, path: pathname });
-    return new NextResponse('Forbidden', { status: 403 });
+    if (isSuspicious) {
+      console.log(`🚫 UA: Blocked suspicious user agent "${userAgent}" from ${ip}`);
+      logAbuseEvent({ type: 'suspicious_ua', ip, path: pathname });
+      return new NextResponse('Forbidden', { status: 403 });
+    }
   }
 
   // 3. Global rate limiting - 100 requests per minute per IP

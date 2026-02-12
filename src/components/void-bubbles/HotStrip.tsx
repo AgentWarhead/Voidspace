@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, memo } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,17 +29,31 @@ interface HotStripProps {
   onTokenClick?: (tokenId: string) => void;
 }
 
-export function HotStrip({ onTokenClick }: HotStripProps) {
-  const [tokens, setTokens] = useState<VoidBubbleToken[]>([]);
-  const [loading, setLoading] = useState(true);
+// Simple in-memory cache to deduplicate API calls (HotStrip + VoidBubblesEngine both fetch /api/void-bubbles)
+let cachedTokens: VoidBubbleToken[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 30_000; // 30s
+
+function HotStripInner({ onTokenClick }: HotStripProps) {
+  const [tokens, setTokens] = useState<VoidBubbleToken[]>(cachedTokens || []);
+  const [loading, setLoading] = useState(!cachedTokens);
   const stripRef = useRef<HTMLDivElement>(null);
 
   const fetchTokens = async () => {
+    // Return cache if still fresh
+    if (cachedTokens && Date.now() - cacheTimestamp < CACHE_TTL) {
+      setTokens(cachedTokens);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch('/api/void-bubbles');
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
-      setTokens(data.tokens || []);
+      const newTokens = data.tokens || [];
+      cachedTokens = newTokens;
+      cacheTimestamp = Date.now();
+      setTokens(newTokens);
     } catch (error) {
       console.error('Failed to fetch tokens for hot strip:', error);
     } finally {
@@ -63,6 +77,8 @@ export function HotStrip({ onTokenClick }: HotStripProps) {
 
   const handleTokenClick = (tokenId: string) => {
     onTokenClick?.(tokenId);
+    // Dispatch custom event so VoidBubblesEngine can open the popup card
+    window.dispatchEvent(new CustomEvent('voidspace:open-token', { detail: { tokenId } }));
   };
 
   if (loading) {
@@ -95,7 +111,7 @@ export function HotStrip({ onTokenClick }: HotStripProps) {
         ref={stripRef}
         className="relative flex items-center whitespace-nowrap"
         style={{
-          animation: 'scroll-left 45s linear infinite',
+          animation: 'scroll-left 25s linear infinite',
         }}
       >
         {tickerItems.map((token, index) => {
@@ -107,12 +123,16 @@ export function HotStrip({ onTokenClick }: HotStripProps) {
               key={`${token.id}-${index}`}
               onClick={() => handleTokenClick(token.id)}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 cursor-pointer transition-all duration-200",
+                "inline-flex items-center gap-2 px-4 py-2 cursor-pointer transition-all duration-300",
                 "font-mono text-xs font-bold tracking-wide",
-                "hover:bg-surface/40 hover:scale-105 hover:shadow-lg",
-                "active:scale-95 active:bg-near-green/10"
+                "hover:bg-surface/50 hover:scale-105 hover:shadow-xl",
+                "active:scale-95 active:bg-near-green/15",
+                "rounded-lg hover:backdrop-blur-sm" // Enhanced styling
               )}
               title={`Click to highlight ${token.symbol} in visualization`}
+              style={{
+                textShadow: '0 1px 2px rgba(0,0,0,0.8)', // Better text shadow
+              }}
             >
               {/* Token symbol with clickable indicator */}
               <span className="text-text-primary flex items-center gap-1">
@@ -155,3 +175,5 @@ export function HotStrip({ onTokenClick }: HotStripProps) {
     </div>
   );
 }
+
+export const HotStrip = memo(HotStripInner);

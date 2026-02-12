@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
+import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -73,7 +74,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    // Check AI usage budget
+    // Primary gate: credit balance check
+    const estimatedCost = estimateCreditCost(2000, 3000, 'sonnet');
+    const hasCredits = await checkBalance(user.userId, estimatedCost);
+    if (!hasCredits) {
+      return NextResponse.json(
+        { error: 'Insufficient credits. Top up your Sanctum balance to roast contracts.' },
+        { status: 402 }
+      );
+    }
+
+    // Secondary safety net: daily AI usage budget
     const budget = await checkAiBudget(user.userId);
     if (!budget.allowed) {
       return NextResponse.json({ 
@@ -137,9 +148,19 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Log AI usage for budget tracking
+    // Log AI usage for budget tracking (secondary safety net)
     const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
     await logAiUsage(user.userId, 'sanctum_roast', totalTokens);
+
+    // Deduct credits based on actual token usage
+    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, 'sonnet');
+    const deduction = await deductCredits(user.userId, creditCost, 'Contract roast', {
+      tokensInput: response.usage.input_tokens,
+      tokensOutput: response.usage.output_tokens,
+    });
+    if (!deduction.success) {
+      console.error('Failed to deduct credits for roast:', deduction.error);
+    }
 
     // Ensure all required fields exist
     return NextResponse.json({
@@ -153,6 +174,10 @@ export async function POST(request: NextRequest) {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
       },
+      credits: deduction.success ? {
+        cost: creditCost,
+        remaining: deduction.remaining.totalCredits,
+      } : undefined,
     });
   } catch (error) {
     console.error('Roast error:', error);

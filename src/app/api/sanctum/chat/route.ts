@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
+import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 
 function sanitizeUserInput(text: string): string {
   // Remove common prompt injection patterns
@@ -966,7 +967,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    // Check AI usage budget
+    // Primary gate: credit balance check
+    // Estimate ~2000 input + ~3000 output tokens for a chat turn
+    const estimatedCost = estimateCreditCost(2000, 3000, 'sonnet');
+    const hasCredits = await checkBalance(user.userId, estimatedCost);
+    if (!hasCredits) {
+      return NextResponse.json(
+        { error: 'Insufficient credits. Top up your Sanctum balance to continue chatting.' },
+        { status: 402 }
+      );
+    }
+
+    // Secondary safety net: daily AI usage budget
     const budget = await checkAiBudget(user.userId);
     if (!budget.allowed) {
       return NextResponse.json({ 
@@ -1062,9 +1074,19 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Log AI usage for budget tracking
+    // Log AI usage for budget tracking (secondary safety net)
     const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
     await logAiUsage(user.userId, 'sanctum_chat', totalTokens);
+
+    // Deduct credits based on actual token usage (Sonnet model)
+    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, 'sonnet');
+    const deduction = await deductCredits(user.userId, creditCost, 'Sanctum chat', {
+      tokensInput: response.usage.input_tokens,
+      tokensOutput: response.usage.output_tokens,
+    });
+    if (!deduction.success) {
+      console.error('Failed to deduct credits for chat:', deduction.error);
+    }
 
     return NextResponse.json({
       ...parsed,
@@ -1072,6 +1094,10 @@ export async function POST(request: NextRequest) {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
       },
+      credits: deduction.success ? {
+        cost: creditCost,
+        remaining: deduction.remaining.totalCredits,
+      } : undefined,
     });
   } catch (error) {
     console.error('Sanctum chat error:', error);

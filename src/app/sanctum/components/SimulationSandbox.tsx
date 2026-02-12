@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-// @ts-expect-error - lucide-react 0.453.0 type issues
 import { Play, Square, RotateCcw, Terminal, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface SimulationSandboxProps {

@@ -27,9 +27,9 @@ import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 import { useSanctumState } from './hooks/useSanctumState';
-// @ts-expect-error - lucide-react types issue with TS 5.9
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
+import { VisualMode } from './components/VisualMode';
 
 export default function SanctumPage() {
   const {
@@ -160,7 +160,7 @@ export default function SanctumPage() {
               </p>
 
               {/* Friendly Mode Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-5xl mx-auto">
                 <button
                   onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
@@ -233,6 +233,31 @@ export default function SanctumPage() {
                   </h3>
                   <p className="text-sm text-text-muted">
                     Paste any contract and get a brutally honest security review
+                  </p>
+                </button>
+
+                <button
+                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'visual' })}
+                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
+                    state.mode === 'visual'
+                      ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                      : 'border-border-subtle bg-void-gray/30 hover:border-purple-500/30 hover:bg-purple-500/5'
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
+                    state.mode === 'visual' 
+                      ? 'bg-purple-500/20 text-purple-400' 
+                      : 'bg-border-subtle text-text-muted group-hover:bg-purple-500/20 group-hover:text-purple-400'
+                  }`}>
+                    <Palette className="w-6 h-6" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                    state.mode === 'visual' ? 'text-purple-400' : 'text-text-primary group-hover:text-purple-400'
+                  }`}>
+                    Visual Generator
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    AI-generated diagrams, infographics, and social graphics
                   </p>
                 </button>
               </div>
@@ -317,6 +342,15 @@ export default function SanctumPage() {
                     <Flame className="w-6 h-6" />
                     🔥 Enter the Roast Zone 🔥
                   </button>
+                </div>
+              )}
+
+              {state.mode === 'visual' && (
+                <div className="mb-16">
+                  <p className="text-text-secondary text-center mb-8">
+                    Generate branded visuals for your NEAR project — architecture diagrams, user flows, infographics, and social graphics.
+                  </p>
+                  <VisualMode />
                 </div>
               )}
 

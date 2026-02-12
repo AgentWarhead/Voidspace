@@ -40,12 +40,11 @@ export const DIFFICULTY_LABELS = {
 } as const;
 
 export const NAV_ITEMS = [
-  { label: 'Home', href: '/' },
   { label: 'Voids', href: '/opportunities' },
-  { label: 'Void Bubbles', href: '/void-bubbles' },
-  { label: 'Sanctum', href: '/sanctum' },
   { label: 'Observatory', href: '/observatory' },
+  { label: 'Sanctum', href: '/sanctum' },
   { label: 'Learn', href: '/learn' },
+  { label: 'Pricing', href: '/pricing' },
 ] as const;
 
 // Observatory tool tabs
