@@ -56,6 +56,7 @@ export default async function OpportunityDetailPage({ params }: Props) {
           relatedProjects={relatedProjects}
           category={category}
           breakdown={breakdown}
+          competitors={categoryProjects}
         />
       </Container>
     </div>

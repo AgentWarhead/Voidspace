@@ -153,5 +153,43 @@ export async function syncEcosystem(supabase: SupabaseClient) {
     }
   }
 
+  // --- Mark abandoned projects as inactive ---
+  // Criteria: no GitHub commits in 6 months AND TVL is 0/null
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+  // Fetch projects that might be abandoned
+  const { data: candidates } = await supabase
+    .from('projects')
+    .select('id, last_github_commit, tvl_usd')
+    .eq('is_active', true);
+
+  if (candidates && candidates.length > 0) {
+    const abandonedIds = candidates
+      .filter((p) => {
+        const noRecentCommits =
+          !p.last_github_commit ||
+          new Date(p.last_github_commit) < sixMonthsAgo;
+        const noTVL = !p.tvl_usd || Number(p.tvl_usd) === 0;
+        return noRecentCommits && noTVL;
+      })
+      .map((p) => p.id);
+
+    if (abandonedIds.length > 0) {
+      // Update in batches of 100
+      for (let i = 0; i < abandonedIds.length; i += 100) {
+        const batch = abandonedIds.slice(i, i + 100);
+        const { error } = await supabase
+          .from('projects')
+          .update({ is_active: false })
+          .in('id', batch);
+
+        if (error) {
+          errors.push(`Mark inactive batch ${i}: ${error.message}`);
+        }
+      }
+    }
+  }
+
   return { processed, total: entities.length, errors };
 }

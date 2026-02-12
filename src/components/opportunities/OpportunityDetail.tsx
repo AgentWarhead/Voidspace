@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ExternalLink, CheckCircle2, TrendingUp, Star, GitFork, Code, Clock, Sparkles, ChevronRight } from 'lucide-react';
+import { CheckCircle2, TrendingUp, ChevronRight, ChevronDown } from 'lucide-react';
 import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
@@ -18,9 +19,10 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { GradientText } from '@/components/effects/GradientText';
 import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
-import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
+import { formatCurrency, formatNumber } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
 import { HELP_CONTENT } from '@/lib/help-content';
+import { CompetitorList, getActivityStatus } from '@/components/opportunities/CompetitorList';
 import type { Opportunity, Project, Category, GapScoreBreakdown as GapScoreBreakdownType } from '@/types';
 
 interface OpportunityDetailProps {
@@ -28,9 +30,20 @@ interface OpportunityDetailProps {
   relatedProjects: Project[];
   category: Category;
   breakdown?: GapScoreBreakdownType;
+  competitors?: Project[];
 }
 
-export function OpportunityDetail({ opportunity, relatedProjects, category, breakdown }: OpportunityDetailProps) {
+export function OpportunityDetail({ opportunity, relatedProjects, category, breakdown, competitors }: OpportunityDetailProps) {
+  const [showInactive, setShowInactive] = useState(false);
+  const allProjects = competitors ?? relatedProjects;
+  const activeCompetitors = allProjects.filter((p) => {
+    const status = getActivityStatus(p.last_github_commit);
+    return status === 'active' || status === 'stale';
+  });
+  const inactiveCompetitors = allProjects.filter((p) => {
+    const status = getActivityStatus(p.last_github_commit);
+    return status === 'abandoned';
+  });
   return (
     <motion.div
       className="space-y-8"
@@ -215,72 +228,42 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
 
       {/* Competition Analysis */}
       <ScrollReveal delay={0.2}>
-        <SectionHeader title="Competition Analysis" count={relatedProjects.length} />
+        <SectionHeader title="Competition Analysis" count={allProjects.length} />
         <Card variant="glass" padding="lg" className="relative overflow-hidden">
           <ScanLine />
           <div className="relative z-10">
-            {relatedProjects.length > 0 ? (
+            {allProjects.length > 0 ? (
               <div className="space-y-4">
-                {/* Summary row */}
+                {/* Summary stats */}
                 <div className="flex items-center gap-4 flex-wrap text-sm text-text-muted">
-                  <span>{relatedProjects.length} {relatedProjects.length === 1 ? 'project' : 'projects'}</span>
+                  <span>{activeCompetitors.length} active / {inactiveCompetitors.length} inactive out of {allProjects.length} total</span>
                   <span className="text-text-muted/50">|</span>
-                  <span>{relatedProjects.filter((p) => p.is_active).length} active</span>
+                  <span>{formatCurrency(allProjects.reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0))} TVL</span>
                   <span className="text-text-muted/50">|</span>
-                  <span>{formatCurrency(relatedProjects.reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0))} TVL</span>
-                  <span className="text-text-muted/50">|</span>
-                  <span>{formatNumber(relatedProjects.reduce((s, p) => s + (p.github_stars || 0), 0))} stars</span>
+                  <span>{formatNumber(allProjects.reduce((s, p) => s + (p.github_stars || 0), 0))} stars</span>
                 </div>
-                <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
-                  {relatedProjects.map((project) => (
-                    <div
-                      key={project.id}
-                      className="flex items-center gap-4 px-4 py-3 border-l-2 border-transparent hover:border-near-green/50 hover:bg-surface-hover transition-colors"
+
+                {/* Active Competitors */}
+                {activeCompetitors.length > 0 && (
+                  <div>
+                    <h4 className="text-xs uppercase tracking-wide text-text-muted font-mono mb-2">Active Competitors</h4>
+                    <CompetitorList projects={activeCompetitors} />
+                  </div>
+                )}
+
+                {/* Inactive/Abandoned — collapsed by default */}
+                {inactiveCompetitors.length > 0 && (
+                  <div>
+                    <button
+                      onClick={() => setShowInactive(!showInactive)}
+                      className="flex items-center gap-1 text-xs uppercase tracking-wide text-text-muted font-mono mb-2 hover:text-text-secondary transition-colors"
                     >
-                      <Link href={`/projects/${project.slug}`} className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate hover:text-near-green transition-colors">{project.name}</p>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          {project.github_stars > 0 && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted font-mono">
-                              <Star className="w-2.5 h-2.5 text-warning" /> {formatNumber(project.github_stars)}
-                            </span>
-                          )}
-                          {project.github_forks > 0 && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted font-mono">
-                              <GitFork className="w-2.5 h-2.5" /> {formatNumber(project.github_forks)}
-                            </span>
-                          )}
-                          {project.github_language && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted">
-                              <Code className="w-2.5 h-2.5" /> {project.github_language}
-                            </span>
-                          )}
-                          {project.last_github_commit && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted">
-                              <Clock className="w-2.5 h-2.5" /> {timeAgo(project.last_github_commit)}
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-medium text-text-primary font-mono">
-                          {Number(project.tvl_usd) > 0 ? formatCurrency(Number(project.tvl_usd)) : '-'}
-                        </p>
-                      </div>
-                      {project.website_url && (
-                        <a
-                          href={project.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-text-muted hover:text-near-green transition-colors shrink-0"
-                          aria-label={`Visit ${project.name} website`}
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                      <ChevronDown className={`w-3 h-3 transition-transform ${showInactive ? 'rotate-0' : '-rotate-90'}`} />
+                      Inactive / Abandoned ({inactiveCompetitors.length})
+                    </button>
+                    {showInactive && <CompetitorList projects={inactiveCompetitors} />}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-sm text-text-muted">
