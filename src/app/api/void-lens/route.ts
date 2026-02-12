@@ -3,7 +3,6 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
-import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 
 interface WalletData {
   account: string;
@@ -112,17 +111,7 @@ async function generateReputationAnalysis(walletData: WalletData, userId?: strin
       return generateBasicAnalysis(walletData);
     }
 
-    // Primary gate: credit balance check
-    if (userId) {
-      const estimatedCost = estimateCreditCost(1000, 800, 'haiku');
-      const hasCredits = await checkBalance(userId, estimatedCost);
-      if (!hasCredits) {
-        console.log(`Insufficient credits for user ${userId}, using basic analysis`);
-        return generateBasicAnalysis(walletData);
-      }
-    }
-
-    // Secondary safety net: daily AI usage budget
+    // Safety net: daily AI usage budget
     if (userId) {
       const budget = await checkAiBudget(userId);
       if (!budget.allowed) {
@@ -184,20 +173,6 @@ Consider factors like account age, transaction frequency, balance consistency, i
     if (userId && result.usage) {
       const totalTokens = result.usage.input_tokens + result.usage.output_tokens;
       await logAiUsage(userId, 'void_lens_ai', totalTokens);
-
-      // Deduct credits based on actual token usage (Haiku model)
-      const creditCost = estimateCreditCost(
-        result.usage.input_tokens,
-        result.usage.output_tokens,
-        'haiku'
-      );
-      const deduction = await deductCredits(userId, creditCost, 'Void Lens analysis', {
-        tokensInput: result.usage.input_tokens,
-        tokensOutput: result.usage.output_tokens,
-      });
-      if (!deduction.success) {
-        console.error('Failed to deduct credits for void-lens:', deduction.error);
-      }
     }
     
     return analysis;

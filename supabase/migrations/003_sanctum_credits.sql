@@ -3,7 +3,7 @@
 -- ============================================================
 
 -- Sanctum subscription tiers enum
-CREATE TYPE sanctum_tier AS ENUM ('free', 'builder', 'hacker', 'founder');
+CREATE TYPE sanctum_tier AS ENUM ('shade', 'specter', 'legion', 'leviathan');
 CREATE TYPE subscription_status AS ENUM ('active', 'canceled', 'past_due', 'trialing', 'incomplete');
 CREATE TYPE credit_transaction_type AS ENUM ('subscription_grant', 'usage', 'topup', 'free_grant');
 
@@ -13,7 +13,7 @@ CREATE TYPE credit_transaction_type AS ENUM ('subscription_grant', 'usage', 'top
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  tier sanctum_tier NOT NULL DEFAULT 'free',
+  tier sanctum_tier NOT NULL DEFAULT 'shade',
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT UNIQUE,
   status subscription_status NOT NULL DEFAULT 'active',
@@ -126,17 +126,14 @@ CREATE TRIGGER update_credit_balances_updated_at
 CREATE OR REPLACE FUNCTION initialize_free_credits()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Create subscription record (free tier)
   INSERT INTO subscriptions (user_id, tier, status)
-  VALUES (NEW.id, 'free', 'active')
+  VALUES (NEW.id, 'shade', 'active')
   ON CONFLICT (user_id) DO NOTHING;
 
-  -- Create balance with free tier one-time credits ($2.50)
   INSERT INTO credit_balances (user_id, subscription_credits, topup_credits)
   VALUES (NEW.id, 2.50, 0)
   ON CONFLICT (user_id) DO NOTHING;
 
-  -- Log the free grant
   INSERT INTO credit_transactions (user_id, amount, type, description)
   VALUES (NEW.id, 2.50, 'free_grant', 'Welcome to Sanctum — free starter credits');
 
@@ -156,26 +153,23 @@ RETURNS void AS $$
 DECLARE
   tier_credits RECORD;
 BEGIN
-  -- Reset subscription credits based on tier
   FOR tier_credits IN
     SELECT s.user_id, s.tier,
       CASE s.tier
-        WHEN 'builder' THEN 25.00
-        WHEN 'hacker' THEN 70.00
-        WHEN 'founder' THEN 230.00
+        WHEN 'specter' THEN 25.00
+        WHEN 'legion' THEN 70.00
+        WHEN 'leviathan' THEN 230.00
         ELSE 0.00
       END AS credit_amount
     FROM subscriptions s
     WHERE s.status = 'active'
-      AND s.tier != 'free'
+      AND s.tier != 'shade'
   LOOP
-    -- Reset subscription credits (top-up credits are untouched)
     UPDATE credit_balances
     SET subscription_credits = tier_credits.credit_amount,
         last_reset = now()
     WHERE user_id = tier_credits.user_id;
 
-    -- Log the grant
     INSERT INTO credit_transactions (user_id, amount, type, description)
     VALUES (tier_credits.user_id, tier_credits.credit_amount, 'subscription_grant',
             'Monthly credit reset — ' || tier_credits.tier || ' tier');
