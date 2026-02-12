@@ -61,39 +61,93 @@ export async function POST(request: NextRequest) {
     }
 
     // Build enhanced prompt based on type
+    // Each prompt is optimized for Gemini image generation with consistent Voidspace branding
+    const BRAND = `STRICT VISUAL STYLE:
+- Background: deep black (#0A0A0F) to dark charcoal (#12121A) gradient
+- Primary accent: vivid teal/cyan (#00EC97) for highlights, borders, glows, and key elements
+- Secondary accents: electric purple (#8B5CF6) sparingly for depth, white (#F0F0F0) for text
+- Typography: clean sans-serif, bold headings, high contrast against dark background
+- Aesthetic: premium Web3/fintech — glass morphism panels, subtle glow effects, sharp edges
+- NO bright white backgrounds. NO clip-art. NO cartoonish elements.
+- Output: high resolution, 16:9 landscape aspect ratio, production-ready quality`;
+
     let enhancedPrompt = '';
+    const ctx = projectContext ? `\nProject context: ${projectContext}` : '';
     
     switch (type) {
       case 'architecture':
-        enhancedPrompt = `Create a clean, professional architecture diagram for a blockchain project. 
-Style: Dark theme, modern, tech startup aesthetic. Colors: Use teal/cyan (#00EC97) as accent color on dark background.
-Show: ${prompt}
-${projectContext ? `Context: ${projectContext}` : ''}
-Make it clear, minimal, and suitable for a pitch deck.`;
+        enhancedPrompt = `Generate a professional software architecture diagram.
+
+${BRAND}
+
+DIAGRAM REQUIREMENTS:
+- Show system components as labeled glass-morphism cards/boxes with teal (#00EC97) borders
+- Connect components with clean directional arrows (white or teal, with subtle glow)
+- Group related services visually (frontend, backend, blockchain layer, external APIs)
+- Include small icons or symbols inside each component box to aid recognition
+- Label all connections with brief protocol/method names (REST, RPC, WebSocket, etc.)
+- Arrange in a clear top-to-bottom or left-to-right hierarchy — no overlapping
+- Add a subtle grid or dot pattern on the dark background for depth
+- This should look like it belongs in a $10M startup pitch deck
+
+WHAT TO DIAGRAM: ${prompt}${ctx}`;
         break;
         
       case 'flow':
-        enhancedPrompt = `Create a user flow / process diagram for a blockchain application.
-Style: Dark theme with neon accents, modern fintech aesthetic. Primary color: teal/cyan (#00EC97).
-Show the flow: ${prompt}
-${projectContext ? `Context: ${projectContext}` : ''}
-Use arrows to show direction, keep it simple and readable.`;
+        enhancedPrompt = `Generate a user flow diagram showing a step-by-step process.
+
+${BRAND}
+
+FLOW REQUIREMENTS:
+- Each step is a rounded rectangle with teal (#00EC97) border and glass-morphism fill
+- Number each step clearly (01, 02, 03...) in the top-left corner of each box
+- Connect steps with smooth curved arrows with directional arrowheads (glowing teal)
+- Decision points use diamond shapes with purple (#8B5CF6) accent
+- Start node: filled teal circle. End node: filled teal circle with ring
+- Include a brief label inside each step box (action verb + noun: "Connect Wallet", "Select Token")
+- Arrange left-to-right or top-to-bottom with consistent spacing
+- Add a subtle "VOIDSPACE" watermark in bottom-right corner, very low opacity
+- Clean, scannable at a glance — no clutter
+
+FLOW TO SHOW: ${prompt}${ctx}`;
         break;
         
       case 'infographic':
-        enhancedPrompt = `Create an infographic explaining a blockchain concept.
-Style: Dark theme, professional, suitable for social media and presentations. Accent: teal (#00EC97).
-Explain: ${prompt}
-${projectContext ? `Context: ${projectContext}` : ''}
-Make it educational but visually engaging.`;
+        enhancedPrompt = `Generate an educational infographic that explains a technical concept visually.
+
+${BRAND}
+
+INFOGRAPHIC REQUIREMENTS:
+- Bold headline at the top in large white text with teal (#00EC97) accent word
+- Divide content into 3-5 clear sections with visual hierarchy (top to bottom)
+- Use icons, small illustrations, and data visualizations (charts, progress bars, comparisons)
+- Key numbers/stats should be LARGE and teal-colored to draw the eye
+- Include brief explanatory text (2-3 lines max per section) in light gray
+- Use divider lines or subtle section backgrounds to separate topics
+- Bottom section: key takeaway or call-to-action in a highlighted teal box
+- Optimized for sharing — readable at both full size and thumbnail
+- Professional enough for a conference presentation, engaging enough for Twitter
+
+TOPIC TO EXPLAIN: ${prompt}${ctx}`;
         break;
         
       case 'social':
-        enhancedPrompt = `Create a social media announcement graphic for a blockchain project launch.
-Style: Dark theme, bold, eye-catching. Use teal/cyan (#00EC97) as primary accent.
-Message: ${prompt}
-${projectContext ? `Project: ${projectContext}` : ''}
-Make it suitable for Twitter/X, professional but exciting.`;
+        enhancedPrompt = `Generate a social media announcement graphic optimized for Twitter/X.
+
+${BRAND}
+
+SOCIAL GRAPHIC REQUIREMENTS:
+- Aspect ratio: 16:9 (1200x675px equivalent) — Twitter card format
+- Massive, bold headline text taking up 40-50% of the image — impossible to scroll past
+- Teal (#00EC97) gradient highlight or underline on the most important word(s)
+- Subtle abstract background elements: mesh gradients, geometric shapes, particle effects
+- If announcing a feature: show a minimal mockup/icon representing it
+- If announcing a launch: add urgency elements (date, "LIVE NOW", countdown feel)
+- Include space for a small logo/brand mark in the corner
+- NO stock photo feel. This should look like it was designed by a top-tier Web3 design agency.
+- The image alone should make someone stop scrolling and want to learn more.
+
+ANNOUNCEMENT: ${prompt}${ctx}`;
         break;
         
       default:
