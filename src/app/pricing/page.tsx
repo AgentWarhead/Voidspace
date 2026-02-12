@@ -9,13 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { SANCTUM_TIERS, TOPUP_PACKS, type SanctumTier } from '@/lib/sanctum-tiers';
 
 const tierIcons: Record<SanctumTier, React.ReactNode> = {
-  free: <Code2 className="w-6 h-6" />,
-  builder: <Rocket className="w-6 h-6" />,
-  hacker: <Zap className="w-6 h-6" />,
-  founder: <Crown className="w-6 h-6" />,
+  shade: <Code2 className="w-6 h-6" />,
+  specter: <Rocket className="w-6 h-6" />,
+  legion: <Zap className="w-6 h-6" />,
+  leviathan: <Crown className="w-6 h-6" />,
 };
 
-const tierOrder: SanctumTier[] = ['free', 'builder', 'hacker', 'founder'];
+const tierOrder: SanctumTier[] = ['shade', 'specter', 'legion', 'leviathan'];
 
 export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
@@ -23,7 +23,7 @@ export default function PricingPage() {
   const [loadingPack, setLoadingPack] = useState<string | null>(null);
 
   async function handleSubscribe(tier: SanctumTier) {
-    if (tier === 'free') return;
+    if (tier === 'shade') return;
     setLoadingTier(tier);
     try {
       // TODO: Get userId from auth context
@@ -197,7 +197,7 @@ export default function PricingPage() {
 
                     {/* Price */}
                     <div className="mb-6">
-                      {tierKey === 'free' ? (
+                      {tierKey === 'shade' ? (
                         <div className="flex items-baseline gap-1">
                           <span className="text-4xl font-bold">$0</span>
                           <span className="text-text-muted text-sm">forever</span>
@@ -220,7 +220,7 @@ export default function PricingPage() {
                     </div>
 
                     {/* Credits highlight */}
-                    {tierKey !== 'free' ? (
+                    {tierKey !== 'shade' ? (
                       <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-lg bg-white/5 border border-white/5">
                         <Zap className="w-4 h-4" style={{ color: tier.color }} />
                         <span className="text-sm font-medium">
@@ -250,7 +250,7 @@ export default function PricingPage() {
                     </ul>
 
                     {/* CTA Button */}
-                    {tierKey === 'free' ? (
+                    {tierKey === 'shade' ? (
                       <Button
                         variant="secondary"
                         size="lg"

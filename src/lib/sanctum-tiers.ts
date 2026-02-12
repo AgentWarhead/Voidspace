@@ -2,7 +2,7 @@
 // Sanctum Pricing Tiers — Single source of truth
 // ============================================================
 
-export type SanctumTier = 'free' | 'builder' | 'hacker' | 'founder';
+export type SanctumTier = 'shade' | 'specter' | 'legion' | 'leviathan';
 
 export interface SanctumTierConfig {
   name: string;
@@ -29,10 +29,10 @@ export interface TopUpPack {
 }
 
 export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
-  free: {
-    name: 'Free',
-    tier: 'free',
-    tagline: 'Enter the void',
+  shade: {
+    name: 'Shade',
+    tier: 'shade',
+    tagline: 'Lurk the void',
     monthlyPrice: 0,
     annualPrice: 0,
     creditsPerMonth: 0,  // One-time $2.50 grant, not monthly
@@ -47,9 +47,9 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdMonthly: '',
     stripePriceIdAnnual: '',
   },
-  builder: {
-    name: 'Builder',
-    tier: 'builder',
+  specter: {
+    name: 'Specter',
+    tier: 'specter',
     tagline: 'Shape the void',
     monthlyPrice: 25,
     annualPrice: 250,
@@ -68,15 +68,15 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZ90gXTP4Q',
     popular: true,
   },
-  hacker: {
-    name: 'Hacker',
-    tier: 'hacker',
-    tagline: 'Bend the void',
+  legion: {
+    name: 'Legion',
+    tier: 'legion',
+    tagline: 'Command the void',
     monthlyPrice: 60,
     annualPrice: 600,
     creditsPerMonth: 70,
     features: [
-      'Everything in Builder',
+      'Everything in Specter',
       '$70/mo in credits',
       'Unlimited projects',
       'Contract auditing',
@@ -88,15 +88,15 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZSfnTGo4G',
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZVfWYySmG',
   },
-  founder: {
-    name: 'Founder',
-    tier: 'founder',
-    tagline: 'Command the void',
+  leviathan: {
+    name: 'Leviathan',
+    tier: 'leviathan',
+    tagline: 'Become the void',
     monthlyPrice: 200,
     annualPrice: 2000,
     creditsPerMonth: 230,
     features: [
-      'Everything in Hacker',
+      'Everything in Legion',
       '$230/mo in credits',
       'Dedicated capacity',
       'Team seats (3)',

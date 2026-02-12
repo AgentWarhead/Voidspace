@@ -2,13 +2,14 @@ import type { TierName, TierConfig } from '@/types';
 import type { SanctumTier } from '@/lib/sanctum-tiers';
 
 /**
- * Map old tier names to new Sanctum tier names (backwards compatibility).
+ * Identity mapping — TierName and SanctumTier now use the same keys.
+ * Kept for backwards compatibility with any code referencing TIER_TO_SANCTUM.
  */
 export const TIER_TO_SANCTUM: Record<TierName, SanctumTier> = {
-  shade: 'free',
-  specter: 'builder',
-  legion: 'hacker',
-  leviathan: 'founder',
+  shade: 'shade',
+  specter: 'specter',
+  legion: 'legion',
+  leviathan: 'leviathan',
 };
 
 export const TIERS: Record<TierName, TierConfig> = {

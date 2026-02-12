@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         .upsert({
           user_id: userId,
           stripe_customer_id: stripeCustomerId,
-          tier: 'free',
+          tier: 'shade',
           status: 'active',
         }, { onConflict: 'user_id' });
     }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     if (type === 'subscription' && tier) {
       const tierConfig = SANCTUM_TIERS[tier];
-      if (!tierConfig || tier === 'free') {
+      if (!tierConfig || tier === 'shade') {
         return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
       }
 

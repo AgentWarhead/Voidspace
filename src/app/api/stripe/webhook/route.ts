@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         const firstItem = subscription.items.data[0];
         const priceId = firstItem?.price?.id;
         const tierConfig = priceId ? getTierFromPriceId(priceId) : null;
-        const tier: SanctumTier = tierConfig?.tier || 'free';
+        const tier: SanctumTier = tierConfig?.tier || 'shade';
 
         const status = mapStripeStatus(subscription.status);
 
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('subscriptions')
           .update({
-            tier: 'free',
+            tier: 'shade',
             status: 'canceled',
             stripe_subscription_id: null,
             cancel_at_period_end: false,

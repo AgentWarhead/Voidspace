@@ -32,7 +32,7 @@ interface CreditDashboardProps {
   compact?: boolean;
 }
 
-export function CreditDashboard({ userId, tier = 'free', className, compact = false }: CreditDashboardProps) {
+export function CreditDashboard({ userId, tier = 'shade', className, compact = false }: CreditDashboardProps) {
   const [balance, setBalance] = useState<CreditBalance | null>(null);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
