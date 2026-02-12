@@ -41,31 +41,64 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(false);
 
-  // Fetch or create user in Supabase
-  const fetchUser = useCallback(async (nearAccountId: string) => {
+  // Authenticate user via signed message (NEP-413) and create/fetch in Supabase
+  const authenticateUser = useCallback(async (nearAccountId: string, walletSelector: WalletSelector) => {
     setUserLoading(true);
     try {
+      const wallet = await walletSelector.wallet();
+
+      // Check if wallet supports signMessage (NEP-413)
+      if (!('signMessage' in wallet) || typeof wallet.signMessage !== 'function') {
+        console.warn('[Auth] Wallet does not support signMessage (NEP-413). Skipping auth.');
+        return;
+      }
+
+      // Generate nonce (32 bytes, as required by NEP-413)
+      const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
+      const message = `Sign in to Voidspace`;
+      const recipient = 'voidspace.io';
+
+      const signed = await wallet.signMessage({
+        message,
+        recipient,
+        nonce,
+      });
+
+      if (!signed) {
+        console.warn('[Auth] User declined to sign message');
+        return;
+      }
+
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountId: nearAccountId }),
+        body: JSON.stringify({
+          accountId: signed.accountId || nearAccountId,
+          publicKey: signed.publicKey,
+          signature: signed.signature,
+          message,
+          recipient,
+          nonce: Buffer.from(nonce).toString('base64'),
+        }),
       });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+      } else {
+        console.error('[Auth] Auth failed:', res.status, await res.text());
       }
     } catch (err) {
-      console.error('Failed to fetch user:', err);
+      console.error('Failed to authenticate user:', err);
     } finally {
       setUserLoading(false);
     }
   }, []);
 
   const refetchUser = useCallback(async () => {
-    if (accountId) {
-      await fetchUser(accountId);
+    if (accountId && selector) {
+      await authenticateUser(accountId, selector);
     }
-  }, [accountId, fetchUser]);
+  }, [accountId, selector, authenticateUser]);
 
   // Initialize wallet selector
   useEffect(() => {
@@ -87,7 +120,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setAccountId(initialAccountId);
 
         if (initialAccountId) {
-          fetchUser(initialAccountId);
+          authenticateUser(initialAccountId, sel);
         }
 
         // Subscribe to account changes
@@ -99,7 +132,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           setAccountId((prev) => {
             if (prev !== newAccountId) {
               if (newAccountId) {
-                fetchUser(newAccountId);
+                authenticateUser(newAccountId, sel);
               } else {
                 setUser(null);
               }
@@ -119,7 +152,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription?.unsubscribe();
     };
-  }, [fetchUser]);
+  }, [authenticateUser]);
 
   const openModal = useCallback(() => {
     modal?.show();

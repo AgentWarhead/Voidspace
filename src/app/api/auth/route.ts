@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createSessionToken, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/auth/session';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
-import * as nacl from 'tweetnacl';
+import { verifySignature } from '@near-wallet-selector/core';
 
 function respondWithSession(user: { id: string }, accountId: string) {
   const token = createSessionToken(user.id, accountId);
@@ -18,44 +18,6 @@ function respondWithSession(user: { id: string }, accountId: string) {
   return response;
 }
 
-/**
- * Verify NEAR wallet signature using ed25519 cryptographic verification.
- * Requires message, signature, and publicKey for proper authentication.
- */
-async function verifyNearSignature(
-  accountId: string,
-  message: string,
-  signature: string,
-  publicKey: string
-): Promise<{ valid: boolean }> {
-  try {
-    // Validate expected message format
-    const expectedMessageStart = `Sign in to Voidspace\nAccount: ${accountId}\nNonce:`;
-    if (!message.startsWith(expectedMessageStart)) {
-      console.warn(`[AUTH] Invalid message format for account ${accountId}`);
-      return { valid: false };
-    }
-
-    // Convert inputs to byte arrays
-    const messageBytes = new TextEncoder().encode(message);
-    const signatureBytes = Buffer.from(signature, 'base64');
-    const publicKeyBytes = Buffer.from(publicKey, 'base64');
-
-    // Verify signature using tweetnacl's ed25519 verification
-    const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
-
-    if (!isValid) {
-      console.warn(`[AUTH] Invalid signature for account ${accountId}`);
-    }
-
-    return { valid: isValid };
-
-  } catch (error) {
-    console.error('[AUTH] Signature verification error:', error);
-    return { valid: false };
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
@@ -63,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
-    const { accountId, message, signature, publicKey } = await request.json();
+    const { accountId, message, signature, publicKey, nonce, recipient } = await request.json();
 
     if (!accountId || typeof accountId !== 'string' || !isValidNearAccountId(accountId)) {
       return NextResponse.json(
@@ -72,17 +34,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Require signature verification - all fields must be provided
-    if (!message || !signature || !publicKey) {
+    // Require NEP-413 signature verification
+    if (!message || !signature || !publicKey || !nonce || !recipient) {
       return NextResponse.json(
-        { error: 'message, signature, and publicKey are required for authentication' },
+        { error: 'NEP-413 signed message required (message, signature, publicKey, nonce, recipient)' },
         { status: 401 }
       );
     }
 
-    // Verify NEAR wallet signature
-    const signatureCheck = await verifyNearSignature(accountId, message, signature, publicKey);
-    if (!signatureCheck.valid) {
+    // Validate recipient matches our domain
+    if (recipient !== 'voidspace.io') {
+      return NextResponse.json(
+        { error: 'Invalid recipient' },
+        { status: 401 }
+      );
+    }
+
+    // Verify NEP-413 signature using wallet-selector's built-in verifier
+    const nonceBuffer = Buffer.from(nonce, 'base64');
+    const isValid = verifySignature({
+      publicKey,
+      signature,
+      message,
+      nonce: nonceBuffer,
+      recipient,
+    });
+
+    if (!isValid) {
+      console.warn(`[AUTH] Invalid NEP-413 signature for account ${accountId}`);
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -115,7 +94,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      // Handle race condition: another request created the user between SELECT and INSERT
+      // Handle race condition
       if (error.code === '23505') {
         const { data: raceUser } = await supabase
           .from('users')
