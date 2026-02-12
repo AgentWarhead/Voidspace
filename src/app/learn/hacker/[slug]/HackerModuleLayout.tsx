@@ -20,6 +20,11 @@ import {
   BuildingAnIndexer,
   MultiChainWithNear,
   ProductionPatterns,
+  ZeroKnowledgeOnNear,
+  OracleIntegration,
+  GasOptimizationDeepDive,
+  BridgeArchitecture,
+  FormalVerification,
 } from '../modules';
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
@@ -36,6 +41,11 @@ const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
   'building-an-indexer': BuildingAnIndexer,
   'multi-chain-with-near': MultiChainWithNear,
   'production-patterns': ProductionPatterns,
+  'zero-knowledge-on-near': ZeroKnowledgeOnNear,
+  'oracle-integration': OracleIntegration,
+  'gas-optimization-deep-dive': GasOptimizationDeepDive,
+  'bridge-architecture': BridgeArchitecture,
+  'formal-verification': FormalVerification,
 };
 
 // ─── Layout Props ──────────────────────────────────────────────────────────────

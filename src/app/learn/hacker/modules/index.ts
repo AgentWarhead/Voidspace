@@ -9,3 +9,8 @@ export { default as MevTransactionOrdering } from './MevTransactionOrdering';
 export { default as BuildingAnIndexer } from './BuildingAnIndexer';
 export { default as MultiChainWithNear } from './MultiChainWithNear';
 export { default as ProductionPatterns } from './ProductionPatterns';
+export { default as ZeroKnowledgeOnNear } from './ZeroKnowledgeOnNear';
+export { default as OracleIntegration } from './OracleIntegration';
+export { default as GasOptimizationDeepDive } from './GasOptimizationDeepDive';
+export { default as BridgeArchitecture } from './BridgeArchitecture';
+export { default as FormalVerification } from './FormalVerification';

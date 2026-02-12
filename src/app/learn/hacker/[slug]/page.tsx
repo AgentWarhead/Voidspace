@@ -24,6 +24,11 @@ export const HACKER_MODULES: HackerModule[] = [
   { slug: 'building-an-indexer', title: 'Building an Indexer', description: 'Build custom indexers using NEAR Lake Framework to process and query on-chain data efficiently.', readTime: '20 min', order: 9 },
   { slug: 'multi-chain-with-near', title: 'Multi-Chain with NEAR', description: 'Leverage NEAR as a coordination layer for multi-chain applications and cross-chain workflows.', readTime: '18 min', order: 10 },
   { slug: 'production-patterns', title: 'Production Patterns', description: 'Battle-tested patterns for production NEAR dApps — monitoring, upgrades, and incident response.', readTime: '18 min', order: 11 },
+  { slug: 'zero-knowledge-on-near', title: 'Zero Knowledge on NEAR', description: 'ZK proofs, privacy-preserving computation, and NEAR\'s ZK roadmap for scalability and privacy.', readTime: '70 min', order: 12 },
+  { slug: 'oracle-integration', title: 'Oracle Integration', description: 'Price feeds, custom data oracles, and secure off-chain data integration on NEAR.', readTime: '65 min', order: 13 },
+  { slug: 'gas-optimization-deep-dive', title: 'Gas Optimization Deep Dive', description: 'NEAR gas model, profiling, storage vs compute tradeoffs, and production optimization patterns.', readTime: '60 min', order: 14 },
+  { slug: 'bridge-architecture', title: 'Bridge Architecture', description: 'Rainbow Bridge, light clients, cross-chain messaging, and bridge security deep dive.', readTime: '70 min', order: 15 },
+  { slug: 'formal-verification', title: 'Formal Verification', description: 'Property testing, invariant testing, model checking, and symbolic execution for smart contracts.', readTime: '75 min', order: 16 },
 ];
 
 // ─── Static Params ─────────────────────────────────────────────────────────────

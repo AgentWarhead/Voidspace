@@ -29,6 +29,12 @@ export const BUILDER_MODULES: BuilderModule[] = [
   { slug: 'deployment', title: 'Deployment', description: 'Deploy your contracts to mainnet — account setup, deployment strategies, and verification.', readTime: '15 min', order: 14 },
   { slug: 'optimization', title: 'Optimization', description: 'Optimize your contracts for gas efficiency, storage costs, and execution speed.', readTime: '15 min', order: 15 },
   { slug: 'launch-checklist', title: 'Launch Checklist', description: 'Everything you need to verify before shipping your dApp to production on NEAR mainnet.', readTime: '12 min', order: 16 },
+  { slug: 'building-an-nft-contract', title: 'Building an NFT Contract', description: 'Implement NEP-171 NFTs with minting, royalties (NEP-199), and marketplace integration patterns.', readTime: '75 min', order: 17 },
+  { slug: 'building-a-dao-contract', title: 'Building a DAO Contract', description: 'Governance contract architecture with proposals, voting, role-based permissions, and treasury management.', readTime: '70 min', order: 18 },
+  { slug: 'defi-contract-patterns', title: 'DeFi Contract Patterns', description: 'AMM mechanics, constant product formula, liquidity pools, and swap contract architecture on NEAR.', readTime: '80 min', order: 19 },
+  { slug: 'aurora-evm-compatibility', title: 'Aurora EVM Compatibility', description: 'Deploy Solidity contracts on NEAR via Aurora — EVM runtime, Rainbow Bridge, and dev tooling.', readTime: '55 min', order: 20 },
+  { slug: 'wallet-selector-integration', title: 'Wallet Selector Integration', description: 'Multi-wallet support with @near-wallet-selector/core — sign-in flows and transaction signing UX.', readTime: '50 min', order: 21 },
+  { slug: 'near-social-bos', title: 'NEAR Social & BOS', description: 'Build composable on-chain widgets with NEAR Social, Social DB, and the Blockchain Operating System.', readTime: '60 min', order: 22 },
 ];
 
 // ─── Static Params ─────────────────────────────────────────────────────────────
