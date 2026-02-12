@@ -77,8 +77,8 @@ const TRACKS: Track[] = [
     description:
       'Start from zero. Learn what blockchain is, understand NEAR Protocol, create your first wallet, and make your first on-chain transaction. No coding required.',
     difficulty: 1,
-    duration: '~6 hours',
-    moduleCount: 11,
+    duration: '~9 hours',
+    moduleCount: 16,
     theme: 'green',
     modules: [
       { label: 'What is Blockchain?', icon: BookOpen, slug: 'what-is-blockchain' },
@@ -92,6 +92,11 @@ const TRACKS: Track[] = [
       { label: 'Reading the Explorer', icon: Eye, slug: 'reading-the-explorer' },
       { label: 'DeFi Basics', icon: Sparkles, slug: 'defi-basics' },
       { label: 'Choose Your Path', icon: Compass, slug: 'choose-your-path' },
+      { label: 'NFT Basics on NEAR', icon: Sparkles, slug: 'nft-basics-on-near' },
+      { label: 'Staking & Validators', icon: Shield, slug: 'staking-and-validators' },
+      { label: 'DAOs on NEAR', icon: Boxes, slug: 'daos-on-near' },
+      { label: 'Staying Safe in Web3', icon: Shield, slug: 'staying-safe-in-web3' },
+      { label: 'NEAR Data Tools', icon: Database, slug: 'near-data-tools' },
     ],
   },
   {
@@ -103,8 +108,8 @@ const TRACKS: Track[] = [
     description:
       'The complete developer journey. Set up your environment, learn Rust from scratch, build and deploy smart contracts, integrate frontends, and ship a real dApp to mainnet.',
     difficulty: 2,
-    duration: '~20 hours',
-    moduleCount: 16,
+    duration: '~28 hours',
+    moduleCount: 22,
     theme: 'cyan',
     popular: true,
     modules: [
@@ -124,6 +129,12 @@ const TRACKS: Track[] = [
       { label: 'Deployment', icon: Upload, slug: 'deployment' },
       { label: 'Optimization', icon: Gauge, slug: 'optimization' },
       { label: 'Launch Checklist', icon: ListChecks, slug: 'launch-checklist' },
+      { label: 'Building an NFT Contract', icon: FileCode, slug: 'building-an-nft-contract' },
+      { label: 'Building a DAO Contract', icon: Boxes, slug: 'building-a-dao-contract' },
+      { label: 'DeFi Contract Patterns', icon: Coins, slug: 'defi-contract-patterns' },
+      { label: 'Aurora EVM Compatibility', icon: Globe, slug: 'aurora-evm-compatibility' },
+      { label: 'Wallet Selector Integration', icon: Wallet, slug: 'wallet-selector-integration' },
+      { label: 'NEAR Social & BOS', icon: Network, slug: 'near-social-bos' },
     ],
   },
   {
@@ -135,8 +146,8 @@ const TRACKS: Track[] = [
     description:
       'For experienced developers. Deep-dive into NEAR architecture, cross-contract calls, advanced storage patterns, chain signatures, and production-grade patterns.',
     difficulty: 3,
-    duration: '~8 hours',
-    moduleCount: 11,
+    duration: '~12 hours',
+    moduleCount: 16,
     theme: 'purple',
     modules: [
       { label: 'NEAR Architecture Deep Dive', icon: Network, slug: 'near-architecture-deep-dive' },
@@ -150,6 +161,11 @@ const TRACKS: Track[] = [
       { label: 'Building an Indexer', icon: Database, slug: 'building-an-indexer' },
       { label: 'Multi-Chain with NEAR', icon: Network, slug: 'multi-chain-with-near' },
       { label: 'Production Patterns', icon: Boxes, slug: 'production-patterns' },
+      { label: 'Zero Knowledge on NEAR', icon: Shield, slug: 'zero-knowledge-on-near' },
+      { label: 'Oracle Integration', icon: Network, slug: 'oracle-integration' },
+      { label: 'Gas Optimization Deep Dive', icon: Gauge, slug: 'gas-optimization-deep-dive' },
+      { label: 'Bridge Architecture', icon: Network, slug: 'bridge-architecture' },
+      { label: 'Formal Verification', icon: Shield, slug: 'formal-verification' },
     ],
   },
   {
@@ -161,8 +177,8 @@ const TRACKS: Track[] = [
     description:
       'Turn your dApp into a real business. Learn tokenomics design, revenue models, grant applications, pitching, and building in public.',
     difficulty: 3,
-    duration: '~6 hours',
-    moduleCount: 5,
+    duration: '~14 hours',
+    moduleCount: 12,
     theme: 'purple',
     modules: [
       { label: 'NEAR Grants & Funding', icon: Wallet, slug: 'near-grants-funding' },
@@ -170,6 +186,13 @@ const TRACKS: Track[] = [
       { label: 'Building in Public', icon: Globe, slug: 'building-in-public' },
       { label: 'Pitching Your Project', icon: Sparkles, slug: 'pitching-your-project' },
       { label: 'Revenue Models for dApps', icon: Coins, slug: 'revenue-models-for-dapps' },
+      { label: 'Community Building', icon: Globe, slug: 'community-building' },
+      { label: 'Go-to-Market Strategy', icon: Send, slug: 'go-to-market' },
+      { label: 'Legal & Regulatory Basics', icon: Shield, slug: 'legal-regulatory-basics' },
+      { label: 'Treasury Management', icon: Wallet, slug: 'treasury-management' },
+      { label: 'Metrics That Matter', icon: Gauge, slug: 'metrics-that-matter' },
+      { label: 'Marketing for Web3', icon: Sparkles, slug: 'marketing-for-web3' },
+      { label: 'Investor Relations', icon: Coins, slug: 'investor-relations' },
     ],
   },
 ];
