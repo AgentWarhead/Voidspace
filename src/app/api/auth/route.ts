@@ -71,11 +71,20 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
 
     // Try to find existing user
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from('users')
       .select('*')
       .eq('near_account_id', accountId)
       .single();
+
+    if (selectError && selectError.code !== 'PGRST116') {
+      // PGRST116 = "no rows found" (expected for new users)
+      console.error('[AUTH] Supabase SELECT error:', JSON.stringify(selectError));
+      return NextResponse.json(
+        { error: 'Database error', detail: selectError.message, code: selectError.code },
+        { status: 500 }
+      );
+    }
 
     if (existing) {
       return respondWithSession(existing, accountId);
@@ -105,9 +114,9 @@ export async function POST(request: NextRequest) {
           return respondWithSession(raceUser, accountId);
         }
       }
-      console.error('Failed to create user:', error);
+      console.error('Failed to create user:', JSON.stringify(error));
       return NextResponse.json(
-        { error: 'Failed to create user' },
+        { error: 'Failed to create user', detail: error.message, code: error.code },
         { status: 500 }
       );
     }
