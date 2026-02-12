@@ -161,14 +161,20 @@ export function HeroCTA() {
         </motion.div>
       </Link>
 
-      <motion.p 
-        className="text-xs text-text-muted font-mono"
+      <motion.div
+        className="flex items-center gap-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        Powered by Claude AI
-      </motion.p>
+        <p className="text-xs text-text-muted font-mono">
+          Powered by Claude AI
+        </p>
+        <span className="text-text-muted/30">·</span>
+        <Link href="/learn" className="text-xs text-near-green/70 hover:text-near-green font-mono transition-colors">
+          New to NEAR? Start learning →
+        </Link>
+      </motion.div>
     </div>
   );
 }

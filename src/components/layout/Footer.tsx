@@ -44,7 +44,7 @@ export function Footer() {
             <div>
               <span className="text-sm font-semibold text-gradient">Voidspace</span>
               <p className="text-[10px] text-text-muted">
-                AI-powered void scanner
+                NEAR ecosystem intelligence, education & AI development
               </p>
             </div>
           </div>
