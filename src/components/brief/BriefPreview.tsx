@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Lock, Sparkles } from 'lucide-react';
 import { Card, Button } from '@/components/ui';
 import type { ProjectBrief } from '@/types';
@@ -16,6 +17,8 @@ function truncateToSentences(text: string, n: number): string {
 }
 
 export function BriefPreview({ brief }: BriefPreviewProps) {
+  const router = useRouter();
+
   return (
     <div className="space-y-4">
       {/* Visible teaser — just enough to tantalize */}
@@ -82,7 +85,7 @@ export function BriefPreview({ brief }: BriefPreviewProps) {
             <p className="text-xs text-text-secondary mb-3">
               Get technical specs, NEAR integration details, monetization strategies, next steps, and funding opportunities.
             </p>
-            <Button variant="primary" size="sm" leftIcon={<Sparkles className="w-3.5 h-3.5" />}>
+            <Button variant="primary" size="sm" leftIcon={<Sparkles className="w-3.5 h-3.5" />} onClick={() => router.push('/pricing')}>
               Upgrade to Specter
             </Button>
           </Card>
