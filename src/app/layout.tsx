@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SearchShortcut } from '@/components/layout/SearchShortcut';
@@ -89,6 +90,18 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-T0WSNESD0W"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-T0WSNESD0W');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
