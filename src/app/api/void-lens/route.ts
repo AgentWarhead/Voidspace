@@ -206,7 +206,7 @@ function extractTopContracts(
     });
 }
 
-async function fetchWalletData(address: string): Promise<WalletData | null> {
+async function fetchWalletData(address: string): Promise<WalletData | null | 'rate-limited'> {
   try {
     const baseUrl = 'https://api.nearblocks.io/v1/account';
     
@@ -215,6 +215,10 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
       headers: { 'Accept': 'application/json' }
     });
     
+    if (accountResponse.status === 429) {
+      return 'rate-limited';
+    }
+    
     if (!accountResponse.ok) {
       throw new Error(`Failed to fetch account: ${accountResponse.status}`);
     }
@@ -222,8 +226,8 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
     const accountData = await accountResponse.json();
     const account = accountData.account?.[0] || accountData;
     
-    // Fetch all data in parallel for speed
-    const [txResponse, tokensResponse, nftResponse, keysResponse] = await Promise.all([
+    // Fetch data in two batches to avoid NearBlocks rate limits
+    const [txResponse, tokensResponse] = await Promise.all([
       // Transactions (last 100)
       fetch(`${baseUrl}/${address}/txns?page=1&per_page=100`, {
         headers: { 'Accept': 'application/json' }
@@ -232,6 +236,12 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
       fetch(`${baseUrl}/${address}/tokens?page=1&per_page=50`, {
         headers: { 'Accept': 'application/json' }
       }).catch(() => null),
+    ]);
+
+    // Small delay to respect rate limits, then fetch remaining data
+    await new Promise(r => setTimeout(r, 200));
+
+    const [nftResponse, keysResponse] = await Promise.all([
       // NFTs
       fetch(`${baseUrl}/${address}/nft-tokens?page=1&per_page=50`, {
         headers: { 'Accept': 'application/json' }
@@ -699,6 +709,9 @@ interface PortfolioData {
 
 async function enrichPortfolio(address: string, walletData: WalletData): Promise<PortfolioData | null> {
   try {
+    // Small delay to avoid NearBlocks rate limits (fetchWalletData already made 5 requests)
+    await new Promise(r => setTimeout(r, 300));
+
     // Fetch token inventory with balances from NearBlocks
     const invResponse = await fetch(
       `https://api.nearblocks.io/v1/account/${address}/inventory`,
@@ -866,6 +879,11 @@ export async function POST(request: NextRequest) {
     }
 
     const walletData = await fetchWalletData(address);
+    if (walletData === 'rate-limited') {
+      return NextResponse.json({ 
+        error: "NEAR's data feeds are busy. Please wait a moment and try again." 
+      }, { status: 429 });
+    }
     if (!walletData) {
       return NextResponse.json({ 
         error: "We couldn't find that wallet on NEAR. Double-check the address." 
