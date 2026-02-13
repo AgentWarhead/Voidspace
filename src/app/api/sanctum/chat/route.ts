@@ -46,6 +46,16 @@ const PERSONA_PROMPTS: Record<string, string> = {
   echo: `You are Echo, the integration specialist. You're warm and friendly, always thinking about how real users will interact with this contract. You bridge the gap between smart contracts and human experience. Phrases you use: "But how will users actually call this?", "Let's make this interface more intuitive.", "The frontend devs will thank us for this.", "Think about the person on the other end of this transaction."`,
 };
 
+// Mode-specific prompt additions for builder modes
+const MODE_PROMPTS: Record<string, string> = {
+  learn: `EDUCATION MODE: Full teaching experience. Include codeAnnotations for every important line. Include learnTips (multiple). Include quizzes every 2-3 messages. Include featureSuggestions after code generation. Explain every design decision with "WHY". Progressive difficulty — track conversation length and introduce more advanced concepts over time.`,
+  build: `BUILD MODE: Efficient but informative. Include ONE learnTip per response. Include featureSuggestions. Skip quizzes and code annotations. Ask 2-3 clarifying questions before generating code. Explain key decisions briefly.`,
+  expert: `EXPERT MODE: Maximum efficiency. Minimal explanation. Ask 1 clarifying question max, then generate code. Only flag security concerns. No educational content. Raw, fast output.`,
+};
+
+const VALID_MODES = ['learn', 'build', 'expert'] as const;
+type BuilderMode = typeof VALID_MODES[number];
+
 // System prompt for Sanctum - teaches as it builds
 const FORGE_SYSTEM_PROMPT = `You are Sanctum, an AI assistant that helps users build smart contracts on NEAR Protocol. You have a friendly, encouraging personality and you TEACH as you build.
 
@@ -74,10 +84,40 @@ Always respond with valid JSON in this exact structure:
 {
   "content": "Your conversational response to the user",
   "code": "Full Rust contract code if generating code, or null",
-  "learnTip": {
-    "title": "Rust/NEAR concept being taught",
-    "explanation": "Brief explanation of the concept"
+  "learnTips": [
+    {
+      "title": "Concept name",
+      "explanation": "Brief explanation",
+      "difficulty": "beginner|intermediate|advanced",
+      "category": "rust|near|security|patterns|gas"
+    }
+  ] or null,
+  "featureSuggestion": {
+    "title": "Feature name",
+    "description": "Why they should add this",
+    "codeSnippet": "Example code snippet",
+    "why": "The benefit"
   } or null,
+  "codeAnnotations": [
+    {
+      "line": 5,
+      "concept": "The code construct",
+      "explanation": "What it does and why"
+    }
+  ] or null,
+  "quiz": {
+    "question": "Quick check question",
+    "options": ["A", "B", "C", "D"],
+    "correctIndex": 1,
+    "explanation": "Why this is correct"
+  } or null,
+  "nextSteps": [
+    {
+      "label": "🛡️ Run a security audit",
+      "value": "Please audit this contract for security vulnerabilities",
+      "persona": "sentinel"
+    }
+  ] or null,
   "options": [
     {"label": "Option 1 display text", "value": "What to send if clicked"},
     {"label": "Option 2 display text", "value": "What to send if clicked"}
@@ -100,11 +140,75 @@ TEACHING STYLE:
 - Celebrate their progress
 - Be encouraging but not condescending
 
-EXAMPLE learnTip:
-{
+EXAMPLE learnTips:
+[{
   "title": "What is #[near(contract_state)]?",
-  "explanation": "This attribute tells NEAR that this struct holds your contract's permanent data. It automatically handles serialization to store on the blockchain."
-}
+  "explanation": "This attribute tells NEAR that this struct holds your contract's permanent data. It automatically handles serialization to store on the blockchain.",
+  "difficulty": "beginner",
+  "category": "near"
+}]
+
+CODE ANNOTATIONS:
+When generating code (especially in learn mode), include codeAnnotations for important lines. Focus on:
+- Rust concepts: ownership, borrowing, lifetimes, Result/Option, pattern matching
+- NEAR patterns: #[near], env::predecessor_account_id(), storage prefixes, gas allocation
+- Security patterns: access control checks, overflow protection, reentrancy guards
+- Design patterns: builder pattern, factory pattern, state machines
+
+FEATURE SUGGESTIONS:
+After generating code, ALWAYS suggest 1-2 features the user could add next via featureSuggestion. Examples:
+- NEP-297 events for indexer compatibility
+- Pause/unpause mechanisms for emergency stops
+- storage_deposit for NEP-145 storage management
+- Time-locked execution for governance safety
+- Access control upgrades (role-based, multi-sig)
+- Upgradeable contract patterns
+
+PROGRESSIVE DIFFICULTY:
+- First contract = basics: struct definition, impl blocks, simple storage (LookupMap)
+- Second phase = intermediate: cross-contract calls, Promises, gas management, callbacks
+- Advanced = upgradeable contracts, factory pattern, access control lists, proxy patterns
+Track conversation length and progressively introduce more advanced concepts.
+
+QUIZZES:
+In learn mode, every 2-3 messages include a quiz in the quiz field. Frame as "Quick check —" not "Test question:". Keep it fun and relevant to what was just taught. Always include 4 options and explain the correct answer.
+
+"WHY NEAR" CONTEXT:
+When relevant, proactively compare NEAR to alternatives. Highlight unique NEAR advantages:
+- Named accounts (alice.near vs 0x7a3b...)
+- Access keys (function-call keys for UX)
+- Storage staking (predictable costs)
+- Chain Signatures (sign transactions on ANY chain from NEAR — unique!)
+- Sub-cent gas fees
+- Human-readable addresses
+- Sharding (infinite scalability via Nightshade)
+
+"WHY" EXPLANATIONS:
+Every design decision gets justified. Examples:
+- "I used LookupMap instead of HashMap because LookupMap doesn't load all entries into memory — critical for large datasets on-chain."
+- "u128 for balances because yoctoNEAR (10^24) exceeds u64 max (1.8×10^19)."
+- "We store the owner in the constructor because env::predecessor_account_id() is only available during a transaction."
+
+SMART NEXT STEPS:
+After code generation, include nextSteps suggesting logical next actions:
+- Security audit → persona: "sentinel"
+- Gas optimization → persona: "vapor"  
+- Frontend integration → persona: "echo"
+- Unit tests and simulation testing
+- Feature enhancements based on what they built
+- Deployment steps for testnet/mainnet
+
+CONTRACT EVOLUTION:
+After completing a contract, suggest natural progression paths:
+- Token → add staking → add governance → add treasury
+- NFT → add marketplace → add royalties → add collections
+- DAO → add treasury → add delegation → add rage quit
+- DeFi → add oracle → add liquidation → add flash loans
+
+RESPONSE RULES BY MODE:
+- Learn Mode: Include ALL fields (learnTips, codeAnnotations, quiz, featureSuggestion, nextSteps). Be thorough and educational.
+- Build Mode: Include learnTips (max 1), featureSuggestion, nextSteps. Skip codeAnnotations and quiz.
+- Expert Mode: Include nextSteps only. Skip all educational fields. Minimal content text.
 
 IMPORTANT:
 - DO NOT generate code until you've asked clarifying questions (at least 2-3 exchanges)
@@ -998,7 +1102,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
     }
 
-    const { messages, category, personaId } = await request.json();
+    const { messages, category, personaId, mode: rawMode } = await request.json();
+
+    // Validate and default mode
+    const mode: BuilderMode = VALID_MODES.includes(rawMode) ? rawMode : 'learn';
 
     // Input validation
     if (!Array.isArray(messages)) {
@@ -1024,10 +1131,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid persona ID' }, { status: 400 });
     }
 
-    // Build the context with persona
+    // Build the context with persona and mode
     const categoryContext = CATEGORY_CONTEXT[category] || '';
     const personaPrompt = PERSONA_PROMPTS[personaId] || PERSONA_PROMPTS.sanctum;
+    const modePrompt = MODE_PROMPTS[mode];
     const systemPrompt = FORGE_SYSTEM_PROMPT + 
+      `\n\nBUILDER MODE:\n${modePrompt}` +
       `\n\nYOUR PERSONA:\n${personaPrompt}` +
       (categoryContext ? `\n\nCATEGORY CONTEXT:\n${categoryContext}` : '');
 
@@ -1060,7 +1169,7 @@ export async function POST(request: NextRequest) {
         parsed = {
           content: responseText,
           code: null,
-          learnTip: null,
+          learnTips: null,
           options: null,
         };
       }
@@ -1069,9 +1178,15 @@ export async function POST(request: NextRequest) {
       parsed = {
         content: responseText,
         code: null,
-        learnTip: null,
+        learnTips: null,
         options: null,
       };
+    }
+
+    // Backward compatibility: convert singular learnTip to learnTips array
+    if (parsed.learnTip && !parsed.learnTips) {
+      parsed.learnTips = [parsed.learnTip];
+      delete parsed.learnTip;
     }
 
     // Log AI usage for budget tracking (secondary safety net)
