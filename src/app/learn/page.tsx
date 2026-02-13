@@ -10,6 +10,8 @@ import { SocialProof } from './components/SocialProof';
 import { LearningTracks } from './components/LearningTracks';
 import { TableOfContents } from './components/TableOfContents';
 import { NonDevCallout } from './components/NonDevCallout';
+import { DeepDiveSection } from './components/DeepDiveSection';
+import { CrossChainSection } from './components/CrossChainSection';
 import Link from 'next/link';
 
 // ─── Lazy-loaded below-fold components ─────────────────────────────────────────
@@ -465,59 +467,22 @@ export default function LearnPage() {
         </ScrollReveal>
       </Container>
 
-      {/* Deep Dive Cards — replacing WalletSetup, KeyTechnologies, WhyRust, RustCurriculum */}
+      {/* Deep Dive Cards — premium bento layout with glassmorphism */}
       <Container className="pb-20">
         <ScrollReveal>
           <div id="deep-dives">
             <SectionHeader title="Deep Dives" badge="EXPLORE" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {DEEP_DIVE_CARDS.map((card) => (
-                <Link key={card.href} href={card.href} className="block group">
-                  <GlowCard className="h-full p-6 flex items-start gap-4 transition-all duration-300 group-hover:scale-[1.02]">
-                    <div className="p-3 rounded-xl bg-near-green/10 group-hover:bg-near-green/20 transition-colors shrink-0">
-                      <card.icon className="w-5 h-5 text-near-green" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-text-primary group-hover:text-near-green transition-colors">
-                        {card.emoji} {card.title}
-                      </h3>
-                      <p className="text-sm text-text-muted mt-1">{card.description}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-near-green group-hover:translate-x-1 transition-all shrink-0 mt-1" />
-                  </GlowCard>
-                </Link>
-              ))}
-            </div>
+            <DeepDiveSection cards={DEEP_DIVE_CARDS.map(({ icon, ...rest }) => rest)} />
           </div>
         </ScrollReveal>
       </Container>
 
-      {/* Cross-Chain Guides — Solana Harvest */}
+      {/* Cross-Chain Guides — developer-oriented with code-themed styling */}
       <Container className="pb-20">
         <ScrollReveal>
           <div id="cross-chain">
             <SectionHeader title="Cross-Chain Guides" badge="MULTI-CHAIN" />
-            <p className="text-sm text-text-muted mb-4">
-              Coming from another Rust blockchain? Your skills transfer directly.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {CROSS_CHAIN_CARDS.map((card) => (
-                <Link key={card.href} href={card.href} className="block group">
-                  <GlowCard className="h-full p-6 flex items-start gap-4 transition-all duration-300 group-hover:scale-[1.02]">
-                    <div className="p-3 rounded-xl bg-near-green/10 group-hover:bg-near-green/20 transition-colors shrink-0">
-                      <card.icon className="w-5 h-5 text-near-green" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-text-primary group-hover:text-near-green transition-colors">
-                        {card.emoji} {card.title}
-                      </h3>
-                      <p className="text-sm text-text-muted mt-1">{card.description}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-near-green group-hover:translate-x-1 transition-all shrink-0 mt-1" />
-                  </GlowCard>
-                </Link>
-              ))}
-            </div>
+            <CrossChainSection cards={CROSS_CHAIN_CARDS.map(({ icon, ...rest }) => rest)} />
           </div>
         </ScrollReveal>
       </Container>
