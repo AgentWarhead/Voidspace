@@ -381,8 +381,8 @@ export default function LearnPage() {
             <Link href="/learn/quick-start" className="block group">
               <GlowCard className="p-6 md:p-8 transition-all duration-300 group-hover:scale-[1.01]">
                 <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-near-green/20 to-accent-cyan/20 border border-near-green/20 flex-shrink-0">
-                    <Rocket className="w-8 h-8 text-near-green" />
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex-shrink-0 shadow-lg shadow-emerald-500/10">
+                    <Rocket className="w-8 h-8 text-emerald-400" />
                   </div>
                   <div className="flex-1 text-center md:text-left">
                     <h3 className="text-xl font-bold text-text-primary group-hover:text-near-green transition-colors">

@@ -285,7 +285,7 @@ function ArchitectureDiagram() {
           <div className="grid grid-cols-3 gap-2 w-full">
             {['Shard 0', 'Shard 1', 'Shard 2'].map((shard) => (
               <div key={shard} className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-center shadow-sm shadow-emerald-500/10">
-                <span className="text-[10px] font-mono text-near-green">{shard}</span>
+                <span className="text-[10px] font-mono text-emerald-400">{shard}</span>
               </div>
             ))}
           </div>
