@@ -912,9 +912,107 @@ export function VoidBubblesEngine() {
     xrayMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
     // Background layers
-    svg.append('g').attr('class', 'background-layer');
+    const bgLayer = svg.append('g').attr('class', 'background-layer');
     svg.append('g').attr('class', 'connection-lines-layer'); // **NEW: For capital flow hints**
     svg.append('g').attr('class', 'shockwave-layer');
+
+    // ── Voidspace-Themed Background ──
+
+    // Vignette (dark edges, lighter center)
+    const vignetteGrad = defs.append('radialGradient')
+      .attr('id', 'vignette-grad')
+      .attr('cx', '50%').attr('cy', '50%').attr('r', '70%');
+    vignetteGrad.append('stop').attr('offset', '0%').attr('stop-color', 'transparent');
+    vignetteGrad.append('stop').attr('offset', '70%').attr('stop-color', 'transparent');
+    vignetteGrad.append('stop').attr('offset', '100%').attr('stop-color', '#000000').attr('stop-opacity', '0.6');
+    bgLayer.append('rect').attr('width', width).attr('height', height).attr('fill', 'url(#vignette-grad)');
+
+    // Nebula fog — layered radial gradients with brand colors
+    const nebulaColors = [
+      { cx: 0.25, cy: 0.3, color: '#00EC97', opacity: 0.035, r: 0.45 },
+      { cx: 0.7, cy: 0.6, color: '#9D4EDD', opacity: 0.03, r: 0.5 },
+      { cx: 0.5, cy: 0.2, color: '#00D4FF', opacity: 0.025, r: 0.4 },
+      { cx: 0.8, cy: 0.15, color: '#00EC97', opacity: 0.02, r: 0.35 },
+      { cx: 0.15, cy: 0.75, color: '#9D4EDD', opacity: 0.025, r: 0.4 },
+    ];
+    nebulaColors.forEach((n, i) => {
+      const nebulaGrad = defs.append('radialGradient')
+        .attr('id', `nebula-${i}`)
+        .attr('cx', `${n.cx * 100}%`).attr('cy', `${n.cy * 100}%`).attr('r', `${n.r * 100}%`);
+      nebulaGrad.append('stop').attr('offset', '0%').attr('stop-color', n.color).attr('stop-opacity', n.opacity * 2);
+      nebulaGrad.append('stop').attr('offset', '100%').attr('stop-color', n.color).attr('stop-opacity', '0');
+
+      // Inject drift animation CSS
+      const driftStyle = document.createElement('style');
+      driftStyle.textContent = `
+        @keyframes nebula-drift-${i} {
+          0%, 100% { transform: translate(0px, 0px); }
+          33% { transform: translate(${10 + i * 5}px, ${-8 + i * 3}px); }
+          66% { transform: translate(${-6 - i * 4}px, ${12 + i * 2}px); }
+        }
+        .nebula-fog-${i} { animation: nebula-drift-${i} ${20 + i * 8}s ease-in-out infinite; }
+      `;
+      document.head.appendChild(driftStyle);
+      injectedStylesRef.current.push(driftStyle);
+
+      bgLayer.append('rect')
+        .attr('class', `nebula-fog-${i}`)
+        .attr('width', width).attr('height', height)
+        .attr('fill', `url(#nebula-${i})`);
+    });
+
+    // Holographic wireframe grid (perspective-fading)
+    const gridGroup = bgLayer.append('g').attr('class', 'void-grid').attr('opacity', 0.07);
+    const gridSpacing = 60;
+    // Vertical lines
+    for (let x = 0; x < width; x += gridSpacing) {
+      const distFromCenter = Math.abs(x - width / 2) / (width / 2);
+      gridGroup.append('line')
+        .attr('x1', x).attr('y1', 0).attr('x2', x).attr('y2', height)
+        .attr('stroke', '#00D4FF').attr('stroke-width', 0.5)
+        .attr('opacity', Math.max(0.1, 1 - distFromCenter * 1.2));
+    }
+    // Horizontal lines
+    for (let y = 0; y < height; y += gridSpacing) {
+      const distFromCenter = Math.abs(y - height / 2) / (height / 2);
+      gridGroup.append('line')
+        .attr('x1', 0).attr('y1', y).attr('x2', width).attr('y2', y)
+        .attr('stroke', '#00D4FF').attr('stroke-width', 0.5)
+        .attr('opacity', Math.max(0.1, 1 - distFromCenter * 1.2));
+    }
+    // Grid pulse animation
+    const gridPulseStyle = document.createElement('style');
+    gridPulseStyle.textContent = `
+      @keyframes grid-pulse { 0%, 100% { opacity: 0.07; } 50% { opacity: 0.12; } }
+      .void-grid { animation: grid-pulse 8s ease-in-out infinite; }
+    `;
+    document.head.appendChild(gridPulseStyle);
+    injectedStylesRef.current.push(gridPulseStyle);
+
+    // Star field — varying sizes and brightness
+    const starGroup = bgLayer.append('g').attr('class', 'star-field');
+    const starCount = Math.min(Math.floor(width * height / 3000), 200);
+    for (let i = 0; i < starCount; i++) {
+      const sx = Math.random() * width;
+      const sy = Math.random() * height;
+      const sr = 0.3 + Math.random() * 1.5;
+      const so = 0.15 + Math.random() * 0.6;
+      const starColor = ['#ffffff', '#00EC97', '#00D4FF', '#9D4EDD'][Math.floor(Math.random() * 4)];
+      starGroup.append('circle')
+        .attr('cx', sx).attr('cy', sy).attr('r', sr)
+        .attr('fill', starColor).attr('opacity', so);
+    }
+    // Twinkle animation for some stars
+    const twinkleStyle = document.createElement('style');
+    twinkleStyle.textContent = `
+      @keyframes star-twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+    `;
+    document.head.appendChild(twinkleStyle);
+    injectedStylesRef.current.push(twinkleStyle);
+    // Apply twinkle to ~30% of stars
+    starGroup.selectAll('circle')
+      .filter(() => Math.random() < 0.3)
+      .style('animation', () => `star-twinkle ${2 + Math.random() * 4}s ease-in-out ${Math.random() * 4}s infinite`);
 
     // **NEW: Premium Visual Effects - Connection Lines**
     const connectionLinesLayer = svg.select('.connection-lines-layer');
@@ -1132,12 +1230,13 @@ export function VoidBubblesEngine() {
       .text('💀');
 
     // Enhanced symbol labels with premium typography
-    bubbleGroups.filter(d => d.targetRadius >= 8)
+    // Only show symbol on bubbles large enough to fit both symbol + content below
+    bubbleGroups.filter(d => d.targetRadius >= 15)
       .append('text')
       .attr('class', 'bubble-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('dy', d => d.targetRadius >= 26 ? '-0.35em' : '0')
+      .attr('dy', '-0.35em')
       .attr('font-family', 'JetBrains Mono, monospace')
       .attr('font-size', d => Math.min(d.targetRadius * 0.45, 14))
       .attr('font-weight', '700')
@@ -1146,18 +1245,23 @@ export function VoidBubblesEngine() {
       .style('pointer-events', 'none')
       .text(d => d.token.symbol);
 
-    // Enhanced floating content — price/volume/performance based on bubbleContent setting
-    // Only show on larger bubbles to keep smaller ones clean
-    bubbleGroups.filter(d => d.targetRadius >= 30)
+    // Floating content — price/volume/performance on ALL bubbles with dynamic sizing
+    bubbleGroups
       .append('text')
       .attr('class', 'bubble-content')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('dy', d => d.targetRadius >= 26 ? '0.8em' : '1.2em')
+      .attr('dy', d => d.targetRadius >= 15 ? '0.8em' : '0')
       .attr('font-family', 'JetBrains Mono, monospace')
-      .attr('font-size', d => Math.min(d.targetRadius * 0.25, 10))
+      .attr('font-size', d => {
+        // Dynamic font size scaled to fit inside the bubble
+        if (d.targetRadius < 10) return Math.max(d.targetRadius * 0.6, 5);
+        if (d.targetRadius < 15) return Math.max(d.targetRadius * 0.5, 6);
+        if (d.targetRadius < 30) return Math.min(d.targetRadius * 0.3, 9);
+        return Math.min(d.targetRadius * 0.25, 10);
+      })
       .attr('font-weight', 'bold')
-      .attr('opacity', 0.9)
+      .attr('opacity', d => d.targetRadius < 10 ? 0.75 : 0.9)
       .style('text-shadow', '0 2px 4px rgba(0,0,0,0.8)')
       .style('pointer-events', 'none')
       .attr('fill', (d: BubbleNode) => {
@@ -1166,13 +1270,18 @@ export function VoidBubblesEngine() {
       })
       .text((d: BubbleNode) => {
         const currentChange = getCurrentPriceChange(d.token);
-        switch (bubbleContent) {
-          case 'price': return formatPrice(d.token.price);
-          case 'volume': return formatCompact(d.token.volume24h);
-          case 'marketCap': return formatCompact(d.token.marketCap);
-          default: // performance
-            return `${currentChange >= 0 ? '+' : ''}${currentChange.toFixed(1)}%`;
-        }
+        // For very small bubbles, show just the number
+        const pctText = bubbleContent === 'performance' || d.targetRadius < 15
+          ? `${currentChange >= 0 ? '+' : ''}${currentChange.toFixed(d.targetRadius < 15 ? 0 : 1)}%`
+          : (() => {
+              switch (bubbleContent) {
+                case 'price': return formatPrice(d.token.price);
+                case 'volume': return formatCompact(d.token.volume24h);
+                case 'marketCap': return formatCompact(d.token.marketCap);
+                default: return `${currentChange >= 0 ? '+' : ''}${currentChange.toFixed(1)}%`;
+              }
+            })();
+        return pctText;
       });
 
     // **NEW: Updated Click Handler** - Single click shows popup, double click shows side panel
@@ -1385,6 +1494,51 @@ export function VoidBubblesEngine() {
       });
     }
 
+    // ── "Alive" Breathing Effect ──
+    // Subtle CSS breathing animation on all bubble-main circles + glow rings
+    const breatheStyle = document.createElement('style');
+    breatheStyle.textContent = `
+      @keyframes bubble-breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+      }
+      @keyframes glow-breathe {
+        0%, 100% { stroke-opacity: 0.4; }
+        50% { stroke-opacity: 0.55; }
+      }
+    `;
+    document.head.appendChild(breatheStyle);
+    injectedStylesRef.current.push(breatheStyle);
+
+    // Apply breathing with random delays so bubbles don't sync
+    bubbleGroups.each(function(_d, i) {
+      const group = d3.select(this);
+      const delay = (i * 0.7 + Math.random() * 3).toFixed(2);
+      const duration = (3 + Math.random() * 3).toFixed(2);
+      group.select('.bubble-main')
+        .style('transform-origin', 'center')
+        .style('transform-box', 'fill-box')
+        .style('animation', `bubble-breathe ${duration}s ease-in-out ${delay}s infinite`);
+      group.select('.bubble-glow')
+        .style('animation', `glow-breathe ${duration}s ease-in-out ${delay}s infinite`);
+    });
+
+    // Keep simulation gently alive — periodic alpha nudge
+    const breatheInterval = setInterval(() => {
+      if (simulationRef.current) {
+        simulationRef.current.alpha(0.015).restart();
+      }
+    }, 6000);
+    // Clean up interval on next re-init or unmount
+    const prevCleanup = () => clearInterval(breatheInterval);
+    // Store cleanup in a style element's remove handler (piggyback)
+    const breatheCleanupStyle = document.createElement('style');
+    breatheCleanupStyle.textContent = '/* breathe-interval-cleanup */';
+    const origRemove = breatheCleanupStyle.remove.bind(breatheCleanupStyle);
+    breatheCleanupStyle.remove = () => { prevCleanup(); origRemove(); };
+    document.head.appendChild(breatheCleanupStyle);
+    injectedStylesRef.current.push(breatheCleanupStyle);
+
     // Enhanced zoom behavior with double-click reset
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.3, 5])
@@ -1488,38 +1642,84 @@ export function VoidBubblesEngine() {
 
   const handleSnapshot = useCallback(() => {
     if (!svgRef.current) return;
-    
-    // Create canvas for export
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const rect = svgRef.current.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    
-    // Draw dark background
-    ctx.fillStyle = '#0a0a0f';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Convert SVG to image (simplified for now)
-    const svgData = new XMLSerializer().serializeToString(svgRef.current);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-    
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-      
-      // Download
-      const link = document.createElement('a');
-      link.download = `voidspace-bubbles-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
+
+    try {
+      // Clone SVG so we can inline styles without affecting the live DOM
+      const clone = svgRef.current.cloneNode(true) as SVGSVGElement;
+      const rect = svgRef.current.getBoundingClientRect();
+
+      // Set explicit dimensions & a dark background rect
+      clone.setAttribute('width', String(rect.width));
+      clone.setAttribute('height', String(rect.height));
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+      // Insert background rect at the start
+      const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bgRect.setAttribute('width', '100%');
+      bgRect.setAttribute('height', '100%');
+      bgRect.setAttribute('fill', '#0a0a0f');
+      clone.insertBefore(bgRect, clone.firstChild);
+
+      // Remove CSS animations (they break serialization) and inline computed styles
+      const allEls = clone.querySelectorAll('*');
+      allEls.forEach(el => {
+        el.removeAttribute('class');
+        (el as HTMLElement).style?.removeProperty?.('animation');
+        // Remove url() filter references that break in serialized context
+        const filter = el.getAttribute('filter');
+        if (filter?.includes('url(')) el.removeAttribute('filter');
+      });
+
+      // Embed JetBrains Mono as a web font (base64 fallback not needed — use Google Fonts CSS)
+      const styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      styleEl.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        text { font-family: 'JetBrains Mono', monospace; }
+      `;
+      (clone.querySelector('defs') || clone).insertBefore(styleEl, (clone.querySelector('defs') || clone).firstChild);
+
+      // Serialize to blob
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(clone);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      // Draw to canvas for PNG export
+      const canvas = document.createElement('canvas');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { URL.revokeObjectURL(svgUrl); return; }
+      ctx.scale(dpr, dpr);
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+
+        const link = document.createElement('a');
+        link.download = `voidspace-bubbles-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        URL.revokeObjectURL(svgUrl);
+      };
+      img.onerror = () => {
+        // Fallback: open SVG in a new tab for manual save
+        const fallbackUrl = URL.createObjectURL(svgBlob);
+        window.open(fallbackUrl, '_blank');
+        setTimeout(() => URL.revokeObjectURL(fallbackUrl), 10000);
+        URL.revokeObjectURL(svgUrl);
+      };
+      img.src = svgUrl;
+    } catch {
+      // Last resort: open raw SVG data URI
+      const svgData = new XMLSerializer().serializeToString(svgRef.current);
+      const dataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData);
+      window.open(dataUri, '_blank');
+    }
   }, []);
 
   const handleShareX = useCallback(() => {
@@ -1992,6 +2192,25 @@ export function VoidBubblesEngine() {
                   {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
                 </button>
               </div>
+
+              {/* ── X-Ray Legend (visible when X-Ray is ON) ── */}
+              {xrayMode && (
+                <div className="rounded-xl border border-cyan-500/15 bg-cyan-500/[0.04] px-3 py-2 space-y-1">
+                  <span className="text-[9px] font-mono uppercase tracking-[0.12em] text-cyan-400/70">Health Ring Legend</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: '#00FF88' }} />
+                    <span className="text-[10px] text-text-muted">Healthy <span className="text-[#00FF88] font-mono">&gt;70</span></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: '#FFAA00' }} />
+                    <span className="text-[10px] text-text-muted">Caution <span className="text-[#FFAA00] font-mono">40–70</span></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: '#FF2244' }} />
+                    <span className="text-[10px] text-text-muted">Unhealthy <span className="text-[#FF2244] font-mono">&lt;40</span></span>
+                  </div>
+                </div>
+              )}
 
               {/* ── Quick Actions ── */}
               <div className="flex gap-1.5">
