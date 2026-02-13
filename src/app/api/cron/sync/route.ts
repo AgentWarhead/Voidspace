@@ -34,7 +34,7 @@ const CATEGORIES = [
   { name: 'Bridges & Cross-Chain', slug: 'bridges', description: 'Cross-chain bridges, wrapped tokens, message relaying, interoperability', icon: '🌉', is_strategic: false, strategic_multiplier: 1.0 },
 ];
 
-// Allow up to 60s for full ecosystem sync (8 data sources + opportunity generation)
+// Allow up to 60s for full ecosystem sync (10+ data sources + opportunity generation)
 export const maxDuration = 60;
 
 /**

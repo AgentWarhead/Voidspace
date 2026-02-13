@@ -143,6 +143,29 @@ export const FAQ_DATA: FAQCategory[] = [
     category: 'Intelligence Tools',
     items: [
       {
+        question: 'What data sources does Voidspace use?',
+        answer: (
+          <>
+            Voidspace aggregates <strong className="text-text-primary">10+ real-time data sources</strong> to power all analysis, briefs, and intelligence tools:
+            <ul className="mt-2 space-y-1 list-none">
+              <li><strong className="text-cyan-400">NearBlocks</strong> — Blockchain transactions, accounts, validators &amp; block data</li>
+              <li><strong className="text-cyan-400">Pikespeak</strong> — Wallet analytics, account activity &amp; NEAR network metrics</li>
+              <li><strong className="text-cyan-400">FastNEAR</strong> — High-speed indexer for real-time on-chain state queries</li>
+              <li><strong className="text-emerald-400">DexScreener</strong> — Live DEX prices, volume, liquidity &amp; trading pair data</li>
+              <li><strong className="text-emerald-400">DefiLlama</strong> — Total Value Locked (TVL) &amp; cross-chain DeFi analytics</li>
+              <li><strong className="text-emerald-400">Mintbase</strong> — NFT marketplace data, collections &amp; trading activity on NEAR</li>
+              <li><strong className="text-purple-400">GitHub</strong> — Repository activity, commits &amp; contributor metrics</li>
+              <li><strong className="text-purple-400">AstroDAO</strong> — DAO governance proposals, voting records &amp; treasury data</li>
+              <li><strong className="text-cyan-400">NEAR RPC</strong> — Direct mainnet blockchain queries &amp; contract state reads</li>
+              <li><strong className="text-teal-400">Ecosystem Registry</strong> — Curated database of 180+ NEAR projects with metadata</li>
+            </ul>
+            <p className="mt-2">
+              All data is fetched from live APIs in real-time and cached for performance. Plus, <strong className="text-amber-400">Anthropic Claude</strong> powers our AI features including Sanctum, Void Briefs, and reputation analysis. No synthetic data — every number is verifiable on-chain.
+            </p>
+          </>
+        ),
+      },
+      {
         question: 'What is Void Lens?',
         answer: (
           <>

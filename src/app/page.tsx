@@ -11,6 +11,7 @@ import { IntelligenceToolsSection } from '@/components/landing/IntelligenceTools
 import { SanctumSection } from '@/components/landing/SanctumSection';
 import { LearnSection } from '@/components/landing/LearnSection';
 import { SocialProofSection } from '@/components/landing/SocialProofSection';
+import { DataSourcesSection } from '@/components/landing/DataSourcesSection';
 import { BottomCtaSection } from '@/components/landing/BottomCtaSection';
 import {
   getEcosystemStats,
@@ -98,6 +99,11 @@ export default async function DashboardPage() {
         {/* SECTION 8.5: Social Proof */}
         <ScrollReveal delay={0.15}>
           <SocialProofSection />
+        </ScrollReveal>
+
+        {/* SECTION 8.6: Data Sources */}
+        <ScrollReveal delay={0.155}>
+          <DataSourcesSection />
         </ScrollReveal>
 
         {/* SECTION 9: Bottom CTA */}

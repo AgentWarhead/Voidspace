@@ -72,7 +72,7 @@ export function VoidspaceMetrics() {
                   Voidspace uses <strong className="text-text-primary">Claude AI by Anthropic</strong> to generate personalized build plans called <strong className="text-text-primary">Void Briefs</strong>. Each brief is tailored to a specific void in the NEAR ecosystem and includes everything you need to start building.
                 </p>
                 <p>
-                  When you request a Void Brief, our system feeds Claude real-time ecosystem data from 6 sources — project registry, DeFiLlama TVL data, GitHub activity, NearBlocks chain metrics, FastNEAR on-chain data, and Pikespeak wallet analytics. This means every brief is grounded in actual ecosystem data, not generic templates.
+                  When you request a Void Brief, our system feeds Claude real-time ecosystem data from 10+ sources — NearBlocks blockchain data, Pikespeak wallet analytics, FastNEAR real-time indexing, DexScreener market data, DefiLlama TVL analytics, Mintbase NFT data, GitHub activity metrics, AstroDAO governance data, NEAR RPC direct queries, and our curated Ecosystem Registry. This means every brief is grounded in actual ecosystem data, not generic templates.
                 </p>
               </div>
             </div>

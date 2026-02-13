@@ -355,8 +355,8 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
       {/* Powered By Data Sources */}
       <div className="pt-4 border-t border-border">
         <p className="text-[10px] text-text-muted uppercase tracking-widest mb-2">Powered By</p>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-          {['Ecosystem', 'DeFiLlama', 'GitHub', 'NearBlocks', 'FastNEAR', 'Pikespeak'].map((source) => (
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
+          {['NearBlocks', 'Pikespeak', 'FastNEAR', 'DexScreener', 'DefiLlama', 'Mintbase', 'GitHub', 'AstroDAO', 'NEAR RPC', 'Registry'].map((source) => (
             <span
               key={source}
               className="text-[10px] font-mono text-near-green/70 bg-near-green/5 border border-near-green/10 rounded px-2 py-1 text-center"

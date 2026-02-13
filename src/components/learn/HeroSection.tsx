@@ -8,7 +8,7 @@ import { TypewriterText } from '@/components/effects/TypewriterText';
 
 const STATS = [
   { value: '20+', label: 'Contract Templates' },
-  { value: '6', label: 'Data Sources' },
+  { value: '10+', label: 'Data Sources' },
   { value: '<1s', label: 'Finality' },
   { value: 'AI', label: 'Powered Briefs' },
 ];

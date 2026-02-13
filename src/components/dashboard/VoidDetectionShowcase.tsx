@@ -11,8 +11,8 @@ const steps = [
   {
     icon: Scan,
     title: 'SCAN',
-    description: '6 data sources. Hundreds of projects. Real-time analysis.',
-    detail: 'Ecosystem Registry, DeFiLlama, GitHub, NearBlocks, FastNEAR, Pikespeak',
+    description: '10+ data sources. Hundreds of projects. Real-time analysis.',
+    detail: 'NearBlocks, Pikespeak, FastNEAR, DexScreener, DefiLlama, Mintbase, GitHub, AstroDAO, NEAR RPC, Ecosystem Registry',
   },
   {
     icon: Target,
