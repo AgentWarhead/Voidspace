@@ -346,7 +346,7 @@ export default function ObservatoryContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="border-b border-border"
+            className="relative z-20 border-b border-border"
           >
             <Container size="xl" className="py-4">
               <div className="flex items-start gap-3 p-4 rounded-lg bg-surface/50 border-l-4 border-near-green/30 backdrop-blur-sm">
@@ -357,10 +357,10 @@ export default function ObservatoryContent() {
                 </div>
                 <button
                   onClick={handleDismissOnboarding}
-                  className="flex-shrink-0 p-1 rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-colors duration-200"
+                  className="flex-shrink-0 p-2 rounded-lg text-text-muted hover:text-white hover:bg-surface-hover transition-colors duration-200"
                   aria-label="Dismiss welcome message"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </Container>
@@ -381,7 +381,7 @@ export default function ObservatoryContent() {
           {isVoidBubbles && (
             <div>
               {/* Expand to fullscreen button */}
-              <div className="border-b border-border bg-[#030508]/60">
+              <div className="relative z-20 border-b border-border bg-[#030508]/60">
                 <Container size="xl" className="py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -400,7 +400,7 @@ export default function ObservatoryContent() {
                     </div>
                     <button
                       onClick={() => setIsExpanded(true)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-near-green/10 border border-near-green/20 text-near-green hover:bg-near-green/20 transition-all text-xs font-mono"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-near-green/10 border border-near-green/20 text-near-green hover:bg-near-green/20 transition-all text-sm font-mono font-semibold"
                     >
                       ⛶ Fullscreen
                     </button>
@@ -409,10 +409,12 @@ export default function ObservatoryContent() {
               </div>
 
               {/* Hot Strip */}
-              <HotStrip />
+              <div className="relative z-10">
+                <HotStrip />
+              </div>
 
               {/* Bubble Engine — tall embedded view */}
-              <div className="relative" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+              <div className="relative" style={{ height: 'calc(100vh - 160px)', minHeight: '600px' }}>
                 {/* Space background */}
                 <div className="absolute inset-0 bg-[#030508]">
                   <div
