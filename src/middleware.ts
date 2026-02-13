@@ -78,18 +78,23 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. Block suspicious User-Agents (but allow legitimate search/social bots)
-  const lowerUserAgent = userAgent.toLowerCase();
-  const isAllowedBot = ALLOWED_BOTS.some(bot => lowerUserAgent.includes(bot));
+  // Skip UA check for localhost requests (development/testing)
+  const isLocalhost = ip === 'unknown' || ip === '::1' || ip === '127.0.0.1' || ip?.startsWith('::ffff:127.');
   
-  if (!isAllowedBot) {
-    const isSuspicious = SUSPICIOUS_USER_AGENTS.some(pattern => 
-      pattern === '' ? userAgent === '' : lowerUserAgent.includes(pattern)
-    );
+  if (!isLocalhost) {
+    const lowerUserAgent = userAgent.toLowerCase();
+    const isAllowedBot = ALLOWED_BOTS.some(bot => lowerUserAgent.includes(bot));
+    
+    if (!isAllowedBot) {
+      const isSuspicious = SUSPICIOUS_USER_AGENTS.some(pattern => 
+        pattern === '' ? userAgent === '' : lowerUserAgent.includes(pattern)
+      );
 
-    if (isSuspicious) {
-      console.log(`🚫 UA: Blocked suspicious user agent "${userAgent}" from ${ip}`);
-      logAbuseEvent({ type: 'suspicious_ua', ip, path: pathname });
-      return new NextResponse('Forbidden', { status: 403 });
+      if (isSuspicious) {
+        console.log(`🚫 UA: Blocked suspicious user agent "${userAgent}" from ${ip}`);
+        logAbuseEvent({ type: 'suspicious_ua', ip, path: pathname });
+        return new NextResponse('Forbidden', { status: 403 });
+      }
     }
   }
 
