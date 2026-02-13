@@ -9,8 +9,18 @@ interface OpportunityListProps {
   total: number;
   page: number;
   pageSize: number;
+  searchParams?: Record<string, string | undefined>;
   baseUrl?: string;
   onClearFilters?: () => void;
+}
+
+function buildPageUrl(targetPage: number, currentParams: Record<string, string | undefined>) {
+  const params = new URLSearchParams();
+  Object.entries(currentParams).forEach(([key, value]) => {
+    if (value && key !== 'page') params.set(key, value);
+  });
+  params.set('page', String(targetPage));
+  return `/opportunities?${params.toString()}`;
 }
 
 export function OpportunityList({
@@ -18,6 +28,7 @@ export function OpportunityList({
   total,
   page,
   pageSize,
+  searchParams = {},
   baseUrl = '/opportunities',
   onClearFilters,
 }: OpportunityListProps) {
@@ -58,7 +69,7 @@ export function OpportunityList({
         <div className="flex items-center justify-center gap-4 pt-2">
           {page > 1 ? (
             <Link
-              href={`${baseUrl}?page=${page - 1}`}
+              href={buildPageUrl(page - 1, searchParams)}
               className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -77,7 +88,7 @@ export function OpportunityList({
 
           {page < totalPages ? (
             <Link
-              href={`${baseUrl}?page=${page + 1}`}
+              href={buildPageUrl(page + 1, searchParams)}
               className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
             >
               Next

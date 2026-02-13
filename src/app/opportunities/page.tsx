@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 import { Suspense } from 'react';
 import Link from 'next/link';
@@ -116,6 +117,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
             total={filteredTotal}
             page={page}
             pageSize={pageSize}
+            searchParams={searchParams}
           />
         </section>
       </Container>
