@@ -21,18 +21,23 @@ export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, o
   useEffect(() => {
     if (!menuRef.current) return;
     const rect = menuRef.current.getBoundingClientRect();
-    const padding = 8; // px from edge
+    const padding = 12; // px from edge
     let newLeft = x;
     let newTop = y;
 
     // Flip left if overflowing right edge
-    if (x + rect.width > window.innerWidth - padding) {
+    if (newLeft + rect.width > window.innerWidth - padding) {
       newLeft = Math.max(padding, x - rect.width);
     }
+    // Clamp left edge
+    if (newLeft < padding) newLeft = padding;
+
     // Flip up if overflowing bottom edge
-    if (y + rect.height > window.innerHeight - padding) {
+    if (newTop + rect.height > window.innerHeight - padding) {
       newTop = Math.max(padding, y - rect.height);
     }
+    // Clamp top edge
+    if (newTop < padding) newTop = padding;
 
     setPosition({ left: newLeft, top: newTop });
   }, [x, y]);

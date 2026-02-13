@@ -421,7 +421,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         const srcId = typeof d.source === 'string' ? d.source : (d.source as ConstellationNode).id;
         const tgtId = typeof d.target === 'string' ? d.target : (d.target as ConstellationNode).id;
         setTooltip({
-          x: event.pageX, y: event.pageY,
+          x: event.clientX, y: event.clientY,
           kind: 'edge',
           edge: {
             sourceId: srcId, targetId: tgtId,
@@ -482,7 +482,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         // Tooltip
         const vals = nvm.get(d.id);
         setTooltip({
-          x: event.pageX, y: event.pageY, kind: 'node',
+          x: event.clientX, y: event.clientY, kind: 'node',
           node: {
             id: d.id, type: d.type, transactionCount: d.transactionCount,
             firstSeen: d.firstSeen, lastSeen: d.lastSeen,
@@ -517,7 +517,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
       .on('contextmenu', function(event, d) {
         event.preventDefault();
         setContextMenu({
-          x: event.pageX, y: event.pageY,
+          x: event.clientX, y: event.clientY,
           nodeId: d.id,
           isCenter: d.id === data.centerNode,
           isExpanded: expandedNodes.has(d.id),
@@ -1125,7 +1125,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
                 style={{
                   left: Math.min(tooltip.x + 10, (typeof window !== 'undefined' ? window.innerWidth : 9999) - 320),
                   top: tooltip.y - 10,
-                  transform: tooltip.y < 200 ? 'translateY(20px)' : 'translateY(-100%)',
+                  transform: tooltip.y > (typeof window !== 'undefined' ? window.innerHeight * 0.6 : 400) ? 'translateY(-100%)' : 'translateY(20px)',
                 }}
               >
                 {tooltip.kind === 'node' && tooltip.node && (
