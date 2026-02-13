@@ -24,6 +24,8 @@ import { SimulationSandbox } from './components/SimulationSandbox';
 import { PairProgramming } from './components/PairProgramming';
 import { DownloadButton } from './components/DownloadContract';
 import { FileStructure, FileStructureToggle } from './components/FileStructure';
+import { DeployInstructions } from './components/DeployInstructions';
+import { ProjectManager } from './components/ProjectManager';
 import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
@@ -170,6 +172,7 @@ function SanctumPageInner() {
       {state.showSimulation && state.generatedCode && (
         <SimulationSandbox
           code={state.generatedCode}
+          category={state.selectedCategory || undefined}
           onClose={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: false })}
         />
       )}
@@ -729,7 +732,7 @@ function SanctumPageInner() {
                         >
                           <Code2 className="w-4 h-4" />
                         </button>
-                        <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} />
+                        <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} category={state.selectedCategory || undefined} />
                         <FileStructureToggle 
                           code={state.generatedCode} 
                           contractName={state.selectedCategory || 'my-contract'}
@@ -759,6 +762,16 @@ function SanctumPageInner() {
                         >
                           <Users className="w-4 h-4" />
                         </button>
+                        <ProjectManager
+                          code={state.generatedCode}
+                          category={state.selectedCategory}
+                          mode={state.mode}
+                          onLoadProject={(project) => {
+                            dispatch({ type: 'SET_GENERATED_CODE', payload: project.code });
+                            dispatch({ type: 'SET_SELECTED_CATEGORY', payload: project.category || 'custom' });
+                            dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
+                          }}
+                        />
                         <button 
                           className="px-3 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
                           onClick={handleShare}
@@ -804,6 +817,17 @@ function SanctumPageInner() {
                       <FileStructure 
                         code={state.generatedCode} 
                         contractName={state.selectedCategory || 'my-contract'}
+                      />
+                    </div>
+                  )}
+
+                  {/* Deploy Instructions Panel */}
+                  {state.generatedCode && (
+                    <div className="px-4 pt-3 border-b border-white/[0.08]">
+                      <DeployInstructions
+                        contractName={state.selectedCategory || 'my-contract'}
+                        category={state.selectedCategory || undefined}
+                        code={state.generatedCode}
                       />
                     </div>
                   )}
@@ -902,7 +926,7 @@ function SanctumPageInner() {
                             >
                               <Code2 className="w-4 h-4" />
                             </button>
-                            <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} />
+                            <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} category={state.selectedCategory || undefined} />
                           </div>
                         </div>
                         <TaskProgressInline task={state.currentTask} isThinking={state.isThinking} />
