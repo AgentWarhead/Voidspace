@@ -71,8 +71,15 @@ export function Footer() {
             </Link>
           </div>
 
-          {/* Competition badge + social */}
+          {/* Contact + social */}
           <div className="flex items-center justify-center sm:justify-end gap-3">
+            <a
+              href="mailto:team@voidspace.io"
+              className="text-[10px] text-text-muted hover:text-near-green transition-colors"
+              aria-label="Email Voidspace"
+            >
+              team@voidspace.io
+            </a>
             <a
               href="https://x.com/voidspacenear"
               target="_blank"

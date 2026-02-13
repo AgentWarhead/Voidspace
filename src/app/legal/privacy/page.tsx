@@ -101,7 +101,11 @@ export default function PrivacyPage() {
           <li>Withdraw consent at any time</li>
         </ul>
         <p>
-          To exercise these rights, contact us on X at{' '}
+          To exercise these rights, email us at{' '}
+          <a href="mailto:team@voidspace.io" className="text-near-green hover:underline">
+            team@voidspace.io
+          </a>{' '}
+          or contact us on X at{' '}
           <a href="https://x.com/voidspacenear" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
             @VoidSpaceNear
           </a>.

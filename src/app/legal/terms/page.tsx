@@ -142,7 +142,11 @@ export default function TermsPage() {
 
       <Section title="15. Contact">
         <p>
-          For questions about these Terms, reach us on X at{' '}
+          For questions about these Terms, email us at{' '}
+          <a href="mailto:team@voidspace.io" className="text-near-green hover:underline">
+            team@voidspace.io
+          </a>{' '}
+          or reach us on X at{' '}
           <a href="https://x.com/voidspacenear" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
             @VoidSpaceNear
           </a>.
