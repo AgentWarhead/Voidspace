@@ -70,12 +70,16 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
       {/* Available: Pulsing beacon */}
       {isAvailable && <BeaconRing size={size} color={track.glow} />}
 
-      {/* Locked: faint shimmer */}
+      {/* Locked: dim but visible glow — must be clearly present on the map */}
       {isLocked && (
         <motion.div
-          className="absolute rounded-full bg-white/[0.02]"
-          style={{ width: size * 1.1, height: size * 1.1, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-          animate={{ opacity: [0.02, 0.07, 0.02] }}
+          className="absolute rounded-full"
+          style={{
+            width: size * 1.3, height: size * 1.3,
+            top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            background: `radial-gradient(circle, ${track.hex || 'rgba(255,255,255,0.08)'} 0%, transparent 70%)`,
+          }}
+          animate={{ opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
       )}
@@ -88,14 +92,14 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
           isAvailable ? `${track.border} ${track.bg}` :
           'border-border/30 bg-surface/30',
           isSelected && 'ring-2 ring-near-green/70 ring-offset-2 ring-offset-background',
-          isLocked && 'opacity-25',
+          isLocked && 'opacity-50',
         )}
         style={{ width: size, height: size }}
         whileHover={{ scale: 1.3, transition: { duration: 0.15 } }}
         whileTap={{ scale: 0.9 }}
       >
         {isLocked ? (
-          <Lock style={{ width: iconSize * 0.8, height: iconSize * 0.8 }} className="text-text-muted/30" />
+          <Lock style={{ width: iconSize * 0.8, height: iconSize * 0.8 }} className="text-text-muted/50" />
         ) : (
           <node.icon
             style={{ width: iconSize, height: iconSize }}
@@ -132,7 +136,7 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
           'text-[8px] font-semibold text-center max-w-[80px] leading-tight mt-1 transition-opacity',
           isCompleted ? 'text-near-green opacity-100' :
           isAvailable ? `${track.color} opacity-100` :
-          'text-text-muted/30 opacity-0 group-hover:opacity-60',
+          'text-text-muted/40 opacity-50 group-hover:opacity-80',
         )}
       >
         {node.label}

@@ -60,7 +60,7 @@ function ConstellationLinesInner({ positions, getStatus }: ConstellationLinesPro
           ? 'url(#conn-completed)'
           : isAvailable
           ? 'url(#conn-available)'
-          : 'rgba(60,60,60,0.12)';
+          : 'rgba(100,100,100,0.25)';
 
         const pathId = `path-${conn.from}-${conn.to}`;
         const dx = to.x - from.x;
@@ -83,8 +83,8 @@ function ConstellationLinesInner({ positions, getStatus }: ConstellationLinesPro
             <motion.line
               x1={from.x} y1={from.y} x2={to.x} y2={to.y}
               stroke={stroke}
-              strokeWidth={isCompleted ? 2 : isAvailable ? 1.5 : 0.6}
-              strokeDasharray={isCompleted ? '0' : isAvailable ? '8 4' : '4 6'}
+              strokeWidth={isCompleted ? 2 : isAvailable ? 1.5 : 0.8}
+              strokeDasharray={isCompleted ? '0' : isAvailable ? '8 4' : '3 5'}
               filter={isCompleted ? 'url(#conn-glow)' : undefined}
               markerEnd={markerEnd}
               initial={{ opacity: 0 }}
