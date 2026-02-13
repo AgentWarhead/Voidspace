@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Coins, Image, Vote, BarChart3, Box, Bot,
   ArrowRight, Sparkles, Filter,
-  ChevronRight, Code2, Zap, Copy,
-  BookOpen, Github, FileCode,
+  ChevronRight, Code2, Zap, Copy, Check,
+  BookOpen, Github, FileCode, Clock,
 } from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -18,6 +18,11 @@ import { cn } from '@/lib/utils';
 
 type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
 
+interface Prerequisite {
+  name: string;
+  slug: string;
+}
+
 interface Template {
   title: string;
   subtitle: string;
@@ -27,9 +32,11 @@ interface Template {
   standard: string;
   tech: string[];
   linesOfCode: string;
+  estimatedTime: string;
   cloneUrl: string;
   walkthroughUrl: string;
   features: string[];
+  prerequisites: Prerequisite[];
   codePreview: string;
   codeFilename: string;
 }
@@ -44,9 +51,14 @@ const TEMPLATES: Template[] = [
     standard: 'NEP-141',
     tech: ['Rust', 'NEAR SDK', 'NEP-141', 'NEP-148'],
     linesOfCode: '~250 lines',
+    estimatedTime: '~2 hours',
     cloneUrl: 'https://github.com/near-examples/ft',
     walkthroughUrl: '/sanctum?template=token',
     features: ['Mint & burn tokens', 'Safe transfers', 'Storage staking', 'Token metadata'],
+    prerequisites: [
+      { name: 'Rust Fundamentals', slug: '/learn/builder/rust-fundamentals' },
+      { name: 'Your First Contract', slug: '/learn/builder/your-first-contract' },
+    ],
     codeFilename: 'lib.rs',
     codePreview: `#[near(contract_state)]
 pub struct FungibleToken {
@@ -75,9 +87,14 @@ impl FungibleToken {
     standard: 'NEP-171',
     tech: ['Rust', 'NEAR SDK', 'NEP-171', 'NEP-199', 'IPFS'],
     linesOfCode: '~400 lines',
+    estimatedTime: '~3 hours',
     cloneUrl: 'https://github.com/near-examples/nft',
     walkthroughUrl: '/sanctum?template=nft',
     features: ['Mint with metadata', 'Royalty system', 'Enumeration', 'Marketplace hooks'],
+    prerequisites: [
+      { name: 'Token Standards', slug: '/learn/builder/token-standards' },
+      { name: 'State Management', slug: '/learn/builder/state-management' },
+    ],
     codeFilename: 'nft_core.rs',
     codePreview: `#[near(contract_state)]
 pub struct NFTContract {
@@ -106,9 +123,14 @@ impl NFTContract {
     standard: 'Sputnik DAO',
     tech: ['Rust', 'NEAR SDK', 'Sputnik', 'Cross-contract'],
     linesOfCode: '~600 lines',
+    estimatedTime: '~4 hours',
     cloneUrl: 'https://github.com/near-daos/sputnik-dao-contract',
     walkthroughUrl: '/sanctum?template=dao',
     features: ['Proposal system', 'Token-weighted voting', 'Treasury ops', 'Role-based access'],
+    prerequisites: [
+      { name: 'Building a dApp', slug: '/learn/builder/building-a-dapp' },
+      { name: 'Security Best Practices', slug: '/learn/builder/security-best-practices' },
+    ],
     codeFilename: 'proposals.rs',
     codePreview: `pub fn add_proposal(&mut self, proposal: ProposalInput) -> u64 {
     let policy = self.policy.get().unwrap();
@@ -138,9 +160,15 @@ impl NFTContract {
     standard: 'Composable DeFi',
     tech: ['Rust', 'NEAR SDK', 'NEP-141', 'Math'],
     linesOfCode: '~800 lines',
-    cloneUrl: 'https://github.com/near/near-sdk-rs/tree/master/examples/fungible-token',
+    estimatedTime: '~5 hours',
+    cloneUrl: '/sanctum?template=vault',
     walkthroughUrl: '/sanctum?template=vault',
     features: ['Share-based deposits', 'Yield strategies', 'Auto-compound', 'Slippage protection'],
+    prerequisites: [
+      { name: 'Token Standards', slug: '/learn/builder/token-standards' },
+      { name: 'Testing & Debugging', slug: '/learn/builder/testing-debugging' },
+      { name: 'Optimization', slug: '/learn/builder/optimization' },
+    ],
     codeFilename: 'vault.rs',
     codePreview: `pub fn deposit(&mut self, amount: U128) -> U128 {
     let shares = if self.total_shares == 0 {
@@ -165,9 +193,14 @@ impl NFTContract {
     standard: 'Escrow + Listings',
     tech: ['Rust', 'NEAR SDK', 'NEP-171', 'Escrow'],
     linesOfCode: '~700 lines',
+    estimatedTime: '~4 hours',
     cloneUrl: '/sanctum?template=marketplace',
     walkthroughUrl: '/sanctum?template=marketplace',
     features: ['List & delist items', 'Escrow payments', 'Offer system', 'Fee distribution'],
+    prerequisites: [
+      { name: 'Building an NFT Contract', slug: '/learn/builder/building-an-nft-contract' },
+      { name: 'Security Best Practices', slug: '/learn/builder/security-best-practices' },
+    ],
     codeFilename: 'marketplace.rs',
     codePreview: `pub fn buy(&mut self, nft_contract_id: AccountId, token_id: TokenId) {
     let sale = self.sales.get(&(nft_contract_id.clone(), token_id.clone()))
@@ -198,9 +231,14 @@ impl NFTContract {
     standard: 'Shade Agent',
     tech: ['Rust', 'Python', 'TEE', 'Chain Signatures'],
     linesOfCode: '~1200 lines',
+    estimatedTime: '~6 hours',
     cloneUrl: 'https://github.com/near-examples/near-intents-agent-example',
     walkthroughUrl: '/sanctum?template=agent',
     features: ['TEE execution', 'Key management', 'Event listeners', 'Multi-chain signing'],
+    prerequisites: [
+      { name: 'Chain Signatures', slug: '/learn/hacker/chain-signatures' },
+      { name: 'AI Agent Integration', slug: '/learn/hacker/ai-agent-integration' },
+    ],
     codeFilename: 'agent.rs',
     codePreview: `async fn handle_event(&self, event: ChainEvent) -> Result<Action> {
     match event {
@@ -247,8 +285,29 @@ const FILTERS: Array<'All' | Difficulty> = ['All', 'Beginner', 'Intermediate', '
 
 function TemplateCard({ template, index }: { template: Template; index: number }) {
   const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const Icon = template.icon;
   const styles = DIFFICULTY_STYLES[template.difficulty];
+
+  const isExternalClone = template.cloneUrl.startsWith('http');
+
+  const handleCopyClone = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(`git clone ${template.cloneUrl}.git`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = `git clone ${template.cloneUrl}.git`;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [template.cloneUrl]);
 
   return (
     <motion.div
@@ -291,10 +350,34 @@ function TemplateCard({ template, index }: { template: Template; index: number }
               <FileCode className="w-3 h-3" />
               {template.linesOfCode}
             </span>
+            <span className="flex items-center gap-1 text-[10px] text-text-muted font-mono">
+              <Clock className="w-3 h-3" />
+              {template.estimatedTime}
+            </span>
           </div>
 
           {/* Description */}
           <p className="text-sm text-text-secondary leading-relaxed">{template.description}</p>
+
+          {/* Prerequisites */}
+          {template.prerequisites.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-text-muted">
+              <span className="font-medium text-text-muted/70">Requires:</span>
+              {template.prerequisites.map((prereq, i) => (
+                <span key={prereq.slug} className="inline-flex items-center gap-0.5">
+                  <Link
+                    href={prereq.slug}
+                    className="text-text-muted hover:text-near-green transition-colors underline underline-offset-2 decoration-border hover:decoration-near-green/40"
+                  >
+                    {prereq.name}
+                  </Link>
+                  {i < template.prerequisites.length - 1 && (
+                    <span className="text-text-muted/40 ml-0.5">·</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Features */}
           <div className="grid grid-cols-2 gap-1.5">
@@ -357,13 +440,31 @@ function TemplateCard({ template, index }: { template: Template; index: number }
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-3 border-t border-border mt-auto">
-            <Link href={template.cloneUrl} target="_blank" className="flex-1">
-              <Button variant="primary" size="sm" className="w-full group">
-                <Copy className="w-3 h-3" />
-                Clone Template
-                <Github className="w-3 h-3 opacity-50" />
-              </Button>
-            </Link>
+            {isExternalClone ? (
+              <button onClick={handleCopyClone} className="flex-1">
+                <Button variant="primary" size="sm" className="w-full group">
+                  {copied ? (
+                    <>
+                      <Check className="w-3 h-3" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      Clone Template
+                      <Github className="w-3 h-3 opacity-50" />
+                    </>
+                  )}
+                </Button>
+              </button>
+            ) : (
+              <Link href={template.cloneUrl} className="flex-1">
+                <Button variant="primary" size="sm" className="w-full group">
+                  <Sparkles className="w-3 h-3" />
+                  Open in Sanctum
+                </Button>
+              </Link>
+            )}
             <Link href={template.walkthroughUrl} className="flex-1">
               <Button variant="secondary" size="sm" className="w-full group">
                 <BookOpen className="w-3 h-3" />
