@@ -2293,21 +2293,23 @@ export function VoidBubblesEngine() {
                 </button>
               </div>
 
-              {/* ── X-Ray Legend (visible when X-Ray is ON) ── */}
+              {/* ── X-Ray Legend (compact inline when X-Ray is ON) ── */}
               {xrayMode && (
-                <div className="rounded-xl border border-cyan-500/15 bg-cyan-500/[0.04] px-3 py-2 space-y-1">
-                  <span className="text-[9px] font-mono uppercase tracking-[0.12em] text-cyan-400/70">Health Ring Legend</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: '#00FF88' }} />
-                    <span className="text-[10px] text-text-muted">Healthy <span className="text-[#00FF88] font-mono">&gt;70</span></span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: '#FFAA00' }} />
-                    <span className="text-[10px] text-text-muted">Caution <span className="text-[#FFAA00] font-mono">40–70</span></span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: '#FF2244' }} />
-                    <span className="text-[10px] text-text-muted">Unhealthy <span className="text-[#FF2244] font-mono">&lt;40</span></span>
+                <div className="rounded-xl border border-cyan-500/15 bg-cyan-500/[0.04] px-3 py-1.5 flex items-center gap-3">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.1em] text-cyan-400/70 shrink-0">Health</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#00FF88' }} />
+                      <span className="text-[9px] font-mono text-[#00FF88]">&gt;70</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FFAA00' }} />
+                      <span className="text-[9px] font-mono text-[#FFAA00]">40–70</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#FF2244' }} />
+                      <span className="text-[9px] font-mono text-[#FF2244]">&lt;40</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -2601,25 +2603,7 @@ export function VoidBubblesEngine() {
         <svg ref={svgRef} className="w-full h-full" style={{ willChange: 'transform' }} />
       </div>
 
-      {/* ═══ BUBBLE SIZE LEGEND — Bottom Left ═══ */}
-      <div className="hidden sm:flex absolute bottom-10 left-4 z-20 items-center gap-3 px-3 py-2 rounded-xl bg-[#060a0f]/80 backdrop-blur-xl border border-white/[0.06]">
-        <span className="text-[8px] font-mono uppercase tracking-wider text-text-muted/60">Size:</span>
-        {[
-          { r: 6, label: 'Low' },
-          { r: 12, label: 'Mid' },
-          { r: 20, label: 'High' },
-        ].map((item) => (
-          <div key={item.label} className="flex items-center gap-1.5">
-            <svg width={item.r * 2 + 2} height={item.r * 2 + 2}>
-              <circle cx={item.r + 1} cy={item.r + 1} r={item.r} fill="none" stroke="#00EC97" strokeWidth={1} opacity={0.5} />
-            </svg>
-            <span className="text-[9px] font-mono text-text-muted/70">{item.label}</span>
-          </div>
-        ))}
-        <span className="text-[8px] font-mono text-[#00EC97]/50">
-          {sizeMetric === 'marketCap' ? 'MCap' : sizeMetric === 'volume' ? 'Volume' : 'Performance'}
-        </span>
-      </div>
+      {/* Bubble size legend removed — boss directive Feb 13 */}
 
       {/* ═══ TOP MOVERS — Quick Access Pills ═══ */}
       {(() => {
