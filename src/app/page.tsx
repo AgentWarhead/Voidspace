@@ -18,7 +18,7 @@ import {
   getTopOpportunities,
 } from '@/lib/queries';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: regenerate every 5 minutes
 
 export default async function DashboardPage() {
   const [stats, categories, opportunities] = await Promise.all([

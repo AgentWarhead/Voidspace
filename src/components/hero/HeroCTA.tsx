@@ -96,7 +96,7 @@ function VoidParticles() {
       ref={canvasRef} 
       width={240} 
       height={60} 
-      className="absolute inset-0 pointer-events-none"
+      className="absolute inset-0 w-full h-full pointer-events-none"
     />
   );
 }
@@ -162,7 +162,7 @@ export function HeroCTA() {
       </Link>
 
       <motion.div
-        className="flex items-center gap-3"
+        className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -170,7 +170,7 @@ export function HeroCTA() {
         <p className="text-xs text-text-muted font-mono">
           Powered by Claude AI
         </p>
-        <span className="text-text-muted/30">·</span>
+        <span className="hidden sm:inline text-text-muted/30">·</span>
         <Link href="/learn" className="text-xs text-near-green/70 hover:text-near-green font-mono transition-colors">
           New to NEAR? Start learning →
         </Link>

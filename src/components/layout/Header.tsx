@@ -78,7 +78,7 @@ export function Header() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
-              const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+              const isActive = item.href === '/' ? pathname === '/' : (pathname?.startsWith(item.href) ?? false);
               return (
                 <Link
                   key={item.href}
@@ -138,7 +138,7 @@ export function Header() {
             >
               <nav className="flex flex-col gap-1">
                 {navItems.map((item) => {
-                  const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+                  const isActive = item.href === '/' ? pathname === '/' : (pathname?.startsWith(item.href) ?? false);
                   return (
                     <Link
                       key={item.href}

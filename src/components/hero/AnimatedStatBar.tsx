@@ -26,7 +26,7 @@ export function AnimatedStatBar({ stats, totalOpportunities }: AnimatedStatBarPr
 
   return (
     <motion.div
-      className="flex items-center justify-center gap-6 sm:gap-10"
+      className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-10"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 1.8 }}

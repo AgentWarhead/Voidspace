@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui';
@@ -67,6 +67,13 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
     intermediate: true,
     advanced: true,
   });
+
+  // Auto-expand on desktop after mount
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setCollapsedMobile({ beginner: false, intermediate: false, advanced: false });
+    }
+  }, []);
 
   const allOpps = [...(opportunities ?? [])].sort((a, b) => b.gap_score - a.gap_score);
 
