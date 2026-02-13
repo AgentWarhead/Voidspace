@@ -1,18 +1,12 @@
+import { HackerModule } from '../../types';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { HackerModuleLayout } from './HackerModuleLayout';
 
 // ─── Module Registry ───────────────────────────────────────────────────────────
 
-export interface HackerModule {
-  slug: string;
-  title: string;
-  description: string;
-  readTime: string;
-  order: number;
-}
 
-export const HACKER_MODULES: HackerModule[] = [
+const HACKER_MODULES: HackerModule[] = [
   { slug: 'near-architecture-deep-dive', title: 'NEAR Architecture Deep Dive', description: 'Understand NEAR\'s sharded architecture, Nightshade consensus, and how blocks are produced and finalized.', readTime: '20 min', order: 1 },
   { slug: 'cross-contract-calls', title: 'Cross-Contract Calls', description: 'Master asynchronous cross-contract calls, callbacks, and promise-based patterns on NEAR.', readTime: '18 min', order: 2 },
   { slug: 'advanced-storage', title: 'Advanced Storage', description: 'Deep dive into storage staking, efficient data structures, and cost optimization patterns.', readTime: '18 min', order: 3 },

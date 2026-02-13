@@ -170,7 +170,7 @@ export async function fetchNearTokens(): Promise<TokenData[]> {
   const tokenMap = deduplicatePairs(pairs);
 
   const tokens: TokenData[] = [];
-  for (const pair of tokenMap.values()) {
+  for (const pair of Array.from(tokenMap.values())) {
     tokens.push(pairToTokenData(pair));
   }
 

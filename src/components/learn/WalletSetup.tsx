@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Wallet, Download, Key, Send, ExternalLink, AlertTriangle } from 'lucide-react';
+import { Wallet, Download, Key, Send, ExternalLink, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';

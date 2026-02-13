@@ -1,18 +1,12 @@
+import { BuilderModule } from '../../types';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { BuilderModuleLayout } from './BuilderModuleLayout';
 
 // ─── Module Registry ───────────────────────────────────────────────────────────
 
-export interface BuilderModule {
-  slug: string;
-  title: string;
-  description: string;
-  readTime: string;
-  order: number;
-}
 
-export const BUILDER_MODULES: BuilderModule[] = [
+const BUILDER_MODULES: BuilderModule[] = [
   { slug: 'dev-environment-setup', title: 'Dev Environment Setup', description: 'Set up your local development environment for building on NEAR — Rust, near-cli, and everything you need.', readTime: '15 min', order: 1 },
   { slug: 'rust-fundamentals', title: 'Rust Fundamentals', description: 'Learn the Rust programming language essentials you need to write smart contracts on NEAR.', readTime: '25 min', order: 2 },
   { slug: 'ownership-borrowing', title: 'Ownership & Borrowing', description: 'Rust\'s killer feature — understand ownership rules, move semantics, references, and why they make smart contracts memory-safe.', readTime: '35 min', order: 3 },

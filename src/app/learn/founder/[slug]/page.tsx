@@ -1,18 +1,12 @@
+import { FounderModule } from '../../types';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { FounderModuleLayout } from './FounderModuleLayout';
 
 // ─── Module Registry ───────────────────────────────────────────────────────────
 
-export interface FounderModule {
-  slug: string;
-  title: string;
-  description: string;
-  readTime: string;
-  order: number;
-}
 
-export const FOUNDER_MODULES: FounderModule[] = [
+const FOUNDER_MODULES: FounderModule[] = [
   { slug: 'near-grants-funding', title: 'NEAR Grants & Funding', description: 'Navigate the NEAR grants ecosystem — DevHub, Ecosystem Fund, and community funding opportunities.', readTime: '15 min', order: 1 },
   { slug: 'tokenomics-design', title: 'Tokenomics Design', description: 'Design sustainable token economics for your project — supply, distribution, utility, and incentive models.', readTime: '20 min', order: 2 },
   { slug: 'building-in-public', title: 'Building in Public', description: 'Leverage transparency as a growth strategy — sharing progress, gathering feedback, and building community.', readTime: '15 min', order: 3 },

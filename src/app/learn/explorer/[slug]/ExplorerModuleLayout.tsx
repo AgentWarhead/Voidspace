@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Container } from '@/components/ui';
 import { ChevronLeft, ChevronRight, Home, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import type { ExplorerModule } from './page';
+import type { ExplorerModule } from '../../types';
 import { RelatedContent } from '../../components/RelatedContent';
 
 import {

@@ -1,18 +1,12 @@
+import { ExplorerModule } from '../../types';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ExplorerModuleLayout } from './ExplorerModuleLayout';
 
 // ─── Module Registry ───────────────────────────────────────────────────────────
 
-export interface ExplorerModule {
-  slug: string;
-  title: string;
-  description: string;
-  readTime: string;
-  order: number;
-}
 
-export const EXPLORER_MODULES: ExplorerModule[] = [
+const EXPLORER_MODULES: ExplorerModule[] = [
   { slug: 'what-is-blockchain', title: 'What is Blockchain?', description: 'Discover the technology that\'s rewriting the rules of trust, ownership, and the internet itself.', readTime: '15 min', order: 1 },
   { slug: 'what-is-near', title: 'What is NEAR?', description: 'Meet the blockchain built for usability — fast, cheap, and designed for humans.', readTime: '12 min', order: 2 },
   { slug: 'create-a-wallet', title: 'Create a Wallet', description: 'Your passport to the decentralized world. Set up your first NEAR wallet in minutes.', readTime: '10 min', order: 3 },
