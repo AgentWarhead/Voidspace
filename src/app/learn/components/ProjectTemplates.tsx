@@ -165,7 +165,7 @@ impl NFTContract {
     standard: 'Escrow + Listings',
     tech: ['Rust', 'NEAR SDK', 'NEP-171', 'Escrow'],
     linesOfCode: '~700 lines',
-    cloneUrl: 'https://github.com/near-examples/NFT',
+    cloneUrl: '/sanctum?template=marketplace',
     walkthroughUrl: '/sanctum?template=marketplace',
     features: ['List & delist items', 'Escrow payments', 'Offer system', 'Fee distribution'],
     codeFilename: 'marketplace.rs',

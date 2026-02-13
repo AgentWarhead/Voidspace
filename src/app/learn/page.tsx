@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Sparkles, Key, Zap, Bug, BookOpen, BarChart3, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft, Rocket, Award } from 'lucide-react';
+import { Key, Zap, Bug, BookOpen, BarChart3, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft, Rocket, Award } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -9,6 +9,7 @@ import { HeroSection } from './components/HeroSection';
 import { SocialProof } from './components/SocialProof';
 import { LearningTracks } from './components/LearningTracks';
 import { TableOfContents } from './components/TableOfContents';
+import { NonDevCallout } from './components/NonDevCallout';
 import Link from 'next/link';
 
 // ─── Lazy-loaded below-fold components ─────────────────────────────────────────
@@ -237,6 +238,39 @@ export default function LearnPage() {
         <SocialProof />
       </Container>
 
+      {/* What is NEAR? — moved up for beginner context */}
+      <Container className="pb-12">
+        <ScrollReveal>
+          <div id="near-overview">
+            <SectionHeader title="What is NEAR Protocol?" badge="OVERVIEW" />
+            <Card variant="glass" padding="lg">
+              <div className="space-y-4 text-text-secondary leading-relaxed">
+                <p>
+                  <strong className="text-text-primary">NEAR Protocol</strong> is a
+                  high-performance Layer 1 blockchain designed for usability and
+                  scalability. Often called &ldquo;The Blockchain for AI,&rdquo; NEAR
+                  combines sub-second transaction finality, human-readable account names
+                  (like{' '}
+                  <code className="text-near-green bg-near-green/10 px-1.5 py-0.5 rounded text-sm">
+                    alice.near
+                  </code>
+                  ), and innovative sharding technology to deliver an experience that
+                  feels more like using a traditional web app than a blockchain.
+                </p>
+                <p>
+                  What sets NEAR apart is its focus on{' '}
+                  <strong className="text-text-primary">chain abstraction</strong> — the
+                  idea that users shouldn&apos;t need to think about which blockchain
+                  they&apos;re on. With technologies like Intents, Chain Signatures, and
+                  Shade Agents, NEAR is building toward a future where one account works
+                  seamlessly across every chain.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </ScrollReveal>
+      </Container>
+
       {/* Quick Start CTA */}
       <Container className="pb-12">
         <ScrollReveal>
@@ -261,6 +295,11 @@ export default function LearnPage() {
             </Link>
           </div>
         </ScrollReveal>
+      </Container>
+
+      {/* "Not a developer?" callout */}
+      <Container className="pb-8">
+        <NonDevCallout />
       </Container>
 
       {/* Learning Tracks — Explorer / Builder / Hacker */}
@@ -330,39 +369,6 @@ export default function LearnPage() {
         </ScrollReveal>
       </Container>
 
-      {/* What is NEAR? */}
-      <Container className="pb-20">
-        <ScrollReveal>
-          <div id="near-overview">
-            <SectionHeader title="What is NEAR Protocol?" badge="OVERVIEW" />
-            <Card variant="glass" padding="lg">
-              <div className="space-y-4 text-text-secondary leading-relaxed">
-                <p>
-                  <strong className="text-text-primary">NEAR Protocol</strong> is a
-                  high-performance Layer 1 blockchain designed for usability and
-                  scalability. Often called &ldquo;The Blockchain for AI,&rdquo; NEAR
-                  combines sub-second transaction finality, human-readable account names
-                  (like{' '}
-                  <code className="text-near-green bg-near-green/10 px-1.5 py-0.5 rounded text-sm">
-                    alice.near
-                  </code>
-                  ), and innovative sharding technology to deliver an experience that
-                  feels more like using a traditional web app than a blockchain.
-                </p>
-                <p>
-                  What sets NEAR apart is its focus on{' '}
-                  <strong className="text-text-primary">chain abstraction</strong> — the
-                  idea that users shouldn&apos;t need to think about which blockchain
-                  they&apos;re on. With technologies like Intents, Chain Signatures, and
-                  Shade Agents, NEAR is building toward a future where one account works
-                  seamlessly across every chain.
-                </p>
-              </div>
-            </Card>
-          </div>
-        </ScrollReveal>
-      </Container>
-
       {/* Deep Dive Cards — replacing WalletSetup, KeyTechnologies, WhyRust, RustCurriculum */}
       <Container className="pb-20">
         <ScrollReveal>
@@ -416,62 +422,6 @@ export default function LearnPage() {
                 </Link>
               ))}
             </div>
-          </div>
-        </ScrollReveal>
-      </Container>
-
-      {/* How AI Creates Your Void Brief */}
-      <Container className="pb-20">
-        <ScrollReveal delay={0.12}>
-          <div id="ai-briefs">
-            <SectionHeader title="How AI Creates Your Void Brief" badge="POWERED BY CLAUDE" />
-            <Card variant="glass" padding="lg">
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
-                    <Sparkles className="w-5 h-5 text-near-green" />
-                  </div>
-                  <div className="space-y-3 text-text-secondary leading-relaxed">
-                    <p>
-                      Voidspace uses{' '}
-                      <strong className="text-text-primary">Claude AI by Anthropic</strong>{' '}
-                      to generate personalized build plans called{' '}
-                      <strong className="text-text-primary">Void Briefs</strong>. Each brief
-                      is tailored to a specific void in the NEAR ecosystem and includes
-                      everything you need to start building.
-                    </p>
-                    <p>
-                      When you request a Void Brief, our system feeds Claude real-time
-                      ecosystem data from 6 sources — project registry, DeFiLlama TVL data,
-                      GitHub activity, NearBlocks chain metrics, FastNEAR on-chain data, and
-                      Pikespeak wallet analytics. This means every brief is grounded in
-                      actual ecosystem data, not generic templates.
-                    </p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[
-                    { title: 'Problem & Solution', desc: 'What the void is and how to fill it' },
-                    { title: 'Why Now', desc: 'Market timing and ecosystem readiness' },
-                    { title: 'Tech Stack', desc: 'Frontend, backend, and NEAR-specific requirements' },
-                    { title: 'Key Features', desc: 'Prioritized feature list with must-haves' },
-                    { title: 'Next Steps', desc: '5 concrete actions for your first week' },
-                    {
-                      title: 'Funding & Monetization',
-                      desc: 'Grants, revenue models, and build complexity',
-                    },
-                  ].map((item) => (
-                    <div key={item.title} className="p-3 rounded-lg bg-surface-hover">
-                      <h4 className="text-sm font-medium text-text-primary">{item.title}</h4>
-                      <p className="text-xs text-text-muted mt-1">{item.desc}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-text-muted font-mono">
-                  Free tier includes 3 mission briefs per month. Upgrade for more.
-                </p>
-              </div>
-            </Card>
           </div>
         </ScrollReveal>
       </Container>

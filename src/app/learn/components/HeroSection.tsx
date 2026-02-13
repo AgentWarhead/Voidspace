@@ -374,11 +374,11 @@ export function HeroSection() {
                 className="text-base px-8 py-4"
                 onClick={() =>
                   document
-                    .getElementById('rust-curriculum')
+                    .getElementById('tracks')
                     ?.scrollIntoView({ behavior: 'smooth' })
                 }
               >
-                I Already Know Crypto
+                Jump to Builder Track
               </Button>
             </motion.div>
 

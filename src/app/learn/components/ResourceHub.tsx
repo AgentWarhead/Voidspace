@@ -98,7 +98,7 @@ const RESOURCES: Resource[] = [
   // Community
   {
     name: 'NEAR Discord',
-    url: 'https://near.chat',
+    url: 'https://discord.gg/nearprotocol',
     description: 'Main developer community — ask questions, find collaborators, get help fast',
     category: 'Community',
     icon: Users,
