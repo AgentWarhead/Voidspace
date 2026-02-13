@@ -128,9 +128,9 @@ function ConstellationBg() {
 
 function StatsTicker() {
   const stats = [
-    { icon: Target, value: '47+', label: 'voids discovered today', color: 'text-near-green' },
-    { icon: Users, value: '380+', label: 'builders active this week', color: 'text-accent-cyan' },
-    { icon: Zap, value: '12', label: 'briefs generated today', color: 'text-purple-400' },
+    { icon: Target, value: '78+', label: 'voids detected', color: 'text-near-green' },
+    { icon: Users, value: '66', label: 'learning modules', color: 'text-accent-cyan' },
+    { icon: Zap, value: '6', label: 'project templates', color: 'text-purple-400' },
   ];
 
   return (
@@ -299,7 +299,7 @@ export default function BottomCTA() {
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <span className="text-near-green font-semibold">380+ builders</span> are already shipping on NEAR.
+          <span className="text-near-green font-semibold">78+ ecosystem voids</span> are waiting to be filled on NEAR.
           Every day you wait, someone else fills your void. The tools are ready. The AI is standing by.
           The only missing piece is <span className="text-text-primary font-semibold">you</span>.
         </motion.p>

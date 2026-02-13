@@ -43,7 +43,7 @@ const CAPSTONES: Capstone[] = [
     difficulty: 2,
     estimatedTime: '3-5 hours',
     skills: ['On-chain data', 'API integration', 'Dashboard design', 'NEAR ecosystem knowledge'],
-    startLink: '/learn/explorer/data-tools',
+    startLink: '/learn/explorer/near-data-tools',
   },
   {
     id: 'token-launcher',

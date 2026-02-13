@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { GradientText } from '@/components/effects/GradientText';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
@@ -214,23 +214,7 @@ function SpaceDust() {
 
 // ─── Animated Builder Counter ──────────────────────────────────────────────────
 
-function BuilderCounter() {
-  const [count, setCount] = useState(2847);
-
-  useEffect(() => {
-    // Slowly tick up to simulate live growth
-    const interval = setInterval(() => {
-      setCount((c) => c + 1);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <span className="text-near-green font-bold tabular-nums">
-      {count.toLocaleString()}
-    </span>
-  );
-}
+// BuilderCounter removed — was displaying fabricated user count (2,847)
 
 // ─── Stats Bar ─────────────────────────────────────────────────────────────────
 
@@ -362,8 +346,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-lg sm:text-xl md:text-2xl text-text-secondary max-w-3xl mb-10 leading-relaxed"
             >
-              Join <BuilderCounter /> builders who went from knowing nothing
-              <br className="hidden sm:block" /> to shipping real dApps on NEAR Protocol.
+              Join builders learning to ship real dApps on NEAR Protocol.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -412,21 +395,20 @@ export function HeroSection() {
                 <div className="relative bg-surface/70 backdrop-blur-xl border border-white/[0.06] rounded-2xl px-6 py-8 shadow-2xl">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:divide-x sm:divide-border">
                     <StatItem
-                      value={1247}
+                      value={78}
                       suffix="+"
-                      label="Void Briefs Generated"
+                      label="Voids Detected"
                       delay={0.8}
                     />
                     <StatItem
-                      prefix="$"
-                      value={10}
-                      suffix="M+"
-                      label="in NEAR Grants Available"
+                      value={66}
+                      label="Learning Modules"
                       delay={1.0}
                     />
                     <StatItem
-                      value={389}
-                      label="Projects Shipped"
+                      value={20}
+                      suffix="+"
+                      label="Categories Analyzed"
                       delay={1.2}
                     />
                   </div>

@@ -265,7 +265,7 @@ export function WhatIsNear() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green mb-4">
             <BookOpen className="w-3 h-3" />
-            Module 2 of 11
+            Module 2 of 16
             <span className="text-text-muted">•</span>
             <Clock className="w-3 h-3" />
             12 min read
