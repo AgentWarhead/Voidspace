@@ -44,28 +44,34 @@ interface TrackCert {
 const STORAGE_KEY = 'voidspace-skill-progress';
 const CERT_NAME_KEY = 'voidspace-cert-name';
 
-// Module IDs for each track — must match SkillConstellation
+// Module IDs for each track — must match LearningTracks.tsx slugs
 const EXPLORER_MODULES = [
-  'near-basics', 'wallet-setup', 'first-transaction', 'ecosystem-tour',
-  'near-overview', 'key-technologies', 'defi-basics', 'governance',
-  'community-nav', 'data-tools', 'explorer-capstone',
+  'what-is-blockchain', 'what-is-near', 'create-a-wallet', 'your-first-transaction',
+  'understanding-dapps', 'reading-smart-contracts', 'near-ecosystem-tour', 'near-vs-other-chains',
+  'reading-the-explorer', 'defi-basics', 'choose-your-path', 'nft-basics-on-near',
+  'staking-and-validators', 'daos-on-near', 'staying-safe-in-web3', 'near-data-tools',
 ];
 
 const BUILDER_MODULES = [
-  'rust-fundamentals', 'smart-contracts-101', 'testing-basics',
-  'build-token', 'build-dapp', 'nft-contracts', 'storage-patterns',
-  'upgradeable-contracts', 'near-cli', 'frontend-integration', 'builder-capstone',
+  'dev-environment-setup', 'rust-fundamentals', 'your-first-contract', 'account-model-access-keys',
+  'state-management', 'near-cli-mastery', 'testing-debugging', 'frontend-integration',
+  'token-standards', 'nep-standards-deep-dive', 'building-a-dapp', 'security-best-practices',
+  'upgrading-contracts', 'deployment', 'optimization', 'launch-checklist',
+  'building-an-nft-contract', 'building-a-dao-contract', 'defi-contract-patterns',
+  'aurora-evm-compatibility', 'wallet-selector-integration', 'near-social-bos',
 ];
 
 const HACKER_MODULES = [
-  'security-fundamentals', 'advanced-rust', 'cross-contract', 'indexer-dev',
-  'chain-signatures', 'intents-protocol', 'ai-agents', 'gas-optimization',
-  'audit-practice', 'hacker-capstone',
+  'near-architecture-deep-dive', 'cross-contract-calls', 'advanced-storage', 'chain-signatures',
+  'intents-chain-abstraction', 'shade-agents', 'ai-agent-integration', 'mev-transaction-ordering',
+  'building-an-indexer', 'multi-chain-with-near', 'production-patterns', 'zero-knowledge-on-near',
+  'oracle-integration', 'gas-optimization-deep-dive', 'bridge-architecture', 'formal-verification',
 ];
 
 const FOUNDER_MODULES = [
-  'market-research', 'pitch-deck', 'tokenomics',
-  'grant-application', 'founder-capstone',
+  'near-grants-funding', 'tokenomics-design', 'building-in-public', 'pitching-your-project',
+  'revenue-models-for-dapps', 'community-building', 'go-to-market', 'legal-regulatory-basics',
+  'treasury-management', 'metrics-that-matter', 'marketing-for-web3', 'investor-relations',
 ];
 
 const TRACK_CERTS: TrackCert[] = [
@@ -79,8 +85,8 @@ const TRACK_CERTS: TrackCert[] = [
     color: 'text-accent-cyan',
     bg: 'bg-accent-cyan/10',
     border: 'border-accent-cyan/30',
-    moduleCount: 11,
-    xpTotal: 550,
+    moduleCount: 16,
+    xpTotal: 800,
     requiredModules: EXPLORER_MODULES,
     gradient: 'from-accent-cyan to-blue-500',
   },
@@ -94,8 +100,8 @@ const TRACK_CERTS: TrackCert[] = [
     color: 'text-near-green',
     bg: 'bg-near-green/10',
     border: 'border-near-green/30',
-    moduleCount: 11,
-    xpTotal: 1100,
+    moduleCount: 22,
+    xpTotal: 2200,
     requiredModules: BUILDER_MODULES,
     gradient: 'from-near-green to-emerald-500',
   },
@@ -109,8 +115,8 @@ const TRACK_CERTS: TrackCert[] = [
     color: 'text-purple-400',
     bg: 'bg-purple-400/10',
     border: 'border-purple-400/30',
-    moduleCount: 10,
-    xpTotal: 1500,
+    moduleCount: 16,
+    xpTotal: 2400,
     requiredModules: HACKER_MODULES,
     gradient: 'from-purple-400 to-violet-500',
   },
@@ -124,8 +130,8 @@ const TRACK_CERTS: TrackCert[] = [
     color: 'text-accent-orange',
     bg: 'bg-accent-orange/10',
     border: 'border-accent-orange/30',
-    moduleCount: 5,
-    xpTotal: 500,
+    moduleCount: 12,
+    xpTotal: 900,
     requiredModules: FOUNDER_MODULES,
     gradient: 'from-accent-orange to-red-500',
   },
@@ -139,8 +145,8 @@ const TRACK_CERTS: TrackCert[] = [
     color: 'text-yellow-400',
     bg: 'bg-yellow-400/10',
     border: 'border-yellow-400/30',
-    moduleCount: 37,
-    xpTotal: 3650,
+    moduleCount: 66,
+    xpTotal: 6300,
     requiredModules: [...EXPLORER_MODULES, ...BUILDER_MODULES, ...HACKER_MODULES, ...FOUNDER_MODULES],
     gradient: 'from-yellow-400 to-amber-500',
   },
