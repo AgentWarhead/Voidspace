@@ -206,7 +206,27 @@ function extractTopContracts(
     });
 }
 
-// Module-level cache for wallet data (avoids re-fetching on rapid refreshes)
+// --- NEAR RPC helpers (no rate limits) ---
+
+const NEAR_RPC = 'https://rpc.mainnet.near.org';
+
+async function rpcQuery(params: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await fetch(NEAR_RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'query', params }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.error) return null;
+    return data.result || null;
+  } catch {
+    return null;
+  }
+}
+
+// Module-level cache for wallet data (helps within single Vercel instance lifecycle)
 const walletDataCache = new Map<string, { data: WalletData; timestamp: number }>();
 const WALLET_CACHE_TTL = 120_000; // 2 minutes
 
@@ -218,99 +238,84 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
   }
 
   try {
-    const baseUrl = 'https://api.nearblocks.io/v1/account';
-    
-    // Fetch basic account info
-    const accountResponse = await fetch(`${baseUrl}/${address}`, {
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    if (accountResponse.status === 429) {
-      return cached?.data || 'rate-limited';
-    }
-    
-    if (!accountResponse.ok) {
-      throw new Error(`Failed to fetch account: ${accountResponse.status}`);
-    }
-    
-    const accountData = await accountResponse.json();
-    const account = accountData.account?.[0] || accountData;
-    
-    // Fetch data in two batches to avoid NearBlocks rate limits
-    const [txResponse, tokensResponse] = await Promise.all([
-      // Transactions (last 100)
-      fetch(`${baseUrl}/${address}/txns?page=1&per_page=100`, {
-        headers: { 'Accept': 'application/json' }
-      }).catch(() => null),
-      // Tokens
-      fetch(`${baseUrl}/${address}/tokens?page=1&per_page=50`, {
-        headers: { 'Accept': 'application/json' }
-      }).catch(() => null),
+    // === PHASE 1: NEAR RPC (no rate limits, always works) ===
+    // Get account info + access keys from RPC in parallel
+    const [accountResult, keysResult] = await Promise.all([
+      rpcQuery({ request_type: 'view_account', finality: 'final', account_id: address }),
+      rpcQuery({ request_type: 'view_access_key_list', finality: 'final', account_id: address }),
     ]);
 
-    // Check for 429 on batch 1
-    if (txResponse?.status === 429 || tokensResponse?.status === 429) {
-      return cached?.data || 'rate-limited';
+    // If RPC can't find the account, it doesn't exist
+    if (!accountResult) {
+      return null;
     }
 
-    // Longer delay to respect rate limits, then fetch remaining data
-    await new Promise(r => setTimeout(r, 500));
+    const amount = (accountResult.amount as string) || '0';
+    const locked = (accountResult.locked as string) || '0';
+    const storageUsage = parseInt(String(accountResult.storage_usage || '0'), 10) || 0;
 
-    const [nftResponse, keysResponse] = await Promise.all([
-      // NFTs
-      fetch(`${baseUrl}/${address}/nft-tokens?page=1&per_page=50`, {
-        headers: { 'Accept': 'application/json' }
-      }).catch(() => null),
-      // Access keys
-      fetch(`${baseUrl}/${address}/keys`, {
-        headers: { 'Accept': 'application/json' }
-      }).catch(() => null),
-    ]);
-
-    // Check for 429 on batch 2
-    if (nftResponse?.status === 429 || keysResponse?.status === 429) {
-      return cached?.data || 'rate-limited';
-    }
-    
-    const txData = txResponse?.ok ? await txResponse.json() : { txns: [] };
-    const transactions = txData.txns || [];
-    
-    const tokensData = tokensResponse?.ok ? await tokensResponse.json() : { tokens: [] };
-    
-    const nftData = nftResponse?.ok ? await nftResponse.json() : { nft: [] };
-    const nftCount = nftData.nft?.length || nftData.nfts?.length || 0;
-    
-    const keysData = keysResponse?.ok ? await keysResponse.json() : { keys: [] };
-    const allKeys = keysData.keys || [];
+    // Parse access keys from RPC format
+    const rpcKeys = (keysResult?.keys as Array<{ public_key: string; access_key: { permission: string | object } }>) || [];
     let fullAccessKeys = 0;
     let functionCallKeys = 0;
-    for (const key of allKeys) {
-      // NearBlocks API returns permission_kind: "FULL_ACCESS" | "FUNCTION_CALL"
-      const permissionKind = key?.permission_kind || key?.access_key?.permission || '';
-      const permStr = typeof permissionKind === 'string' ? permissionKind.toUpperCase() : '';
-      if (permStr === 'FULL_ACCESS' || permStr === 'FULLACCESS') {
+    const allKeys: Array<Record<string, unknown>> = [];
+    for (const key of rpcKeys) {
+      const perm = key?.access_key?.permission;
+      if (perm === 'FullAccess') {
         fullAccessKeys++;
       } else {
         functionCallKeys++;
       }
+      allKeys.push(key as Record<string, unknown>);
     }
+
+    // === PHASE 2: NearBlocks for tx history, tokens, NFTs (best-effort) ===
+    // Single batch with generous error handling — if NearBlocks fails, we still return data
+    const baseUrl = 'https://api.nearblocks.io/v1/account';
+    
+    const [txResponse, tokensResponse, nftResponse] = await Promise.all([
+      fetch(`${baseUrl}/${address}/txns?page=1&per_page=100`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+      fetch(`${baseUrl}/${address}/tokens?page=1&per_page=50`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+      fetch(`${baseUrl}/${address}/nft-tokens?page=1&per_page=50`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+    ]);
+
+    // Also try to get the account creation date from NearBlocks (best-effort)
+    let createdTimestamp: string | null = null;
+    try {
+      const nbAccountRes = await fetch(`${baseUrl}/${address}`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null);
+      if (nbAccountRes?.ok) {
+        const nbData = await nbAccountRes.json();
+        const nbAccount = nbData.account?.[0] || nbData;
+        createdTimestamp = nbAccount?.created?.block_timestamp || null;
+      }
+    } catch { /* ignore */ }
+
+    // Parse NearBlocks responses (graceful — empty arrays on any failure)
+    const transactions = (txResponse?.ok ? (await txResponse.json().catch(() => ({ txns: [] }))).txns : []) || [];
+    const tokensData = (tokensResponse?.ok ? (await tokensResponse.json().catch(() => ({ tokens: [] }))).tokens : []) || [];
+    const nftData = nftResponse?.ok ? await nftResponse.json().catch(() => ({ nft: [] })) : { nft: [] };
+    const nftCount = nftData?.nft?.length || nftData?.nfts?.length || 0;
     
     // Get first/last transaction timestamps
     const firstTxTimestamp = transactions.length > 0 
       ? transactions[transactions.length - 1]?.block_timestamp 
-      : account.created?.block_timestamp;
+      : createdTimestamp;
     const lastTxTimestamp = transactions.length > 0 
       ? transactions[0]?.block_timestamp 
       : null;
     
     const firstTxISO = nanoToISOString(firstTxTimestamp);
     
-    // Staking: locked field in account data
-    const lockedAmount = account.locked || '0';
-    const stakedAmount = yoctoToNear(lockedAmount);
-    
-    // Storage usage
-    const storageUsage = parseInt(account.storage_usage || '0', 10) || 0;
+    // Staking: locked field from RPC
+    const stakedAmount = yoctoToNear(locked);
     
     // Analyze tx patterns
     const txPatterns = analyzeTxPatterns(transactions, address, firstTxISO);
@@ -320,10 +325,10 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
     
     const result: WalletData = {
       account: address,
-      balance: yoctoToNear(account.amount || '0'),
+      balance: yoctoToNear(amount),
       transactions,
       contracts: [],
-      tokens: tokensData.tokens || [],
+      tokens: tokensData,
       stats: {
         total_transactions: transactions.length || 0,
         first_transaction: firstTxISO,
@@ -746,9 +751,6 @@ async function enrichPortfolio(address: string, walletData: WalletData): Promise
   }
 
   try {
-    // Delay to avoid NearBlocks rate limits (fetchWalletData already made 5 requests)
-    await new Promise(r => setTimeout(r, 500));
-
     // Abort controller for 8s timeout protection on serverless
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
@@ -775,26 +777,29 @@ async function _enrichPortfolioInner(
 ): Promise<PortfolioData | null> {
   try {
     // Fetch token inventory with balances from NearBlocks
-    const invResponse = await fetch(
-      `https://api.nearblocks.io/v1/account/${address}/inventory`,
-      { headers: { 'Accept': 'application/json' }, signal }
-    ).catch(() => null);
-
-    if (invResponse?.status === 429) {
-      const cached = portfolioCache.get(address);
-      return cached?.data || null;
-    }
-
-    if (!invResponse?.ok) return null;
-
-    const invData = await invResponse.json();
-    const fts: Array<{
+    let fts: Array<{
       contract: string;
       amount: string;
       ft_meta?: { name?: string; symbol?: string; decimals?: number; icon?: string; price?: number | null };
-    }> = invData?.inventory?.fts || [];
+    }> = [];
 
-    if (fts.length === 0) return null;
+    try {
+      const invResponse = await fetch(
+        `https://api.nearblocks.io/v1/account/${address}/inventory`,
+        { headers: { 'Accept': 'application/json' }, signal }
+      ).catch(() => null);
+
+      if (invResponse?.status === 429) {
+        const cached = portfolioCache.get(address);
+        if (cached?.data) return cached.data;
+        // Fall through — we can still price native NEAR balance
+      } else if (invResponse?.ok) {
+        const invData = await invResponse.json().catch(() => null);
+        fts = invData?.inventory?.fts || [];
+      }
+    } catch {
+      // NearBlocks failed — continue with empty fts, still price native NEAR
+    }
 
     // Collect all addresses for a single batched DexScreener call
     const lookupTokens = fts.slice(0, 30);
@@ -805,6 +810,9 @@ async function _enrichPortfolioInner(
     if (nearBalance > 0 && !allAddresses.includes('wrap.near')) {
       allAddresses.push('wrap.near');
     }
+
+    // If no tokens and no NEAR balance, nothing to price
+    if (allAddresses.length === 0) return null;
 
     // Single batched call (groups of 15 internally)
     const priceMap = await fetchTokensByAddresses(allAddresses, signal);
@@ -935,7 +943,12 @@ async function _enrichPortfolioInner(
 
 export async function POST(request: NextRequest) {
   try {
-    const user = getAuthenticatedUser(request);
+    let user: { userId: string; accountId: string; shouldRotate: boolean } | null = null;
+    try {
+      user = getAuthenticatedUser(request);
+    } catch {
+      // SESSION_SECRET might not be set — proceed without auth
+    }
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const rateKey = user ? `void-lens:${user.userId}` : `void-lens:${ip}`;
     
