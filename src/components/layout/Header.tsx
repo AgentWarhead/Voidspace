@@ -62,7 +62,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <Container>
-        <div className="flex items-center justify-between h-16 overflow-hidden">
+        <div className="flex items-center justify-between h-16 overflow-visible">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <VoidspaceLogo size="sm" animate={false} />
