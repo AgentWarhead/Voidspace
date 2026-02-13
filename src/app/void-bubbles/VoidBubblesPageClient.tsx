@@ -19,13 +19,33 @@ interface EcosystemStats {
   gainersCount: number;
   losersCount: number;
   avgHealthScore: number;
+  categoryBreakdown?: Record<string, number>;
+  // Enhanced stats
+  totalTxns24h?: number;
+  buyPressure?: number;
+  newPairsLast24h?: number;
+  topGainerSymbol?: string | null;
+  topGainerChange?: number;
+  topLoserSymbol?: string | null;
+  topLoserChange?: number;
+  nearPrice?: number | null;
+  nearPriceChange24h?: number | null;
+  totalVolume1h?: number;
+  dominanceTop5?: number;
 }
 
-function formatStatValue(n: number): string {
-  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
-  return `$${n.toFixed(0)}`;
+function formatStatValue(n: number, opts?: { prefix?: string; suffix?: string; decimals?: number }): string {
+  const prefix = opts?.prefix ?? '$';
+  const suffix = opts?.suffix ?? '';
+  const decimals = opts?.decimals;
+  if (n >= 1_000_000_000) return `${prefix}${(n / 1_000_000_000).toFixed(decimals ?? 2)}B${suffix}`;
+  if (n >= 1_000_000) return `${prefix}${(n / 1_000_000).toFixed(decimals ?? 1)}M${suffix}`;
+  if (n >= 1_000) return `${prefix}${(n / 1_000).toFixed(decimals ?? 1)}K${suffix}`;
+  return `${prefix}${n.toFixed(decimals ?? 0)}${suffix}`;
+}
+
+function formatCount(n: number): string {
+  return formatStatValue(n, { prefix: '', decimals: 1 });
 }
 
 export function VoidBubblesPageClient() {
@@ -187,48 +207,8 @@ export function VoidBubblesPageClient() {
               </div>
             </Link>
 
-            {/* Center: Live Stats — desktop only */}
-            {stats && (
-              <div className="hidden md:flex items-center gap-4 lg:gap-6">
-                <div className="text-center">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Total MCap</div>
-                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalMarketCap)}</div>
-                </div>
-                <div className="w-px h-6 bg-white/[0.06]" />
-                <div className="text-center">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">24h Volume</div>
-                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalVolume24h)}</div>
-                </div>
-                <div className="w-px h-6 bg-white/[0.06]" />
-                <div className="text-center">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Liquidity</div>
-                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalLiquidity)}</div>
-                </div>
-                <div className="w-px h-6 bg-white/[0.06]" />
-                <div className="text-center">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Tokens</div>
-                  <div className="text-sm font-bold font-mono text-white">{stats.totalTokens}</div>
-                </div>
-                <div className="w-px h-6 bg-white/[0.06]" />
-                <div className="text-center">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Gainers/Losers</div>
-                  <div className="text-sm font-bold font-mono">
-                    <span className="text-emerald-400">{stats.gainersCount}</span>
-                    <span className="text-text-muted mx-1">/</span>
-                    <span className="text-rose-400">{stats.losersCount}</span>
-                  </div>
-                </div>
-                <div className="w-px h-6 bg-white/[0.06]" />
-                <div className="text-center">
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-text-muted/60">Avg Health</div>
-                  <div className={`text-sm font-bold font-mono ${
-                    stats.avgHealthScore > 60 ? 'text-emerald-400' : stats.avgHealthScore > 40 ? 'text-amber-400' : 'text-rose-400'
-                  }`}>
-                    {stats.avgHealthScore}/100
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Center spacer — stats moved to dedicated ribbon below */}
+            <div className="flex-1" />
 
             {/* Right: Live indicator + hamburger */}
             <div className="flex items-center gap-2 shrink-0">
@@ -250,6 +230,183 @@ export function VoidBubblesPageClient() {
         
         {/* Bottom accent */}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00EC97]/20 to-transparent" />
+      </section>
+
+      {/* ── Stats Ribbon ── */}
+      <section className="relative shrink-0 z-10 border-b border-white/[0.06] overflow-hidden">
+        <div className="absolute inset-0 bg-[#060a0f]/90 backdrop-blur-2xl" />
+        {/* Subtle top glow */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
+        {/* Bottom glow */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00EC97]/15 to-transparent" />
+
+        <Container size="xl" className="relative z-10">
+          {/* Row 1: Primary stats */}
+          <div className="py-2 flex items-center gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-none">
+            {stats ? (
+              <>
+                {/* NEAR Price */}
+                <div className="shrink-0 text-center min-w-[100px]">
+                  <div className="text-[8px] font-mono uppercase tracking-[0.2em] text-text-muted/50">NEAR</div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="text-sm font-bold font-mono text-white">
+                      {stats.nearPrice != null ? `$${stats.nearPrice.toFixed(2)}` : '—'}
+                    </span>
+                    {stats.nearPriceChange24h != null && (
+                      <span className={`text-[10px] font-mono font-semibold ${stats.nearPriceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {stats.nearPriceChange24h >= 0 ? '▲' : '▼'}{Math.abs(stats.nearPriceChange24h).toFixed(1)}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-px h-7 bg-white/[0.06] shrink-0" />
+
+                {/* Total MCap */}
+                <div className="shrink-0 text-center min-w-[90px]">
+                  <div className="text-[8px] font-mono uppercase tracking-[0.2em] text-text-muted/50">MCap</div>
+                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalMarketCap)}</div>
+                </div>
+                <div className="w-px h-7 bg-white/[0.06] shrink-0" />
+
+                {/* 24h Volume + 1h pulse */}
+                <div className="shrink-0 text-center min-w-[100px]">
+                  <div className="text-[8px] font-mono uppercase tracking-[0.2em] text-text-muted/50">24h Vol</div>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalVolume24h)}</span>
+                    {(stats.totalVolume1h ?? 0) > 0 && (
+                      <span className="text-[9px] font-mono text-cyan-400/70">
+                        1h:{formatStatValue(stats.totalVolume1h ?? 0)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-px h-7 bg-white/[0.06] shrink-0" />
+
+                {/* Liquidity */}
+                <div className="shrink-0 text-center min-w-[90px]">
+                  <div className="text-[8px] font-mono uppercase tracking-[0.2em] text-text-muted/50">Liquidity</div>
+                  <div className="text-sm font-bold font-mono text-white">{formatStatValue(stats.totalLiquidity)}</div>
+                </div>
+              </>
+            ) : (
+              /* Skeleton shimmer */
+              <>
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="shrink-0 text-center min-w-[90px]">
+                    <div className="h-2.5 w-12 mx-auto bg-white/[0.06] rounded animate-pulse mb-1.5" />
+                    <div className="h-4 w-16 mx-auto bg-white/[0.08] rounded animate-pulse" />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+          {/* Row 2: Secondary stats — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-3 lg:gap-4 pb-2 overflow-x-auto scrollbar-none border-t border-white/[0.03] pt-1.5">
+            {stats ? (
+              <>
+                {/* Tokens */}
+                <div className="shrink-0 flex items-center gap-1.5">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.15em] text-text-muted/50">Tokens</span>
+                  <span className="text-xs font-bold font-mono text-white">{stats.totalTokens}</span>
+                </div>
+                <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+
+                {/* Sentiment Bar */}
+                <div className="shrink-0 flex items-center gap-2 min-w-[140px]">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.15em] text-text-muted/50">Sentiment</span>
+                  <div className="flex items-center gap-1 flex-1">
+                    <span className="text-[9px] font-mono text-emerald-400 font-semibold">{stats.buyPressure ?? 50}%</span>
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-rose-500/30 min-w-[50px]">
+                      <div
+                        className="h-full bg-emerald-400 rounded-full transition-all duration-700"
+                        style={{ width: `${stats.buyPressure ?? 50}%` }}
+                      />
+                    </div>
+                    <span className="text-[9px] font-mono text-rose-400 font-semibold">{100 - (stats.buyPressure ?? 50)}%</span>
+                  </div>
+                </div>
+                <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+
+                {/* Gainers/Losers */}
+                <div className="shrink-0 flex items-center gap-1.5">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.15em] text-text-muted/50">G/L</span>
+                  <div className="flex items-center gap-0.5">
+                    <div className="flex h-1.5 rounded-full overflow-hidden w-10">
+                      <div className="bg-emerald-400" style={{ width: `${stats.totalTokens > 0 ? (stats.gainersCount / stats.totalTokens) * 100 : 50}%` }} />
+                      <div className="bg-rose-500 flex-1" />
+                    </div>
+                    <span className="text-[10px] font-mono">
+                      <span className="text-emerald-400 font-semibold">{stats.gainersCount}</span>
+                      <span className="text-text-muted/40">/</span>
+                      <span className="text-rose-400 font-semibold">{stats.losersCount}</span>
+                    </span>
+                  </div>
+                </div>
+                <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+
+                {/* Top Gainer */}
+                {stats.topGainerSymbol && (
+                  <>
+                    <div className="shrink-0 flex items-center gap-1">
+                      <span className="text-[10px]">🔥</span>
+                      <span className="text-[10px] font-mono font-bold text-emerald-400">{stats.topGainerSymbol}</span>
+                      <span className="text-[9px] font-mono text-emerald-400/80">+{(stats.topGainerChange ?? 0).toFixed(1)}%</span>
+                    </div>
+                    <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+                  </>
+                )}
+
+                {/* Top Loser */}
+                {stats.topLoserSymbol && (
+                  <>
+                    <div className="shrink-0 flex items-center gap-1">
+                      <span className="text-[10px]">💀</span>
+                      <span className="text-[10px] font-mono font-bold text-rose-400">{stats.topLoserSymbol}</span>
+                      <span className="text-[9px] font-mono text-rose-400/80">{(stats.topLoserChange ?? 0).toFixed(1)}%</span>
+                    </div>
+                    <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+                  </>
+                )}
+
+                {/* New Pairs */}
+                <div className="shrink-0 flex items-center gap-1">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.15em] text-text-muted/50">New</span>
+                  <span className="text-[10px] font-mono font-bold text-cyan-400">{stats.newPairsLast24h ?? 0}</span>
+                  {(stats.newPairsLast24h ?? 0) > 0 && (
+                    <span className="text-[7px] font-mono font-bold bg-cyan-400/20 text-cyan-300 px-1 py-px rounded tracking-wider">NEW</span>
+                  )}
+                </div>
+                <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+
+                {/* Top 5 Dominance */}
+                <div className="shrink-0 flex items-center gap-1.5">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.15em] text-text-muted/50">Top5</span>
+                  <div className="flex items-center gap-1">
+                    <div className="w-8 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div className="h-full bg-purple-400/70 rounded-full transition-all duration-700" style={{ width: `${stats.dominanceTop5 ?? 0}%` }} />
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-purple-300">{stats.dominanceTop5 ?? 0}%</span>
+                  </div>
+                </div>
+                <div className="w-px h-4 bg-white/[0.04] shrink-0" />
+
+                {/* Txns 24h */}
+                <div className="shrink-0 flex items-center gap-1">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.15em] text-text-muted/50">Txns</span>
+                  <span className="text-[10px] font-mono font-bold text-white">{formatCount(stats.totalTxns24h ?? 0)}</span>
+                </div>
+              </>
+            ) : (
+              /* Skeleton shimmer row 2 */
+              <>
+                {[1,2,3,4,5].map(i => (
+                  <div key={i} className="h-3 w-14 bg-white/[0.04] rounded animate-pulse shrink-0" />
+                ))}
+              </>
+            )}
+          </div>
+        </Container>
       </section>
 
       {/* ── Navigation Menu Dropdown ── */}

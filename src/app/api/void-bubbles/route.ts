@@ -329,6 +329,39 @@ export async function GET(request: Request) {
     const categoryBreakdown: Record<string, number> = {};
     cappedTokens.forEach(t => { categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + 1; });
 
+    // --- Enhanced stats ---
+    // Total 24h transactions and buy pressure
+    let totalBuys24h = 0;
+    let totalSells24h = 0;
+    cappedTokens.forEach(t => {
+      totalBuys24h += t.txns24h?.buys || 0;
+      totalSells24h += t.txns24h?.sells || 0;
+    });
+    const totalTxns24h = totalBuys24h + totalSells24h;
+    const buyPressure = totalTxns24h > 0 ? Math.round((totalBuys24h / totalTxns24h) * 100) : 50;
+
+    // New pairs in last 24h
+    const now24h = Date.now() - 24 * 60 * 60 * 1000;
+    const newPairsLast24h = cappedTokens.filter(t => {
+      if (!t.pairCreatedAt) return false;
+      return new Date(t.pairCreatedAt).getTime() > now24h;
+    }).length;
+
+    // Top gainer and loser
+    const sortedByChange = [...cappedTokens].sort((a, b) => b.priceChange24h - a.priceChange24h);
+    const topGainer = sortedByChange[0];
+    const topLoser = sortedByChange[sortedByChange.length - 1];
+
+    // NEAR price
+    const nearToken = cappedTokens.find(t => t.symbol === 'NEAR' || t.symbol === 'wNEAR');
+
+    // Total 1h volume
+    const totalVolume1h = cappedTokens.reduce((sum, t) => sum + (t.volume1h || 0), 0);
+
+    // Top 5 dominance
+    const top5Mcap = cappedTokens.slice(0, 5).reduce((sum, t) => sum + t.marketCap, 0);
+    const dominanceTop5 = totalMarketCap > 0 ? Math.round((top5Mcap / totalMarketCap) * 100) : 0;
+
     return NextResponse.json({
       tokens: cappedTokens,
       stats: {
@@ -340,6 +373,18 @@ export async function GET(request: Request) {
         losersCount,
         avgHealthScore,
         categoryBreakdown,
+        // Enhanced stats
+        totalTxns24h,
+        buyPressure,
+        newPairsLast24h,
+        topGainerSymbol: topGainer?.symbol || null,
+        topGainerChange: topGainer?.priceChange24h || 0,
+        topLoserSymbol: topLoser?.symbol || null,
+        topLoserChange: topLoser?.priceChange24h || 0,
+        nearPrice: nearToken?.price || null,
+        nearPriceChange24h: nearToken?.priceChange24h || null,
+        totalVolume1h,
+        dominanceTop5,
       },
       lastUpdated: new Date().toISOString(),
       sources: ['ref-finance', 'dexscreener'],
