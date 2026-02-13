@@ -53,17 +53,22 @@ export function ConstellationMap({
       const { width, height } = entries[0].contentRect;
       setContainerSize({ w: width, h: height });
 
-      // Auto-fit: center the constellation in viewport on initial load
+      // Auto-fit: fill the viewport so the constellation is large and readable
       if (!hasInitialFit.current && width > 0 && height > 0) {
         hasInitialFit.current = true;
-        // Calculate zoom to fit content with slight padding
-        const padding = 0.92; // 8% breathing room
-        const zoomX = (width / MAP_WIDTH) * padding;
-        const zoomY = (height / MAP_HEIGHT) * padding;
-        const fitZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.min(zoomX, zoomY)));
-        // Center the map in the container
-        const fitPanX = (width - MAP_WIDTH * fitZoom) / 2;
-        const fitPanY = (height - MAP_HEIGHT * fitZoom) / 2;
+        // Zoom to fill WIDTH fully — nodes must be readable, not tiny
+        // Content spans roughly x:150-1450 (1300px) and y:150-1250 (1100px)
+        const contentWidth = 1300;
+        const contentHeight = 1100;
+        const contentCenterX = 750; // center of content area
+        const contentCenterY = 700;
+        
+        const fitZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, 
+          Math.max(width / contentWidth, height / contentHeight)
+        ));
+        // Pan so content center is at viewport center
+        const fitPanX = (width / 2) - (contentCenterX * fitZoom);
+        const fitPanY = (height / 2) - (contentCenterY * fitZoom);
         onSetZoom(fitZoom);
         onSetPan(fitPanX, fitPanY);
       }
