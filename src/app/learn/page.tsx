@@ -206,7 +206,7 @@ export default function LearnPage() {
                 name: 'What is Sanctum?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Sanctum is Voidspace\'s AI-powered vibe-coding builder. Describe what you want in plain English, and it generates production-ready NEAR smart contracts — tokens, NFTs, DAOs, DeFi vaults, marketplaces, and AI agents.',
+                  text: 'Sanctum is Voidspace\'s general-purpose AI vibe-coding builder, powered by Claude (Anthropic). Describe what you want in plain English, and it generates production-ready NEAR smart contracts, web apps, code audits, visual assets, and more.',
                 },
               },
               {
@@ -243,10 +243,18 @@ export default function LearnPage() {
               },
               {
                 '@type': 'Question',
+                name: 'What can I build with Sanctum?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Anything. Sanctum is a general-purpose AI builder powered by Claude — not limited to templates. Build smart contracts, web apps, full-stack dApps, code audits, visual assets, and more. Six starter templates help you get going fast, but Sanctum handles any NEAR development task you throw at it.',
+                },
+              },
+              {
+                '@type': 'Question',
                 name: 'What\'s free and what\'s paid?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'All learning tracks, Void Lens, Void Bubbles, and Constellation Map are completely free. Only Sanctum (the AI builder) has paid tiers — and even that starts with a free tier.',
+                  text: 'Free: All learning tracks, Void Lens, Void Bubbles, and Constellation Map. Paid: Sanctum (the AI builder) and Void Brief generation (AI-generated build plans) — both powered by Claude. Sanctum starts with a free tier so you can try before you commit.',
                 },
               },
               {
@@ -271,6 +279,46 @@ export default function LearnPage() {
                 acceptedAnswer: {
                   '@type': 'Answer',
                   text: 'Chain Abstraction is NEAR\'s approach to making blockchain invisible to end users. Technologies like Intents, Chain Signatures, and Shade Agents let users interact across multiple blockchains from a single NEAR account.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What are Shade Agents?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Shade Agents are NEAR\'s autonomous AI agents that can own wallets, sign transactions, and interact across chains. By combining chain abstraction with AI, they enable truly autonomous on-chain applications.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is Nightshade Sharding?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Nightshade is NEAR\'s sharding approach that splits the network into parallel processing lanes. It scales horizontally — like the internet itself — so throughput grows with demand instead of hitting a ceiling.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What are Chain Signatures?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Chain Signatures let you sign transactions on any blockchain — Bitcoin, Ethereum, Arbitrum, and more — directly from your NEAR account. No bridges, no wrapped tokens, no separate wallets.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What are Intents on NEAR?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Intents let users express what they want to do, not how to do it. Intent relayers handle the execution — enabling gasless transactions, cross-chain operations, and seamless user experiences.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is NEAR Data Availability (DA)?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'NEAR DA provides cheap, reliable data availability for rollups and Layer 2s. Ethereum L2s can use NEAR DA to dramatically reduce data costs while inheriting NEAR\'s security and performance.',
                 },
               },
             ],

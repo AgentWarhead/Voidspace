@@ -13,6 +13,7 @@ const TOC_ITEMS = [
   { id: 'cross-chain', label: 'Cross-Chain' },
   { id: 'templates', label: 'Templates' },
   { id: 'resources', label: 'Resources' },
+  { id: 'faq', label: 'FAQ' },
 ];
 
 export function TableOfContents() {
