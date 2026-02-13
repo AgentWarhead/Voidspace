@@ -227,10 +227,15 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
                       <MiniScoreRing score={cat.gapScore} />
                     </div>
 
-                    {/* Category name */}
+                    {/* Category name + description */}
                     <h3 className="font-semibold text-text-primary text-sm leading-snug truncate">
                       {cat.name}
                     </h3>
+                    {cat.description && (
+                      <p className="text-[11px] text-text-muted leading-tight line-clamp-2">
+                        {cat.description}
+                      </p>
+                    )}
 
                     {/* Badges row */}
                     <div className="flex items-center gap-1.5 flex-wrap">
