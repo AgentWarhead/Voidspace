@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Sparkles, Info, Loader2, ArrowRight, Rocket, X, Dices, Zap, WandSparkles, PenLine } from 'lucide-react';
+import { BriefDisplay } from '@/components/brief/BriefDisplay';
 import type { ProjectBrief } from '@/types';
 
 // ~20 mystery NEAR ecosystem prompts — randomly picked client-side
@@ -134,7 +135,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
     setCustomIdea('');
   };
 
-  // Preview mode — show the generated brief
+  // Preview mode — show the generated brief using the same template as /opportunities
   if (mode === 'preview' && brief) {
     return (
       <div className="mb-16 max-w-3xl mx-auto">
@@ -153,85 +154,9 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
             </button>
           </div>
 
-          {/* Brief content */}
-          <div className="p-6 space-y-5">
-            {/* Project name */}
-            <div>
-              <h3 className="text-xl font-bold text-text-primary mb-1">
-                {brief.projectNames?.[0] || 'Your Project'}
-              </h3>
-              <p className="text-sm text-text-muted">
-                {brief.buildComplexity?.difficulty && (
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono mr-2 ${
-                    brief.buildComplexity.difficulty === 'beginner' ? 'bg-green-500/10 text-green-400' :
-                    brief.buildComplexity.difficulty === 'intermediate' ? 'bg-amber-500/10 text-amber-400' :
-                    'bg-red-500/10 text-red-400'
-                  }`}>
-                    {brief.buildComplexity.difficulty}
-                  </span>
-                )}
-                {brief.buildComplexity?.estimatedTimeline}
-              </p>
-            </div>
-
-            {/* Problem & Solution */}
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-near-green/60 mb-1">Problem</p>
-                <p className="text-sm text-text-secondary leading-relaxed">{brief.problemStatement}</p>
-              </div>
-              <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-near-green/60 mb-1">Solution</p>
-                <p className="text-sm text-text-secondary leading-relaxed">{brief.solutionOverview}</p>
-              </div>
-            </div>
-
-            {/* Key Features */}
-            {brief.keyFeatures && brief.keyFeatures.length > 0 && (
-              <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-near-green/60 mb-2">Key Features</p>
-                <div className="space-y-1.5">
-                  {brief.keyFeatures.slice(0, 4).map((f, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm">
-                      <span className="text-near-green mt-0.5">▸</span>
-                      <span className="text-text-secondary">
-                        <span className="text-text-primary font-medium">{f.name}</span>
-                        {' — '}{f.description}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* NEAR Stack */}
-            {brief.nearTechStack && (
-              <div className="flex flex-wrap gap-2">
-                {brief.nearTechStack.useShadeAgents && (
-                  <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-mono">Shade Agents</span>
-                )}
-                {brief.nearTechStack.useIntents && (
-                  <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-mono">Intents</span>
-                )}
-                {brief.nearTechStack.useChainSignatures && (
-                  <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-mono">Chain Signatures</span>
-                )}
-              </div>
-            )}
-
-            {/* Monetization */}
-            {brief.monetizationIdeas && brief.monetizationIdeas.length > 0 && (
-              <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-near-green/60 mb-2">Monetization</p>
-                <div className="flex flex-wrap gap-2">
-                  {brief.monetizationIdeas.slice(0, 3).map((idea, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-text-secondary">
-                      {idea}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Brief content — reuse the same BriefDisplay from /opportunities */}
+          <div className="p-6">
+            <BriefDisplay brief={brief} />
           </div>
 
           {/* CTA */}
