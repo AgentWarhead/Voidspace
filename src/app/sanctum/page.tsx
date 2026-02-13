@@ -35,6 +35,7 @@ import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCo
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 import { BuilderShowcase } from './components/BuilderShowcase';
+import { PERSONA_LIST } from './lib/personas';
 
 // Template slug → starter message mapping
 const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
@@ -513,6 +514,48 @@ function SanctumPageInner() {
                   <VisualMode />
                 </div>
               )}
+
+              {/* The Sanctum Council */}
+              <div className="mb-16 max-w-4xl mx-auto">
+                <div className="text-center mb-6">
+                  <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-purple-400/60">
+                    The Sanctum Council
+                  </p>
+                  <p className="text-sm text-text-muted mt-1">Guided by 8 AI Experts</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2.5">
+                  {PERSONA_LIST.map((persona, i) => (
+                    <div
+                      key={persona.id}
+                      className="group relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] hover:border-white/[0.15] transition-all duration-300 hover:bg-white/[0.06] cursor-default"
+                      style={{
+                        animationDelay: `${i * 80}ms`,
+                        animation: 'fadeInUp 0.5s ease-out backwards',
+                      }}
+                    >
+                      {/* Subtle glow on hover using persona color */}
+                      <div
+                        className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${persona.bgColor} blur-xl -z-10`}
+                      />
+                      <span className="text-base">{persona.emoji}</span>
+                      <span className={`text-sm font-medium ${persona.color}`}>{persona.name}</span>
+                      <span className="text-[11px] text-text-muted hidden sm:inline">· {persona.role}</span>
+                    </div>
+                  ))}
+                </div>
+                <style jsx>{`
+                  @keyframes fadeInUp {
+                    from {
+                      opacity: 0;
+                      transform: translateY(8px);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: translateY(0);
+                    }
+                  }
+                `}</style>
+              </div>
 
               {/* Stats */}
               <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">

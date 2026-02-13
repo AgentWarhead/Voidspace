@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Sparkles, ChevronRight, BookOpen, Zap } from 'lucide-react';
+import { PERSONA_LIST } from '@/app/sanctum/lib/personas';
 
 export function SanctumSection() {
   return (
@@ -144,6 +145,31 @@ export function SanctumSection() {
             </div>
           </div>
 
+          {/* Council Strip */}
+          <div className="flex flex-col items-center gap-3 mb-10">
+            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-purple-400/50">
+              Meet the Council
+            </p>
+            <div className="flex items-center gap-1">
+              {PERSONA_LIST.map((persona) => (
+                <div
+                  key={persona.id}
+                  className="group relative"
+                >
+                  <div className={`w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-base hover:border-white/[0.2] hover:bg-white/[0.08] transition-all duration-200 cursor-default hover:scale-110`}>
+                    {persona.emoji}
+                  </div>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-void-black/90 border border-white/[0.1] backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20">
+                    <span className={`text-xs font-medium ${persona.color}`}>{persona.name}</span>
+                    <span className="text-[10px] text-text-muted ml-1">· {persona.role}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-text-muted">8 Expert AI Personas</p>
+          </div>
+
           {/* How it works */}
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 mb-10 text-sm text-text-muted">
             {[
@@ -170,7 +196,7 @@ export function SanctumSection() {
               <ChevronRight className="w-4 h-4" />
             </Link>
             <p className="text-xs text-text-muted font-mono mt-3">
-              Powered by Claude Opus · $2.50 free credits · No Rust experience needed
+              Powered by Claude Opus · 8 Expert AI Personas · Free credits to start
             </p>
           </div>
         </div>
