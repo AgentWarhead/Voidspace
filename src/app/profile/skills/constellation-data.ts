@@ -126,10 +126,10 @@ export const TRACK_CONFIG: Record<TrackId, TrackConfig> = {
 /* ─── Track Quadrants for positioning ──────────────────────── */
 
 export const TRACK_QUADRANTS: Record<TrackId, { cx: number; cy: number }> = {
-  explorer: { cx: 400, cy: 350 },   // top-left
-  builder:  { cx: 1200, cy: 400 },  // top-right
-  hacker:   { cx: 400, cy: 1000 },  // bottom-left
-  founder:  { cx: 1150, cy: 1050 }, // bottom-right
+  explorer: { cx: 300, cy: 280 },   // top-left — pushed to corner
+  builder:  { cx: 1300, cy: 320 },  // top-right — pushed to corner
+  hacker:   { cx: 300, cy: 1050 },  // bottom-left — pushed to corner
+  founder:  { cx: 1300, cy: 1100 }, // bottom-right — pushed to corner
 };
 
 export const MAP_WIDTH = 1600;

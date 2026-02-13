@@ -56,12 +56,12 @@ export function ConstellationMap({
       // Auto-fit: fill the viewport so the constellation is large and readable
       if (!hasInitialFit.current && width > 0 && height > 0) {
         hasInitialFit.current = true;
-        // Zoom to fill WIDTH fully — nodes must be readable, not tiny
-        // Content spans roughly x:150-1450 (1300px) and y:150-1250 (1100px)
-        const contentWidth = 1300;
-        const contentHeight = 1100;
-        const contentCenterX = 750; // center of content area
-        const contentCenterY = 700;
+        // Zoom to fill viewport — nodes must be readable and impressive
+        // Content now spans roughly x:100-1500 and y:100-1300
+        const contentWidth = 1400;
+        const contentHeight = 1200;
+        const contentCenterX = 800; // center of content area
+        const contentCenterY = 690;
         
         const fitZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, 
           Math.max(width / contentWidth, height / contentHeight)
