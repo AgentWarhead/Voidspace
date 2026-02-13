@@ -9,8 +9,19 @@ interface CategoryPickerProps {
   onCustomStart: () => void;
 }
 
-// Popular categories - beginner-friendly and commonly used
-const POPULAR_CATEGORIES = [
+interface Category {
+  slug: string;
+  name: string;
+  icon: string;
+  description: string;
+  tech?: string[];
+  color: string;
+  borderColor: string;
+  beginner?: boolean;
+}
+
+// Popular categories - top 5, reduced for decision clarity
+const POPULAR_CATEGORIES: Category[] = [
   {
     slug: 'ai-agents',
     name: 'AI & Shade Agents',
@@ -35,14 +46,7 @@ const POPULAR_CATEGORIES = [
     description: 'Collections, marketplaces, royalties',
     color: 'from-pink-500/20 to-rose-500/20',
     borderColor: 'border-pink-500/30',
-  },
-  {
-    slug: 'gaming',
-    name: 'Gaming & Metaverse',
-    icon: '🎮',
-    description: 'GameFi, play-to-earn, in-game assets',
-    color: 'from-blue-500/20 to-indigo-500/20',
-    borderColor: 'border-blue-500/30',
+    beginner: true,
   },
   {
     slug: 'meme-tokens',
@@ -52,7 +56,21 @@ const POPULAR_CATEGORIES = [
     tech: ['NEP-141', 'Tokenomics', 'Fair Launch'],
     color: 'from-yellow-500/20 to-orange-500/20',
     borderColor: 'border-yellow-500/30',
+    beginner: true,
   },
+  {
+    slug: 'gaming',
+    name: 'Gaming & Metaverse',
+    icon: '🎮',
+    description: 'GameFi, play-to-earn, in-game assets',
+    color: 'from-blue-500/20 to-indigo-500/20',
+    borderColor: 'border-blue-500/30',
+    beginner: true,
+  },
+];
+
+// Advanced categories - for experienced developers
+const ADVANCED_CATEGORIES: Category[] = [
   {
     slug: 'staking-rewards',
     name: 'Staking & Rewards',
@@ -79,10 +97,6 @@ const POPULAR_CATEGORIES = [
     color: 'from-cyan-500/20 to-blue-500/20',
     borderColor: 'border-cyan-500/30',
   },
-];
-
-// Advanced categories - for experienced developers
-const ADVANCED_CATEGORIES = [
   {
     slug: 'intents',
     name: 'Intents & Chain Abstraction',
@@ -190,20 +204,19 @@ const ADVANCED_CATEGORIES = [
 export function CategoryPicker({ onSelect, customPrompt, setCustomPrompt, onCustomStart }: CategoryPickerProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const renderCategoryCard = (cat: {
-    slug: string;
-    name: string;
-    icon: string;
-    description: string;
-    tech?: string[];
-    color: string;
-    borderColor: string;
-  }) => (
+  const renderCategoryCard = (cat: Category) => (
     <button
       key={cat.slug}
       onClick={() => onSelect(cat.slug)}
       className={`group relative p-4 rounded-xl border ${cat.borderColor} bg-gradient-to-br ${cat.color} hover:scale-[1.02] transition-all text-left`}
     >
+      {/* Beginner Friendly badge */}
+      {cat.beginner && (
+        <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 text-[10px] bg-near-green/10 text-near-green border border-near-green/20 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-near-green" />
+          Beginner Friendly
+        </span>
+      )}
       <div className="flex items-start gap-3">
         <span className="text-2xl">{cat.icon}</span>
         <div className="flex-1">
@@ -222,14 +235,56 @@ export function CategoryPicker({ onSelect, customPrompt, setCustomPrompt, onCust
           )}
         </div>
       </div>
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <span className="text-near-green text-sm">Build →</span>
-      </div>
+      {/* Build arrow — only show when no beginner badge (avoid overlap) */}
+      {!cat.beginner && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-near-green text-sm">Build →</span>
+        </div>
+      )}
     </button>
   );
 
   return (
     <div className="max-w-5xl mx-auto">
+      {/* Custom Project — Elevated, above templates */}
+      <div className="mb-10">
+        <div className="rounded-2xl border border-near-green/20 bg-white/[0.03] backdrop-blur-sm p-6 sm:p-8">
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-text-primary flex items-center gap-2">
+              <span>✨</span> Describe Your Idea
+            </h3>
+            <p className="text-sm text-text-muted mt-1">
+              Tell Sanctum what you want to build — in plain English
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && onCustomStart()}
+              placeholder="I want to build a token that rewards holders every time someone trades..."
+              className="flex-1 px-4 py-4 rounded-xl bg-void-gray border border-border-subtle focus:border-near-green/50 focus:outline-none focus:ring-1 focus:ring-near-green/30 text-text-primary placeholder:text-text-muted transition-all text-base"
+            />
+            <button
+              onClick={onCustomStart}
+              disabled={!customPrompt.trim()}
+              className="px-8 py-4 rounded-xl bg-near-green text-void-black font-bold text-base hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-near-green/20 hover:shadow-near-green/40 whitespace-nowrap"
+            >
+              Start Building →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="flex-1 h-px bg-border-subtle" />
+        <span className="text-xs text-text-muted font-mono uppercase tracking-wider">— or pick a template —</span>
+        <div className="flex-1 h-px bg-border-subtle" />
+      </div>
+
       {/* Popular Categories */}
       <div className="mb-8">
         <div className="mb-4">
@@ -245,47 +300,21 @@ export function CategoryPicker({ onSelect, customPrompt, setCustomPrompt, onCust
       <div className="mb-8">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-2 mb-4 text-text-secondary hover:text-text-primary transition-colors"
+          className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg border border-border-subtle bg-white/[0.02] hover:bg-white/[0.05] hover:border-text-muted text-text-secondary hover:text-text-primary transition-all mb-4"
         >
-          <span className="text-xs font-mono text-text-muted uppercase tracking-wider">ADVANCED</span>
-          <span className="text-sm text-text-muted">({ADVANCED_CATEGORIES.length} categories)</span>
-          <span className={`text-text-muted transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>
-            {showAdvanced ? '▲' : '▼'}
+          <span className="text-sm font-medium">More Templates</span>
+          <span className="px-1.5 py-0.5 text-xs bg-white/[0.08] rounded text-text-muted font-mono">{ADVANCED_CATEGORIES.length}</span>
+          <span className={`text-text-muted transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`}>
+            ▼
           </span>
         </button>
         
-        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          showAdvanced ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+          showAdvanced ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
             {ADVANCED_CATEGORIES.map((cat) => renderCategoryCard(cat))}
           </div>
-        </div>
-      </div>
-
-      {/* Custom Project - Always Visible */}
-      <div className="border-t border-border-subtle pt-8">
-        <div className="flex items-center gap-2 mb-4">
-          <span>✨</span>
-          <h3 className="text-lg font-semibold text-text-primary">Or describe your own project...</h3>
-        </div>
-        
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && onCustomStart()}
-            placeholder="I want to build a token that rewards holders every time someone trades..."
-            className="flex-1 px-4 py-3 rounded-xl bg-void-gray border border-border-subtle focus:border-near-green/50 focus:outline-none focus:ring-1 focus:ring-near-green/30 text-text-primary placeholder:text-text-muted transition-all"
-          />
-          <button
-            onClick={onCustomStart}
-            disabled={!customPrompt.trim()}
-            className="px-6 py-3 rounded-xl bg-near-green text-void-black font-semibold hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            Start Building →
-          </button>
         </div>
       </div>
     </div>
