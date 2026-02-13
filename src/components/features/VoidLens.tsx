@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 // @ts-ignore
-import { Search, Shield, TrendingUp, Activity, Wallet, AlertTriangle, CheckCircle, Network, RotateCcw, RefreshCw, Key, Lock, Zap, Coins, BarChart3, Clock, Globe, Layers } from 'lucide-react';
+import { Search, Shield, TrendingUp, TrendingDown, Activity, Wallet, AlertTriangle, CheckCircle, Network, RotateCcw, RefreshCw, Key, Lock, Zap, Coins, BarChart3, Clock, Globe, Layers, DollarSign, PieChart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -64,10 +64,38 @@ interface WalletData {
   };
 }
 
+interface PortfolioHolding {
+  symbol: string;
+  name: string;
+  contractAddress: string;
+  balance: number;
+  price: number;
+  usdValue: number;
+  priceChange24h: number;
+  category: string;
+  imageUrl?: string;
+}
+
+interface PortfolioData {
+  totalValue: number;
+  totalChange24h: number;
+  topHolding: { symbol: string; usdValue: number } | null;
+  holdings: PortfolioHolding[];
+  diversification: {
+    defi: number;
+    stablecoin: number;
+    meme: number;
+    infrastructure: number;
+    other: number;
+  };
+  diversificationLabel: string;
+}
+
 interface VoidLensResult {
   address: string;
   walletData: WalletData;
   analysis: ReputationAnalysis;
+  portfolio?: PortfolioData | null;
   timestamp: string;
   analysisTimestamp?: number;
 }
@@ -648,6 +676,193 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
               </div>
             </div>
           </Card>
+
+          {/* Portfolio Cards */}
+          {result.portfolio && result.portfolio.holdings.length > 0 && (
+            <>
+              {/* Portfolio Valuation Card — Full Width */}
+              <Card variant="glass" glow>
+                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-near-green" />
+                  Portfolio Valuation
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="text-center sm:text-left">
+                    <div className="text-xs text-text-muted mb-1 uppercase tracking-wide">Total Value</div>
+                    <div className="text-3xl font-bold text-text-primary">
+                      ${result.portfolio.totalValue >= 1000000
+                        ? `${(result.portfolio.totalValue / 1000000).toFixed(2)}M`
+                        : result.portfolio.totalValue >= 1000
+                        ? `${(result.portfolio.totalValue / 1000).toFixed(2)}K`
+                        : result.portfolio.totalValue.toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-text-muted mb-1 uppercase tracking-wide">24h Change</div>
+                    <div className={cn(
+                      "text-2xl font-bold flex items-center justify-center gap-1",
+                      result.portfolio.totalChange24h >= 0 ? "text-near-green" : "text-error"
+                    )}>
+                      {result.portfolio.totalChange24h >= 0
+                        ? <ArrowUpRight className="w-5 h-5" />
+                        : <ArrowDownRight className="w-5 h-5" />}
+                      {Math.abs(result.portfolio.totalChange24h).toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="text-center sm:text-right">
+                    <div className="text-xs text-text-muted mb-1 uppercase tracking-wide">Top Holding</div>
+                    <div className="text-xl font-bold text-text-primary">
+                      {result.portfolio.topHolding?.symbol || '—'}
+                    </div>
+                    <div className="text-sm text-text-secondary">
+                      ${result.portfolio.topHolding?.usdValue?.toFixed(2) || '0.00'}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Holdings Table — Full Width */}
+              <Card>
+                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-yellow-400" />
+                  Token Holdings
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
+                        <th className="text-left py-3 pr-4">Token</th>
+                        <th className="text-right py-3 px-4">Balance</th>
+                        <th className="text-right py-3 px-4">Price</th>
+                        <th className="text-right py-3 px-4">Value</th>
+                        <th className="text-right py-3 pl-4">24h</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.portfolio.holdings
+                        .filter(h => h.usdValue > 0.01 || h.balance > 0)
+                        .slice(0, 15)
+                        .map((holding, i) => (
+                        <tr key={holding.contractAddress || i} className="border-b border-border/50 hover:bg-surface-hover transition-colors">
+                          <td className="py-3 pr-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center text-xs font-bold text-text-primary border border-border">
+                                {holding.symbol?.slice(0, 2) || '?'}
+                              </div>
+                              <div>
+                                <div className="font-medium text-text-primary">{holding.symbol}</div>
+                                <div className="text-xs text-text-muted truncate max-w-[120px]">{holding.name}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-right py-3 px-4 text-text-secondary font-mono text-xs">
+                            {holding.balance >= 1000000
+                              ? `${(holding.balance / 1000000).toFixed(2)}M`
+                              : holding.balance >= 1000
+                              ? `${(holding.balance / 1000).toFixed(2)}K`
+                              : holding.balance >= 1
+                              ? holding.balance.toFixed(2)
+                              : holding.balance.toFixed(6)}
+                          </td>
+                          <td className="text-right py-3 px-4 text-text-secondary font-mono text-xs">
+                            {holding.price > 0
+                              ? holding.price >= 1
+                                ? `$${holding.price.toFixed(2)}`
+                                : `$${holding.price.toFixed(6)}`
+                              : '—'}
+                          </td>
+                          <td className="text-right py-3 px-4 text-text-primary font-semibold font-mono text-xs">
+                            {holding.usdValue > 0
+                              ? `$${holding.usdValue >= 1000 
+                                  ? holding.usdValue.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                                  : holding.usdValue.toFixed(2)}`
+                              : '—'}
+                          </td>
+                          <td className="text-right py-3 pl-4">
+                            {holding.price > 0 ? (
+                              <span className={cn(
+                                "inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded",
+                                holding.priceChange24h >= 0
+                                  ? "text-near-green bg-near-green/10"
+                                  : "text-error bg-error/10"
+                              )}>
+                                {holding.priceChange24h >= 0 ? '+' : ''}
+                                {holding.priceChange24h.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <span className="text-xs text-text-muted">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {result.portfolio.holdings.filter(h => h.usdValue > 0.01 || h.balance > 0).length === 0 && (
+                    <p className="text-center text-text-muted text-sm py-6">No priced tokens found</p>
+                  )}
+                </div>
+              </Card>
+
+              {/* Diversification Analysis Card */}
+              <Card>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+                    <PieChart className="w-5 h-5 text-purple-400" />
+                    Diversification
+                  </h3>
+                  <span className={cn(
+                    "text-xs font-medium px-3 py-1 rounded-full border",
+                    result.portfolio.diversificationLabel.includes('Concentrated')
+                      ? "text-warning bg-warning/10 border-warning/30"
+                      : result.portfolio.diversificationLabel.includes('Well')
+                      ? "text-near-green bg-near-green/10 border-near-green/30"
+                      : "text-blue-400 bg-blue-400/10 border-blue-400/30"
+                  )}>
+                    {result.portfolio.diversificationLabel}
+                  </span>
+                </div>
+
+                {/* Category Bars */}
+                <div className="space-y-3">
+                  {([
+                    { key: 'infrastructure' as const, label: 'Infrastructure', color: 'bg-blue-500' },
+                    { key: 'defi' as const, label: 'DeFi', color: 'bg-purple-500' },
+                    { key: 'stablecoin' as const, label: 'Stablecoins', color: 'bg-near-green' },
+                    { key: 'meme' as const, label: 'Meme', color: 'bg-pink-500' },
+                    { key: 'other' as const, label: 'Other', color: 'bg-gray-500' },
+                  ] as const).filter(cat => (result.portfolio?.diversification?.[cat.key] || 0) > 0)
+                    .map(cat => {
+                      const pct = result.portfolio?.diversification?.[cat.key] || 0;
+                      return (
+                        <div key={cat.key}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm text-text-secondary">{cat.label}</span>
+                            <span className="text-sm font-semibold text-text-primary">{pct}%</span>
+                          </div>
+                          <div className="h-2.5 rounded-full bg-surface-hover overflow-hidden">
+                            <div
+                              className={cn("h-full rounded-full transition-all duration-700", cat.color)}
+                              style={{ width: `${Math.min(pct, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                {/* Token count by category */}
+                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
+                  {result.portfolio.holdings.length > 0 && (
+                    <span className="text-xs text-text-muted">
+                      {result.portfolio.holdings.filter(h => h.price > 0).length} priced tokens
+                      {' · '}
+                      {result.portfolio.holdings.filter(h => h.price === 0).length} unpriced
+                    </span>
+                  )}
+                </div>
+              </Card>
+            </>
+          )}
 
           {/* Cards Grid — 2x2 on desktop, single column on mobile */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

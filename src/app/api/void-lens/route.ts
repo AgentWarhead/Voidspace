@@ -3,6 +3,7 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
+import { fetchTokenByAddress } from '@/lib/dexscreener';
 
 // Known NEAR contracts mapped to friendly names
 const KNOWN_CONTRACTS: Record<string, { name: string; category: string }> = {
@@ -630,6 +631,218 @@ Be specific about NEAR ecosystem context. Reference actual protocols by name.`;
   }
 }
 
+// --- Portfolio Enrichment ---
+
+// Token category classification
+const TOKEN_CATEGORIES: Record<string, string> = {
+  'wrap.near': 'infrastructure',
+  'aurora': 'infrastructure',
+  'core.near': 'infrastructure',
+  'token.sweat': 'other',
+  'token.ref-finance.near': 'defi',
+  'token.v2.ref-finance.near': 'defi',
+  'v2.ref-finance.near': 'defi',
+  'linear-protocol.near': 'defi',
+  'meta-pool.near': 'defi',
+  'app.burrow.cash': 'defi',
+  'nearx.stader-labs.near': 'defi',
+  'v1.orderly-network.near': 'defi',
+  'usn': 'stablecoin',
+  'usdt.tether-token.near': 'stablecoin',
+  'dac17f958d2ee523a2206206994597c13d831ec7.factory.bridge.near': 'stablecoin',
+  'a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.factory.bridge.near': 'stablecoin',
+  '17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1': 'stablecoin',
+  'token.0xshitzu.near': 'meme',
+  'token.lonk.near': 'meme',
+  'bobo.tkn.near': 'meme',
+  'ftv2.nekotoken.near': 'meme',
+  'blackdragon.tkn.near': 'meme',
+};
+
+function classifyToken(contractAddress: string, symbol: string): string {
+  if (TOKEN_CATEGORIES[contractAddress]) return TOKEN_CATEGORIES[contractAddress];
+  const lc = (symbol || '').toLowerCase();
+  const contract = contractAddress.toLowerCase();
+  if (contract.includes('meme-cooking') || contract.includes('.tkn.near')) return 'meme';
+  if (['usdt', 'usdc', 'dai', 'usn', 'usd'].includes(lc)) return 'stablecoin';
+  if (['ref', 'linear', 'burrow', 'meta', 'orderly', 'nearx'].some(k => lc.includes(k))) return 'defi';
+  if (['near', 'aurora', 'wnear'].includes(lc)) return 'infrastructure';
+  return 'other';
+}
+
+interface PortfolioHolding {
+  symbol: string;
+  name: string;
+  contractAddress: string;
+  balance: number;
+  price: number;
+  usdValue: number;
+  priceChange24h: number;
+  category: string;
+  imageUrl?: string;
+}
+
+interface PortfolioData {
+  totalValue: number;
+  totalChange24h: number;
+  topHolding: { symbol: string; usdValue: number } | null;
+  holdings: PortfolioHolding[];
+  diversification: {
+    defi: number;
+    stablecoin: number;
+    meme: number;
+    infrastructure: number;
+    other: number;
+  };
+  diversificationLabel: string;
+}
+
+async function enrichPortfolio(address: string, walletData: WalletData): Promise<PortfolioData | null> {
+  try {
+    // Fetch token inventory with balances from NearBlocks
+    const invResponse = await fetch(
+      `https://api.nearblocks.io/v1/account/${address}/inventory`,
+      { headers: { 'Accept': 'application/json' } }
+    ).catch(() => null);
+
+    if (!invResponse?.ok) return null;
+
+    const invData = await invResponse.json();
+    const fts: Array<{
+      contract: string;
+      amount: string;
+      ft_meta?: { name?: string; symbol?: string; decimals?: number; icon?: string; price?: number | null };
+    }> = invData?.inventory?.fts || [];
+
+    if (fts.length === 0) return null;
+
+    // Look up prices from DexScreener for each token (batch, max 15 to avoid rate limits)
+    const lookupTokens = fts.slice(0, 30);
+    const priceResults = await Promise.allSettled(
+      lookupTokens.map(ft => fetchTokenByAddress(ft.contract))
+    );
+
+    const holdings: PortfolioHolding[] = [];
+
+    // Also add native NEAR balance
+    const nearBalance = parseFloat(walletData.balance) || 0;
+    if (nearBalance > 0) {
+      const nearDex = await fetchTokenByAddress('wrap.near').catch(() => null);
+      if (nearDex) {
+        holdings.push({
+          symbol: 'NEAR',
+          name: 'NEAR Protocol',
+          contractAddress: 'native',
+          balance: nearBalance,
+          price: nearDex.price || 0,
+          usdValue: nearBalance * (nearDex.price || 0),
+          priceChange24h: nearDex.priceChange24h || 0,
+          category: 'infrastructure',
+        });
+      }
+    }
+
+    for (let i = 0; i < lookupTokens.length; i++) {
+      const ft = lookupTokens[i];
+      const result = priceResults[i];
+      const dexData = result?.status === 'fulfilled' ? result.value : null;
+
+      const decimals = ft.ft_meta?.decimals || 18;
+      const rawAmount = ft.amount || '0';
+      let balance = 0;
+      try {
+        // Handle very large numbers by converting safely
+        if (decimals <= 18) {
+          balance = Number(BigInt(rawAmount)) / Math.pow(10, decimals);
+        } else {
+          // For very high decimals, divide step by step
+          const divisor = BigInt(10) ** BigInt(decimals);
+          balance = Number(BigInt(rawAmount) * BigInt(1e6) / divisor) / 1e6;
+        }
+      } catch {
+        balance = parseFloat(rawAmount) / Math.pow(10, decimals);
+      }
+
+      if (balance <= 0 || !isFinite(balance)) continue;
+
+      const symbol = ft.ft_meta?.symbol || ft.contract.split('.')[0] || 'UNKNOWN';
+      const name = ft.ft_meta?.name || symbol;
+      const price = dexData?.price || 0;
+      const usdValue = balance * price;
+      const category = classifyToken(ft.contract, symbol);
+
+      holdings.push({
+        symbol,
+        name,
+        contractAddress: ft.contract,
+        balance,
+        price,
+        usdValue,
+        priceChange24h: dexData?.priceChange24h || 0,
+        category,
+        imageUrl: dexData?.imageUrl || undefined,
+      });
+    }
+
+    // Sort by USD value descending
+    holdings.sort((a, b) => b.usdValue - a.usdValue);
+
+    const totalValue = holdings.reduce((sum, h) => sum + h.usdValue, 0);
+
+    // Calculate weighted 24h change
+    let totalChange24h = 0;
+    if (totalValue > 0) {
+      totalChange24h = holdings.reduce((sum, h) => {
+        const weight = h.usdValue / totalValue;
+        return sum + (h.priceChange24h * weight);
+      }, 0);
+    }
+
+    const topHolding = holdings.length > 0
+      ? { symbol: holdings[0].symbol, usdValue: holdings[0].usdValue }
+      : null;
+
+    // Diversification analysis
+    const diversification = { defi: 0, stablecoin: 0, meme: 0, infrastructure: 0, other: 0 };
+    for (const h of holdings) {
+      const cat = h.category as keyof typeof diversification;
+      if (cat in diversification) {
+        diversification[cat] += h.usdValue;
+      } else {
+        diversification.other += h.usdValue;
+      }
+    }
+
+    // Convert to percentages
+    if (totalValue > 0) {
+      for (const key of Object.keys(diversification) as Array<keyof typeof diversification>) {
+        diversification[key] = Math.round((diversification[key] / totalValue) * 100);
+      }
+    }
+
+    // Diversification label
+    const maxCategoryPct = Math.max(...Object.values(diversification));
+    const activeCats = Object.values(diversification).filter(v => v > 5).length;
+    let diversificationLabel = 'Balanced';
+    if (maxCategoryPct >= 80) diversificationLabel = 'Highly Concentrated';
+    else if (maxCategoryPct >= 60) diversificationLabel = 'Concentrated';
+    else if (activeCats >= 4) diversificationLabel = 'Well Diversified';
+    else if (activeCats >= 3) diversificationLabel = 'Moderately Diversified';
+
+    return {
+      totalValue,
+      totalChange24h: Math.round(totalChange24h * 100) / 100,
+      topHolding,
+      holdings: holdings.slice(0, 20), // Cap at 20 for response size
+      diversification,
+      diversificationLabel,
+    };
+  } catch (error) {
+    console.error('Portfolio enrichment error:', error);
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = getAuthenticatedUser(request);
@@ -659,12 +872,17 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    const analysis = await generateReputationAnalysis(walletData, user?.userId);
+    // Run analysis and portfolio enrichment in parallel
+    const [analysis, portfolio] = await Promise.all([
+      generateReputationAnalysis(walletData, user?.userId),
+      enrichPortfolio(address, walletData),
+    ]);
     
     const responseData = {
       address,
       walletData,
       analysis,
+      portfolio,
       timestamp: new Date().toISOString()
     };
 
