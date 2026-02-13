@@ -316,9 +316,27 @@ function SanctumPageInner() {
                 <span className="animate-bounce">→</span>
               </button>
 
-              {/* Builder Showcase */}
-              <div className="mb-16">
-                <BuilderShowcase />
+              {/* Stats */}
+              <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-text-primary font-mono">🧠</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Zero Rust Required</div>
+                </div>
+                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-cyan-400 font-mono">Full</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Stack Builder</div>
+                </div>
+                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-near-green font-mono">Idea→</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Deployed in Minutes</div>
+                </div>
+              </div>
+
+              {/* Social Proof Banner */}
+              <div className="mb-8">
+                <SocialProof variant="banner" />
               </div>
 
               {/* Friendly Mode Cards */}
@@ -516,6 +534,23 @@ function SanctumPageInner() {
                 </div>
               )}
 
+              {/* Void Brief — AI mission brief generator */}
+              <VoidBriefCard
+                isConnected={isConnected}
+                openModal={openModal}
+                onStartBuild={(brief) => {
+                  // Start a build session with the brief's solution as context
+                  const briefContext = `Build this project: ${brief.projectNames?.[0] || 'Project'}. ${brief.solutionOverview}. Key features: ${brief.keyFeatures?.map(f => f.name).join(', ')}`;
+                  dispatch({ type: 'SET_CUSTOM_PROMPT', payload: briefContext });
+                  handleCustomStart();
+                }}
+              />
+
+              {/* Builder Showcase */}
+              <div className="mb-16">
+                <BuilderShowcase />
+              </div>
+
               {/* The Sanctum Council */}
               <div className="mb-16 max-w-4xl mx-auto">
                 <div className="text-center mb-6">
@@ -556,41 +591,6 @@ function SanctumPageInner() {
                     }
                   }
                 `}</style>
-              </div>
-
-              {/* Void Brief — AI mission brief generator */}
-              <VoidBriefCard
-                isConnected={isConnected}
-                openModal={openModal}
-                onStartBuild={(brief) => {
-                  // Start a build session with the brief's solution as context
-                  const briefContext = `Build this project: ${brief.projectNames?.[0] || 'Project'}. ${brief.solutionOverview}. Key features: ${brief.keyFeatures?.map(f => f.name).join(', ')}`;
-                  dispatch({ type: 'SET_CUSTOM_PROMPT', payload: briefContext });
-                  handleCustomStart();
-                }}
-              />
-
-              {/* Stats */}
-              <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-text-primary font-mono">🧠</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Zero Rust Required</div>
-                </div>
-                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-cyan-400 font-mono">Full</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Stack Builder</div>
-                </div>
-                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-near-green font-mono">Idea→</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Deployed in Minutes</div>
-                </div>
-              </div>
-
-              {/* Social Proof Banner */}
-              <div className="mb-8">
-                <SocialProof variant="banner" />
               </div>
 
             </Container>
