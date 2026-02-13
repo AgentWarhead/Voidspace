@@ -126,14 +126,14 @@ export const TRACK_CONFIG: Record<TrackId, TrackConfig> = {
 /* ─── Track Quadrants for positioning ──────────────────────── */
 
 export const TRACK_QUADRANTS: Record<TrackId, { cx: number; cy: number }> = {
-  explorer: { cx: 300, cy: 280 },   // top-left — pushed to corner
-  builder:  { cx: 1300, cy: 320 },  // top-right — pushed to corner
-  hacker:   { cx: 300, cy: 1050 },  // bottom-left — pushed to corner
-  founder:  { cx: 1300, cy: 1100 }, // bottom-right — pushed to corner
+  explorer: { cx: 280, cy: 230 },   // top-left
+  builder:  { cx: 820, cy: 230 },   // top-right
+  hacker:   { cx: 280, cy: 720 },   // bottom-left
+  founder:  { cx: 820, cy: 720 },   // bottom-right
 };
 
-export const MAP_WIDTH = 1600;
-export const MAP_HEIGHT = 1400;
+export const MAP_WIDTH = 1100;
+export const MAP_HEIGHT = 950;
 
 /* ─── Skill Nodes — All 66 Modules ────────────────────────── */
 

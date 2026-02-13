@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { connections, type NodeStatus } from './constellation-data';
+import { connections, MAP_WIDTH, MAP_HEIGHT, type NodeStatus } from './constellation-data';
 
 /* ─── Animated Connection Lines ────────────────────────────── */
 
@@ -15,7 +15,7 @@ function ConstellationLinesInner({ positions, getStatus }: ConstellationLinesPro
   return (
     <svg
       className="absolute inset-0 w-full h-full pointer-events-none"
-      viewBox="0 0 1600 1400"
+      viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
