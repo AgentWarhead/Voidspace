@@ -107,7 +107,7 @@ const TRACK_CONFIG = {
     border: 'border-accent-orange/30',
     glow: 'rgba(251, 146, 60, 0.3)',
     icon: Flame,
-    xpPerModule: 100,
+    xpPerModule: 75,
     description: 'Launch your NEAR project',
   },
 };
@@ -121,511 +121,685 @@ const LEVELS = [
   { name: 'Legend', minXP: 7000, icon: '👑' },
 ];
 
-/* ─── Skill Nodes (from SkillTree, enhanced with tracks) ──── */
+/* ─── Skill Nodes — All 71 Modules ────────────────────────── */
 
 const skillNodes: SkillNode[] = [
-  // Explorer Track (11 nodes)
+  // ════════════════════════════════════════════════════════════
+  // EXPLORER TRACK (16 modules) — 50 XP each = 800 XP total
+  // ════════════════════════════════════════════════════════════
   {
-    id: 'near-basics',
-    label: 'NEAR Basics',
-    icon: BookOpen,
-    description: 'Understand blockchain fundamentals and what makes NEAR unique.',
-    details: ['What is a blockchain & why NEAR?', 'NEAR\'s sharded architecture', 'Named accounts vs hex addresses', 'Access keys model', 'Gas fees & storage staking', 'Transaction finality'],
+    id: 'what-is-blockchain', label: 'What is Blockchain?', icon: BookOpen,
+    description: 'Understand the fundamentals of blockchain technology and why it matters.',
+    details: ['Distributed ledger basics', 'Consensus mechanisms', 'Blocks and transactions', 'Decentralization benefits', 'Public vs private chains', 'Blockchain use cases'],
     xp: 50, tier: 'foundation', track: 'explorer', position: 0,
-    unlocks: ['wallet-setup'], prerequisites: [], estimatedTime: '2 hours',
-    rewards: ['NEAR Basics Badge'], link: '/learn/explorer/near-basics',
+    unlocks: ['what-is-near'], prerequisites: [], estimatedTime: '1.5 hours',
+    rewards: ['Blockchain Basics Badge'], link: '/learn/explorer/what-is-blockchain',
   },
   {
-    id: 'wallet-setup',
-    label: 'Wallet Setup',
-    icon: Wallet,
-    description: 'Create, fund, and secure your NEAR wallet.',
-    details: ['Choose & install a wallet', 'Create a testnet account', 'NEAR account model', 'Access key types', 'Get testnet NEAR', 'Security best practices'],
+    id: 'what-is-near', label: 'What is NEAR?', icon: Star,
+    description: 'Discover NEAR Protocol — its architecture, vision, and what makes it unique.',
+    details: ['NEAR\'s sharded architecture', 'Nightshade consensus', 'Named accounts model', 'Human-readable addresses', 'Developer experience focus', 'Chain abstraction vision'],
     xp: 50, tier: 'foundation', track: 'explorer', position: 1,
-    unlocks: ['first-transaction'], prerequisites: ['near-basics'], estimatedTime: '30 min',
-    rewards: ['Wallet Pioneer Badge'], link: '/learn/wallet-setup',
+    unlocks: ['create-a-wallet'], prerequisites: ['what-is-blockchain'], estimatedTime: '2 hours',
+    rewards: ['NEAR Explorer Badge'], link: '/learn/explorer/what-is-near',
   },
   {
-    id: 'first-transaction',
-    label: 'First Transaction',
-    icon: Zap,
-    description: 'Send your first on-chain transaction on NEAR.',
-    details: ['Send NEAR between accounts', 'Explore on NearBlocks', 'Understand gas and receipts', 'Call a smart contract', 'Check account state', 'View transaction history'],
+    id: 'create-a-wallet', label: 'Create a Wallet', icon: Wallet,
+    description: 'Set up your first NEAR wallet and secure your account.',
+    details: ['Choose a wallet provider', 'Create testnet account', 'Understand access keys', 'Backup seed phrase', 'Fund with testnet NEAR', 'Security best practices'],
     xp: 50, tier: 'foundation', track: 'explorer', position: 2,
-    unlocks: ['ecosystem-tour'], prerequisites: ['wallet-setup'], estimatedTime: '20 min',
-    rewards: ['First Tx Badge'], link: '/learn/quick-start',
+    unlocks: ['your-first-transaction'], prerequisites: ['what-is-near'], estimatedTime: '30 min',
+    rewards: ['Wallet Pioneer Badge'], link: '/learn/explorer/create-a-wallet',
   },
   {
-    id: 'ecosystem-tour',
-    label: 'Ecosystem Tour',
-    icon: Globe,
-    description: 'Explore the major dApps and protocols in the NEAR ecosystem.',
-    details: ['DeFi on NEAR (Ref Finance, Burrow)', 'NFT marketplaces', 'Social protocols', 'Infrastructure tools', 'DAO ecosystem', 'Chain abstraction'],
+    id: 'your-first-transaction', label: 'Your First Transaction', icon: Zap,
+    description: 'Send your first on-chain transaction on NEAR.',
+    details: ['Send NEAR between accounts', 'Explore on NearBlocks', 'Understand gas & receipts', 'Call a smart contract', 'Check account state', 'View transaction history'],
     xp: 50, tier: 'foundation', track: 'explorer', position: 3,
-    unlocks: ['near-overview'], prerequisites: ['first-transaction'], estimatedTime: '1 hour',
-    rewards: ['Explorer Badge'], link: '/learn/explorer/ecosystem-tour',
+    unlocks: ['understanding-dapps'], prerequisites: ['create-a-wallet'], estimatedTime: '20 min',
+    rewards: ['First Tx Badge'], link: '/learn/explorer/your-first-transaction',
   },
   {
-    id: 'near-overview',
-    label: 'NEAR Overview',
-    icon: Star,
-    description: 'Deep dive into NEAR Protocol architecture and vision.',
-    details: ['Nightshade sharding', 'Consensus mechanism', 'Chain abstraction vision', 'NEAR DA layer', 'Aurora EVM', 'Developer experience'],
+    id: 'understanding-dapps', label: 'Understanding dApps', icon: AppWindow,
+    description: 'Learn what decentralized applications are and how they work on NEAR.',
+    details: ['What makes an app "decentralized"', 'Frontend + smart contract', 'Wallet connection flow', 'On-chain vs off-chain data', 'Popular NEAR dApps', 'User experience patterns'],
+    xp: 50, tier: 'foundation', track: 'explorer', position: 4,
+    unlocks: ['reading-smart-contracts'], prerequisites: ['your-first-transaction'], estimatedTime: '1 hour',
+    rewards: ['dApp Explorer Badge'], link: '/learn/explorer/understanding-dapps',
+  },
+  {
+    id: 'reading-smart-contracts', label: 'Reading Smart Contracts', icon: FileCode,
+    description: 'Learn to read and understand NEAR smart contract code.',
+    details: ['Contract structure overview', 'View vs change methods', 'State and storage', 'Reading contract source', 'ABI and interfaces', 'Common contract patterns'],
     xp: 50, tier: 'core', track: 'explorer', position: 0,
-    unlocks: ['key-technologies'], prerequisites: ['ecosystem-tour'], estimatedTime: '1.5 hours',
-    rewards: ['Architecture Badge'], link: '/learn/explorer/near-overview',
+    unlocks: ['near-ecosystem-tour'], prerequisites: ['understanding-dapps'], estimatedTime: '1.5 hours',
+    rewards: ['Code Reader Badge'], link: '/learn/explorer/reading-smart-contracts',
   },
   {
-    id: 'key-technologies',
-    label: 'Key Technologies',
-    icon: Brain,
-    description: 'Chain Abstraction, Intents, Chain Signatures, and more.',
-    details: ['Chain Signatures', 'Intents framework', 'Account aggregation', 'NEAR DA', 'Meta transactions', 'Relayers'],
+    id: 'near-ecosystem-tour', label: 'NEAR Ecosystem Tour', icon: Globe,
+    description: 'Explore the major dApps, protocols, and projects in the NEAR ecosystem.',
+    details: ['DeFi protocols (Ref, Burrow)', 'NFT marketplaces', 'Social protocols', 'Infrastructure tools', 'DAO ecosystem', 'Chain abstraction projects'],
     xp: 50, tier: 'core', track: 'explorer', position: 1,
-    unlocks: ['defi-basics'], prerequisites: ['near-overview'], estimatedTime: '2 hours',
-    rewards: ['Tech Savvy Badge'], link: '/learn/key-technologies',
+    unlocks: ['near-vs-other-chains', 'reading-the-explorer'], prerequisites: ['reading-smart-contracts'], estimatedTime: '1 hour',
+    rewards: ['Ecosystem Explorer Badge'], link: '/learn/explorer/near-ecosystem-tour',
   },
   {
-    id: 'defi-basics',
-    label: 'DeFi Basics',
-    icon: Coins,
-    description: 'Understand DeFi primitives on NEAR.',
-    details: ['AMM mechanics', 'Lending protocols', 'Staking & liquid staking', 'Yield strategies', 'DEX aggregation', 'Risk management'],
+    id: 'near-vs-other-chains', label: 'NEAR vs Other Chains', icon: Shield,
+    description: 'Compare NEAR Protocol with Ethereum, Solana, and other L1s.',
+    details: ['Sharding vs monolithic', 'Gas fee comparison', 'Developer experience', 'Account model differences', 'Finality & throughput', 'Ecosystem maturity'],
     xp: 50, tier: 'core', track: 'explorer', position: 2,
-    unlocks: ['governance'], prerequisites: ['key-technologies'], estimatedTime: '1.5 hours',
+    unlocks: ['choose-your-path'], prerequisites: ['near-ecosystem-tour'], estimatedTime: '1 hour',
+    rewards: ['Chain Analyst Badge'], link: '/learn/explorer/near-vs-other-chains',
+  },
+  {
+    id: 'reading-the-explorer', label: 'Reading the Explorer', icon: Target,
+    description: 'Master NearBlocks and other block explorers to investigate on-chain activity.',
+    details: ['NearBlocks navigation', 'Transaction details', 'Account inspection', 'Token tracking', 'Contract verification', 'Receipt tracing'],
+    xp: 50, tier: 'core', track: 'explorer', position: 3,
+    unlocks: ['defi-basics'], prerequisites: ['near-ecosystem-tour'], estimatedTime: '45 min',
+    rewards: ['Explorer Pro Badge'], link: '/learn/explorer/reading-the-explorer',
+  },
+  {
+    id: 'defi-basics', label: 'DeFi Basics', icon: Coins,
+    description: 'Understand DeFi primitives on NEAR — AMMs, lending, and more.',
+    details: ['AMM mechanics', 'Lending protocols', 'Staking & liquid staking', 'Yield strategies', 'DEX aggregation', 'Risk management'],
+    xp: 50, tier: 'core', track: 'explorer', position: 4,
+    unlocks: ['nft-basics-on-near', 'staking-and-validators'], prerequisites: ['reading-the-explorer'], estimatedTime: '1.5 hours',
     rewards: ['DeFi Literate Badge'], link: '/learn/explorer/defi-basics',
   },
   {
-    id: 'governance',
-    label: 'Governance',
-    icon: Shield,
-    description: 'How DAOs and governance work on NEAR.',
-    details: ['DAO structures', 'Astro DAO', 'Proposal lifecycle', 'Voting mechanisms', 'Treasury management', 'Multi-sig patterns'],
+    id: 'choose-your-path', label: 'Choose Your Path', icon: Compass,
+    description: 'Decide which track to pursue — Builder, Hacker, or Founder.',
+    details: ['Self-assessment quiz', 'Track comparison', 'Skill prerequisites', 'Career pathways', 'Community recommendations', 'Personalized roadmap'],
     xp: 50, tier: 'advanced', track: 'explorer', position: 0,
-    unlocks: ['community-nav'], prerequisites: ['defi-basics'], estimatedTime: '1 hour',
-    rewards: ['Governance Badge'], link: '/learn/explorer/governance',
+    unlocks: ['staying-safe-in-web3'], prerequisites: ['near-vs-other-chains'], estimatedTime: '30 min',
+    rewards: ['Pathfinder Badge'], link: '/learn/explorer/choose-your-path',
   },
   {
-    id: 'community-nav',
-    label: 'Community Navigation',
-    icon: Globe,
-    description: 'Navigate the NEAR community and find your tribe.',
-    details: ['NEAR forums', 'Developer channels', 'Ecosystem events', 'Working groups', 'Contributor pathways', 'Grant programs'],
+    id: 'nft-basics-on-near', label: 'NFT Basics on NEAR', icon: Star,
+    description: 'Explore NFT standards, marketplaces, and use cases on NEAR.',
+    details: ['NEP-171 standard', 'Minting & collecting', 'Marketplace ecosystem', 'Royalties on NEAR', 'NFT utilities', 'Series & collections'],
     xp: 50, tier: 'advanced', track: 'explorer', position: 1,
-    unlocks: ['explorer-capstone'], prerequisites: ['governance'], estimatedTime: '45 min',
-    rewards: ['Community Badge'], link: '/learn/explorer/community',
+    unlocks: ['near-data-tools'], prerequisites: ['defi-basics'], estimatedTime: '1 hour',
+    rewards: ['NFT Explorer Badge'], link: '/learn/explorer/nft-basics-on-near',
   },
   {
-    id: 'data-tools',
-    label: 'Data & Analytics',
-    icon: Target,
-    description: 'Master NEAR analytics and on-chain data tools.',
-    details: ['NearBlocks explorer', 'Pikespeak analytics', 'NEAR Lake indexer', 'On-chain queries', 'DeFiLlama NEAR', 'FastNEAR'],
+    id: 'staking-and-validators', label: 'Staking & Validators', icon: Shield,
+    description: 'Learn how staking and validation work on NEAR Protocol.',
+    details: ['Proof of Stake on NEAR', 'Validator roles', 'Delegated staking', 'Liquid staking protocols', 'Rewards mechanics', 'Slashing conditions'],
     xp: 50, tier: 'advanced', track: 'explorer', position: 2,
-    unlocks: ['explorer-capstone'], prerequisites: ['defi-basics'], estimatedTime: '1 hour',
-    rewards: ['Data Analyst Badge'], link: '/learn/explorer/data-tools',
+    unlocks: ['daos-on-near'], prerequisites: ['defi-basics'], estimatedTime: '1 hour',
+    rewards: ['Staking Expert Badge'], link: '/learn/explorer/staking-and-validators',
   },
   {
-    id: 'explorer-capstone',
-    label: 'Explorer Capstone',
-    icon: Award,
-    description: 'Build a personal dashboard tracking 5 NEAR dApps.',
-    details: ['Choose 5 dApps to track', 'Aggregate on-chain data', 'Build a dashboard', 'Present findings', 'Community sharing', 'Certificate earned'],
+    id: 'daos-on-near', label: 'DAOs on NEAR', icon: Crown,
+    description: 'How DAOs and on-chain governance work on NEAR.',
+    details: ['DAO structures', 'Astro DAO', 'Proposal lifecycle', 'Voting mechanisms', 'Treasury management', 'Multi-sig patterns'],
+    xp: 50, tier: 'advanced', track: 'explorer', position: 3,
+    unlocks: ['staying-safe-in-web3'], prerequisites: ['staking-and-validators'], estimatedTime: '1 hour',
+    rewards: ['Governance Badge'], link: '/learn/explorer/daos-on-near',
+  },
+  {
+    id: 'staying-safe-in-web3', label: 'Staying Safe in Web3', icon: ShieldCheck,
+    description: 'Security practices to protect yourself in the Web3 ecosystem.',
+    details: ['Phishing detection', 'Wallet security', 'Smart contract risks', 'Social engineering', 'Rug pull red flags', 'Recovery strategies'],
     xp: 50, tier: 'mastery', track: 'explorer', position: 0,
-    unlocks: [], prerequisites: ['community-nav', 'data-tools'], estimatedTime: '3 hours',
-    rewards: ['Explorer Certificate'], link: '/learn/certificate',
+    unlocks: ['near-data-tools'], prerequisites: ['choose-your-path', 'daos-on-near'], estimatedTime: '1 hour',
+    rewards: ['Security Aware Badge'], link: '/learn/explorer/staying-safe-in-web3',
+  },
+  {
+    id: 'near-data-tools', label: 'NEAR Data Tools', icon: Target,
+    description: 'Master NEAR analytics, indexers, and on-chain data tools.',
+    details: ['Pikespeak analytics', 'NEAR Lake indexer', 'On-chain queries', 'DeFiLlama NEAR', 'FastNEAR', 'Building dashboards'],
+    xp: 50, tier: 'mastery', track: 'explorer', position: 1,
+    unlocks: [], prerequisites: ['staying-safe-in-web3', 'nft-basics-on-near'], estimatedTime: '1.5 hours',
+    rewards: ['Data Analyst Badge'], link: '/learn/explorer/near-data-tools',
   },
 
-  // Builder Track (16 nodes) - uses the original SkillTree data
+  // ════════════════════════════════════════════════════════════
+  // BUILDER TRACK (27 modules) — 100 XP each = 2700 XP total
+  // ════════════════════════════════════════════════════════════
   {
-    id: 'rust-fundamentals',
-    label: 'Rust Fundamentals',
-    icon: Code2,
-    description: 'Master the language that powers NEAR smart contracts.',
-    details: ['Variables, types & mutability', 'Ownership & borrowing model', 'Structs, enums & pattern matching', 'Error handling with Result/Option', 'Traits & generics basics', 'Collections: Vec, HashMap, iterators'],
+    id: 'dev-environment-setup', label: 'Dev Environment Setup', icon: Terminal,
+    description: 'Set up your NEAR development environment with all essential tools.',
+    details: ['Install Rust & cargo', 'near-cli-rs setup', 'Node.js & npm', 'IDE configuration', 'Testnet account', 'Project scaffolding'],
     xp: 100, tier: 'foundation', track: 'builder', position: 0,
-    unlocks: ['smart-contracts-101'], prerequisites: ['first-transaction'], estimatedTime: '8 hours',
-    rewards: ['Rustacean Badge'], link: '/learn/why-rust',
+    unlocks: ['rust-fundamentals'], prerequisites: [], estimatedTime: '1 hour',
+    rewards: ['Dev Setup Badge'], link: '/learn/builder/dev-environment-setup',
   },
   {
-    id: 'smart-contracts-101',
-    label: 'Smart Contracts 101',
-    icon: FileCode,
-    description: 'Build and deploy your first NEAR smart contract.',
-    details: ['Contract structure with #[near] macro', 'State management & Borsh', 'View vs change methods', 'Storage collections', 'Cross-contract calls', 'Events & logging'],
+    id: 'rust-fundamentals', label: 'Rust Fundamentals', icon: Code2,
+    description: 'Master the language that powers NEAR smart contracts.',
+    details: ['Variables, types & mutability', 'Functions & control flow', 'Pattern matching', 'Modules & crates', 'Cargo basics', 'Rust playground'],
     xp: 100, tier: 'foundation', track: 'builder', position: 1,
-    unlocks: ['testing-basics'], prerequisites: ['rust-fundamentals'], estimatedTime: '10 hours',
-    rewards: ['Contract Builder Badge'], link: '/sanctum',
+    unlocks: ['ownership-borrowing'], prerequisites: ['dev-environment-setup'], estimatedTime: '6 hours',
+    rewards: ['Rustacean Badge'], link: '/learn/builder/rust-fundamentals',
   },
   {
-    id: 'testing-basics',
-    label: 'Testing',
-    icon: FlaskConical,
-    description: 'Write bulletproof tests for smart contracts.',
-    details: ['Unit tests with #[cfg(test)]', 'Integration tests with near-workspaces', 'Sandbox testing', 'Multi-user simulation', 'Gas profiling', 'Security checklist'],
+    id: 'ownership-borrowing', label: 'Ownership & Borrowing', icon: Code2,
+    description: 'Understand Rust\'s unique ownership model and borrowing rules.',
+    details: ['Ownership rules', 'Move semantics', 'References & borrowing', 'Lifetimes basics', 'Stack vs heap', 'Common ownership patterns'],
+    xp: 100, tier: 'foundation', track: 'builder', position: 2,
+    unlocks: ['structs-enums'], prerequisites: ['rust-fundamentals'], estimatedTime: '4 hours',
+    rewards: ['Ownership Master Badge'], link: '/learn/builder/ownership-borrowing',
+  },
+  {
+    id: 'structs-enums', label: 'Structs & Enums', icon: FileCode,
+    description: 'Build complex data types with structs, enums, and pattern matching.',
+    details: ['Struct definitions', 'Enum variants', 'Pattern matching', 'Method implementation', 'impl blocks', 'Newtype pattern'],
+    xp: 100, tier: 'foundation', track: 'builder', position: 3,
+    unlocks: ['error-handling'], prerequisites: ['ownership-borrowing'], estimatedTime: '3 hours',
+    rewards: ['Type Builder Badge'], link: '/learn/builder/structs-enums',
+  },
+  {
+    id: 'error-handling', label: 'Error Handling', icon: ShieldCheck,
+    description: 'Master Result, Option, and error handling patterns in Rust.',
+    details: ['Result<T, E> type', 'Option<T> type', 'The ? operator', 'Custom error types', 'Error propagation', 'Panic vs Result'],
+    xp: 100, tier: 'foundation', track: 'builder', position: 4,
+    unlocks: ['traits-generics'], prerequisites: ['structs-enums'], estimatedTime: '3 hours',
+    rewards: ['Error Handler Badge'], link: '/learn/builder/error-handling',
+  },
+  {
+    id: 'traits-generics', label: 'Traits & Generics', icon: Brain,
+    description: 'Write flexible, reusable code with traits and generics.',
+    details: ['Trait definitions', 'Implementing traits', 'Generic types', 'Trait bounds', 'Default implementations', 'Common traits (Display, Debug)'],
+    xp: 100, tier: 'foundation', track: 'builder', position: 5,
+    unlocks: ['collections-iterators'], prerequisites: ['error-handling'], estimatedTime: '4 hours',
+    rewards: ['Generics Pro Badge'], link: '/learn/builder/traits-generics',
+  },
+  {
+    id: 'collections-iterators', label: 'Collections & Iterators', icon: Code2,
+    description: 'Work with Vec, HashMap, and Rust\'s powerful iterator system.',
+    details: ['Vec operations', 'HashMap usage', 'Iterator adaptors', 'Closures', 'Collecting results', 'Functional patterns'],
+    xp: 100, tier: 'foundation', track: 'builder', position: 6,
+    unlocks: ['your-first-contract'], prerequisites: ['traits-generics'], estimatedTime: '3 hours',
+    rewards: ['Collections Badge'], link: '/learn/builder/collections-iterators',
+  },
+  {
+    id: 'your-first-contract', label: 'Your First Contract', icon: FileCode,
+    description: 'Build and deploy your first NEAR smart contract.',
+    details: ['#[near] macro', 'Contract structure', 'Init methods', 'View vs change methods', 'Storage basics', 'Deploy to testnet'],
     xp: 100, tier: 'core', track: 'builder', position: 0,
-    unlocks: ['build-token', 'build-dapp'], prerequisites: ['smart-contracts-101'], estimatedTime: '6 hours',
-    rewards: ['QA Badge'], link: '/sanctum',
+    unlocks: ['account-model-access-keys', 'near-cli-mastery'], prerequisites: ['collections-iterators'], estimatedTime: '4 hours',
+    rewards: ['First Contract Badge'], link: '/learn/builder/your-first-contract',
   },
   {
-    id: 'build-token',
-    label: 'Build a Token',
-    icon: Coins,
-    description: 'Create an NEP-141 fungible token.',
-    details: ['NEP-141 standard', 'Token metadata (NEP-148)', 'Minting & burning', 'Storage management', 'Transfer & approval flow', 'DEX listing'],
+    id: 'account-model-access-keys', label: 'Account Model & Access Keys', icon: Wallet,
+    description: 'Deep dive into NEAR\'s unique account model and access key system.',
+    details: ['Named accounts', 'Sub-accounts', 'Full access keys', 'Function call keys', 'Key rotation', 'Multi-key patterns'],
     xp: 100, tier: 'core', track: 'builder', position: 1,
-    unlocks: ['nft-contracts'], prerequisites: ['testing-basics'], estimatedTime: '8 hours',
-    rewards: ['Token Minter Badge'], link: '/sanctum',
+    unlocks: ['state-management'], prerequisites: ['your-first-contract'], estimatedTime: '2 hours',
+    rewards: ['Account Model Badge'], link: '/learn/builder/account-model-access-keys',
   },
   {
-    id: 'build-dapp',
-    label: 'Build a dApp',
-    icon: AppWindow,
-    description: 'Connect a frontend to your smart contracts.',
-    details: ['near-api-js setup', 'Wallet selector', 'View & change methods', 'Transaction signing', 'Real-time state', 'Full deployment'],
+    id: 'state-management', label: 'State Management', icon: Shield,
+    description: 'Master on-chain state management and storage collections.',
+    details: ['Borsh serialization', 'LookupMap & UnorderedMap', 'LazyOption & TreeMap', 'Storage staking', 'State versioning', 'Migration patterns'],
     xp: 100, tier: 'core', track: 'builder', position: 2,
-    unlocks: ['storage-patterns'], prerequisites: ['testing-basics'], estimatedTime: '10 hours',
-    rewards: ['Full-Stack Badge'], link: '/sanctum',
+    unlocks: ['testing-debugging'], prerequisites: ['account-model-access-keys'], estimatedTime: '4 hours',
+    rewards: ['State Manager Badge'], link: '/learn/builder/state-management',
   },
   {
-    id: 'nft-contracts',
-    label: 'NFT Contracts',
-    icon: Star,
-    description: 'Build NEP-171 NFT contracts with metadata and royalties.',
-    details: ['NEP-171 standard', 'Token metadata', 'Minting & royalties', 'Marketplace integration', 'Enumeration methods', 'Series & collections'],
+    id: 'near-cli-mastery', label: 'NEAR CLI Mastery', icon: Terminal,
+    description: 'Master the NEAR CLI for deployment, debugging, and account management.',
+    details: ['near-cli-rs commands', 'Deploy & call', 'Account management', 'Key management', 'Transaction inspection', 'Batch operations'],
+    xp: 100, tier: 'core', track: 'builder', position: 3,
+    unlocks: ['testing-debugging'], prerequisites: ['your-first-contract'], estimatedTime: '2 hours',
+    rewards: ['CLI Ninja Badge'], link: '/learn/builder/near-cli-mastery',
+  },
+  {
+    id: 'testing-debugging', label: 'Testing & Debugging', icon: FlaskConical,
+    description: 'Write bulletproof tests and debug NEAR smart contracts.',
+    details: ['Unit tests with #[cfg(test)]', 'near-workspaces integration tests', 'Sandbox testing', 'Multi-user simulation', 'Gas profiling', 'Debug logging'],
+    xp: 100, tier: 'core', track: 'builder', position: 4,
+    unlocks: ['frontend-integration', 'token-standards'], prerequisites: ['state-management', 'near-cli-mastery'], estimatedTime: '5 hours',
+    rewards: ['QA Expert Badge'], link: '/learn/builder/testing-debugging',
+  },
+  {
+    id: 'frontend-integration', label: 'Frontend Integration', icon: AppWindow,
+    description: 'Connect a frontend to your NEAR smart contracts.',
+    details: ['near-api-js setup', 'Wallet selector', 'View & change methods', 'Transaction signing', 'Real-time state updates', 'Error handling UX'],
+    xp: 100, tier: 'core', track: 'builder', position: 5,
+    unlocks: ['building-a-dapp'], prerequisites: ['testing-debugging'], estimatedTime: '5 hours',
+    rewards: ['Frontend Badge'], link: '/learn/builder/frontend-integration',
+  },
+  {
+    id: 'token-standards', label: 'Token Standards', icon: Coins,
+    description: 'Build NEP-141 fungible tokens on NEAR.',
+    details: ['NEP-141 standard', 'Token metadata (NEP-148)', 'Minting & burning', 'Storage management', 'Transfer & approval', 'DEX integration'],
+    xp: 100, tier: 'core', track: 'builder', position: 6,
+    unlocks: ['nep-standards-deep-dive', 'building-an-nft-contract'], prerequisites: ['testing-debugging'], estimatedTime: '4 hours',
+    rewards: ['Token Minter Badge'], link: '/learn/builder/token-standards',
+  },
+  {
+    id: 'nep-standards-deep-dive', label: 'NEP Standards Deep Dive', icon: FileCode,
+    description: 'Master the full range of NEAR Enhancement Proposals.',
+    details: ['NEP-141 fungible tokens', 'NEP-171 NFTs', 'NEP-145 storage management', 'NEP-148 metadata', 'NEP-199 royalties', 'Proposing new NEPs'],
     xp: 100, tier: 'advanced', track: 'builder', position: 0,
-    unlocks: ['upgradeable-contracts'], prerequisites: ['build-token'], estimatedTime: '6 hours',
-    rewards: ['NFT Builder Badge'], link: '/sanctum',
+    unlocks: ['building-a-dapp', 'building-a-dao-contract'], prerequisites: ['token-standards'], estimatedTime: '4 hours',
+    rewards: ['Standards Expert Badge'], link: '/learn/builder/nep-standards-deep-dive',
   },
   {
-    id: 'storage-patterns',
-    label: 'Storage Patterns',
-    icon: Shield,
-    description: 'Master NEAR storage: collections, staking, and optimization.',
-    details: ['LookupMap, UnorderedMap', 'LazyOption & TreeMap', 'Storage staking costs', 'Pagination patterns', 'State migration', 'Cost optimization'],
+    id: 'building-a-dapp', label: 'Building a dApp', icon: AppWindow,
+    description: 'Build a complete decentralized application end-to-end.',
+    details: ['Architecture design', 'Smart contract backend', 'React frontend', 'Wallet integration', 'State management', 'Full deployment'],
     xp: 100, tier: 'advanced', track: 'builder', position: 1,
-    unlocks: ['upgradeable-contracts'], prerequisites: ['build-dapp'], estimatedTime: '4 hours',
-    rewards: ['Storage Expert Badge'], link: '/sanctum',
+    unlocks: ['security-best-practices', 'defi-contract-patterns'], prerequisites: ['frontend-integration', 'nep-standards-deep-dive'], estimatedTime: '8 hours',
+    rewards: ['Full-Stack Builder Badge'], link: '/learn/builder/building-a-dapp',
   },
   {
-    id: 'upgradeable-contracts',
-    label: 'Upgradeable Contracts',
-    icon: Rocket,
+    id: 'security-best-practices', label: 'Security Best Practices', icon: ShieldCheck,
+    description: 'Secure your smart contracts against common attack vectors.',
+    details: ['Reentrancy protection', 'Access control patterns', 'Input validation', 'Storage attacks', 'Gas manipulation', 'Audit checklist'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 2,
+    unlocks: ['upgrading-contracts'], prerequisites: ['building-a-dapp'], estimatedTime: '4 hours',
+    rewards: ['Security Badge'], link: '/learn/builder/security-best-practices',
+  },
+  {
+    id: 'upgrading-contracts', label: 'Upgrading Contracts', icon: Rocket,
     description: 'Deploy contracts that can be safely upgraded over time.',
     details: ['Upgrade patterns', 'State migration', 'Versioning strategy', 'Proxy patterns', 'DAO-controlled upgrades', 'Rollback plans'],
-    xp: 100, tier: 'advanced', track: 'builder', position: 2,
-    unlocks: ['builder-capstone'], prerequisites: ['nft-contracts', 'storage-patterns'], estimatedTime: '5 hours',
-    rewards: ['Upgrade Master Badge'], link: '/sanctum',
-  },
-  {
-    id: 'near-cli',
-    label: 'NEAR CLI Mastery',
-    icon: Terminal,
-    description: 'Master the NEAR CLI for deployment and debugging.',
-    details: ['near-cli-rs setup', 'Deploy & call commands', 'Account management', 'Key management', 'Transaction inspection', 'Batch operations'],
-    xp: 100, tier: 'foundation', track: 'builder', position: 2,
-    unlocks: ['testing-basics'], prerequisites: ['first-transaction'], estimatedTime: '2 hours',
-    rewards: ['CLI Ninja Badge'], link: '/sanctum',
-  },
-  {
-    id: 'frontend-integration',
-    label: 'Frontend Integration',
-    icon: AppWindow,
-    description: 'Deep dive into wallet selector and near-api-js patterns.',
-    details: ['Wallet selector customization', 'Multiple wallet support', 'Session management', 'Error handling UX', 'Mobile wallet support', 'Social login integration'],
     xp: 100, tier: 'advanced', track: 'builder', position: 3,
-    unlocks: ['builder-capstone'], prerequisites: ['build-dapp'], estimatedTime: '5 hours',
-    rewards: ['Frontend Expert Badge'], link: '/sanctum',
+    unlocks: ['deployment'], prerequisites: ['security-best-practices'], estimatedTime: '4 hours',
+    rewards: ['Upgrade Master Badge'], link: '/learn/builder/upgrading-contracts',
   },
   {
-    id: 'dao-contracts',
-    label: 'DAO Contracts',
-    icon: Shield,
-    description: 'Build governance contracts with proposals, voting, and treasury management.',
-    details: ['Proposal lifecycle', 'Voting mechanisms', 'Role-based permissions', 'Treasury management', 'Multi-sig patterns', 'DAO factory'],
+    id: 'deployment', label: 'Deployment', icon: Rocket,
+    description: 'Deploy your contracts to testnet and mainnet with confidence.',
+    details: ['Testnet deployment', 'Mainnet preparation', 'Contract verification', 'Environment configs', 'CI/CD pipelines', 'Monitoring setup'],
     xp: 100, tier: 'advanced', track: 'builder', position: 4,
-    unlocks: ['builder-capstone'], prerequisites: ['nft-contracts'], estimatedTime: '6 hours',
+    unlocks: ['optimization'], prerequisites: ['upgrading-contracts'], estimatedTime: '3 hours',
+    rewards: ['Deployer Badge'], link: '/learn/builder/deployment',
+  },
+  {
+    id: 'optimization', label: 'Optimization', icon: Zap,
+    description: 'Optimize your contracts for gas, storage, and performance.',
+    details: ['Gas profiling', 'Storage optimization', 'Serialization tuning', 'Batch operations', 'Lazy evaluation', 'WASM size reduction'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 5,
+    unlocks: ['launch-checklist'], prerequisites: ['deployment'], estimatedTime: '3 hours',
+    rewards: ['Optimizer Badge'], link: '/learn/builder/optimization',
+  },
+  {
+    id: 'launch-checklist', label: 'Launch Checklist', icon: CheckCircle,
+    description: 'Everything you need before going live on mainnet.',
+    details: ['Security audit', 'Gas budget review', 'Monitoring & alerts', 'Documentation', 'Community preparation', 'Launch day plan'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 6,
+    unlocks: ['aurora-evm-compatibility', 'wallet-selector-integration', 'near-social-bos'], prerequisites: ['optimization'], estimatedTime: '2 hours',
+    rewards: ['Launch Ready Badge'], link: '/learn/builder/launch-checklist',
+  },
+  {
+    id: 'building-an-nft-contract', label: 'Building an NFT Contract', icon: Star,
+    description: 'Build NEP-171 NFT contracts with metadata and royalties.',
+    details: ['NEP-171 implementation', 'Token metadata', 'Minting & royalties', 'Marketplace integration', 'Enumeration methods', 'Series & collections'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 7,
+    unlocks: ['aurora-evm-compatibility'], prerequisites: ['token-standards'], estimatedTime: '5 hours',
+    rewards: ['NFT Builder Badge'], link: '/learn/builder/building-an-nft-contract',
+  },
+  {
+    id: 'building-a-dao-contract', label: 'Building a DAO Contract', icon: Crown,
+    description: 'Build governance contracts with proposals, voting, and treasury.',
+    details: ['Proposal lifecycle', 'Voting mechanisms', 'Role-based permissions', 'Treasury management', 'Multi-sig patterns', 'DAO factory'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 8,
+    unlocks: ['wallet-selector-integration'], prerequisites: ['nep-standards-deep-dive'], estimatedTime: '6 hours',
     rewards: ['DAO Builder Badge'], link: '/learn/builder/building-a-dao-contract',
   },
   {
-    id: 'defi-patterns',
-    label: 'DeFi Patterns',
-    icon: Coins,
-    description: 'AMM mechanics, liquidity pools, and swap contract architecture on NEAR.',
+    id: 'defi-contract-patterns', label: 'DeFi Contract Patterns', icon: Coins,
+    description: 'AMM mechanics, liquidity pools, and swap contract architecture.',
     details: ['Constant product formula', 'Liquidity pool design', 'Swap mechanics', 'Fee structures', 'Flash loan patterns', 'Oracle integration'],
-    xp: 100, tier: 'advanced', track: 'builder', position: 5,
-    unlocks: ['builder-capstone'], prerequisites: ['nft-contracts'], estimatedTime: '7 hours',
+    xp: 100, tier: 'advanced', track: 'builder', position: 9,
+    unlocks: ['near-social-bos'], prerequisites: ['building-a-dapp'], estimatedTime: '6 hours',
     rewards: ['DeFi Builder Badge'], link: '/learn/builder/defi-contract-patterns',
   },
   {
-    id: 'aurora-evm',
-    label: 'Aurora EVM',
-    icon: Globe,
-    description: 'Deploy Solidity contracts on NEAR via Aurora EVM runtime.',
+    id: 'aurora-evm-compatibility', label: 'Aurora EVM Compatibility', icon: Globe,
+    description: 'Deploy Solidity contracts on NEAR via the Aurora EVM runtime.',
     details: ['Aurora architecture', 'EVM on NEAR', 'Rainbow Bridge', 'Solidity deployment', 'Cross-runtime calls', 'Dev tooling'],
-    xp: 100, tier: 'advanced', track: 'builder', position: 6,
-    unlocks: ['builder-capstone'], prerequisites: ['build-dapp'], estimatedTime: '5 hours',
+    xp: 100, tier: 'mastery', track: 'builder', position: 0,
+    unlocks: [], prerequisites: ['launch-checklist', 'building-an-nft-contract'], estimatedTime: '5 hours',
     rewards: ['EVM Bridge Badge'], link: '/learn/builder/aurora-evm-compatibility',
   },
   {
-    id: 'wallet-selector',
-    label: 'Wallet Selector',
-    icon: Wallet,
+    id: 'wallet-selector-integration', label: 'Wallet Selector Integration', icon: Wallet,
     description: 'Multi-wallet support with @near-wallet-selector for seamless UX.',
     details: ['Wallet selector setup', 'Multiple wallet support', 'Sign-in flows', 'Transaction signing UX', 'Mobile support', 'Social login'],
-    xp: 100, tier: 'advanced', track: 'builder', position: 7,
-    unlocks: ['builder-capstone'], prerequisites: ['frontend-integration'], estimatedTime: '4 hours',
+    xp: 100, tier: 'mastery', track: 'builder', position: 1,
+    unlocks: [], prerequisites: ['launch-checklist', 'building-a-dao-contract'], estimatedTime: '4 hours',
     rewards: ['Wallet Expert Badge'], link: '/learn/builder/wallet-selector-integration',
   },
   {
-    id: 'near-social-bos',
-    label: 'NEAR Social & BOS',
-    icon: Globe,
+    id: 'near-social-bos', label: 'NEAR Social & BOS', icon: Globe,
     description: 'Build composable on-chain widgets with NEAR Social and BOS.',
     details: ['Social DB', 'Widget development', 'Composability patterns', 'On-chain frontends', 'Social graph', 'BOS gateway'],
-    xp: 100, tier: 'advanced', track: 'builder', position: 8,
-    unlocks: ['builder-capstone'], prerequisites: ['frontend-integration'], estimatedTime: '5 hours',
+    xp: 100, tier: 'mastery', track: 'builder', position: 2,
+    unlocks: [], prerequisites: ['launch-checklist', 'defi-contract-patterns'], estimatedTime: '5 hours',
     rewards: ['Social Builder Badge'], link: '/learn/builder/near-social-bos',
   },
-  {
-    id: 'builder-capstone',
-    label: 'Builder Capstone',
-    icon: Trophy,
-    description: 'Deploy an NEP-141 token with a simple frontend.',
-    details: ['Design token economics', 'Write token contract', 'Build frontend UI', 'Deploy to testnet', 'Test full flow', 'Certificate earned'],
-    xp: 100, tier: 'mastery', track: 'builder', position: 0,
-    unlocks: [], prerequisites: ['upgradeable-contracts', 'frontend-integration'], estimatedTime: '10 hours',
-    rewards: ['Builder Certificate'], link: '/learn/certificate',
-  },
 
-  // Hacker Track (11 nodes)
+  // ════════════════════════════════════════════════════════════
+  // HACKER TRACK (16 modules) — 150 XP each = 2400 XP total
+  // ════════════════════════════════════════════════════════════
   {
-    id: 'security-fundamentals',
-    label: 'Security Fundamentals',
-    icon: ShieldCheck,
-    description: 'Master smart contract security patterns.',
-    details: ['Common attack vectors', 'Reentrancy protection', 'Access control', 'Contract upgrades', 'Gas & storage attacks', 'Audit process'],
+    id: 'near-architecture-deep-dive', label: 'NEAR Architecture Deep Dive', icon: Brain,
+    description: 'Deep dive into NEAR\'s sharding, consensus, and runtime architecture.',
+    details: ['Nightshade sharding', 'Chunk production', 'Runtime internals', 'State storage trie', 'Receipt system', 'Validator selection'],
     xp: 150, tier: 'foundation', track: 'hacker', position: 0,
-    unlocks: ['advanced-rust'], prerequisites: ['testing-basics'], estimatedTime: '6 hours',
-    rewards: ['Security Expert Badge'], link: '/sanctum',
+    unlocks: ['cross-contract-calls'], prerequisites: [], estimatedTime: '6 hours',
+    rewards: ['Architecture Badge'], link: '/learn/hacker/near-architecture-deep-dive',
   },
   {
-    id: 'advanced-rust',
-    label: 'Advanced Rust',
-    icon: Code2,
-    description: 'Advanced Rust patterns for high-performance contracts.',
-    details: ['Async/await patterns', 'Custom derive macros', 'Zero-copy parsing', 'Unsafe Rust (when needed)', 'Performance optimization', 'Memory layout control'],
-    xp: 150, tier: 'core', track: 'hacker', position: 0,
-    unlocks: ['cross-contract', 'indexer-dev'], prerequisites: ['security-fundamentals'], estimatedTime: '8 hours',
-    rewards: ['Advanced Rustacean Badge'], link: '/sanctum',
-  },
-  {
-    id: 'cross-contract',
-    label: 'Cross-Contract Calls',
-    icon: Globe,
-    description: 'Master complex cross-contract interactions and promises.',
+    id: 'cross-contract-calls', label: 'Cross-Contract Calls', icon: Globe,
+    description: 'Master complex cross-contract interactions and promise chains.',
     details: ['Promise chains', 'Callback patterns', 'Error propagation', 'Gas allocation', 'Batch actions', 'Atomic operations'],
-    xp: 150, tier: 'core', track: 'hacker', position: 1,
-    unlocks: ['chain-signatures'], prerequisites: ['advanced-rust'], estimatedTime: '6 hours',
-    rewards: ['Cross-Contract Badge'], link: '/sanctum',
+    xp: 150, tier: 'foundation', track: 'hacker', position: 1,
+    unlocks: ['advanced-storage'], prerequisites: ['near-architecture-deep-dive'], estimatedTime: '5 hours',
+    rewards: ['Cross-Contract Badge'], link: '/learn/hacker/cross-contract-calls',
   },
   {
-    id: 'indexer-dev',
-    label: 'Indexer Development',
-    icon: Target,
-    description: 'Build custom indexers for NEAR on-chain data.',
-    details: ['NEAR Lake framework', 'Block & receipt processing', 'Custom data models', 'Database integration', 'Real-time streaming', 'Querying patterns'],
-    xp: 150, tier: 'core', track: 'hacker', position: 2,
-    unlocks: ['hacker-capstone'], prerequisites: ['advanced-rust'], estimatedTime: '8 hours',
-    rewards: ['Indexer Badge'], link: '/sanctum',
+    id: 'advanced-storage', label: 'Advanced Storage', icon: Shield,
+    description: 'Advanced storage patterns, optimization, and state management.',
+    details: ['Trie storage internals', 'Storage staking costs', 'Pagination patterns', 'State migration', 'Cost optimization', 'Custom collections'],
+    xp: 150, tier: 'foundation', track: 'hacker', position: 2,
+    unlocks: ['chain-signatures'], prerequisites: ['cross-contract-calls'], estimatedTime: '4 hours',
+    rewards: ['Storage Expert Badge'], link: '/learn/hacker/advanced-storage',
   },
   {
-    id: 'chain-signatures',
-    label: 'Chain Signatures',
-    icon: Shield,
+    id: 'chain-signatures', label: 'Chain Signatures', icon: Shield,
     description: 'Use NEAR\'s Chain Signatures for cross-chain operations.',
     details: ['MPC key derivation', 'Signing for other chains', 'Cross-chain verification', 'Multi-chain wallets', 'Bridge patterns', 'Security considerations'],
-    xp: 150, tier: 'advanced', track: 'hacker', position: 0,
-    unlocks: ['intents-protocol'], prerequisites: ['cross-contract'], estimatedTime: '8 hours',
-    rewards: ['Chain Sig Badge'], link: '/sanctum',
+    xp: 150, tier: 'foundation', track: 'hacker', position: 3,
+    unlocks: ['intents-chain-abstraction', 'multi-chain-with-near'], prerequisites: ['advanced-storage'], estimatedTime: '6 hours',
+    rewards: ['Chain Sig Badge'], link: '/learn/hacker/chain-signatures',
   },
   {
-    id: 'intents-protocol',
-    label: 'Intents Protocol',
-    icon: Brain,
-    description: 'Build with NEAR\'s intent-based transaction system.',
-    details: ['Intent lifecycle', 'Solver architecture', 'Intent composition', 'Cross-chain intents', 'MEV protection', 'Solver incentives'],
-    xp: 150, tier: 'advanced', track: 'hacker', position: 1,
-    unlocks: ['ai-agents'], prerequisites: ['chain-signatures'], estimatedTime: '6 hours',
-    rewards: ['Intents Badge'], link: '/sanctum',
+    id: 'intents-chain-abstraction', label: 'Intents & Chain Abstraction', icon: Brain,
+    description: 'Build with NEAR\'s intent-based transaction and chain abstraction system.',
+    details: ['Intent lifecycle', 'Solver architecture', 'Intent composition', 'Cross-chain intents', 'Account aggregation', 'Solver incentives'],
+    xp: 150, tier: 'core', track: 'hacker', position: 0,
+    unlocks: ['shade-agents'], prerequisites: ['chain-signatures'], estimatedTime: '5 hours',
+    rewards: ['Intents Badge'], link: '/learn/hacker/intents-chain-abstraction',
   },
   {
-    id: 'ai-agents',
-    label: 'AI Agents on NEAR',
-    icon: Brain,
-    description: 'Build AI agents that interact with NEAR Protocol.',
-    details: ['Agent architecture', 'On-chain AI models', 'Autonomous transactions', 'Agent-to-agent comms', 'Safety guardrails', 'NEAR AI integration'],
-    xp: 150, tier: 'advanced', track: 'hacker', position: 2,
-    unlocks: ['hacker-capstone'], prerequisites: ['intents-protocol'], estimatedTime: '8 hours',
-    rewards: ['AI Agent Badge'], link: '/sanctum',
-  },
-  {
-    id: 'gas-optimization',
-    label: 'Gas Optimization',
-    icon: Zap,
-    description: 'Optimize contracts for minimum gas consumption.',
-    details: ['Gas profiling tools', 'Serialization optimization', 'Storage minimization', 'Batch operations', 'Lazy evaluation', 'Benchmarking'],
-    xp: 150, tier: 'core', track: 'hacker', position: 3,
-    unlocks: ['chain-signatures'], prerequisites: ['advanced-rust'], estimatedTime: '4 hours',
-    rewards: ['Gas Optimizer Badge'], link: '/sanctum',
-  },
-  {
-    id: 'audit-practice',
-    label: 'Audit Practice',
-    icon: ShieldCheck,
-    description: 'Practice auditing real-world NEAR contracts.',
-    details: ['Read audit reports', 'Common vulnerability patterns', 'Manual review process', 'Automated tools', 'Report writing', 'Bug bounty programs'],
-    xp: 150, tier: 'advanced', track: 'hacker', position: 3,
-    unlocks: ['hacker-capstone'], prerequisites: ['chain-signatures'], estimatedTime: '6 hours',
-    rewards: ['Auditor Badge'], link: '/sanctum',
-  },
-  {
-    id: 'shade-agents',
-    label: 'Shade Agents',
-    icon: Brain,
+    id: 'shade-agents', label: 'Shade Agents', icon: Brain,
     description: 'Build autonomous AI agents that execute on-chain actions on NEAR.',
     details: ['Agent architecture', 'Autonomous transactions', 'On-chain tool calling', 'Safety guardrails', 'Agent-to-agent comms', 'Deployment patterns'],
-    xp: 150, tier: 'advanced', track: 'hacker', position: 4,
-    unlocks: ['hacker-capstone'], prerequisites: ['ai-agents'], estimatedTime: '6 hours',
+    xp: 150, tier: 'core', track: 'hacker', position: 1,
+    unlocks: ['ai-agent-integration'], prerequisites: ['intents-chain-abstraction'], estimatedTime: '6 hours',
     rewards: ['Shade Agent Badge'], link: '/learn/hacker/shade-agents',
   },
   {
-    id: 'hacker-capstone',
-    label: 'Hacker Capstone',
-    icon: Trophy,
-    description: 'Build a cross-chain oracle using Chain Signatures.',
-    details: ['Design oracle architecture', 'Implement Chain Signatures', 'Build verification logic', 'Cross-chain data feed', 'Deploy & test', 'Certificate earned'],
+    id: 'ai-agent-integration', label: 'AI Agent Integration', icon: Brain,
+    description: 'Integrate AI models and agents with NEAR Protocol.',
+    details: ['On-chain AI models', 'NEAR AI platform', 'Agent wallets', 'Autonomous execution', 'Safety guardrails', 'Multi-agent systems'],
+    xp: 150, tier: 'core', track: 'hacker', position: 2,
+    unlocks: ['mev-transaction-ordering'], prerequisites: ['shade-agents'], estimatedTime: '6 hours',
+    rewards: ['AI Agent Badge'], link: '/learn/hacker/ai-agent-integration',
+  },
+  {
+    id: 'mev-transaction-ordering', label: 'MEV & Transaction Ordering', icon: Zap,
+    description: 'Understand MEV, transaction ordering, and protection strategies on NEAR.',
+    details: ['MEV on NEAR', 'Transaction ordering', 'Front-running protection', 'Backrunning strategies', 'MEV mitigation', 'Fair ordering'],
+    xp: 150, tier: 'core', track: 'hacker', position: 3,
+    unlocks: ['building-an-indexer'], prerequisites: ['ai-agent-integration'], estimatedTime: '4 hours',
+    rewards: ['MEV Expert Badge'], link: '/learn/hacker/mev-transaction-ordering',
+  },
+  {
+    id: 'building-an-indexer', label: 'Building an Indexer', icon: Target,
+    description: 'Build custom indexers for NEAR on-chain data.',
+    details: ['NEAR Lake framework', 'Block & receipt processing', 'Custom data models', 'Database integration', 'Real-time streaming', 'Query optimization'],
+    xp: 150, tier: 'advanced', track: 'hacker', position: 0,
+    unlocks: ['production-patterns'], prerequisites: ['mev-transaction-ordering'], estimatedTime: '8 hours',
+    rewards: ['Indexer Badge'], link: '/learn/hacker/building-an-indexer',
+  },
+  {
+    id: 'multi-chain-with-near', label: 'Multi-Chain with NEAR', icon: Globe,
+    description: 'Build multi-chain applications using NEAR as the coordination layer.',
+    details: ['Chain abstraction in practice', 'Multi-chain wallet UX', 'Cross-chain messaging', 'Bridge integration', 'Settlement patterns', 'Multi-chain dApp design'],
+    xp: 150, tier: 'advanced', track: 'hacker', position: 1,
+    unlocks: ['production-patterns'], prerequisites: ['chain-signatures'], estimatedTime: '6 hours',
+    rewards: ['Multi-Chain Badge'], link: '/learn/hacker/multi-chain-with-near',
+  },
+  {
+    id: 'production-patterns', label: 'Production Patterns', icon: Rocket,
+    description: 'Battle-tested patterns for production-grade NEAR applications.',
+    details: ['Error recovery', 'Monitoring & alerting', 'Rate limiting', 'Graceful degradation', 'Load testing', 'Incident response'],
+    xp: 150, tier: 'advanced', track: 'hacker', position: 2,
+    unlocks: ['zero-knowledge-on-near', 'oracle-integration'], prerequisites: ['building-an-indexer', 'multi-chain-with-near'], estimatedTime: '5 hours',
+    rewards: ['Production Pro Badge'], link: '/learn/hacker/production-patterns',
+  },
+  {
+    id: 'zero-knowledge-on-near', label: 'Zero Knowledge on NEAR', icon: ShieldCheck,
+    description: 'Explore zero-knowledge proofs and privacy solutions on NEAR.',
+    details: ['ZK proof basics', 'ZK on NEAR', 'Privacy-preserving txns', 'Verifier contracts', 'ZK rollup patterns', 'Privacy protocols'],
+    xp: 150, tier: 'advanced', track: 'hacker', position: 3,
+    unlocks: ['gas-optimization-deep-dive'], prerequisites: ['production-patterns'], estimatedTime: '6 hours',
+    rewards: ['ZK Explorer Badge'], link: '/learn/hacker/zero-knowledge-on-near',
+  },
+  {
+    id: 'oracle-integration', label: 'Oracle Integration', icon: Target,
+    description: 'Integrate price feeds and off-chain data using oracles.',
+    details: ['Oracle architectures', 'Price feed integration', 'Data verification', 'Decentralized oracles', 'Custom data feeds', 'Reliability patterns'],
+    xp: 150, tier: 'advanced', track: 'hacker', position: 4,
+    unlocks: ['gas-optimization-deep-dive'], prerequisites: ['production-patterns'], estimatedTime: '4 hours',
+    rewards: ['Oracle Master Badge'], link: '/learn/hacker/oracle-integration',
+  },
+  {
+    id: 'gas-optimization-deep-dive', label: 'Gas Optimization Deep Dive', icon: Zap,
+    description: 'Advanced gas optimization techniques for NEAR contracts.',
+    details: ['Gas profiling tools', 'Serialization optimization', 'Storage minimization', 'Batch operations', 'WASM optimization', 'Benchmarking framework'],
     xp: 150, tier: 'mastery', track: 'hacker', position: 0,
-    unlocks: [], prerequisites: ['indexer-dev', 'shade-agents', 'audit-practice'], estimatedTime: '15 hours',
-    rewards: ['Hacker Certificate'], link: '/learn/certificate',
+    unlocks: ['bridge-architecture'], prerequisites: ['zero-knowledge-on-near', 'oracle-integration'], estimatedTime: '5 hours',
+    rewards: ['Gas Optimizer Badge'], link: '/learn/hacker/gas-optimization-deep-dive',
+  },
+  {
+    id: 'bridge-architecture', label: 'Bridge Architecture', icon: Globe,
+    description: 'Design and build cross-chain bridge architectures.',
+    details: ['Bridge design patterns', 'Rainbow Bridge internals', 'Light client verification', 'Asset locking/minting', 'Security considerations', 'Bridge monitoring'],
+    xp: 150, tier: 'mastery', track: 'hacker', position: 1,
+    unlocks: ['formal-verification'], prerequisites: ['gas-optimization-deep-dive'], estimatedTime: '6 hours',
+    rewards: ['Bridge Architect Badge'], link: '/learn/hacker/bridge-architecture',
+  },
+  {
+    id: 'formal-verification', label: 'Formal Verification', icon: Award,
+    description: 'Apply formal verification techniques to NEAR smart contracts.',
+    details: ['Formal methods intro', 'Property specification', 'Model checking', 'Theorem proving', 'Verification tools', 'Audit integration'],
+    xp: 150, tier: 'mastery', track: 'hacker', position: 2,
+    unlocks: [], prerequisites: ['bridge-architecture'], estimatedTime: '8 hours',
+    rewards: ['Formal Verifier Badge'], link: '/learn/hacker/formal-verification',
   },
 
-  // Founder Track (5 nodes)
+  // ════════════════════════════════════════════════════════════
+  // FOUNDER TRACK (12 modules) — 75 XP each = 900 XP total
+  // ════════════════════════════════════════════════════════════
   {
-    id: 'market-research',
-    label: 'Market Research',
-    icon: Target,
-    description: 'Identify real opportunities in the NEAR ecosystem.',
-    details: ['Ecosystem gap analysis', 'User research methods', 'Competitive landscape', 'TVL & usage data', 'Community needs', 'Timing analysis'],
-    xp: 100, tier: 'foundation', track: 'founder', position: 0,
-    unlocks: ['pitch-deck'], prerequisites: ['ecosystem-tour'], estimatedTime: '4 hours',
-    rewards: ['Researcher Badge'], link: '/opportunities',
+    id: 'near-grants-funding', label: 'NEAR Grants & Funding', icon: CircleDollarSign,
+    description: 'Navigate NEAR ecosystem grants, funding programs, and opportunities.',
+    details: ['NEAR Foundation grants', 'DevDAO funding', 'Ecosystem funds', 'Application process', 'Budget planning', 'Milestone design'],
+    xp: 75, tier: 'foundation', track: 'founder', position: 0,
+    unlocks: ['tokenomics-design'], prerequisites: [], estimatedTime: '3 hours',
+    rewards: ['Grant Ready Badge'], link: '/learn/founder/near-grants-funding',
   },
   {
-    id: 'pitch-deck',
-    label: 'Pitch Deck',
-    icon: Rocket,
-    description: 'Create a compelling pitch for your NEAR project.',
-    details: ['Problem statement', 'Solution architecture', 'Market sizing', 'Business model', 'Team & traction', 'Funding ask'],
-    xp: 100, tier: 'core', track: 'founder', position: 0,
-    unlocks: ['tokenomics'], prerequisites: ['market-research'], estimatedTime: '6 hours',
-    rewards: ['Pitch Ready Badge'], link: '/opportunities',
-  },
-  {
-    id: 'tokenomics',
-    label: 'Tokenomics',
-    icon: CircleDollarSign,
+    id: 'tokenomics-design', label: 'Tokenomics Design', icon: Coins,
     description: 'Design sustainable token economics for your project.',
     details: ['Supply mechanics', 'Distribution strategy', 'Utility design', 'Incentive alignment', 'Vesting schedules', 'Governance rights'],
-    xp: 100, tier: 'core', track: 'founder', position: 1,
-    unlocks: ['grant-application'], prerequisites: ['pitch-deck'], estimatedTime: '5 hours',
-    rewards: ['Tokenomics Badge'], link: '/opportunities',
+    xp: 75, tier: 'foundation', track: 'founder', position: 1,
+    unlocks: ['building-in-public'], prerequisites: ['near-grants-funding'], estimatedTime: '5 hours',
+    rewards: ['Tokenomics Badge'], link: '/learn/founder/tokenomics-design',
   },
   {
-    id: 'grant-application',
-    label: 'Grant Application',
-    icon: CircleDollarSign,
-    description: 'Apply for NEAR ecosystem grants and funding.',
-    details: ['NEAR Foundation grants', 'DevDAO funding', 'Proposal writing', 'Budget planning', 'Milestone design', 'Reporting requirements'],
-    xp: 100, tier: 'advanced', track: 'founder', position: 0,
-    unlocks: ['founder-capstone'], prerequisites: ['tokenomics'], estimatedTime: '4 hours',
-    rewards: ['Grant Ready Badge'], link: '/opportunities',
+    id: 'building-in-public', label: 'Building in Public', icon: Globe,
+    description: 'Leverage transparency and community engagement while building.',
+    details: ['Public roadmaps', 'Dev logs & updates', 'Community feedback loops', 'Social media strategy', 'Open-source benefits', 'Accountability frameworks'],
+    xp: 75, tier: 'foundation', track: 'founder', position: 2,
+    unlocks: ['pitching-your-project'], prerequisites: ['tokenomics-design'], estimatedTime: '2 hours',
+    rewards: ['Transparent Builder Badge'], link: '/learn/founder/building-in-public',
   },
   {
-    id: 'founder-capstone',
-    label: 'Founder Capstone',
-    icon: Trophy,
-    description: 'Create a complete project pitch with deployed testnet demo.',
-    details: ['Complete pitch deck', 'Testnet deployment', 'Demo video', 'Grant proposal draft', 'Community feedback', 'Certificate earned'],
-    xp: 100, tier: 'mastery', track: 'founder', position: 0,
-    unlocks: [], prerequisites: ['grant-application'], estimatedTime: '20 hours',
-    rewards: ['Founder Certificate'], link: '/learn/certificate',
+    id: 'pitching-your-project', label: 'Pitching Your Project', icon: Rocket,
+    description: 'Create a compelling pitch for your NEAR project.',
+    details: ['Problem statement', 'Solution architecture', 'Market sizing', 'Business model', 'Team & traction', 'Demo preparation'],
+    xp: 75, tier: 'core', track: 'founder', position: 0,
+    unlocks: ['revenue-models-for-dapps'], prerequisites: ['building-in-public'], estimatedTime: '4 hours',
+    rewards: ['Pitch Pro Badge'], link: '/learn/founder/pitching-your-project',
+  },
+  {
+    id: 'revenue-models-for-dapps', label: 'Revenue Models for dApps', icon: CircleDollarSign,
+    description: 'Explore sustainable revenue models for decentralized applications.',
+    details: ['Transaction fees', 'Freemium models', 'Token-gated access', 'Protocol fees', 'SaaS in Web3', 'Hybrid models'],
+    xp: 75, tier: 'core', track: 'founder', position: 1,
+    unlocks: ['community-building'], prerequisites: ['pitching-your-project'], estimatedTime: '3 hours',
+    rewards: ['Revenue Architect Badge'], link: '/learn/founder/revenue-models-for-dapps',
+  },
+  {
+    id: 'community-building', label: 'Community Building', icon: Globe,
+    description: 'Build and nurture a thriving community around your project.',
+    details: ['Community platforms', 'Engagement strategies', 'Ambassador programs', 'Governance participation', 'Event planning', 'Growth metrics'],
+    xp: 75, tier: 'core', track: 'founder', position: 2,
+    unlocks: ['go-to-market'], prerequisites: ['revenue-models-for-dapps'], estimatedTime: '3 hours',
+    rewards: ['Community Builder Badge'], link: '/learn/founder/community-building',
+  },
+  {
+    id: 'go-to-market', label: 'Go-to-Market', icon: Rocket,
+    description: 'Plan and execute your go-to-market strategy for Web3.',
+    details: ['GTM strategy framework', 'User acquisition', 'Partnership development', 'Launch planning', 'Distribution channels', 'Growth hacking'],
+    xp: 75, tier: 'advanced', track: 'founder', position: 0,
+    unlocks: ['legal-regulatory-basics', 'treasury-management'], prerequisites: ['community-building'], estimatedTime: '4 hours',
+    rewards: ['GTM Badge'], link: '/learn/founder/go-to-market',
+  },
+  {
+    id: 'legal-regulatory-basics', label: 'Legal & Regulatory Basics', icon: Shield,
+    description: 'Navigate the legal and regulatory landscape for Web3 projects.',
+    details: ['Token classification', 'Securities law basics', 'KYC/AML requirements', 'DAO legal wrappers', 'Jurisdiction selection', 'Compliance frameworks'],
+    xp: 75, tier: 'advanced', track: 'founder', position: 1,
+    unlocks: ['metrics-that-matter'], prerequisites: ['go-to-market'], estimatedTime: '3 hours',
+    rewards: ['Legal Aware Badge'], link: '/learn/founder/legal-regulatory-basics',
+  },
+  {
+    id: 'treasury-management', label: 'Treasury Management', icon: Coins,
+    description: 'Manage your project treasury and financial operations effectively.',
+    details: ['Multi-sig setup', 'Treasury diversification', 'Runway planning', 'DeFi yield strategies', 'Reporting & transparency', 'Risk management'],
+    xp: 75, tier: 'advanced', track: 'founder', position: 2,
+    unlocks: ['metrics-that-matter'], prerequisites: ['go-to-market'], estimatedTime: '3 hours',
+    rewards: ['Treasury Manager Badge'], link: '/learn/founder/treasury-management',
+  },
+  {
+    id: 'metrics-that-matter', label: 'Metrics That Matter', icon: Target,
+    description: 'Track the right metrics to measure and grow your project.',
+    details: ['On-chain analytics', 'User retention metrics', 'TVL & volume tracking', 'Community health', 'Developer activity', 'Growth dashboards'],
+    xp: 75, tier: 'mastery', track: 'founder', position: 0,
+    unlocks: ['marketing-for-web3'], prerequisites: ['legal-regulatory-basics', 'treasury-management'], estimatedTime: '3 hours',
+    rewards: ['Data-Driven Badge'], link: '/learn/founder/metrics-that-matter',
+  },
+  {
+    id: 'marketing-for-web3', label: 'Marketing for Web3', icon: Flame,
+    description: 'Master Web3-native marketing strategies and channels.',
+    details: ['Crypto Twitter strategy', 'Discord marketing', 'Influencer partnerships', 'Airdrop campaigns', 'Content marketing', 'Brand building'],
+    xp: 75, tier: 'mastery', track: 'founder', position: 1,
+    unlocks: ['investor-relations'], prerequisites: ['metrics-that-matter'], estimatedTime: '3 hours',
+    rewards: ['Web3 Marketer Badge'], link: '/learn/founder/marketing-for-web3',
+  },
+  {
+    id: 'investor-relations', label: 'Investor Relations', icon: Trophy,
+    description: 'Build and maintain relationships with investors and stakeholders.',
+    details: ['Investor outreach', 'Due diligence preparation', 'Term sheets & SAFTs', 'Quarterly reporting', 'Board management', 'Follow-on funding'],
+    xp: 75, tier: 'mastery', track: 'founder', position: 2,
+    unlocks: [], prerequisites: ['marketing-for-web3'], estimatedTime: '4 hours',
+    rewards: ['Investor Ready Badge'], link: '/learn/founder/investor-relations',
   },
 ];
 
+/* ─── Connections ──────────────────────────────────────────── */
+
 const connections: Connection[] = [
-  // Explorer track
-  { from: 'near-basics', to: 'wallet-setup' },
-  { from: 'wallet-setup', to: 'first-transaction' },
-  { from: 'first-transaction', to: 'ecosystem-tour' },
-  { from: 'ecosystem-tour', to: 'near-overview' },
-  { from: 'near-overview', to: 'key-technologies' },
-  { from: 'key-technologies', to: 'defi-basics' },
-  { from: 'defi-basics', to: 'governance' },
-  { from: 'governance', to: 'community-nav' },
-  { from: 'defi-basics', to: 'data-tools' },
-  { from: 'community-nav', to: 'explorer-capstone' },
-  { from: 'data-tools', to: 'explorer-capstone' },
-  // Builder track
-  { from: 'first-transaction', to: 'rust-fundamentals' },
-  { from: 'first-transaction', to: 'near-cli' },
-  { from: 'rust-fundamentals', to: 'smart-contracts-101' },
-  { from: 'smart-contracts-101', to: 'testing-basics' },
-  { from: 'near-cli', to: 'testing-basics' },
-  { from: 'testing-basics', to: 'build-token' },
-  { from: 'testing-basics', to: 'build-dapp' },
-  { from: 'build-token', to: 'nft-contracts' },
-  { from: 'build-dapp', to: 'storage-patterns' },
-  { from: 'build-dapp', to: 'frontend-integration' },
-  { from: 'nft-contracts', to: 'upgradeable-contracts' },
-  { from: 'nft-contracts', to: 'dao-contracts' },
-  { from: 'nft-contracts', to: 'defi-patterns' },
-  { from: 'storage-patterns', to: 'upgradeable-contracts' },
-  { from: 'build-dapp', to: 'aurora-evm' },
-  { from: 'frontend-integration', to: 'wallet-selector' },
-  { from: 'frontend-integration', to: 'near-social-bos' },
-  { from: 'upgradeable-contracts', to: 'builder-capstone' },
-  { from: 'dao-contracts', to: 'builder-capstone' },
-  { from: 'defi-patterns', to: 'builder-capstone' },
-  { from: 'aurora-evm', to: 'builder-capstone' },
-  { from: 'wallet-selector', to: 'builder-capstone' },
-  { from: 'near-social-bos', to: 'builder-capstone' },
-  { from: 'frontend-integration', to: 'builder-capstone' },
-  // Hacker track
-  { from: 'testing-basics', to: 'security-fundamentals' },
-  { from: 'security-fundamentals', to: 'advanced-rust' },
-  { from: 'advanced-rust', to: 'cross-contract' },
-  { from: 'advanced-rust', to: 'indexer-dev' },
-  { from: 'advanced-rust', to: 'gas-optimization' },
-  { from: 'cross-contract', to: 'chain-signatures' },
-  { from: 'gas-optimization', to: 'chain-signatures' },
-  { from: 'chain-signatures', to: 'intents-protocol' },
-  { from: 'chain-signatures', to: 'audit-practice' },
-  { from: 'intents-protocol', to: 'ai-agents' },
-  { from: 'ai-agents', to: 'shade-agents' },
-  { from: 'shade-agents', to: 'hacker-capstone' },
-  { from: 'indexer-dev', to: 'hacker-capstone' },
-  { from: 'audit-practice', to: 'hacker-capstone' },
-  // Founder track
-  { from: 'ecosystem-tour', to: 'market-research' },
-  { from: 'market-research', to: 'pitch-deck' },
-  { from: 'pitch-deck', to: 'tokenomics' },
-  { from: 'tokenomics', to: 'grant-application' },
-  { from: 'grant-application', to: 'founder-capstone' },
+  // Explorer track (16 nodes)
+  { from: 'what-is-blockchain', to: 'what-is-near' },
+  { from: 'what-is-near', to: 'create-a-wallet' },
+  { from: 'create-a-wallet', to: 'your-first-transaction' },
+  { from: 'your-first-transaction', to: 'understanding-dapps' },
+  { from: 'understanding-dapps', to: 'reading-smart-contracts' },
+  { from: 'reading-smart-contracts', to: 'near-ecosystem-tour' },
+  { from: 'near-ecosystem-tour', to: 'near-vs-other-chains' },
+  { from: 'near-ecosystem-tour', to: 'reading-the-explorer' },
+  { from: 'near-vs-other-chains', to: 'choose-your-path' },
+  { from: 'reading-the-explorer', to: 'defi-basics' },
+  { from: 'defi-basics', to: 'nft-basics-on-near' },
+  { from: 'defi-basics', to: 'staking-and-validators' },
+  { from: 'staking-and-validators', to: 'daos-on-near' },
+  { from: 'choose-your-path', to: 'staying-safe-in-web3' },
+  { from: 'daos-on-near', to: 'staying-safe-in-web3' },
+  { from: 'nft-basics-on-near', to: 'near-data-tools' },
+  { from: 'staying-safe-in-web3', to: 'near-data-tools' },
+
+  // Builder track (27 nodes)
+  { from: 'dev-environment-setup', to: 'rust-fundamentals' },
+  { from: 'rust-fundamentals', to: 'ownership-borrowing' },
+  { from: 'ownership-borrowing', to: 'structs-enums' },
+  { from: 'structs-enums', to: 'error-handling' },
+  { from: 'error-handling', to: 'traits-generics' },
+  { from: 'traits-generics', to: 'collections-iterators' },
+  { from: 'collections-iterators', to: 'your-first-contract' },
+  { from: 'your-first-contract', to: 'account-model-access-keys' },
+  { from: 'your-first-contract', to: 'near-cli-mastery' },
+  { from: 'account-model-access-keys', to: 'state-management' },
+  { from: 'state-management', to: 'testing-debugging' },
+  { from: 'near-cli-mastery', to: 'testing-debugging' },
+  { from: 'testing-debugging', to: 'frontend-integration' },
+  { from: 'testing-debugging', to: 'token-standards' },
+  { from: 'frontend-integration', to: 'building-a-dapp' },
+  { from: 'token-standards', to: 'nep-standards-deep-dive' },
+  { from: 'token-standards', to: 'building-an-nft-contract' },
+  { from: 'nep-standards-deep-dive', to: 'building-a-dapp' },
+  { from: 'nep-standards-deep-dive', to: 'building-a-dao-contract' },
+  { from: 'building-a-dapp', to: 'security-best-practices' },
+  { from: 'building-a-dapp', to: 'defi-contract-patterns' },
+  { from: 'security-best-practices', to: 'upgrading-contracts' },
+  { from: 'upgrading-contracts', to: 'deployment' },
+  { from: 'deployment', to: 'optimization' },
+  { from: 'optimization', to: 'launch-checklist' },
+  { from: 'launch-checklist', to: 'aurora-evm-compatibility' },
+  { from: 'launch-checklist', to: 'wallet-selector-integration' },
+  { from: 'launch-checklist', to: 'near-social-bos' },
+  { from: 'building-an-nft-contract', to: 'aurora-evm-compatibility' },
+  { from: 'building-a-dao-contract', to: 'wallet-selector-integration' },
+  { from: 'defi-contract-patterns', to: 'near-social-bos' },
+
+  // Hacker track (16 nodes)
+  { from: 'near-architecture-deep-dive', to: 'cross-contract-calls' },
+  { from: 'cross-contract-calls', to: 'advanced-storage' },
+  { from: 'advanced-storage', to: 'chain-signatures' },
+  { from: 'chain-signatures', to: 'intents-chain-abstraction' },
+  { from: 'chain-signatures', to: 'multi-chain-with-near' },
+  { from: 'intents-chain-abstraction', to: 'shade-agents' },
+  { from: 'shade-agents', to: 'ai-agent-integration' },
+  { from: 'ai-agent-integration', to: 'mev-transaction-ordering' },
+  { from: 'mev-transaction-ordering', to: 'building-an-indexer' },
+  { from: 'building-an-indexer', to: 'production-patterns' },
+  { from: 'multi-chain-with-near', to: 'production-patterns' },
+  { from: 'production-patterns', to: 'zero-knowledge-on-near' },
+  { from: 'production-patterns', to: 'oracle-integration' },
+  { from: 'zero-knowledge-on-near', to: 'gas-optimization-deep-dive' },
+  { from: 'oracle-integration', to: 'gas-optimization-deep-dive' },
+  { from: 'gas-optimization-deep-dive', to: 'bridge-architecture' },
+  { from: 'bridge-architecture', to: 'formal-verification' },
+
+  // Founder track (12 nodes)
+  { from: 'near-grants-funding', to: 'tokenomics-design' },
+  { from: 'tokenomics-design', to: 'building-in-public' },
+  { from: 'building-in-public', to: 'pitching-your-project' },
+  { from: 'pitching-your-project', to: 'revenue-models-for-dapps' },
+  { from: 'revenue-models-for-dapps', to: 'community-building' },
+  { from: 'community-building', to: 'go-to-market' },
+  { from: 'go-to-market', to: 'legal-regulatory-basics' },
+  { from: 'go-to-market', to: 'treasury-management' },
+  { from: 'legal-regulatory-basics', to: 'metrics-that-matter' },
+  { from: 'treasury-management', to: 'metrics-that-matter' },
+  { from: 'metrics-that-matter', to: 'marketing-for-web3' },
+  { from: 'marketing-for-web3', to: 'investor-relations' },
 ];
 
 const STORAGE_KEY = 'voidspace-skill-progress';
-const TOTAL_MODULES = 43;
+const TOTAL_MODULES = 71;
 
 /* ─── Helpers ──────────────────────────────────────────────── */
 
@@ -764,18 +938,18 @@ function GalaxyNode({
       style={{ left: `${x}%`, top: `${y}%` }}
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.1 + index * 0.04, type: 'spring', stiffness: 200, damping: 18 }}
+      transition={{ delay: 0.1 + index * 0.02, type: 'spring', stiffness: 200, damping: 18 }}
       onClick={() => onSelect(node.id)}
     >
       {/* Glow for completed */}
       {isCompleted && (
         <motion.div
-          className="absolute w-16 h-16 rounded-full"
+          className="absolute w-14 h-14 rounded-full"
           animate={{
             boxShadow: [
-              `0 0 15px ${track.glow}, 0 0 30px rgba(0,236,151,0.06)`,
-              `0 0 25px ${track.glow}, 0 0 45px rgba(0,236,151,0.1)`,
-              `0 0 15px ${track.glow}, 0 0 30px rgba(0,236,151,0.06)`,
+              `0 0 12px ${track.glow}, 0 0 24px rgba(0,236,151,0.06)`,
+              `0 0 20px ${track.glow}, 0 0 36px rgba(0,236,151,0.1)`,
+              `0 0 12px ${track.glow}, 0 0 24px rgba(0,236,151,0.06)`,
             ],
           }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -785,7 +959,7 @@ function GalaxyNode({
       {/* Pulse for available */}
       {isAvailable && (
         <motion.div
-          className="absolute w-14 h-14 rounded-full border-2"
+          className="absolute w-12 h-12 rounded-full border-2"
           style={{ borderColor: track.glow }}
           animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -795,39 +969,39 @@ function GalaxyNode({
       {/* Node circle */}
       <motion.div
         className={cn(
-          'w-10 h-10 rounded-full flex items-center justify-center border-2 relative backdrop-blur-sm transition-shadow',
+          'w-9 h-9 rounded-full flex items-center justify-center border-2 relative backdrop-blur-sm transition-shadow',
           isCompleted ? 'border-near-green bg-near-green/15' :
           isAvailable ? `${track.border} ${track.bg}` :
           'border-border/40 bg-surface/40',
           isSelected && 'ring-2 ring-near-green/60 ring-offset-2 ring-offset-background'
         )}
-        whileHover={{ scale: 1.2, transition: { duration: 0.15 } }}
+        whileHover={{ scale: 1.25, transition: { duration: 0.15 } }}
         whileTap={{ scale: 0.9 }}
       >
         {isLocked ? (
-          <Lock className="w-3.5 h-3.5 text-text-muted/30" />
+          <Lock className="w-3 h-3 text-text-muted/30" />
         ) : (
-          <node.icon className={cn('w-4 h-4', isCompleted ? 'text-near-green' : track.color)} />
+          <node.icon className={cn('w-3.5 h-3.5', isCompleted ? 'text-near-green' : track.color)} />
         )}
         {isCompleted && (
-          <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-near-green flex items-center justify-center shadow-lg shadow-near-green/30">
-            <CheckCircle className="w-2.5 h-2.5 text-background" />
+          <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-near-green flex items-center justify-center shadow-lg shadow-near-green/30">
+            <CheckCircle className="w-2 h-2 text-background" />
           </div>
         )}
         {isAvailable && (
           <motion.div
-            className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-accent-cyan flex items-center justify-center"
+            className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-accent-cyan flex items-center justify-center"
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
-            <Zap className="w-2 h-2 text-background" />
+            <Zap className="w-1.5 h-1.5 text-background" />
           </motion.div>
         )}
       </motion.div>
 
       {/* Label */}
       <span className={cn(
-        'text-[9px] font-semibold text-center max-w-[80px] leading-tight opacity-0 group-hover:opacity-100 transition-opacity',
+        'text-[8px] font-semibold text-center max-w-[70px] leading-tight opacity-0 group-hover:opacity-100 transition-opacity',
         isCompleted ? 'text-near-green' : isAvailable ? track.color : 'text-text-muted/40'
       )}>
         {node.label}
@@ -1066,40 +1240,34 @@ export function SkillConstellation() {
   // Uses a golden-angle spiral for natural, non-overlapping node distribution
   const positions = useMemo(() => {
     const pos = new Map<string, { x: number; y: number }>();
+
+    // Builder (27 nodes) gets the largest quadrant (top-right, wider area)
+    // Explorer (16) top-left, Hacker (16) bottom-left, Founder (12) bottom-right
     const trackQuadrants = {
-      explorer: { cx: 25, cy: 28 },   // top-left
-      builder:  { cx: 72, cy: 32 },   // top-right (slightly larger area for 16 nodes)
-      hacker:   { cx: 25, cy: 74 },   // bottom-left
-      founder:  { cx: 75, cy: 76 },   // bottom-right
+      explorer: { cx: 22, cy: 26, maxR: 16 },   // top-left
+      builder:  { cx: 68, cy: 30, maxR: 22 },    // top-right (extra space for 27 nodes)
+      hacker:   { cx: 22, cy: 74, maxR: 16 },    // bottom-left
+      founder:  { cx: 72, cy: 78, maxR: 14 },    // bottom-right
     };
 
     const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5°
 
     (Object.keys(TRACK_CONFIG) as Array<keyof typeof TRACK_CONFIG>).forEach(trackId => {
-      const { cx, cy } = trackQuadrants[trackId];
+      const { cx, cy, maxR } = trackQuadrants[trackId];
       const trackNodes_local = skillNodes.filter(n => n.track === trackId);
       const count = trackNodes_local.length;
-      // Scale radius based on node count for balanced density
-      const maxRadius = count > 12 ? 18 : count > 8 ? 15 : count > 5 ? 13 : 11;
 
       trackNodes_local.forEach((node, i) => {
         if (i === 0) {
           // Center node (first/foundation node)
           pos.set(node.id, { x: cx, y: cy });
-        } else if (i === count - 1 && node.tier === 'mastery') {
-          // Capstone node — place at outer edge, bottom of cluster
-          const angle = Math.PI * 0.5; // directly below center
-          pos.set(node.id, {
-            x: Math.max(4, Math.min(96, cx + maxRadius * 0.9 * Math.cos(angle))),
-            y: Math.max(4, Math.min(96, cy + maxRadius * 0.9 * Math.sin(angle))),
-          });
         } else {
-          // Golden-angle spiral for remaining nodes
+          // Golden-angle spiral for all other nodes
           const angle = i * goldenAngle - Math.PI / 2;
-          const r = maxRadius * Math.sqrt(i / count) * 1.1;
+          const r = maxR * Math.sqrt(i / count) * 1.05;
           const x = cx + r * Math.cos(angle);
           const y = cy + r * Math.sin(angle);
-          pos.set(node.id, { x: Math.max(4, Math.min(96, x)), y: Math.max(4, Math.min(96, y)) });
+          pos.set(node.id, { x: Math.max(3, Math.min(97, x)), y: Math.max(3, Math.min(97, y)) });
         }
       });
     });
@@ -1206,22 +1374,22 @@ export function SkillConstellation() {
       </div>
 
       {/* Galaxy Map (desktop) */}
-      <div ref={containerRef} className="hidden lg:block relative h-[700px] rounded-xl border border-border/30 bg-background/80 overflow-hidden">
+      <div ref={containerRef} className="hidden lg:block relative h-[750px] rounded-xl border border-border/30 bg-background/80 overflow-hidden">
         <StarField />
         {/* Nebula backgrounds per quadrant */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_25%_28%,rgba(0,212,255,0.05),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_45%_40%_at_72%_32%,rgba(0,236,151,0.05),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_25%_74%,rgba(192,132,252,0.05),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_30%_25%_at_75%_76%,rgba(251,146,60,0.04),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_22%_26%,rgba(0,212,255,0.05),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_68%_30%,rgba(0,236,151,0.05),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_22%_74%,rgba(192,132,252,0.05),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_35%_25%_at_72%_78%,rgba(251,146,60,0.04),transparent)]" />
         </div>
 
         {/* Track labels */}
         {[
-          { label: 'Explorer · 11', x: 25, y: 10, color: 'text-accent-cyan' },
-          { label: 'Builder · 16', x: 72, y: 10, color: 'text-near-green' },
-          { label: 'Hacker · 11', x: 25, y: 56, color: 'text-purple-400' },
-          { label: 'Founder · 5', x: 75, y: 60, color: 'text-accent-orange' },
+          { label: 'Explorer · 16', x: 22, y: 8, color: 'text-accent-cyan' },
+          { label: 'Builder · 27', x: 68, y: 6, color: 'text-near-green' },
+          { label: 'Hacker · 16', x: 22, y: 56, color: 'text-purple-400' },
+          { label: 'Founder · 12', x: 72, y: 62, color: 'text-accent-orange' },
         ].map(t => (
           <div key={t.label} className="absolute z-20" style={{ left: `${t.x}%`, top: `${t.y}%`, transform: 'translate(-50%, -50%)' }}>
             <span className={cn('text-[10px] font-mono uppercase tracking-widest', t.color)}>{t.label}</span>
