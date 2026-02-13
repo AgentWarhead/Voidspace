@@ -31,9 +31,6 @@ const SanctumPreview = dynamic(() => import('./components/SanctumPreview').then(
   loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
 });
 
-const CapstoneProjects = dynamic(() => import('./components/CapstoneProjects').then(m => ({ default: m.CapstoneProjects })), {
-  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
-});
 
 const FAQ = dynamic(() => import('./components/FAQ').then(m => ({ default: m.FAQ })), {
   loading: () => <div className="h-48 animate-pulse bg-surface rounded-xl" />,
@@ -336,11 +333,6 @@ export default function LearnPage() {
             </Card>
           </Link>
         </ScrollReveal>
-      </Container>
-
-      {/* Capstone Projects */}
-      <Container className="pb-20">
-        <CapstoneProjects />
       </Container>
 
       {/* Earn Your Certificate */}
