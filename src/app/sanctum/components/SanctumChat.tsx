@@ -4,6 +4,12 @@ import { useState, useRef, useEffect } from 'react';
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { PersonaSelector } from './PersonaSelector';
+import { ModeSelector, ChatMode } from './ModeSelector';
+import { CodeAnnotations, CodeAnnotation } from './CodeAnnotations';
+import { FeatureSuggestion, FeatureSuggestionData } from './FeatureSuggestion';
+import { InlineQuiz, QuizData } from './InlineQuiz';
+import { NextSteps, NextStep } from './NextSteps';
+import { CategoryLearnBanner } from './CategoryLearnBanner';
 import { PERSONAS, Persona, getPersona } from '../lib/personas';
 import { UpgradeModal } from '@/components/credits/UpgradeModal';
 
@@ -25,6 +31,14 @@ interface Message {
     title: string;
     explanation: string;
   };
+  learnTips?: {
+    title: string;
+    explanation: string;
+  }[];
+  featureSuggestion?: FeatureSuggestionData;
+  codeAnnotations?: CodeAnnotation[];
+  quiz?: QuizData;
+  nextSteps?: NextStep[];
   options?: {
     label: string;
     value: string;
@@ -55,10 +69,14 @@ interface SanctumChatProps {
   category: string | null;
   customPrompt: string;
   autoMessage?: string;
+  chatMode?: ChatMode;
+  onChatModeChange?: (mode: ChatMode) => void;
   onCodeGenerated: (code: string) => void;
   onTokensUsed: (input: number, output: number) => void;
   onTaskUpdate?: (task: CurrentTask | null) => void;
   onThinkingChange?: (thinking: boolean) => void;
+  onQuizAnswer?: (correct: boolean) => void;
+  onConceptLearned?: (concept: { title: string; category: string; difficulty: string }) => void;
 }
 
 // Category-specific starter prompts
@@ -81,7 +99,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS.sanctum);
   const [input, setInput] = useState('');
@@ -374,6 +392,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
           })),
           category,
           personaId: currentPersona.id,
+          mode: chatMode,
           attachments: userAttachments?.filter(f => f.type.startsWith('image/')),
         }),
         signal: abortControllerRef.current.signal,
@@ -439,6 +458,14 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
       );
       onTaskUpdate?.({ ...task });
 
+      // Build learnTips array from both old and new formats
+      const learnTips: { title: string; explanation: string }[] = [];
+      if (data.learnTips && Array.isArray(data.learnTips)) {
+        learnTips.push(...data.learnTips);
+      } else if (data.learnTip) {
+        learnTips.push(data.learnTip);
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -446,9 +473,21 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
         code: data.code,
         personaId: currentPersona.id,
         learnTip: data.learnTip,
+        learnTips: learnTips.length > 0 ? learnTips : undefined,
+        featureSuggestion: data.featureSuggestion,
+        codeAnnotations: data.codeAnnotations,
+        quiz: data.quiz,
+        nextSteps: data.nextSteps,
         options: data.options,
         tokensUsed: data.usage,
       };
+
+      // Notify parent about concepts from learn tips
+      if (learnTips.length > 0 && onConceptLearned) {
+        for (const tip of learnTips) {
+          onConceptLearned({ title: tip.title, category: 'near-sdk', difficulty: 'intermediate' });
+        }
+      }
 
       setMessages(prev => [...prev, assistantMessage]);
 
@@ -563,17 +602,28 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
         onClose={() => setShowUpgradeModal(false)}
       />
 
-      {/* Persona selector header */}
-      <div className="flex-shrink-0 p-3 border-b border-border-subtle bg-void-black/30 flex items-center justify-between">
-        <PersonaSelector 
-          currentPersona={currentPersona}
-          onSelect={setCurrentPersona}
-          disabled={isLoading}
-        />
-        <div className="text-xs text-text-muted">
-          Switch experts for specialized help
+      {/* Chat header with mode selector and persona selector */}
+      <div className="flex-shrink-0 p-3 border-b border-border-subtle bg-void-black/30 space-y-2">
+        <div className="flex items-center justify-between">
+          <PersonaSelector 
+            currentPersona={currentPersona}
+            onSelect={setCurrentPersona}
+            disabled={isLoading}
+          />
+          {onChatModeChange && (
+            <ModeSelector
+              mode={chatMode}
+              onModeChange={onChatModeChange}
+              disabled={isLoading}
+            />
+          )}
         </div>
       </div>
+
+      {/* Category learn banner */}
+      {category && (
+        <CategoryLearnBanner category={category} mode={chatMode} />
+      )}
       
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -619,8 +669,19 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
                   {/* Message content */}
                   <p className="text-text-primary whitespace-pre-wrap">{message.content}</p>
                   
-                  {/* Learn tip */}
-                  {message.learnTip && (
+                  {/* Learn tips (array — new format) */}
+                  {message.learnTips && message.learnTips.length > 0 ? (
+                    message.learnTips.map((tip, tipIdx) => (
+                      <div key={tipIdx} className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                        <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
+                          <Lightbulb className="w-4 h-4" />
+                          {tip.title}
+                        </div>
+                        <p className="text-sm text-text-secondary">{tip.explanation}</p>
+                      </div>
+                    ))
+                  ) : message.learnTip ? (
+                    /* Backward compat: single learnTip */
                     <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                       <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-1">
                         <Lightbulb className="w-4 h-4" />
@@ -628,6 +689,29 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
                       </div>
                       <p className="text-sm text-text-secondary">{message.learnTip.explanation}</p>
                     </div>
+                  ) : null}
+
+                  {/* Code annotations */}
+                  {message.codeAnnotations && message.code && (
+                    <CodeAnnotations annotations={message.codeAnnotations} code={message.code} />
+                  )}
+
+                  {/* Inline quiz */}
+                  {message.quiz && (
+                    <InlineQuiz quiz={message.quiz} onAnswer={onQuizAnswer} />
+                  )}
+
+                  {/* Feature suggestion */}
+                  {message.featureSuggestion && (
+                    <FeatureSuggestion
+                      suggestion={message.featureSuggestion}
+                      onAddFeature={(text) => handleSend(text)}
+                    />
+                  )}
+
+                  {/* Next steps */}
+                  {message.nextSteps && (
+                    <NextSteps steps={message.nextSteps} onSelect={(value) => handleSend(value)} />
                   )}
                   
                   {/* Quick options */}

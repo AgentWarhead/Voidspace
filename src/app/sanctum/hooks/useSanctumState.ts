@@ -5,6 +5,9 @@ import { DeployedContract, saveDeployment } from '../components/DeploymentHistor
 import { ImportedContract } from '../components/ImportContract';
 import { generateSessionId } from '../components/PairProgramming';
 
+import { ChatMode } from '../components/ModeSelector';
+import { LearnedConcept } from '../components/KnowledgeTracker';
+
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
 type SanctumMode = 'build' | 'roast' | 'webapp' | 'visual';
 
@@ -42,6 +45,10 @@ export interface SanctumState {
   showWebappSession: boolean;
   activePanel: 'chat' | 'code';
   deployError: string | null;
+  chatMode: ChatMode;
+  conceptsLearned: LearnedConcept[];
+  quizScore: { correct: number; total: number };
+  contractsBuilt: number;
 }
 
 type SanctumAction =
@@ -81,6 +88,10 @@ type SanctumAction =
   | { type: 'SET_SHOW_WEBAPP_SESSION'; payload: boolean }
   | { type: 'SET_ACTIVE_PANEL'; payload: 'chat' | 'code' }
   | { type: 'SET_DEPLOY_ERROR'; payload: string | null }
+  | { type: 'SET_CHAT_MODE'; payload: ChatMode }
+  | { type: 'ADD_CONCEPT_LEARNED'; payload: LearnedConcept }
+  | { type: 'UPDATE_QUIZ_SCORE'; payload: { correct: boolean } }
+  | { type: 'INCREMENT_CONTRACTS_BUILT' }
   | { type: 'RESET_SESSION' }
   | { type: 'START_CODE_GENERATION'; payload: string }
   | { type: 'COMPLETE_CODE_GENERATION' };
@@ -119,6 +130,10 @@ const initialState: SanctumState = {
   showWebappSession: false,
   activePanel: 'chat',
   deployError: null,
+  chatMode: 'learn' as ChatMode,
+  conceptsLearned: [],
+  quizScore: { correct: 0, total: 0 },
+  contractsBuilt: 0,
 };
 
 function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumState {
@@ -233,6 +248,27 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
     
     case 'SET_DEPLOY_ERROR':
       return { ...state, deployError: action.payload };
+    
+    case 'SET_CHAT_MODE':
+      return { ...state, chatMode: action.payload };
+    
+    case 'ADD_CONCEPT_LEARNED': {
+      const exists = state.conceptsLearned.some(c => c.title === action.payload.title);
+      if (exists) return state;
+      return { ...state, conceptsLearned: [...state.conceptsLearned, action.payload] };
+    }
+    
+    case 'UPDATE_QUIZ_SCORE':
+      return {
+        ...state,
+        quizScore: {
+          correct: state.quizScore.correct + (action.payload.correct ? 1 : 0),
+          total: state.quizScore.total + 1,
+        },
+      };
+    
+    case 'INCREMENT_CONTRACTS_BUILT':
+      return { ...state, contractsBuilt: state.contractsBuilt + 1 };
     
     case 'RESET_SESSION':
       return {

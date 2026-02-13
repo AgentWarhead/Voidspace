@@ -700,6 +700,10 @@ function SanctumPageInner() {
                       onTokensUsed={handleTokensUsed}
                       onTaskUpdate={handleTaskUpdate}
                       onThinkingChange={handleThinkingChange}
+                      chatMode={state.chatMode}
+                      onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
+                      onQuizAnswer={(correct) => dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } })}
+                      onConceptLearned={(c) => dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c })}
                     />
                   </div>
                 </GlassPanel>
@@ -867,6 +871,10 @@ function SanctumPageInner() {
                         onTokensUsed={handleTokensUsed}
                         onTaskUpdate={handleTaskUpdate}
                         onThinkingChange={handleThinkingChange}
+                        chatMode={state.chatMode}
+                        onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
+                        onQuizAnswer={(correct) => dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } })}
+                        onConceptLearned={(c) => dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c })}
                       />
                     </div>
                   </GlassPanel>
