@@ -143,6 +143,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Unwrap: edge function returns DB record { id, content: {...}, ... }
+    // Frontend expects the brief fields directly (projectNames, problemStatement, etc.)
+    const briefContent = data?.content || data;
+
     // Log usage and deduct credits
     if (userId) {
       const usageRecord: Record<string, unknown> = {
@@ -171,7 +175,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ brief: data });
+    return NextResponse.json({ brief: briefContent });
   } catch (err) {
     console.error('Brief generation error:', err);
     return NextResponse.json(

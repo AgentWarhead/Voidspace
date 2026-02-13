@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -24,7 +24,6 @@ export function ConstellationSidePanel({ nodeId, getStatus, onClose, onToggleCom
   const node = nodeId ? skillNodes.find(n => n.id === nodeId) : null;
   const status = node ? getStatus(node.id) : 'locked';
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
@@ -38,7 +37,6 @@ export function ConstellationSidePanel({ nodeId, getStatus, onClose, onToggleCom
     <AnimatePresence mode="wait">
       {node && (
         <>
-          {/* Backdrop */}
           <motion.div
             className="fixed inset-0 z-40 bg-black/30"
             initial={{ opacity: 0 }}
@@ -46,23 +44,16 @@ export function ConstellationSidePanel({ nodeId, getStatus, onClose, onToggleCom
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-
-          {/* Panel */}
           <motion.div
             className="fixed right-0 top-0 bottom-0 z-50 w-[380px] max-w-[90vw] bg-background/95 backdrop-blur-xl border-l border-border/50 overflow-y-auto"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 280, mass: 0.8 }}
           >
             <SidePanelContent
-              node={node}
-              status={status}
-              prereqs={prereqs}
-              unlocks={unlocks}
-              getStatus={getStatus}
-              onClose={onClose}
-              onToggleComplete={onToggleComplete}
+              node={node} status={status} prereqs={prereqs} unlocks={unlocks}
+              getStatus={getStatus} onClose={onClose} onToggleComplete={onToggleComplete}
             />
           </motion.div>
         </>
@@ -71,25 +62,84 @@ export function ConstellationSidePanel({ nodeId, getStatus, onClose, onToggleCom
   );
 }
 
+/* ─── Prerequisite Chain Diagram ───────────────────────────── */
+
+function PrereqChainDiagram({ prereqs, getStatus }: { prereqs: SkillNode[]; getStatus: (id: string) => NodeStatus }) {
+  if (prereqs.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      <h3 className="text-xs font-mono text-text-muted uppercase tracking-widest">Prerequisite Chain</h3>
+      <div className="flex items-center gap-1 overflow-x-auto py-2">
+        {prereqs.map((p, i) => {
+          const ps = getStatus(p.id);
+          const done = ps === 'completed';
+          return (
+            <div key={p.id} className="flex items-center gap-1 flex-shrink-0">
+              {i > 0 && (
+                <div className={cn('w-4 h-0.5 rounded-full', done ? 'bg-near-green/50' : 'bg-border/40')} />
+              )}
+              <div className="flex flex-col items-center gap-0.5">
+                <div className={cn(
+                  'w-6 h-6 rounded-full flex items-center justify-center border',
+                  done ? 'border-near-green/50 bg-near-green/10' : 'border-border/40 bg-surface/40',
+                )}>
+                  {done
+                    ? <CheckCircle className="w-3 h-3 text-near-green" />
+                    : <Lock className="w-2.5 h-2.5 text-text-muted/40" />}
+                </div>
+                <span className={cn('text-[7px] max-w-[50px] text-center leading-tight truncate',
+                  done ? 'text-near-green/70' : 'text-text-muted/40')}>
+                  {p.label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        {/* Current node indicator */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="w-4 h-0.5 rounded-full bg-accent-cyan/40" />
+          <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-accent-cyan/50 bg-accent-cyan/10">
+            <Target className="w-3 h-3 text-accent-cyan" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Panel Content ────────────────────────────────────────── */
 
 function SidePanelContent({
   node, status, prereqs, unlocks, getStatus, onClose, onToggleComplete,
 }: {
-  node: SkillNode;
-  status: NodeStatus;
-  prereqs: SkillNode[];
-  unlocks: SkillNode[];
-  getStatus: (id: string) => NodeStatus;
-  onClose: () => void;
-  onToggleComplete: (id: string) => void;
+  node: SkillNode; status: NodeStatus; prereqs: SkillNode[]; unlocks: SkillNode[];
+  getStatus: (id: string) => NodeStatus; onClose: () => void; onToggleComplete: (id: string) => void;
 }) {
   const track = TRACK_CONFIG[node.track];
 
   return (
     <div className="p-6 space-y-6">
-      {/* Top accent */}
+      {/* Top accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-near-green/60 to-transparent" />
+
+      {/* Particle header background */}
+      <div className="absolute top-0 left-0 right-0 h-24 overflow-hidden pointer-events-none">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: 2 + (i % 3),
+              height: 2 + (i % 3),
+              backgroundColor: i % 2 === 0 ? track.hex : 'rgba(255,255,255,0.3)',
+              left: `${10 + (i * 12)}%`,
+              top: `${20 + (i * 8) % 60}%`,
+            }}
+            animate={{ y: [-5, 5, -5], opacity: [0.2, 0.5, 0.2] }}
+            transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        ))}
+      </div>
 
       {/* Close button */}
       <button
@@ -100,7 +150,7 @@ function SidePanelContent({
       </button>
 
       {/* Header */}
-      <div className="flex items-start gap-4 pt-2">
+      <div className="flex items-start gap-4 pt-2 relative z-10">
         <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border-2', track.bg, track.border)}>
           <node.icon className={cn('w-6 h-6', track.color)} />
         </div>
@@ -124,6 +174,9 @@ function SidePanelContent({
       {/* Description */}
       <p className="text-sm text-text-secondary leading-relaxed">{node.description}</p>
 
+      {/* Prerequisite chain diagram */}
+      <PrereqChainDiagram prereqs={prereqs} getStatus={getStatus} />
+
       {/* Details */}
       <div className="space-y-2">
         <h3 className="text-xs font-mono text-text-muted uppercase tracking-widest">What You&apos;ll Learn</h3>
@@ -136,25 +189,6 @@ function SidePanelContent({
           ))}
         </div>
       </div>
-
-      {/* Prerequisites chain */}
-      {prereqs.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-xs font-mono text-text-muted uppercase tracking-widest">Prerequisites</h3>
-          <div className="flex flex-wrap gap-2">
-            {prereqs.map(p => {
-              const ps = getStatus(p.id);
-              const pt = TRACK_CONFIG[p.track];
-              return (
-                <div key={p.id} className={cn('flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs', ps === 'completed' ? 'border-near-green/30 bg-near-green/5 text-near-green' : `${pt.border} ${pt.bg} ${pt.color}`)}>
-                  {ps === 'completed' ? <CheckCircle className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                  {p.label}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Unlocks next */}
       {unlocks.length > 0 && (

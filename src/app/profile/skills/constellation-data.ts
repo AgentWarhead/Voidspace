@@ -56,10 +56,10 @@ export const TOTAL_MODULES = 66;
 /* ─── Tier Sizes (px) ──────────────────────────────────────── */
 
 export const TIER_SIZES: Record<string, number> = {
-  foundation: 36,
-  core: 42,
+  foundation: 32,
+  core: 40,
   advanced: 48,
-  mastery: 56,
+  mastery: 60,
 };
 
 /* ─── Levels ───────────────────────────────────────────────── */
@@ -90,10 +90,14 @@ import {
   Crown, Compass, Terminal, Flame, Award, CheckCircle, Lock,
 } from 'lucide-react';
 
+// Re-export icons for use by components
+import { RotateCcw, X, ArrowRight, ChevronRight } from 'lucide-react';
+
 export { 
   BookOpen, Wallet, Code2, FileCode, FlaskConical, Rocket, Star, Brain, Globe,
   Target, Coins, AppWindow, ShieldCheck, CircleDollarSign, Trophy, Zap, Shield,
   Crown, Compass, Terminal, Flame, Award, CheckCircle, Lock,
+  RotateCcw, X, ArrowRight, ChevronRight,
 };
 
 export const TRACK_CONFIG: Record<TrackId, TrackConfig> = {
@@ -423,6 +427,61 @@ export function computeNodePositions(): Map<string, { x: number; y: number }> {
   }
 
   return pos;
+}
+
+/* ─── Prereq/unlock helpers for side panel ─────────────────── */
+
+/* ─── Streak helpers ───────────────────────────────────────── */
+
+export const STREAK_KEY = 'voidspace-skill-streak';
+
+interface StreakData {
+  lastCompletionDate: string; // YYYY-MM-DD
+  count: number;
+}
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function yesterdayStr(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+export function loadStreak(): StreakData {
+  if (typeof window === 'undefined') return { lastCompletionDate: '', count: 0 };
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return { lastCompletionDate: '', count: 0 };
+}
+
+export function saveStreak(data: StreakData) {
+  try { localStorage.setItem(STREAK_KEY, JSON.stringify(data)); } catch { /* ignore */ }
+}
+
+export function recordCompletion(): StreakData {
+  const streak = loadStreak();
+  const today = todayStr();
+  if (streak.lastCompletionDate === today) return streak; // already recorded today
+  const yesterday = yesterdayStr();
+  const newStreak: StreakData = {
+    lastCompletionDate: today,
+    count: streak.lastCompletionDate === yesterday ? streak.count + 1 : 1,
+  };
+  saveStreak(newStreak);
+  return newStreak;
+}
+
+export function getCurrentStreak(): number {
+  const streak = loadStreak();
+  const today = todayStr();
+  const yesterday = yesterdayStr();
+  if (streak.lastCompletionDate === today || streak.lastCompletionDate === yesterday) return streak.count;
+  return 0;
 }
 
 /* ─── Prereq/unlock helpers for side panel ─────────────────── */

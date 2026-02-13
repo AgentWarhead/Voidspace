@@ -8,6 +8,7 @@ import {
   CheckCircle, Lock, Zap,
   type SkillNode, type NodeStatus, type TrackId,
 } from './constellation-data';
+import { LensFlare, OrbitingSparkles, HudReticle, BeaconRing } from './ConstellationNodeEffects';
 
 /* ─── Individual Constellation Node ────────────────────────── */
 
@@ -27,7 +28,6 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
   const isAvailable = status === 'available';
   const isLocked = status === 'locked';
 
-  // Convert absolute pixel coords to percentages
   const pctX = (x / MAP_WIDTH) * 100;
   const pctY = (y / MAP_HEIGHT) * 100;
 
@@ -47,49 +47,35 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
       transition={{ delay: 0.05 + index * 0.015, type: 'spring', stiffness: 200, damping: 18 }}
       onClick={() => onSelect(node.id)}
     >
-      {/* Completed: Lens flare glow */}
+      {/* Completed: SVG lens flare + orbiting sparkles */}
       {isCompleted && (
-        <motion.div
-          className="absolute rounded-full"
-          style={{ width: size * 1.8, height: size * 1.8 }}
-          animate={{
-            boxShadow: [
-              `0 0 ${size * 0.4}px ${track.glow}, 0 0 ${size * 0.8}px rgba(0,236,151,0.08)`,
-              `0 0 ${size * 0.7}px ${track.glow}, 0 0 ${size * 1.2}px rgba(0,236,151,0.15)`,
-              `0 0 ${size * 0.4}px ${track.glow}, 0 0 ${size * 0.8}px rgba(0,236,151,0.08)`,
-            ],
-          }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      )}
-
-      {/* Available: Pulsing beacon halo */}
-      {isAvailable && (
         <>
-          <motion.div
-            className="absolute rounded-full border-2"
-            style={{ width: size * 1.5, height: size * 1.5, borderColor: track.glow }}
-            animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          <LensFlare size={size} color={track.hex} />
+          <OrbitingSparkles size={size} color={track.hex} />
           <motion.div
             className="absolute rounded-full"
-            style={{
-              width: size * 1.2, height: size * 1.2,
-              background: `radial-gradient(circle, ${track.glow.replace('0.3', '0.15')} 0%, transparent 70%)`,
+            style={{ width: size * 1.8, height: size * 1.8, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+            animate={{
+              boxShadow: [
+                `0 0 ${size * 0.5}px ${track.glow}, 0 0 ${size}px rgba(0,236,151,0.08)`,
+                `0 0 ${size * 0.8}px ${track.glow}, 0 0 ${size * 1.4}px rgba(0,236,151,0.15)`,
+                `0 0 ${size * 0.5}px ${track.glow}, 0 0 ${size}px rgba(0,236,151,0.08)`,
+              ],
             }}
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           />
         </>
       )}
+
+      {/* Available: Pulsing beacon */}
+      {isAvailable && <BeaconRing size={size} color={track.glow} />}
 
       {/* Locked: faint shimmer */}
       {isLocked && (
         <motion.div
           className="absolute rounded-full bg-white/[0.02]"
-          style={{ width: size * 1.1, height: size * 1.1 }}
-          animate={{ opacity: [0.02, 0.06, 0.02] }}
+          style={{ width: size * 1.1, height: size * 1.1, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+          animate={{ opacity: [0.02, 0.07, 0.02] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
       )}
@@ -117,19 +103,17 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
           />
         )}
 
-        {/* Completed checkmark orbit */}
+        {/* Completed checkmark badge */}
         {isCompleted && (
-          <motion.div
+          <div
             className="absolute -top-0.5 -right-0.5 rounded-full bg-near-green flex items-center justify-center shadow-lg shadow-near-green/30"
             style={{ width: size * 0.3, height: size * 0.3 }}
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
           >
             <CheckCircle style={{ width: size * 0.18, height: size * 0.18 }} className="text-background" />
-          </motion.div>
+          </div>
         )}
 
-        {/* Available indicator */}
+        {/* Available zap indicator */}
         {isAvailable && (
           <motion.div
             className="absolute -top-0.5 -right-0.5 rounded-full bg-accent-cyan flex items-center justify-center"
@@ -142,7 +126,7 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
         )}
       </motion.div>
 
-      {/* Label — always visible for completed/available, hidden for locked */}
+      {/* Label */}
       <span
         className={cn(
           'text-[8px] font-semibold text-center max-w-[80px] leading-tight mt-1 transition-opacity',
@@ -154,26 +138,8 @@ function ConstellationNodeInner({ node, status, isSelected, onSelect, x, y, inde
         {node.label}
       </span>
 
-      {/* Hover HUD ring */}
-      <motion.div
-        className="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        style={{
-          width: size * 2.5,
-          height: size * 2.5,
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className={cn(
-          'absolute inset-0 rounded-full border border-dashed',
-          isCompleted ? 'border-near-green/30' : isAvailable ? `${track.border}` : 'border-border/20',
-        )} />
-        {/* XP badge */}
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm rounded-full px-2 py-0.5 border border-border/50">
-          <span className="text-[7px] font-mono text-near-green">{node.xp} XP</span>
-        </div>
-      </motion.div>
+      {/* HUD targeting reticle on hover */}
+      <HudReticle size={size} color={track.hex} label={node.label} xp={node.xp} />
     </motion.div>
   );
 }

@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { Award } from 'lucide-react';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GlowCard } from '@/components/effects/GlowCard';
-import { TRACK_CONFIG, type TrackId } from './constellation-data';
+import { type TrackId } from './constellation-data';
 import { useConstellationState } from './useConstellationState';
 import { ConstellationHeader } from './ConstellationHeader';
 import { ConstellationMap } from './ConstellationMap';
 import { ConstellationSidePanel } from './ConstellationSidePanel';
 import { ConstellationMobile } from './ConstellationMobile';
+import { ConstellationCelebration } from './ConstellationCelebration';
 
 /* ─── Thin Orchestrator ────────────────────────────────────── */
 
@@ -23,7 +24,7 @@ export function SkillConstellation() {
 
   return (
     <div className="space-y-8">
-      {/* Header: progress, level, filters, track summaries */}
+      {/* Header: progress, level, filters, track summaries, streak */}
       <ConstellationHeader
         completedCount={state.completedCount}
         earnedXP={state.earnedXP}
@@ -33,6 +34,7 @@ export function SkillConstellation() {
         onSetTrack={state.setActiveTrack}
         onReset={state.handleReset}
         getTrackStats={state.getTrackStats}
+        streak={state.streak}
       />
 
       {/* Desktop: Interactive galaxy map */}
@@ -58,6 +60,13 @@ export function SkillConstellation() {
         getStatus={state.getStatus}
         onClose={() => state.handleSelect(state.selectedNode || '')}
         onToggleComplete={state.handleToggleComplete}
+      />
+
+      {/* Celebration overlay */}
+      <ConstellationCelebration
+        completedNodeId={state.celebration.completedNodeId}
+        levelUp={state.celebration.levelUp}
+        onDismiss={state.dismissCelebration}
       />
 
       {/* Mobile: List view */}
