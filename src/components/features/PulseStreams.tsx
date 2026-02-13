@@ -202,7 +202,7 @@ export function PulseStreams({ initialAddress }: PulseStreamsProps = {}) {
   };
 
   const getActionIcon = (actionKind: string) => {
-    switch (actionKind.toLowerCase()) {
+    switch ((actionKind || '').toLowerCase()) {
       case 'transfer':
         return <ArrowRight className="w-4 h-4" />;
       case 'functioncall':
@@ -215,7 +215,7 @@ export function PulseStreams({ initialAddress }: PulseStreamsProps = {}) {
   };
 
   const getActionColor = (actionKind: string) => {
-    switch (actionKind.toLowerCase()) {
+    switch ((actionKind || '').toLowerCase()) {
       case 'transfer':
         return 'text-near-green bg-near-green/10 border-near-green/20';
       case 'functioncall':
