@@ -121,7 +121,7 @@ const LEVELS = [
   { name: 'Legend', minXP: 7000, icon: '👑' },
 ];
 
-/* ─── Skill Nodes — All 71 Modules ────────────────────────── */
+/* ─── Skill Nodes — All 66 Modules ────────────────────────── */
 
 const skillNodes: SkillNode[] = [
   // ════════════════════════════════════════════════════════════
@@ -272,55 +272,15 @@ const skillNodes: SkillNode[] = [
     description: 'Master the language that powers NEAR smart contracts.',
     details: ['Variables, types & mutability', 'Functions & control flow', 'Pattern matching', 'Modules & crates', 'Cargo basics', 'Rust playground'],
     xp: 100, tier: 'foundation', track: 'builder', position: 1,
-    unlocks: ['ownership-borrowing'], prerequisites: ['dev-environment-setup'], estimatedTime: '6 hours',
+    unlocks: ['your-first-contract'], prerequisites: ['dev-environment-setup'], estimatedTime: '6 hours',
     rewards: ['Rustacean Badge'], link: '/learn/builder/rust-fundamentals',
-  },
-  {
-    id: 'ownership-borrowing', label: 'Ownership & Borrowing', icon: Code2,
-    description: 'Understand Rust\'s unique ownership model and borrowing rules.',
-    details: ['Ownership rules', 'Move semantics', 'References & borrowing', 'Lifetimes basics', 'Stack vs heap', 'Common ownership patterns'],
-    xp: 100, tier: 'foundation', track: 'builder', position: 2,
-    unlocks: ['structs-enums'], prerequisites: ['rust-fundamentals'], estimatedTime: '4 hours',
-    rewards: ['Ownership Master Badge'], link: '/learn/builder/ownership-borrowing',
-  },
-  {
-    id: 'structs-enums', label: 'Structs & Enums', icon: FileCode,
-    description: 'Build complex data types with structs, enums, and pattern matching.',
-    details: ['Struct definitions', 'Enum variants', 'Pattern matching', 'Method implementation', 'impl blocks', 'Newtype pattern'],
-    xp: 100, tier: 'foundation', track: 'builder', position: 3,
-    unlocks: ['error-handling'], prerequisites: ['ownership-borrowing'], estimatedTime: '3 hours',
-    rewards: ['Type Builder Badge'], link: '/learn/builder/structs-enums',
-  },
-  {
-    id: 'error-handling', label: 'Error Handling', icon: ShieldCheck,
-    description: 'Master Result, Option, and error handling patterns in Rust.',
-    details: ['Result<T, E> type', 'Option<T> type', 'The ? operator', 'Custom error types', 'Error propagation', 'Panic vs Result'],
-    xp: 100, tier: 'foundation', track: 'builder', position: 4,
-    unlocks: ['traits-generics'], prerequisites: ['structs-enums'], estimatedTime: '3 hours',
-    rewards: ['Error Handler Badge'], link: '/learn/builder/error-handling',
-  },
-  {
-    id: 'traits-generics', label: 'Traits & Generics', icon: Brain,
-    description: 'Write flexible, reusable code with traits and generics.',
-    details: ['Trait definitions', 'Implementing traits', 'Generic types', 'Trait bounds', 'Default implementations', 'Common traits (Display, Debug)'],
-    xp: 100, tier: 'foundation', track: 'builder', position: 5,
-    unlocks: ['collections-iterators'], prerequisites: ['error-handling'], estimatedTime: '4 hours',
-    rewards: ['Generics Pro Badge'], link: '/learn/builder/traits-generics',
-  },
-  {
-    id: 'collections-iterators', label: 'Collections & Iterators', icon: Code2,
-    description: 'Work with Vec, HashMap, and Rust\'s powerful iterator system.',
-    details: ['Vec operations', 'HashMap usage', 'Iterator adaptors', 'Closures', 'Collecting results', 'Functional patterns'],
-    xp: 100, tier: 'foundation', track: 'builder', position: 6,
-    unlocks: ['your-first-contract'], prerequisites: ['traits-generics'], estimatedTime: '3 hours',
-    rewards: ['Collections Badge'], link: '/learn/builder/collections-iterators',
   },
   {
     id: 'your-first-contract', label: 'Your First Contract', icon: FileCode,
     description: 'Build and deploy your first NEAR smart contract.',
     details: ['#[near] macro', 'Contract structure', 'Init methods', 'View vs change methods', 'Storage basics', 'Deploy to testnet'],
     xp: 100, tier: 'core', track: 'builder', position: 0,
-    unlocks: ['account-model-access-keys', 'near-cli-mastery'], prerequisites: ['collections-iterators'], estimatedTime: '4 hours',
+    unlocks: ['account-model-access-keys', 'near-cli-mastery'], prerequisites: ['rust-fundamentals'], estimatedTime: '4 hours',
     rewards: ['First Contract Badge'], link: '/learn/builder/your-first-contract',
   },
   {
@@ -731,14 +691,9 @@ const connections: Connection[] = [
   { from: 'nft-basics-on-near', to: 'near-data-tools' },
   { from: 'staying-safe-in-web3', to: 'near-data-tools' },
 
-  // Builder track (27 nodes)
+  // Builder track (22 nodes)
   { from: 'dev-environment-setup', to: 'rust-fundamentals' },
-  { from: 'rust-fundamentals', to: 'ownership-borrowing' },
-  { from: 'ownership-borrowing', to: 'structs-enums' },
-  { from: 'structs-enums', to: 'error-handling' },
-  { from: 'error-handling', to: 'traits-generics' },
-  { from: 'traits-generics', to: 'collections-iterators' },
-  { from: 'collections-iterators', to: 'your-first-contract' },
+  { from: 'rust-fundamentals', to: 'your-first-contract' },
   { from: 'your-first-contract', to: 'account-model-access-keys' },
   { from: 'your-first-contract', to: 'near-cli-mastery' },
   { from: 'account-model-access-keys', to: 'state-management' },
@@ -799,7 +754,7 @@ const connections: Connection[] = [
 ];
 
 const STORAGE_KEY = 'voidspace-skill-progress';
-const TOTAL_MODULES = 71;
+const TOTAL_MODULES = 66;
 
 /* ─── Helpers ──────────────────────────────────────────────── */
 
@@ -1241,11 +1196,11 @@ export function SkillConstellation() {
   const positions = useMemo(() => {
     const pos = new Map<string, { x: number; y: number }>();
 
-    // Builder (27 nodes) gets the largest quadrant (top-right, wider area)
+    // Builder (22 nodes) gets the largest quadrant (top-right, wider area)
     // Explorer (16) top-left, Hacker (16) bottom-left, Founder (12) bottom-right
     const trackQuadrants = {
       explorer: { cx: 22, cy: 26, maxR: 16 },   // top-left
-      builder:  { cx: 68, cy: 30, maxR: 22 },    // top-right (extra space for 27 nodes)
+      builder:  { cx: 68, cy: 30, maxR: 20 },    // top-right (22 nodes)
       hacker:   { cx: 22, cy: 74, maxR: 16 },    // bottom-left
       founder:  { cx: 72, cy: 78, maxR: 14 },    // bottom-right
     };
@@ -1387,7 +1342,7 @@ export function SkillConstellation() {
         {/* Track labels */}
         {[
           { label: 'Explorer · 16', x: 22, y: 8, color: 'text-accent-cyan' },
-          { label: 'Builder · 27', x: 68, y: 6, color: 'text-near-green' },
+          { label: 'Builder · 22', x: 68, y: 6, color: 'text-near-green' },
           { label: 'Hacker · 16', x: 22, y: 56, color: 'text-purple-400' },
           { label: 'Founder · 12', x: 72, y: 62, color: 'text-accent-orange' },
         ].map(t => (

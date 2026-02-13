@@ -3,7 +3,7 @@ import { Container } from '@/components/ui';
 
 const stats = [
   { value: '20+', label: 'CATEGORIES ANALYZED', icon: Layers, delay: '0s' },
-  { value: '71', label: 'LEARNING MODULES', icon: GraduationCap, delay: '0.5s' },
+  { value: '66', label: 'LEARNING MODULES', icon: GraduationCap, delay: '0.5s' },
   { value: '8', label: 'DATA SOURCES', icon: Database, delay: '1s' },
   { value: 'LIVE', label: 'REAL-TIME INTEL', icon: Radio, delay: '1.5s' },
 ];

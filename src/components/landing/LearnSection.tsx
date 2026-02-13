@@ -40,7 +40,7 @@ export function LearnSection() {
               Master NEAR Development
             </GradientText>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
-              71 interactive modules across 4 structured tracks. From your first Rust line to deploying production dApps — with AI guidance at every step.
+              66 interactive modules across 4 structured tracks. From your first Rust line to deploying production dApps — with AI guidance at every step.
             </p>
           </div>
 

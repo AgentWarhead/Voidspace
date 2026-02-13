@@ -5,7 +5,7 @@ import { Cpu, BookOpen, Search, BarChart3 } from 'lucide-react';
 const stats = [
   { value: '383+', label: 'Projects Analyzed', icon: Search },
   { value: '78', label: 'Voids Detected', icon: Cpu },
-  { value: '71', label: 'Learning Modules', icon: BookOpen },
+  { value: '66', label: 'Learning Modules', icon: BookOpen },
   { value: '150+', label: 'Tokens Tracked', icon: BarChart3 },
 ];
 

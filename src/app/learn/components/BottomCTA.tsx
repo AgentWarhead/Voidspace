@@ -129,7 +129,7 @@ function ConstellationBg() {
 function StatsTicker() {
   const stats = [
     { icon: Target, value: '78+', label: 'voids detected', color: 'text-near-green' },
-    { icon: Users, value: '71', label: 'learning modules', color: 'text-accent-cyan' },
+    { icon: Users, value: '66', label: 'learning modules', color: 'text-accent-cyan' },
     { icon: Zap, value: '6', label: 'project templates', color: 'text-purple-400' },
   ];
 
