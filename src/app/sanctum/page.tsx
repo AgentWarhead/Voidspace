@@ -558,6 +558,16 @@ function SanctumPageInner() {
                   <span>One-Click Deploy</span>
                 </div>
               </div>
+              <p className="text-center text-[11px] text-text-muted/50 mt-4">
+                By using Sanctum, you agree to our{' '}
+                <a href="/legal/terms" className="text-near-green/50 hover:text-near-green/80 underline underline-offset-2 transition-colors">
+                  Terms of Service
+                </a>
+                {' '}and{' '}
+                <a href="/legal/acceptable-use" className="text-near-green/50 hover:text-near-green/80 underline underline-offset-2 transition-colors">
+                  Acceptable Use Policy
+                </a>.
+              </p>
             </Container>
           </div>
         </section>

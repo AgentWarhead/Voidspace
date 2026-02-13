@@ -92,6 +92,29 @@ export function Footer() {
             </span>
           </div>
         </div>
+
+        {/* Legal links */}
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pb-6 pt-2 border-t border-white/[0.04]">
+          <Link href="/legal/terms" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+            Terms
+          </Link>
+          <span className="text-text-muted/30 text-[10px]">·</span>
+          <Link href="/legal/privacy" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+            Privacy
+          </Link>
+          <span className="text-text-muted/30 text-[10px]">·</span>
+          <Link href="/legal/disclaimer" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+            Disclaimer
+          </Link>
+          <span className="text-text-muted/30 text-[10px]">·</span>
+          <Link href="/legal/cookies" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+            Cookies
+          </Link>
+          <span className="text-text-muted/30 text-[10px]">·</span>
+          <Link href="/legal/acceptable-use" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+            Acceptable Use
+          </Link>
+        </div>
       </Container>
     </footer>
   );
