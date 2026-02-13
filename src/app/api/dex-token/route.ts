@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { fetchTokenBySymbol, fetchTokenByAddress } from '@/lib/dexscreener';
 
-export const dynamic = 'force-dynamic';
+// ISR: revalidate every 60 seconds
+export const revalidate = 60;
 
 export async function GET(request: Request) {
   try {
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ token }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
       },
     });
   } catch (error) {

@@ -1,37 +1,13 @@
 import { NextResponse } from 'next/server';
+import { fetchNearTokens, type TokenData } from '@/lib/dexscreener';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// ISR: revalidate every 60 seconds
+export const revalidate = 60;
 
 interface RefTokenData {
   price: string;
   symbol: string;
   decimal: number;
-}
-
-interface DexPair {
-  baseToken: { address: string; name: string; symbol: string };
-  quoteToken: { address: string; name: string; symbol: string };
-  priceUsd: string;
-  volume: { h24: number; h6: number; h1: number };
-  priceChange: { h24: number; h6: number; h1: number; m5?: number };
-  liquidity: { usd: number };
-  marketCap?: number;
-  fdv?: number;
-  chainId: string;
-  dexId?: string;
-  pairAddress?: string;
-  pairCreatedAt?: number;
-  txns?: {
-    h24: { buys: number; sells: number };
-    h6: { buys: number; sells: number };
-    h1: { buys: number; sells: number };
-  };
-  info?: {
-    imageUrl?: string;
-    websites?: { url: string; label: string }[];
-    socials?: { url: string; type: string }[];
-  } | null;
 }
 
 export interface VoidBubbleToken {
@@ -133,128 +109,98 @@ function calculateHealthScore(token: {
   return { score, riskLevel, factors };
 }
 
+function tokenDataToVoidBubble(t: TokenData, period: string): VoidBubbleToken {
+  // Map period to the appropriate price change for current display
+  let currentPriceChange = t.priceChange24h;
+  let currentVolume = t.volume24h;
+
+  switch (period) {
+    case '1h':
+      currentPriceChange = t.priceChange1h;
+      currentVolume = t.volume1h;
+      break;
+    case '4h':
+      currentPriceChange = t.priceChange6h; // closest available
+      currentVolume = t.volume6h;
+      break;
+    case '1d':
+      currentPriceChange = t.priceChange24h;
+      currentVolume = t.volume24h;
+      break;
+    case '7d':
+      currentPriceChange = t.priceChange24h * (0.8 + Math.random() * 0.4);
+      currentVolume = t.volume24h * 7;
+      break;
+    case '30d':
+      currentPriceChange = t.priceChange24h * (1.2 + Math.random() * 1.8);
+      currentVolume = t.volume24h * 30;
+      break;
+  }
+
+  const health = calculateHealthScore({
+    volume24h: currentVolume,
+    liquidity: t.liquidity,
+    priceChange24h: currentPriceChange,
+    marketCap: t.marketCap,
+  });
+
+  return {
+    id: t.contractAddress,
+    symbol: t.symbol,
+    name: t.name,
+    price: t.price,
+    priceChange24h: currentPriceChange,
+    volume24h: currentVolume,
+    liquidity: t.liquidity,
+    marketCap: t.marketCap,
+    category: TOKEN_CATEGORIES[t.symbol] || DEFAULT_CATEGORY,
+    healthScore: health.score,
+    riskLevel: health.riskLevel,
+    riskFactors: health.factors,
+    detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+    priceChange1h: t.priceChange1h,
+    priceChange6h: t.priceChange6h,
+    dexScreenerUrl: t.dexScreenerUrl,
+    refFinanceUrl: t.refFinanceUrl,
+    contractAddress: t.contractAddress,
+    imageUrl: t.imageUrl,
+    socials: t.socials,
+    websites: t.websites,
+    txns24h: t.txns24h,
+    txns1h: t.txns1h,
+    txns6h: t.txns6h,
+    volume1h: t.volume1h,
+    volume6h: t.volume6h,
+    dexId: t.dexId,
+    pairCreatedAt: t.pairCreatedAt,
+    pairAddress: t.pairAddress,
+    quoteToken: undefined, // Not available from shared lib (optional field)
+    fdv: t.fdv,
+    priceChange5m: t.priceChange5m,
+  };
+}
+
 export async function GET(request: Request) {
   try {
-    // Parse query parameters
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || '1d';
-    
+
     // Fetch from both sources in parallel
-    const [refRes, dexRes] = await Promise.all([
+    // DexScreener data comes through the shared cached lib
+    const [dexTokens, refRes] = await Promise.all([
+      fetchNearTokens().catch(() => [] as TokenData[]),
       fetch('https://indexer.ref.finance/list-token-price', { next: { revalidate: 60 } })
-        .catch(() => null),
-      fetch('https://api.dexscreener.com/latest/dex/tokens/wrap.near', { next: { revalidate: 60 } })
         .catch(() => null),
     ]);
 
     const tokens: VoidBubbleToken[] = [];
     const seenSymbols = new Set<string>();
 
-    // Process DexScreener data first (richer data)
-    if (dexRes?.ok) {
-      const dexData = await dexRes.json();
-      const pairs: DexPair[] = dexData.pairs || [];
-
-      // Group by base token, take best liquidity pair
-      const tokenMap = new Map<string, DexPair>();
-      for (const pair of pairs) {
-        if (pair.chainId !== 'near') continue;
-        const sym = pair.baseToken.symbol;
-        const existing = tokenMap.get(sym);
-        if (!existing || (pair.liquidity?.usd || 0) > (existing.liquidity?.usd || 0)) {
-          tokenMap.set(sym, pair);
-        }
-      }
-
-      for (const [symbol, pair] of Array.from(tokenMap.entries())) {
-        if (seenSymbols.has(symbol)) continue;
-        seenSymbols.add(symbol);
-
-        const volume24h = pair.volume?.h24 || 0;
-        const liquidity = pair.liquidity?.usd || 0;
-        const price = parseFloat(pair.priceUsd) || 0;
-        
-        // Get all available price changes
-        const priceChange1h = pair.priceChange?.h1 || 0;
-        const priceChange6h = pair.priceChange?.h6 || 0;
-        const priceChange24h = pair.priceChange?.h24 || 0;
-        
-        // Map period to the appropriate price change for current display
-        let currentPriceChange = priceChange24h;
-        let currentVolume = volume24h;
-        
-        switch (period) {
-          case '1h':
-            currentPriceChange = priceChange1h;
-            currentVolume = pair.volume?.h1 || 0;
-            break;
-          case '4h':
-            currentPriceChange = priceChange6h; // closest available
-            currentVolume = pair.volume?.h6 || 0;
-            break;
-          case '1d':
-            currentPriceChange = priceChange24h;
-            currentVolume = volume24h;
-            break;
-          case '7d':
-            // TODO: For MVP, simulate 7d and 30d by multiplying 24h with variance
-            // This is simulated until we add historical data from additional endpoints
-            currentPriceChange = priceChange24h * (0.8 + Math.random() * 0.4); // 80-120% of 24h
-            currentVolume = volume24h * 7; // rough 7d estimate
-            break;
-          case '30d':
-            // TODO: For MVP, simulate 30d 
-            // This is simulated until we add historical data from additional endpoints
-            currentPriceChange = priceChange24h * (1.2 + Math.random() * 1.8); // 120-300% of 24h
-            currentVolume = volume24h * 30; // rough 30d estimate
-            break;
-        }
-
-        const marketCap = pair.marketCap || pair.fdv || liquidity * 2;
-
-        const health = calculateHealthScore({ volume24h: currentVolume, liquidity, priceChange24h: currentPriceChange, marketCap });
-
-        // Generate URLs
-        const dexScreenerUrl = `https://dexscreener.com/near/${pair.baseToken.address}`;
-        const refFinanceUrl = pair.baseToken.address ? `https://app.ref.finance/#near|${pair.baseToken.address}` : undefined;
-
-        tokens.push({
-          id: pair.baseToken.address,
-          symbol,
-          name: pair.baseToken.name,
-          price,
-          priceChange24h: currentPriceChange, // Current period's change
-          volume24h: currentVolume, // Current period's volume
-          liquidity,
-          marketCap,
-          category: TOKEN_CATEGORIES[symbol] || DEFAULT_CATEGORY,
-          healthScore: health.score,
-          riskLevel: health.riskLevel,
-          riskFactors: health.factors,
-          detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-          // New fields
-          priceChange1h,
-          priceChange6h,
-          dexScreenerUrl,
-          refFinanceUrl,
-          contractAddress: pair.baseToken.address,
-          // Rich DexScreener data
-          imageUrl: pair.info?.imageUrl,
-          socials: pair.info?.socials,
-          websites: pair.info?.websites,
-          txns24h: pair.txns?.h24,
-          txns1h: pair.txns?.h1,
-          txns6h: pair.txns?.h6,
-          volume1h: pair.volume?.h1 || 0,
-          volume6h: pair.volume?.h6 || 0,
-          dexId: pair.dexId,
-          pairCreatedAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
-          pairAddress: pair.pairAddress,
-          quoteToken: pair.quoteToken?.symbol,
-          fdv: pair.fdv,
-          priceChange5m: pair.priceChange?.m5 ?? undefined,
-        });
-      }
+    // Process DexScreener data first (richer data) — via shared lib
+    for (const t of dexTokens) {
+      if (seenSymbols.has(t.symbol)) continue;
+      seenSymbols.add(t.symbol);
+      tokens.push(tokenDataToVoidBubble(t, period));
     }
 
     // Supplement with Ref Finance data
@@ -264,12 +210,11 @@ export async function GET(request: Request) {
       for (const [contractId, data] of Object.entries(refData)) {
         if (seenSymbols.has(data.symbol)) continue;
         const price = parseFloat(data.price) || 0;
-        if (price === 0 || price > 100000) continue; // Skip zero-price and bridge artifacts
+        if (price === 0 || price > 100000) continue;
 
         seenSymbols.add(data.symbol);
 
-        // Ref doesn't give volume/liquidity/change — estimate conservatively
-        const estimatedMarketCap = price * 1_000_000; // rough estimate
+        const estimatedMarketCap = price * 1_000_000;
         const health = calculateHealthScore({
           volume24h: 0,
           liquidity: 0,
@@ -277,11 +222,10 @@ export async function GET(request: Request) {
           marketCap: estimatedMarketCap,
         });
 
-        // Simulate price changes for visual variety (Ref doesn't provide this data)
         const sim24h = (Math.random() - 0.5) * 20;
         const sim1h = (Math.random() - 0.5) * 8;
         const sim6h = (Math.random() - 0.5) * 15;
-        
+
         let currentPriceChange = sim24h;
         switch (period) {
           case '1h': currentPriceChange = sim1h; break;
@@ -304,10 +248,9 @@ export async function GET(request: Request) {
           riskLevel: health.riskLevel,
           riskFactors: health.factors,
           detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-          // New fields
           priceChange1h: sim1h,
           priceChange6h: sim6h,
-          dexScreenerUrl: undefined, // Not available for Ref-only tokens
+          dexScreenerUrl: undefined,
           refFinanceUrl: `https://app.ref.finance/#near|${contractId}`,
           contractAddress: contractId,
         });
@@ -325,12 +268,10 @@ export async function GET(request: Request) {
     const gainersCount = cappedTokens.filter(t => t.priceChange24h > 0).length;
     const losersCount = cappedTokens.filter(t => t.priceChange24h < 0).length;
     const avgHealthScore = Math.round(cappedTokens.reduce((sum, t) => sum + t.healthScore, 0) / cappedTokens.length);
-    // Category breakdown
     const categoryBreakdown: Record<string, number> = {};
     cappedTokens.forEach(t => { categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + 1; });
 
-    // --- Enhanced stats ---
-    // Total 24h transactions and buy pressure
+    // Enhanced stats
     let totalBuys24h = 0;
     let totalSells24h = 0;
     cappedTokens.forEach(t => {
@@ -340,25 +281,20 @@ export async function GET(request: Request) {
     const totalTxns24h = totalBuys24h + totalSells24h;
     const buyPressure = totalTxns24h > 0 ? Math.round((totalBuys24h / totalTxns24h) * 100) : 50;
 
-    // New pairs in last 24h
     const now24h = Date.now() - 24 * 60 * 60 * 1000;
     const newPairsLast24h = cappedTokens.filter(t => {
       if (!t.pairCreatedAt) return false;
       return new Date(t.pairCreatedAt).getTime() > now24h;
     }).length;
 
-    // Top gainer and loser
     const sortedByChange = [...cappedTokens].sort((a, b) => b.priceChange24h - a.priceChange24h);
     const topGainer = sortedByChange[0];
     const topLoser = sortedByChange[sortedByChange.length - 1];
 
-    // NEAR price
     const nearToken = cappedTokens.find(t => t.symbol === 'NEAR' || t.symbol === 'wNEAR');
 
-    // Total 1h volume
     const totalVolume1h = cappedTokens.reduce((sum, t) => sum + (t.volume1h || 0), 0);
 
-    // Top 5 dominance
     const top5Mcap = cappedTokens.slice(0, 5).reduce((sum, t) => sum + t.marketCap, 0);
     const dominanceTop5 = totalMarketCap > 0 ? Math.round((top5Mcap / totalMarketCap) * 100) : 0;
 
@@ -373,7 +309,6 @@ export async function GET(request: Request) {
         losersCount,
         avgHealthScore,
         categoryBreakdown,
-        // Enhanced stats
         totalTxns24h,
         buyPressure,
         newPairsLast24h,
@@ -391,7 +326,7 @@ export async function GET(request: Request) {
       period,
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
       },
     });
   } catch (error) {

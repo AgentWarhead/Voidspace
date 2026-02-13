@@ -265,8 +265,13 @@ export async function fetchTokensByAddresses(
     batches.push(uncached.slice(i, i + BATCH_SIZE));
   }
 
-  await Promise.all(
-    batches.map(async (batch) => {
+  // Process batches sequentially with a stagger to avoid rate limiting
+  for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+    if (batchIndex > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+    const batch = batches[batchIndex];
+    await (async () => {
       try {
         const joined = batch.join(',');
         const res = await fetch(
@@ -304,8 +309,8 @@ export async function fetchTokensByAddresses(
       } catch {
         // Silently skip failed batches
       }
-    })
-  );
+    })();
+  }
 
   return result;
 }
