@@ -350,10 +350,9 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
                       onClick={handleMysteryMission}
                       onMouseEnter={() => setDiceHover(true)}
                       onMouseLeave={() => setDiceHover(false)}
-                      disabled={mode === 'generating'}
-                      className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl bg-near-green text-void-black font-semibold text-sm hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl bg-near-green text-void-black font-semibold text-sm hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                     >
-                      <Dices className="w-4.5 h-4.5" />
+                      <Dices className="w-[18px] h-[18px]" />
                       Roll a Mystery Mission
                       <Zap className="w-4 h-4 opacity-70" />
                     </button>
@@ -392,7 +391,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
 
                     <button
                       onClick={handleCustomGenerate}
-                      disabled={customIdea.trim().length === 0 || mode === 'generating'}
+                      disabled={customIdea.trim().length === 0}
                       className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white/[0.06] border border-white/[0.1] text-text-primary font-semibold text-sm hover:bg-white/[0.1] hover:border-white/[0.2] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                       <Sparkles className="w-4 h-4 text-near-green" />
