@@ -13,9 +13,6 @@ import Link from 'next/link';
 
 // ─── Lazy-loaded below-fold components ─────────────────────────────────────────
 
-const EcosystemMap = dynamic(() => import('./components/EcosystemMap').then(m => ({ default: m.EcosystemMap })), {
-  loading: () => <div className="h-96 animate-pulse bg-surface rounded-xl" />,
-});
 
 const ProjectTemplates = dynamic(() => import('./components/ProjectTemplates'), {
   loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
@@ -477,13 +474,6 @@ export default function LearnPage() {
             </Card>
           </div>
         </ScrollReveal>
-      </Container>
-
-      {/* Ecosystem Map */}
-      <Container className="pb-20">
-        <div id="ecosystem">
-          <EcosystemMap />
-        </div>
       </Container>
 
       {/* Project Templates */}

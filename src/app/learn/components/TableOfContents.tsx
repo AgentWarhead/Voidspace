@@ -13,7 +13,6 @@ const TOC_ITEMS = [
   { id: 'cross-chain', label: 'Cross-Chain' },
   { id: 'near-overview', label: 'NEAR Overview' },
   { id: 'ai-briefs', label: 'AI Briefs' },
-  { id: 'ecosystem', label: 'Ecosystem' },
   { id: 'templates', label: 'Templates' },
   { id: 'resources', label: 'Resources' },
 ];
