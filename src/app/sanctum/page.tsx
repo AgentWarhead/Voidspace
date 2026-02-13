@@ -1,7 +1,6 @@
 'use client';
 
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { Container } from '@/components/ui';
@@ -17,7 +16,6 @@ import { AchievementPopup } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline } from './components/TaskProgressInline';
 import { ShareContract } from './components/ShareContract';
-import { DeploymentHistory } from './components/DeploymentHistory';
 import { SocialProof } from './components/SocialProof';
 import { ContractDNA } from './components/ContractDNA';
 import { GasEstimatorCompact } from './components/GasEstimator';
@@ -34,6 +32,7 @@ import { useWallet } from '@/hooks/useWallet';
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
+import { BuilderShowcase } from './components/BuilderShowcase';
 
 // Template slug → starter message mapping
 const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
@@ -295,14 +294,30 @@ function SanctumPageInner() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-text-secondary text-xl max-w-2xl mx-auto mb-12">
+              <p className="text-text-secondary text-xl max-w-2xl mx-auto mb-8">
                 AI-powered development studio for NEAR Protocol.
                 <br />
                 <span className="text-near-green">Contracts, webapps, deployment</span> — all through conversation.
               </p>
 
+              {/* Hero CTA */}
+              <button
+                onClick={() => {
+                  document.getElementById('modes')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-near-green text-void-black font-semibold text-lg hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] transition-all shadow-lg shadow-near-green/25 mb-12"
+              >
+                Start Building Free
+                <span className="animate-bounce">→</span>
+              </button>
+
+              {/* Builder Showcase */}
+              <div className="mb-16">
+                <BuilderShowcase />
+              </div>
+
               {/* Friendly Mode Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-5xl mx-auto">
+              <div id="modes" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-5xl mx-auto">
                 <button
                   onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
@@ -499,8 +514,8 @@ function SanctumPageInner() {
               {/* Stats */}
               <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-text-primary font-mono">15+</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Contract Types</div>
+                  <div className="text-3xl font-bold text-text-primary font-mono">🧠</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Zero Rust Required</div>
                 </div>
                 <div className="w-px h-12 bg-border-subtle hidden sm:block" />
                 <div className="text-center">
@@ -509,8 +524,8 @@ function SanctumPageInner() {
                 </div>
                 <div className="w-px h-12 bg-border-subtle hidden sm:block" />
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-near-green font-mono">&lt;5m</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">To Deploy</div>
+                  <div className="text-3xl font-bold text-near-green font-mono">Idea→</div>
+                  <div className="text-xs text-text-muted uppercase tracking-wider">Deployed in Minutes</div>
                 </div>
               </div>
 
@@ -519,25 +534,6 @@ function SanctumPageInner() {
                 <SocialProof variant="banner" />
               </div>
 
-              {/* History toggle - smaller and less prominent */}
-              <div className="flex justify-center">
-                <button
-                  onClick={() => dispatch({ type: 'SET_SHOW_HISTORY', payload: !state.showHistory })}
-                  className="text-xs text-text-muted hover:text-text-secondary transition-colors underline decoration-dotted underline-offset-4"
-                >
-                  {state.showHistory ? 'Hide' : 'View'} My Deployments
-                </button>
-              </div>
-
-              {/* Deployment History (collapsible) */}
-              {state.showHistory && (
-                <div className="max-w-2xl mx-auto mt-8">
-                  <DeploymentHistory
-                    onRemix={handleRemixFromHistory}
-                    onShare={handleShareFromHistory}
-                  />
-                </div>
-              )}
             </Container>
           </div>
 
@@ -561,16 +557,6 @@ function SanctumPageInner() {
                   <Rocket className="w-4 h-4 text-cyan-400" />
                   <span>One-Click Deploy</span>
                 </div>
-              </div>
-              
-              {/* Void Bubbles CTA */}
-              <div className="mt-16 max-w-lg mx-auto">
-                <Link href="/void-bubbles" className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
-                  <span className="text-lg">🫧</span>
-                  <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
-                    Track token health in real-time → Void Bubbles
-                  </span>
-                </Link>
               </div>
             </Container>
           </div>
