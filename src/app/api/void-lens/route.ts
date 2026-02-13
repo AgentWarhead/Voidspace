@@ -3,7 +3,7 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
-import { fetchTokenByAddress } from '@/lib/dexscreener';
+import { fetchTokensByAddresses } from '@/lib/dexscreener';
 
 // Known NEAR contracts mapped to friendly names
 const KNOWN_CONTRACTS: Record<string, { name: string; category: string }> = {
@@ -265,8 +265,10 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
     let fullAccessKeys = 0;
     let functionCallKeys = 0;
     for (const key of allKeys) {
-      const permission = key?.access_key?.permission;
-      if (permission === 'FullAccess' || typeof permission === 'string' && permission.includes('FullAccess')) {
+      // NearBlocks API returns permission_kind: "FULL_ACCESS" | "FUNCTION_CALL"
+      const permissionKind = key?.permission_kind || key?.access_key?.permission || '';
+      const permStr = typeof permissionKind === 'string' ? permissionKind.toUpperCase() : '';
+      if (permStr === 'FULL_ACCESS' || permStr === 'FULLACCESS') {
         fullAccessKeys++;
       } else {
         functionCallKeys++;
@@ -712,10 +714,35 @@ async function enrichPortfolio(address: string, walletData: WalletData): Promise
     // Small delay to avoid NearBlocks rate limits (fetchWalletData already made 5 requests)
     await new Promise(r => setTimeout(r, 300));
 
+    // Abort controller for 8s timeout protection on serverless
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    try {
+      return await _enrichPortfolioInner(address, walletData, controller.signal);
+    } finally {
+      clearTimeout(timeout);
+    }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      console.warn('Portfolio enrichment timed out after 8s');
+    } else {
+      console.error('Portfolio enrichment error:', error);
+    }
+    return null;
+  }
+}
+
+async function _enrichPortfolioInner(
+  address: string,
+  walletData: WalletData,
+  signal: AbortSignal
+): Promise<PortfolioData | null> {
+  try {
     // Fetch token inventory with balances from NearBlocks
     const invResponse = await fetch(
       `https://api.nearblocks.io/v1/account/${address}/inventory`,
-      { headers: { 'Accept': 'application/json' } }
+      { headers: { 'Accept': 'application/json' }, signal }
     ).catch(() => null);
 
     if (!invResponse?.ok) return null;
@@ -729,18 +756,24 @@ async function enrichPortfolio(address: string, walletData: WalletData): Promise
 
     if (fts.length === 0) return null;
 
-    // Look up prices from DexScreener for each token (batch, max 15 to avoid rate limits)
+    // Collect all addresses for a single batched DexScreener call
     const lookupTokens = fts.slice(0, 30);
-    const priceResults = await Promise.allSettled(
-      lookupTokens.map(ft => fetchTokenByAddress(ft.contract))
-    );
+    const allAddresses = lookupTokens.map(ft => ft.contract);
+
+    // Include wrap.near for native NEAR price lookup
+    const nearBalance = parseFloat(walletData.balance) || 0;
+    if (nearBalance > 0 && !allAddresses.includes('wrap.near')) {
+      allAddresses.push('wrap.near');
+    }
+
+    // Single batched call (groups of 15 internally)
+    const priceMap = await fetchTokensByAddresses(allAddresses, signal);
 
     const holdings: PortfolioHolding[] = [];
 
-    // Also add native NEAR balance
-    const nearBalance = parseFloat(walletData.balance) || 0;
+    // Add native NEAR balance using batched price data
     if (nearBalance > 0) {
-      const nearDex = await fetchTokenByAddress('wrap.near').catch(() => null);
+      const nearDex = priceMap.get('wrap.near');
       if (nearDex) {
         holdings.push({
           symbol: 'NEAR',
@@ -757,8 +790,7 @@ async function enrichPortfolio(address: string, walletData: WalletData): Promise
 
     for (let i = 0; i < lookupTokens.length; i++) {
       const ft = lookupTokens[i];
-      const result = priceResults[i];
-      const dexData = result?.status === 'fulfilled' ? result.value : null;
+      const dexData = priceMap.get(ft.contract) || null;
 
       const decimals = ft.ft_meta?.decimals || 18;
       const rawAmount = ft.amount || '0';

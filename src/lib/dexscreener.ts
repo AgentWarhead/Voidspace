@@ -230,6 +230,85 @@ export async function fetchTokenBySymbol(symbol: string): Promise<TokenData | nu
 }
 
 /**
+ * Fetch multiple tokens' data by contract addresses in batched requests.
+ * DexScreener supports comma-separated multi-token lookup.
+ * Batches into groups of 15 to stay within URL length limits.
+ */
+export async function fetchTokensByAddresses(
+  addresses: string[],
+  signal?: AbortSignal
+): Promise<Map<string, TokenData>> {
+  const result = new Map<string, TokenData>();
+  if (addresses.length === 0) return result;
+
+  // Deduplicate and check cache first
+  const unique = [...new Set(addresses)];
+  const uncached: string[] = [];
+
+  for (const addr of unique) {
+    const cached = getCached<TokenData | null>(`token-addr-${addr}`);
+    if (cached !== null) {
+      result.set(addr, cached);
+    } else {
+      uncached.push(addr);
+    }
+  }
+
+  if (uncached.length === 0) return result;
+
+  // Batch into groups of 15
+  const BATCH_SIZE = 15;
+  const batches: string[][] = [];
+  for (let i = 0; i < uncached.length; i += BATCH_SIZE) {
+    batches.push(uncached.slice(i, i + BATCH_SIZE));
+  }
+
+  await Promise.all(
+    batches.map(async (batch) => {
+      try {
+        const joined = batch.map(a => encodeURIComponent(a)).join(',');
+        const res = await fetch(
+          `https://api.dexscreener.com/latest/dex/tokens/${joined}`,
+          { next: { revalidate: 60 }, signal }
+        );
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const pairs: DexPair[] = data?.pairs || [];
+
+        // Group by base token address, pick highest liquidity NEAR pair for each
+        const bestByAddress = new Map<string, DexPair>();
+        for (const pair of pairs) {
+          if (pair.chainId !== 'near') continue;
+          const addr = pair.baseToken?.address;
+          if (!addr) continue;
+          const existing = bestByAddress.get(addr);
+          if (!existing || (pair.liquidity?.usd || 0) > (existing.liquidity?.usd || 0)) {
+            bestByAddress.set(addr, pair);
+          }
+        }
+
+        for (const addr of batch) {
+          const bestPair = bestByAddress.get(addr);
+          if (bestPair) {
+            const token = pairToTokenData(bestPair);
+            result.set(addr, token);
+            setCache(`token-addr-${addr}`, token);
+          } else {
+            // Cache miss so we don't re-fetch next time
+            setCache(`token-addr-${addr}`, null);
+          }
+        }
+      } catch {
+        // Silently skip failed batches
+      }
+    })
+  );
+
+  return result;
+}
+
+/**
  * Fetch a single token's data by contract address.
  */
 export async function fetchTokenByAddress(contractAddress: string): Promise<TokenData | null> {
