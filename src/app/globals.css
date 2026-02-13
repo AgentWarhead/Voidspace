@@ -452,3 +452,18 @@ body::before {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Constellation Map icon pulse */
+@keyframes constellationPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(6, 182, 212, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.6), 0 0 60px rgba(6, 182, 212, 0.2);
+  }
+}
+
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,236,151,0.3); }
+  50% { box-shadow: 0 0 30px rgba(0,236,151,0.5); }
+}

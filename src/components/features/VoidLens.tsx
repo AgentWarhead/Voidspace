@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 // @ts-ignore
 import { Search, Shield, TrendingUp, TrendingDown, Activity, Wallet, AlertTriangle, CheckCircle, Network, RotateCcw, RefreshCw, Key, Lock, Zap, Coins, BarChart3, Clock, Globe, Layers, DollarSign, PieChart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { GradientText } from '@/components/effects/GradientText';
+import { GridPattern } from '@/components/effects/GridPattern';
+import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -492,116 +495,213 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     );
   };
 
+  // Cursor-tracking glow for glassmorphism card
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }, []);
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-near-green/20 flex items-center justify-center">
-            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-near-green" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Void Lens</h1>
-        </div>
-        <p className="text-text-secondary text-sm sm:text-lg max-w-2xl mx-auto px-4">
-          Advanced NEAR wallet reputation scoring powered by blockchain analytics and AI
-        </p>
-      </div>
+      {/* Background Atmosphere */}
+      <div className="relative">
+        <div 
+          className="absolute inset-0 -top-20 -bottom-20 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at 30% 20%, rgba(0,236,151,0.06) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(6,182,212,0.04) 0%, transparent 50%)',
+          }}
+        />
+        <GridPattern className="opacity-[0.07]" />
 
-      {/* Search Interface */}
-      <Card className="max-w-2xl mx-auto" padding="lg">
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
-            <Input
-              placeholder="Enter NEAR wallet address (e.g., alex.near)"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="pl-10"
-              onKeyPress={(e) => e.key === 'Enter' && handleAnalyze()}
-            />
-          </div>
-
-          {/* Example Wallets */}
-          <div className="space-y-2">
-            <p className="text-xs text-text-muted">Try these notable wallets:</p>
-            <div className="flex flex-wrap gap-2">
-              {EXAMPLE_WALLETS.map((example) => (
-                <button
-                  key={example}
-                  onClick={() => handleAnalyze(example)}
-                  className="text-xs px-2 py-1 bg-surface border border-border rounded-full hover:border-near-green/30 cursor-pointer transition-colors"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <Button 
-            onClick={() => handleAnalyze()}
-            disabled={loading || !address.trim()}
-            className="w-full"
-            variant="primary"
+        {/* Header */}
+        <div className="text-center relative z-10">
+          {/* Animated Shield Icon */}
+          <motion.div 
+            className="flex items-center justify-center mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0 }}
           >
-            {!loading ? (
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Analyze Reputation
+            <div className="relative">
+              {/* Rotating glow ring */}
+              <div className="absolute inset-[-6px] rounded-xl animate-[spin_4s_linear_infinite] opacity-60">
+                <div className="w-full h-full rounded-xl bg-[conic-gradient(from_0deg,transparent,rgba(0,236,151,0.4),transparent,transparent)]" />
               </div>
-            ) : null}
-          </Button>
-          
-          {/* Multi-Step Loading Progress */}
-          {loading && (
-            <div className="space-y-3 pt-2">
-              {loadingStages.map((stage, index) => (
-                <div key={stage.id} className="flex items-center gap-3 text-sm">
-                  <div className="flex items-center justify-center w-5 h-5">
-                    {stage.completed ? (
-                      <CheckCircle className="w-4 h-4 text-near-green" />
-                    ) : index === currentStageIndex ? (
-                      <div className="animate-spin w-4 h-4 border-2 border-near-green/30 border-t-near-green rounded-full" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border-2 border-text-muted/30" />
-                    )}
-                  </div>
-                  <span className={cn(
-                    "transition-colors",
-                    stage.completed ? "text-near-green" : 
-                    index === currentStageIndex ? "text-text-primary" : 
-                    "text-text-muted"
-                  )}>
-                    {stage.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Error Display */}
-          {error && (
-            <div className="p-4 rounded-lg bg-error/10 border border-error/20 animate-in slide-in-from-top duration-300">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-error text-sm font-medium mb-2">
-                    {errorType ? getErrorMessage(errorType, error) : error}
-                  </p>
-                  <Button
-                    onClick={() => handleAnalyze()}
-                    size="sm"
-                    variant="ghost"
-                    className="text-error hover:text-error hover:bg-error/10"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Try Again
-                  </Button>
-                </div>
+              {/* Pulsing shield container */}
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-near-green/20 border border-near-green/30 flex items-center justify-center animate-[pulse_3s_ease-in-out_infinite]">
+                <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-near-green drop-shadow-[0_0_8px_rgba(0,236,151,0.5)]" />
               </div>
             </div>
-          )}
+          </motion.div>
+
+          {/* Title with GradientText + FREE badge */}
+          <motion.div 
+            className="flex items-center justify-center gap-3 mb-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <GradientText as="h1" animated className="text-2xl sm:text-3xl font-bold">
+              Void Lens
+            </GradientText>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-near-green/10 text-near-green border border-near-green/20 uppercase tracking-wider">
+              Free
+            </span>
+          </motion.div>
+
+          {/* Punchier Subtitle */}
+          <motion.p 
+            className="text-text-secondary text-base sm:text-lg max-w-2xl mx-auto px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            Scan any NEAR wallet. Trust score in 60 seconds.
+          </motion.p>
         </div>
-      </Card>
+
+        {/* Glassmorphism Search Card */}
+        <motion.div
+          className="max-w-2xl mx-auto mt-6 relative z-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div
+            ref={cardRef}
+            className="relative bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl p-6 overflow-hidden"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
+            {/* Top edge highlight */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-near-green/30 to-transparent" />
+            
+            {/* Cursor-tracking glow */}
+            {isHovering && (
+              <div
+                className="absolute pointer-events-none w-[300px] h-[300px] rounded-full opacity-20 transition-opacity duration-300"
+                style={{
+                  background: 'radial-gradient(circle, rgba(0,236,151,0.15) 0%, transparent 70%)',
+                  left: mousePos.x - 150,
+                  top: mousePos.y - 150,
+                }}
+              />
+            )}
+
+            <div className="relative z-10 space-y-4">
+              {/* Enhanced Input Field */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <Input
+                  placeholder="Enter NEAR wallet address (e.g., alex.near)"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="pl-10 transition-all duration-300 focus:border-near-green/50 focus:shadow-[0_0_15px_rgba(0,236,151,0.15)]"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAnalyze()}
+                />
+              </div>
+
+              {/* Example Wallets Upgrade */}
+              <div className="space-y-2">
+                <p className="text-xs text-text-muted">🐋 Notable Wallets:</p>
+                <div className="flex flex-wrap gap-2">
+                  {EXAMPLE_WALLETS.map((example) => (
+                    <button
+                      key={example}
+                      onClick={() => handleAnalyze(example)}
+                      className="text-xs px-2.5 py-1 bg-surface/50 border border-border rounded-full hover:border-near-green/40 hover:shadow-[0_0_10px_rgba(0,236,151,0.1)] hover:scale-105 cursor-pointer transition-all duration-200"
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* CTA Button Upgrade */}
+              <button 
+                onClick={() => handleAnalyze()}
+                disabled={loading || !address.trim()}
+                className={cn(
+                  "w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2",
+                  "bg-gradient-to-r from-near-green to-emerald-500 text-black",
+                  "shadow-[0_0_20px_rgba(0,236,151,0.3)]",
+                  "hover:shadow-[0_0_30px_rgba(0,236,151,0.5)] hover:brightness-110",
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
+                  !loading && address.trim() && "animate-[ctaPulse_2s_ease-in-out_infinite]"
+                )}
+              >
+                {!loading ? (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Analyze Reputation
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-black/30 border-t-black rounded-full" />
+                    Analyzing...
+                  </div>
+                )}
+              </button>
+              
+              {/* Multi-Step Loading Progress */}
+              {loading && (
+                <div className="space-y-3 pt-2">
+                  {loadingStages.map((stage, index) => (
+                    <div key={stage.id} className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center justify-center w-5 h-5">
+                        {stage.completed ? (
+                          <CheckCircle className="w-4 h-4 text-near-green" />
+                        ) : index === currentStageIndex ? (
+                          <div className="animate-spin w-4 h-4 border-2 border-near-green/30 border-t-near-green rounded-full" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full border-2 border-text-muted/30" />
+                        )}
+                      </div>
+                      <span className={cn(
+                        "transition-colors",
+                        stage.completed ? "text-near-green" : 
+                        index === currentStageIndex ? "text-text-primary" : 
+                        "text-text-muted"
+                      )}>
+                        {stage.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Error Display */}
+              {error && (
+                <div className="p-4 rounded-lg bg-error/10 border border-error/20 animate-in slide-in-from-top duration-300">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-error text-sm font-medium mb-2">
+                        {errorType ? getErrorMessage(errorType, error) : error}
+                      </p>
+                      <Button
+                        onClick={() => handleAnalyze()}
+                        size="sm"
+                        variant="ghost"
+                        className="text-error hover:text-error hover:bg-error/10"
+                      >
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Try Again
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Results */}
       {result && (

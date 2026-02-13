@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import { Search, Network, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
+import { GradientText } from '@/components/effects/GradientText';
+import { GridPattern } from '@/components/effects/GridPattern';
 import { ConstellationContextMenu } from './ConstellationContextMenu';
 import { ConstellationMinimap } from './ConstellationMinimap';
 import { ConstellationControls } from './ConstellationControls';
@@ -850,117 +853,193 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
   }, [constellation, initializeVisualization]);
 
   // ── Render ─────────────────────────────────────────────────────
+  // Cursor-tracking glow for glassmorphism card
+  const glassCardRef = useRef<HTMLDivElement>(null);
+  const [glowPos, setGlowPos] = useState({ x: 0, y: 0 });
+  const handleCardMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = glassCardRef.current?.getBoundingClientRect();
+    if (rect) setGlowPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }, []);
+
+  const fadeUp = (delay: number) => ({
+    initial: { opacity: 0, y: 20 } as const,
+    animate: { opacity: 1, y: 0 } as const,
+    transition: { duration: 0.5, delay, ease: 'easeOut' } as const,
+  });
+
   return (
     <div className="space-y-6 flex flex-col">
-      {/* Header */}
-      <div className="text-center py-6">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-            <Search className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-text-primary">Constellation Mapping</h1>
-        </div>
-        <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-          Explore the cosmic web of wallet relationships on NEAR Protocol
-        </p>
-      </div>
+      {/* Background Atmosphere */}
+      <div className="relative">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at 30% 30%, rgba(139,92,246,0.06) 0%, transparent 50%), radial-gradient(ellipse at 70% 70%, rgba(6,182,212,0.04) 0%, transparent 50%)',
+          }}
+        />
+        <GridPattern className="opacity-10" />
 
-      {/* Search Interface */}
-      <Card className="max-w-4xl mx-auto" padding="lg">
-        <div className="space-y-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
+        {/* Header */}
+        <div className="relative text-center py-8">
+          <motion.div {...fadeUp(0)} className="flex items-center justify-center gap-3 mb-4">
+            <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.4)] animate-[constellationPulse_3s_ease-in-out_infinite]">
+              <Network className="w-7 h-7 text-white" />
+            </div>
+          </motion.div>
+          <motion.div {...fadeUp(0.1)}>
+            <GradientText as="h1" animated className="text-3xl font-bold">
+              Constellation Mapping
+            </GradientText>
+          </motion.div>
+          <motion.p {...fadeUp(0.2)} className="text-text-secondary text-lg max-w-2xl mx-auto mt-3">
+            Trace the invisible threads connecting NEAR&apos;s biggest players.
+          </motion.p>
+        </div>
+
+        {/* Search Interface — Glassmorphism Card */}
+        <motion.div
+          {...fadeUp(0.3)}
+          ref={glassCardRef}
+          onMouseMove={handleCardMouseMove}
+          className="relative max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl p-6 overflow-hidden"
+        >
+          {/* Top edge highlight */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+          {/* Cursor glow spotlight */}
+          <div
+            className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+            style={{
+              background: `radial-gradient(400px at ${glowPos.x}px ${glowPos.y}px, rgba(139,92,246,0.08), transparent 50%)`,
+            }}
+          />
+
+          <div className="relative space-y-4">
+            {/* Full-width input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted pointer-events-none" />
               <Input
                 placeholder="Enter NEAR wallet address (e.g., alex.near)"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="text-lg"
+                className="text-lg pl-11 w-full focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
               />
             </div>
+
+            {/* CTA Button — full width */}
             <Button
               onClick={() => handleSearch()}
               disabled={loading || !address.trim()}
               variant="primary"
-              className="px-8"
+              className="w-full py-3 text-base font-semibold bg-gradient-to-r from-purple-500 to-cyan-500 shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 border-0"
             >
               {loading ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <div className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
                   Mapping...
                 </div>
               ) : (
-                'Explore Constellation'
+                <span className="flex items-center justify-center gap-2">
+                  <Network className="w-5 h-5" />
+                  Explore Constellation
+                </span>
               )}
             </Button>
-          </div>
 
-          {/* Example wallets */}
-          <div className="space-y-2">
-            <p className="text-xs text-text-muted">Try an example:</p>
-            <div className="flex flex-wrap gap-2">
-              {EXAMPLE_WALLETS.map(({ id, label }) => (
-                <button
-                  key={id}
-                  onClick={() => handleSearch(id)}
-                  className="px-2.5 py-1 text-xs font-mono rounded-md bg-surface border border-border text-text-secondary hover:border-near-green/30 hover:text-text-primary transition-colors"
-                >
-                  {id} <span className="text-text-muted ml-1">— {label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+            {/* Wallet Suggestions — Unified */}
+            <div className="space-y-3 pt-2">
+              {/* Featured */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-text-muted shrink-0">🌟 Featured:</span>
+                {EXAMPLE_WALLETS.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => handleSearch(id)}
+                    className="px-2.5 py-1 text-xs font-mono rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 hover:border-purple-500/40 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)] hover:scale-105 transition-all duration-200"
+                  >
+                    {id} <span className="text-purple-400/60 ml-1">— {label}</span>
+                  </button>
+                ))}
+              </div>
 
-          {/* Popular wallets */}
-          <div className="space-y-2">
-            <p className="text-xs text-text-muted">Popular:</p>
-            <div className="flex flex-wrap gap-2">
-              {POPULAR_WALLETS.map(w => (
-                <button
-                  key={w}
-                  onClick={() => handleSearch(w)}
-                  className="px-2 py-0.5 text-xs font-mono rounded bg-surface/50 border border-border/50 text-text-muted hover:border-near-green/30 hover:text-text-secondary transition-colors"
-                >
-                  {w}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent wallets */}
-          {recentWallets.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs text-text-muted">Recent:</p>
-              <div className="flex flex-wrap gap-2">
-                {recentWallets.map(w => (
+              {/* Popular */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-text-muted shrink-0">🔥 Popular:</span>
+                {POPULAR_WALLETS.map(w => (
                   <button
                     key={w}
                     onClick={() => handleSearch(w)}
-                    className="px-2 py-0.5 text-xs font-mono rounded bg-surface/50 border border-cyan-500/20 text-cyan-300/70 hover:border-cyan-500/40 hover:text-cyan-300 transition-colors"
+                    className="px-2 py-0.5 text-xs font-mono rounded bg-amber-500/10 border border-amber-500/20 text-amber-300/80 hover:border-amber-500/40 hover:shadow-[0_0_10px_rgba(245,158,11,0.15)] hover:scale-105 transition-all duration-200"
                   >
                     {w}
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
 
-        {error && (
-          <div className="mt-4 p-4 rounded-lg bg-red-900/20 border border-red-500/20 text-red-300">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-sm font-medium mb-1">Connection Failed</p>
-                <p className="text-xs text-red-200">{error}</p>
-              </div>
-              <Button onClick={() => handleSearch()} variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs">
-                <RefreshCw className="w-3 h-3" />
-                Retry
-              </Button>
+              {/* Recent */}
+              {recentWallets.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-text-muted shrink-0">🕐 Recent:</span>
+                  {recentWallets.map(w => (
+                    <button
+                      key={w}
+                      onClick={() => handleSearch(w)}
+                      className="px-2 py-0.5 text-xs font-mono rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300/80 hover:border-cyan-500/40 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] hover:scale-105 transition-all duration-200"
+                    >
+                      {w}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+
+          {error && (
+            <div className="mt-4 p-4 rounded-lg bg-red-900/20 border border-red-500/20 text-red-300">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <p className="text-sm font-medium mb-1">Connection Failed</p>
+                  <p className="text-xs text-red-200">{error}</p>
+                </div>
+                <Button onClick={() => handleSearch()} variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs">
+                  <RefreshCw className="w-3 h-3" />
+                  Retry
+                </Button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Mini Constellation Preview */}
+        {!constellation && !loading && (
+          <motion.div {...fadeUp(0.5)} className="flex justify-center py-6">
+            <svg width="200" height="120" viewBox="0 0 200 120" className="opacity-35">
+              {/* Connecting lines */}
+              <line x1="40" y1="60" x2="100" y2="30" stroke="#8B5CF6" strokeWidth="0.5" opacity="0.5" />
+              <line x1="100" y1="30" x2="160" y2="55" stroke="#06B6D4" strokeWidth="0.5" opacity="0.5" />
+              <line x1="100" y1="30" x2="70" y2="95" stroke="#8B5CF6" strokeWidth="0.5" opacity="0.4" />
+              <line x1="160" y1="55" x2="130" y2="95" stroke="#06B6D4" strokeWidth="0.5" opacity="0.4" />
+              <line x1="40" y1="60" x2="70" y2="95" stroke="white" strokeWidth="0.3" opacity="0.3" />
+              {/* Nodes */}
+              <circle cx="40" cy="60" r="3" fill="#8B5CF6" opacity="0.8">
+                <animate attributeName="cy" values="60;55;60" dur="4s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="100" cy="30" r="4" fill="white" opacity="0.9">
+                <animate attributeName="cy" values="30;35;30" dur="3.5s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="160" cy="55" r="3" fill="#06B6D4" opacity="0.8">
+                <animate attributeName="cy" values="55;50;55" dur="4.5s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="70" cy="95" r="2.5" fill="#8B5CF6" opacity="0.6">
+                <animate attributeName="cx" values="70;75;70" dur="5s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="130" cy="95" r="2.5" fill="#06B6D4" opacity="0.6">
+                <animate attributeName="cx" values="130;125;130" dur="4s" repeatCount="indefinite" />
+              </circle>
+            </svg>
+          </motion.div>
         )}
-      </Card>
+      </div>
 
       {/* Time Range + Value Filter */}
       {constellation && (
