@@ -1,6 +1,9 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
@@ -31,7 +34,48 @@ import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCo
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 
+// Template slug → starter message mapping
+const TEMPLATE_MESSAGES: Record<string, { message: string; category: string }> = {
+  token: {
+    message: 'I want to build a NEP-141 fungible token contract on NEAR. Walk me through the template step by step — explain the code structure, key functions, and how to deploy it to testnet.',
+    category: 'defi',
+  },
+  nft: {
+    message: 'I want to build an NFT collection on NEAR using NEP-171. Walk me through the template — minting, royalties, metadata, and marketplace integration.',
+    category: 'nfts',
+  },
+  dao: {
+    message: 'I want to build a DAO governance contract on NEAR. Walk me through proposals, voting mechanics, treasury management, and role-based access control.',
+    category: 'daos',
+  },
+  vault: {
+    message: 'I want to build a DeFi vault contract on NEAR. Walk me through share-based deposits, yield strategies, auto-compounding, and slippage protection.',
+    category: 'defi',
+  },
+  marketplace: {
+    message: 'I want to build an NFT marketplace on NEAR. Walk me through listings, escrow payments, the offer system, and fee distribution.',
+    category: 'nfts',
+  },
+  agent: {
+    message: 'I want to build an autonomous AI agent on NEAR. Walk me through TEE execution, key management, Chain Signatures, and multi-chain signing.',
+    category: 'ai-agents',
+  },
+};
+
 export default function SanctumPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-void-black" />}>
+      <SanctumPageInner />
+    </Suspense>
+  );
+}
+
+function SanctumPageInner() {
+  const searchParams = useSearchParams();
+  const templateSlug = searchParams.get('template');
+  const templateConfig = templateSlug ? TEMPLATE_MESSAGES[templateSlug] : null;
+  const templateHandledRef = useRef(false);
+
   const {
     state,
     dispatch,
@@ -47,6 +91,24 @@ export default function SanctumPage() {
     handleShareFromHistory,
     handleRemixFromHistory,
   } = useSanctumState();
+
+  // Auto-start session when template query param is present
+  useEffect(() => {
+    if (templateConfig && !templateHandledRef.current && !state.sessionStarted) {
+      templateHandledRef.current = true;
+      // Start the build session with the mapped category
+      handleCategorySelect(templateConfig.category);
+      // Clean the URL
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('template');
+        window.history.replaceState({}, '', url.pathname);
+      }
+    }
+  }, [templateConfig, state.sessionStarted, handleCategorySelect]);
+
+  // Derive the auto-message for SanctumChat (only when template triggered the session)
+  const autoMessage = templateHandledRef.current && templateConfig ? templateConfig.message : undefined;
 
   return (
     <div className="min-h-screen bg-void-black relative overflow-hidden">
@@ -557,6 +619,7 @@ export default function SanctumPage() {
                     <SanctumChat 
                       category={state.selectedCategory}
                       customPrompt={state.customPrompt}
+                      autoMessage={autoMessage}
                       onCodeGenerated={handleCodeGenerated}
                       onTokensUsed={handleTokensUsed}
                       onTaskUpdate={handleTaskUpdate}
@@ -723,6 +786,7 @@ export default function SanctumPage() {
                       <SanctumChat 
                         category={state.selectedCategory}
                         customPrompt={state.customPrompt}
+                        autoMessage={autoMessage}
                         onCodeGenerated={handleCodeGenerated}
                         onTokensUsed={handleTokensUsed}
                         onTaskUpdate={handleTaskUpdate}

@@ -54,6 +54,7 @@ interface CurrentTask {
 interface SanctumChatProps {
   category: string | null;
   customPrompt: string;
+  autoMessage?: string;
   onCodeGenerated: (code: string) => void;
   onTokensUsed: (input: number, output: number) => void;
   onTaskUpdate?: (task: CurrentTask | null) => void;
@@ -80,7 +81,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS.sanctum);
   const [input, setInput] = useState('');
@@ -96,6 +97,7 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const autoMessageSentRef = useRef(false);
 
   // Check for speech recognition support
   useEffect(() => {
@@ -231,12 +233,22 @@ export function SanctumChat({ category, customPrompt, onCodeGenerated, onTokensU
     setMessages([initialMessage]);
 
     // If custom prompt provided, auto-send it
-    if (category === 'custom' && customPrompt) {
+    if (category === 'custom' && customPrompt && !autoMessage) {
       setTimeout(() => {
         handleSend(customPrompt);
       }, 500);
     }
   }, [category]);
+
+  // Auto-send template message on mount (once)
+  useEffect(() => {
+    if (autoMessage && !autoMessageSentRef.current && messages.length > 0) {
+      autoMessageSentRef.current = true;
+      setTimeout(() => {
+        handleSend(autoMessage);
+      }, 600);
+    }
+  }, [autoMessage, messages.length]);
 
   // Auto-scroll to bottom
   useEffect(() => {
