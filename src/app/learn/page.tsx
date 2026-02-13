@@ -155,58 +155,114 @@ export default function LearnPage() {
             mainEntity: [
               {
                 '@type': 'Question',
-                name: 'Is this course free?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes, all learning tracks on Voidspace are completely free. Explore NEAR Protocol, learn Rust, and build smart contracts at no cost.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Do I need coding experience?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'The Explorer track requires no coding experience — it covers NEAR basics, wallets, and ecosystem navigation. The Builder and Hacker tracks assume basic programming knowledge, and the Rust Curriculum starts from zero Rust experience.',
-                },
-              },
-              {
-                '@type': 'Question',
                 name: 'What is NEAR Protocol?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'NEAR Protocol is a high-performance Layer 1 blockchain designed for usability and scalability. It features sub-second transaction finality, human-readable account names, and innovative chain abstraction technology that lets users interact across multiple blockchains seamlessly.',
+                  text: 'NEAR is a high-performance Layer 1 blockchain with sub-second finality, human-readable accounts (like alice.near), and built-in chain abstraction. It\'s designed to feel like using a normal web app.',
                 },
               },
               {
                 '@type': 'Question',
-                name: 'What will I be able to build after completing these tracks?',
+                name: 'What is Voidspace?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'You will be able to build and deploy Rust smart contracts on NEAR, create full-stack dApps with frontend integration, work with NEAR\'s chain abstraction features like Intents and Chain Signatures, and contribute to the NEAR ecosystem.',
+                  text: 'Voidspace is your all-in-one platform for learning, building, and analyzing on NEAR Protocol. It includes free learning tracks, an AI-powered smart contract builder called Sanctum, and a suite of free intelligence tools.',
                 },
               },
               {
                 '@type': 'Question',
-                name: 'How long does it take to complete?',
+                name: 'Do I need coding experience to get started?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'The Explorer track takes about 6 hours. The Builder track is the most comprehensive at around 20 hours. The Hacker track takes about 8 hours, and the Founder track around 6 hours. All tracks are self-paced.',
+                  text: 'Not at all. The Explorer track covers NEAR basics, wallets, and ecosystem navigation with zero coding required. The Builder and Hacker tracks assume basic programming knowledge, but the Rust Curriculum starts from scratch.',
                 },
               },
               {
                 '@type': 'Question',
-                name: 'Is Rust hard to learn?',
+                name: 'Are the learning tracks really free?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Rust has a steeper learning curve than JavaScript or Python, but our Builder track starts from zero Rust experience. The strict compiler actually helps you write safer code — it catches bugs before they reach production.',
+                  text: 'Yes — all 4 tracks (Explorer, Builder, Hacker, Founder) with 66 modules are completely free. No credit card, no paywall, no catch.',
                 },
               },
               {
                 '@type': 'Question',
-                name: 'How does NEAR compare to Solana?',
+                name: 'How long does each track take?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Both use Rust for smart contracts, but NEAR offers human-readable account names, built-in chain abstraction, and a sharded architecture. NEAR focuses on usability and cross-chain interoperability, while Solana optimizes for raw throughput.',
+                  text: 'Explorer ~6 hours, Builder ~20 hours, Hacker ~8 hours, Founder ~6 hours. All tracks are self-paced.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Do I earn certificates?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. Complete any track to earn a shareable certificate. Finish all four tracks and earn Legend status.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is Sanctum?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Sanctum is Voidspace\'s AI-powered vibe-coding builder. Describe what you want in plain English, and it generates production-ready NEAR smart contracts — tokens, NFTs, DAOs, DeFi vaults, marketplaces, and AI agents.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How much does Sanctum cost?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Sanctum uses a credit-based system. The Shade tier is free with $2.50 in credits. Paid tiers: Specter ($25/mo), Legion ($60/mo), and Leviathan ($200/mo). Top-up packs are also available.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is Void Lens?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Void Lens is a free wallet analyzer that gives you portfolio valuation, on-chain reputation scoring, and DeFi position tracking for any NEAR account.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What are Void Bubbles?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Void Bubbles is a free real-time visualization of NEAR token markets. Watch token activity as dynamic bubbles — great for spotting trends at a glance.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is the Constellation Map?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Constellation Map is a free transaction graph explorer. Paste any NEAR account and visualize its on-chain relationships and transaction flows as an interactive network graph.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What\'s free and what\'s paid?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'All learning tracks, Void Lens, Void Bubbles, and Constellation Map are completely free. Only Sanctum (the AI builder) has paid tiers — and even that starts with a free tier.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is Rust hard to learn for smart contracts?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Rust has a steeper learning curve than JavaScript, but the strict compiler catches bugs before they reach production. Our Builder track starts from zero Rust experience and many developers find it rewarding once it clicks.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How does NEAR compare to Solana technically?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Both use Rust for smart contracts. NEAR adds human-readable accounts, built-in chain abstraction, and a sharded architecture optimized for usability. Solana optimizes for raw throughput. If you know Solana Rust, your skills transfer directly.',
                 },
               },
               {
@@ -214,7 +270,7 @@ export default function LearnPage() {
                 name: 'What is Chain Abstraction?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Chain Abstraction is NEAR\'s approach to making blockchain invisible to users. With technologies like Intents, Chain Signatures, and Shade Agents, users can interact across multiple blockchains from a single NEAR account without switching networks.',
+                  text: 'Chain Abstraction is NEAR\'s approach to making blockchain invisible to end users. Technologies like Intents, Chain Signatures, and Shade Agents let users interact across multiple blockchains from a single NEAR account.',
                 },
               },
             ],

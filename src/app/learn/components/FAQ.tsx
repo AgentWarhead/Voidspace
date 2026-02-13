@@ -1,54 +1,208 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
+interface FAQItem {
+  question: string;
+  answer: React.ReactNode;
+}
+
+interface FAQCategory {
+  category: string;
+  items: FAQItem[];
+}
 
 // ─── FAQ Data ──────────────────────────────────────────────────────────────────
 
-const FAQ_ITEMS = [
+export const FAQ_DATA: FAQCategory[] = [
   {
-    question: 'Is this course free?',
-    answer: 'Yes, all learning tracks on Voidspace are completely free. Explore NEAR Protocol, learn Rust, and build smart contracts at no cost. No credit card, no paywall, no catch.',
+    category: 'Getting Started',
+    items: [
+      {
+        question: 'What is NEAR Protocol?',
+        answer: (
+          <>
+            NEAR is a high-performance Layer 1 blockchain with sub-second finality, human-readable accounts (like{' '}
+            <code className="text-near-green bg-near-green/10 px-1 py-0.5 rounded text-xs">alice.near</code>
+            ), and built-in chain abstraction. It&apos;s designed to feel like using a normal web app.
+          </>
+        ),
+      },
+      {
+        question: 'What is Voidspace?',
+        answer: (
+          <>
+            Voidspace is your all-in-one platform for learning, building, and analyzing on NEAR Protocol. It includes{' '}
+            <Link href="/learn" className="text-near-green hover:underline">free learning tracks</Link>,{' '}
+            an <Link href="/sanctum" className="text-near-green hover:underline">AI-powered smart contract builder</Link>,{' '}
+            and a suite of <Link href="/void-lens" className="text-near-green hover:underline">free intelligence tools</Link>.
+          </>
+        ),
+      },
+      {
+        question: 'Do I need coding experience to get started?',
+        answer:
+          'Not at all. The Explorer track covers NEAR basics, wallets, and ecosystem navigation with zero coding required. The Builder and Hacker tracks assume basic programming knowledge, but the Rust Curriculum starts from scratch.',
+      },
+    ],
   },
   {
-    question: 'Do I need coding experience?',
-    answer: 'The Explorer track requires no coding experience — it covers NEAR basics, wallets, and ecosystem navigation. The Builder and Hacker tracks assume basic programming knowledge, and the Rust Curriculum starts from zero Rust experience.',
+    category: 'Learning & Tracks',
+    items: [
+      {
+        question: 'Are the learning tracks really free?',
+        answer:
+          'Yes — all 4 tracks (Explorer, Builder, Hacker, Founder) with 66 modules are completely free. No credit card, no paywall, no catch.',
+      },
+      {
+        question: 'How long does each track take?',
+        answer:
+          'Explorer ~6 hours, Builder ~20 hours, Hacker ~8 hours, Founder ~6 hours. All tracks are self-paced — go as fast or slow as you want.',
+      },
+      {
+        question: 'Do I earn certificates?',
+        answer: (
+          <>
+            Yes. Complete any track to earn a shareable certificate. Finish all four tracks and earn <strong className="text-text-primary">Legend</strong> status.{' '}
+            <Link href="/learn/certificate" className="text-near-green hover:underline">Learn about certificates →</Link>
+          </>
+        ),
+      },
+      {
+        question: 'I\'m a Solana/Ethereum developer — is this relevant to me?',
+        answer: (
+          <>
+            Absolutely. If you know Rust (Solana) or Solidity (Ethereum), your skills transfer directly. The Hacker track covers NEAR-specific patterns, and we have dedicated{' '}
+            <Link href="/learn/for-solana-developers" className="text-near-green hover:underline">cross-chain guides</Link>{' '}
+            comparing architectures and tooling side by side.
+          </>
+        ),
+      },
+    ],
   },
   {
-    question: 'What is NEAR Protocol?',
-    answer: 'NEAR Protocol is a high-performance Layer 1 blockchain designed for usability and scalability. It features sub-second transaction finality, human-readable account names (like alice.near), and innovative chain abstraction technology that lets users interact across multiple blockchains seamlessly.',
+    category: 'Sanctum (AI Builder)',
+    items: [
+      {
+        question: 'What is Sanctum?',
+        answer: (
+          <>
+            <Link href="/sanctum" className="text-near-green hover:underline">Sanctum</Link> is Voidspace&apos;s AI-powered vibe-coding builder. Describe what you want in plain English, and it generates production-ready NEAR smart contracts — tokens, NFTs, DAOs, DeFi vaults, marketplaces, and AI agents.
+          </>
+        ),
+      },
+      {
+        question: 'What can I build with Sanctum?',
+        answer:
+          'Sanctum supports 6 project templates: Token, NFT Collection, DAO, DeFi Vault, Marketplace, and AI Agent. Each generates a complete, deployable smart contract with tests and frontend integration.',
+      },
+      {
+        question: 'How much does Sanctum cost?',
+        answer: (
+          <>
+            Sanctum uses a credit-based system. The Shade tier is free with $2.50 in credits. Paid tiers: Specter ($25/mo), Legion ($60/mo), and Leviathan ($200/mo). Top-up packs are also available.{' '}
+            <Link href="/pricing" className="text-near-green hover:underline">See all pricing →</Link>
+          </>
+        ),
+      },
+    ],
   },
   {
-    question: 'What will I be able to build?',
-    answer: 'You\'ll be able to build and deploy Rust smart contracts on NEAR, create full-stack dApps with frontend integration, work with chain abstraction features like Intents and Chain Signatures, and ship production-ready applications to mainnet.',
+    category: 'Intelligence Tools',
+    items: [
+      {
+        question: 'What is Void Lens?',
+        answer: (
+          <>
+            <Link href="/void-lens" className="text-near-green hover:underline">Void Lens</Link> is a free wallet analyzer that gives you portfolio valuation, on-chain reputation scoring, and DeFi position tracking for any NEAR account.
+          </>
+        ),
+      },
+      {
+        question: 'What are Void Bubbles?',
+        answer: (
+          <>
+            <Link href="/void-bubbles" className="text-near-green hover:underline">Void Bubbles</Link> is a free real-time visualization of NEAR token markets. Watch token activity as dynamic bubbles — great for spotting trends at a glance.
+          </>
+        ),
+      },
+      {
+        question: 'What is the Constellation Map?',
+        answer: (
+          <>
+            <Link href="/constellation" className="text-near-green hover:underline">Constellation Map</Link> is a free transaction graph explorer. Paste any NEAR account and visualize its on-chain relationships and transaction flows as an interactive network graph.
+          </>
+        ),
+      },
+    ],
   },
   {
-    question: 'How long does it take to complete?',
-    answer: 'The Explorer track takes about 6 hours. The Builder track is the most comprehensive at around 20 hours. The Hacker track takes about 8 hours, and the Founder track around 6 hours. All tracks are self-paced — go at your own speed.',
+    category: 'Pricing & Access',
+    items: [
+      {
+        question: 'What\'s free and what\'s paid?',
+        answer: (
+          <>
+            All learning tracks, Void Lens, Void Bubbles, and Constellation Map are <strong className="text-text-primary">completely free</strong>. Only{' '}
+            <Link href="/sanctum" className="text-near-green hover:underline">Sanctum</Link> (the AI builder) has paid tiers — and even that starts with a free tier.
+          </>
+        ),
+      },
+      {
+        question: 'Can I try Sanctum before paying?',
+        answer: (
+          <>
+            Yes. The Shade tier gives you $2.50 in free credits to test Sanctum with no commitment. Upgrade anytime from the{' '}
+            <Link href="/pricing" className="text-near-green hover:underline">pricing page</Link>.
+          </>
+        ),
+      },
+    ],
   },
   {
-    question: 'Is Rust hard to learn?',
-    answer: 'Rust has a steeper learning curve than JavaScript or Python, but our Builder track starts from zero Rust experience. The strict compiler actually helps you write safer code — it catches bugs before they reach production. Many developers find it rewarding once it "clicks."',
-  },
-  {
-    question: 'How does NEAR compare to Solana?',
-    answer: 'Both use Rust for smart contracts, but NEAR offers human-readable account names, built-in chain abstraction, and a sharded architecture. NEAR focuses on usability and cross-chain interoperability, while Solana optimizes for raw throughput. If you know Solana Rust, your skills transfer directly.',
-  },
-  {
-    question: 'What is Chain Abstraction?',
-    answer: 'Chain Abstraction is NEAR\'s approach to making blockchain invisible to users. With technologies like Intents, Chain Signatures, and Shade Agents, users can interact across multiple blockchains from a single NEAR account without switching networks or managing multiple wallets.',
+    category: 'Technical',
+    items: [
+      {
+        question: 'Is Rust hard to learn for smart contracts?',
+        answer:
+          'Rust has a steeper learning curve than JavaScript, but the strict compiler catches bugs before they reach production. Our Builder track starts from zero Rust experience and many developers find it rewarding once it clicks.',
+      },
+      {
+        question: 'How does NEAR compare to Solana technically?',
+        answer: (
+          <>
+            Both use Rust for smart contracts. NEAR adds human-readable accounts, built-in chain abstraction, and a sharded architecture optimized for usability. Solana optimizes for raw throughput. If you know Solana Rust, your skills transfer directly.{' '}
+            <Link href="/learn/solana-vs-near" className="text-near-green hover:underline">Full comparison →</Link>
+          </>
+        ),
+      },
+      {
+        question: 'What is Chain Abstraction?',
+        answer:
+          'Chain Abstraction is NEAR\'s approach to making blockchain invisible to end users. Technologies like Intents, Chain Signatures, and Shade Agents let users interact across multiple blockchains from a single NEAR account — no network switching or multi-wallet juggling.',
+      },
+    ],
   },
 ];
 
 // ─── Accordion Item ────────────────────────────────────────────────────────────
 
-function FAQItem({ question, answer, isOpen, onToggle }: {
+function FAQItem({
+  question,
+  answer,
+  isOpen,
+  onToggle,
+}: {
   question: string;
-  answer: string;
+  answer: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -89,21 +243,45 @@ function FAQItem({ question, answer, isOpen, onToggle }: {
 // ─── FAQ Section ───────────────────────────────────────────────────────────────
 
 export function FAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+
+  const toggleItem = useCallback((key: string) => {
+    setOpenItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   return (
     <ScrollReveal>
       <div id="faq">
         <SectionHeader title="Frequently Asked Questions" badge="FAQ" />
-        <div className="max-w-3xl mx-auto space-y-3">
-          {FAQ_ITEMS.map((item, i) => (
-            <FAQItem
-              key={i}
-              question={item.question}
-              answer={item.answer}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
-            />
+        <div className="max-w-3xl mx-auto space-y-8">
+          {FAQ_DATA.map((category, ci) => (
+            <div key={category.category}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3 px-1">
+                {category.category}
+              </h3>
+              <div className="space-y-3">
+                {category.items.map((item, ii) => {
+                  const key = `${ci}-${ii}`;
+                  return (
+                    <FAQItem
+                      key={key}
+                      question={item.question}
+                      answer={item.answer}
+                      isOpen={openItems.has(key)}
+                      onToggle={() => toggleItem(key)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </div>
       </div>
