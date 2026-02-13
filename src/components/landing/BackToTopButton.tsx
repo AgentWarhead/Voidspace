@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { ArrowUp } from 'lucide-react';
 
 export function BackToTopButton() {

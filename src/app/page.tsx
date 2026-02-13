@@ -21,11 +21,28 @@ import {
 export const revalidate = 300; // ISR: regenerate every 5 minutes
 
 export default async function DashboardPage() {
-  const [stats, categories, opportunities] = await Promise.all([
-    getEcosystemStats(),
-    getCategoriesWithStats(),
-    getTopOpportunities(100),
-  ]);
+  let stats: Awaited<ReturnType<typeof getEcosystemStats>>;
+  let categories: Awaited<ReturnType<typeof getCategoriesWithStats>>;
+  let opportunities: Awaited<ReturnType<typeof getTopOpportunities>>;
+
+  try {
+    [stats, categories, opportunities] = await Promise.all([
+      getEcosystemStats(),
+      getCategoriesWithStats(),
+      getTopOpportunities(100),
+    ]);
+  } catch (error) {
+    console.error('[DashboardPage] Failed to fetch Supabase data:', error);
+    stats = {
+      totalProjects: 0,
+      activeProjects: 0,
+      totalTVL: 0,
+      categoryCount: 0,
+      lastSyncAt: null,
+    };
+    categories = [];
+    opportunities = [];
+  }
 
   return (
     <div className="min-h-screen">

@@ -583,7 +583,7 @@ export function SolanaVsNear() {
                 </Button>
               </Link>
               <Link href="/learn/rust-for-blockchain">
-                <Button variant="outline" size="lg">
+                <Button variant="secondary" size="lg">
                   <Code2 className="w-4 h-4 mr-2" />
                   Chain-Agnostic Rust Modules
                 </Button>

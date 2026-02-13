@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { Layers, GraduationCap, Database, Radio } from 'lucide-react';
 import { Container } from '@/components/ui';
 

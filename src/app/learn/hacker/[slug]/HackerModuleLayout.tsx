@@ -29,7 +29,7 @@ import {
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
 
-const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
+const MODULE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'near-architecture-deep-dive': NearArchitectureDeepDive,
   'cross-contract-calls': CrossContractCalls,
   'advanced-storage': AdvancedStorage,

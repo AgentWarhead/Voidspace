@@ -266,7 +266,7 @@ function KnowledgeQuiz() {
           </h3>
           <div className="flex justify-center gap-3">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 setCurrentQ(0);
@@ -741,7 +741,7 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 </Button>
               </Link>
               <Link href="/learn/solana-vs-near">
-                <Button variant="outline" size="lg">
+                <Button variant="secondary" size="lg">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   Read Full Comparison
                 </Button>

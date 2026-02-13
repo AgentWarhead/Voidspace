@@ -29,7 +29,7 @@ import {
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
 
-const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
+const MODULE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'what-is-blockchain': WhatIsBlockchain,
   'what-is-near': WhatIsNear,
   'create-a-wallet': CreateAWallet,

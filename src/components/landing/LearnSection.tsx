@@ -1,6 +1,4 @@
 import Link from 'next/link';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { BookOpen } from 'lucide-react';
 import { GradientText } from '@/components/effects/GradientText';
 

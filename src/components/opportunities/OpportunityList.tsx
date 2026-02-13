@@ -1,9 +1,7 @@
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { OpportunityCard } from '@/components/opportunities/OpportunityCard';
 import { VoidEmptyState } from '@/components/ui/VoidEmptyState';
-// @ts-ignore
-import { Filter } from 'lucide-react';
 import type { Opportunity } from '@/types';
 
 interface OpportunityListProps {

@@ -40,7 +40,7 @@ import {
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
 
-const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
+const MODULE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'dev-environment-setup': DevEnvironmentSetup,
   'rust-fundamentals': RustFundamentals,
   'ownership-borrowing': OwnershipBorrowing,

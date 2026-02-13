@@ -1,6 +1,4 @@
 import Link from 'next/link';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { ChevronRight, Search, Target, FileText, BarChart3, Code2, CalendarCheck, Lightbulb } from 'lucide-react';
 import { GradientText } from '@/components/effects/GradientText';
 

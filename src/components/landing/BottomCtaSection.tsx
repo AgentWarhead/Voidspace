@@ -1,6 +1,4 @@
 import Link from 'next/link';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { ChevronRight, BookOpen, Search, Sparkles } from 'lucide-react';
 import { GradientText } from '@/components/effects/GradientText';
 
@@ -31,11 +29,12 @@ export function BottomCtaSection() {
           Every void you fill makes NEAR stronger. Find your opportunity, generate your mission brief, and start building.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-          <Link href="/opportunities">
-            <button className="shimmer-btn text-background font-semibold px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 hover:scale-[1.03] transition-transform duration-200">
-              Explore Voids
-              <ChevronRight className="w-4 h-4" />
-            </button>
+          <Link
+            href="/opportunities"
+            className="shimmer-btn text-background font-semibold px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 hover:scale-[1.03] transition-transform duration-200"
+          >
+            Explore Voids
+            <ChevronRight className="w-4 h-4" />
           </Link>
           <Link
             href="/sanctum"

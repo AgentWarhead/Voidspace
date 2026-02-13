@@ -25,7 +25,7 @@ import {
 
 // ─── Module Component Map ──────────────────────────────────────────────────────
 
-const MODULE_COMPONENTS: Record<string, React.ComponentType> = {
+const MODULE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'near-grants-funding': NearGrantsFunding,
   'tokenomics-design': TokenomicsDesign,
   'building-in-public': BuildingInPublic,

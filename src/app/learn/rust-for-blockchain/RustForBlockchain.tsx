@@ -433,13 +433,13 @@ export function RustForBlockchain() {
                 </Button>
               </Link>
               <Link href="/learn#tracks">
-                <Button variant="outline" size="lg">
+                <Button variant="secondary" size="lg">
                   <ArrowRight className="w-4 h-4 mr-2" />
                   I Know Rust (Builder Track)
                 </Button>
               </Link>
               <Link href="/learn/for-solana-developers">
-                <Button variant="outline" size="lg">
+                <Button variant="secondary" size="lg">
                   <Code2 className="w-4 h-4 mr-2" />
                   Coming from Solana?
                 </Button>

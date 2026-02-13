@@ -1,6 +1,4 @@
 import Link from 'next/link';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { ChevronRight, Telescope, Zap } from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 

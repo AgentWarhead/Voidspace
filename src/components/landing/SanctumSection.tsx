@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { Sparkles, ChevronRight, BookOpen, Zap } from 'lucide-react';
 
 export function SanctumSection() {
