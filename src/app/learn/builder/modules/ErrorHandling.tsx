@@ -166,7 +166,7 @@ const ErrorHandling: React.FC<ErrorHandlingProps> = ({ isActive, onToggle }) => 
                         <p className="text-sm text-text-muted mt-1">{exercise.desc}</p>
                       </div>
                       <Badge className={cn(
-                        exercise.difficulty === 'Easy' ? 'bg-near-green/10 text-near-green border-near-green/20' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                        exercise.difficulty === 'Easy' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                       )}>{exercise.difficulty}</Badge>
                     </div>
                   </Card>

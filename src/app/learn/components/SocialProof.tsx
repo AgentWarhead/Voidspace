@@ -26,8 +26,8 @@ const ECOSYSTEM_STATS = [
     label: 'Grants Distributed',
     source: 'NEAR Foundation',
     color: 'text-near-green',
-    bgColor: 'bg-near-green/10',
-    borderColor: 'border-near-green/20',
+    bgColor: 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 shadow-lg shadow-green-500/10 backdrop-blur-sm',
+    borderColor: 'border-green-500/20',
   },
   {
     icon: Users,
@@ -66,8 +66,8 @@ const DIFFERENTIATORS = [
     title: 'AI-Powered',
     description: 'Sanctum AI tutor answers your questions in real-time',
     color: 'text-near-green',
-    bgColor: 'bg-near-green/10',
-    borderColor: 'border-near-green/20',
+    bgColor: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10 backdrop-blur-sm',
+    borderColor: 'border-emerald-500/20',
   },
   {
     icon: DollarSign,

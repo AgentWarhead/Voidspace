@@ -136,7 +136,7 @@ const TECHNOLOGIES: Technology[] = [
     builderImpact:
       "Build AI-powered protocols that manage real assets autonomously. Deploy agents that can trade, lend, borrow, and manage treasuries without human intervention. The agent economy is the next massive opportunity in crypto — and NEAR is where it's being built.",
     accentColor: 'text-near-green',
-    accentBg: 'bg-near-green/10',
+    accentBg: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20',
     accentBorder: 'border-near-green/30',
     glowColor: 'rgba(0, 236, 151, 0.15)',
     stats: [
@@ -523,7 +523,7 @@ export function KeyTechnologies() {
           <div className="absolute inset-0 border border-near-green/20 rounded-xl" />
           <div className="relative z-10 p-6 flex flex-col sm:flex-row items-center gap-4">
             <motion.div
-              className="p-3 rounded-xl bg-near-green/10 border border-near-green/20"
+              className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/20 shadow-lg shadow-cyan-500/10 backdrop-blur-sm"
               animate={{
                 boxShadow: [
                   '0 0 15px rgba(0,236,151,0.1)',

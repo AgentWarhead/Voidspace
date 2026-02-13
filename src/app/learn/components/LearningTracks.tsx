@@ -204,7 +204,7 @@ const themeStyles = {
     border: 'border-near-green/20',
     borderActive: 'border-near-green/50',
     accent: 'text-near-green',
-    accentBg: 'bg-near-green/10',
+    accentBg: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10',
     accentBorder: 'border-near-green/20',
     glow: 'shadow-near-green/20',
     glowBg: 'from-near-green/20 to-near-green/0',

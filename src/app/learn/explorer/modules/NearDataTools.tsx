@@ -100,7 +100,7 @@ function DataToolExplorer() {
             className={cn(
               'p-3 rounded-lg border text-center transition-all',
               activeTool === i
-                ? 'bg-near-green/10 border-near-green/30'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/30'
                 : 'bg-surface border-border hover:border-border-hover'
             )}
           >
@@ -225,7 +225,7 @@ function WhaleTracker() {
             className={cn(
               'px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap',
               activeWhale === i
-                ? 'bg-near-green/10 text-near-green border border-near-green/30'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 border border-emerald-500/30'
                 : 'bg-surface text-text-muted border border-border hover:border-border-hover'
             )}
           >
@@ -320,7 +320,7 @@ function DataAnalysisTips() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold text-text-primary text-sm">{tip.title}</h4>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-near-green/10 text-near-green font-bold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 font-bold shadow-sm shadow-emerald-500/10">
                     {tip.category}
                   </span>
                 </div>
@@ -442,8 +442,8 @@ export function NearDataTools() {
       <ScrollReveal delay={0.1}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <Database className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <Database className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">Why On-Chain Data Matters</h2>
           </div>

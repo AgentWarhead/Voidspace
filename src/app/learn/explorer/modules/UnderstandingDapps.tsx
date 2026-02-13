@@ -82,12 +82,12 @@ function AppVsDapp() {
                   <span className="text-sm text-blue-400">📱 Frontend (UI)</span>
                 </div>
                 <ArrowRight className="w-4 h-4 text-text-muted rotate-90" />
-                <div className="p-3 rounded-lg bg-near-green/10 border border-near-green/20 w-full max-w-xs text-center">
-                  <span className="text-sm text-near-green">⛓️ Smart Contract (on NEAR)</span>
+                <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 w-full max-w-xs text-center shadow-sm shadow-blue-500/10">
+                  <span className="text-sm text-blue-400">⛓️ Smart Contract (on NEAR)</span>
                 </div>
                 <ArrowRight className="w-4 h-4 text-text-muted rotate-90" />
-                <div className="p-3 rounded-lg bg-near-green/10 border border-near-green/20 w-full max-w-xs text-center">
-                  <span className="text-sm text-near-green">🌍 Blockchain (Decentralized)</span>
+                <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 w-full max-w-xs text-center shadow-sm shadow-blue-500/10">
+                  <span className="text-sm text-blue-400">🌍 Blockchain (Decentralized)</span>
                 </div>
               </div>
               <p className="text-sm text-text-muted text-center mt-4">
@@ -155,7 +155,7 @@ function DappShowcase() {
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all',
               activeDapp === i
-                ? 'bg-near-green/10 border border-near-green/30 text-near-green'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border border-emerald-500/30 text-emerald-400'
                 : 'bg-surface border border-border text-text-muted hover:border-border-hover'
             )}
           >
@@ -223,8 +223,8 @@ function DecentralizationChecklist() {
             transition={{ delay: i * 0.1 }}
             className="flex items-start gap-4 p-4 rounded-xl bg-surface border border-border"
           >
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center flex-shrink-0">
-              <Icon className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm flex-shrink-0">
+              <Icon className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-text-primary text-sm">{trait.label}</h4>
@@ -303,8 +303,8 @@ export function UnderstandingDapps() {
       <ScrollReveal delay={0.1}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <AppWindow className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <AppWindow className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">What is a dApp?</h2>
           </div>

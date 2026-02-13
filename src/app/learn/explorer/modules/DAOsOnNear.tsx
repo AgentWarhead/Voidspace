@@ -100,7 +100,7 @@ function DAOConceptExplorer() {
             className={cn(
               'p-3 rounded-lg border text-center transition-all',
               activeConcept === i
-                ? 'bg-near-green/10 border-near-green/30'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/30'
                 : 'bg-surface border-border hover:border-border-hover'
             )}
           >
@@ -188,7 +188,7 @@ function NotableDAOs() {
               <Users className="w-3 h-3" />
               <span>{d.members}</span>
             </div>
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-near-green/10 text-near-green font-bold">
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 font-bold shadow-sm shadow-emerald-500/10">
               {d.type}
             </span>
           </div>
@@ -253,7 +253,7 @@ function ExploreProposals() {
             className={cn(
               'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
               activeProposal === i
-                ? 'bg-near-green/10 text-near-green border border-near-green/30'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 border border-emerald-500/30'
                 : 'bg-surface text-text-muted border border-border hover:border-border-hover'
             )}
           >
@@ -421,8 +421,8 @@ export function DAOsOnNear() {
       <ScrollReveal delay={0.1}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <Scale className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <Scale className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">Why DAOs Matter</h2>
           </div>
@@ -451,8 +451,8 @@ export function DAOsOnNear() {
       <ScrollReveal delay={0.12}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <Handshake className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <Handshake className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">How to Join a DAO</h2>
           </div>

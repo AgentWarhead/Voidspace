@@ -83,7 +83,7 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
       const elements = parts.map((part, j) => {
         if (part.startsWith('BOLD|||')) return <strong key={j} className="text-text-primary">{part.replace('BOLD|||', '')}</strong>;
         if (part === '/BOLD') return null;
-        if (part.startsWith('CODE|||')) return <code key={j} className="text-near-green bg-near-green/10 px-1 py-0.5 rounded text-[11px]">{part.replace('CODE|||', '')}</code>;
+        if (part.startsWith('CODE|||')) return <code key={j} className="text-emerald-400 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-1 py-0.5 rounded text-[11px]">{part.replace('CODE|||', '')}</code>;
         if (part === '/CODE') return null;
         return <span key={j}>{part}</span>;
       });

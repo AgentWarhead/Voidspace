@@ -98,7 +98,7 @@ const TRACK_CERTS: TrackCert[] = [
     description: 'Demonstrated ability to build, test, and deploy Rust smart contracts on NEAR Protocol with frontend integration.',
     icon: Code2,
     color: 'text-near-green',
-    bg: 'bg-near-green/10',
+    bg: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10',
     border: 'border-near-green/30',
     moduleCount: 22,
     xpTotal: 2200,

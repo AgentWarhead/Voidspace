@@ -102,7 +102,7 @@ function ExplorerConcepts() {
               className={cn(
                 'p-3 rounded-lg border text-center transition-all',
                 activeConcept === i
-                  ? 'bg-near-green/10 border-near-green/30'
+                  ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/30'
                   : 'bg-surface border-border hover:border-border-hover'
               )}
             >
@@ -206,7 +206,7 @@ function DetectiveChallenge() {
                   <span className="text-near-green font-mono text-xs font-bold">#{i + 1}</span>
                   <span className={cn(
                     'text-[10px] px-1.5 py-0.5 rounded-full font-bold',
-                    c.difficulty === 'Easy' ? 'bg-near-green/10 text-near-green' :
+                    c.difficulty === 'Easy' ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400' :
                     c.difficulty === 'Medium' ? 'bg-orange-500/10 text-orange-400' :
                     'bg-red-500/10 text-red-400'
                   )}>
@@ -351,8 +351,8 @@ export function ReadingTheExplorer() {
       <ScrollReveal delay={0.1}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <Eye className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <Eye className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">Why Learn to Read Explorers?</h2>
           </div>

@@ -208,7 +208,7 @@ function SafeWalletPractices() {
                   <h4 className="font-semibold text-text-primary text-sm">{p.title}</h4>
                   <span className={cn(
                     'text-[9px] px-1.5 py-0.5 rounded-full font-bold',
-                    p.level === 'Essential' ? 'bg-near-green/10 text-near-green' :
+                    p.level === 'Essential' ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400' :
                     p.level === 'Important' ? 'bg-blue-500/10 text-blue-400' :
                     'bg-yellow-500/10 text-yellow-400'
                   )}>

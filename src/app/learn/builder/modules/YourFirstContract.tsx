@@ -29,7 +29,7 @@ const YourFirstContract: React.FC<YourFirstContractProps> = ({ isActive, onToggl
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Beginner</Badge>
+          <Badge className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Beginner</Badge>
           <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">60 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>

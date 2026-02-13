@@ -69,7 +69,7 @@ const TIER_CONFIG = {
     label: 'Foundation',
     row: 0,
     color: 'text-near-green',
-    bg: 'bg-near-green/10',
+    bg: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10',
     border: 'border-near-green/30',
     glow: 'rgba(0, 236, 151, 0.3)',
     icon: Shield,
@@ -916,7 +916,7 @@ function DetailPanel({
                 className={cn(
                   'flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all',
                   status === 'completed'
-                    ? 'border-near-green/30 bg-near-green/10 text-near-green hover:bg-near-green/20'
+                    ? 'border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 hover:from-emerald-500/20 hover:to-cyan-500/20'
                     : 'border-border bg-surface hover:bg-surface-hover text-text-muted hover:text-text-primary'
                 )}
               >
@@ -1417,7 +1417,7 @@ export function SkillTree() {
                                     className={cn(
                                       'text-[10px] font-mono px-2 py-1 rounded border transition-all',
                                       status === 'completed'
-                                        ? 'border-near-green/30 text-near-green bg-near-green/10'
+                                        ? 'border-emerald-500/30 text-emerald-400 bg-gradient-to-br from-emerald-500/15 to-cyan-500/15'
                                         : 'border-border text-text-muted hover:text-text-primary'
                                     )}
                                   >

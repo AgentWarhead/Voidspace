@@ -103,7 +103,7 @@ function ProgressSummary() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mt-4 p-4 rounded-lg bg-near-green/10 border border-near-green/30 text-center"
+          className="mt-4 p-4 rounded-lg bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border border-emerald-500/30 text-center shadow-lg shadow-emerald-500/10"
         >
           <div className="text-2xl mb-2">🏆</div>
           <p className="text-near-green font-bold">Explorer Track Complete!</p>
@@ -174,7 +174,7 @@ function SelfAssessment() {
                   className={cn(
                     'px-3 py-2 rounded-lg border text-xs text-left transition-all',
                     answers[qi] === q.scores[oi]
-                      ? 'bg-near-green/10 border-near-green/30 text-near-green'
+                      ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/30 text-emerald-400'
                       : 'bg-surface border-border text-text-muted hover:border-border-hover'
                   )}
                 >

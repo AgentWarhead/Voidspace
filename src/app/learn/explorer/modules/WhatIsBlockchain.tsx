@@ -34,7 +34,7 @@ function BlockChainVisual() {
               className={cn(
                 'relative border rounded-xl p-4 w-56 cursor-pointer transition-all duration-300',
                 activeBlock === block.id
-                  ? 'bg-near-green/10 border-near-green/50 shadow-[0_0_20px_rgba(0,236,151,0.15)]'
+                  ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/50 shadow-[0_0_20px_rgba(0,236,151,0.15)]'
                   : 'bg-surface border-border hover:border-border-hover'
               )}
               whileHover={{ scale: 1.03, y: -2 }}
@@ -114,8 +114,8 @@ function ConceptCard({ icon: Icon, title, preview, details }: {
   return (
     <GlowCard padding="lg" onClick={() => setIsOpen(!isOpen)}>
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/20 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-near-green" />
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+          <Icon className="w-5 h-5 text-emerald-400" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
@@ -208,7 +208,7 @@ function MiniQuiz() {
             className={cn(
               'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
               revealed && i === correctAnswer
-                ? 'bg-near-green/10 border-near-green/50 text-near-green'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/50 text-emerald-400'
                 : revealed && i === selected && i !== correctAnswer
                   ? 'bg-red-500/10 border-red-500/30 text-red-400'
                   : selected === i
@@ -228,7 +228,7 @@ function MiniQuiz() {
           className={cn(
             'mt-4 p-3 rounded-lg text-sm',
             selected === correctAnswer
-              ? 'bg-near-green/10 text-near-green border border-near-green/20'
+              ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 border border-emerald-500/20'
               : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
           )}
         >
@@ -310,8 +310,8 @@ export function WhatIsBlockchain() {
       <ScrollReveal delay={0.1}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <Zap className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">The Big Idea</h2>
           </div>

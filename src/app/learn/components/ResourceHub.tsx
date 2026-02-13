@@ -37,7 +37,7 @@ interface Resource {
 }
 
 const CATEGORY_CONFIG: Record<Exclude<Category, 'All'>, { icon: React.ElementType; color: string; bg: string; border: string }> = {
-  'Official Docs':          { icon: FileText,   color: 'text-near-green',  bg: 'bg-near-green/10',  border: 'border-near-green/20' },
+  'Official Docs':          { icon: FileText,   color: 'text-near-green',  bg: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10',  border: 'border-near-green/20' },
   'Rust & Smart Contracts': { icon: Code2,      color: 'text-accent-cyan', bg: 'bg-accent-cyan/10', border: 'border-accent-cyan/20' },
   'Tools & Infrastructure': { icon: Wrench,     color: 'text-orange-400',  bg: 'bg-orange-400/10',  border: 'border-orange-400/20' },
   'Community & Support':    { icon: Users,      color: 'text-purple-400',  bg: 'bg-purple-400/10',  border: 'border-purple-400/20' },
@@ -368,7 +368,7 @@ const CATEGORIES: Category[] = [
 ];
 
 const difficultyColor: Record<string, string> = {
-  Beginner: 'text-near-green bg-near-green/10 border-near-green/20',
+  Beginner: 'text-emerald-400 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-500/20 shadow-sm shadow-emerald-500/10',
   Intermediate: 'text-accent-cyan bg-accent-cyan/10 border-accent-cyan/20',
   Advanced: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
 };
@@ -417,7 +417,7 @@ export function ResourceHub() {
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
                   activeCategory === cat
                     ? cat === 'All'
-                      ? 'bg-near-green/10 text-near-green border-near-green/30'
+                      ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 border-emerald-500/30'
                       : cn(config?.bg, config?.color, config?.border)
                     : 'bg-surface text-text-muted border-border hover:text-text-secondary'
                 )}

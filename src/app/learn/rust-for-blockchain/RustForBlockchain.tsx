@@ -257,8 +257,8 @@ function ModuleCard({ module }: { module: RustModule }) {
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
-              <module.icon className="w-5 h-5 text-near-green" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 shrink-0 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+              <module.icon className="w-5 h-5 text-blue-400" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
@@ -323,7 +323,7 @@ export function RustForBlockchain() {
       {/* Hero */}
       <ScrollReveal>
         <div className="text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-xs font-mono text-near-green">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/20 text-xs font-mono text-blue-400 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
             <Code2 className="w-3 h-3" /> CHAIN-AGNOSTIC RUST CURRICULUM
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary">

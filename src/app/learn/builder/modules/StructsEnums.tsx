@@ -29,7 +29,7 @@ const StructsEnums: React.FC<StructsEnumsProps> = ({ isActive, onToggle }) => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Beginner</Badge>
+          <Badge className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Beginner</Badge>
           <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">30 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
@@ -154,7 +154,7 @@ const StructsEnums: React.FC<StructsEnumsProps> = ({ isActive, onToggle }) => {
                         <p className="text-sm text-text-muted mt-1">{exercise.desc}</p>
                       </div>
                       <Badge className={cn(
-                        exercise.difficulty === 'Easy' ? 'bg-near-green/10 text-near-green border-near-green/20' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                        exercise.difficulty === 'Easy' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                       )}>{exercise.difficulty}</Badge>
                     </div>
                   </Card>

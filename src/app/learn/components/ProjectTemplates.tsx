@@ -260,7 +260,7 @@ impl NFTContract {
 
 const DIFFICULTY_STYLES: Record<Difficulty, { badge: string; glow: string; color: string; border: string }> = {
   Beginner: {
-    badge: 'bg-near-green/10 text-near-green border-near-green/20',
+    badge: 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10',
     glow: 'from-near-green/20',
     color: 'text-near-green',
     border: 'border-near-green/20',
@@ -520,7 +520,7 @@ export default function ProjectTemplates() {
               className={cn(
                 'px-4 py-1.5 rounded-full text-sm font-medium border transition-colors',
                 activeFilter === f
-                  ? f === 'All' ? 'bg-near-green/10 text-near-green border-near-green/30'
+                  ? f === 'All' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/30 shadow-sm shadow-emerald-500/10'
                     : DIFFICULTY_STYLES[f as Difficulty].badge
                   : 'bg-surface text-text-muted border-border hover:text-text-secondary'
               )}

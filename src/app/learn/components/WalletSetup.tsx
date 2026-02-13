@@ -431,7 +431,7 @@ function WalletCard({
           <div className="flex items-center gap-3">
             <div className={cn(
               'p-3 rounded-xl border',
-              wallet.recommended ? 'bg-near-green/10 border-near-green/30' : 'bg-surface-hover border-border'
+              wallet.recommended ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/30 shadow-lg shadow-amber-500/10 backdrop-blur-sm' : 'bg-surface-hover border-border'
             )}>
               <Icon className={cn('w-6 h-6', wallet.recommended ? 'text-near-green' : 'text-text-secondary')} />
             </div>
@@ -439,7 +439,7 @@ function WalletCard({
               <div className="flex items-center gap-2 flex-wrap">
                 <h4 className="font-bold text-text-primary text-base">{wallet.name}</h4>
                 {wallet.recommended && (
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-near-green bg-near-green/10 px-2 py-0.5 rounded-full border border-near-green/30 flex items-center gap-1">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-sm shadow-amber-500/10 backdrop-blur-sm">
                     <Star className="w-2.5 h-2.5 fill-near-green" /> RECOMMENDED
                   </span>
                 )}
@@ -491,7 +491,7 @@ function WalletCard({
             className={cn(
               'flex items-center gap-1.5 px-4 py-2 rounded-lg border text-xs font-medium transition-all',
               isExpanded
-                ? 'border-near-green/30 bg-near-green/10 text-near-green'
+                ? 'border-amber-500/30 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 shadow-sm shadow-amber-500/10'
                 : 'border-border bg-surface hover:bg-surface-hover text-text-muted hover:text-text-primary'
             )}
           >
@@ -887,7 +887,7 @@ export function WalletSetup() {
           <p className="text-text-secondary text-base leading-relaxed">
             Before you can build or explore NEAR, you need a wallet. It&apos;s{' '}
             <span className="text-near-green font-semibold">free, takes 10 minutes</span>, and gives
-            you a human-readable <code className="text-near-green bg-near-green/10 px-1 py-0.5 rounded text-sm">yourname.near</code> address
+            you a human-readable <code className="text-emerald-400 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-1 py-0.5 rounded text-sm">yourname.near</code> address
             instead of a hex string. Pick a wallet below, follow the guide, and you&apos;re on-chain.
           </p>
         </div>
@@ -990,7 +990,7 @@ export function WalletSetup() {
               Congratulations — you&apos;re a NEAR citizen!
             </p>
             <p className="text-sm text-text-muted max-w-md mx-auto">
-              Your <code className="text-near-green bg-near-green/10 px-1.5 py-0.5 rounded text-xs">yourname.near</code> account
+              Your <code className="text-emerald-400 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-1.5 py-0.5 rounded text-xs">yourname.near</code> account
               is ready. Now mark this skill complete above and continue your journey through the skill tree.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">

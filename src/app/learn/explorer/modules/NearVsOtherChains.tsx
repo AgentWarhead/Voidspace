@@ -42,7 +42,7 @@ const CHAINS: ChainInfo[] = [
     name: 'NEAR',
     emoji: '💚',
     color: 'text-near-green',
-    bgColor: 'bg-near-green/10',
+    bgColor: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10 backdrop-blur-sm',
     borderColor: 'border-near-green/30',
     stats: {
       tps: '100K+ (sharded)',
@@ -377,8 +377,8 @@ export function NearVsOtherChains() {
               return (
                 <GlowCard key={item.title} padding="lg">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-4 h-4 text-near-green" />
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm flex-shrink-0">
+                      <Icon className="w-4 h-4 text-emerald-400" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-text-primary text-sm mb-1">{item.title}</h4>

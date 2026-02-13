@@ -129,7 +129,7 @@ function ConceptTranslator() {
                     {mapping.solana}
                   </span>
                   <ArrowRightLeft className="w-4 h-4 text-text-muted shrink-0" />
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-near-green/10 border border-near-green/20 text-xs font-mono text-near-green">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-xs font-mono text-emerald-400">
                     {mapping.near}
                   </span>
                   {mapping.important && (
@@ -307,7 +307,7 @@ function KnowledgeQuiz() {
             className={cn(
               'w-full p-3 rounded-lg border text-left text-sm transition-all duration-200',
               !answered && 'hover:border-border-hover',
-              selected === i && i === q.correctIndex && 'bg-near-green/10 border-near-green/50 text-near-green',
+              selected === i && i === q.correctIndex && 'bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border-emerald-500/50 text-emerald-400',
               selected === i && i !== q.correctIndex && 'bg-red-500/10 border-red-500/50 text-red-400',
               answered && i === q.correctIndex && selected !== i && 'bg-near-green/5 border-near-green/30',
               !answered && 'bg-surface border-border text-text-secondary',
@@ -349,7 +349,7 @@ export function ForSolanaDevelopers() {
       {/* Hero */}
       <ScrollReveal>
         <div className="text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-xs font-mono text-near-green">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-xs font-mono text-emerald-400 shadow-lg shadow-emerald-500/10">
             <ArrowRightLeft className="w-3 h-3" /> EXPAND YOUR TOOLKIT
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary">
@@ -380,8 +380,8 @@ export function ForSolanaDevelopers() {
             {/* Step 1: Install */}
             <Card variant="glass" padding="lg">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-near-green/10 border border-near-green/20 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-near-green">1</span>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+                  <span className="text-sm font-bold text-blue-400">1</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base font-semibold text-text-primary">Install NEAR CLI</h4>
@@ -405,8 +405,8 @@ near account create-account fund-myself my-app.testnet '1 NEAR' autogenerate-new
             {/* Step 2: Write Contract */}
             <Card variant="glass" padding="lg">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-near-green/10 border border-near-green/20 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-near-green">2</span>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+                  <span className="text-sm font-bold text-blue-400">2</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base font-semibold text-text-primary">Write a Storage Contract</h4>
@@ -486,8 +486,8 @@ impl Contract {
             {/* Step 3: Build & Deploy */}
             <Card variant="glass" padding="lg">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-near-green/10 border border-near-green/20 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-near-green">3</span>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+                  <span className="text-sm font-bold text-blue-400">3</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base font-semibold text-text-primary">Build & Deploy to Testnet</h4>
@@ -564,7 +564,7 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 <div className="flex items-start gap-3">
                   <div className={cn(
                     'p-2 rounded-lg shrink-0',
-                    item.severity === 'high' ? 'bg-accent-orange/10' : item.severity === 'low' ? 'bg-near-green/10' : 'bg-accent-cyan/10',
+                    item.severity === 'high' ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 shadow-lg shadow-amber-500/10' : item.severity === 'low' ? 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10' : 'bg-gradient-to-br from-cyan-500/20 to-teal-500/20 shadow-lg shadow-cyan-500/10',
                   )}>
                     <item.icon className={cn(
                       'w-4 h-4',
@@ -615,8 +615,8 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
             ].map((item) => (
               <Card key={item.title} variant="glass" padding="lg">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-near-green/10 shrink-0">
-                    <item.icon className="w-5 h-5 text-near-green" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 shrink-0 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+                    <item.icon className="w-5 h-5 text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-base font-semibold text-text-primary">{item.title}</h4>
@@ -655,6 +655,9 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 description: 'Full Rust smart contract curriculum on NEAR',
                 href: '/learn#tracks',
                 internal: true,
+                gradient: 'from-emerald-500/20 to-cyan-500/20',
+                shadow: 'shadow-emerald-500/10',
+                iconColor: 'text-emerald-400',
               },
               {
                 icon: Code2,
@@ -662,6 +665,9 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 description: 'From zero Rust to deployed contracts',
                 href: '/learn/rust-curriculum',
                 internal: true,
+                gradient: 'from-blue-500/20 to-indigo-500/20',
+                shadow: 'shadow-blue-500/10',
+                iconColor: 'text-blue-400',
               },
               {
                 icon: Terminal,
@@ -669,6 +675,9 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 description: 'Official docs, tutorials, and API references',
                 href: 'https://docs.near.org',
                 internal: false,
+                gradient: 'from-cyan-500/20 to-teal-500/20',
+                shadow: 'shadow-cyan-500/10',
+                iconColor: 'text-cyan-400',
               },
               {
                 icon: Globe,
@@ -676,6 +685,9 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 description: 'GitHub repository of example contracts',
                 href: 'https://github.com/near-examples',
                 internal: false,
+                gradient: 'from-purple-500/20 to-pink-500/20',
+                shadow: 'shadow-purple-500/10',
+                iconColor: 'text-purple-400',
               },
               {
                 icon: Users,
@@ -683,6 +695,9 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 description: 'Join the developer community',
                 href: 'https://near.chat',
                 internal: false,
+                gradient: 'from-purple-500/20 to-pink-500/20',
+                shadow: 'shadow-purple-500/10',
+                iconColor: 'text-purple-400',
               },
               {
                 icon: Zap,
@@ -690,13 +705,16 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 description: 'Get personalized build plans for the NEAR ecosystem',
                 href: '/voids',
                 internal: true,
+                gradient: 'from-amber-500/20 to-orange-500/20',
+                shadow: 'shadow-amber-500/10',
+                iconColor: 'text-amber-400',
               },
             ].map((item) => (
               item.internal ? (
                 <Link key={item.title} href={item.href} className="block group">
                   <GlowCard className="h-full p-4 flex items-start gap-3 transition-all duration-300 group-hover:scale-[1.02]">
-                    <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
-                      <item.icon className="w-4 h-4 text-near-green" />
+                    <div className={cn('p-2 rounded-lg shrink-0 bg-gradient-to-br backdrop-blur-sm shadow-lg', item.gradient, item.shadow)}>
+                      <item.icon className={cn('w-4 h-4', item.iconColor)} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-semibold text-text-primary group-hover:text-near-green transition-colors">{item.title}</h4>
@@ -708,8 +726,8 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
               ) : (
                 <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer" className="block group">
                   <GlowCard className="h-full p-4 flex items-start gap-3 transition-all duration-300 group-hover:scale-[1.02]">
-                    <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
-                      <item.icon className="w-4 h-4 text-near-green" />
+                    <div className={cn('p-2 rounded-lg shrink-0 bg-gradient-to-br backdrop-blur-sm shadow-lg', item.gradient, item.shadow)}>
+                      <item.icon className={cn('w-4 h-4', item.iconColor)} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-semibold text-text-primary group-hover:text-near-green transition-colors">{item.title}</h4>

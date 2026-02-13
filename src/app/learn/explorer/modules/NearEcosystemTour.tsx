@@ -137,7 +137,7 @@ function EcosystemExplorer() {
             className={cn(
               'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all',
               activeCategory === i
-                ? 'bg-near-green/10 text-near-green border border-near-green/30'
+                ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 border border-emerald-500/30'
                 : 'bg-surface text-text-muted border border-border hover:border-border-hover'
             )}
           >
@@ -158,7 +158,7 @@ function EcosystemExplorer() {
         >
           <Card variant="glass" padding="lg">
             <div className="flex items-center gap-3 mb-4">
-              <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', 'bg-near-green/10')}>
+              <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10 backdrop-blur-sm')}>
                 <Icon className={cn('w-5 h-5', cat.color)} />
               </div>
               <div>
@@ -309,8 +309,8 @@ export function NearEcosystemTour() {
       <ScrollReveal delay={0.15}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <MapPin className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">Why Explore the Ecosystem?</h2>
           </div>

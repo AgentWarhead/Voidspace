@@ -248,7 +248,7 @@ export function QuickStart() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-mono text-near-green uppercase tracking-widest">Step {step.id} of {STEPS.length}</span>
                     {completedSteps.has(step.id) && (
-                      <span className="text-[10px] font-mono text-near-green bg-near-green/10 px-2 py-0.5 rounded-full">✓ Done</span>
+                      <span className="text-[10px] font-mono text-emerald-400 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 px-2 py-0.5 rounded-full shadow-sm shadow-emerald-500/10">✓ Done</span>
                     )}
                   </div>
                   <h2 className="text-xl font-bold text-text-primary">{step.title}</h2>
@@ -283,7 +283,7 @@ export function QuickStart() {
                   href={step.link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 p-3 rounded-lg bg-near-green/5 border border-near-green/20 hover:bg-near-green/10 transition-colors group"
+                  className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 border border-emerald-500/20 hover:from-emerald-500/10 hover:to-cyan-500/10 transition-colors group backdrop-blur-sm"
                 >
                   <ExternalLink className="w-4 h-4 text-near-green" />
                   <span className="text-sm font-medium text-near-green group-hover:underline">{step.link.label}</span>
@@ -317,7 +317,7 @@ export function QuickStart() {
                   {!completedSteps.has(step.id) && (
                     <button
                       onClick={markComplete}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-near-green/10 border border-near-green/30 text-near-green text-sm font-medium hover:bg-near-green/20 transition-colors"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-medium hover:from-emerald-500/30 hover:to-cyan-500/30 transition-colors shadow-lg shadow-emerald-500/10"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Mark Complete

@@ -64,8 +64,8 @@ const heroStats = [
     label: 'Average Salary',
     sublabel: 'Highest-paid language globally',
     color: 'text-near-green',
-    bgColor: 'bg-near-green/10',
-    borderColor: 'border-near-green/20',
+    bgColor: 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 shadow-lg shadow-green-500/10 backdrop-blur-sm',
+    borderColor: 'border-green-500/20',
   },
   {
     icon: TrendingUp,
@@ -215,8 +215,8 @@ const topRustProjects = [
     icon: Globe,
     fact: 'Core protocol (nearcore) is written entirely in Rust. Smart contracts compile to WASM from Rust.',
     color: 'text-near-green',
-    bgColor: 'bg-near-green/10',
-    borderColor: 'border-near-green/20',
+    bgColor: 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shadow-lg shadow-emerald-500/10 backdrop-blur-sm',
+    borderColor: 'border-emerald-500/20',
   },
   {
     name: 'Solana',
@@ -606,10 +606,10 @@ function WhyRustForContracts() {
               <div className="flex items-start gap-3">
                 <div className={cn(
                   'p-2.5 rounded-lg border flex-shrink-0',
-                  benefit.color === 'text-near-green' ? 'bg-near-green/10 border-near-green/20' :
-                  benefit.color === 'text-accent-cyan' ? 'bg-accent-cyan/10 border-accent-cyan/20' :
-                  benefit.color === 'text-purple-400' ? 'bg-purple-400/10 border-purple-400/20' :
-                  'bg-yellow-400/10 border-yellow-400/20'
+                  benefit.color === 'text-near-green' ? 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border-emerald-500/20 shadow-lg shadow-emerald-500/10 backdrop-blur-sm' :
+                  benefit.color === 'text-accent-cyan' ? 'bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border-cyan-500/20 shadow-lg shadow-cyan-500/10 backdrop-blur-sm' :
+                  benefit.color === 'text-purple-400' ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/20 shadow-lg shadow-purple-500/10 backdrop-blur-sm' :
+                  'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/20 shadow-lg shadow-amber-500/10 backdrop-blur-sm'
                 )}>
                   <Icon className={cn('w-5 h-5', benefit.color)} />
                 </div>
@@ -683,8 +683,8 @@ function CareerSection() {
             >
               <Card variant="glass" padding="md" className="h-full">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-near-green/10 border border-near-green/20 flex-shrink-0">
-                    <PathIcon className="w-4 h-4 text-near-green" />
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex-shrink-0 shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+                    <PathIcon className="w-4 h-4 text-blue-400" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-text-primary mb-0.5">{path.title}</h4>

@@ -25,7 +25,7 @@ function TransactionSimulator() {
       visual: (
         <div className="flex items-center justify-center gap-4">
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-near-green/10 border-2 border-near-green/30 flex items-center justify-center mb-2 mx-auto">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-500/30 flex items-center justify-center mb-2 mx-auto shadow-lg shadow-green-500/10 backdrop-blur-sm">
               <span className="text-lg">👩</span>
             </div>
             <span className="text-xs text-text-secondary">alice.near</span>
@@ -69,7 +69,7 @@ function TransactionSimulator() {
           {[1, 2, 3, 4, 5].map((i) => (
             <motion.div
               key={i}
-              className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/20 flex items-center justify-center"
+              className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20 flex items-center justify-center shadow-lg shadow-green-500/10 backdrop-blur-sm"
               animate={{ opacity: [0.4, 1, 0.4] }}
               transition={{ duration: 1, delay: i * 0.15, repeat: Infinity }}
             >
@@ -85,7 +85,7 @@ function TransactionSimulator() {
       visual: (
         <div className="flex items-center justify-center gap-4">
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-near-green/10 border-2 border-near-green/30 flex items-center justify-center mb-2 mx-auto">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-500/30 flex items-center justify-center mb-2 mx-auto shadow-lg shadow-green-500/10 backdrop-blur-sm">
               <span className="text-lg">👩</span>
             </div>
             <span className="text-xs text-text-secondary">alice.near</span>
@@ -99,7 +99,7 @@ function TransactionSimulator() {
             <CheckCircle2 className="w-8 h-8 text-near-green" />
           </motion.div>
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-near-green/10 border-2 border-near-green/30 flex items-center justify-center mb-2 mx-auto">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-500/30 flex items-center justify-center mb-2 mx-auto shadow-lg shadow-green-500/10 backdrop-blur-sm">
               <span className="text-lg">👨</span>
             </div>
             <span className="text-xs text-text-secondary">bob.near</span>
@@ -176,8 +176,8 @@ function GasFeeExplainer() {
   return (
     <GlowCard padding="lg" onClick={() => setShowDetail(!showDetail)}>
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/20 flex items-center justify-center flex-shrink-0">
-          <Fuel className="w-5 h-5 text-near-green" />
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+          <Fuel className="w-5 h-5 text-emerald-400" />
         </div>
         <div className="flex-1">
           <h4 className="font-bold text-text-primary mb-1">Gas Fees on NEAR</h4>

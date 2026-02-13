@@ -192,8 +192,8 @@ function ComparisonCard({ category }: { category: ComparisonCategory }) {
       <div className="p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
-              <category.icon className="w-5 h-5 text-near-green" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-teal-500/20 shrink-0 shadow-lg shadow-cyan-500/10 backdrop-blur-sm">
+              <category.icon className="w-5 h-5 text-cyan-400" />
             </div>
             <h3 className="text-base font-semibold text-text-primary">{category.title}</h3>
           </div>
@@ -284,18 +284,18 @@ function ArchitectureDiagram() {
         <div className="flex flex-col items-center gap-2">
           <div className="grid grid-cols-3 gap-2 w-full">
             {['Shard 0', 'Shard 1', 'Shard 2'].map((shard) => (
-              <div key={shard} className="p-2 rounded-lg bg-near-green/10 border border-near-green/20 text-center">
+              <div key={shard} className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-center shadow-sm shadow-emerald-500/10">
                 <span className="text-[10px] font-mono text-near-green">{shard}</span>
               </div>
             ))}
           </div>
           <div className="text-text-muted text-xs">↓ produce chunks ↓</div>
-          <div className="w-full p-3 rounded-lg bg-near-green/10 border border-near-green/20 text-center">
-            <span className="text-xs font-mono text-near-green">Combined Block (Nightshade)</span>
+          <div className="w-full p-3 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-center shadow-sm shadow-emerald-500/10">
+            <span className="text-xs font-mono text-emerald-400">Combined Block (Nightshade)</span>
           </div>
           <div className="text-text-muted text-xs">↓ finalized by ↓</div>
-          <div className="w-full p-3 rounded-lg bg-near-green/10 border border-near-green/20 text-center">
-            <span className="text-xs font-mono text-near-green">Validator Set (Doomslug + BFT)</span>
+          <div className="w-full p-3 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-center shadow-sm shadow-emerald-500/10">
+            <span className="text-xs font-mono text-emerald-400">Validator Set (Doomslug + BFT)</span>
           </div>
         </div>
         <p className="text-xs text-text-muted mt-3 text-center">Scales horizontally — add shards for more capacity</p>
@@ -356,7 +356,7 @@ function PriorityQuiz() {
                   className={cn(
                     'p-3 rounded-lg border text-left text-sm transition-all duration-200',
                     answers[qi] === oi
-                      ? 'bg-near-green/10 border-near-green/50 text-text-primary'
+                      ? 'bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border-emerald-500/50 text-text-primary'
                       : 'bg-surface border-border hover:border-border-hover text-text-secondary hover:text-text-primary'
                   )}
                 >
@@ -381,7 +381,7 @@ function PriorityQuiz() {
                 <div className={cn(
                   'p-4 rounded-lg text-center border',
                   nearScore > solanaScore
-                    ? 'bg-near-green/10 border-near-green/30'
+                    ? 'bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border-emerald-500/30'
                     : 'bg-surface border-border'
                 )}>
                   <div className="text-2xl font-bold text-near-green">{nearScore}</div>
@@ -428,7 +428,7 @@ export function SolanaVsNear() {
       {/* Hero */}
       <ScrollReveal>
         <div className="text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-xs font-mono text-near-green">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-xs font-mono text-emerald-400 shadow-lg shadow-emerald-500/10">
             <Zap className="w-3 h-3" /> HONEST COMPARISON
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary">
@@ -444,7 +444,7 @@ export function SolanaVsNear() {
               Solana
             </span>
             <span className="text-text-muted text-sm">vs</span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-xs font-mono text-near-green">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-xs font-mono text-emerald-400 shadow-lg shadow-emerald-500/10">
               NEAR Protocol
             </span>
           </div>
@@ -511,8 +511,8 @@ export function SolanaVsNear() {
             ].map((item) => (
               <GlowCard key={item.title} padding="lg">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-near-green/10 shrink-0">
-                    <item.icon className="w-4 h-4 text-near-green" />
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 shrink-0 shadow-lg shadow-emerald-500/10">
+                    <item.icon className="w-4 h-4 text-emerald-400" />
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-text-primary">{item.title}</h4>

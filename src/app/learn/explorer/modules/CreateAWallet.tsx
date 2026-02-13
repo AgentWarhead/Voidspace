@@ -94,7 +94,7 @@ function WalletComparison() {
             className={cn(
               'p-4 rounded-xl border text-left transition-all',
               activeWallet === i
-                ? 'bg-near-green/10 border-near-green/40 shadow-[0_0_15px_rgba(0,236,151,0.1)]'
+                ? 'bg-gradient-to-br from-amber-500/15 to-orange-500/15 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
                 : 'bg-surface border-border hover:border-border-hover'
             )}
           >
@@ -336,7 +336,7 @@ function SecurityChecklist() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 p-3 rounded-lg bg-near-green/10 border border-near-green/20"
+          className="mt-4 p-3 rounded-lg bg-gradient-to-br from-amber-500/15 to-orange-500/15 border border-amber-500/20 shadow-sm shadow-amber-500/10"
         >
           <p className="text-sm text-near-green font-medium">
             🎉 You&apos;re security-savvy! You&apos;re ready to use your wallet safely.
@@ -411,8 +411,8 @@ export function CreateAWallet() {
       <ScrollReveal delay={0.1}>
         <Card variant="glass" padding="lg" className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-near-green/10 flex items-center justify-center">
-              <Wallet className="w-4 h-4 text-near-green" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+              <Wallet className="w-4 h-4 text-emerald-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary">What is a Wallet?</h2>
           </div>

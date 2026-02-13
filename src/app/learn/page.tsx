@@ -354,7 +354,7 @@ export default function LearnPage() {
                   scalability. Often called &ldquo;The Blockchain for AI,&rdquo; NEAR
                   combines sub-second transaction finality, human-readable account names
                   (like{' '}
-                  <code className="text-near-green bg-near-green/10 px-1.5 py-0.5 rounded text-sm">
+                  <code className="text-emerald-400 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-1.5 py-0.5 rounded text-sm">
                     alice.near
                   </code>
                   ), and innovative sharding technology to deliver an experience that
@@ -422,8 +422,8 @@ export default function LearnPage() {
             <Card variant="glass" padding="lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-near-green/10 group-hover:bg-near-green/20 transition-colors">
-                    <BarChart3 className="w-6 h-6 text-near-green" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-teal-500/20 group-hover:from-cyan-500/30 group-hover:to-teal-500/30 transition-colors shadow-lg shadow-cyan-500/10 backdrop-blur-sm">
+                    <BarChart3 className="w-6 h-6 text-cyan-400" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-text-primary group-hover:text-near-green transition-colors">

@@ -271,7 +271,7 @@ export default function BottomCTA() {
       >
         {/* Badge */}
         <motion.div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-sm font-medium mb-8"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-8 shadow-lg shadow-emerald-500/10 backdrop-blur-sm"
           initial={{ opacity: 0, scale: 0.8 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
