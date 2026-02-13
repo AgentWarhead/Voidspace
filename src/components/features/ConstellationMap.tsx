@@ -86,6 +86,8 @@ interface ContextMenuState {
   isExpanded: boolean;
 }
 
+type NodeType = 'wallet' | 'contract' | 'dao';
+
 // ── Constants ──────────────────────────────────────────────────────
 
 const NODE_COLORS = {
@@ -138,7 +140,6 @@ function formatNear(value: number): string {
 
 function formatDate(dateString?: string): string {
   if (!dateString) return 'Unknown';
-  // NearBlocks timestamps are in nanoseconds
   const ts = Number(dateString);
   const date = ts > 1e15 ? new Date(ts / 1e6) : new Date(dateString);
   if (isNaN(date.getTime())) return 'Unknown';
@@ -195,6 +196,8 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [recentWallets, setRecentWallets] = useState<string[]>([]);
   const [viewTransform, setViewTransform] = useState({ x: 0, y: 0, k: 1 });
+  // Issue 4: Type filter state
+  const [hiddenTypes, setHiddenTypes] = useState<Set<NodeType>>(new Set());
 
   const simulationRef = useRef<d3.Simulation<ConstellationNode, ConstellationEdge> | null>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
@@ -211,7 +214,19 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isFullscreen]);
 
-  // Edge-value-to-node lookup for value filter (compute per-node totals)
+  // Re-measure SVG on fullscreen toggle
+  useEffect(() => {
+    if (constellation) {
+      // Small delay to let CSS transition settle
+      const timer = setTimeout(() => {
+        initializeVisualization(constellation);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFullscreen]);
+
+  // Edge-value-to-node lookup for value filter
   const nodeValueMap = useCallback(() => {
     if (!constellation) return new Map<string, { totalIn: number; totalOut: number }>();
     const map = new Map<string, { totalIn: number; totalOut: number }>();
@@ -246,6 +261,23 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
     return parts.join(' · ');
   }, []);
 
+  // ── Type filter toggle (Issue 4) ────────────────────────────────
+  const toggleTypeFilter = useCallback((type: NodeType) => {
+    setHiddenTypes(prev => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  }, []);
+
+  const resetTypeFilters = useCallback(() => {
+    setHiddenTypes(new Set());
+  }, []);
+
   // ── D3 Visualization ────────────────────────────────────────────
   const initializeVisualization = useCallback((data: ConstellationData) => {
     if (!svgRef.current || !containerRef.current) return;
@@ -260,16 +292,28 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
     svg.attr('width', width).attr('height', height).style('opacity', 0);
 
     // Filter edges by minValue
-    const filteredEdges = data.edges.filter(e => e.totalValue >= minValue);
+    const valueFilteredEdges = data.edges.filter(e => e.totalValue >= minValue);
     const connectedNodeIds = new Set<string>();
     connectedNodeIds.add(data.centerNode);
-    for (const e of filteredEdges) {
+    for (const e of valueFilteredEdges) {
       const s = typeof e.source === 'string' ? e.source : e.source.id;
       const t = typeof e.target === 'string' ? e.target : e.target.id;
       connectedNodeIds.add(s);
       connectedNodeIds.add(t);
     }
-    const filteredNodes = data.nodes.filter(n => connectedNodeIds.has(n.id));
+    const valueFilteredNodes = data.nodes.filter(n => connectedNodeIds.has(n.id));
+
+    // Issue 4: Apply type filter — hide nodes of hidden types (but never hide center)
+    const visibleNodes = valueFilteredNodes.filter(n =>
+      n.id === data.centerNode || !hiddenTypes.has(n.type)
+    );
+    const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
+    const filteredEdges = valueFilteredEdges.filter(e => {
+      const s = typeof e.source === 'string' ? e.source : e.source.id;
+      const t = typeof e.target === 'string' ? e.target : e.target.id;
+      return visibleNodeIds.has(s) && visibleNodeIds.has(t);
+    });
+    const filteredNodes = visibleNodes;
 
     const g = svg.append('g');
     const defs = svg.append('defs');
@@ -365,7 +409,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
       .style('filter', d => `drop-shadow(0 0 3px ${edgeColor(d)})`)
       .style('transition', 'all 0.3s ease');
 
-    // Invisible wider hit areas for edge hover (item 11)
+    // Invisible wider hit areas for edge hover
     const linkHits = linkHitGroup.selectAll('.link-hit')
       .data(filteredEdges)
       .enter().append('line')
@@ -390,13 +434,10 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
       })
       .on('mouseout', () => setTooltip(null));
 
-    // ── Important nodes for labeling ──
-    const sortedNodes = [...filteredNodes].filter(n => n.id !== data.centerNode)
-      .sort((a, b) => b.transactionCount - a.transactionCount);
-    const importantNodes = new Set<string>();
-    importantNodes.add(data.centerNode);
-    filteredNodes.forEach(n => { if (n.transactionCount > 5) importantNodes.add(n.id); });
-    sortedNodes.slice(0, 5).forEach(n => importantNodes.add(n.id));
+    // ── Issue 2: Show labels on ALL nodes ──
+    // Nodes with 3+ txns get permanent visible labels
+    // Nodes with fewer txns get smaller, slightly dimmer labels
+    // All labels use smart truncation
 
     // Build adjacency for cluster highlighting
     const adjacency = new Map<string, Set<string>>();
@@ -429,7 +470,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         links.style('stroke-opacity', function(l) {
           return l.source === d || l.target === d ? 1 : 0.1;
         });
-        // Cluster highlight (#12)
+        // Cluster highlight
         const neighbors = adjacency.get(d.id) || new Set();
         const centerNeighbors = adjacency.get(data.centerNode) || new Set();
         const clusterPeers = new Set<string>();
@@ -452,6 +493,10 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         });
         d3.select(this).transition().duration(200)
           .attr('r', (d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount)) * 1.5);
+        // Highlight the label on hover too
+        labels.filter(l => l.id === d.id)
+          .style('fill', '#FFFFFF')
+          .style('font-size', d.id === data.centerNode ? '11px' : '10px');
       })
       .on('mouseout', function(_event, d) {
         links.style('stroke-opacity', l => Math.min(0.8, l.weight / 50));
@@ -459,9 +504,12 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         setTooltip(null);
         d3.select(this).transition().duration(200)
           .attr('r', d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount));
+        // Restore label style
+        labels.filter(l => l.id === d.id)
+          .style('fill', d.id === data.centerNode ? '#FFFFFF' : (d.transactionCount >= 3 ? '#D1D5DB' : '#6B7280'))
+          .style('font-size', d.id === data.centerNode ? '10px' : (d.transactionCount >= 3 ? '9px' : '8px'));
       })
       .on('click', function(_event, d) {
-        // Left click: expand immediately for speed (non-center only)
         if (d.id !== data.centerNode && !expandedNodes.has(d.id)) {
           expandNode(d.id);
         }
@@ -487,7 +535,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         }));
 
     // Loading indicators
-    const loadingIndicators = nodeGroup.selectAll('.loading-indicator')
+    nodeGroup.selectAll('.loading-indicator')
       .data(filteredNodes.filter(d => loadingNodes.has(d.id)))
       .enter().append('circle')
       .attr('class', 'loading-indicator')
@@ -495,13 +543,21 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
       .style('fill', 'none').style('stroke', '#10B981')
       .style('stroke-width', '2px').style('stroke-dasharray', '5,5').style('opacity', 0.8);
 
-    // Labels with smart truncation (#4)
+    // Issue 2 FIX: Labels on ALL nodes (not just importantNodes)
+    // Center + high-txn nodes: bright, larger. Low-txn nodes: dimmer, smaller.
     const labels = labelGroup.selectAll('.label')
-      .data(filteredNodes.filter(d => importantNodes.has(d.id)))
+      .data(filteredNodes) // ALL nodes get labels
       .enter().append('text')
       .attr('class', 'label')
-      .style('font-size', '9px').style('fill', '#9CA3AF')
-      .style('text-anchor', 'middle').style('pointer-events', 'none').style('user-select', 'none')
+      .style('font-size', d => d.id === data.centerNode ? '10px' : (d.transactionCount >= 3 ? '9px' : '8px'))
+      .style('fill', d => d.id === data.centerNode ? '#FFFFFF' : (d.transactionCount >= 3 ? '#D1D5DB' : '#6B7280'))
+      .style('text-anchor', 'middle')
+      .style('pointer-events', 'none')
+      .style('user-select', 'none')
+      .style('paint-order', 'stroke')
+      .style('stroke', 'rgba(0,0,0,0.7)')
+      .style('stroke-width', '3px')
+      .style('stroke-linejoin', 'round')
       .text(d => smartTruncate(d.id, 20, d.id === data.centerNode));
 
     // ── Zoom ──
@@ -561,11 +617,18 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
 
       nodes.attr('cx', d => d.x!).attr('cy', d => d.y!);
 
+      // Labels positioned below nodes with offset to reduce overlap
       labels
         .attr('x', d => d.x!)
-        .attr('y', d => d.y! + (d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount)) + 12);
+        .attr('y', d => {
+          const radius = d.id === data.centerNode ? NODE_RADIUS.center : nodeScale(d.transactionCount);
+          return d.y! + radius + 12;
+        });
 
-      loadingIndicators.attr('cx', d => d.x!).attr('cy', d => d.y!);
+      // Rotate loading indicators
+      nodeGroup.selectAll('.loading-indicator')
+        .attr('cx', (d: unknown) => (d as ConstellationNode).x!)
+        .attr('cy', (d: unknown) => (d as ConstellationNode).y!);
 
       // Particle animation
       if (Math.random() < 0.1 && filteredEdges.length > 0) {
@@ -585,7 +648,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandedNodes, loadingNodes, calculateInsight, minValue]);
+  }, [expandedNodes, loadingNodes, calculateInsight, minValue, hiddenTypes]);
 
   // ── Expand node ────────────────────────────────────────────────
   const expandNode = async (nodeId: string) => {
@@ -662,8 +725,8 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
     setExpandedNodes(new Set());
     setLoadingNodes(new Set());
     setContextMenu(null);
+    setHiddenTypes(new Set());
 
-    // Update address state if called with explicit address (e.g. from example buttons)
     if (searchAddress) setAddress(searchAddress);
 
     try {
@@ -693,8 +756,10 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
   }, [address, period]);
 
   const getErrorMessage = (error: string, status?: number) => {
-    if (status === 429 || error.toLowerCase().includes('rate limit')) return "NEAR's data feeds are busy. Try again shortly.";
-    if (error.toLowerCase().includes('not found') || error.toLowerCase().includes('no data')) return "No connections found for this wallet. It may be new or inactive.";
+    if (status === 429 || error.toLowerCase().includes('rate limit') || error.toLowerCase().includes('nearblocks is busy'))
+      return "NearBlocks is busy, try again in a moment.";
+    if (error.toLowerCase().includes('not found') || error.toLowerCase().includes('no data'))
+      return "No connections found for this wallet. It may be new or inactive.";
     return error || 'An unexpected error occurred. Please try again.';
   };
 
@@ -712,43 +777,74 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
       d3.select(svgRef.current).transition().duration(300).call(zoomRef.current.scaleBy, 0.67);
   };
 
-  // ── Screenshot / Export (#14) ──────────────────────────────────
-  const handleScreenshot = () => {
-    if (!svgRef.current) return;
+  // ── Issue 3 FIX: Screenshot — properly serialize SVG with inline styles ──
+  const handleScreenshot = useCallback(() => {
+    if (!svgRef.current || !containerRef.current) return;
     const svgEl = svgRef.current;
+    const w = svgEl.clientWidth || containerRef.current.offsetWidth;
+    const h = svgEl.clientHeight || containerRef.current.offsetHeight;
+
+    // Clone the SVG to avoid modifying the live one
+    const clone = svgEl.cloneNode(true) as SVGSVGElement;
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', String(w));
+    clone.setAttribute('height', String(h));
+
+    // Add a background rect since canvas won't have the CSS background
+    const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bgRect.setAttribute('width', '100%');
+    bgRect.setAttribute('height', '100%');
+    bgRect.setAttribute('fill', '#0a0a0a');
+    clone.insertBefore(bgRect, clone.firstChild);
+
+    // Remove any filters that might cause tainted canvas issues
+    // (drop-shadow filters with url() references are fine since they're inline)
+
     const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgEl);
+    const svgString = serializer.serializeToString(clone);
     const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
+
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = svgEl.clientWidth * 2;
-      canvas.height = svgEl.clientHeight * 2;
+      canvas.width = w * 2;
+      canvas.height = h * 2;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) { URL.revokeObjectURL(url); return; }
       ctx.scale(2, 2);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
+      ctx.drawImage(img, 0, 0, w, h);
       // Watermark
       ctx.font = '14px Inter, sans-serif';
       ctx.fillStyle = 'rgba(0, 236, 151, 0.5)';
-      ctx.fillText('voidspace.io', svgEl.clientWidth - 120, svgEl.clientHeight - 16);
+      ctx.fillText('voidspace.io', w - 120, h - 16);
       canvas.toBlob(blob => {
         if (!blob) return;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = `constellation-${constellation?.centerNode || 'map'}.png`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(a.href);
       }, 'image/png');
       URL.revokeObjectURL(url);
     };
+    img.onerror = () => {
+      // Fallback: direct SVG download if canvas conversion fails
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `constellation-${constellation?.centerNode || 'map'}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
     img.src = url;
-  };
+  }, [constellation]);
 
-  // Re-init visualization when constellation or minValue changes
+  // Re-init visualization when constellation or minValue or hiddenTypes changes
   useEffect(() => {
     if (constellation) initializeVisualization(constellation);
   }, [constellation, initializeVisualization]);
@@ -799,7 +895,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             </Button>
           </div>
 
-          {/* Example wallets with labels (#8) */}
+          {/* Example wallets */}
           <div className="space-y-2">
             <p className="text-xs text-text-muted">Try an example:</p>
             <div className="flex flex-wrap gap-2">
@@ -815,7 +911,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             </div>
           </div>
 
-          {/* Popular wallets (#8) */}
+          {/* Popular wallets */}
           <div className="space-y-2">
             <p className="text-xs text-text-muted">Popular:</p>
             <div className="flex flex-wrap gap-2">
@@ -831,7 +927,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             </div>
           </div>
 
-          {/* Recent wallets (#8) */}
+          {/* Recent wallets */}
           {recentWallets.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs text-text-muted">Recent:</p>
@@ -866,7 +962,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         )}
       </Card>
 
-      {/* Time Range + Value Filter (#9 #10) */}
+      {/* Time Range + Value Filter */}
       {constellation && (
         <div className="max-w-4xl mx-auto flex flex-wrap items-center gap-4 px-4">
           {/* Period selector */}
@@ -874,7 +970,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             {PERIOD_OPTIONS.map(opt => (
               <button
                 key={opt.value}
-                onClick={() => { setPeriod(opt.value); /* re-fetch with new period */ }}
+                onClick={() => { setPeriod(opt.value); }}
                 className={cn(
                   'px-3 py-1 text-xs font-medium rounded-md transition-colors',
                   period === opt.value
@@ -933,9 +1029,9 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               'relative overflow-hidden rounded-xl border border-border bg-surface/50',
               isFullscreen && 'fixed inset-0 z-50 rounded-none'
             )}
-            style={isFullscreen ? undefined : { height: '600px', minHeight: '500px', maxHeight: '70vh' }}
+            style={isFullscreen ? { width: '100vw', height: '100vh' } : { height: '600px', minHeight: '500px', maxHeight: '70vh' }}
           >
-            {/* Controls (#14 #15) */}
+            {/* Controls */}
             <ConstellationControls
               onResetView={resetView}
               onZoomIn={zoomIn}
@@ -957,20 +1053,49 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               </Badge>
             </div>
 
-            {/* Legend */}
+            {/* Issue 4: Interactive Legend/Filter Pills */}
             <div className="absolute bottom-4 left-4 z-10 space-y-2">
-              {[
-                { type: 'wallet', label: 'Wallets', color: 'bg-purple-500' },
-                { type: 'contract', label: 'Smart Contracts', color: 'bg-cyan-500' },
-                { type: 'dao', label: 'DAOs', color: 'bg-amber-500' },
-              ].map(({ type, label, color }) => (
-                <div key={type} className={cn('px-3 py-1.5 rounded-lg border text-xs font-medium', getTypeColor(type))}>
-                  <div className="flex items-center gap-2">
-                    <div className={cn('w-2 h-2 rounded-full', color)} />
-                    {label}
-                  </div>
-                </div>
-              ))}
+              {([
+                { type: 'wallet' as NodeType, label: 'Wallets', color: 'bg-purple-500', dotColor: '#8B5CF6' },
+                { type: 'contract' as NodeType, label: 'Smart Contracts', color: 'bg-cyan-500', dotColor: '#06B6D4' },
+                { type: 'dao' as NodeType, label: 'DAOs', color: 'bg-amber-500', dotColor: '#F59E0B' },
+              ]).map(({ type, label, color }) => {
+                const isHidden = hiddenTypes.has(type);
+                const count = constellation.nodes.filter(n => n.type === type).length;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => toggleTypeFilter(type)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 cursor-pointer',
+                      'hover:scale-105 hover:brightness-110',
+                      isHidden
+                        ? 'border-gray-600 bg-gray-800/40 text-gray-500 opacity-30'
+                        : getTypeColor(type)
+                    )}
+                    title={isHidden ? `Show ${label}` : `Hide ${label}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={cn('w-2 h-2 rounded-full', color, isHidden && 'opacity-30')} />
+                      <span className={isHidden ? 'line-through' : ''}>
+                        {label}
+                      </span>
+                      <span className={cn('text-[10px] ml-1', isHidden ? 'text-gray-600' : 'opacity-60')}>
+                        ({count})
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+              {/* Reset button when any filter is active */}
+              {hiddenTypes.size > 0 && (
+                <button
+                  onClick={resetTypeFilters}
+                  className="px-3 py-1.5 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 text-xs font-medium cursor-pointer hover:bg-green-500/20 transition-colors"
+                >
+                  Show All
+                </button>
+              )}
               {/* Arrow legend */}
               <div className="px-3 py-1.5 rounded-lg border border-gray-600 bg-gray-800/40 text-xs text-gray-300 space-y-1">
                 <div className="flex items-center gap-2"><span className="text-green-400">→</span> Inflow</div>
@@ -983,7 +1108,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               <svg ref={svgRef} className="w-full h-full" />
             </div>
 
-            {/* Minimap (#13) */}
+            {/* Minimap */}
             <ConstellationMinimap
               nodes={constellation.nodes}
               edges={constellation.edges}
@@ -993,7 +1118,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               containerHeight={containerRef.current?.offsetHeight || 600}
             />
 
-            {/* Tooltip (#3 #11) */}
+            {/* Tooltip */}
             {tooltip && (
               <div
                 className="fixed z-50 p-3 bg-black/90 border border-gray-600 rounded-lg shadow-xl pointer-events-none backdrop-blur-sm max-w-xs"
@@ -1057,7 +1182,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         </div>
       )}
 
-      {/* Context Menu (#6 #7) */}
+      {/* Context Menu */}
       {contextMenu && (
         <ConstellationContextMenu
           x={contextMenu.x}

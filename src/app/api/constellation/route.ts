@@ -37,7 +37,6 @@ interface EdgeData {
   weight: number;
   transactionCount: number;
   totalValue: number;
-  // Direction-aware fields (relative to queried address)
   sentCount: number;
   receivedCount: number;
   totalValueSent: number;
@@ -51,6 +50,67 @@ interface ConstellationData {
   nodes: NodeData[];
   edges: EdgeData[];
   centerNode: string;
+}
+
+// ── In-memory cache with TTL ──────────────────────────────────────
+interface CacheEntry {
+  data: NearBlocksResponse;
+  timestamp: number;
+}
+
+const txnCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 60_000; // 60 seconds
+
+function getCached(key: string): NearBlocksResponse | null {
+  const entry = txnCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    txnCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key: string, data: NearBlocksResponse) {
+  txnCache.set(key, { data, timestamp: Date.now() });
+  // Evict old entries periodically (keep cache bounded)
+  if (txnCache.size > 200) {
+    const now = Date.now();
+    for (const [k, v] of txnCache) {
+      if (now - v.timestamp > CACHE_TTL_MS) txnCache.delete(k);
+    }
+  }
+}
+
+// ── Retry with exponential backoff ────────────────────────────────
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = 3,
+  baseDelay = 1000
+): Promise<Response> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.status === 429 && attempt < retries - 1) {
+        // Rate limited — wait and retry
+        const delay = baseDelay * Math.pow(2, attempt); // 1s, 2s, 4s
+        console.log(`Rate limited by NearBlocks, retrying in ${delay}ms (attempt ${attempt + 1}/${retries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      return response;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < retries - 1) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        console.log(`Fetch error, retrying in ${delay}ms (attempt ${attempt + 1}/${retries}):`, err);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError || new Error('Fetch failed after retries');
 }
 
 // Helper function to determine account type
@@ -130,51 +190,65 @@ export async function POST(request: NextRequest) {
       headers['Authorization'] = `Bearer ${apiKey}`;
     }
 
-    // Fetch transactions for the given address (increased to 250)
-    const transactionUrl = `https://api.nearblocks.io/v1/account/${address}/txns?page=1&per_page=250&order=desc`;
-    
-    console.log('Fetching transactions from:', transactionUrl);
-    
-    let response;
-    try {
-      response = await fetch(transactionUrl, { 
-        headers,
-        next: { revalidate: 60 }
-      });
-    } catch (fetchError) {
-      console.error('Fetch error:', fetchError);
-      return NextResponse.json(
-        { error: 'Network error connecting to NEAR Blocks API' },
-        { status: 503 }
-      );
-    }
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('NEAR Blocks API error:', response.status, errorText);
+    // Check cache first
+    const cacheKey = `${address}:txns`;
+    let data: NearBlocksResponse;
+    const cached = getCached(cacheKey);
+
+    if (cached) {
+      console.log(`Cache hit for ${address}`);
+      data = cached;
+    } else {
+      // Fetch transactions (reduced to 200 to help with rate limits)
+      const transactionUrl = `https://api.nearblocks.io/v1/account/${address}/txns?page=1&per_page=200&order=desc`;
       
-      if (response.status === 429) {
+      console.log('Fetching transactions from:', transactionUrl);
+      
+      let response: Response;
+      try {
+        response = await fetchWithRetry(transactionUrl, { 
+          headers,
+          next: { revalidate: 60 }
+        }, 3, 1000);
+      } catch (fetchError) {
+        console.error('Fetch error after retries:', fetchError);
         return NextResponse.json(
-          { error: 'Rate limited by NEAR Blocks. Please wait a moment and try again.' },
-          { status: 429 }
+          { error: 'Network error connecting to NEAR Blocks API' },
+          { status: 503 }
         );
       }
       
-      return NextResponse.json(
-        { error: `NEAR Blocks API error: ${response.status}` },
-        { status: response.status }
-      );
-    }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('NEAR Blocks API error:', response.status, errorText);
+        
+        if (response.status === 429) {
+          return NextResponse.json(
+            { error: 'NearBlocks is busy, try again in a moment.' },
+            { status: 429 }
+          );
+        }
+        
+        return NextResponse.json(
+          { error: `NEAR Blocks API error: ${response.status}` },
+          { status: response.status }
+        );
+      }
 
-    let data: NearBlocksResponse;
-    try {
-      data = await response.json();
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      return NextResponse.json(
-        { error: 'Failed to parse NEAR Blocks response' },
-        { status: 500 }
-      );
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        return NextResponse.json(
+          { error: 'Failed to parse NEAR Blocks response' },
+          { status: 500 }
+        );
+      }
+
+      // Cache successful response
+      if (data.txns && Array.isArray(data.txns)) {
+        setCache(cacheKey, data);
+      }
     }
     
     if (!data.txns || !Array.isArray(data.txns)) {
@@ -222,11 +296,10 @@ export async function POST(request: NextRequest) {
       
       // Determine the other party in the transaction
       const otherParty: string = predecessor_account_id === address ? receiver_account_id : predecessor_account_id;
-      const isSent = predecessor_account_id === address; // center node is the sender
+      const isSent = predecessor_account_id === address;
       
       if (otherParty === address || otherParty === 'system') continue;
       
-      // Track connections — use directed key (always center -> other)
       const connectionKey = [address, otherParty].sort().join('->');
       
       if (!connectionMap.has(connectionKey)) {
@@ -249,7 +322,6 @@ export async function POST(request: NextRequest) {
       const nearValue = Number(depositValue) / 1e24;
       connection.totalValue += nearValue;
       
-      // Track direction relative to the queried address
       if (isSent) {
         connection.sentCount++;
         connection.totalValueSent += nearValue;
@@ -265,7 +337,6 @@ export async function POST(request: NextRequest) {
         connection.firstSeen = block_timestamp;
       }
       
-      // Add node data for the other party
       if (!nodeData.has(otherParty)) {
         nodeData.set(otherParty, {
           id: otherParty,
@@ -295,7 +366,6 @@ export async function POST(request: NextRequest) {
       const [source, target] = connectionKey.split('->');
       
       if (connection.transactionCount >= 1) {
-        // Determine primary direction
         let direction: 'outflow' | 'inflow' | 'bidirectional' = 'bidirectional';
         if (connection.sentCount > 0 && connection.receivedCount === 0) {
           direction = 'outflow';
