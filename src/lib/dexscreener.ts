@@ -78,12 +78,14 @@ interface CacheEntry<T> {
 const CACHE_TTL_MS = 60_000; // 60 seconds
 const cache = new Map<string, CacheEntry<unknown>>();
 
-function getCached<T>(key: string): T | null {
+const CACHE_MISS = Symbol('cache-miss');
+
+function getCached<T>(key: string): T | typeof CACHE_MISS {
   const entry = cache.get(key);
-  if (!entry) return null;
+  if (!entry) return CACHE_MISS;
   if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
     cache.delete(key);
-    return null;
+    return CACHE_MISS;
   }
   return entry.data as T;
 }
@@ -155,7 +157,7 @@ function deduplicatePairs(pairs: DexPair[]): Map<string, DexPair> {
 export async function fetchNearTokens(): Promise<TokenData[]> {
   const cacheKey = 'near-all-tokens';
   const cached = getCached<TokenData[]>(cacheKey);
-  if (cached) return cached;
+  if (cached !== CACHE_MISS) return cached;
 
   const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/wrap.near', {
     next: { revalidate: 60 },
@@ -185,7 +187,7 @@ export async function fetchNearTokens(): Promise<TokenData[]> {
 export async function fetchTokenBySymbol(symbol: string): Promise<TokenData | null> {
   const cacheKey = `token-sym-${symbol.toLowerCase()}`;
   const cached = getCached<TokenData | null>(cacheKey);
-  if (cached !== null) return cached;
+  if (cached !== CACHE_MISS) return cached;
 
   // First try the full NEAR tokens list (already cached)
   try {
@@ -247,8 +249,8 @@ export async function fetchTokensByAddresses(
 
   for (const addr of unique) {
     const cached = getCached<TokenData | null>(`token-addr-${addr}`);
-    if (cached !== null) {
-      result.set(addr, cached);
+    if (cached !== CACHE_MISS) {
+      if (cached !== null) result.set(addr, cached);
     } else {
       uncached.push(addr);
     }
@@ -266,7 +268,7 @@ export async function fetchTokensByAddresses(
   await Promise.all(
     batches.map(async (batch) => {
       try {
-        const joined = batch.map(a => encodeURIComponent(a)).join(',');
+        const joined = batch.join(',');
         const res = await fetch(
           `https://api.dexscreener.com/latest/dex/tokens/${joined}`,
           { next: { revalidate: 60 }, signal }
@@ -314,11 +316,11 @@ export async function fetchTokensByAddresses(
 export async function fetchTokenByAddress(contractAddress: string): Promise<TokenData | null> {
   const cacheKey = `token-addr-${contractAddress}`;
   const cached = getCached<TokenData | null>(cacheKey);
-  if (cached !== null) return cached;
+  if (cached !== CACHE_MISS) return cached;
 
   try {
     const res = await fetch(
-      `https://api.dexscreener.com/latest/dex/tokens/${encodeURIComponent(contractAddress)}`,
+      `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`,
       { next: { revalidate: 60 } }
     );
     if (!res.ok) return null;

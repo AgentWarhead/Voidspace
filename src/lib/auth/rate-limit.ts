@@ -117,13 +117,26 @@ class RateLimiter {
   }
 }
 
+// Shared limiter instances keyed by limit:windowMs so the Map persists across calls
+const sharedLimiters = new Map<string, RateLimiter>();
+
+function getSharedLimiter(limit: number, windowMs: number): RateLimiter {
+  const limiterKey = `${limit}:${windowMs}`;
+  let limiter = sharedLimiters.get(limiterKey);
+  if (!limiter) {
+    limiter = new RateLimiter({ limit, windowMs });
+    sharedLimiters.set(limiterKey, limiter);
+  }
+  return limiter;
+}
+
 // Legacy function for backwards compatibility
 export function rateLimit(
   key: string,
   limit: number,
   windowMs: number
 ): { allowed: boolean; remaining: number } {
-  const limiter = new RateLimiter({ limit, windowMs });
+  const limiter = getSharedLimiter(limit, windowMs);
   const result = limiter.rateLimit(key);
   return {
     allowed: result.allowed,
@@ -137,7 +150,7 @@ export function rateLimitStrict(
   limit: number,
   windowMs: number
 ): StrictRateLimitResult {
-  const limiter = new RateLimiter({ limit, windowMs });
+  const limiter = getSharedLimiter(limit, windowMs);
   return limiter.rateLimitStrict(key);
 }
 

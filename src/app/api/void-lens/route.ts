@@ -206,7 +206,17 @@ function extractTopContracts(
     });
 }
 
+// Module-level cache for wallet data (avoids re-fetching on rapid refreshes)
+const walletDataCache = new Map<string, { data: WalletData; timestamp: number }>();
+const WALLET_CACHE_TTL = 120_000; // 2 minutes
+
 async function fetchWalletData(address: string): Promise<WalletData | null | 'rate-limited'> {
+  // Check cache first
+  const cached = walletDataCache.get(address);
+  if (cached && Date.now() - cached.timestamp < WALLET_CACHE_TTL) {
+    return cached.data;
+  }
+
   try {
     const baseUrl = 'https://api.nearblocks.io/v1/account';
     
@@ -216,7 +226,7 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
     });
     
     if (accountResponse.status === 429) {
-      return 'rate-limited';
+      return cached?.data || 'rate-limited';
     }
     
     if (!accountResponse.ok) {
@@ -238,8 +248,13 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
       }).catch(() => null),
     ]);
 
-    // Small delay to respect rate limits, then fetch remaining data
-    await new Promise(r => setTimeout(r, 200));
+    // Check for 429 on batch 1
+    if (txResponse?.status === 429 || tokensResponse?.status === 429) {
+      return cached?.data || 'rate-limited';
+    }
+
+    // Longer delay to respect rate limits, then fetch remaining data
+    await new Promise(r => setTimeout(r, 500));
 
     const [nftResponse, keysResponse] = await Promise.all([
       // NFTs
@@ -251,6 +266,11 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
         headers: { 'Accept': 'application/json' }
       }).catch(() => null),
     ]);
+
+    // Check for 429 on batch 2
+    if (nftResponse?.status === 429 || keysResponse?.status === 429) {
+      return cached?.data || 'rate-limited';
+    }
     
     const txData = txResponse?.ok ? await txResponse.json() : { txns: [] };
     const transactions = txData.txns || [];
@@ -298,7 +318,7 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
     // Extract top contracts
     const topContracts = extractTopContracts(transactions, address);
     
-    return {
+    const result: WalletData = {
       account: address,
       balance: yoctoToNear(account.amount || '0'),
       transactions,
@@ -320,9 +340,14 @@ async function fetchWalletData(address: string): Promise<WalletData | null | 'ra
       storageUsage,
       txPatterns,
     };
+
+    // Cache the result
+    walletDataCache.set(address, { data: result, timestamp: Date.now() });
+
+    return result;
   } catch (error) {
     console.error('Error fetching wallet data:', error);
-    return null;
+    return cached?.data || null;
   }
 }
 
@@ -709,10 +734,20 @@ interface PortfolioData {
   diversificationLabel: string;
 }
 
+// Module-level cache for portfolio enrichment
+const portfolioCache = new Map<string, { data: PortfolioData; timestamp: number }>();
+const PORTFOLIO_CACHE_TTL = 120_000; // 2 minutes
+
 async function enrichPortfolio(address: string, walletData: WalletData): Promise<PortfolioData | null> {
+  // Check cache first
+  const cached = portfolioCache.get(address);
+  if (cached && Date.now() - cached.timestamp < PORTFOLIO_CACHE_TTL) {
+    return cached.data;
+  }
+
   try {
-    // Small delay to avoid NearBlocks rate limits (fetchWalletData already made 5 requests)
-    await new Promise(r => setTimeout(r, 300));
+    // Delay to avoid NearBlocks rate limits (fetchWalletData already made 5 requests)
+    await new Promise(r => setTimeout(r, 500));
 
     // Abort controller for 8s timeout protection on serverless
     const controller = new AbortController();
@@ -744,6 +779,11 @@ async function _enrichPortfolioInner(
       `https://api.nearblocks.io/v1/account/${address}/inventory`,
       { headers: { 'Accept': 'application/json' }, signal }
     ).catch(() => null);
+
+    if (invResponse?.status === 429) {
+      const cached = portfolioCache.get(address);
+      return cached?.data || null;
+    }
 
     if (!invResponse?.ok) return null;
 
@@ -874,7 +914,7 @@ async function _enrichPortfolioInner(
     else if (activeCats >= 4) diversificationLabel = 'Well Diversified';
     else if (activeCats >= 3) diversificationLabel = 'Moderately Diversified';
 
-    return {
+    const portfolioResult: PortfolioData = {
       totalValue,
       totalChange24h: Math.round(totalChange24h * 100) / 100,
       topHolding,
@@ -882,6 +922,11 @@ async function _enrichPortfolioInner(
       diversification,
       diversificationLabel,
     };
+
+    // Cache the result
+    portfolioCache.set(address, { data: portfolioResult, timestamp: Date.now() });
+
+    return portfolioResult;
   } catch (error) {
     console.error('Portfolio enrichment error:', error);
     return null;
