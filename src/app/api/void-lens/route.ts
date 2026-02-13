@@ -4,6 +4,26 @@ import { isValidNearAccountId } from '@/lib/auth/validate';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 
+// Known NEAR contracts mapped to friendly names
+const KNOWN_CONTRACTS: Record<string, { name: string; category: string }> = {
+  'v2.ref-finance.near': { name: 'Ref Finance', category: 'DEX' },
+  'aurora': { name: 'Aurora', category: 'EVM' },
+  'wrap.near': { name: 'wNEAR', category: 'DeFi' },
+  'linear-protocol.near': { name: 'LiNEAR', category: 'Liquid Staking' },
+  'meta-pool.near': { name: 'Meta Pool', category: 'Liquid Staking' },
+  'app.burrow.cash': { name: 'Burrow', category: 'Lending' },
+  'v1.orderly-network.near': { name: 'Orderly', category: 'Orderbook' },
+  'token.sweat': { name: 'Sweat Economy', category: 'Move-to-Earn' },
+  'v2.staking-pool.near': { name: 'NEAR Staking', category: 'Staking' },
+  'usn': { name: 'USN Stablecoin', category: 'Stablecoin' },
+  'token.v2.ref-finance.near': { name: 'Ref Finance Token', category: 'DEX' },
+  'priceoracle.near': { name: 'Price Oracle', category: 'Oracle' },
+  'nearx.stader-labs.near': { name: 'Stader NearX', category: 'Liquid Staking' },
+  'sweat_welcome.near': { name: 'Sweat Welcome', category: 'Move-to-Earn' },
+  'core.near': { name: 'NEAR Core', category: 'Infrastructure' },
+  'lockup.near': { name: 'NEAR Lockup', category: 'Lockup' },
+};
+
 interface WalletData {
   account: string;
   balance: string;
@@ -14,6 +34,23 @@ interface WalletData {
     total_transactions: number;
     first_transaction: string | null;
     last_transaction: string | null;
+  };
+  // Enriched data
+  nftCount: number;
+  accessKeys: {
+    fullAccess: number;
+    functionCall: number;
+    keys: Array<Record<string, unknown>>;
+  };
+  topContracts: Array<{ address: string; name: string; category: string; interactions: number }>;
+  stakedAmount: string;
+  storageUsage: number;
+  txPatterns: {
+    avgTxPerDay: number;
+    mostActiveDay: string;
+    sendCount: number;
+    receiveCount: number;
+    recentActivity: 'active' | 'moderate' | 'dormant';
   };
 }
 
@@ -27,6 +64,30 @@ interface ReputationAnalysis {
     activityScore: number;
     diversityScore: number;
     balanceScore: number;
+    securityScore: number;
+    defiScore: number;
+  };
+  securityProfile: {
+    fullAccessKeys: number;
+    functionCallKeys: number;
+    riskFlags: string[];
+  };
+  defiActivity: {
+    topProtocols: Array<{ name: string; interactions: number; category: string }>;
+    hasStaking: boolean;
+    stakedAmount: string;
+    nftCount: number;
+  };
+  activityPattern: {
+    avgTxPerDay: number;
+    mostActiveDay: string;
+    sendReceiveRatio: number;
+    recentActivity: 'active' | 'moderate' | 'dormant';
+  };
+  walletAge: {
+    days: number;
+    created: string;
+    label: string;
   };
 }
 
@@ -45,6 +106,105 @@ function nanoToISOString(nanoTimestamp: string | number | null): string | null {
   return new Date(ms).toISOString();
 }
 
+function getWalletAgeLabel(days: number, firstTx: string | null): string {
+  if (!firstTx) return 'Unknown';
+  const year = new Date(firstTx).getFullYear();
+  if (days < 90) return 'New (<3mo)';
+  if (year <= 2020) return `OG (${year})`;
+  if (year <= 2022) return `Veteran (${year})`;
+  return `Regular (${year}+)`;
+}
+
+function analyzeTxPatterns(
+  transactions: Array<Record<string, unknown>>,
+  address: string,
+  firstTx: string | null
+): WalletData['txPatterns'] {
+  const txCount = transactions.length;
+  
+  // Calculate avg tx per day
+  let avgTxPerDay = 0;
+  if (firstTx) {
+    const ageInDays = Math.max(1, (Date.now() - new Date(firstTx).getTime()) / (1000 * 60 * 60 * 24));
+    avgTxPerDay = parseFloat((txCount / ageInDays).toFixed(2));
+  }
+  
+  // Count sends vs receives
+  let sendCount = 0;
+  let receiveCount = 0;
+  const dayCounts: Record<string, number> = {};
+  
+  for (const tx of transactions) {
+    const signerId = tx?.signer_account_id as string | undefined;
+    if (signerId === address) {
+      sendCount++;
+    } else {
+      receiveCount++;
+    }
+    
+    // Track day of week activity
+    const timestamp = tx?.block_timestamp as string | number | undefined;
+    if (timestamp) {
+      const ms = Number(timestamp) / 1_000_000;
+      if (!isNaN(ms) && ms > 0) {
+        const dayName = new Date(ms).toLocaleDateString('en-US', { weekday: 'long' });
+        dayCounts[dayName] = (dayCounts[dayName] || 0) + 1;
+      }
+    }
+  }
+  
+  // Find most active day
+  let mostActiveDay = 'Unknown';
+  let maxDayCount = 0;
+  for (const [day, count] of Object.entries(dayCounts)) {
+    if (count > maxDayCount) {
+      maxDayCount = count;
+      mostActiveDay = day;
+    }
+  }
+  
+  // Determine recent activity level
+  let recentActivity: 'active' | 'moderate' | 'dormant' = 'dormant';
+  if (transactions.length > 0) {
+    const lastTxTimestamp = transactions[0]?.block_timestamp as string | number | undefined;
+    if (lastTxTimestamp) {
+      const lastTxMs = Number(lastTxTimestamp) / 1_000_000;
+      const daysSinceLastTx = (Date.now() - lastTxMs) / (1000 * 60 * 60 * 24);
+      if (daysSinceLastTx < 7) recentActivity = 'active';
+      else if (daysSinceLastTx < 30) recentActivity = 'moderate';
+    }
+  }
+  
+  return { avgTxPerDay, mostActiveDay, sendCount, receiveCount, recentActivity };
+}
+
+function extractTopContracts(
+  transactions: Array<Record<string, unknown>>,
+  address: string
+): Array<{ address: string; name: string; category: string; interactions: number }> {
+  const contractCounts: Record<string, number> = {};
+  
+  for (const tx of transactions) {
+    const receiver = tx?.receiver_account_id as string | undefined;
+    if (receiver && receiver !== address) {
+      contractCounts[receiver] = (contractCounts[receiver] || 0) + 1;
+    }
+  }
+  
+  return Object.entries(contractCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([addr, count]) => {
+      const known = KNOWN_CONTRACTS[addr];
+      return {
+        address: addr,
+        name: known?.name || addr,
+        category: known?.category || 'Unknown',
+        interactions: count,
+      };
+    });
+}
+
 async function fetchWalletData(address: string): Promise<WalletData | null> {
   try {
     const baseUrl = 'https://api.nearblocks.io/v1/account';
@@ -59,25 +219,50 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
     }
     
     const accountData = await accountResponse.json();
-    // NearBlocks returns data in account[0] array
     const account = accountData.account?.[0] || accountData;
     
-    // Fetch transactions (last 100)
-    const txResponse = await fetch(`${baseUrl}/${address}/txns?page=1&per_page=100`, {
-      headers: { 'Accept': 'application/json' }
-    });
+    // Fetch all data in parallel for speed
+    const [txResponse, tokensResponse, nftResponse, keysResponse] = await Promise.all([
+      // Transactions (last 100)
+      fetch(`${baseUrl}/${address}/txns?page=1&per_page=100`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+      // Tokens
+      fetch(`${baseUrl}/${address}/tokens?page=1&per_page=50`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+      // NFTs
+      fetch(`${baseUrl}/${address}/nft-tokens?page=1&per_page=50`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+      // Access keys
+      fetch(`${baseUrl}/${address}/keys`, {
+        headers: { 'Accept': 'application/json' }
+      }).catch(() => null),
+    ]);
     
-    const txData = txResponse.ok ? await txResponse.json() : { txns: [] };
+    const txData = txResponse?.ok ? await txResponse.json() : { txns: [] };
     const transactions = txData.txns || [];
     
-    // Fetch tokens
-    const tokensResponse = await fetch(`${baseUrl}/${address}/tokens?page=1&per_page=50`, {
-      headers: { 'Accept': 'application/json' }
-    });
+    const tokensData = tokensResponse?.ok ? await tokensResponse.json() : { tokens: [] };
     
-    const tokensData = tokensResponse.ok ? await tokensResponse.json() : { tokens: [] };
+    const nftData = nftResponse?.ok ? await nftResponse.json() : { nft: [] };
+    const nftCount = nftData.nft?.length || nftData.nfts?.length || 0;
     
-    // Get first/last transaction timestamps (in nanoseconds from API)
+    const keysData = keysResponse?.ok ? await keysResponse.json() : { keys: [] };
+    const allKeys = keysData.keys || [];
+    let fullAccessKeys = 0;
+    let functionCallKeys = 0;
+    for (const key of allKeys) {
+      const permission = key?.access_key?.permission;
+      if (permission === 'FullAccess' || typeof permission === 'string' && permission.includes('FullAccess')) {
+        fullAccessKeys++;
+      } else {
+        functionCallKeys++;
+      }
+    }
+    
+    // Get first/last transaction timestamps
     const firstTxTimestamp = transactions.length > 0 
       ? transactions[transactions.length - 1]?.block_timestamp 
       : account.created?.block_timestamp;
@@ -85,17 +270,42 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
       ? transactions[0]?.block_timestamp 
       : null;
     
+    const firstTxISO = nanoToISOString(firstTxTimestamp);
+    
+    // Staking: locked field in account data
+    const lockedAmount = account.locked || '0';
+    const stakedAmount = yoctoToNear(lockedAmount);
+    
+    // Storage usage
+    const storageUsage = parseInt(account.storage_usage || '0', 10) || 0;
+    
+    // Analyze tx patterns
+    const txPatterns = analyzeTxPatterns(transactions, address, firstTxISO);
+    
+    // Extract top contracts
+    const topContracts = extractTopContracts(transactions, address);
+    
     return {
       account: address,
       balance: yoctoToNear(account.amount || '0'),
-      transactions: transactions,
+      transactions,
       contracts: [],
       tokens: tokensData.tokens || [],
       stats: {
         total_transactions: transactions.length || 0,
-        first_transaction: nanoToISOString(firstTxTimestamp),
+        first_transaction: firstTxISO,
         last_transaction: nanoToISOString(lastTxTimestamp),
-      }
+      },
+      nftCount,
+      accessKeys: {
+        fullAccess: fullAccessKeys,
+        functionCall: functionCallKeys,
+        keys: allKeys,
+      },
+      topContracts,
+      stakedAmount,
+      storageUsage,
+      txPatterns,
     };
   } catch (error) {
     console.error('Error fetching wallet data:', error);
@@ -103,15 +313,216 @@ async function fetchWalletData(address: string): Promise<WalletData | null> {
   }
 }
 
+function generateBasicAnalysis(walletData: WalletData): ReputationAnalysis {
+  const balance = parseFloat(walletData.balance) || 0;
+  const txCount = walletData.stats.total_transactions || 0;
+  const tokenCount = walletData.tokens?.length || 0;
+  
+  // Age scoring
+  const ageInDays = walletData.stats.first_transaction 
+    ? (Date.now() - new Date(walletData.stats.first_transaction).getTime()) / (1000 * 60 * 60 * 24)
+    : 0;
+  const ageScore = Math.min(100, Math.log10(ageInDays + 1) * 30);
+  
+  // Activity scoring
+  const activityScore = Math.min(100, Math.log10(txCount + 1) * 25);
+  
+  // Diversity scoring — tokens + contracts interacted with
+  const contractDiversity = walletData.topContracts?.length || 0;
+  const diversityScore = Math.min(100, (tokenCount * 5) + (contractDiversity * 5));
+  
+  // Balance scoring
+  const balanceScore = Math.min(100, Math.log10(balance + 1) * 20);
+  
+  // Security scoring — based on access keys
+  const fullKeys = walletData.accessKeys?.fullAccess || 0;
+  const fnKeys = walletData.accessKeys?.functionCall || 0;
+  let securityScore = 70; // base
+  if (fullKeys === 1) securityScore += 20; // single full-access key is ideal
+  else if (fullKeys === 0) securityScore += 10; // contract account
+  else if (fullKeys > 3) securityScore -= 20; // too many full-access keys is risky
+  if (fnKeys > 0 && fnKeys <= 20) securityScore += 10; // healthy function-call key usage
+  else if (fnKeys > 50) securityScore -= 10; // excessive
+  securityScore = Math.max(0, Math.min(100, securityScore));
+  
+  // DeFi scoring — based on known protocol interactions
+  const defiContracts = walletData.topContracts?.filter(c => {
+    const known = KNOWN_CONTRACTS[c.address];
+    return known && ['DEX', 'DeFi', 'Liquid Staking', 'Lending', 'Staking', 'Orderbook'].includes(known.category);
+  }) || [];
+  const hasStaking = parseFloat(walletData.stakedAmount || '0') > 0;
+  const nftCount = walletData.nftCount || 0;
+  let defiScore = 0;
+  defiScore += Math.min(40, defiContracts.length * 15);
+  if (hasStaking) defiScore += 25;
+  if (nftCount > 0) defiScore += Math.min(20, nftCount * 2);
+  if (tokenCount > 3) defiScore += 15;
+  defiScore = Math.min(100, defiScore);
+  
+  // Overall score — weighted average of all 6 dimensions
+  const score = Math.round(
+    (ageScore * 0.15) + 
+    (activityScore * 0.2) + 
+    (diversityScore * 0.15) + 
+    (balanceScore * 0.2) + 
+    (securityScore * 0.15) + 
+    (defiScore * 0.15)
+  );
+  
+  const riskLevel = score >= 70 ? 'LOW' : score >= 40 ? 'MEDIUM' : 'HIGH';
+  
+  // Rich activity summary
+  const stakeInfo = hasStaking ? `, ${walletData.stakedAmount} NEAR staked` : '';
+  const nftInfo = nftCount > 0 ? `, ${nftCount} NFTs` : '';
+  const activitySummary = `${txCount} transactions over ${Math.round(ageInDays)} days, ${balance.toFixed(2)} NEAR balance, ${tokenCount} tokens${stakeInfo}${nftInfo}`;
+  
+  // Security risk flags
+  const riskFlags: string[] = [];
+  const fullAccessKeys = walletData.accessKeys?.fullAccess || 0;
+  if (fullAccessKeys > 3) riskFlags.push('Multiple full-access keys detected — potential security risk');
+  if (fullAccessKeys === 0) riskFlags.push('No full-access keys — likely a contract account');
+  if (walletData.txPatterns?.recentActivity === 'dormant') riskFlags.push('Account appears dormant — no recent activity');
+  if (balance < 0.1 && txCount > 50) riskFlags.push('Low balance with high activity — may indicate fund transfers');
+  if (tokenCount === 0 && txCount > 20) riskFlags.push('No token holdings despite activity — unusual pattern');
+  
+  // Rich key insights
+  const keyInsights: string[] = [];
+  
+  // Age insight
+  if (ageInDays > 1000) {
+    keyInsights.push(`🏛️ OG wallet — active for ${Math.round(ageInDays / 365)} years on NEAR. This is a well-established account.`);
+  } else if (ageInDays > 365) {
+    keyInsights.push(`📅 Veteran account — ${Math.round(ageInDays / 365)}+ years old with established on-chain history.`);
+  } else if (ageInDays > 90) {
+    keyInsights.push(`📅 Account is ${Math.round(ageInDays)} days old — building transaction history.`);
+  } else {
+    keyInsights.push(`🆕 New account — only ${Math.round(ageInDays)} days old. Limited history for analysis.`);
+  }
+  
+  // Activity insight
+  const avgTxPerDay = walletData.txPatterns?.avgTxPerDay || 0;
+  if (avgTxPerDay > 5) {
+    keyInsights.push(`⚡ Power user — averaging ${avgTxPerDay.toFixed(1)} transactions per day. Highly active on-chain.`);
+  } else if (avgTxPerDay > 1) {
+    keyInsights.push(`📊 Active user — averaging ${avgTxPerDay.toFixed(1)} transactions per day.`);
+  } else if (txCount > 0) {
+    keyInsights.push(`📊 Light user — ${avgTxPerDay.toFixed(2)} transactions per day on average.`);
+  }
+  
+  // DeFi insight
+  if (defiContracts.length > 0) {
+    const protocolNames = defiContracts.slice(0, 3).map(c => KNOWN_CONTRACTS[c.address]?.name || c.address).join(', ');
+    keyInsights.push(`🔄 Active DeFi participant — interacted with ${protocolNames}${defiContracts.length > 3 ? ` and ${defiContracts.length - 3} more` : ''}.`);
+  } else if (tokenCount > 3) {
+    keyInsights.push(`🪙 Holds ${tokenCount} tokens but limited DeFi protocol interactions detected.`);
+  }
+  
+  // Security insight
+  if (securityScore >= 80) {
+    keyInsights.push(`🔒 Strong security posture — ${fullAccessKeys} full-access key${fullAccessKeys !== 1 ? 's' : ''}, ${fnKeys} function-call keys.`);
+  } else if (riskFlags.length > 0) {
+    keyInsights.push(`⚠️ Security note: ${riskFlags[0]}`);
+  }
+  
+  // Staking insight
+  if (hasStaking) {
+    keyInsights.push(`💎 Staking ${walletData.stakedAmount} NEAR — committed to network security.`);
+  }
+  
+  // NFT insight
+  if (nftCount > 10) {
+    keyInsights.push(`🎨 NFT collector — holds ${nftCount} NFTs across various collections.`);
+  } else if (nftCount > 0) {
+    keyInsights.push(`🎨 Owns ${nftCount} NFT${nftCount > 1 ? 's' : ''} on NEAR.`);
+  }
+  
+  // Balance insight
+  if (balance > 1000) {
+    keyInsights.push(`💰 Significant NEAR holdings — ${formatBalanceCompact(balance)} in wallet.`);
+  }
+  
+  // Send/receive insight
+  const { sendCount, receiveCount } = walletData.txPatterns || { sendCount: 0, receiveCount: 0 };
+  if (sendCount > 0 && receiveCount > 0) {
+    const ratio = sendCount / Math.max(1, receiveCount);
+    if (ratio > 2) {
+      keyInsights.push(`📤 Primarily an outbound wallet — sends ${ratio.toFixed(1)}x more than it receives.`);
+    } else if (ratio < 0.5) {
+      keyInsights.push(`📥 Primarily a receiving wallet — receives ${(1/ratio).toFixed(1)}x more than it sends.`);
+    }
+  }
+  
+  // Top protocol insight (enriched)
+  if (walletData.topContracts?.length > 0) {
+    const topContract = walletData.topContracts[0];
+    const topName = KNOWN_CONTRACTS[topContract.address]?.name || topContract.address;
+    keyInsights.push(`🏆 Most interacted: ${topName} (${topContract.interactions} transactions).`);
+  }
+  
+  // DeFi activity details
+  const topProtocols = walletData.topContracts
+    ?.filter(c => KNOWN_CONTRACTS[c.address])
+    .slice(0, 6)
+    .map(c => ({
+      name: KNOWN_CONTRACTS[c.address]?.name || c.name,
+      interactions: c.interactions,
+      category: KNOWN_CONTRACTS[c.address]?.category || c.category,
+    })) || [];
+  
+  // Wallet age details
+  const walletAge = {
+    days: Math.round(ageInDays),
+    created: walletData.stats.first_transaction || 'Unknown',
+    label: getWalletAgeLabel(ageInDays, walletData.stats.first_transaction),
+  };
+  
+  return {
+    score,
+    riskLevel,
+    activitySummary,
+    keyInsights: keyInsights.slice(0, 8), // cap at 8
+    details: {
+      ageScore: Math.round(ageScore),
+      activityScore: Math.round(activityScore),
+      diversityScore: Math.round(diversityScore),
+      balanceScore: Math.round(balanceScore),
+      securityScore: Math.round(securityScore),
+      defiScore: Math.round(defiScore),
+    },
+    securityProfile: {
+      fullAccessKeys: walletData.accessKeys?.fullAccess || 0,
+      functionCallKeys: walletData.accessKeys?.functionCall || 0,
+      riskFlags,
+    },
+    defiActivity: {
+      topProtocols,
+      hasStaking,
+      stakedAmount: walletData.stakedAmount || '0',
+      nftCount,
+    },
+    activityPattern: {
+      avgTxPerDay: walletData.txPatterns?.avgTxPerDay || 0,
+      mostActiveDay: walletData.txPatterns?.mostActiveDay || 'Unknown',
+      sendReceiveRatio: sendCount / Math.max(1, receiveCount),
+      recentActivity: walletData.txPatterns?.recentActivity || 'dormant',
+    },
+    walletAge,
+  };
+}
+
+function formatBalanceCompact(balance: number): string {
+  if (balance >= 1000000) return `${(balance / 1000000).toFixed(2)}M NEAR`;
+  if (balance >= 1000) return `${(balance / 1000).toFixed(2)}K NEAR`;
+  return `${balance.toFixed(2)} NEAR`;
+}
+
 async function generateReputationAnalysis(walletData: WalletData, userId?: string): Promise<ReputationAnalysis> {
   try {
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     if (!anthropicKey) {
-      // Fallback to basic analysis if Claude API not available
       return generateBasicAnalysis(walletData);
     }
 
-    // Safety net: daily AI usage budget
     if (userId) {
       const budget = await checkAiBudget(userId);
       if (!budget.allowed) {
@@ -120,28 +531,52 @@ async function generateReputationAnalysis(walletData: WalletData, userId?: strin
       }
     }
 
-    const prompt = `Analyze this NEAR wallet and generate a reputation score (0-100) and analysis:
+    // Get basic analysis first for structure
+    const basicAnalysis = generateBasicAnalysis(walletData);
+    
+    const hasStaking = parseFloat(walletData.stakedAmount || '0') > 0;
+    const topContractsSummary = walletData.topContracts?.slice(0, 8).map(c => 
+      `${c.name} (${c.category}): ${c.interactions} txs`
+    ).join('\n') || 'None detected';
+
+    const prompt = `Analyze this NEAR Protocol wallet and generate a comprehensive reputation report. Return ONLY valid JSON.
 
 Wallet: ${walletData.account}
 Balance: ${walletData.balance} NEAR
+Staked: ${walletData.stakedAmount} NEAR
 Total Transactions: ${walletData.stats.total_transactions}
-First Activity: ${walletData.stats.first_transaction}
-Last Activity: ${walletData.stats.last_transaction}
-Token Holdings: ${walletData.tokens.length} different tokens
+First Activity: ${walletData.stats.first_transaction || 'Unknown'}
+Last Activity: ${walletData.stats.last_transaction || 'Unknown'}
+Account Age: ${basicAnalysis.walletAge.days} days (${basicAnalysis.walletAge.label})
+Token Holdings: ${walletData.tokens?.length || 0} different tokens
+NFT Holdings: ${walletData.nftCount} NFTs
+Storage Used: ${walletData.storageUsage} bytes
 
-Recent Transactions:
-${walletData.transactions.slice(0, 10).map(tx => 
-  `- ${tx.action_kind || 'Unknown'}: ${tx.hash} (${tx.block_timestamp})`
-).join('\n')}
+Access Keys:
+- Full Access: ${walletData.accessKeys?.fullAccess || 0}
+- Function Call: ${walletData.accessKeys?.functionCall || 0}
 
-Please analyze and respond with a JSON object containing:
-- score (0-100): Overall reputation score
-- riskLevel (LOW/MEDIUM/HIGH): Risk assessment
-- activitySummary (string): Brief activity overview
-- keyInsights (string[]): 3-4 key insights about this wallet
-- details: { ageScore, activityScore, diversityScore, balanceScore } (each 0-100)
+Top Contract Interactions:
+${topContractsSummary}
 
-Consider factors like account age, transaction frequency, balance consistency, interaction diversity, and any suspicious patterns.`;
+Activity Patterns:
+- Avg TX/day: ${walletData.txPatterns?.avgTxPerDay || 0}
+- Most Active Day: ${walletData.txPatterns?.mostActiveDay || 'Unknown'}
+- Sent: ${walletData.txPatterns?.sendCount || 0}, Received: ${walletData.txPatterns?.receiveCount || 0}
+- Recent Activity: ${walletData.txPatterns?.recentActivity || 'unknown'}
+
+Security Risk Flags: ${basicAnalysis.securityProfile.riskFlags.join('; ') || 'None'}
+
+Respond with JSON containing:
+{
+  "score": 0-100,
+  "riskLevel": "LOW"|"MEDIUM"|"HIGH",
+  "activitySummary": "Rich 2-3 sentence summary",
+  "keyInsights": ["insight1", "insight2", ...up to 8 insights with emoji prefixes],
+  "details": { "ageScore": 0-100, "activityScore": 0-100, "diversityScore": 0-100, "balanceScore": 0-100, "securityScore": 0-100, "defiScore": 0-100 }
+}
+
+Be specific about NEAR ecosystem context. Reference actual protocols by name.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -152,13 +587,8 @@ Consider factors like account age, transaction frequency, balance consistency, i
       },
       body: JSON.stringify({
         model: 'claude-3-haiku-20240307',
-        max_tokens: 1000,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
@@ -167,71 +597,45 @@ Consider factors like account age, transaction frequency, balance consistency, i
     }
 
     const result = await response.json();
-    const analysis = JSON.parse(result.content[0].text);
+    const aiOutput = JSON.parse(result.content[0].text);
     
-    // Log AI usage for budget tracking if userId provided
     if (userId && result.usage) {
       const totalTokens = result.usage.input_tokens + result.usage.output_tokens;
       await logAiUsage(userId, 'void_lens_ai', totalTokens);
     }
     
-    return analysis;
+    // Merge AI insights with our computed structural data
+    return {
+      score: aiOutput.score || basicAnalysis.score,
+      riskLevel: aiOutput.riskLevel || basicAnalysis.riskLevel,
+      activitySummary: aiOutput.activitySummary || basicAnalysis.activitySummary,
+      keyInsights: aiOutput.keyInsights || basicAnalysis.keyInsights,
+      details: {
+        ageScore: aiOutput.details?.ageScore || basicAnalysis.details.ageScore,
+        activityScore: aiOutput.details?.activityScore || basicAnalysis.details.activityScore,
+        diversityScore: aiOutput.details?.diversityScore || basicAnalysis.details.diversityScore,
+        balanceScore: aiOutput.details?.balanceScore || basicAnalysis.details.balanceScore,
+        securityScore: aiOutput.details?.securityScore || basicAnalysis.details.securityScore,
+        defiScore: aiOutput.details?.defiScore || basicAnalysis.details.defiScore,
+      },
+      // These are always computed from real data, not AI
+      securityProfile: basicAnalysis.securityProfile,
+      defiActivity: basicAnalysis.defiActivity,
+      activityPattern: basicAnalysis.activityPattern,
+      walletAge: basicAnalysis.walletAge,
+    };
   } catch (error) {
     console.error('Error generating analysis:', error);
     return generateBasicAnalysis(walletData);
   }
 }
 
-function generateBasicAnalysis(walletData: WalletData): ReputationAnalysis {
-  const balance = parseFloat(walletData.balance) || 0;
-  const txCount = walletData.stats.total_transactions || 0;
-  const tokenCount = walletData.tokens.length || 0;
-  
-  // Basic scoring algorithm
-  const balanceScore = Math.min(100, Math.log10(balance + 1) * 20);
-  const activityScore = Math.min(100, Math.log10(txCount + 1) * 25);
-  const diversityScore = Math.min(100, tokenCount * 10);
-  
-  const ageInDays = walletData.stats.first_transaction 
-    ? (Date.now() - new Date(walletData.stats.first_transaction).getTime()) / (1000 * 60 * 60 * 24)
-    : 0;
-  const ageScore = Math.min(100, Math.log10(ageInDays + 1) * 30);
-  
-  const score = Math.round((balanceScore + activityScore + diversityScore + ageScore) / 4);
-  
-  const riskLevel = score >= 70 ? 'LOW' : score >= 40 ? 'MEDIUM' : 'HIGH';
-  
-  const activitySummary = `${txCount} transactions, ${balance.toFixed(2)} NEAR balance, ${tokenCount} tokens`;
-  
-  const keyInsights = [
-    `Account age: ${Math.round(ageInDays)} days`,
-    `Transaction activity: ${txCount > 100 ? 'High' : txCount > 20 ? 'Medium' : 'Low'}`,
-    `Token diversity: ${tokenCount} different tokens`,
-    `Balance level: ${balance > 100 ? 'High' : balance > 10 ? 'Medium' : 'Low'}`
-  ];
-  
-  return {
-    score,
-    riskLevel,
-    activitySummary,
-    keyInsights,
-    details: {
-      ageScore: Math.round(ageScore),
-      activityScore: Math.round(activityScore),
-      diversityScore: Math.round(diversityScore),
-      balanceScore: Math.round(balanceScore)
-    }
-  };
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Make authentication optional
     const user = getAuthenticatedUser(request);
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const rateKey = user ? `void-lens:${user.userId}` : `void-lens:${ip}`;
     
-    // Different rate limits for authenticated vs unauthenticated users
     if (!rateLimit(rateKey, user ? 10 : 5, 60_000).allowed) {
       return NextResponse.json({ 
         error: 'Too many requests. Connect your wallet for higher limits.' 
@@ -255,7 +659,6 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Only pass userId if authenticated
     const analysis = await generateReputationAnalysis(walletData, user?.userId);
     
     const responseData = {
@@ -265,7 +668,6 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     };
 
-    // Add cache headers for unauthenticated requests
     const headers: Record<string, string> = {};
     if (!user) {
       headers['Cache-Control'] = 'public, s-maxage=120, stale-while-revalidate=300';

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, Shield, TrendingUp, Activity, Wallet, AlertTriangle, CheckCircle, Network, RotateCcw, RefreshCw } from 'lucide-react';
+// @ts-ignore
+import { Search, Shield, TrendingUp, Activity, Wallet, AlertTriangle, CheckCircle, Network, RotateCcw, RefreshCw, Key, Lock, Zap, Coins, BarChart3, Clock, Globe, Layers } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -18,6 +19,30 @@ interface ReputationAnalysis {
     activityScore: number;
     diversityScore: number;
     balanceScore: number;
+    securityScore: number;
+    defiScore: number;
+  };
+  securityProfile: {
+    fullAccessKeys: number;
+    functionCallKeys: number;
+    riskFlags: string[];
+  };
+  defiActivity: {
+    topProtocols: Array<{ name: string; interactions: number; category: string }>;
+    hasStaking: boolean;
+    stakedAmount: string;
+    nftCount: number;
+  };
+  activityPattern: {
+    avgTxPerDay: number;
+    mostActiveDay: string;
+    sendReceiveRatio: number;
+    recentActivity: 'active' | 'moderate' | 'dormant';
+  };
+  walletAge: {
+    days: number;
+    created: string;
+    label: string;
   };
 }
 
@@ -30,6 +55,12 @@ interface WalletData {
     total_transactions: number;
     first_transaction: string | null;
     last_transaction: string | null;
+  };
+  nftCount: number;
+  storageUsage: number;
+  accessKeys: {
+    fullAccess: number;
+    functionCall: number;
   };
 }
 
@@ -54,6 +85,15 @@ interface VoidLensProps {
   initialAddress?: string;
 }
 
+const EXAMPLE_WALLETS = [
+  'alex.near',
+  'mob.near',
+  'root.near',
+  'aurora.near',
+  'v2.ref-finance.near',
+  'nearweek.near',
+];
+
 export function VoidLens({ initialAddress }: VoidLensProps = {}) {
   const [address, setAddress] = useState('');
   const [result, setResult] = useState<VoidLensResult | null>(null);
@@ -68,32 +108,29 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
   const stageTimeouts = useRef<NodeJS.Timeout[]>([]);
   const scoreAnimationRef = useRef<number | null>(null);
 
-  // Initialize loading stages
   const initializeLoadingStages = (): LoadingStage[] => [
-    { id: 'fetch', label: 'Fetching on-chain data...', duration: 1000, completed: false },
-    { id: 'analyze', label: 'Analyzing transaction patterns...', duration: 1500, completed: false },
-    { id: 'generate', label: 'Generating reputation report...', duration: 1500, completed: false }
+    { id: 'fetch', label: 'Fetching on-chain data...', duration: 800, completed: false },
+    { id: 'keys', label: 'Analyzing access keys & security...', duration: 800, completed: false },
+    { id: 'defi', label: 'Scanning DeFi & NFT activity...', duration: 1000, completed: false },
+    { id: 'analyze', label: 'Computing reputation scores...', duration: 1000, completed: false },
+    { id: 'generate', label: 'Generating intelligence report...', duration: 1200, completed: false }
   ];
 
-  // Clear all stage timeouts
   const clearStageTimeouts = () => {
     stageTimeouts.current.forEach(timeout => clearTimeout(timeout));
     stageTimeouts.current = [];
   };
 
-  // Set address from initialAddress prop if provided
   useEffect(() => {
     if (initialAddress) {
       setAddress(initialAddress);
     }
   }, [initialAddress]);
 
-  // Start loading stage progression
   const startLoadingStages = () => {
     const stages = initializeLoadingStages();
     setLoadingStages(stages);
     setCurrentStageIndex(0);
-    
     clearStageTimeouts();
     
     let cumulativeDelay = 0;
@@ -106,57 +143,40 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
           setCurrentStageIndex(index + 1);
         }
       }, cumulativeDelay + stage.duration);
-      
       stageTimeouts.current.push(timeout);
       cumulativeDelay += stage.duration;
     });
   };
 
-  // Animate score counting up
   const animateScore = (targetScore: number) => {
     setShowScoreAnimation(true);
     setAnimatedScore(0);
-    
     const startTime = Date.now();
-    const duration = 1500; // 1.5 seconds
+    const duration = 1500;
     
     const updateScore = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
-      // Ease-out animation
       const easedProgress = 1 - Math.pow(1 - progress, 3);
-      const currentScore = Math.round(targetScore * easedProgress);
-      
-      setAnimatedScore(currentScore);
-      
+      setAnimatedScore(Math.round(targetScore * easedProgress));
       if (progress < 1) {
         scoreAnimationRef.current = requestAnimationFrame(updateScore);
       }
     };
-    
     scoreAnimationRef.current = requestAnimationFrame(updateScore);
   };
 
-  // Get error message based on type
   const getErrorMessage = (type: ErrorType, message: string) => {
     switch (type) {
-      case 'validation':
-        return 'Please enter a valid NEAR wallet address';
-      case 'not-found':
-        return 'Wallet not found. Please check the address and try again.';
-      case 'rate-limit':
-        return 'Too many requests. Please wait a moment and try again.';
-      case 'server-error':
-        return 'Our servers are experiencing issues. Please try again in a few minutes.';
-      case 'network-error':
-        return 'Network connection error. Please check your internet and try again.';
-      default:
-        return message || 'An unexpected error occurred';
+      case 'validation': return 'Please enter a valid NEAR wallet address';
+      case 'not-found': return 'Wallet not found. Please check the address and try again.';
+      case 'rate-limit': return 'Too many requests. Please wait a moment and try again.';
+      case 'server-error': return 'Our servers are experiencing issues. Please try again in a few minutes.';
+      case 'network-error': return 'Network connection error. Please check your internet and try again.';
+      default: return message || 'An unexpected error occurred';
     }
   };
 
-  // Classify error type
   const classifyError = (error: Error, status?: number): ErrorType => {
     if (status === 404) return 'not-found';
     if (status === 429) return 'rate-limit';
@@ -165,39 +185,37 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     return 'server-error';
   };
 
-  // Format time ago
   const formatTimeAgo = (timestamp: number): string => {
-    const now = Date.now();
-    const diff = now - timestamp;
+    const diff = Date.now() - timestamp;
     const minutes = Math.floor(diff / 60000);
-    
     if (minutes === 0) return 'just now';
     if (minutes === 1) return '1m ago';
     if (minutes < 60) return `${minutes}m ago`;
-    
     const hours = Math.floor(minutes / 60);
     if (hours === 1) return '1h ago';
     if (hours < 24) return `${hours}h ago`;
-    
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return `${Math.floor(hours / 24)}d ago`;
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       clearStageTimeouts();
-      if (scoreAnimationRef.current) {
-        cancelAnimationFrame(scoreAnimationRef.current);
-      }
+      if (scoreAnimationRef.current) cancelAnimationFrame(scoreAnimationRef.current);
     };
   }, []);
 
-  const handleAnalyze = async () => {
-    if (!address.trim()) {
+  const handleAnalyze = async (addressOverride?: string) => {
+    const targetAddress = addressOverride || address;
+    
+    if (!targetAddress.trim()) {
       setError('Please enter a NEAR wallet address');
       setErrorType('validation');
       return;
+    }
+
+    // Update displayed address if override was passed
+    if (addressOverride) {
+      setAddress(addressOverride);
     }
 
     setLoading(true);
@@ -205,52 +223,38 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     setErrorType(null);
     setResult(null);
     setShowScoreAnimation(false);
-    
-    // Start multi-step loading animation
     startLoadingStages();
 
     try {
       const response = await fetch('/api/void-lens', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ address: address.trim() }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: targetAddress.trim() }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        const error = new Error(errorData.error || 'Failed to analyze wallet');
-        const errorType = classifyError(error, response.status);
-        setErrorType(errorType);
-        throw error;
+        const err = new Error(errorData.error || 'Failed to analyze wallet');
+        const errType = classifyError(err, response.status);
+        setErrorType(errType);
+        throw err;
       }
 
       const data = await response.json();
+      const resultWithTimestamp = { ...data, analysisTimestamp: Date.now() };
       
-      // Add analysis timestamp
-      const resultWithTimestamp = {
-        ...data,
-        analysisTimestamp: Date.now()
-      };
-      
-      // Complete all loading stages immediately
       clearStageTimeouts();
       setLoadingStages(prev => prev.map(stage => ({ ...stage, completed: true })));
-      
       setResult(resultWithTimestamp);
       
-      // Start score animation after a brief delay
       setTimeout(() => {
-        animateScore(data.analysis.score);
+        animateScore(data.analysis?.score || 0);
       }, 300);
       
     } catch (err) {
       const error = err instanceof Error ? err : new Error('An error occurred');
       setError(error.message);
-      if (!errorType) {
-        setErrorType(classifyError(error));
-      }
+      if (!errorType) setErrorType(classifyError(error));
     } finally {
       setLoading(false);
     }
@@ -258,27 +262,19 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'LOW':
-        return 'text-near-green border-near-green bg-near-green/10';
-      case 'MEDIUM':
-        return 'text-warning border-warning bg-warning/10';
-      case 'HIGH':
-        return 'text-error border-error bg-error/10';
-      default:
-        return 'text-text-secondary border-border bg-surface';
+      case 'LOW': return 'text-near-green border-near-green bg-near-green/10';
+      case 'MEDIUM': return 'text-warning border-warning bg-warning/10';
+      case 'HIGH': return 'text-error border-error bg-error/10';
+      default: return 'text-text-secondary border-border bg-surface';
     }
   };
 
   const getRiskIcon = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'LOW':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'MEDIUM':
-        return <AlertTriangle className="w-4 h-4" />;
-      case 'HIGH':
-        return <AlertTriangle className="w-4 h-4" />;
-      default:
-        return <Shield className="w-4 h-4" />;
+      case 'LOW': return <CheckCircle className="w-4 h-4" />;
+      case 'MEDIUM': return <AlertTriangle className="w-4 h-4" />;
+      case 'HIGH': return <AlertTriangle className="w-4 h-4" />;
+      default: return <Shield className="w-4 h-4" />;
     }
   };
 
@@ -286,6 +282,12 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     if (score >= 70) return 'text-near-green';
     if (score >= 40) return 'text-warning';
     return 'text-error';
+  };
+
+  const getScoreGradient = (score: number) => {
+    if (score >= 70) return 'from-near-green/20 to-near-green/5';
+    if (score >= 40) return 'from-warning/20 to-warning/5';
+    return 'from-error/20 to-error/5';
   };
 
   const formatBalance = (balance: string) => {
@@ -297,102 +299,87 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     return `${num.toFixed(2)} NEAR`;
   };
 
-  // Generate radar chart SVG
-  const generateRadarChart = (scores: { ageScore: number; activityScore: number; diversityScore: number; balanceScore: number }) => {
-    const size = 250;
+  const getRecentActivityBadge = (activity: string) => {
+    switch (activity) {
+      case 'active': return { label: 'Active', color: 'text-near-green bg-near-green/10 border-near-green/30' };
+      case 'moderate': return { label: 'Moderate', color: 'text-warning bg-warning/10 border-warning/30' };
+      case 'dormant': return { label: 'Dormant', color: 'text-error bg-error/10 border-error/30' };
+      default: return { label: 'Unknown', color: 'text-text-muted bg-surface border-border' };
+    }
+  };
+
+  // Generate 6-axis radar chart (hexagon)
+  const generateRadarChart = (scores: {
+    ageScore: number;
+    activityScore: number;
+    diversityScore: number;
+    balanceScore: number;
+    securityScore: number;
+    defiScore: number;
+  }) => {
+    const size = 280;
     const center = size / 2;
-    const maxRadius = center - 40;
+    const maxRadius = center - 45;
     
     const axes = [
-      { label: 'Age', angle: 0, score: scores.ageScore },
-      { label: 'Activity', angle: 90, score: scores.activityScore },
-      { label: 'Diversity', angle: 180, score: scores.diversityScore },
-      { label: 'Balance', angle: 270, score: scores.balanceScore }
+      { label: 'Age', angle: 0, score: scores.ageScore || 0 },
+      { label: 'Activity', angle: 60, score: scores.activityScore || 0 },
+      { label: 'DeFi', angle: 120, score: scores.defiScore || 0 },
+      { label: 'Diversity', angle: 180, score: scores.diversityScore || 0 },
+      { label: 'Security', angle: 240, score: scores.securityScore || 0 },
+      { label: 'Balance', angle: 300, score: scores.balanceScore || 0 }
     ];
 
-    // Convert polar coordinates to cartesian
     const polarToCartesian = (angle: number, radius: number) => ({
       x: center + radius * Math.cos((angle - 90) * Math.PI / 180),
       y: center + radius * Math.sin((angle - 90) * Math.PI / 180)
     });
 
-    // Generate grid circles
-    const gridCircles = [25, 50, 75, 100].map(percent => {
+    // Hexagonal grid
+    const gridLevels = [25, 50, 75, 100];
+    const gridPolygons = gridLevels.map(percent => {
       const radius = (percent / 100) * maxRadius;
+      const points = axes.map(a => polarToCartesian(a.angle, radius));
+      const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
       return (
-        <circle
-          key={percent}
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
-          strokeWidth="1"
-        />
+        <path key={percent} d={path} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
       );
     });
 
-    // Generate axis lines
     const axisLines = axes.map(axis => {
       const end = polarToCartesian(axis.angle, maxRadius);
       return (
-        <line
-          key={axis.label}
-          x1={center}
-          y1={center}
-          x2={end.x}
-          y2={end.y}
-          stroke="rgba(255, 255, 255, 0.2)"
-          strokeWidth="1"
-        />
+        <line key={axis.label} x1={center} y1={center} x2={end.x} y2={end.y}
+          stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
       );
     });
 
-    // Generate score polygon
     const scorePoints = axes.map(axis => {
       const radius = (axis.score / 100) * maxRadius;
       return polarToCartesian(axis.angle, radius);
     });
-
-    const scorePolygonPath = scorePoints.map((point, index) => 
-      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    const scorePolygonPath = scorePoints.map((p, i) =>
+      `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
     ).join(' ') + ' Z';
 
-    // Generate labels
     const labels = axes.map(axis => {
-      const labelRadius = maxRadius + 20;
-      const pos = polarToCartesian(axis.angle, labelRadius);
+      const pos = polarToCartesian(axis.angle, maxRadius + 25);
       return (
-        <text
-          key={axis.label}
-          x={pos.x}
-          y={pos.y}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill="rgba(255, 255, 255, 0.8)"
-          fontSize="12"
-          fontWeight="500"
-        >
+        <text key={axis.label} x={pos.x} y={pos.y}
+          textAnchor="middle" dominantBaseline="central"
+          fill="rgba(255,255,255,0.7)" fontSize="11" fontWeight="500">
           {axis.label}
         </text>
       );
     });
 
-    // Generate score labels
     const scoreLabels = axes.map(axis => {
-      const scoreRadius = (axis.score / 100) * maxRadius;
-      const pos = polarToCartesian(axis.angle, scoreRadius + 15);
+      const radius = Math.max((axis.score / 100) * maxRadius, 15);
+      const pos = polarToCartesian(axis.angle, radius + 14);
       return (
-        <text
-          key={`score-${axis.label}`}
-          x={pos.x}
-          y={pos.y}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill="#10B981"
-          fontSize="10"
-          fontWeight="600"
-        >
+        <text key={`s-${axis.label}`} x={pos.x} y={pos.y}
+          textAnchor="middle" dominantBaseline="central"
+          fill="#10B981" fontSize="10" fontWeight="600">
           {axis.score}
         </text>
       );
@@ -401,14 +388,13 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     return (
       <div className="flex justify-center">
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {gridCircles}
+          {gridPolygons}
           {axisLines}
-          <path
-            d={scorePolygonPath}
-            fill="rgba(16, 185, 129, 0.2)"
-            stroke="#10B981"
-            strokeWidth="2"
-          />
+          <path d={scorePolygonPath}
+            fill="rgba(16,185,129,0.15)" stroke="#10B981" strokeWidth="2" />
+          {scorePoints.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r="3" fill="#10B981" />
+          ))}
           {labels}
           {scoreLabels}
         </svg>
@@ -419,10 +405,63 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Unknown';
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: 'numeric', month: 'short', day: 'numeric',
     });
+  };
+
+  const formatStorage = (bytes: number) => {
+    if (!bytes || bytes === 0) return '0 B';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  // Score gauge arc for security/defi cards
+  const ScoreGauge = ({ score, label, size = 60 }: { score: number; label: string; size?: number }) => {
+    const radius = (size / 2) - 6;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (score / 100) * circumference;
+    const color = score >= 70 ? '#10B981' : score >= 40 ? '#F59E0B' : '#EF4444';
+    
+    return (
+      <div className="flex flex-col items-center gap-1">
+        <svg width={size} height={size} className="-rotate-90">
+          <circle cx={size/2} cy={size/2} r={radius} fill="none"
+            stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+          <circle cx={size/2} cy={size/2} r={radius} fill="none"
+            stroke={color} strokeWidth="4" strokeLinecap="round"
+            strokeDasharray={circumference} strokeDashoffset={offset}
+            style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
+        </svg>
+        <div className="absolute flex items-center justify-center" style={{ width: size, height: size }}>
+          <span className="text-sm font-bold" style={{ color }}>{score}</span>
+        </div>
+        <span className="text-xs text-text-muted">{label}</span>
+      </div>
+    );
+  };
+
+  // Send/Receive ratio bar
+  const RatioBar = ({ sent, received }: { sent: number; received: number }) => {
+    const total = sent + received;
+    if (total === 0) return <div className="text-xs text-text-muted">No data</div>;
+    const sentPct = Math.round((sent / total) * 100);
+    const recvPct = 100 - sentPct;
+    
+    return (
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-text-muted">
+          <span>Sent ({sentPct}%)</span>
+          <span>Received ({recvPct}%)</span>
+        </div>
+        <div className="h-2 rounded-full bg-surface-hover overflow-hidden flex">
+          <div className="h-full bg-blue-500 rounded-l-full transition-all duration-700"
+            style={{ width: `${sentPct}%` }} />
+          <div className="h-full bg-purple-500 rounded-r-full transition-all duration-700"
+            style={{ width: `${recvPct}%` }} />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -456,15 +495,12 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
 
           {/* Example Wallets */}
           <div className="space-y-2">
-            <p className="text-xs text-text-muted">Try these:</p>
+            <p className="text-xs text-text-muted">Try these notable wallets:</p>
             <div className="flex flex-wrap gap-2">
-              {['alex.near', 'mob.near', 'root.near'].map((example) => (
+              {EXAMPLE_WALLETS.map((example) => (
                 <button
                   key={example}
-                  onClick={() => {
-                    setAddress(example);
-                    setTimeout(() => handleAnalyze(), 100);
-                  }}
+                  onClick={() => handleAnalyze(example)}
                   className="text-xs px-2 py-1 bg-surface border border-border rounded-full hover:border-near-green/30 cursor-pointer transition-colors"
                 >
                   {example}
@@ -474,7 +510,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
           </div>
           
           <Button 
-            onClick={handleAnalyze}
+            onClick={() => handleAnalyze()}
             disabled={loading || !address.trim()}
             className="w-full"
             variant="primary"
@@ -514,7 +550,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
             </div>
           )}
           
-          {/* Improved Error Display */}
+          {/* Error Display */}
           {error && (
             <div className="p-4 rounded-lg bg-error/10 border border-error/20 animate-in slide-in-from-top duration-300">
               <div className="flex items-start gap-3">
@@ -524,7 +560,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
                     {errorType ? getErrorMessage(errorType, error) : error}
                   </p>
                   <Button
-                    onClick={handleAnalyze}
+                    onClick={() => handleAnalyze()}
                     size="sm"
                     variant="ghost"
                     className="text-error hover:text-error hover:bg-error/10"
@@ -541,132 +577,322 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
 
       {/* Results */}
       {result && (
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Score Card */}
-            <Card className="lg:col-span-2" variant="glass" glow hover>
-              <div className="text-center mb-6">
-                <div className={cn(
-                  "text-5xl sm:text-6xl font-bold mb-2 transition-transform duration-300",
-                  getScoreColor(result.analysis.score),
-                  showScoreAnimation ? "scale-105" : "scale-100"
-                )}>
-                  {showScoreAnimation ? animatedScore : result.analysis.score}
+        <div className="max-w-6xl mx-auto space-y-6">
+          
+          {/* 1. Hero Score Card — Full Width */}
+          <Card variant="glass" glow hover className={cn("relative overflow-hidden")}>
+            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", getScoreGradient(result.analysis?.score || 0))} />
+            <div className="relative z-10">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  {/* Score Circle */}
+                  <div className="relative">
+                    <svg width="120" height="120" className="-rotate-90">
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
+                      <circle cx="60" cy="60" r="52" fill="none"
+                        stroke={result.analysis?.score >= 70 ? '#10B981' : result.analysis?.score >= 40 ? '#F59E0B' : '#EF4444'}
+                        strokeWidth="6" strokeLinecap="round"
+                        strokeDasharray={`${2 * Math.PI * 52}`}
+                        strokeDashoffset={`${2 * Math.PI * 52 * (1 - (result.analysis?.score || 0) / 100)}`}
+                        style={{ transition: 'stroke-dashoffset 1.5s ease-out' }} />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={cn("text-4xl font-bold", getScoreColor(result.analysis?.score || 0))}>
+                        {showScoreAnimation ? animatedScore : (result.analysis?.score || 0)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center sm:text-left">
+                    <h2 className="text-xl font-bold text-text-primary mb-1">
+                      {result.walletData?.account || result.address}
+                    </h2>
+                    <p className="text-text-secondary text-sm mb-3">{result.analysis?.activitySummary || ''}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium",
+                        getRiskColor(result.analysis?.riskLevel || '')
+                      )}>
+                        {getRiskIcon(result.analysis?.riskLevel || '')}
+                        {result.analysis?.riskLevel || 'UNKNOWN'} RISK
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs font-medium">
+                        <Clock className="w-3 h-3" />
+                        {result.analysis?.walletAge?.label || 'Unknown'}
+                      </span>
+                      {result.analysis?.activityPattern && (
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium",
+                          getRecentActivityBadge(result.analysis.activityPattern.recentActivity).color
+                        )}>
+                          <Zap className="w-3 h-3" />
+                          {getRecentActivityBadge(result.analysis.activityPattern.recentActivity).label}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-text-secondary text-sm sm:text-base">Reputation Score</div>
                 
-                <div className={cn(
-                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium mt-3",
-                  getRiskColor(result.analysis.riskLevel)
-                )}>
-                  {getRiskIcon(result.analysis.riskLevel)}
-                  {result.analysis.riskLevel} RISK
+                {/* Freshness + Refresh */}
+                <div className="flex items-center gap-2 text-xs text-text-muted">
+                  <span>Analyzed {result.analysisTimestamp ? formatTimeAgo(result.analysisTimestamp) : 'recently'}</span>
+                  <button
+                    onClick={() => handleAnalyze(result.walletData?.account || result.address)}
+                    className="inline-flex items-center gap-1 text-near-green hover:text-near-green/80 transition-colors"
+                    disabled={loading}
+                  >
+                    <RefreshCw className={cn("w-3 h-3", loading && "animate-spin")} />
+                    Refresh
+                  </button>
                 </div>
               </div>
-              
+            </div>
+          </Card>
+
+          {/* Cards Grid — 2x2 on desktop, single column on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* 2. Security Profile Card */}
+            <Card>
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <Lock className="w-5 h-5 text-blue-400" />
+                Security Profile
+              </h3>
               <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2">Activity Summary</h3>
-                  <p className="text-text-secondary">{result.analysis.activitySummary}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <ScoreGauge score={result.analysis?.details?.securityScore || 0} label="Security" />
+                    </div>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <div className="flex items-center gap-2 justify-end">
+                      <Key className="w-4 h-4 text-near-green" />
+                      <span className="text-sm text-text-primary">
+                        {result.analysis?.securityProfile?.fullAccessKeys ?? 0} Full Access
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 justify-end">
+                      <Key className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm text-text-primary">
+                        {result.analysis?.securityProfile?.functionCallKeys ?? 0} Function Call
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-3">Score Breakdown</h3>
-                  {generateRadarChart(result.analysis.details)}
+                {/* Risk Flags */}
+                {(result.analysis?.securityProfile?.riskFlags?.length || 0) > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    {result.analysis?.securityProfile?.riskFlags?.map((flag, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs">
+                        <AlertTriangle className="w-3.5 h-3.5 text-warning flex-shrink-0 mt-0.5" />
+                        <span className="text-text-secondary">{flag}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {(result.analysis?.securityProfile?.riskFlags?.length || 0) === 0 && (
+                  <div className="flex items-center gap-2 text-xs text-near-green pt-2 border-t border-border">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    <span>No security risks detected</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* 3. DeFi Activity Card */}
+            <Card>
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-400" />
+                DeFi &amp; NFT Activity
+              </h3>
+              <div className="space-y-4">
+                {/* Top Protocols */}
+                {(result.analysis?.defiActivity?.topProtocols?.length || 0) > 0 ? (
+                  <div className="space-y-2">
+                    {result.analysis?.defiActivity?.topProtocols?.slice(0, 5).map((proto, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-purple-400" />
+                          <span className="text-sm text-text-primary">{proto.name}</span>
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-surface-hover text-text-muted">
+                            {proto.category}
+                          </span>
+                        </div>
+                        <span className="text-xs text-text-muted">{proto.interactions} txs</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-text-muted">No known DeFi protocol interactions detected.</p>
+                )}
+                
+                {/* Staking + NFT row */}
+                <div className="flex flex-wrap gap-3 pt-2 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-yellow-400" />
+                    <span className="text-sm text-text-primary">
+                      {result.analysis?.defiActivity?.hasStaking 
+                        ? `${result.analysis.defiActivity.stakedAmount} NEAR staked`
+                        : 'No staking'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-pink-400" />
+                    <span className="text-sm text-text-primary">
+                      {result.analysis?.defiActivity?.nftCount || 0} NFTs
+                    </span>
+                  </div>
                 </div>
               </div>
             </Card>
 
-            {/* Wallet Info */}
-            <div className="space-y-6">
-              <Card>
-                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <Wallet className="w-5 h-5" />
-                  Wallet Overview
-                </h3>
-                <div className="space-y-3">
+            {/* 4. Activity Pattern Card */}
+            <Card>
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-cyan-400" />
+                Activity Patterns
+              </h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm text-text-muted">Address</div>
-                    <div className="text-text-primary font-mono text-sm break-all">
-                      {result.walletData.account}
-                    </div>
-                    {/* Freshness Indicator */}
-                    <div className="flex items-center gap-2 mt-2 text-xs text-text-muted">
-                      <span>
-                        Analyzed {result.analysisTimestamp ? formatTimeAgo(result.analysisTimestamp) : 'recently'}
-                      </span>
-                      <span>·</span>
-                      <button
-                        onClick={() => {
-                          setAddress(result.walletData.account);
-                          setTimeout(() => handleAnalyze(), 100);
-                        }}
-                        className="inline-flex items-center gap-1 text-near-green hover:text-near-green/80 transition-colors"
-                        disabled={loading}
-                      >
-                        <RefreshCw className={cn("w-3 h-3", loading && "animate-spin")} />
-                        Refresh
-                      </button>
+                    <div className="text-xs text-text-muted mb-1">Avg TX / Day</div>
+                    <div className="text-lg font-semibold text-text-primary">
+                      {result.analysis?.activityPattern?.avgTxPerDay?.toFixed(2) || '0'}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-text-muted">Balance</div>
-                    <div className="text-text-primary font-semibold">
-                      {formatBalance(result.walletData.balance)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-text-muted">Total Transactions</div>
-                    <div className="text-text-primary font-semibold">
-                      {result.walletData.stats.total_transactions.toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-text-muted">Token Holdings</div>
-                    <div className="text-text-primary font-semibold">
-                      {result.walletData.tokens.length} tokens
+                    <div className="text-xs text-text-muted mb-1">Most Active Day</div>
+                    <div className="text-lg font-semibold text-text-primary">
+                      {result.analysis?.activityPattern?.mostActiveDay || 'Unknown'}
                     </div>
                   </div>
                 </div>
-              </Card>
+                
+                {/* Send/Receive Ratio */}
+                <RatioBar 
+                  sent={result.analysis?.activityPattern?.sendReceiveRatio 
+                    ? Math.round(result.analysis.activityPattern.sendReceiveRatio * 100) : 50}
+                  received={result.analysis?.activityPattern?.sendReceiveRatio 
+                    ? Math.round(100) : 50}
+                />
+                
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  <span className="text-xs text-text-muted">Account Age</span>
+                  <span className="text-sm text-text-primary font-medium">
+                    {result.analysis?.walletAge?.days 
+                      ? `${result.analysis.walletAge.days} days`
+                      : 'Unknown'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-text-muted">First Seen</span>
+                  <span className="text-sm text-text-primary">
+                    {formatDate(result.analysis?.walletAge?.created || null)}
+                  </span>
+                </div>
+              </div>
+            </Card>
 
-              <Card>
-                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
-                  Activity Timeline
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm text-text-muted">First Transaction</div>
-                    <div className="text-text-primary">
-                      {formatDate(result.walletData.stats.first_transaction)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-text-muted">Last Transaction</div>
-                    <div className="text-text-primary">
-                      {formatDate(result.walletData.stats.last_transaction)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-text-muted">Analysis Time</div>
-                    <div className="text-text-primary">
-                      {formatDate(result.timestamp)}
-                    </div>
-                  </div>
+            {/* 5. Wallet Overview Card */}
+            <Card>
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-near-green" />
+                Wallet Overview
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-text-muted">Balance</span>
+                  <span className="text-sm font-semibold text-text-primary">
+                    {formatBalance(result.walletData?.balance || '0')}
+                  </span>
                 </div>
-              </Card>
-            </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-text-muted">Total Transactions</span>
+                  <span className="text-sm font-semibold text-text-primary">
+                    {(result.walletData?.stats?.total_transactions || 0).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-text-muted">Token Holdings</span>
+                  <span className="text-sm font-semibold text-text-primary">
+                    {result.walletData?.tokens?.length || 0} tokens
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-text-muted">NFT Holdings</span>
+                  <span className="text-sm font-semibold text-text-primary">
+                    {result.walletData?.nftCount || result.analysis?.defiActivity?.nftCount || 0} NFTs
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-text-muted">Storage Used</span>
+                  <span className="text-sm font-semibold text-text-primary">
+                    {formatStorage(result.walletData?.storageUsage || 0)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  <span className="text-sm text-text-muted">Last Activity</span>
+                  <span className="text-sm text-text-primary">
+                    {formatDate(result.walletData?.stats?.last_transaction || null)}
+                  </span>
+                </div>
+              </div>
+            </Card>
           </div>
 
-          {/* Key Insights */}
-          <Card className="mt-6">
+          {/* 6. Radar Chart Card — Full Width */}
+          <Card>
             <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Key Insights
+              <Activity className="w-5 h-5 text-near-green" />
+              Score Breakdown
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {result.analysis.keyInsights.map((insight, index) => (
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1">
+                {generateRadarChart(result.analysis?.details || {
+                  ageScore: 0, activityScore: 0, diversityScore: 0,
+                  balanceScore: 0, securityScore: 0, defiScore: 0
+                })}
+              </div>
+              <div className="flex-1 grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Age', score: result.analysis?.details?.ageScore || 0, icon: <Clock className="w-4 h-4" /> },
+                  { label: 'Activity', score: result.analysis?.details?.activityScore || 0, icon: <Zap className="w-4 h-4" /> },
+                  { label: 'Diversity', score: result.analysis?.details?.diversityScore || 0, icon: <Globe className="w-4 h-4" /> },
+                  { label: 'Balance', score: result.analysis?.details?.balanceScore || 0, icon: <Coins className="w-4 h-4" /> },
+                  { label: 'Security', score: result.analysis?.details?.securityScore || 0, icon: <Lock className="w-4 h-4" /> },
+                  { label: 'DeFi', score: result.analysis?.details?.defiScore || 0, icon: <Layers className="w-4 h-4" /> },
+                ].map(item => (
+                  <div key={item.label} className="flex items-center gap-2 p-2 rounded-lg bg-surface-hover">
+                    <span className="text-text-muted">{item.icon}</span>
+                    <div className="flex-1">
+                      <div className="text-xs text-text-muted">{item.label}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
+                          <div className="h-full rounded-full bg-near-green transition-all duration-700"
+                            style={{ width: `${item.score}%` }} />
+                        </div>
+                        <span className="text-xs font-semibold text-text-primary w-8 text-right">
+                          {item.score}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* 7. Key Insights Card — Full Width */}
+          <Card>
+            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-near-green" />
+              Intelligence Report
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {(result.analysis?.keyInsights || []).map((insight, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-surface-hover">
                   <div className="w-2 h-2 rounded-full bg-near-green mt-2 flex-shrink-0" />
                   <p className="text-text-secondary text-sm">{insight}</p>
@@ -674,7 +900,6 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
               ))}
             </div>
             
-            {/* View in Constellation Button */}
             <div className="flex justify-center">
               <a 
                 href={`/observatory?tool=constellation&address=${result.address}`}
