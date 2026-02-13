@@ -151,6 +151,15 @@ export default function ObservatoryContent() {
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isExpanded]);
 
+  // Listen for fullscreen toggle from VoidBubblesEngine keyboard shortcut
+  useEffect(() => {
+    const handleToggleFullscreen = () => {
+      setIsExpanded(prev => !prev);
+    };
+    window.addEventListener('voidspace:toggle-fullscreen', handleToggleFullscreen);
+    return () => window.removeEventListener('voidspace:toggle-fullscreen', handleToggleFullscreen);
+  }, []);
+
   const handleToolSwitch = useCallback((toolId: ToolId) => {
     setActiveTool(toolId);
     setIsExpanded(false);

@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, RotateCcw, Clock, Activity, X, Copy, ExternalLink,
-  TrendingUp, TrendingDown, Search, Settings, Brain, Link,
+  TrendingUp, TrendingDown, Search, Settings, Brain, Link, Keyboard,
 } from 'lucide-react';
 // These icons exist but TS types are broken in v0.453 RSC mode
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
@@ -225,6 +225,12 @@ export function VoidBubblesEngine() {
   
   // **NEW: Popup Card state - floating overlay**
   const [popupCard, setPopupCard] = useState<{ token: VoidBubbleToken } | null>(null);
+  
+  // Top Movers panel visibility
+  const [showMovers, setShowMovers] = useState(true);
+  
+  // Keyboard shortcuts tooltip
+  const [showShortcuts, setShowShortcuts] = useState(false);
   
   // Pulse Mode state - volume-based pulsing (always enabled for now)
   const pulseMode = true;
@@ -1510,6 +1516,45 @@ export function VoidBubblesEngine() {
     document.head.appendChild(breatheStyle);
     injectedStylesRef.current.push(breatheStyle);
 
+    // ── New Pair Indicator — golden pulsing ring for tokens listed < 24h ──
+    const newPairStyle = document.createElement('style');
+    newPairStyle.textContent = `
+      @keyframes new-pair-pulse {
+        0%, 100% { stroke-opacity: 0.4; stroke-width: 2; }
+        50% { stroke-opacity: 1; stroke-width: 4; }
+      }
+    `;
+    document.head.appendChild(newPairStyle);
+    injectedStylesRef.current.push(newPairStyle);
+
+    const now = Date.now();
+    nodes.forEach(d => {
+      const createdAt = d.token.pairCreatedAt ? new Date(d.token.pairCreatedAt).getTime() : 0;
+      if (createdAt && now - createdAt < 86400000) {
+        const group = bubbleGroups.filter(n => n.id === d.id);
+        // Golden ring
+        group.insert('circle', '.bubble-main')
+          .attr('class', 'new-pair-ring')
+          .attr('r', d.targetRadius + (isMobile ? 5 : 10))
+          .attr('fill', 'none')
+          .attr('stroke', '#FFB800')
+          .attr('stroke-width', 2)
+          .style('animation', 'new-pair-pulse 2s ease-in-out infinite');
+        // "NEW" label
+        group.append('text')
+          .attr('class', 'new-pair-label')
+          .attr('text-anchor', 'middle')
+          .attr('y', -(d.targetRadius + 6))
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-size', '7')
+          .attr('font-weight', 'bold')
+          .attr('fill', '#FFB800')
+          .style('text-shadow', '0 1px 4px rgba(0,0,0,0.9)')
+          .style('pointer-events', 'none')
+          .text('NEW');
+      }
+    });
+
     // Apply breathing with random delays so bubbles don't sync
     bubbleGroups.each(function(_d, i) {
       const group = d3.select(this);
@@ -1613,6 +1658,34 @@ export function VoidBubblesEngine() {
     window.addEventListener('voidspace:open-token', handler);
     return () => window.removeEventListener('voidspace:open-token', handler);
   }, [handleShowPopup]);
+
+  // ── Keyboard Shortcuts ──
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't fire when typing in an input
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case 'f':
+          window.dispatchEvent(new CustomEvent('voidspace:toggle-fullscreen'));
+          break;
+        case 's':
+          setShowSearch(prev => !prev);
+          break;
+        case 'x':
+          setXrayMode(prev => !prev);
+          break;
+        case 'Escape':
+          setPopupCard(null);
+          setShowSearch(false);
+          setSearchQuery('');
+          setShowMobilePanel(false);
+          break;
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -1762,6 +1835,33 @@ export function VoidBubblesEngine() {
                   {currentChange >= 0 ? '+' : ''}{currentChange.toFixed(1)}% ({period})
                 </div>
               </div>
+              {/* Sparkline — 4 timeframe data points */}
+              {(() => {
+                const points = [
+                  hoveredToken.priceChange5m ?? 0,
+                  hoveredToken.priceChange1h,
+                  hoveredToken.priceChange6h,
+                  hoveredToken.priceChange24h,
+                ];
+                const maxAbs = Math.max(...points.map(Math.abs), 1);
+                const w = 60;
+                const h = 20;
+                const mid = h / 2;
+                const coords = points.map((p, i) => ({
+                  x: (i / 3) * w,
+                  y: mid - (p / maxAbs) * (mid - 2),
+                }));
+                const polyline = coords.map(c => `${c.x},${c.y}`).join(' ');
+                const fillPath = `M${coords[0].x},${coords[0].y} ${coords.map(c => `L${c.x},${c.y}`).join(' ')} L${coords[coords.length - 1].x},${h} L${coords[0].x},${h} Z`;
+                const overall = hoveredToken.priceChange24h >= 0;
+                const color = overall ? '#00EC97' : '#FF3366';
+                return (
+                  <svg width={w} height={h} className="mt-1">
+                    <path d={fillPath} fill={color} opacity={0.1} />
+                    <polyline points={polyline} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" />
+                  </svg>
+                );
+              })()}
             </div>
           </Card>
         </motion.div>
@@ -2237,6 +2337,29 @@ export function VoidBubblesEngine() {
                 </button>
               </div>
 
+              {/* ── Keyboard Shortcuts ── */}
+              <div className="relative">
+                <button
+                  onMouseEnter={() => setShowShortcuts(true)}
+                  onMouseLeave={() => setShowShortcuts(false)}
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[10px] text-text-muted hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] transition-all"
+                >
+                  <Keyboard className="w-3 h-3" />
+                  <span className="font-mono">Shortcuts</span>
+                </button>
+                {showShortcuts && (
+                  <div className="absolute left-0 bottom-full mb-2 w-48 bg-[#0a0e14]/95 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50">
+                    <div className="text-[9px] font-mono uppercase tracking-wider text-[#00EC97]/70 mb-2">Keyboard Shortcuts</div>
+                    <div className="space-y-1.5 text-[10px] font-mono text-text-muted">
+                      <div className="flex justify-between"><span>Fullscreen</span><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white">F</kbd></div>
+                      <div className="flex justify-between"><span>Search</span><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white">S</kbd></div>
+                      <div className="flex justify-between"><span>X-Ray Mode</span><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white">X</kbd></div>
+                      <div className="flex justify-between"><span>Close / Exit</span><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white">Esc</kbd></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* ── Powered By Footer ── */}
               <div className="flex items-center justify-center gap-1 pt-1">
                 <span className="text-[8px] font-mono text-text-muted/40 uppercase tracking-widest">Powered by</span>
@@ -2477,6 +2600,76 @@ export function VoidBubblesEngine() {
       <div ref={containerRef} className="w-full h-full touch-manipulation">
         <svg ref={svgRef} className="w-full h-full" style={{ willChange: 'transform' }} />
       </div>
+
+      {/* ═══ BUBBLE SIZE LEGEND — Bottom Left ═══ */}
+      <div className="hidden sm:flex absolute bottom-10 left-4 z-20 items-center gap-3 px-3 py-2 rounded-xl bg-[#060a0f]/80 backdrop-blur-xl border border-white/[0.06]">
+        <span className="text-[8px] font-mono uppercase tracking-wider text-text-muted/60">Size:</span>
+        {[
+          { r: 6, label: 'Low' },
+          { r: 12, label: 'Mid' },
+          { r: 20, label: 'High' },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <svg width={item.r * 2 + 2} height={item.r * 2 + 2}>
+              <circle cx={item.r + 1} cy={item.r + 1} r={item.r} fill="none" stroke="#00EC97" strokeWidth={1} opacity={0.5} />
+            </svg>
+            <span className="text-[9px] font-mono text-text-muted/70">{item.label}</span>
+          </div>
+        ))}
+        <span className="text-[8px] font-mono text-[#00EC97]/50">
+          {sizeMetric === 'marketCap' ? 'MCap' : sizeMetric === 'volume' ? 'Volume' : 'Performance'}
+        </span>
+      </div>
+
+      {/* ═══ TOP MOVERS — Quick Access Pills ═══ */}
+      {(() => {
+        if (!showMovers || filteredTokens.length === 0) return null;
+        const sorted = [...filteredTokens].sort((a, b) => getCurrentPriceChange(b) - getCurrentPriceChange(a));
+        const gainers = sorted.slice(0, 3).filter(t => getCurrentPriceChange(t) > 0);
+        const losers = sorted.slice(-3).filter(t => getCurrentPriceChange(t) < 0).reverse();
+        if (gainers.length === 0 && losers.length === 0) return null;
+        return (
+          <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-1">
+            <button
+              onClick={() => setShowMovers(false)}
+              className="text-[8px] font-mono text-text-muted/50 hover:text-text-muted mb-0.5 self-end"
+            >
+              ✕ hide
+            </button>
+            {gainers.map(t => (
+              <button
+                key={t.id}
+                onClick={() => handleShowPopup(t.id)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-pointer"
+              >
+                <span className="text-[10px] font-mono font-bold text-emerald-400">{t.symbol}</span>
+                <span className="text-[10px] font-mono text-emerald-300">+{getCurrentPriceChange(t).toFixed(1)}%</span>
+              </button>
+            ))}
+            {gainers.length > 0 && losers.length > 0 && (
+              <div className="w-8 h-px bg-white/10 my-0.5" />
+            )}
+            {losers.map(t => (
+              <button
+                key={t.id}
+                onClick={() => handleShowPopup(t.id)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all cursor-pointer"
+              >
+                <span className="text-[10px] font-mono font-bold text-rose-400">{t.symbol}</span>
+                <span className="text-[10px] font-mono text-rose-300">{getCurrentPriceChange(t).toFixed(1)}%</span>
+              </button>
+            ))}
+          </div>
+        );
+      })()}
+      {!showMovers && filteredTokens.length > 0 && (
+        <button
+          onClick={() => setShowMovers(true)}
+          className="absolute top-4 right-4 z-20 px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[9px] font-mono text-text-muted hover:text-white transition-all"
+        >
+          📊 Movers
+        </button>
+      )}
 
       {/* Branding Bar — always visible at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-20">
