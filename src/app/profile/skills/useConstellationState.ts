@@ -54,7 +54,7 @@ export function useConstellationState(): ConstellationState {
   const [completedNodes, setCompletedNodes] = useState<Set<string>>(() => loadProgress());
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [activeTrack, setActiveTrack] = useState<TrackId | 'all'>('all');
-  const [zoom, setZoom] = useState(0.55);
+  const [zoom, setZoom] = useState(0.65);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -136,7 +136,8 @@ export function useConstellationState(): ConstellationState {
   }, []);
 
   const zoomToFit = useCallback(() => {
-    setZoom(0.55);
+    // Reset to defaults — ConstellationMap's auto-fit will recalculate on next render
+    setZoom(0.65);
     setPanX(0);
     setPanY(0);
     setActiveTrack('all');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, memo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   TRACK_CONFIG, TRACK_QUADRANTS, MAP_WIDTH, MAP_HEIGHT,
@@ -43,17 +43,34 @@ export function ConstellationMap({
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
-  // Track container size
+  const hasInitialFit = useRef(false);
+
+  // Track container size + auto-fit on first mount
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const obs = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
       setContainerSize({ w: width, h: height });
+
+      // Auto-fit: center the constellation in viewport on initial load
+      if (!hasInitialFit.current && width > 0 && height > 0) {
+        hasInitialFit.current = true;
+        // Calculate zoom to fit content with slight padding
+        const padding = 0.92; // 8% breathing room
+        const zoomX = (width / MAP_WIDTH) * padding;
+        const zoomY = (height / MAP_HEIGHT) * padding;
+        const fitZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.min(zoomX, zoomY)));
+        // Center the map in the container
+        const fitPanX = (width - MAP_WIDTH * fitZoom) / 2;
+        const fitPanY = (height - MAP_HEIGHT * fitZoom) / 2;
+        onSetZoom(fitZoom);
+        onSetPan(fitPanX, fitPanY);
+      }
     });
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [onSetZoom, onSetPan]);
 
   // Mouse wheel zoom (centered on cursor)
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -108,7 +125,7 @@ export function ConstellationMap({
     <div
       ref={containerRef}
       className={cn(
-        'hidden lg:block relative h-[750px] rounded-xl border border-border/30 bg-background/80 overflow-hidden select-none',
+        'hidden lg:block relative h-[calc(100vh-220px)] min-h-[600px] rounded-xl border border-border/30 bg-background/80 overflow-hidden select-none',
         isDragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       onWheel={handleWheel}
