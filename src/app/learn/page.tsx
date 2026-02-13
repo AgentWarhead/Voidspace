@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Key, Zap, Bug, BookOpen, BarChart3, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft, Rocket, Award } from 'lucide-react';
+import { Key, Zap, Bug, BookOpen, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft, Rocket } from 'lucide-react';
 import { Container, Card } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
@@ -33,6 +33,13 @@ const SanctumPreview = dynamic(() => import('./components/SanctumPreview').then(
   loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
 });
 
+const ProgressTracker = dynamic(() => import('./components/ProgressTracker').then(m => ({ default: m.ProgressTracker })), {
+  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
+});
+
+const CertificateShowcase = dynamic(() => import('./components/CertificateShowcase').then(m => ({ default: m.CertificateShowcase })), {
+  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
+});
 
 const FAQ = dynamic(() => import('./components/FAQ').then(m => ({ default: m.FAQ })), {
   loading: () => <div className="h-48 animate-pulse bg-surface rounded-xl" />,
@@ -415,56 +422,14 @@ export default function LearnPage() {
         <SanctumPreview />
       </Container>
 
-      {/* Track Your Progress — compact CTA */}
+      {/* Track Your Progress */}
       <Container className="py-12">
-        <ScrollReveal>
-          <Link href="/profile/skills" className="block group">
-            <Card variant="glass" padding="lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-teal-500/20 group-hover:from-cyan-500/30 group-hover:to-teal-500/30 transition-colors shadow-lg shadow-cyan-500/10 backdrop-blur-sm">
-                    <BarChart3 className="w-6 h-6 text-cyan-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-text-primary group-hover:text-near-green transition-colors">
-                      📊 Track Your Progress
-                    </h3>
-                    <p className="text-sm text-text-muted mt-0.5">
-                      View your skill constellation and learning roadmap
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-text-muted group-hover:text-near-green group-hover:translate-x-1 transition-all" />
-              </div>
-            </Card>
-          </Link>
-        </ScrollReveal>
+        <ProgressTracker />
       </Container>
 
       {/* Earn Your Certificate */}
       <Container className="pb-20">
-        <ScrollReveal>
-          <div id="certificates">
-            <Link href="/learn/certificate" className="block group">
-              <GlowCard className="p-6 md:p-8 transition-all duration-300 group-hover:scale-[1.01]">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-amber-500/20 border border-yellow-400/20 flex-shrink-0">
-                    <Award className="w-8 h-8 text-yellow-400" />
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-xl font-bold text-text-primary group-hover:text-near-green transition-colors">
-                      🏆 Earn Your Certificate
-                    </h3>
-                    <p className="text-sm text-text-muted mt-1">
-                      Complete a learning track to earn a shareable NEAR certificate. Explorer, Builder, Hacker, Founder — or all four for Legend status.
-                    </p>
-                  </div>
-                  <ArrowRight className="w-6 h-6 text-text-muted group-hover:text-near-green group-hover:translate-x-2 transition-all flex-shrink-0" />
-                </div>
-              </GlowCard>
-            </Link>
-          </div>
-        </ScrollReveal>
+        <CertificateShowcase />
       </Container>
 
       {/* Deep Dive Cards — premium bento layout with glassmorphism */}
