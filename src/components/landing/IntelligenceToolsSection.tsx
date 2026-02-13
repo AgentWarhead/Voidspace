@@ -1,15 +1,16 @@
 import Link from 'next/link';
-import { ChevronRight, Telescope, Zap, Network } from 'lucide-react';
+// @ts-ignore
+import { ChevronRight, Zap, Network, Circle } from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 
 const tools = [
   {
-    href: '/observatory',
-    title: 'Observatory',
-    desc: 'Deep-dive any NEAR project. Health scores, team analysis, contract audits.',
-    icon: Telescope,
-    tags: ['Health Score', 'Team Intel', 'Contract Audit', 'Risk Analysis'],
-    badge: null,
+    href: '/void-bubbles',
+    title: 'Void Bubbles',
+    desc: 'Live visualization of 150+ NEAR tokens. Real-time prices, volume, and market movements.',
+    icon: Circle,
+    tags: ['Live Data', 'Token Prices', 'Volume', 'Market Overview'],
+    badge: 'FREE',
     borderClass: 'border-cyan-500/15 hover:border-cyan-500/40',
     hoverBgClass: 'group-hover:from-cyan-500/5 group-hover:to-cyan-500/5',
     iconBgClass: 'bg-cyan-500/10 border-cyan-500/20',
