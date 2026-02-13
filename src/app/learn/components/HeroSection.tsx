@@ -374,11 +374,11 @@ export function HeroSection() {
                 className="text-base px-8 py-4"
                 onClick={() =>
                   document
-                    .getElementById('tracks')
+                    .getElementById('sanctum-preview')
                     ?.scrollIntoView({ behavior: 'smooth' })
                 }
               >
-                Jump to Builder Track
+                Try Sanctum AI
               </Button>
             </motion.div>
 
