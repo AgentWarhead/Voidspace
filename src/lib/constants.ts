@@ -51,5 +51,4 @@ export const NAV_ITEMS = [
 export const OBSERVATORY_TOOLS = [
   { id: 'void-lens', label: 'Void Lens', icon: 'Eye', description: 'Wallet reputation scoring' },
   { id: 'constellation', label: 'Constellation', icon: 'Network', description: 'Wallet relationship mapping' },
-  { id: 'pulse-streams', label: 'Pulse Streams', icon: 'Activity', description: 'Real-time transaction feed' },
 ] as const;

@@ -3,13 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Network, Activity, Globe, X } from 'lucide-react';
+import { Eye, Network, Globe, X } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { GradientText } from '@/components/effects/GradientText';
 import { GridPattern } from '@/components/effects/GridPattern';
 import { VoidLens } from '@/components/features/VoidLens';
 import { ConstellationMap } from '@/components/features/ConstellationMap';
-import { PulseStreams } from '@/components/features/PulseStreams';
 import { VoidBubblesEngine } from '@/components/void-bubbles/VoidBubblesEngine';
 import { HotStrip } from '@/components/void-bubbles/HotStrip';
 import { cn } from '@/lib/utils';
@@ -37,14 +36,6 @@ const TOOLS = [
     icon: Network,
     description: 'Map wallet relationships and transaction patterns',
     iconTint: 'text-purple-400',
-    hero: false,
-  },
-  {
-    id: 'pulse-streams',
-    label: 'Pulse Streams',
-    icon: Activity,
-    description: 'Monitor real-time ecosystem activity',
-    iconTint: 'text-near-green',
     hero: false,
   },
 ] as const;
@@ -398,7 +389,7 @@ export default function ObservatoryContent() {
               <div className="flex items-start gap-3 p-4 rounded-lg bg-surface/50 border-l-4 border-near-green/30 backdrop-blur-sm">
                 <div className="flex-1">
                   <p className="text-sm text-text-secondary">
-                    Welcome to the Observatory — your intelligence command center. Start with <strong className="text-near-green">Void Bubbles</strong> to see the ecosystem at a glance, then dive deeper with Void Lens, Constellation, and Pulse Streams.
+                    Welcome to the Observatory — your intelligence command center. Start with <strong className="text-near-green">Void Bubbles</strong> to see the ecosystem at a glance, then dive deeper with <strong className="text-cyan-400">Void Lens</strong> and <strong className="text-purple-400">Constellation Map</strong>.
                   </p>
                 </div>
                 <button
@@ -654,11 +645,7 @@ export default function ObservatoryContent() {
           {activeTool === 'constellation' && (
             <ConstellationMap initialAddress={addressParam || undefined} />
           )}
-          {activeTool === 'pulse-streams' && (
-            <Container className="py-8">
-              <PulseStreams initialAddress={addressParam || undefined} />
-            </Container>
-          )}
+{/* Tools: Void Bubbles, Void Lens, Constellation */}
         </motion.div>
       </AnimatePresence>
     </div>

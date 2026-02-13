@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronRight, Telescope, Zap } from 'lucide-react';
+import { ChevronRight, Telescope, Zap, Network } from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 
 const tools = [
@@ -18,18 +18,18 @@ const tools = [
     tagClass: 'bg-cyan-500/10 text-cyan-400/70 border-cyan-500/10',
   },
   {
-    href: '/observatory?tool=pulse-streams',
-    title: 'Pulse Streams',
-    desc: 'Real-time NEAR ecosystem activity. Track transactions, contracts, and network health live.',
-    icon: null,
-    tags: ['Live Feed', 'Transactions', 'Network Health', 'Real-Time'],
+    href: '/observatory?tool=constellation',
+    title: 'Constellation Map',
+    desc: 'Map wallet relationships and transaction patterns across the NEAR ecosystem.',
+    icon: Network,
+    tags: ['Wallet Graph', 'Relationships', 'Patterns', 'Network'],
     badge: null,
-    borderClass: 'border-emerald-500/15 hover:border-emerald-500/40',
-    hoverBgClass: 'group-hover:from-emerald-500/5 group-hover:to-emerald-500/5',
-    iconBgClass: 'bg-emerald-500/10 border-emerald-500/20',
-    iconTextClass: 'text-emerald-400',
-    chevronHoverClass: 'group-hover:text-emerald-400',
-    tagClass: 'bg-emerald-500/10 text-emerald-400/70 border-emerald-500/10',
+    borderClass: 'border-purple-500/15 hover:border-purple-500/40',
+    hoverBgClass: 'group-hover:from-purple-500/5 group-hover:to-purple-500/5',
+    iconBgClass: 'bg-purple-500/10 border-purple-500/20',
+    iconTextClass: 'text-purple-400',
+    chevronHoverClass: 'group-hover:text-purple-400',
+    tagClass: 'bg-purple-500/10 text-purple-400/70 border-purple-500/10',
   },
   {
     href: '/observatory?tool=void-lens',
@@ -59,11 +59,7 @@ export function IntelligenceToolsSection() {
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`p-2 rounded-lg ${tool.iconBgClass} border`}>
-                    {tool.title === 'Pulse Streams' ? (
-                      <svg className={`w-5 h-5 ${tool.iconTextClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-                    ) : tool.icon ? (
-                      <tool.icon className={`w-5 h-5 ${tool.iconTextClass}`} />
-                    ) : null}
+                    {tool.icon && <tool.icon className={`w-5 h-5 ${tool.iconTextClass}`} />}
                   </div>
                   <h3 className="text-lg font-semibold text-text-primary">{tool.title}</h3>
                   {tool.badge && (
