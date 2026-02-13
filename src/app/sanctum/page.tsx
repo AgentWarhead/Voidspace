@@ -29,9 +29,12 @@ import { ProjectManager } from './components/ProjectManager';
 import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
+import { ScratchWebappSession } from './components/ScratchWebappSession';
+import { ScratchTemplates, SCRATCH_TEMPLATES } from './components/ScratchTemplates';
 import { useSanctumState } from './hooks/useSanctumState';
 import { useWallet } from '@/hooks/useWallet';
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight } from 'lucide-react';
+// @ts-ignore
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight, Wand2 } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 import { BuilderShowcase } from './components/BuilderShowcase';
@@ -213,6 +216,21 @@ function SanctumPageInner() {
         />
       )}
 
+      {/* Scratch Webapp Session */}
+      {state.showScratchSession && state.scratchDescription && (
+        <ScratchWebappSession
+          initialPrompt={state.scratchDescription}
+          templateName={
+            state.scratchTemplate
+              ? SCRATCH_TEMPLATES.find(t => t.id === state.scratchTemplate)?.name
+              : undefined
+          }
+          onBack={() => {
+            dispatch({ type: 'SET_SHOW_SCRATCH_SESSION', payload: false });
+          }}
+        />
+      )}
+
       {/* Wallet Gate for Template Walkthroughs */}
       {showWalletGate && (
         <section className="relative z-10 min-h-screen flex items-center justify-center">
@@ -340,7 +358,7 @@ function SanctumPageInner() {
               </div>
 
               {/* Friendly Mode Cards */}
-              <div id="modes" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-5xl mx-auto">
+              <div id="modes" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
                 <button
                   onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
@@ -440,6 +458,37 @@ function SanctumPageInner() {
                     AI-generated diagrams, infographics, and social graphics
                   </p>
                 </button>
+
+                {/* Vibe Code — Featured 5th Card */}
+                <button
+                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'scratch' })}
+                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl md:col-span-2 lg:col-span-1 ${
+                    state.mode === 'scratch'
+                      ? 'border-amber-500/50 bg-gradient-to-br from-amber-500/15 to-orange-500/10 shadow-lg shadow-amber-500/20'
+                      : 'border-border-subtle bg-void-gray/30 hover:border-amber-500/30 hover:bg-gradient-to-br hover:from-amber-500/5 hover:to-orange-500/5'
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
+                    state.mode === 'scratch' 
+                      ? 'bg-amber-500/20 text-amber-400' 
+                      : 'bg-border-subtle text-text-muted group-hover:bg-amber-500/20 group-hover:text-amber-400'
+                  }`}>
+                    <Wand2 className="w-6 h-6" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                    state.mode === 'scratch' ? 'text-amber-400' : 'text-text-primary group-hover:text-amber-400'
+                  }`}>
+                    Vibe Code
+                  </h3>
+                  <p className="text-sm text-text-muted">
+                    Describe your idea, we&apos;ll build the entire NEAR dApp — no code needed
+                  </p>
+                  {state.mode !== 'scratch' && (
+                    <span className="inline-block mt-3 text-[10px] font-mono uppercase tracking-wider text-amber-400/60 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                      ✨ New
+                    </span>
+                  )}
+                </button>
               </div>
 
               {/* Category Picker (Build Mode), Webapp Import, or Start Roast */}
@@ -531,6 +580,60 @@ function SanctumPageInner() {
                     Generate branded visuals for your NEAR project — architecture diagrams, user flows, infographics, and social graphics.
                   </p>
                   <VisualMode />
+                </div>
+              )}
+
+              {state.mode === 'scratch' && (
+                <div className="mb-16 max-w-3xl mx-auto">
+                  <div className="text-center mb-8">
+                    <p className="text-text-secondary text-lg mb-2">
+                      Just describe it. We&apos;ll handle everything.
+                    </p>
+                    <p className="text-text-muted text-sm">
+                      Full-stack NEAR dApp — React, Tailwind, wallet connect — generated from your description.
+                    </p>
+                  </div>
+
+                  {/* Description input */}
+                  <div className="mb-8">
+                    <textarea
+                      value={state.scratchDescription}
+                      onChange={(e) => dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: e.target.value })}
+                      placeholder="I want to build an NFT marketplace where users can mint, list, and trade digital art on NEAR..."
+                      rows={4}
+                      className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-5 py-4 text-text-primary placeholder-text-muted/50 resize-none focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all text-sm leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Template quick-starts */}
+                  <div className="mb-8">
+                    <p className="text-xs font-mono uppercase tracking-wider text-text-muted mb-4">
+                      Or pick a template to start fast
+                    </p>
+                    <ScratchTemplates
+                      selectedId={state.scratchTemplate}
+                      onSelect={(template) => {
+                        dispatch({ type: 'SET_SCRATCH_TEMPLATE', payload: template.id });
+                        dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: template.starterPrompt });
+                      }}
+                    />
+                  </div>
+
+                  {/* Start button */}
+                  <div className="text-center">
+                    <button
+                      onClick={() => {
+                        if (state.scratchDescription.trim()) {
+                          dispatch({ type: 'SET_SHOW_SCRATCH_SESSION', payload: true });
+                        }
+                      }}
+                      disabled={!state.scratchDescription.trim()}
+                      className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-void-black font-semibold text-lg hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-amber-500 disabled:hover:to-orange-500"
+                    >
+                      <Rocket className="w-5 h-5" />
+                      Start Building
+                    </button>
+                  </div>
                 </div>
               )}
 

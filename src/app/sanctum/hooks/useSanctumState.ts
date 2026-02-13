@@ -9,7 +9,7 @@ import { ChatMode } from '../components/ModeSelector';
 import { LearnedConcept } from '../components/KnowledgeTracker';
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
-type SanctumMode = 'build' | 'roast' | 'webapp' | 'visual';
+type SanctumMode = 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
 
 export interface SanctumState {
   mode: SanctumMode;
@@ -49,6 +49,10 @@ export interface SanctumState {
   conceptsLearned: LearnedConcept[];
   quizScore: { correct: number; total: number };
   contractsBuilt: number;
+  showScratchSession: boolean;
+  scratchDescription: string;
+  scratchGeneratedCode: string;
+  scratchTemplate: string | null;
 }
 
 type SanctumAction =
@@ -92,6 +96,10 @@ type SanctumAction =
   | { type: 'ADD_CONCEPT_LEARNED'; payload: LearnedConcept }
   | { type: 'UPDATE_QUIZ_SCORE'; payload: { correct: boolean } }
   | { type: 'INCREMENT_CONTRACTS_BUILT' }
+  | { type: 'SET_SHOW_SCRATCH_SESSION'; payload: boolean }
+  | { type: 'SET_SCRATCH_DESCRIPTION'; payload: string }
+  | { type: 'SET_SCRATCH_GENERATED_CODE'; payload: string }
+  | { type: 'SET_SCRATCH_TEMPLATE'; payload: string | null }
   | { type: 'RESET_SESSION' }
   | { type: 'START_CODE_GENERATION'; payload: string }
   | { type: 'COMPLETE_CODE_GENERATION' };
@@ -134,6 +142,10 @@ const initialState: SanctumState = {
   conceptsLearned: [],
   quizScore: { correct: 0, total: 0 },
   contractsBuilt: 0,
+  showScratchSession: false,
+  scratchDescription: '',
+  scratchGeneratedCode: '',
+  scratchTemplate: null,
 };
 
 function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumState {
@@ -270,6 +282,18 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
     case 'INCREMENT_CONTRACTS_BUILT':
       return { ...state, contractsBuilt: state.contractsBuilt + 1 };
     
+    case 'SET_SHOW_SCRATCH_SESSION':
+      return { ...state, showScratchSession: action.payload };
+    
+    case 'SET_SCRATCH_DESCRIPTION':
+      return { ...state, scratchDescription: action.payload };
+    
+    case 'SET_SCRATCH_GENERATED_CODE':
+      return { ...state, scratchGeneratedCode: action.payload };
+    
+    case 'SET_SCRATCH_TEMPLATE':
+      return { ...state, scratchTemplate: action.payload };
+    
     case 'RESET_SESSION':
       return {
         ...state,
@@ -281,6 +305,10 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
         currentTask: null,
         isThinking: false,
         deployError: null,
+        showScratchSession: false,
+        scratchDescription: '',
+        scratchGeneratedCode: '',
+        scratchTemplate: null,
       };
     
     case 'START_CODE_GENERATION':
