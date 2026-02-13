@@ -72,11 +72,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'", // unsafe-inline required for Next.js hydration
+              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com", // unsafe-inline required for Next.js hydration
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com https://api.coingecko.com https://graph.mintbase.xyz https://indexer.ref.finance https://api.dexscreener.com wss://*.near.org",
+              "connect-src 'self' https://*.supabase.co https://*.supabase.in https://rpc.mainnet.near.org https://rpc.testnet.near.org https://api.nearblocks.io https://testnet.nearblocks.io https://api.defillama.com https://api.github.com https://raw.githubusercontent.com https://api.pikespeak.ai https://api.fastnear.com https://api.coingecko.com https://graph.mintbase.xyz https://indexer.ref.finance https://api.dexscreener.com wss://*.near.org https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com",
               "base-uri 'self'", // Prevent base tag injection attacks
               "form-action 'self'", // Prevent form hijacking
               "upgrade-insecure-requests", // Force HTTPS
