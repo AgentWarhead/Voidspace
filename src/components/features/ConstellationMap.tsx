@@ -1122,7 +1122,11 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             {tooltip && (
               <div
                 className="fixed z-50 p-3 bg-black/90 border border-gray-600 rounded-lg shadow-xl pointer-events-none backdrop-blur-sm max-w-xs"
-                style={{ left: tooltip.x + 10, top: tooltip.y - 10, transform: 'translateY(-100%)' }}
+                style={{
+                  left: Math.min(tooltip.x + 10, (typeof window !== 'undefined' ? window.innerWidth : 9999) - 320),
+                  top: tooltip.y - 10,
+                  transform: tooltip.y < 200 ? 'translateY(20px)' : 'translateY(-100%)',
+                }}
               >
                 {tooltip.kind === 'node' && tooltip.node && (
                   <div className="text-sm text-white space-y-1.5">

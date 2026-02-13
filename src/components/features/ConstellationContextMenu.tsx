@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Network, ExternalLink, Copy, Search } from 'lucide-react';
 
 interface ContextMenuProps {
@@ -15,6 +15,27 @@ interface ContextMenuProps {
 
 export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, onExpand, onClose }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ left: x, top: y });
+
+  // Measure menu after render and reposition if it overflows viewport
+  useEffect(() => {
+    if (!menuRef.current) return;
+    const rect = menuRef.current.getBoundingClientRect();
+    const padding = 8; // px from edge
+    let newLeft = x;
+    let newTop = y;
+
+    // Flip left if overflowing right edge
+    if (x + rect.width > window.innerWidth - padding) {
+      newLeft = Math.max(padding, x - rect.width);
+    }
+    // Flip up if overflowing bottom edge
+    if (y + rect.height > window.innerHeight - padding) {
+      newTop = Math.max(padding, y - rect.height);
+    }
+
+    setPosition({ left: newLeft, top: newTop });
+  }, [x, y]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -32,10 +53,6 @@ export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, o
       document.removeEventListener('keydown', handleEsc);
     };
   }, [onClose]);
-
-  // Adjust position to stay in viewport
-  const adjustedX = Math.min(x, window.innerWidth - 220);
-  const adjustedY = Math.min(y, window.innerHeight - 200);
 
   const handleCopy = async () => {
     try {
@@ -66,7 +83,7 @@ export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, o
     <div
       ref={menuRef}
       className="fixed z-[60] min-w-[200px] bg-black/95 border border-gray-600 rounded-lg shadow-2xl backdrop-blur-md py-1 animate-in fade-in zoom-in-95 duration-150"
-      style={{ left: adjustedX, top: adjustedY }}
+      style={{ left: position.left, top: position.top }}
     >
       <div className="px-3 py-2 border-b border-gray-700">
         <p className="text-xs text-cyan-400 font-mono truncate" title={nodeId}>{nodeId}</p>
