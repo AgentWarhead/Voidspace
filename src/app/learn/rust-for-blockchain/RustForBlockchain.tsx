@@ -426,13 +426,13 @@ export function RustForBlockchain() {
               take you from Rust fundamentals to deployed smart contracts.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/learn/explorer">
+              <Link href="/learn#tracks">
                 <Button variant="primary" size="lg">
                   <Zap className="w-4 h-4 mr-2" />
                   Start from Zero (Explorer)
                 </Button>
               </Link>
-              <Link href="/learn/builder">
+              <Link href="/learn#tracks">
                 <Button variant="outline" size="lg">
                   <ArrowRight className="w-4 h-4 mr-2" />
                   I Know Rust (Builder Track)

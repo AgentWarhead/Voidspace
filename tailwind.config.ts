@@ -23,6 +23,8 @@ const config: Config = {
         'near-green': '#00EC97',
         'near-green-dim': 'rgba(0, 236, 151, 0.2)',
         'accent-cyan': '#00D4FF',
+        'void-purple': '#8B5CF6',
+        'void-cyan': '#00D4FF',
         error: '#FF4757',
         warning: '#FFA502',
         'tier-shade': '#666666',

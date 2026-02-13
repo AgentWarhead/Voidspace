@@ -78,11 +78,11 @@ export function SanctumSection() {
           {/* Two Pillars */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 max-w-4xl mx-auto">
             {/* Build */}
-            <div className="group relative p-6 rounded-xl bg-surface/50 border border-accent-green/20 hover:border-accent-green/40 transition-all duration-300">
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-green/0 to-accent-green/0 group-hover:from-accent-green/5 group-hover:to-emerald-500/5 transition-all duration-300" />
+            <div className="group relative p-6 rounded-xl bg-surface/50 border border-near-green/20 hover:border-near-green/40 transition-all duration-300">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-near-green/0 to-near-green/0 group-hover:from-near-green/5 group-hover:to-emerald-500/5 transition-all duration-300" />
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-lg bg-accent-green/10 border border-accent-green/20 flex items-center justify-center mb-4">
-                  <Zap className="w-5 h-5 text-accent-green" />
+                <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/20 flex items-center justify-center mb-4">
+                  <Zap className="w-5 h-5 text-near-green" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Build NEAR Projects</h3>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
@@ -96,14 +96,14 @@ export function SanctumSection() {
                     'From zero to mainnet in hours',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-xs text-text-secondary">
-                      <span className="text-accent-green mt-0.5">▸</span>
+                      <span className="text-near-green mt-0.5">▸</span>
                       {item}
                     </li>
                   ))}
                 </ul>
                 <div className="flex flex-wrap gap-2">
                   {['Smart Contracts', 'Web Apps', 'Code Audit', 'Deploy'].map((tag) => (
-                    <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded bg-accent-green/10 text-accent-green/80 border border-accent-green/10">
+                    <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded bg-near-green/10 text-near-green/80 border border-near-green/10">
                       {tag}
                     </span>
                   ))}
@@ -124,7 +124,7 @@ export function SanctumSection() {
                 </p>
                 <ul className="space-y-1.5 mb-4">
                   {[
-                    '43 modules of structured learning',
+                    '66 modules of structured learning',
                     'AI explains every concept interactively',
                     'Hands-on projects, not toy examples',
                     'Earn completion certificates',

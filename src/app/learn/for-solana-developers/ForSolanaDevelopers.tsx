@@ -278,7 +278,7 @@ function KnowledgeQuiz() {
             >
               Try Again
             </Button>
-            <Link href="/learn/builder">
+            <Link href="/learn#tracks">
               <Button variant="primary" size="sm">
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Start Building
@@ -653,7 +653,7 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
                 icon: BookOpen,
                 title: 'Builder Track',
                 description: 'Full Rust smart contract curriculum on NEAR',
-                href: '/learn/builder',
+                href: '/learn#tracks',
                 internal: true,
               },
               {
@@ -734,7 +734,7 @@ near contract call-function as-read-only my-app.testnet get_value json-args {} n
               chain abstraction, named accounts, and cross-chain everything.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/learn/builder">
+              <Link href="/learn#tracks">
                 <Button variant="primary" size="lg">
                   <ArrowRight className="w-4 h-4 mr-2" />
                   Start the Builder Track

@@ -232,7 +232,7 @@ export function ProfileContent() {
                     🌟 Skill Constellation
                   </h3>
                   <p className="text-sm text-text-muted mt-0.5">
-                    View your learning progress across 43 modules, earn XP, and level up
+                    View your learning progress across 66 modules, earn XP, and level up
                   </p>
                 </div>
               </div>

@@ -5,10 +5,10 @@ import { BookOpen } from 'lucide-react';
 import { GradientText } from '@/components/effects/GradientText';
 
 const tracks = [
-  { emoji: '🧭', title: 'Explorer', modules: 11, desc: 'Wallet setup, key concepts, ecosystem overview', borderClass: 'border-emerald-500/15 hover:border-emerald-500/30', textClass: 'text-emerald-400' },
-  { emoji: '🏗️', title: 'Builder', modules: 16, desc: 'Rust fundamentals, smart contracts, testing, deployment', borderClass: 'border-cyan-500/15 hover:border-cyan-500/30', textClass: 'text-cyan-400' },
-  { emoji: '⚡', title: 'Hacker', modules: 11, desc: 'Cross-chain patterns, security auditing, DeFi architecture', borderClass: 'border-purple-500/15 hover:border-purple-500/30', textClass: 'text-purple-400' },
-  { emoji: '🚀', title: 'Founder', modules: 5, desc: 'Tokenomics, DAO governance, go-to-market strategy', borderClass: 'border-amber-500/15 hover:border-amber-500/30', textClass: 'text-amber-400' },
+  { emoji: '🧭', title: 'Explorer', modules: 16, desc: 'Wallet setup, key concepts, ecosystem overview', borderClass: 'border-emerald-500/15 hover:border-emerald-500/30', textClass: 'text-emerald-400' },
+  { emoji: '🏗️', title: 'Builder', modules: 22, desc: 'Rust fundamentals, smart contracts, testing, deployment', borderClass: 'border-cyan-500/15 hover:border-cyan-500/30', textClass: 'text-cyan-400' },
+  { emoji: '⚡', title: 'Hacker', modules: 16, desc: 'Cross-chain patterns, security auditing, DeFi architecture', borderClass: 'border-purple-500/15 hover:border-purple-500/30', textClass: 'text-purple-400' },
+  { emoji: '🚀', title: 'Founder', modules: 12, desc: 'Tokenomics, DAO governance, go-to-market strategy', borderClass: 'border-amber-500/15 hover:border-amber-500/30', textClass: 'text-amber-400' },
 ];
 
 const differentiators = [
@@ -42,7 +42,7 @@ export function LearnSection() {
               Master NEAR Development
             </GradientText>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
-              43 interactive modules across 4 structured tracks. From your first Rust line to deploying production dApps — with AI guidance at every step.
+              66 interactive modules across 4 structured tracks. From your first Rust line to deploying production dApps — with AI guidance at every step.
             </p>
           </div>
 
