@@ -35,6 +35,7 @@ import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCo
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 import { BuilderShowcase } from './components/BuilderShowcase';
+import { VoidBriefCard } from './components/VoidBriefCard';
 import { PERSONA_LIST } from './lib/personas';
 
 // Template slug → starter message mapping
@@ -556,6 +557,18 @@ function SanctumPageInner() {
                   }
                 `}</style>
               </div>
+
+              {/* Void Brief — AI mission brief generator */}
+              <VoidBriefCard
+                isConnected={isConnected}
+                openModal={openModal}
+                onStartBuild={(brief) => {
+                  // Start a build session with the brief's solution as context
+                  const briefContext = `Build this project: ${brief.projectNames?.[0] || 'Project'}. ${brief.solutionOverview}. Key features: ${brief.keyFeatures?.map(f => f.name).join(', ')}`;
+                  dispatch({ type: 'SET_CUSTOM_PROMPT', payload: briefContext });
+                  handleCustomStart();
+                }}
+              />
 
               {/* Stats */}
               <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
