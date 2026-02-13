@@ -222,6 +222,21 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
 
   // Initialize with category-specific starter
   useEffect(() => {
+    // For template walkthroughs, skip the greeting — go straight to user message
+    if (autoMessage && !autoMessageSentRef.current) {
+      autoMessageSentRef.current = true;
+      // Show the user's message immediately as a chat bubble
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: autoMessage,
+      };
+      setMessages([userMessage]);
+      // Fire the AI response immediately (bypass handleSend to avoid re-adding the user message)
+      sendToApi(autoMessage, [userMessage]);
+      return;
+    }
+
     const starterMessage = CATEGORY_STARTERS[category || 'custom'] || CATEGORY_STARTERS['custom'];
     const initialMessage: Message = {
       id: 'initial',
@@ -239,16 +254,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
       }, 500);
     }
   }, [category]);
-
-  // Auto-send template message on mount (once)
-  useEffect(() => {
-    if (autoMessage && !autoMessageSentRef.current && messages.length > 0) {
-      autoMessageSentRef.current = true;
-      setTimeout(() => {
-        handleSend(autoMessage);
-      }, 600);
-    }
-  }, [autoMessage, messages.length]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -292,28 +297,14 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
     }
   }
 
-  async function handleSend(messageText?: string) {
-    const text = messageText || input;
-    if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: text,
-      attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setAttachedFiles([]);
+  // Core API call logic — used by both handleSend and auto-message
+  async function sendToApi(text: string, contextMessages: Message[], userAttachments?: AttachedFile[]) {
     setIsLoading(true);
     onThinkingChange?.(true);
 
-    // Determine task name from the request
     const taskName = getTaskName(text);
-    const hasAttachments = userMessage.attachments && userMessage.attachments.length > 0;
+    const hasAttachments = userAttachments && userAttachments.length > 0;
     
-    // Initialize task with steps
     const task: CurrentTask = {
       name: taskName,
       description: text.length > 50 ? text.slice(0, 50) + '...' : text,
@@ -328,7 +319,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
     };
     onTaskUpdate?.(task);
 
-    // Simulate progress on analyze step
     let analyzeProgress = 0;
     const analyzeInterval = setInterval(() => {
       analyzeProgress = Math.min(analyzeProgress + 15, 90);
@@ -339,10 +329,9 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
       onTaskUpdate?.(updatedTask);
     }, 200);
 
-    // Build content with attachments for API
     let fullContent = text;
-    if (userMessage.attachments) {
-      for (const file of userMessage.attachments) {
+    if (userAttachments) {
+      for (const file of userAttachments) {
         if (file.type === 'text/plain') {
           fullContent += `\n\n--- Attached file: ${file.name} ---\n${file.content}\n--- End of ${file.name} ---`;
         }
@@ -350,14 +339,12 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
     }
 
     try {
-      // Complete analyze step
       clearInterval(analyzeInterval);
       task.steps = task.steps.map(s => 
         s.id === 'analyze' ? { ...s, status: 'complete', progress: 100 } : s
       );
       onTaskUpdate?.({ ...task });
       
-      // Start attachments step if present
       if (hasAttachments) {
         task.steps = task.steps.map(s => 
           s.id === 'attachments' ? { ...s, status: 'working', detail: 'Reading attached files...' } : s
@@ -370,37 +357,33 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
         onTaskUpdate?.({ ...task });
       }
 
-      // Start design step
       task.steps = task.steps.map(s => 
         s.id === 'design' ? { ...s, status: 'working', detail: 'Planning contract architecture...' } : s
       );
       onTaskUpdate?.({ ...task });
 
-      // Create abort controller for this request
       abortControllerRef.current = new AbortController();
 
       const response = await fetch('/api/sanctum/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, { ...userMessage, content: fullContent }].map(m => ({
+          messages: contextMessages.map(m => ({
             role: m.role,
             content: m.content,
           })),
           category,
           personaId: currentPersona.id,
-          attachments: userMessage.attachments?.filter(f => f.type.startsWith('image/')),
+          attachments: userAttachments?.filter(f => f.type.startsWith('image/')),
         }),
         signal: abortControllerRef.current.signal,
       });
 
-      // Complete design step
       task.steps = task.steps.map(s => 
         s.id === 'design' ? { ...s, status: 'complete' } : s
       );
       onTaskUpdate?.({ ...task });
 
-      // Handle 402 — credits depleted
       if (response.status === 402) {
         setShowUpgradeModal(true);
         setIsLoading(false);
@@ -415,14 +398,12 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
         throw new Error(data.error);
       }
 
-      // If code was generated, animate that step
       if (data.code) {
         task.steps = task.steps.map(s => 
           s.id === 'generate' ? { ...s, status: 'working', progress: 0, detail: 'Writing Rust code...' } : s
         );
         onTaskUpdate?.({ ...task });
         
-        // Animate code generation progress
         const codeLines = data.code.split('\n').length;
         let codeProgress = 0;
         const codeInterval = setInterval(() => {
@@ -444,12 +425,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
         );
         onTaskUpdate?.({ ...task });
       } else {
-        // Skip generate step if no code
         task.steps = task.steps.filter(s => s.id !== 'generate');
         onTaskUpdate?.({ ...task });
       }
 
-      // Review step
       task.steps = task.steps.map(s => 
         s.id === 'review' ? { ...s, status: 'working', detail: 'Preparing explanation...' } : s
       );
@@ -473,17 +452,14 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Update code preview if code was generated
       if (data.code) {
         onCodeGenerated(data.code);
       }
 
-      // Track token usage
       if (data.usage) {
         onTokensUsed(data.usage.input, data.usage.output);
       }
 
-      // Clear task after completion
       setTimeout(() => {
         onTaskUpdate?.(null);
       }, 1500);
@@ -491,9 +467,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
     } catch (error) {
       clearInterval(analyzeInterval);
       
-      // Check if this was a user-initiated abort
       if (error instanceof Error && error.name === 'AbortError') {
-        // User cancelled - show cancelled state
         task.steps = task.steps.map(s => 
           s.status === 'working' ? { ...s, status: 'error', detail: 'Cancelled' } : s
         );
@@ -507,7 +481,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
       } else {
         console.error('Chat error:', error);
         
-        // Mark current working step as error
         task.steps = task.steps.map(s => 
           s.status === 'working' ? { ...s, status: 'error', detail: 'Something went wrong' } : s
         );
@@ -524,6 +497,25 @@ export function SanctumChat({ category, customPrompt, autoMessage, onCodeGenerat
       onThinkingChange?.(false);
       abortControllerRef.current = null;
     }
+  }
+
+  async function handleSend(messageText?: string) {
+    const text = messageText || input;
+    if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text,
+      attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
+    };
+
+    const allMessages = [...messages, userMessage];
+    setMessages(allMessages);
+    setInput('');
+    setAttachedFiles([]);
+
+    await sendToApi(text, allMessages, userMessage.attachments);
   }
 
   // Stop/cancel the current request

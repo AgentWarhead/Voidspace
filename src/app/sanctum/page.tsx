@@ -30,35 +30,48 @@ import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 import { useSanctumState } from './hooks/useSanctumState';
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 
 // Template slug → starter message mapping
-const TEMPLATE_MESSAGES: Record<string, { message: string; category: string }> = {
+const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
   token: {
     message: 'I want to build a NEP-141 fungible token contract on NEAR. Walk me through the template step by step — explain the code structure, key functions, and how to deploy it to testnet.',
     category: 'defi',
+    title: 'Token Contract',
+    subtitle: 'Launch your own fungible token on NEAR',
   },
   nft: {
     message: 'I want to build an NFT collection on NEAR using NEP-171. Walk me through the template — minting, royalties, metadata, and marketplace integration.',
     category: 'nfts',
+    title: 'NFT Collection',
+    subtitle: 'Create and mint NFTs on NEAR',
   },
   dao: {
     message: 'I want to build a DAO governance contract on NEAR. Walk me through proposals, voting mechanics, treasury management, and role-based access control.',
     category: 'daos',
+    title: 'DAO Governance',
+    subtitle: 'Decentralized governance on NEAR',
   },
   vault: {
     message: 'I want to build a DeFi vault contract on NEAR. Walk me through share-based deposits, yield strategies, auto-compounding, and slippage protection.',
     category: 'defi',
+    title: 'DeFi Vault',
+    subtitle: 'Yield strategies and staking on NEAR',
   },
   marketplace: {
     message: 'I want to build an NFT marketplace on NEAR. Walk me through listings, escrow payments, the offer system, and fee distribution.',
     category: 'nfts',
+    title: 'Marketplace',
+    subtitle: 'Buy, sell, and trade on NEAR',
   },
   agent: {
     message: 'I want to build an autonomous AI agent on NEAR. Walk me through TEE execution, key management, Chain Signatures, and multi-chain signing.',
     category: 'ai-agents',
+    title: 'AI Agent',
+    subtitle: 'Autonomous on-chain agent on NEAR',
   },
 };
 
@@ -75,6 +88,7 @@ function SanctumPageInner() {
   const templateSlug = searchParams.get('template');
   const templateConfig = templateSlug ? TEMPLATE_MESSAGES[templateSlug] : null;
   const templateHandledRef = useRef(false);
+  const { isConnected, isLoading: walletLoading, openModal } = useWallet();
 
   const {
     state,
@@ -92,23 +106,26 @@ function SanctumPageInner() {
     handleRemixFromHistory,
   } = useSanctumState();
 
-  // Auto-start session when template query param is present
+  // Auto-start session when template query param is present AND wallet is connected
   useEffect(() => {
-    if (templateConfig && !templateHandledRef.current && !state.sessionStarted) {
+    if (templateConfig && !templateHandledRef.current && !state.sessionStarted && isConnected) {
       templateHandledRef.current = true;
       // Start the build session with the mapped category
       handleCategorySelect(templateConfig.category);
-      // Clean the URL
+      // Clean the URL (but keep template in case they need to refresh)
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         url.searchParams.delete('template');
         window.history.replaceState({}, '', url.pathname);
       }
     }
-  }, [templateConfig, state.sessionStarted, handleCategorySelect]);
+  }, [templateConfig, state.sessionStarted, handleCategorySelect, isConnected]);
 
   // Derive the auto-message for SanctumChat (only when template triggered the session)
   const autoMessage = templateHandledRef.current && templateConfig ? templateConfig.message : undefined;
+
+  // Show wallet gate for template arrivals without wallet connected
+  const showWalletGate = templateConfig && !isConnected && !walletLoading && !state.sessionStarted;
 
   return (
     <div className="min-h-screen bg-void-black relative overflow-hidden">
@@ -192,8 +209,71 @@ function SanctumPageInner() {
         />
       )}
 
+      {/* Wallet Gate for Template Walkthroughs */}
+      {showWalletGate && (
+        <section className="relative z-10 min-h-screen flex items-center justify-center">
+          <div className="max-w-lg mx-auto px-6">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 mb-6">
+                <Sparkles className="w-4 h-4 text-near-green" />
+                <span className="text-near-green text-sm font-mono font-medium">TEMPLATE WALKTHROUGH</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3">
+                {templateConfig.title}
+              </h1>
+              <p className="text-text-secondary text-lg">
+                {templateConfig.subtitle}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border-2 border-near-green/30 bg-void-gray/50 backdrop-blur-sm p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-near-green/20 flex items-center justify-center mx-auto mb-5">
+                <Wallet className="w-8 h-8 text-near-green" />
+              </div>
+              
+              <h2 className="text-xl font-semibold text-text-primary mb-3">
+                Connect your wallet to begin
+              </h2>
+              
+              <p className="text-text-secondary mb-6 leading-relaxed">
+                Sanctum uses your NEAR wallet to track your learning progress, 
+                save builds, and earn XP as you complete walkthroughs.
+              </p>
+
+              <button
+                onClick={openModal}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-near-green text-void-black font-semibold text-lg hover:bg-near-green/90 transition-all shadow-lg shadow-near-green/25 mb-6 w-full justify-center"
+              >
+                <Wallet className="w-5 h-5" />
+                Connect NEAR Wallet
+                <ArrowRight className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center justify-center gap-6 text-sm text-text-muted">
+                <span className="flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-near-green/60" />
+                  Tracks progress
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Star className="w-4 h-4 text-amber-400/60" />
+                  Earns XP
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Rocket className="w-4 h-4 text-cyan-400/60" />
+                  Deploy to testnet
+                </span>
+              </div>
+            </div>
+
+            <p className="text-center text-xs text-text-muted mt-4">
+              Don&apos;t have a wallet? The connection modal will help you create one.
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* Landing / Category Selection */}
-      {!state.sessionStarted && (
+      {!state.sessionStarted && !showWalletGate && (
         <section className="relative z-10 min-h-screen flex flex-col">
           {/* Hero */}
           <div className="flex-1 flex items-center justify-center py-16">
