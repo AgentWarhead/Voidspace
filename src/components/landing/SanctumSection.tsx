@@ -122,7 +122,7 @@ export function SanctumSection() {
                 </p>
                 <ul className="space-y-1.5 mb-4">
                   {[
-                    '66 modules of structured learning',
+                    '71 modules of structured learning',
                     'AI explains every concept interactively',
                     'Hands-on projects, not toy examples',
                     'Earn completion certificates',

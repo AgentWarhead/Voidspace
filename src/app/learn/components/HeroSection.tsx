@@ -401,7 +401,7 @@ export function HeroSection() {
                       delay={0.8}
                     />
                     <StatItem
-                      value={66}
+                      value={71}
                       label="Learning Modules"
                       delay={1.0}
                     />
