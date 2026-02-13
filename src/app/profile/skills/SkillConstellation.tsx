@@ -338,6 +338,56 @@ const skillNodes: SkillNode[] = [
     rewards: ['Frontend Expert Badge'], link: '/sanctum',
   },
   {
+    id: 'dao-contracts',
+    label: 'DAO Contracts',
+    icon: Shield,
+    description: 'Build governance contracts with proposals, voting, and treasury management.',
+    details: ['Proposal lifecycle', 'Voting mechanisms', 'Role-based permissions', 'Treasury management', 'Multi-sig patterns', 'DAO factory'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 4,
+    unlocks: ['builder-capstone'], prerequisites: ['nft-contracts'], estimatedTime: '6 hours',
+    rewards: ['DAO Builder Badge'], link: '/learn/builder/building-a-dao-contract',
+  },
+  {
+    id: 'defi-patterns',
+    label: 'DeFi Patterns',
+    icon: Coins,
+    description: 'AMM mechanics, liquidity pools, and swap contract architecture on NEAR.',
+    details: ['Constant product formula', 'Liquidity pool design', 'Swap mechanics', 'Fee structures', 'Flash loan patterns', 'Oracle integration'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 5,
+    unlocks: ['builder-capstone'], prerequisites: ['nft-contracts'], estimatedTime: '7 hours',
+    rewards: ['DeFi Builder Badge'], link: '/learn/builder/defi-contract-patterns',
+  },
+  {
+    id: 'aurora-evm',
+    label: 'Aurora EVM',
+    icon: Globe,
+    description: 'Deploy Solidity contracts on NEAR via Aurora EVM runtime.',
+    details: ['Aurora architecture', 'EVM on NEAR', 'Rainbow Bridge', 'Solidity deployment', 'Cross-runtime calls', 'Dev tooling'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 6,
+    unlocks: ['builder-capstone'], prerequisites: ['build-dapp'], estimatedTime: '5 hours',
+    rewards: ['EVM Bridge Badge'], link: '/learn/builder/aurora-evm-compatibility',
+  },
+  {
+    id: 'wallet-selector',
+    label: 'Wallet Selector',
+    icon: Wallet,
+    description: 'Multi-wallet support with @near-wallet-selector for seamless UX.',
+    details: ['Wallet selector setup', 'Multiple wallet support', 'Sign-in flows', 'Transaction signing UX', 'Mobile support', 'Social login'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 7,
+    unlocks: ['builder-capstone'], prerequisites: ['frontend-integration'], estimatedTime: '4 hours',
+    rewards: ['Wallet Expert Badge'], link: '/learn/builder/wallet-selector-integration',
+  },
+  {
+    id: 'near-social-bos',
+    label: 'NEAR Social & BOS',
+    icon: Globe,
+    description: 'Build composable on-chain widgets with NEAR Social and BOS.',
+    details: ['Social DB', 'Widget development', 'Composability patterns', 'On-chain frontends', 'Social graph', 'BOS gateway'],
+    xp: 100, tier: 'advanced', track: 'builder', position: 8,
+    unlocks: ['builder-capstone'], prerequisites: ['frontend-integration'], estimatedTime: '5 hours',
+    rewards: ['Social Builder Badge'], link: '/learn/builder/near-social-bos',
+  },
+  {
     id: 'builder-capstone',
     label: 'Builder Capstone',
     icon: Trophy,
@@ -440,13 +490,23 @@ const skillNodes: SkillNode[] = [
     rewards: ['Auditor Badge'], link: '/sanctum',
   },
   {
+    id: 'shade-agents',
+    label: 'Shade Agents',
+    icon: Brain,
+    description: 'Build autonomous AI agents that execute on-chain actions on NEAR.',
+    details: ['Agent architecture', 'Autonomous transactions', 'On-chain tool calling', 'Safety guardrails', 'Agent-to-agent comms', 'Deployment patterns'],
+    xp: 150, tier: 'advanced', track: 'hacker', position: 4,
+    unlocks: ['hacker-capstone'], prerequisites: ['ai-agents'], estimatedTime: '6 hours',
+    rewards: ['Shade Agent Badge'], link: '/learn/hacker/shade-agents',
+  },
+  {
     id: 'hacker-capstone',
     label: 'Hacker Capstone',
     icon: Trophy,
     description: 'Build a cross-chain oracle using Chain Signatures.',
     details: ['Design oracle architecture', 'Implement Chain Signatures', 'Build verification logic', 'Cross-chain data feed', 'Deploy & test', 'Certificate earned'],
     xp: 150, tier: 'mastery', track: 'hacker', position: 0,
-    unlocks: [], prerequisites: ['indexer-dev', 'ai-agents', 'audit-practice'], estimatedTime: '15 hours',
+    unlocks: [], prerequisites: ['indexer-dev', 'shade-agents', 'audit-practice'], estimatedTime: '15 hours',
     rewards: ['Hacker Certificate'], link: '/learn/certificate',
   },
 
@@ -528,8 +588,18 @@ const connections: Connection[] = [
   { from: 'build-dapp', to: 'storage-patterns' },
   { from: 'build-dapp', to: 'frontend-integration' },
   { from: 'nft-contracts', to: 'upgradeable-contracts' },
+  { from: 'nft-contracts', to: 'dao-contracts' },
+  { from: 'nft-contracts', to: 'defi-patterns' },
   { from: 'storage-patterns', to: 'upgradeable-contracts' },
+  { from: 'build-dapp', to: 'aurora-evm' },
+  { from: 'frontend-integration', to: 'wallet-selector' },
+  { from: 'frontend-integration', to: 'near-social-bos' },
   { from: 'upgradeable-contracts', to: 'builder-capstone' },
+  { from: 'dao-contracts', to: 'builder-capstone' },
+  { from: 'defi-patterns', to: 'builder-capstone' },
+  { from: 'aurora-evm', to: 'builder-capstone' },
+  { from: 'wallet-selector', to: 'builder-capstone' },
+  { from: 'near-social-bos', to: 'builder-capstone' },
   { from: 'frontend-integration', to: 'builder-capstone' },
   // Hacker track
   { from: 'testing-basics', to: 'security-fundamentals' },
@@ -542,7 +612,8 @@ const connections: Connection[] = [
   { from: 'chain-signatures', to: 'intents-protocol' },
   { from: 'chain-signatures', to: 'audit-practice' },
   { from: 'intents-protocol', to: 'ai-agents' },
-  { from: 'ai-agents', to: 'hacker-capstone' },
+  { from: 'ai-agents', to: 'shade-agents' },
+  { from: 'shade-agents', to: 'hacker-capstone' },
   { from: 'indexer-dev', to: 'hacker-capstone' },
   { from: 'audit-practice', to: 'hacker-capstone' },
   // Founder track
@@ -992,25 +1063,44 @@ export function SkillConstellation() {
   }, []);
 
   // Calculate positions for the galaxy view — each track gets a quadrant
+  // Uses a golden-angle spiral for natural, non-overlapping node distribution
   const positions = useMemo(() => {
     const pos = new Map<string, { x: number; y: number }>();
     const trackQuadrants = {
-      explorer: { cx: 25, cy: 30 },   // top-left
-      builder: { cx: 75, cy: 30 },    // top-right
-      hacker: { cx: 25, cy: 72 },     // bottom-left
-      founder: { cx: 75, cy: 72 },    // bottom-right
+      explorer: { cx: 25, cy: 28 },   // top-left
+      builder:  { cx: 72, cy: 32 },   // top-right (slightly larger area for 16 nodes)
+      hacker:   { cx: 25, cy: 74 },   // bottom-left
+      founder:  { cx: 75, cy: 76 },   // bottom-right
     };
+
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5°
 
     (Object.keys(TRACK_CONFIG) as Array<keyof typeof TRACK_CONFIG>).forEach(trackId => {
       const { cx, cy } = trackQuadrants[trackId];
       const trackNodes_local = skillNodes.filter(n => n.track === trackId);
-      const radius = 14;
+      const count = trackNodes_local.length;
+      // Scale radius based on node count for balanced density
+      const maxRadius = count > 12 ? 18 : count > 8 ? 15 : count > 5 ? 13 : 11;
+
       trackNodes_local.forEach((node, i) => {
-        const angle = (i / trackNodes_local.length) * 2 * Math.PI - Math.PI / 2;
-        const r = radius * (0.4 + (i % 3) * 0.3);
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        pos.set(node.id, { x: Math.max(3, Math.min(97, x)), y: Math.max(3, Math.min(97, y)) });
+        if (i === 0) {
+          // Center node (first/foundation node)
+          pos.set(node.id, { x: cx, y: cy });
+        } else if (i === count - 1 && node.tier === 'mastery') {
+          // Capstone node — place at outer edge, bottom of cluster
+          const angle = Math.PI * 0.5; // directly below center
+          pos.set(node.id, {
+            x: Math.max(4, Math.min(96, cx + maxRadius * 0.9 * Math.cos(angle))),
+            y: Math.max(4, Math.min(96, cy + maxRadius * 0.9 * Math.sin(angle))),
+          });
+        } else {
+          // Golden-angle spiral for remaining nodes
+          const angle = i * goldenAngle - Math.PI / 2;
+          const r = maxRadius * Math.sqrt(i / count) * 1.1;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+          pos.set(node.id, { x: Math.max(4, Math.min(96, x)), y: Math.max(4, Math.min(96, y)) });
+        }
       });
     });
 
@@ -1116,22 +1206,22 @@ export function SkillConstellation() {
       </div>
 
       {/* Galaxy Map (desktop) */}
-      <div ref={containerRef} className="hidden lg:block relative h-[600px] rounded-xl border border-border/30 bg-background/80 overflow-hidden">
+      <div ref={containerRef} className="hidden lg:block relative h-[700px] rounded-xl border border-border/30 bg-background/80 overflow-hidden">
         <StarField />
         {/* Nebula backgrounds per quadrant */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_25%_30%,rgba(0,212,255,0.04),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_75%_30%,rgba(0,236,151,0.04),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_25%_72%,rgba(192,132,252,0.04),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_75%_72%,rgba(251,146,60,0.03),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_25%_28%,rgba(0,212,255,0.05),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_45%_40%_at_72%_32%,rgba(0,236,151,0.05),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_25%_74%,rgba(192,132,252,0.05),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_30%_25%_at_75%_76%,rgba(251,146,60,0.04),transparent)]" />
         </div>
 
         {/* Track labels */}
         {[
-          { label: 'Explorer', x: 25, y: 12, color: 'text-accent-cyan' },
-          { label: 'Builder', x: 75, y: 12, color: 'text-near-green' },
-          { label: 'Hacker', x: 25, y: 55, color: 'text-purple-400' },
-          { label: 'Founder', x: 75, y: 55, color: 'text-accent-orange' },
+          { label: 'Explorer · 11', x: 25, y: 10, color: 'text-accent-cyan' },
+          { label: 'Builder · 16', x: 72, y: 10, color: 'text-near-green' },
+          { label: 'Hacker · 11', x: 25, y: 56, color: 'text-purple-400' },
+          { label: 'Founder · 5', x: 75, y: 60, color: 'text-accent-orange' },
         ].map(t => (
           <div key={t.label} className="absolute z-20" style={{ left: `${t.x}%`, top: `${t.y}%`, transform: 'translate(-50%, -50%)' }}>
             <span className={cn('text-[10px] font-mono uppercase tracking-widest', t.color)}>{t.label}</span>
