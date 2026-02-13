@@ -101,7 +101,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS.sanctum);
+  const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS.shade);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
