@@ -1,8 +1,18 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import {
+  ChevronDown,
+  Search,
+  Rocket,
+  GraduationCap,
+  Sparkles,
+  Eye,
+  CreditCard,
+  Code,
+  X,
+} from 'lucide-react';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { cn } from '@/lib/utils';
@@ -19,6 +29,17 @@ interface FAQCategory {
   category: string;
   items: FAQItem[];
 }
+
+// ─── Category Icons Map ────────────────────────────────────────────────────────
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  'Getting Started': <Rocket className="w-4 h-4" />,
+  'Learning & Tracks': <GraduationCap className="w-4 h-4" />,
+  'Sanctum (AI Builder)': <Sparkles className="w-4 h-4" />,
+  'Intelligence Tools': <Eye className="w-4 h-4" />,
+  'Pricing & Access': <CreditCard className="w-4 h-4" />,
+  Technical: <Code className="w-4 h-4" />,
+};
 
 // ─── FAQ Data ──────────────────────────────────────────────────────────────────
 
@@ -195,47 +216,111 @@ export const FAQ_DATA: FAQCategory[] = [
 
 // ─── Accordion Item ────────────────────────────────────────────────────────────
 
-function FAQItem({
+function FAQAccordionItem({
   question,
   answer,
   isOpen,
   onToggle,
+  index,
 }: {
   question: string;
   answer: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
+  index: number;
 }) {
   return (
-    <div className="border border-border rounded-xl overflow-hidden bg-surface/50">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-5 text-left hover:bg-surface-hover transition-colors"
-      >
-        <span className="text-sm font-medium text-text-primary pr-4">{question}</span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="flex-shrink-0"
-        >
-          <ChevronDown className={cn('w-4 h-4', isOpen ? 'text-near-green' : 'text-text-muted')} />
-        </motion.div>
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 pb-5 text-sm text-text-secondary leading-relaxed">
-              {answer}
-            </div>
-          </motion.div>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.4, 0, 0.2, 1] }}
+    >
+      <div
+        className={cn(
+          'rounded-2xl overflow-hidden transition-all duration-300',
+          'backdrop-blur-sm bg-surface/30 border',
+          isOpen
+            ? 'border-near-green/30 shadow-[0_0_20px_rgba(0,236,151,0.05)]'
+            : 'border-white/5 hover:border-near-green/20'
         )}
-      </AnimatePresence>
+      >
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-between p-5 md:p-6 text-left hover:bg-white/[0.02] transition-colors"
+        >
+          <span className="text-sm font-medium text-text-primary pr-4">{question}</span>
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex-shrink-0"
+          >
+            <ChevronDown
+              className={cn(
+                'w-4 h-4 transition-colors duration-300',
+                isOpen ? 'text-near-green' : 'text-text-muted'
+              )}
+            />
+          </motion.div>
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="px-5 md:px-6 pb-5 md:pb-6 text-sm text-text-secondary leading-relaxed">
+                {answer}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Category Block ────────────────────────────────────────────────────────────
+
+function CategoryBlock({
+  category,
+  items,
+  categoryIndex,
+  openItems,
+  toggleItem,
+}: {
+  category: string;
+  items: FAQItem[];
+  categoryIndex: number;
+  openItems: Set<string>;
+  toggleItem: (key: string) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-4 px-1">
+        <span className="text-near-green/70">{CATEGORY_ICONS[category]}</span>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+          {category}
+        </h3>
+      </div>
+      <div className="space-y-3">
+        {items.map((item, ii) => {
+          const key = `${categoryIndex}-${ii}`;
+          return (
+            <FAQAccordionItem
+              key={key}
+              question={item.question}
+              answer={item.answer}
+              isOpen={openItems.has(key)}
+              onToggle={() => toggleItem(key)}
+              index={ii}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -244,6 +329,8 @@ function FAQItem({
 
 export function FAQ() {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const toggleItem = useCallback((key: string) => {
     setOpenItems((prev) => {
@@ -257,33 +344,205 @@ export function FAQ() {
     });
   }, []);
 
+  // Build category counts
+  const categoryNames = useMemo(() => FAQ_DATA.map((c) => c.category), []);
+  const categoryCounts = useMemo(
+    () => FAQ_DATA.reduce<Record<string, number>>((acc, c) => {
+      acc[c.category] = c.items.length;
+      return acc;
+    }, {}),
+    []
+  );
+  const totalCount = useMemo(() => FAQ_DATA.reduce((s, c) => s + c.items.length, 0), []);
+
+  // Filter data
+  const filteredData = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    return FAQ_DATA.map((cat, ci) => {
+      if (activeCategory !== 'All' && cat.category !== activeCategory) {
+        return { ...cat, items: [], originalIndex: ci };
+      }
+      const filtered = query
+        ? cat.items.filter((item) => item.question.toLowerCase().includes(query))
+        : cat.items;
+      return { ...cat, items: filtered, originalIndex: ci };
+    }).filter((cat) => cat.items.length > 0);
+  }, [activeCategory, searchQuery]);
+
+  const allItemKeys = useMemo(() => {
+    const keys: string[] = [];
+    FAQ_DATA.forEach((cat, ci) => {
+      cat.items.forEach((_, ii) => {
+        keys.push(`${ci}-${ii}`);
+      });
+    });
+    return keys;
+  }, []);
+
+  const isAllExpanded = allItemKeys.length > 0 && allItemKeys.every((k) => openItems.has(k));
+
+  const toggleAll = useCallback(() => {
+    setOpenItems((prev) => {
+      if (allItemKeys.every((k) => prev.has(k))) {
+        return new Set();
+      }
+      return new Set(allItemKeys);
+    });
+  }, [allItemKeys]);
+
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+    setActiveCategory('All');
+  }, []);
+
+  const showTwoCol = activeCategory === 'All' && !searchQuery;
+
   return (
     <ScrollReveal>
       <div id="faq">
         <SectionHeader title="Frequently Asked Questions" badge="FAQ" />
-        <div className="max-w-3xl mx-auto space-y-8">
-          {FAQ_DATA.map((category, ci) => (
-            <div key={category.category}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3 px-1">
-                {category.category}
-              </h3>
-              <div className="space-y-3">
-                {category.items.map((item, ii) => {
-                  const key = `${ci}-${ii}`;
-                  return (
-                    <FAQItem
-                      key={key}
-                      question={item.question}
-                      answer={item.answer}
-                      isOpen={openItems.has(key)}
-                      onToggle={() => toggleItem(key)}
-                    />
-                  );
-                })}
-              </div>
+
+        {/* Controls */}
+        <div className="max-w-4xl mx-auto mb-8 space-y-4">
+          {/* Search + Expand All row */}
+          <div className="flex items-center gap-3">
+            {/* Search input */}
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search questions..."
+                className={cn(
+                  'w-full pl-9 pr-9 py-2.5 text-sm rounded-xl',
+                  'backdrop-blur-sm bg-surface/30 border border-white/5',
+                  'text-text-primary placeholder:text-text-muted/50',
+                  'focus:outline-none focus:border-near-green/30 focus:ring-1 focus:ring-near-green/20',
+                  'transition-all duration-300'
+                )}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-          ))}
+
+            {/* Expand All / Collapse All */}
+            <button
+              onClick={toggleAll}
+              className={cn(
+                'text-xs font-medium px-3 py-2.5 rounded-xl whitespace-nowrap',
+                'backdrop-blur-sm bg-surface/30 border border-white/5',
+                'text-text-muted hover:text-near-green hover:border-near-green/20',
+                'transition-all duration-300'
+              )}
+            >
+              {isAllExpanded ? 'Collapse All' : 'Expand All'}
+            </button>
+          </div>
+
+          {/* Category pills */}
+          <div className="flex flex-wrap gap-2">
+            {/* All pill */}
+            <button
+              onClick={() => setActiveCategory('All')}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium',
+                'backdrop-blur-sm border transition-all duration-300',
+                activeCategory === 'All'
+                  ? 'bg-near-green/15 border-near-green/30 text-near-green shadow-[0_0_12px_rgba(0,236,151,0.1)]'
+                  : 'bg-surface/30 border-white/5 text-text-muted hover:border-near-green/20 hover:text-text-secondary'
+              )}
+            >
+              All
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-[10px] font-semibold',
+                  activeCategory === 'All'
+                    ? 'bg-near-green/20 text-near-green'
+                    : 'bg-white/5 text-text-muted'
+                )}
+              >
+                {totalCount}
+              </span>
+            </button>
+
+            {categoryNames.map((name) => (
+              <button
+                key={name}
+                onClick={() => setActiveCategory(name)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium',
+                  'backdrop-blur-sm border transition-all duration-300',
+                  activeCategory === name
+                    ? 'bg-near-green/15 border-near-green/30 text-near-green shadow-[0_0_12px_rgba(0,236,151,0.1)]'
+                    : 'bg-surface/30 border-white/5 text-text-muted hover:border-near-green/20 hover:text-text-secondary'
+                )}
+              >
+                <span className="opacity-70">{CATEGORY_ICONS[name]}</span>
+                <span className="hidden sm:inline">{name}</span>
+                <span
+                  className={cn(
+                    'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-[10px] font-semibold',
+                    activeCategory === name
+                      ? 'bg-near-green/20 text-near-green'
+                      : 'bg-white/5 text-text-muted'
+                  )}
+                >
+                  {categoryCounts[name]}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* FAQ Content */}
+        {filteredData.length === 0 ? (
+          /* Empty state */
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-md mx-auto text-center py-16"
+          >
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-surface/30 border border-white/5 mb-4">
+              <Search className="w-5 h-5 text-text-muted" />
+            </div>
+            <p className="text-text-secondary text-sm mb-1">
+              No matching questions for &ldquo;{searchQuery}&rdquo;
+            </p>
+            <button
+              onClick={clearSearch}
+              className="text-near-green text-sm hover:underline mt-2"
+            >
+              Browse all questions →
+            </button>
+          </motion.div>
+        ) : (
+          <div
+            className={cn(
+              'max-w-4xl mx-auto',
+              showTwoCol
+                ? 'grid grid-cols-1 lg:grid-cols-2 gap-8'
+                : 'max-w-3xl space-y-8'
+            )}
+          >
+            {filteredData.map((category) => (
+              <CategoryBlock
+                key={category.category}
+                category={category.category}
+                items={category.items}
+                categoryIndex={category.originalIndex}
+                openItems={openItems}
+                toggleItem={toggleItem}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </ScrollReveal>
   );
