@@ -214,87 +214,109 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
           {/* Step 1: Goal */}
           {step === 'goal' && (
             <Container size="xl" className="py-8 px-4">
-              <div className="text-center mb-10">
-                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-xs font-mono mb-4" style={{ animation: 'sanctumFadeInUp 0.4s ease-out backwards' }}>
+                  <Sparkles className="w-3 h-3" />
+                  CHOOSE YOUR PATH
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3" style={{ animation: 'sanctumFadeInUp 0.4s ease-out 0.05s backwards' }}>
                   What&apos;s your <GradientText>goal</GradientText>?
                 </h2>
-                <p className="text-text-muted text-sm">Choose your path into the Sanctum</p>
+                <p className="text-text-muted text-base max-w-md mx-auto" style={{ animation: 'sanctumFadeInUp 0.4s ease-out 0.1s backwards' }}>Every great project starts with a single choice</p>
               </div>
 
-              {/* Main 4 cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-8">
+              {/* Top 2 cards — featured row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-4xl mx-auto mb-5">
                 <GoalCard
                   emoji="🚀"
                   title="Deploy my first contract"
-                  description="Fast track for beginners. We'll walk you through everything."
+                  description="Zero to deployed in minutes. The AI walks you through every step — no experience needed."
                   color="amber"
                   tag="Beginner Friendly"
+                  tagIcon="⚡"
                   delay={0}
                   onClick={() => handleGoalSelect('deploy-first')}
                   selected={goal === 'deploy-first'}
                 />
                 <GoalCard
+                  emoji="💡"
+                  title="I have an idea — build it"
+                  description="Describe your vision in plain English. We architect, code, and deploy it for you."
+                  color="purple"
+                  tag="Most Popular"
+                  tagIcon="🔥"
+                  featured
+                  delay={80}
+                  onClick={() => handleGoalSelect('idea')}
+                  selected={goal === 'idea'}
+                />
+              </div>
+
+              {/* Middle 2 cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-4xl mx-auto mb-5">
+                <GoalCard
                   emoji="📚"
                   title="Learn NEAR & Rust"
-                  description="Educational path. AI teaches you step by step."
+                  description="Structured learning with 66 interactive modules. AI teaches you while you build real projects."
                   color="cyan"
-                  delay={80}
+                  delay={160}
                   onClick={() => handleGoalSelect('learn')}
                   selected={goal === 'learn'}
                 />
                 <GoalCard
                   emoji="🔨"
                   title="Build something specific"
-                  description="For developers who know what they want."
+                  description="Pick a contract category and dive in. For developers who know what they want."
                   color="green"
-                  delay={160}
+                  delay={240}
                   onClick={() => handleGoalSelect('build-specific')}
                   selected={goal === 'build-specific'}
                 />
-                <GoalCard
-                  emoji="💡"
-                  title="I have an idea — build it"
-                  description="Describe your vision, we handle the code."
-                  color="purple"
-                  tag="Most Popular"
-                  delay={240}
-                  onClick={() => handleGoalSelect('idea')}
-                  selected={goal === 'idea'}
-                />
+              </div>
+
+              {/* Bottom discovery card — full width, centered */}
+              <div className="max-w-4xl mx-auto mb-10">
                 <GoalCard
                   emoji="🔍"
                   title="Help me find something to build"
-                  description="Browse ecosystem opportunities or let AI generate a project brief for you."
-                  color="cyan"
+                  description="Not sure where to start? Browse ecosystem opportunities, explore trending ideas, or let AI generate a custom project brief tailored to your interests."
+                  color="teal"
                   tag="Explorer"
+                  tagIcon="🧭"
+                  wide
                   delay={320}
                   onClick={() => handleGoalSelect('discover')}
                   selected={goal === 'discover'}
                 />
               </div>
 
-              {/* Secondary options */}
-              <div className="max-w-3xl mx-auto">
+              {/* Secondary options — sleeker pills */}
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-white/[0.08]" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted/50">or</span>
+                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-white/[0.08]" />
+                </div>
                 <div className="flex flex-wrap justify-center gap-3">
                   <button
                     onClick={() => handleGoalSelect('existing-code')}
-                    className={`group flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all text-sm ${
+                    className={`group flex items-center gap-2.5 px-5 py-3 rounded-2xl border-2 transition-all duration-300 text-sm font-medium ${
                       goal === 'existing-code'
-                        ? 'border-red-500/40 bg-red-500/10 text-red-300'
-                        : 'border-white/[0.08] bg-white/[0.03] text-text-muted hover:border-white/[0.15] hover:text-text-secondary'
+                        ? 'border-red-500/40 bg-red-500/10 text-red-300 shadow-lg shadow-red-500/10'
+                        : 'border-white/[0.06] bg-white/[0.02] text-text-muted hover:border-red-500/20 hover:bg-red-500/5 hover:text-red-300'
                     }`}
                   >
                     <Wrench className="w-4 h-4" />
                     I have existing code
-                    <ChevronRight className="w-3 h-3" />
+                    <ChevronRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                   </button>
                   <button
                     onClick={() => handleGoalSelect('visual')}
-                    className="group flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] text-text-muted hover:border-purple-500/30 hover:text-purple-300 transition-all text-sm"
+                    className="group flex items-center gap-2.5 px-5 py-3 rounded-2xl border-2 border-white/[0.06] bg-white/[0.02] text-text-muted hover:border-purple-500/20 hover:bg-purple-500/5 hover:text-purple-300 transition-all duration-300 text-sm font-medium"
                   >
                     <Palette className="w-4 h-4" />
                     Visual Generator
-                    <ChevronRight className="w-3 h-3" />
+                    <ChevronRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                   </button>
                 </div>
 
@@ -573,51 +595,80 @@ function GoalCard({
   description,
   color,
   tag,
+  tagIcon,
   delay,
   onClick,
   selected,
+  featured,
+  wide,
 }: {
   emoji: string;
   title: string;
   description: string;
-  color: 'amber' | 'cyan' | 'green' | 'purple';
+  color: 'amber' | 'cyan' | 'green' | 'purple' | 'teal';
   tag?: string;
+  tagIcon?: string;
   delay: number;
   onClick: () => void;
   selected: boolean;
+  featured?: boolean;
+  wide?: boolean;
 }) {
   const colorMap = {
     amber: {
       border: 'border-amber-500/50',
-      bg: 'bg-gradient-to-br from-amber-500/15 to-orange-500/10',
-      shadow: 'shadow-amber-500/20',
-      hover: 'hover:border-amber-500/30 hover:bg-amber-500/5',
+      bg: 'bg-gradient-to-br from-amber-500/15 via-orange-500/8 to-transparent',
+      shadow: 'shadow-amber-500/25',
+      hover: 'hover:border-amber-500/30',
       text: 'text-amber-400',
-      tagBg: 'bg-amber-500/10 text-amber-400/70',
+      tagBg: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
+      glow: 'rgba(245,158,11,0.15)',
+      iconBg: 'bg-amber-500/15 border-amber-500/20',
+      ring: 'ring-amber-500/30',
     },
     cyan: {
       border: 'border-cyan-500/50',
-      bg: 'bg-gradient-to-br from-cyan-500/15 to-blue-500/10',
-      shadow: 'shadow-cyan-500/20',
-      hover: 'hover:border-cyan-500/30 hover:bg-cyan-500/5',
+      bg: 'bg-gradient-to-br from-cyan-500/15 via-blue-500/8 to-transparent',
+      shadow: 'shadow-cyan-500/25',
+      hover: 'hover:border-cyan-500/30',
       text: 'text-cyan-400',
-      tagBg: 'bg-cyan-500/10 text-cyan-400/70',
+      tagBg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
+      glow: 'rgba(6,182,212,0.15)',
+      iconBg: 'bg-cyan-500/15 border-cyan-500/20',
+      ring: 'ring-cyan-500/30',
     },
     green: {
       border: 'border-near-green/50',
-      bg: 'bg-gradient-to-br from-near-green/15 to-emerald-500/10',
-      shadow: 'shadow-near-green/20',
-      hover: 'hover:border-near-green/30 hover:bg-near-green/5',
+      bg: 'bg-gradient-to-br from-near-green/15 via-emerald-500/8 to-transparent',
+      shadow: 'shadow-near-green/25',
+      hover: 'hover:border-near-green/30',
       text: 'text-near-green',
-      tagBg: 'bg-near-green/10 text-near-green/70',
+      tagBg: 'bg-near-green/15 text-near-green border-near-green/20',
+      glow: 'rgba(0,236,151,0.15)',
+      iconBg: 'bg-near-green/15 border-near-green/20',
+      ring: 'ring-near-green/30',
     },
     purple: {
       border: 'border-purple-500/50',
-      bg: 'bg-gradient-to-br from-purple-500/15 to-pink-500/10',
-      shadow: 'shadow-purple-500/20',
-      hover: 'hover:border-purple-500/30 hover:bg-purple-500/5',
+      bg: 'bg-gradient-to-br from-purple-500/15 via-violet-500/8 to-transparent',
+      shadow: 'shadow-purple-500/25',
+      hover: 'hover:border-purple-500/30',
       text: 'text-purple-400',
-      tagBg: 'bg-purple-500/10 text-purple-400/70',
+      tagBg: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
+      glow: 'rgba(168,85,247,0.15)',
+      iconBg: 'bg-purple-500/15 border-purple-500/20',
+      ring: 'ring-purple-500/30',
+    },
+    teal: {
+      border: 'border-teal-500/50',
+      bg: 'bg-gradient-to-br from-teal-500/15 via-emerald-500/8 to-transparent',
+      shadow: 'shadow-teal-500/25',
+      hover: 'hover:border-teal-500/30',
+      text: 'text-teal-400',
+      tagBg: 'bg-teal-500/15 text-teal-300 border-teal-500/20',
+      glow: 'rgba(20,184,166,0.15)',
+      iconBg: 'bg-teal-500/15 border-teal-500/20',
+      ring: 'ring-teal-500/30',
     },
   };
 
@@ -626,27 +677,72 @@ function GoalCard({
   return (
     <button
       onClick={onClick}
-      className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
+      className={`goal-card group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 text-left ${
+        wide ? 'p-7 sm:p-8' : 'p-6'
+      } ${
         selected
-          ? `${c.border} ${c.bg} shadow-lg ${c.shadow}`
-          : `border-white/[0.08] bg-void-gray/30 ${c.hover}`
-      }`}
+          ? `${c.border} ${c.bg} shadow-xl ${c.shadow} ring-1 ${c.ring}`
+          : `border-white/[0.06] bg-white/[0.02] ${c.hover}`
+      } hover:scale-[1.015] active:scale-[0.99]`}
       style={{
         animationDelay: `${delay}ms`,
         animation: 'sanctumFadeInUp 0.5s ease-out backwards',
       }}
     >
-      <div className="text-3xl mb-3">{emoji}</div>
-      <h3 className={`text-base font-bold mb-1.5 transition-colors ${
-        selected ? c.text : `text-text-primary group-hover:${c.text}`
-      }`}>
-        {title}
-      </h3>
-      <p className="text-sm text-text-muted leading-relaxed">{description}</p>
-      {tag && (
-        <span className={`inline-block mt-3 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full ${c.tagBg}`}>
-          ✨ {tag}
-        </span>
+      {/* Hover glow overlay */}
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: `radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${c.glow}, transparent 40%)` }}
+      />
+
+      {/* Selected corner accent */}
+      {selected && (
+        <div className="absolute top-0 right-0 w-20 h-20 pointer-events-none">
+          <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${c.text} animate-pulse`} style={{ boxShadow: `0 0 12px ${c.glow}` }}>
+            <div className="w-full h-full rounded-full bg-current" />
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className={`relative z-10 ${wide ? 'flex items-start gap-6 sm:gap-8' : ''}`}>
+        {/* Emoji icon with background */}
+        <div className={`${wide ? 'flex-shrink-0' : 'mb-4'}`}>
+          <div className={`inline-flex items-center justify-center ${wide ? 'w-14 h-14' : 'w-12 h-12'} rounded-xl border ${c.iconBg} backdrop-blur-sm transition-transform duration-300 group-hover:scale-110`}>
+            <span className={`${wide ? 'text-2xl' : 'text-xl'}`}>{emoji}</span>
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          {/* Title */}
+          <h3 className={`${wide ? 'text-lg' : 'text-base'} font-bold mb-2 transition-colors duration-200 ${
+            selected ? c.text : 'text-text-primary'
+          } group-hover:${c.text}`}>
+            {title}
+            {featured && !selected && (
+              <span className="inline-block ml-2 align-middle">
+                <ChevronRight className={`w-4 h-4 inline ${c.text} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300`} />
+              </span>
+            )}
+          </h3>
+
+          {/* Description */}
+          <p className={`${wide ? 'text-sm sm:text-base' : 'text-sm'} text-text-muted leading-relaxed ${wide ? 'max-w-xl' : ''}`}>
+            {description}
+          </p>
+
+          {/* Tag pill */}
+          {tag && (
+            <span className={`inline-flex items-center gap-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full border backdrop-blur-sm ${c.tagBg}`}>
+              {tagIcon || '✨'} {tag}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom gradient line for selected */}
+      {selected && (
+        <div className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full" style={{ background: `linear-gradient(90deg, transparent, ${c.glow.replace('0.15', '0.6')}, transparent)` }} />
       )}
     </button>
   );
