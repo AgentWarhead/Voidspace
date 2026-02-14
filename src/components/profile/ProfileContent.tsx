@@ -11,6 +11,7 @@ import { GradientText } from '@/components/effects/GradientText';
 import { BuilderProfileCard } from './BuilderProfileCard';
 import { VoidMissionCard } from './VoidMissionCard';
 import { QuickActionsBar } from './QuickActionsBar';
+import { CreditDashboard } from '@/components/credits/CreditDashboard';
 import { useWallet } from '@/hooks/useWallet';
 import { useUser } from '@/hooks/useUser';
 import type { TierName, SavedOpportunity, MissionStatus } from '@/types';
@@ -217,6 +218,18 @@ export function ProfileContent() {
           accountId={accountId || ''}
         />
       </ScrollReveal>
+
+      {/* Sanctum Arsenal — Credit Dashboard */}
+      {user?.id && (
+        <ScrollReveal delay={0.06}>
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+              ⚡ <GradientText>Sanctum Arsenal</GradientText>
+            </h2>
+            <CreditDashboard userId={user.id} tier={tier} />
+          </div>
+        </ScrollReveal>
+      )}
 
       {/* Skill Constellation Link */}
       <ScrollReveal delay={0.07}>

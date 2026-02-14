@@ -9,7 +9,7 @@ import { ParticleBackground } from './components/ParticleBackground';
 // CategoryPicker moved to SanctumWizard
 import { SanctumChat } from './components/SanctumChat';
 import { TypewriterCode } from './components/TypewriterCode';
-import { TokenCounter } from './components/TokenCounter';
+// TokenCounter removed
 import { SanctumVisualization } from './components/SanctumVisualization';
 import { GlassPanel } from './components/GlassPanel';
 import { AchievementPopup } from './components/AchievementPopup';
@@ -546,21 +546,7 @@ function SanctumPageInner() {
                 </button>
               </div>
               
-              {/* Desktop controls */}
-              <div className="hidden md:flex items-center gap-4">
-                <button
-                  onClick={() => dispatch({ type: 'SET_SOUND_ENABLED', payload: !state.soundEnabled })}
-                  className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-lg"
-                  title={state.soundEnabled ? 'Sound on' : 'Sound off'}
-                >
-                  {state.soundEnabled ? '🔊' : '🔇'}
-                </button>
-                
-                <TokenCounter 
-                  tokensUsed={state.tokensUsed} 
-                  tokenBalance={state.tokenBalance}
-                />
-              </div>
+              {/* Desktop controls - cleaned up */}
             </div>
           </div>
 

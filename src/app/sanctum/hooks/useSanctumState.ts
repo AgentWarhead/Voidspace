@@ -83,7 +83,6 @@ export interface SanctumState {
   isGenerating: boolean;
   currentAchievement: Achievement | null;
   unlockedAchievements: Set<string>;
-  soundEnabled: boolean;
   messageCount: number;
   deployCount: number;
   showDeployCelebration: boolean;
@@ -129,7 +128,6 @@ type SanctumAction =
   | { type: 'SET_IS_GENERATING'; payload: boolean }
   | { type: 'SET_CURRENT_ACHIEVEMENT'; payload: Achievement | null }
   | { type: 'ADD_UNLOCKED_ACHIEVEMENT'; payload: string }
-  | { type: 'SET_SOUND_ENABLED'; payload: boolean }
   | { type: 'SET_MESSAGE_COUNT'; payload: number }
   | { type: 'INCREMENT_MESSAGE_COUNT' }
   | { type: 'SET_DEPLOY_COUNT'; payload: number }
@@ -176,7 +174,6 @@ const defaultState: SanctumState = {
   isGenerating: false,
   currentAchievement: null,
   unlockedAchievements: new Set<string>(),
-  soundEnabled: true,
   messageCount: 0,
   deployCount: 0,
   showDeployCelebration: false,
@@ -257,9 +254,6 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
         ...state, 
         unlockedAchievements: new Set(Array.from(state.unlockedAchievements).concat([action.payload]))
       };
-    
-    case 'SET_SOUND_ENABLED':
-      return { ...state, soundEnabled: action.payload };
     
     case 'SET_MESSAGE_COUNT':
       return { ...state, messageCount: action.payload };
@@ -366,7 +360,6 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
         ...defaultState,
         // Keep persistent progress stats
         unlockedAchievements: state.unlockedAchievements,
-        soundEnabled: state.soundEnabled,
         deployCount: state.deployCount,
       };
     
@@ -435,15 +428,8 @@ export function useSanctumState() {
     if (achievement) {
       dispatch({ type: 'ADD_UNLOCKED_ACHIEVEMENT', payload: achievementId });
       dispatch({ type: 'SET_CURRENT_ACHIEVEMENT', payload: achievement });
-      
-      // Play sound if enabled
-      if (state.soundEnabled) {
-        const audio = new Audio('/sounds/achievement.mp3');
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-      }
     }
-  }, [state.unlockedAchievements, state.soundEnabled]);
+  }, [state.unlockedAchievements]);
 
   // Handler functions
   const handleCategorySelect = useCallback((categorySlug: string) => {
@@ -540,18 +526,12 @@ export function useSanctumState() {
         code: state.generatedCode,
       });
       
-      // Play deploy sound
-      if (state.soundEnabled) {
-        const audio = new Audio('/sounds/deploy.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(() => {});
-      }
     } catch (error) {
       console.error('Deploy error:', error);
       dispatch({ type: 'SET_DEPLOY_ERROR', payload: 'Deploy failed. Please try again.' });
       dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
     }
-  }, [state.generatedCode, state.selectedCategory, state.deployCount, state.soundEnabled, unlockAchievement]);
+  }, [state.generatedCode, state.selectedCategory, state.deployCount, unlockAchievement]);
 
   const handleBack = useCallback(() => {
     dispatch({ type: 'RESET_SESSION' });

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, TrendingDown, ArrowRight, Clock, Wallet, Sparkles } from 'lucide-react';
+import { Zap, TrendingDown, ArrowRight, Clock, Wallet, Sparkles, Rocket, Activity, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
 
 interface CreditBalance {
   subscriptionCredits: number;
@@ -37,11 +38,13 @@ export function CreditDashboard({ userId, tier = 'shade', className, compact = f
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const tierConfig = SANCTUM_TIERS[(tier as SanctumTier) || 'shade'] || SANCTUM_TIERS.shade;
+
   const fetchData = useCallback(async () => {
     try {
       const [balRes, txRes] = await Promise.all([
         fetch(`/api/credits/balance?userId=${userId}`),
-        fetch(`/api/credits/transactions?userId=${userId}&limit=10`),
+        fetch(`/api/credits/transactions?userId=${userId}&limit=50`),
       ]);
 
       if (balRes.ok) {
@@ -62,11 +65,32 @@ export function CreditDashboard({ userId, tier = 'shade', className, compact = f
     fetchData();
   }, [fetchData]);
 
+  // Computed stats
+  const stats = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const usageTxs = transactions.filter(t => t.type === 'usage');
+    const monthlyUsageTxs = usageTxs.filter(t => new Date(t.createdAt) >= monthStart);
+    const todayUsageTxs = usageTxs.filter(t => new Date(t.createdAt) > dayAgo);
+
+    // Count unique sessions this month
+    const uniqueSessions = new Set(monthlyUsageTxs.map(t => t.sessionId).filter(Boolean));
+    const sessionsThisMonth = uniqueSessions.size || monthlyUsageTxs.length;
+
+    const totalMonthlyUsage = monthlyUsageTxs.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const usedToday = todayUsageTxs.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const avgPerSession = sessionsThisMonth > 0 ? totalMonthlyUsage / sessionsThisMonth : 0;
+
+    return { usedToday, sessionsThisMonth, avgPerSession, totalMonthlyUsage };
+  }, [transactions]);
+
   if (loading) {
     return (
       <div className={cn('animate-pulse space-y-4', className)}>
-        <div className="h-24 bg-surface rounded-lg" />
-        <div className="h-32 bg-surface rounded-lg" />
+        <div className="h-32 bg-surface rounded-xl" />
+        <div className="h-24 bg-surface rounded-xl" />
       </div>
     );
   }
@@ -78,15 +102,6 @@ export function CreditDashboard({ userId, tier = 'shade', className, compact = f
   const totalCredits = balance.totalCredits;
   const subPct = totalCredits > 0 ? (balance.subscriptionCredits / totalCredits) * 100 : 0;
   const topupPct = totalCredits > 0 ? (balance.topupCredits / totalCredits) * 100 : 0;
-
-  // Usage in last 24h
-  const recentUsage = transactions
-    .filter((t) => {
-      const txDate = new Date(t.createdAt);
-      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      return t.type === 'usage' && txDate > dayAgo;
-    })
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   if (compact) {
     return (
@@ -119,105 +134,134 @@ export function CreditDashboard({ userId, tier = 'shade', className, compact = f
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Balance Card */}
-      <Card variant="glass" padding="lg">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-text-muted text-sm mb-1">Credit Balance</p>
-            <p className="text-3xl font-bold font-mono">${totalCredits.toFixed(2)}</p>
-          </div>
-          <div className="p-2 rounded-lg bg-near-green/10">
-            <Wallet className="w-5 h-5 text-near-green" />
-          </div>
-        </div>
+      {/* Tier Badge + Glowing Balance */}
+      <Card variant="glass" padding="lg" className="relative overflow-hidden">
+        {/* Tier glow background */}
+        <div
+          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse at 30% 20%, ${tierConfig.color}, transparent 70%)`,
+          }}
+        />
 
-        {/* Credit bar */}
-        <div className="h-3 bg-background rounded-full overflow-hidden mb-3 flex">
-          {subPct > 0 && (
-            <motion.div
-              className="h-full bg-near-green rounded-l-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${subPct}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            />
-          )}
-          {topupPct > 0 && (
-            <motion.div
-              className="h-full bg-accent-cyan"
-              style={{ borderRadius: subPct === 0 ? '9999px 0 0 9999px' : undefined }}
-              initial={{ width: 0 }}
-              animate={{ width: `${topupPct}%` }}
-              transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
-            />
-          )}
-        </div>
-
-        <div className="flex items-center gap-4 text-xs text-text-muted">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-near-green" />
-            Subscription: ${balance.subscriptionCredits.toFixed(2)}
+        <div className="relative">
+          {/* Tier badge */}
+          <div className="flex items-center justify-between mb-4">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border"
+              style={{
+                color: tierConfig.color,
+                borderColor: `${tierConfig.color}33`,
+                backgroundColor: `${tierConfig.color}10`,
+              }}
+            >
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: tierConfig.color }} />
+              {tierConfig.name}
+            </div>
+            <span className="text-xs text-text-muted italic">{tierConfig.tagline}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-accent-cyan" />
-            Top-up: ${balance.topupCredits.toFixed(2)}
-          </div>
-        </div>
 
-        {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/5">
-          <div className="flex items-center gap-2">
-            <TrendingDown className="w-4 h-4 text-text-muted" />
-            <div>
-              <p className="text-xs text-text-muted">Used today</p>
-              <p className="text-sm font-medium font-mono">${recentUsage.toFixed(2)}</p>
+          {/* Big glowing balance */}
+          <div className="text-center py-4">
+            <p className="text-xs text-text-muted uppercase tracking-widest mb-2">Credit Balance</p>
+            <motion.p
+              className="text-5xl font-black font-mono"
+              style={{
+                color: tierConfig.color,
+                textShadow: `0 0 30px ${tierConfig.glowColor}, 0 0 60px ${tierConfig.glowColor}`,
+              }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, type: 'spring' }}
+            >
+              ${totalCredits.toFixed(2)}
+            </motion.p>
+          </div>
+
+          {/* Credit bar — chunky */}
+          <div className="h-4 bg-background/60 rounded-full overflow-hidden mb-3 flex border border-white/[0.05]">
+            {subPct > 0 && (
+              <motion.div
+                className="h-full rounded-l-full"
+                style={{ backgroundColor: tierConfig.color }}
+                initial={{ width: 0 }}
+                animate={{ width: `${subPct}%` }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+              />
+            )}
+            {topupPct > 0 && (
+              <motion.div
+                className="h-full bg-accent-cyan"
+                style={{ borderRadius: subPct === 0 ? '9999px 0 0 9999px' : undefined }}
+                initial={{ width: 0 }}
+                animate={{ width: `${topupPct}%` }}
+                transition={{ duration: 1, delay: 0.15, ease: 'easeOut' }}
+              />
+            )}
+          </div>
+
+          <div className="flex items-center gap-4 text-xs text-text-muted">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: tierConfig.color }} />
+              Subscription: ${balance.subscriptionCredits.toFixed(2)}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-accent-cyan" />
+              Top-up: ${balance.topupCredits.toFixed(2)}
             </div>
           </div>
-          {balance.lastReset && (
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-text-muted" />
-              <div>
-                <p className="text-xs text-text-muted">Last reset</p>
-                <p className="text-sm font-medium">
-                  {new Date(balance.lastReset).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       </Card>
 
-      {/* Actions */}
+      {/* Usage Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card variant="glass" padding="md" className="text-center">
+          <TrendingDown className="w-4 h-4 mx-auto mb-1.5 text-text-muted" />
+          <p className="text-lg font-bold font-mono">${stats.usedToday.toFixed(2)}</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-wider">Used Today</p>
+        </Card>
+        <Card variant="glass" padding="md" className="text-center">
+          <Activity className="w-4 h-4 mx-auto mb-1.5 text-text-muted" />
+          <p className="text-lg font-bold font-mono">{stats.sessionsThisMonth}</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-wider">Sessions/mo</p>
+        </Card>
+        <Card variant="glass" padding="md" className="text-center">
+          <BarChart3 className="w-4 h-4 mx-auto mb-1.5 text-text-muted" />
+          <p className="text-lg font-bold font-mono">${stats.avgPerSession.toFixed(2)}</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-wider">Avg/Session</p>
+        </Card>
+      </div>
+
+      {/* Power-up Action Buttons */}
       <div className="grid grid-cols-2 gap-3">
         <Button
           variant="secondary"
           size="md"
-          className="border-near-green/20"
-          onClick={() => (window.location.href = '/pricing')}
+          className="border-accent-cyan/30 hover:border-accent-cyan/60 hover:shadow-[0_0_20px_rgba(0,212,255,0.15)] transition-all group"
+          onClick={() => (window.location.href = '/pricing#topup')}
         >
-          <Sparkles className="w-4 h-4 text-near-green" />
-          Upgrade
+          <Zap className="w-4 h-4 text-accent-cyan group-hover:animate-pulse" />
+          Recharge
         </Button>
         <Button
           variant="secondary"
           size="md"
-          className="border-accent-cyan/20"
-          onClick={() => (window.location.href = '/pricing#topup')}
+          className="hover:shadow-[0_0_20px_rgba(0,236,151,0.15)] transition-all group"
+          style={{ borderColor: `${tierConfig.color}30` }}
+          onClick={() => (window.location.href = '/pricing')}
         >
-          <Zap className="w-4 h-4 text-accent-cyan" />
-          Top Up
+          <Rocket className="w-4 h-4 group-hover:animate-bounce" style={{ color: tierConfig.color }} />
+          Upgrade Plan
         </Button>
       </div>
 
       {/* Recent Transactions */}
       {transactions.length > 0 && (
-        <Card padding="none">
-          <div className="px-4 py-3 border-b border-border">
-            <p className="text-sm font-medium">Recent Activity</p>
+        <Card variant="glass" padding="none">
+          <div className="px-4 py-3 border-b border-white/[0.05]">
+            <p className="text-sm font-medium text-text-secondary">Recent Activity</p>
           </div>
-          <div className="divide-y divide-border/50">
+          <div className="divide-y divide-white/[0.03]">
             {transactions.slice(0, 5).map((tx) => (
               <div key={tx.id} className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
