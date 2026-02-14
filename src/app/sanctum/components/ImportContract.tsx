@@ -25,12 +25,190 @@ export interface ExtractedMethod {
 
 type ImportMode = 'address' | 'code' | 'file';
 
+// NEAR RPC helpers
+const NEAR_RPC_URLS: Record<string, string> = {
+  mainnet: 'https://rpc.mainnet.near.org',
+  testnet: 'https://rpc.testnet.near.org',
+};
+
+// Internal method names to filter out from WASM exports
+const INTERNAL_METHODS = new Set([
+  'memory', '__data_end', '__heap_base', '__indirect_function_table',
+  '_start', '__wasm_call_ctors', 'allocate', 'deallocate',
+  'register_len', 'read_register', 'current_account_id',
+  'signer_account_id', 'signer_account_pk', 'predecessor_account_id',
+  'input', 'block_index', 'block_timestamp', 'epoch_height',
+  'storage_usage', 'account_balance', 'account_locked_balance',
+  'attached_deposit', 'prepaid_gas', 'used_gas', 'random_seed',
+  'sha256', 'keccak256', 'keccak512', 'ripemd160', 'ecrecover',
+  'value_return', 'panic', 'panic_utf8', 'log', 'log_utf8',
+  'promise_create', 'promise_then', 'promise_and', 'promise_batch_create',
+  'promise_batch_then', 'promise_batch_action_create_account',
+  'promise_batch_action_deploy_contract', 'promise_batch_action_function_call',
+  'promise_batch_action_function_call_weight',
+  'promise_batch_action_transfer', 'promise_batch_action_stake',
+  'promise_batch_action_add_key_with_full_access',
+  'promise_batch_action_add_key_with_function_call',
+  'promise_batch_action_delete_key', 'promise_batch_action_delete_account',
+  'promise_results_count', 'promise_result', 'promise_return',
+  'storage_write', 'storage_read', 'storage_remove', 'storage_has_key',
+  'validator_stake', 'validator_total_stake', 'alt_bn128_g1_multiexp',
+  'alt_bn128_g1_sum', 'alt_bn128_pairing_check',
+]);
+
+// View method heuristics — names that typically indicate read-only methods
+const VIEW_METHOD_PREFIXES = ['get_', 'view_', 'is_', 'has_', 'check_', 'ft_balance_of', 'ft_total_supply', 'ft_metadata', 'nft_token', 'nft_tokens', 'nft_supply', 'nft_metadata', 'storage_balance_of'];
+
+async function nearRpcCall(network: string, method: string, params: Record<string, unknown>): Promise<unknown> {
+  const rpcUrl = NEAR_RPC_URLS[network];
+  const response = await fetch(rpcUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: '1',
+      method,
+      params,
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`RPC request failed: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+async function validateAccount(network: string, accountId: string): Promise<boolean> {
+  try {
+    const result = await nearRpcCall(network, 'query', {
+      request_type: 'view_account',
+      finality: 'final',
+      account_id: accountId,
+    }) as { result?: { code_hash?: string }; error?: unknown };
+    
+    if (result.error) return false;
+    return !!result.result;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchContractAbi(network: string, accountId: string): Promise<ExtractedMethod[] | null> {
+  try {
+    const result = await nearRpcCall(network, 'query', {
+      request_type: 'call_function',
+      finality: 'final',
+      account_id: accountId,
+      method_name: '__contract_abi',
+      args_base64: '',
+    }) as { result?: { result?: number[] }; error?: unknown };
+    
+    if (result.error || !result.result?.result) return null;
+    
+    // Decode the result (array of bytes → string → JSON)
+    const bytes = new Uint8Array(result.result.result);
+    const text = new TextDecoder().decode(bytes);
+    const abi = JSON.parse(text);
+    
+    const methods: ExtractedMethod[] = [];
+    
+    // ABI schema: body.functions[]
+    const functions = abi?.body?.functions || abi?.functions || [];
+    for (const fn of functions) {
+      if (!fn.name) continue;
+      const args = (fn.params?.args || fn.params || [])
+        .map((a: { name?: string }) => a.name)
+        .filter(Boolean) as string[];
+      const isView = fn.kind === 'view' || fn.is_view === true;
+      methods.push({ name: fn.name, isView, args });
+    }
+    
+    return methods.length > 0 ? methods : null;
+  } catch {
+    return null;
+  }
+}
+
+function extractMethodNamesFromWasm(base64Code: string): string[] {
+  try {
+    // Decode base64 to binary string
+    const binaryStr = atob(base64Code);
+    
+    // Search for readable ASCII strings that look like method names
+    // WASM exports contain method names as readable strings
+    const methodNames: string[] = [];
+    let currentStr = '';
+    
+    for (let i = 0; i < binaryStr.length; i++) {
+      const charCode = binaryStr.charCodeAt(i);
+      // Printable ASCII range for method names: letters, digits, underscore
+      if ((charCode >= 97 && charCode <= 122) || // a-z
+          (charCode >= 65 && charCode <= 90) ||  // A-Z
+          (charCode >= 48 && charCode <= 57) ||  // 0-9
+          charCode === 95) {                      // _
+        currentStr += binaryStr[i];
+      } else {
+        if (currentStr.length >= 3 && currentStr.length <= 64) {
+          // Filter: must contain at least one lowercase letter (not just constants)
+          if (/[a-z]/.test(currentStr) && !INTERNAL_METHODS.has(currentStr)) {
+            methodNames.push(currentStr);
+          }
+        }
+        currentStr = '';
+      }
+    }
+    
+    // Deduplicate and filter for likely method names
+    const unique = [...new Set(methodNames)];
+    
+    // Heuristic: keep names that look like Rust/NEAR method names
+    return unique.filter(name => {
+      // Must start with a letter or underscore
+      if (!/^[a-z_]/.test(name)) return false;
+      // Must be snake_case or simple name
+      if (!/^[a-z][a-z0-9_]*$/.test(name)) return false;
+      // Filter out likely internal strings
+      if (name.startsWith('rust_') || name.startsWith('wasm_') || name.startsWith('alloc_')) return false;
+      if (name === 'main' || name === 'abort' || name === 'handle_result') return false;
+      return true;
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function fetchContractMethodsFromWasm(network: string, accountId: string): Promise<ExtractedMethod[] | null> {
+  try {
+    const result = await nearRpcCall(network, 'query', {
+      request_type: 'view_code',
+      finality: 'final',
+      account_id: accountId,
+    }) as { result?: { code_base64?: string }; error?: unknown };
+    
+    if (result.error || !result.result?.code_base64) return null;
+    
+    const methodNames = extractMethodNamesFromWasm(result.result.code_base64);
+    
+    if (methodNames.length === 0) return null;
+    
+    return methodNames.map(name => ({
+      name,
+      isView: VIEW_METHOD_PREFIXES.some(prefix => name.startsWith(prefix)),
+      args: [], // Can't determine args from WASM alone
+    }));
+  } catch {
+    return null;
+  }
+}
+
 export function ImportContract({ onImport, onCancel }: ImportContractProps) {
   const [mode, setMode] = useState<ImportMode>('address');
   const [address, setAddress] = useState('');
   const [code, setCode] = useState('');
   const [network, setNetwork] = useState<'testnet' | 'mainnet'>('testnet');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<ImportedContract | null>(null);
 
@@ -50,6 +228,7 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
   const analyzeContract = async () => {
     setIsAnalyzing(true);
     setError(null);
+    setLoadingStatus('');
 
     try {
       if (mode === 'address') {
@@ -58,19 +237,39 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
           throw new Error('Please enter a valid NEAR contract address (e.g., contract.testnet)');
         }
 
-        // In production, we'd fetch the contract ABI from the chain
-        // For now, we'll create a placeholder that prompts for code
+        // Step 1: Validate the account exists on-chain
+        setLoadingStatus('Checking account on-chain...');
+        const accountExists = await validateAccount(network, address);
+        if (!accountExists) {
+          throw new Error(`Account "${address}" not found on ${network}. Check the address and network.`);
+        }
+
+        // Step 2: Try to fetch ABI
+        setLoadingStatus('Looking for contract ABI...');
+        let methods = await fetchContractAbi(network, address);
+        
+        // Step 3: Fallback — extract from WASM binary
+        if (!methods) {
+          setLoadingStatus('No ABI found. Analyzing WASM binary for methods...');
+          methods = await fetchContractMethodsFromWasm(network, address);
+        }
+
+        // Step 4: If all failed, show helpful message
+        if (!methods || methods.length === 0) {
+          throw new Error(
+            "Couldn't auto-detect methods from on-chain data. This contract may not export ABI metadata. " +
+            "Try pasting the contract source code instead for full analysis."
+          );
+        }
+
         const result: ImportedContract = {
           source: 'address',
           address,
           name: address.split('.')[0],
           network,
-          methods: [], // Would be populated from chain query
+          methods,
         };
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
         setAnalysisResult(result);
         
       } else {
@@ -290,7 +489,7 @@ pub struct Contract {
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Analyzing...
+                {loadingStatus || 'Analyzing...'}
               </>
             ) : (
               <>
