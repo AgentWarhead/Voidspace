@@ -190,7 +190,7 @@ export function SanctumLanding({
             </div>
             <div className="flex items-center gap-2">
               <Rocket className="w-4 h-4 text-cyan-400" />
-              <span>One-Click Deploy</span>
+              <span>Testnet Ready</span>
             </div>
           </div>
           <p className="text-center text-[11px] text-text-muted/50 mt-4">
