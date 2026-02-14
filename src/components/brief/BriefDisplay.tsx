@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Lightbulb,
@@ -21,6 +21,7 @@ import {
   Rocket,
   Coins,
   Share2,
+  Heart,
 } from 'lucide-react';
 import { Badge, Button } from '@/components/ui';
 import { BriefSection } from './BriefSection';
@@ -28,16 +29,79 @@ import { useToast } from '@/contexts/ToastContext';
 import { storeBriefForSanctum } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
 
+// ── Local storage helpers for saving briefs ──
+const SAVED_BRIEFS_KEY = 'voidspace-saved-briefs';
+
+function getBriefFingerprint(brief: ProjectBrief): string {
+  // Create a stable fingerprint from the brief content
+  const raw = `${(brief.projectNames ?? []).join('|')}::${brief.problemStatement ?? ''}`;
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return `brief_${Math.abs(hash).toString(36)}`;
+}
+
+function getSavedBriefs(): Record<string, { brief: ProjectBrief; savedAt: string }> {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_BRIEFS_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function saveBriefToLocal(brief: ProjectBrief): void {
+  const id = getBriefFingerprint(brief);
+  const saved = getSavedBriefs();
+  saved[id] = { brief, savedAt: new Date().toISOString() };
+  localStorage.setItem(SAVED_BRIEFS_KEY, JSON.stringify(saved));
+}
+
+function removeBriefFromLocal(brief: ProjectBrief): void {
+  const id = getBriefFingerprint(brief);
+  const saved = getSavedBriefs();
+  delete saved[id];
+  localStorage.setItem(SAVED_BRIEFS_KEY, JSON.stringify(saved));
+}
+
+function isBriefSavedLocally(brief: ProjectBrief): boolean {
+  const id = getBriefFingerprint(brief);
+  return id in getSavedBriefs();
+}
+
 interface BriefDisplayProps {
   brief: ProjectBrief;
   /** Optional callback when user clicks "Build in Sanctum" (used on Sanctum page itself) */
   onStartBuild?: (brief: ProjectBrief) => void;
+  /** Optional opportunity ID — if provided, uses database-backed save via SaveButton */
+  opportunityId?: string;
 }
 
-export function BriefDisplay({ brief, onStartBuild }: BriefDisplayProps) {
+export function BriefDisplay({ brief, onStartBuild, opportunityId }: BriefDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
   const router = useRouter();
   const { addToast } = useToast();
+
+  // Check saved state on mount
+  useEffect(() => {
+    setIsFavorited(isBriefSavedLocally(brief));
+  }, [brief]);
+
+  const toggleFavorite = useCallback(() => {
+    if (isFavorited) {
+      removeBriefFromLocal(brief);
+      setIsFavorited(false);
+      addToast('Removed from favorites', 'success');
+    } else {
+      saveBriefToLocal(brief);
+      setIsFavorited(true);
+      addToast('Saved to favorites ❤️', 'success');
+    }
+  }, [isFavorited, brief, addToast]);
 
   // Defensive: ensure all expected arrays exist
   const projectNames = brief.projectNames ?? [];
@@ -148,6 +212,18 @@ export function BriefDisplay({ brief, onStartBuild }: BriefDisplayProps) {
           </div>
         </div>
         <div className="flex gap-1 shrink-0">
+          <button
+            onClick={toggleFavorite}
+            className={`p-2 rounded-lg transition-all hover:scale-110 ${
+              isFavorited
+                ? 'text-red-400 hover:text-red-300 bg-red-400/10'
+                : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+            }`}
+            title={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
+            aria-label={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
+          >
+            <Heart className={`w-4 h-4 transition-transform ${isFavorited ? 'fill-current' : ''}`} />
+          </button>
           <Button
             variant="ghost"
             size="sm"
