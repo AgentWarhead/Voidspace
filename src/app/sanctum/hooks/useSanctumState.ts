@@ -387,7 +387,10 @@ export function useSanctumState() {
   const [state, dispatch] = useReducer(sanctumReducer, undefined, getInitialState);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced save to localStorage after every state change
+  // Save to localStorage after every state change (debounced, but flush on unmount)
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   useEffect(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
@@ -395,8 +398,23 @@ export function useSanctumState() {
     }, 500);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      // Flush save immediately on unmount — never lose state
+      savePersistedState(stateRef.current);
     };
   }, [state]);
+
+  // Also save on page unload (back button, tab close, etc.)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      savePersistedState(stateRef.current);
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+    };
+  }, []);
 
   // Handle body scroll lock when session is active
   useEffect(() => {

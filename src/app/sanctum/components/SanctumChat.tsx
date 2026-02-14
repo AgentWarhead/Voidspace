@@ -221,7 +221,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     }
   };
 
-  // Debounced save messages to localStorage
+  // Save messages to localStorage (debounced, but flush on unmount)
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
   useEffect(() => {
     if (messages.length === 0) return;
     if (saveMsgTimerRef.current) clearTimeout(saveMsgTimerRef.current);
@@ -234,8 +237,31 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     }, 500);
     return () => {
       if (saveMsgTimerRef.current) clearTimeout(saveMsgTimerRef.current);
+      // Flush save immediately on unmount — never lose messages
+      if (typeof window !== 'undefined' && messagesRef.current.length > 0) {
+        try {
+          localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messagesRef.current));
+        } catch { /* ignore */ }
+      }
     };
   }, [messages]);
+
+  // Also save on page unload (back button, tab close, navigation)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (messagesRef.current.length > 0) {
+        try {
+          localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messagesRef.current));
+        } catch { /* ignore */ }
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+    };
+  }, []);
 
   // Save persona to localStorage
   useEffect(() => {
