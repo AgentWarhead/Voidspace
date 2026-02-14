@@ -77,6 +77,34 @@ interface SanctumChatProps {
   onThinkingChange?: (thinking: boolean) => void;
   onQuizAnswer?: (correct: boolean) => void;
   onConceptLearned?: (concept: { title: string; category: string; difficulty: string }) => void;
+  sessionReset?: number; // increment to signal reset from parent
+}
+
+// --- localStorage persistence for chat ---
+const CHAT_MESSAGES_KEY = 'sanctum-chat-messages';
+const CHAT_PERSONA_KEY = 'sanctum-chat-persona';
+
+function loadSavedMessages(): Message[] | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(CHAT_MESSAGES_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function loadSavedPersona(): Persona | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const id = localStorage.getItem(CHAT_PERSONA_KEY);
+    if (!id) return null;
+    return getPersona(id);
+  } catch {
+    return null;
+  }
 }
 
 // Category-specific starter prompts
@@ -99,9 +127,11 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, sessionReset }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS.shade);
+  const [currentPersona, setCurrentPersona] = useState<Persona>(() => loadSavedPersona() || PERSONAS.shade);
+  const messagesRestoredRef = useRef(false);
+  const saveMsgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
@@ -191,6 +221,45 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     }
   };
 
+  // Debounced save messages to localStorage
+  useEffect(() => {
+    if (messages.length === 0) return;
+    if (saveMsgTimerRef.current) clearTimeout(saveMsgTimerRef.current);
+    saveMsgTimerRef.current = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messages));
+        } catch { /* ignore */ }
+      }
+    }, 500);
+    return () => {
+      if (saveMsgTimerRef.current) clearTimeout(saveMsgTimerRef.current);
+    };
+  }, [messages]);
+
+  // Save persona to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(CHAT_PERSONA_KEY, currentPersona.id);
+      } catch { /* ignore */ }
+    }
+  }, [currentPersona]);
+
+  // Handle session reset from parent
+  useEffect(() => {
+    if (sessionReset && sessionReset > 0) {
+      setMessages([]);
+      messagesRestoredRef.current = false;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem(CHAT_MESSAGES_KEY);
+          localStorage.removeItem(CHAT_PERSONA_KEY);
+        } catch { /* ignore */ }
+      }
+    }
+  }, [sessionReset]);
+
   // Handle file selection
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -238,8 +307,18 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     setAttachedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Initialize with category-specific starter
+  // Initialize with category-specific starter (or restore from localStorage)
   useEffect(() => {
+    // Try to restore messages from localStorage first
+    if (!messagesRestoredRef.current) {
+      messagesRestoredRef.current = true;
+      const saved = loadSavedMessages();
+      if (saved && saved.length > 0) {
+        setMessages(saved);
+        return; // Skip initial message setup — we have restored messages
+      }
+    }
+
     // For template walkthroughs, skip the greeting — go straight to user message
     if (autoMessage && !autoMessageSentRef.current) {
       autoMessageSentRef.current = true;

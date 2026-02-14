@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useEffect } from 'react';
+import { useReducer, useCallback, useEffect, useRef } from 'react';
 import { Achievement, ACHIEVEMENTS } from '../components/AchievementPopup';
 import { CurrentTask } from '../components/TaskProgressInline';
 import { DeployedContract, saveDeployment } from '../components/DeploymentHistory';
@@ -7,6 +7,66 @@ import { generateSessionId } from '../components/PairProgramming';
 
 import { ChatMode } from '../components/ModeSelector';
 import { LearnedConcept } from '../components/KnowledgeTracker';
+
+// --- localStorage persistence helpers ---
+const STORAGE_KEY = 'sanctum-session-state';
+
+const PERSISTED_FIELDS = [
+  'mode', 'selectedCategory', 'customPrompt', 'sessionStarted',
+  'generatedCode', 'tokensUsed', 'tokenBalance', 'sanctumStage',
+  'messageCount', 'chatMode', 'conceptsLearned', 'quizScore',
+  'contractsBuilt', 'scratchDescription', 'scratchGeneratedCode',
+  'scratchTemplate', 'showScratchSession', 'unlockedAchievements',
+] as const;
+
+interface PersistedState {
+  [key: string]: unknown;
+  unlockedAchievements?: string[];
+}
+
+function loadPersistedState(): Partial<SanctumState> | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed: PersistedState = JSON.parse(raw);
+    // Convert unlockedAchievements back to Set
+    if (Array.isArray(parsed.unlockedAchievements)) {
+      (parsed as Record<string, unknown>).unlockedAchievements = new Set<string>(parsed.unlockedAchievements);
+    }
+    return parsed as Partial<SanctumState>;
+  } catch {
+    return null;
+  }
+}
+
+function savePersistedState(state: SanctumState): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const subset: Record<string, unknown> = {};
+    for (const key of PERSISTED_FIELDS) {
+      if (key === 'unlockedAchievements') {
+        subset[key] = Array.from(state.unlockedAchievements);
+      } else {
+        subset[key] = state[key];
+      }
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(subset));
+  } catch {
+    // quota exceeded or private mode — silently ignore
+  }
+}
+
+export function clearPersistedSession(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('sanctum-chat-messages');
+    localStorage.removeItem('sanctum-chat-persona');
+  } catch {
+    // ignore
+  }
+}
 
 type SanctumStage = 'idle' | 'thinking' | 'generating' | 'complete';
 type SanctumMode = 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
@@ -104,7 +164,7 @@ type SanctumAction =
   | { type: 'START_CODE_GENERATION'; payload: string }
   | { type: 'COMPLETE_CODE_GENERATION' };
 
-const initialState: SanctumState = {
+const defaultState: SanctumState = {
   mode: 'build',
   selectedCategory: null,
   customPrompt: '',
@@ -147,6 +207,12 @@ const initialState: SanctumState = {
   scratchGeneratedCode: '',
   scratchTemplate: null,
 };
+
+function getInitialState(): SanctumState {
+  const persisted = loadPersistedState();
+  if (!persisted) return defaultState;
+  return { ...defaultState, ...persisted };
+}
 
 function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumState {
   switch (action.type) {
@@ -295,20 +361,13 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
       return { ...state, scratchTemplate: action.payload };
     
     case 'RESET_SESSION':
+      clearPersistedSession();
       return {
-        ...state,
-        sessionStarted: false,
-        selectedCategory: null,
-        generatedCode: '',
-        sanctumStage: 'idle',
-        isGenerating: false,
-        currentTask: null,
-        isThinking: false,
-        deployError: null,
-        showScratchSession: false,
-        scratchDescription: '',
-        scratchGeneratedCode: '',
-        scratchTemplate: null,
+        ...defaultState,
+        // Keep persistent progress stats
+        unlockedAchievements: state.unlockedAchievements,
+        soundEnabled: state.soundEnabled,
+        deployCount: state.deployCount,
       };
     
     case 'START_CODE_GENERATION':
@@ -332,7 +391,19 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
 }
 
 export function useSanctumState() {
-  const [state, dispatch] = useReducer(sanctumReducer, initialState);
+  const [state, dispatch] = useReducer(sanctumReducer, undefined, getInitialState);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced save to localStorage after every state change
+  useEffect(() => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      savePersistedState(state);
+    }, 500);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [state]);
 
   // Handle body scroll lock when session is active
   useEffect(() => {

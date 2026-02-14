@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
@@ -30,11 +30,11 @@ import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 import { ScratchWebappSession } from './components/ScratchWebappSession';
 import { ScratchTemplates, SCRATCH_TEMPLATES } from './components/ScratchTemplates';
-import { useSanctumState } from './hooks/useSanctumState';
+import { useSanctumState, clearPersistedSession } from './hooks/useSanctumState';
 import { useWallet } from '@/hooks/useWallet';
 import { consumeStoredBrief, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 // @ts-ignore
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight, Wand2 } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight, Wand2, RefreshCw } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 import { BuilderShowcase } from './components/BuilderShowcase';
@@ -111,6 +111,15 @@ function SanctumPageInner() {
     handleShareFromHistory,
     handleRemixFromHistory,
   } = useSanctumState();
+
+  // Counter to signal chat component to reset
+  const [sessionResetCounter, setSessionResetCounter] = useState(0);
+
+  const handleNewSession = useCallback(() => {
+    clearPersistedSession();
+    dispatch({ type: 'RESET_SESSION' });
+    setSessionResetCounter(c => c + 1);
+  }, [dispatch]);
 
   // Auto-start session when template query param is present AND wallet is connected
   useEffect(() => {
@@ -978,6 +987,14 @@ function SanctumPageInner() {
                   </h2>
                   <p className="text-sm text-text-muted">Chat with Sanctum to forge your contract</p>
                 </div>
+                <button
+                  onClick={handleNewSession}
+                  className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted hover:text-near-green rounded-lg hover:bg-white/[0.05] transition-all"
+                  title="Start a new session"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">New Session</span>
+                </button>
               </div>
               
               {/* Desktop controls */}
@@ -1047,6 +1064,7 @@ function SanctumPageInner() {
                       onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
                       onQuizAnswer={(correct) => dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } })}
                       onConceptLearned={(c) => dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c })}
+                      sessionReset={sessionResetCounter}
                     />
                   </div>
                 </GlassPanel>
@@ -1180,6 +1198,7 @@ function SanctumPageInner() {
                         onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
                         onQuizAnswer={(correct) => dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } })}
                         onConceptLearned={(c) => dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c })}
+                        sessionReset={sessionResetCounter}
                       />
                     </div>
                   </GlassPanel>
