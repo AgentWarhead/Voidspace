@@ -46,7 +46,7 @@ interface SanctumWizardProps {
 }
 
 type WizardStep = 'goal' | 'details' | 'persona';
-type GoalChoice = 'deploy-first' | 'learn' | 'build-specific' | 'idea' | 'existing-code' | 'visual' | 'discover';
+type GoalChoice = 'deploy-first' | 'learn' | 'idea' | 'existing-code' | 'visual' | 'discover';
 type ExistingCodeSub = 'roast' | 'webapp' | null;
 
 export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected = false, openModal = () => {}, hasSavedSession = false, savedSessionInfo, onResumeSession }: SanctumWizardProps) {
@@ -87,8 +87,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
       setSelectedCategory('meme-tokens');
       goForward('persona');
     } else if (choice === 'learn') {
-      goForward('details');
-    } else if (choice === 'build-specific') {
       goForward('details');
     } else if (choice === 'idea') {
       goForward('details');
@@ -157,11 +155,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
     } else if (goal === 'learn') {
       config.mode = 'build';
       config.chatMode = 'learn';
-      config.category = selectedCategory;
-      config.customPrompt = state.customPrompt || undefined;
-    } else if (goal === 'build-specific') {
-      config.mode = 'build';
-      config.chatMode = 'build';
       config.category = selectedCategory;
       config.customPrompt = state.customPrompt || undefined;
     } else if (goal === 'idea') {
@@ -305,25 +298,17 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 />
               </div>
 
-              {/* Middle 2 cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-4xl mx-auto mb-5">
+              {/* Learn card — full width */}
+              <div className="max-w-4xl mx-auto mb-5">
                 <GoalCard
                   emoji="📚"
                   title="Learn NEAR & Rust"
-                  description="Structured learning with 66 interactive modules. AI teaches you while you build real projects."
+                  description="Structured learning with 66 interactive modules. Pick a contract category and build real projects with AI guidance."
                   color="cyan"
+                  wide
                   delay={160}
                   onClick={() => handleGoalSelect('learn')}
                   selected={goal === 'learn'}
-                />
-                <GoalCard
-                  emoji="🔨"
-                  title="Build something specific"
-                  description="Pick a contract category and dive in. For developers who know what they want."
-                  color="green"
-                  delay={240}
-                  onClick={() => handleGoalSelect('build-specific')}
-                  selected={goal === 'build-specific'}
                 />
               </div>
 
@@ -400,16 +385,14 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
           {step === 'details' && (
             <Container size="xl" className="py-8 px-4">
               {/* Build mode — Category Picker */}
-              {(goal === 'learn' || goal === 'build-specific') && (
+              {goal === 'learn' && (
                 <>
                   <div className="text-center mb-8">
                     <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                       Choose a <GradientText>category</GradientText>
                     </h2>
                     <p className="text-text-muted text-sm">
-                      {goal === 'learn'
-                        ? 'Pick a contract type to learn about'
-                        : 'What are you building?'}
+                      Pick a contract type to learn about
                     </p>
                   </div>
                   <CategoryPicker
