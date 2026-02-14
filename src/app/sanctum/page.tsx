@@ -747,11 +747,11 @@ function SanctumPageInner() {
                             Visual Generator
                           </h3>
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-purple-500/15 text-purple-400 border border-purple-500/25">
-                            AI-Powered
+                            🍌 Nano Banana Pro Powered
                           </span>
                         </div>
                         <p className="text-sm md:text-base text-text-secondary leading-relaxed max-w-xl">
-                          Generate stunning architecture diagrams, user flows, infographics, and social graphics for your NEAR project — all AI-powered, production-ready.
+                          Generate stunning architecture diagrams, user flows, infographics, and social graphics for your NEAR project — all Nano Banana Pro powered, production-ready.
                         </p>
                       </div>
 
