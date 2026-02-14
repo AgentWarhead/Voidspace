@@ -10,7 +10,7 @@ import { PERSONA_LIST } from '../lib/personas';
 import { storeBriefForSanctum, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
 // @ts-ignore
-import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles, Search } from 'lucide-react';
+import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles, Search, MessageSquare, Play } from 'lucide-react';
 
 export interface WizardConfig {
   mode: 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
@@ -20,6 +20,13 @@ export interface WizardConfig {
   persona?: string;
   scratchDescription?: string;
   scratchTemplate?: string | null;
+}
+
+interface SavedSessionInfo {
+  mode?: string;
+  selectedCategory?: string;
+  messageCount?: number;
+  tokensUsed?: number;
 }
 
 interface SanctumWizardProps {
@@ -33,13 +40,16 @@ interface SanctumWizardProps {
   };
   isConnected?: boolean;
   openModal?: () => void;
+  hasSavedSession?: boolean;
+  savedSessionInfo?: SavedSessionInfo | null;
+  onResumeSession?: () => void;
 }
 
 type WizardStep = 'goal' | 'details' | 'persona';
 type GoalChoice = 'deploy-first' | 'learn' | 'build-specific' | 'idea' | 'existing-code' | 'visual' | 'discover';
 type ExistingCodeSub = 'roast' | 'webapp' | null;
 
-export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected = false, openModal = () => {} }: SanctumWizardProps) {
+export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected = false, openModal = () => {}, hasSavedSession = false, savedSessionInfo, onResumeSession }: SanctumWizardProps) {
   const [step, setStep] = useState<WizardStep>('goal');
   const [goal, setGoal] = useState<GoalChoice | null>(null);
   const [existingCodeSub, setExistingCodeSub] = useState<ExistingCodeSub>(null);
@@ -229,6 +239,44 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 </h2>
                 <p className="text-text-muted text-base max-w-md mx-auto" style={{ animation: 'sanctumFadeInUp 0.4s ease-out 0.1s backwards' }}>Every great project starts with a single choice</p>
               </div>
+
+              {/* Resume existing session */}
+              {hasSavedSession && onResumeSession && (
+                <div className="max-w-4xl mx-auto mb-6" style={{ animation: 'sanctumFadeInUp 0.4s ease-out backwards' }}>
+                  <button
+                    onClick={onResumeSession}
+                    className="w-full group relative overflow-hidden rounded-2xl border-2 border-purple-500/30 bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-transparent p-5 text-left transition-all duration-300 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
+                        <Play className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-purple-300 mb-0.5">
+                          Continue existing project
+                        </h3>
+                        <p className="text-sm text-text-muted flex items-center gap-2">
+                          {savedSessionInfo?.selectedCategory && (
+                            <span className="capitalize">{savedSessionInfo.selectedCategory.replace('-', ' ')}</span>
+                          )}
+                          {savedSessionInfo?.messageCount ? (
+                            <>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="w-3 h-3" />
+                                {savedSessionInfo.messageCount} messages
+                              </span>
+                            </>
+                          ) : null}
+                          <span>•</span>
+                          <span>Pick up where you left off</span>
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-purple-400 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </button>
+                </div>
+              )}
 
               {/* Top 2 cards — featured row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-4xl mx-auto mb-5">

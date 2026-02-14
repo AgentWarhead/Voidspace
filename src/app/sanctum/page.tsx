@@ -410,6 +410,9 @@ function SanctumPageInner() {
           state={state}
           isConnected={isConnected}
           openModal={openModal}
+          hasSavedSession={hasSavedSession}
+          savedSessionInfo={savedSessionInfo}
+          onResumeSession={handleResumeSession}
         />
       )}
 
