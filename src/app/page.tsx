@@ -56,10 +56,10 @@ export default async function DashboardPage() {
       <Container size="xl" className="py-8 space-y-16">
         {/* SECTION 3: Priority Voids */}
         <section>
-          <SectionHeader title="Here's what NEAR needs" badge="AI ANALYZED" />
+          <SectionHeader title="Here's what NEAR needs" badge="NEARCON TRACKS" />
           <div className="mb-8">
             <p className="text-text-secondary max-w-3xl mx-auto text-center">
-              Our AI continuously scans the NEAR ecosystem to identify critical gaps where innovation is needed most. These voids represent the highest-impact opportunities for builders to make their mark.
+              Explore the highest-impact voids aligned with Nearcon Innovation Sandbox prize tracks. Each track maps to real ecosystem gaps where builders can win.
             </p>
           </div>
           <PriorityVoids categories={categories} opportunities={opportunities} />

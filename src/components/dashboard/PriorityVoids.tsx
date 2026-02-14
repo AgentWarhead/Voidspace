@@ -3,16 +3,48 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Badge } from '@/components/ui';
-import { GradientText } from '@/components/effects/GradientText';
-import { ScanLine } from '@/components/effects/ScanLine';
 import { cn } from '@/lib/utils';
 import type { CategoryWithStats, Opportunity } from '@/types';
 
-interface PriorityVoidsProps {
-  categories: CategoryWithStats[];
-  opportunities: Opportunity[];
+/* ── Prize Track Config ─────────────────────────────────── */
+
+interface PrizeTrack {
+  name: string;
+  icon: string;
+  description: string;
+  categorySlugs: string[];
 }
+
+const PRIZE_TRACKS: PrizeTrack[] = [
+  {
+    name: 'The Private Web & Private Life',
+    icon: '🔒',
+    description:
+      'Build consumer apps or Web3 widgets where privacy is the default across finance, assets, identity, and user data.',
+    categorySlugs: ['privacy', 'wallets'],
+  },
+  {
+    name: 'AI That Works for You',
+    icon: '🤖',
+    description:
+      'Leverage NEAR\'s AI stack, including private cloud, private chat, Shade Agents, and agentic payments to build user-owned AI.',
+    categorySlugs: ['ai-agents'],
+  },
+  {
+    name: 'Open Society: Finance → Real World',
+    icon: '🌐',
+    description:
+      'Build solutions that integrate stablecoins, tokenized assets, and NEAR Intents, or products that turn real-world facts into reliable on-chain outcomes.',
+    categorySlugs: ['rwa', 'defi', 'intents'],
+  },
+  {
+    name: 'Only on NEAR',
+    icon: '⚡',
+    description:
+      'Exceptional use of NEAR-native capabilities such as account model, global contracts, chain abstraction, off-chain computation patterns, and Shade Agents.',
+    categorySlugs: ['chain-signatures', 'bridges', 'dev-tools'],
+  },
+];
 
 /* ── Score utilities ────────────────────────────────────── */
 
@@ -22,32 +54,26 @@ function getScoreTheme(score: number) {
       text: 'text-accent-cyan',
       ring: 'stroke-accent-cyan',
       glow: 'rgba(0,212,255,0.35)',
-      glowSoft: 'rgba(0,212,255,0.08)',
       gradient: 'from-accent-cyan/8 via-transparent to-near-green/6',
       border: 'border-accent-cyan/20 hover:border-accent-cyan/40',
       badge: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/25',
-      emojiGlow: '0 0 20px rgba(0,212,255,0.4), 0 0 40px rgba(0,212,255,0.15)',
     };
   if (score >= 60)
     return {
       text: 'text-warning',
       ring: 'stroke-warning',
       glow: 'rgba(255,165,2,0.30)',
-      glowSoft: 'rgba(255,165,2,0.06)',
       gradient: 'from-warning/8 via-transparent to-amber-400/5',
       border: 'border-warning/20 hover:border-warning/40',
       badge: 'bg-warning/10 text-warning border-warning/25',
-      emojiGlow: '0 0 18px rgba(255,165,2,0.35), 0 0 36px rgba(255,165,2,0.12)',
     };
   return {
     text: 'text-text-muted',
     ring: 'stroke-text-muted',
     glow: 'rgba(136,136,136,0.15)',
-    glowSoft: 'rgba(136,136,136,0.04)',
     gradient: 'from-white/[0.03] via-transparent to-white/[0.02]',
     border: 'border-border-primary/40 hover:border-border-hover',
     badge: 'bg-white/5 text-text-muted border-white/10',
-    emojiGlow: '0 0 12px rgba(136,136,136,0.2)',
   };
 }
 
@@ -57,7 +83,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   advanced: 'text-rose-400 bg-rose-400/10 border-rose-400/25',
 };
 
-/* ── Mini ScoreRing (compact for category cards) ───────── */
+/* ── Mini ScoreRing ─────────────────────────────────────── */
 
 function MiniScoreRing({ score, size = 36 }: { score: number; size?: number }) {
   const theme = getScoreTheme(score);
@@ -93,104 +119,105 @@ function MiniScoreRing({ score, size = 36 }: { score: number; size?: number }) {
 
 const container = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+  show: { opacity: 1, transition: { staggerChildren: 0.12 } },
 };
 
-const item = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+const cardVariant = {
+  hidden: { opacity: 0, y: 24, scale: 0.96 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
+    transition: { type: 'spring' as const, stiffness: 240, damping: 22 },
   },
 };
+
+/* ── Props ──────────────────────────────────────────────── */
+
+interface PriorityVoidsProps {
+  categories: CategoryWithStats[];
+  opportunities: Opportunity[];
+}
 
 /* ── Main component ────────────────────────────────────── */
 
 export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps) {
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [expandedTrack, setExpandedTrack] = useState<number | null>(null);
 
-  const oppsByCategory =
-    opportunities?.reduce<Record<string, Opportunity[]>>((acc, opp) => {
-      const catId = opp?.category_id;
-      if (!catId) return acc;
-      if (!acc[catId]) acc[catId] = [];
-      acc[catId].push(opp);
-      return acc;
-    }, {}) ?? {};
+  // Build lookup: slug → category
+  const catBySlug = (categories ?? []).reduce<Record<string, CategoryWithStats>>((acc, cat) => {
+    acc[cat.slug] = cat;
+    return acc;
+  }, {});
 
-  const visibleCategories = (categories ?? [])
-    .filter((c) => (oppsByCategory[c.id]?.length ?? 0) > 0)
-    .sort((a, b) => b.gapScore - a.gapScore);
+  // Build lookup: category_id → opportunities
+  const oppsByCatId = (opportunities ?? []).reduce<Record<string, Opportunity[]>>((acc, opp) => {
+    const catId = opp?.category_id;
+    if (!catId) return acc;
+    if (!acc[catId]) acc[catId] = [];
+    acc[catId].push(opp);
+    return acc;
+  }, {});
 
-  if (visibleCategories.length === 0) return null;
+  // Total opportunity count
+  const totalVoidCount = opportunities?.length ?? 0;
+
+  // Build track data
+  const trackData = PRIZE_TRACKS.map((track) => {
+    const matchedCats = track.categorySlugs
+      .map((slug) => catBySlug[slug])
+      .filter(Boolean);
+
+    const allOpps = matchedCats.flatMap((cat) => oppsByCatId[cat.id] ?? []);
+    const topVoids = [...allOpps]
+      .sort((a, b) => b.gap_score - a.gap_score)
+      .slice(0, 3);
+
+    const avgScore =
+      matchedCats.length > 0
+        ? matchedCats.reduce((sum, c) => sum + c.gapScore, 0) / matchedCats.length
+        : 0;
+
+    return {
+      ...track,
+      matchedCats,
+      voidCount: allOpps.length,
+      topVoids,
+      avgScore,
+    };
+  });
+
+  if (trackData.every((t) => t.voidCount === 0)) return null;
 
   return (
     <div className="space-y-8">
-      {/* ── Section Header ─────────────────────────────── */}
-      <div className="text-center space-y-3">
-        <div className="flex items-center justify-center gap-3">
-          <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent-cyan/40" />
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-cyan opacity-40" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-cyan" />
-          </span>
-          <div className="h-px w-12 bg-gradient-to-l from-transparent to-accent-cyan/40" />
-        </div>
-
-        <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Here&apos;s What NEAR Needs
-        </GradientText>
-
-        <motion.p
-          className="text-text-secondary max-w-md mx-auto text-sm"
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          Categories ranked by void density — where the biggest opportunities await.
-        </motion.p>
-      </div>
-
-      {/* ── Category Grid ──────────────────────────────── */}
+      {/* ── Track Cards Grid ───────────────────────────── */}
       <motion.div
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
         variants={container}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: '-40px' }}
       >
-        {visibleCategories.map((cat) => {
-          const catOpps = oppsByCategory[cat.id] ?? [];
-          const count = catOpps.length;
-          const topVoids = [...catOpps]
-            .sort((a, b) => b.gap_score - a.gap_score)
-            .slice(0, 3);
-          const isExpanded = expanded === cat.id;
-          const isHovered = hoveredCard === cat.id;
-          const theme = getScoreTheme(cat.gapScore);
+        {trackData.map((track, idx) => {
+          const isExpanded = expandedTrack === idx;
+          const theme = getScoreTheme(track.avgScore);
 
           return (
-            <motion.div key={cat.id} variants={item} className="col-span-1">
-              {/* ── Category Card ──────────────────────── */}
+            <motion.div key={track.name} variants={cardVariant} className="col-span-1">
+              {/* ── Track Card ─────────────────────────── */}
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => setExpanded(isExpanded ? null : cat.id)}
-                onKeyDown={(e) => e.key === 'Enter' && setExpanded(isExpanded ? null : cat.id)}
-                onMouseEnter={() => setHoveredCard(cat.id)}
-                onMouseLeave={() => setHoveredCard(null)}
+                onClick={() => setExpandedTrack(isExpanded ? null : idx)}
+                onKeyDown={(e) => e.key === 'Enter' && setExpandedTrack(isExpanded ? null : idx)}
                 className="cursor-pointer"
               >
                 <motion.div
                   className={cn(
-                    'relative rounded-lg overflow-hidden border transition-colors duration-300',
-                    'bg-gradient-to-br',
+                    'relative rounded-xl overflow-hidden border transition-colors duration-300',
+                    'bg-gradient-to-br bg-surface',
                     theme.gradient,
-                    'bg-surface',
                     theme.border
                   )}
                   whileHover={{
@@ -199,10 +226,7 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
                   }}
                   transition={{ duration: 0.25 }}
                 >
-                  {/* Scan line on hover */}
-                  {isHovered && <ScanLine />}
-
-                  {/* Subtle top accent line */}
+                  {/* Top accent line */}
                   <div
                     className="absolute top-0 left-0 right-0 h-[1px] opacity-60"
                     style={{
@@ -210,61 +234,44 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
                     }}
                   />
 
-                  <div className="relative z-10 p-3 space-y-3">
-                    {/* Top row: emoji + score ring */}
+                  <div className="relative z-10 p-4 space-y-3">
+                    {/* Icon + score */}
                     <div className="flex items-start justify-between">
-                      <div className="relative">
-                        <span
-                          className="text-3xl block"
-                          style={{
-                            filter: isHovered ? `drop-shadow(${theme.emojiGlow})` : 'none',
-                            transition: 'filter 0.3s ease',
-                          }}
-                        >
-                          {cat.icon ?? '📦'}
-                        </span>
-                      </div>
-                      <MiniScoreRing score={cat.gapScore} />
+                      <span className="text-3xl">{track.icon}</span>
+                      <MiniScoreRing score={track.avgScore} size={40} />
                     </div>
 
-                    {/* Category name + description */}
-                    <h3 className="font-semibold text-text-primary text-sm leading-snug truncate">
-                      {cat.name}
+                    {/* Track name */}
+                    <h3 className="font-bold text-text-primary text-sm leading-snug">
+                      {track.name}
                     </h3>
-                    {cat.description && (
-                      <p className="text-[11px] text-text-muted leading-tight line-clamp-2">
-                        {cat.description}
-                      </p>
-                    )}
 
-                    {/* Badges row */}
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {cat.is_strategic && (
-                        <Badge
-                          variant="default"
-                          className={cn(
-                            'text-[10px] px-2 py-0.5 border font-semibold',
-                            'bg-accent/10 text-accent border-accent/25'
-                          )}
-                        >
-                          <span className="relative flex h-1.5 w-1.5 mr-1">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60" />
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
-                          </span>
-                          Strategic
-                        </Badge>
-                      )}
-                      <span className={cn(
-                        'inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-full border',
-                        theme.badge
-                      )}>
+                    {/* Description */}
+                    <p className="text-[11px] text-text-muted leading-relaxed line-clamp-3">
+                      {track.description}
+                    </p>
+
+                    {/* Badges */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border',
+                          theme.badge
+                        )}
+                      >
                         <span className="opacity-70">◈</span>
-                        {count} void{count !== 1 ? 's' : ''}
+                        {track.voidCount} void{track.voidCount !== 1 ? 's' : ''}
+                      </span>
+                      <span className="text-[10px] text-text-muted">
+                        {track.matchedCats.length} categor{track.matchedCats.length !== 1 ? 'ies' : 'y'}
                       </span>
                     </div>
 
-                    {/* Expand indicator */}
-                    <div className="flex items-center justify-end">
+                    {/* Expand hint */}
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-text-muted">
+                        {isExpanded ? 'Hide top voids' : 'Show top voids'}
+                      </span>
                       <motion.span
                         className="text-text-muted text-[10px]"
                         animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -277,9 +284,9 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
                 </motion.div>
               </div>
 
-              {/* ── Expanded: top 3 voids ─────────────── */}
+              {/* ── Expanded: top voids ────────────────── */}
               <AnimatePresence>
-                {isExpanded && (
+                {isExpanded && track.topVoids.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -287,7 +294,7 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
                     transition={{ duration: 0.25, ease: 'easeOut' }}
                     className="overflow-hidden mt-2 space-y-1.5"
                   >
-                    {topVoids.map((opp, i) => {
+                    {track.topVoids.map((opp, i) => {
                       const oppTheme = getScoreTheme(opp.gap_score);
                       return (
                         <motion.div
@@ -335,18 +342,6 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
                         </motion.div>
                       );
                     })}
-                    <Link
-                      href={`/categories/${cat.slug}`}
-                      className={cn(
-                        'group/link block text-center text-[10px] font-medium py-1.5 rounded-md transition-all duration-200',
-                        'text-accent hover:text-white hover:bg-accent/10'
-                      )}
-                    >
-                      View all {count} voids
-                      <span className="inline-block ml-1 transition-transform group-hover/link:translate-x-0.5">
-                        →
-                      </span>
-                    </Link>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -354,6 +349,28 @@ export function PriorityVoids({ categories, opportunities }: PriorityVoidsProps)
           );
         })}
       </motion.div>
+
+      {/* ── Explore All Link ───────────────────────────── */}
+      {totalVoidCount > 0 && (
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <Link
+            href="/categories"
+            className={cn(
+              'group inline-flex items-center gap-2 text-sm font-medium',
+              'text-text-secondary hover:text-accent-cyan transition-colors duration-200'
+            )}
+          >
+            Explore all {totalVoidCount} ecosystem voids
+            <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        </motion.div>
+      )}
     </div>
   );
 }
