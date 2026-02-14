@@ -129,7 +129,7 @@ function SanctumPageInner() {
       const raw = localStorage.getItem('sanctum-session-state');
       if (!raw) return false;
       const parsed = JSON.parse(raw);
-      return parsed.sessionStarted === true || (parsed.messageCount && parsed.messageCount > 0);
+      return parsed.sessionStarted === true || (parsed.messageCount != null && parsed.messageCount > 0);
     } catch { return false; }
   })();
 
