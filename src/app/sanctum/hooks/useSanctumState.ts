@@ -481,19 +481,58 @@ export function useSanctumState() {
     }
   }, [state.messageCount, unlockAchievement]);
 
+  // Check message content for "asked_why" achievement
+  const checkMessageForAchievements = useCallback((messageText: string) => {
+    if (!state.unlockedAchievements.has('asked_why')) {
+      const lower = messageText.toLowerCase();
+      if (lower.includes('why') || lower.includes('how does this work') || lower.includes('how does that work') || lower.includes('explain')) {
+        setTimeout(() => unlockAchievement('asked_why'), 1000);
+      }
+    }
+  }, [state.unlockedAchievements, unlockAchievement]);
+
+  // Concept-based achievement checks
+  const handleConceptLearned = useCallback(() => {
+    const newCount = state.conceptsLearned.length + 1;
+    if (newCount >= 5 && !state.unlockedAchievements.has('concept_collector_5')) {
+      setTimeout(() => unlockAchievement('concept_collector_5'), 1500);
+    }
+    if (newCount >= 20 && !state.unlockedAchievements.has('concept_collector_20')) {
+      setTimeout(() => unlockAchievement('concept_collector_20'), 1500);
+    }
+  }, [state.conceptsLearned.length, state.unlockedAchievements, unlockAchievement]);
+
+  // Quiz streak achievement check
+  const handleQuizAnswer = useCallback((correct: boolean) => {
+    dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } });
+    if (correct) {
+      // Check for streak of 5 — simplified: just check if they have 5+ correct
+      const newCorrect = state.quizScore.correct + 1;
+      if (newCorrect >= 5 && !state.unlockedAchievements.has('quiz_ace')) {
+        setTimeout(() => unlockAchievement('quiz_ace'), 1500);
+      }
+    }
+  }, [state.quizScore.correct, state.unlockedAchievements, unlockAchievement]);
+
   const handleCodeGenerated = useCallback((code: string) => {
     dispatch({ type: 'START_CODE_GENERATION', payload: code });
+    dispatch({ type: 'INCREMENT_CONTRACTS_BUILT' });
     
     // First code achievement
     if (!state.unlockedAchievements.has('first_code')) {
       setTimeout(() => unlockAchievement('first_code'), 1500);
+    }
+
+    // Three contracts achievement
+    if (state.contractsBuilt + 1 >= 3 && !state.unlockedAchievements.has('three_contracts')) {
+      setTimeout(() => unlockAchievement('three_contracts'), 2000);
     }
     
     // Complete after typing animation
     setTimeout(() => {
       dispatch({ type: 'COMPLETE_CODE_GENERATION' });
     }, code.length * 10 + 500);
-  }, [state.unlockedAchievements, unlockAchievement]);
+  }, [state.unlockedAchievements, state.contractsBuilt, unlockAchievement]);
 
   const handleTaskUpdate = useCallback((task: CurrentTask | null) => {
     dispatch({ type: 'SET_CURRENT_TASK', payload: task });
@@ -525,6 +564,14 @@ export function useSanctumState() {
       // First deploy achievement
       if (state.deployCount === 0) {
         unlockAchievement('first_deploy');
+      }
+
+      // Speed demon — deployed within 3 minutes of session start
+      if (state.sessionStartTime && !state.unlockedAchievements.has('speed_demon')) {
+        const elapsed = (Date.now() - state.sessionStartTime) / 1000 / 60;
+        if (elapsed <= 3) {
+          setTimeout(() => unlockAchievement('speed_demon'), 2000);
+        }
       }
       
       dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
@@ -589,6 +636,13 @@ export function useSanctumState() {
     dispatch({ type: 'SET_SHOW_HISTORY', payload: false });
   }, []);
 
+  // Trigger security_aware when roast mode is entered (Warden audit)
+  useEffect(() => {
+    if (state.mode === 'roast' && !state.unlockedAchievements.has('security_aware')) {
+      setTimeout(() => unlockAchievement('security_aware'), 2000);
+    }
+  }, [state.mode, state.unlockedAchievements, unlockAchievement]);
+
   return {
     state,
     dispatch,
@@ -605,5 +659,8 @@ export function useSanctumState() {
     handleShare,
     handleShareFromHistory,
     handleRemixFromHistory,
+    checkMessageForAchievements,
+    handleConceptLearned,
+    handleQuizAnswer,
   };
 }

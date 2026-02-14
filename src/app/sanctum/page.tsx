@@ -40,6 +40,7 @@ import { VisualMode } from './components/VisualMode';
 import { DownloadButton } from './components/DownloadContract';
 import { SanctumLanding } from './components/SanctumLanding';
 import { SanctumWizard, WizardConfig } from './components/SanctumWizard';
+import { BuilderProgress } from './components/BuilderProgress';
 
 // Template slug → starter message mapping
 const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
@@ -110,6 +111,9 @@ function SanctumPageInner() {
     handleShare,
     handleShareFromHistory,
     handleRemixFromHistory,
+    checkMessageForAchievements,
+    handleConceptLearned,
+    handleQuizAnswer,
   } = useSanctumState();
 
   // Counter to signal chat component to reset
@@ -602,12 +606,27 @@ function SanctumPageInner() {
                       onThinkingChange={handleThinkingChange}
                       chatMode={state.chatMode}
                       onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
-                      onQuizAnswer={(correct) => dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } })}
-                      onConceptLearned={(c) => dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c })}
+                      onQuizAnswer={(correct) => handleQuizAnswer(correct)}
+                      onConceptLearned={(c) => { dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c }); handleConceptLearned(); }}
+                      onUserMessage={checkMessageForAchievements}
                       sessionReset={sessionResetCounter}
                     />
                   </div>
                 </GlassPanel>
+
+                {/* Builder Progress / XP Widget */}
+                <div className="flex-shrink-0 mt-2">
+                  <BuilderProgress
+                    messagesCount={state.messageCount}
+                    codeGenerations={state.contractsBuilt}
+                    deploysCount={state.deployCount}
+                    tokensUsed={state.tokensUsed}
+                    unlockedAchievements={state.unlockedAchievements}
+                    conceptsLearned={state.conceptsLearned.length}
+                    quizScore={state.quizScore}
+                    sessionMinutes={state.sessionStartTime ? Math.floor((Date.now() - state.sessionStartTime) / 60000) : 0}
+                  />
+                </div>
               </div>
 
               {/* Right Panel - Code Preview */}
@@ -736,8 +755,9 @@ function SanctumPageInner() {
                         onThinkingChange={handleThinkingChange}
                         chatMode={state.chatMode}
                         onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
-                        onQuizAnswer={(correct) => dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } })}
-                        onConceptLearned={(c) => dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c })}
+                        onQuizAnswer={(correct) => handleQuizAnswer(correct)}
+                        onConceptLearned={(c) => { dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c }); handleConceptLearned(); }}
+                        onUserMessage={checkMessageForAchievements}
                         sessionReset={sessionResetCounter}
                       />
                     </div>

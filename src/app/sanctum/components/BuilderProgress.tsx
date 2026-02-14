@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { Zap, Rocket, Code2 } from 'lucide-react';
+import { ACHIEVEMENTS } from './AchievementPopup';
 
-// Inline SVG icons for ones not exporting properly
+// Inline SVG icons
 const ChevronDown = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="m6 9 6 6 6-6"/>
@@ -37,30 +38,37 @@ const Flame = ({ className }: { className?: string }) => (
   </svg>
 );
 
-interface BuilderProgressProps {
+// Achievement icon map
+const ACHIEVEMENT_ICONS: Record<string, string> = {
+  first_message: '💬',
+  first_code: '📝',
+  first_deploy: '🚀',
+  chain_signatures: '🔗',
+  shade_agent: '🤖',
+  speed_demon: '⚡',
+  concept_collector_5: '📚',
+  concept_collector_20: '🧠',
+  quiz_ace: '🎯',
+  security_aware: '🛡️',
+  three_contracts: '🏭',
+  asked_why: '❓',
+};
+
+export interface BuilderProgressProps {
   messagesCount: number;
   codeGenerations: number;
   deploysCount: number;
   tokensUsed: number;
   unlockedAchievements: Set<string>;
+  conceptsLearned: number;
+  quizScore: { correct: number; total: number };
   sessionMinutes?: number;
 }
 
-// Achievement definitions with icons and descriptions
-const ACHIEVEMENT_DEFS = {
-  first_message: { icon: '💬', name: 'First Words', desc: 'Sent your first message' },
-  first_code: { icon: '📝', name: 'Code Conjurer', desc: 'Generated your first contract' },
-  first_deploy: { icon: '🚀', name: 'Launcher', desc: 'Deployed your first contract' },
-  chain_signatures: { icon: '🔗', name: 'Chain Master', desc: 'Explored Chain Signatures' },
-  shade_agent: { icon: '🤖', name: 'Agent Smith', desc: 'Built an AI Agent' },
-  ten_messages: { icon: '🗣️', name: 'Conversationalist', desc: 'Sent 10 messages' },
-  three_deploys: { icon: '🎯', name: 'Serial Deployer', desc: 'Deployed 3 contracts' },
-  speed_demon: { icon: '⚡', name: 'Speed Demon', desc: 'Deploy in under 5 minutes' },
-};
-
 // Calculate level from XP
-function getLevel(xp: number): { level: number; currentXP: number; nextLevelXP: number; progress: number } {
-  const levels = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500];
+function getLevel(xp: number): { level: number; currentXP: number; nextLevelXP: number; progress: number; title: string } {
+  const levels = [0, 50, 150, 350, 600, 1000, 1500, 2200, 3000, 4000, 5500];
+  const titles = ['Initiate', 'Apprentice', 'Coder', 'Builder', 'Architect', 'Engineer', 'Artisan', 'Master', 'Grandmaster', 'Legend', 'Mythic'];
   let level = 1;
   for (let i = 1; i < levels.length; i++) {
     if (xp >= levels[i]) level = i + 1;
@@ -69,12 +77,33 @@ function getLevel(xp: number): { level: number; currentXP: number; nextLevelXP: 
   const currentLevelXP = levels[level - 1] || 0;
   const nextLevelXP = levels[level] || levels[levels.length - 1] + 1000;
   const progress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-  return { level, currentXP: xp - currentLevelXP, nextLevelXP: nextLevelXP - currentLevelXP, progress };
+  return { level, currentXP: xp - currentLevelXP, nextLevelXP: nextLevelXP - currentLevelXP, progress, title: titles[level - 1] || 'Mythic' };
 }
 
-// Calculate XP from actions
-function calculateXP(messages: number, codeGens: number, deploys: number, achievements: number): number {
-  return (messages * 10) + (codeGens * 50) + (deploys * 200) + (achievements * 100);
+// Calculate XP from all sources — uses actual achievement XP values
+export function calculateTotalXP(
+  messages: number,
+  codeGens: number,
+  deploys: number,
+  unlockedAchievements: Set<string>,
+  conceptsLearned: number,
+  quizCorrect: number,
+): number {
+  // Activity XP
+  const messageXP = messages * 5;      // 5 XP per message
+  const codeXP = codeGens * 25;        // 25 XP per code generation
+  const deployXP = deploys * 100;      // 100 XP per deploy
+  const conceptXP = conceptsLearned * 15; // 15 XP per concept learned
+  const quizXP = quizCorrect * 20;     // 20 XP per correct quiz answer
+
+  // Achievement XP — use actual defined values
+  let achievementXP = 0;
+  for (const id of unlockedAchievements) {
+    const ach = ACHIEVEMENTS[id];
+    if (ach) achievementXP += ach.xp;
+  }
+
+  return messageXP + codeXP + deployXP + conceptXP + quizXP + achievementXP;
 }
 
 export function BuilderProgress({
@@ -83,52 +112,61 @@ export function BuilderProgress({
   deploysCount,
   tokensUsed,
   unlockedAchievements,
+  conceptsLearned,
+  quizScore,
   sessionMinutes = 0,
 }: BuilderProgressProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  const xp = calculateXP(messagesCount, codeGenerations, deploysCount, unlockedAchievements.size);
-  const { level, currentXP, nextLevelXP, progress } = getLevel(xp);
-  
-  const achievementsList = Object.entries(ACHIEVEMENT_DEFS);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const xp = calculateTotalXP(messagesCount, codeGenerations, deploysCount, unlockedAchievements, conceptsLearned, quizScore.correct);
+  const { level, currentXP, nextLevelXP, progress, title } = getLevel(xp);
+
+  const achievementsList = Object.entries(ACHIEVEMENTS);
   const unlockedCount = unlockedAchievements.size;
   const totalAchievements = achievementsList.length;
 
   return (
     <div className="bg-void-gray/50 border border-border-subtle rounded-xl overflow-hidden">
-      {/* Header - always visible */}
+      {/* Header - always visible, compact */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+        className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-near-green flex items-center justify-center text-lg font-bold text-white">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-near-green flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-purple-500/20">
             {level}
           </div>
           <div className="text-left">
-            <div className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              Builder Progress
-              <span className="text-xs text-near-green">{xp} XP</span>
+            <div className="text-xs font-semibold text-text-primary flex items-center gap-2">
+              {title}
+              <span className="text-[10px] font-mono text-near-green bg-near-green/10 px-1.5 py-0.5 rounded">{xp} XP</span>
             </div>
-            <div className="text-xs text-text-muted">
-              {unlockedCount}/{totalAchievements} achievements
+            {/* Mini progress bar */}
+            <div className="w-24 h-1 bg-void-black rounded-full overflow-hidden mt-1">
+              <div
+                className="h-full bg-gradient-to-r from-purple-500 to-near-green transition-all duration-500"
+                style={{ width: `${Math.min(progress, 100)}%` }}
+              />
             </div>
           </div>
         </div>
-        {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-text-muted" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-text-muted" />
-        )}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-text-muted">{unlockedCount}/{totalAchievements}</span>
+          {isExpanded ? (
+            <ChevronUp className="w-3.5 h-3.5 text-text-muted" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+          )}
+        </div>
       </button>
 
       {/* Expanded content */}
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-4">
-          {/* XP Progress Bar */}
-          <div>
-            <div className="flex justify-between text-xs text-text-muted mb-1">
-              <span>Level {level}</span>
+        <div className="px-3 pb-3 space-y-3 border-t border-white/[0.05]">
+          {/* XP Progress Bar — larger */}
+          <div className="pt-2">
+            <div className="flex justify-between text-[10px] text-text-muted mb-1">
+              <span>Level {level} → {level + 1}</span>
               <span>{currentXP}/{nextLevelXP} XP</span>
             </div>
             <div className="h-2 bg-void-black rounded-full overflow-hidden">
@@ -139,58 +177,58 @@ export function BuilderProgress({
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-void-black/50 rounded-lg p-2 flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-purple-400" />
-              <div>
-                <div className="text-sm font-semibold text-text-primary">{messagesCount}</div>
-                <div className="text-xs text-text-muted">Messages</div>
-              </div>
+          {/* Stats Grid — compact */}
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="bg-void-black/50 rounded-lg p-2 text-center">
+              <MessageSquare className="w-3.5 h-3.5 text-purple-400 mx-auto mb-0.5" />
+              <div className="text-sm font-semibold text-text-primary">{messagesCount}</div>
+              <div className="text-[9px] text-text-muted">Messages</div>
             </div>
-            <div className="bg-void-black/50 rounded-lg p-2 flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-cyan-400" />
-              <div>
-                <div className="text-sm font-semibold text-text-primary">{codeGenerations}</div>
-                <div className="text-xs text-text-muted">Contracts</div>
-              </div>
+            <div className="bg-void-black/50 rounded-lg p-2 text-center">
+              <Code2 className="w-3.5 h-3.5 text-cyan-400 mx-auto mb-0.5" />
+              <div className="text-sm font-semibold text-text-primary">{codeGenerations}</div>
+              <div className="text-[9px] text-text-muted">Contracts</div>
             </div>
-            <div className="bg-void-black/50 rounded-lg p-2 flex items-center gap-2">
-              <Rocket className="w-4 h-4 text-near-green" />
-              <div>
-                <div className="text-sm font-semibold text-text-primary">{deploysCount}</div>
-                <div className="text-xs text-text-muted">Deployed</div>
-              </div>
-            </div>
-            <div className="bg-void-black/50 rounded-lg p-2 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" />
-              <div>
-                <div className="text-sm font-semibold text-text-primary">{(tokensUsed / 1000).toFixed(1)}k</div>
-                <div className="text-xs text-text-muted">Tokens</div>
-              </div>
+            <div className="bg-void-black/50 rounded-lg p-2 text-center">
+              <Rocket className="w-3.5 h-3.5 text-near-green mx-auto mb-0.5" />
+              <div className="text-sm font-semibold text-text-primary">{deploysCount}</div>
+              <div className="text-[9px] text-text-muted">Deployed</div>
             </div>
           </div>
 
+          {/* Learn stats if any */}
+          {(conceptsLearned > 0 || quizScore.total > 0) && (
+            <div className="flex gap-3 text-xs text-text-muted">
+              {conceptsLearned > 0 && (
+                <span className="flex items-center gap-1">📚 {conceptsLearned} concepts</span>
+              )}
+              {quizScore.total > 0 && (
+                <span className="flex items-center gap-1">🎯 {quizScore.correct}/{quizScore.total} quizzes</span>
+              )}
+            </div>
+          )}
+
           {/* Achievements */}
           <div>
-            <div className="text-xs text-text-muted mb-2 flex items-center gap-1">
+            <div className="text-[10px] text-text-muted mb-1.5 flex items-center gap-1">
               <Trophy className="w-3 h-3" />
-              Achievements
+              Achievements ({unlockedCount}/{totalAchievements})
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {achievementsList.map(([id, def]) => {
+            <div className="flex flex-wrap gap-1">
+              {achievementsList.map(([id, ach]) => {
                 const unlocked = unlockedAchievements.has(id);
+                const icon = ACHIEVEMENT_ICONS[id] || '⭐';
                 return (
                   <div
                     key={id}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all ${
                       unlocked
                         ? 'bg-gradient-to-br from-purple-500/20 to-near-green/20 border border-near-green/30'
-                        : 'bg-void-black/50 border border-border-subtle opacity-40'
+                        : 'bg-void-black/50 border border-border-subtle opacity-30 grayscale'
                     }`}
-                    title={unlocked ? `${def.name}: ${def.desc}` : '???'}
+                    title={unlocked ? `${ach.title}: ${ach.description} (+${ach.xp} XP)` : '???'}
                   >
-                    {unlocked ? def.icon : '?'}
+                    {unlocked ? icon : '?'}
                   </div>
                 );
               })}
@@ -199,7 +237,7 @@ export function BuilderProgress({
 
           {/* Session time */}
           {sessionMinutes > 0 && (
-            <div className="text-xs text-text-muted flex items-center gap-1">
+            <div className="text-[10px] text-text-muted flex items-center gap-1">
               <Flame className="w-3 h-3 text-orange-400" />
               Building for {sessionMinutes} min{sessionMinutes !== 1 ? 's' : ''}
             </div>

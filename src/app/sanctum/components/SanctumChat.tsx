@@ -77,6 +77,7 @@ interface SanctumChatProps {
   onThinkingChange?: (thinking: boolean) => void;
   onQuizAnswer?: (correct: boolean) => void;
   onConceptLearned?: (concept: { title: string; category: string; difficulty: string }) => void;
+  onUserMessage?: (text: string) => void; // for achievement checks on user messages
   sessionReset?: number; // increment to signal reset from parent
 }
 
@@ -127,7 +128,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, sessionReset }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset }: SanctumChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentPersona, setCurrentPersona] = useState<Persona>(() => loadSavedPersona() || PERSONAS.shade);
   const messagesRestoredRef = useRef(false);
@@ -658,6 +659,9 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     setMessages(allMessages);
     setInput('');
     setAttachedFiles([]);
+
+    // Notify parent for achievement checks
+    onUserMessage?.(text);
 
     await sendToApi(text, allMessages, userMessage.attachments);
   }
