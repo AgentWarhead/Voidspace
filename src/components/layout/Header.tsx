@@ -126,7 +126,6 @@ export function Header() {
               aria-label="Search"
             >
               <Search className="w-4 h-4" />
-              <span className="text-xs text-text-muted font-mono">⌘K</span>
             </Link>
             <ConnectWalletButton />
           </div>
