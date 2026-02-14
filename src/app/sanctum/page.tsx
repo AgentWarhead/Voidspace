@@ -323,11 +323,11 @@ function SanctumPageInner() {
       {/* Landing / Category Selection */}
       {!state.sessionStarted && !showWalletGate && (
         <section className="relative z-10 min-h-screen flex flex-col">
-          {/* Hero */}
-          <div className="flex-1 flex items-center justify-center py-16">
+          {/* Hero — Compact */}
+          <div className="pt-16 pb-8">
             <Container size="xl" className="text-center">
               {/* Animated badge */}
-              <div className="flex items-center justify-center mb-8">
+              <div className="flex items-center justify-center mb-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 animate-pulse-glow">
                   <Sparkles className="w-4 h-4 text-near-green" />
                   <span className="text-near-green text-sm font-mono font-medium">THE SANCTUM</span>
@@ -336,360 +336,451 @@ function SanctumPageInner() {
               </div>
 
               {/* Title */}
-              <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
+              <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-4">
                 <span className="text-text-primary">Build on NEAR</span>
                 <br />
                 <GradientText className="mt-2">From Idea to Launch</GradientText>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-text-secondary text-xl max-w-2xl mx-auto mb-8">
+              <p className="text-text-secondary text-lg max-w-2xl mx-auto">
                 AI-powered development studio for NEAR Protocol.
                 <br />
                 <span className="text-near-green">Contracts, webapps, deployment</span> — all through conversation.
               </p>
+            </Container>
+          </div>
 
-              {/* Hero CTA */}
-              <button
-                onClick={() => {
-                  document.getElementById('modes')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-near-green text-void-black font-semibold text-lg hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] transition-all shadow-lg shadow-near-green/25 mb-12"
-              >
-                Start Building Free
-                <span className="animate-bounce">→</span>
-              </button>
-
-              {/* Stats */}
-              <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-text-primary font-mono">🧠</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Zero Rust Required</div>
-                </div>
-                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-cyan-400 font-mono">Full</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Stack Builder</div>
-                </div>
-                <div className="w-px h-12 bg-border-subtle hidden sm:block" />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-near-green font-mono">Idea→</div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider">Deployed in Minutes</div>
-                </div>
+          {/* Step 1: "What brings you to the Sanctum?" — 3 Path Cards */}
+          <div className="pb-8">
+            <Container size="xl">
+              <div className="text-center mb-8">
+                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
+                  Step 1
+                </p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary">
+                  What brings you to the Sanctum?
+                </h2>
               </div>
 
-              {/* Social Proof Banner */}
-              <div className="mb-8">
-                <SocialProof variant="banner" />
-              </div>
-
-              {/* Build Mode Cards — 2x2 Grid */}
-              <div id="modes" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-4xl mx-auto">
+              <div id="modes" className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
+                {/* Path 1: Idea — PRIMARY (slightly larger on md+) */}
                 <button
-                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
-                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    state.mode === 'build'
-                      ? 'border-near-green/50 bg-near-green/10 shadow-lg shadow-near-green/20'
-                      : 'border-border-subtle bg-void-gray/30 hover:border-near-green/30 hover:bg-near-green/5'
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    state.mode === 'build' 
-                      ? 'bg-near-green/20 text-near-green' 
-                      : 'bg-border-subtle text-text-muted group-hover:bg-near-green/20 group-hover:text-near-green'
-                  }`}>
-                    <Hammer className="w-6 h-6" />
-                  </div>
-                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    state.mode === 'build' ? 'text-near-green' : 'text-text-primary group-hover:text-near-green'
-                  }`}>
-                    Build a Smart Contract
-                  </h3>
-                  <p className="text-sm text-text-muted">
-                    AI walks you through creating a Rust smart contract step by step
-                  </p>
-                </button>
-
-                <button
-                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'webapp' })}
-                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    state.mode === 'webapp'
-                      ? 'border-cyan-500/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
-                      : 'border-border-subtle bg-void-gray/30 hover:border-cyan-500/30 hover:bg-cyan-500/5'
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    state.mode === 'webapp' 
-                      ? 'bg-cyan-500/20 text-cyan-400' 
-                      : 'bg-border-subtle text-text-muted group-hover:bg-cyan-500/20 group-hover:text-cyan-400'
-                  }`}>
-                    <Globe className="w-6 h-6" />
-                  </div>
-                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    state.mode === 'webapp' ? 'text-cyan-400' : 'text-text-primary group-hover:text-cyan-400'
-                  }`}>
-                    Build a Web App
-                  </h3>
-                  <p className="text-sm text-text-muted">
-                    Generate a frontend for your existing NEAR contract
-                  </p>
-                </button>
-
-                <button
-                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'roast' })}
-                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    state.mode === 'roast'
-                      ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
-                      : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-red-500/5'
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    state.mode === 'roast' 
-                      ? 'bg-red-500/20 text-red-400' 
-                      : 'bg-border-subtle text-text-muted group-hover:bg-red-500/20 group-hover:text-red-400'
-                  }`}>
-                    <Flame className="w-6 h-6" />
-                  </div>
-                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    state.mode === 'roast' ? 'text-red-400' : 'text-text-primary group-hover:text-red-400'
-                  }`}>
-                    Audit Your Code
-                  </h3>
-                  <p className="text-sm text-text-muted">
-                    Paste any contract and get a brutally honest security review
-                  </p>
-                </button>
-
-                {/* Vibe Code */}
-                <button
-                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'scratch' })}
-                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
+                  onClick={() => {
+                    dispatch({ type: 'SET_MODE', payload: 'scratch' });
+                    setTimeout(() => {
+                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className={`group relative p-7 md:p-8 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
                     state.mode === 'scratch'
-                      ? 'border-amber-500/50 bg-gradient-to-br from-amber-500/15 to-orange-500/10 shadow-lg shadow-amber-500/20'
-                      : 'border-border-subtle bg-void-gray/30 hover:border-amber-500/30 hover:bg-gradient-to-br hover:from-amber-500/5 hover:to-orange-500/5'
+                      ? 'border-amber-500/60 bg-gradient-to-br from-amber-500/15 to-orange-500/10 shadow-lg shadow-amber-500/20'
+                      : ['build', 'roast', 'webapp', 'visual'].includes(state.mode)
+                        ? 'border-border-subtle bg-void-gray/30 opacity-60 hover:opacity-100 hover:border-amber-500/30'
+                        : 'border-border-subtle bg-void-gray/30 hover:border-amber-500/40 hover:bg-gradient-to-br hover:from-amber-500/10 hover:to-orange-500/5'
                   }`}
+                  style={{ animationDelay: '0ms', animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}
                 >
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    state.mode === 'scratch' 
-                      ? 'bg-amber-500/20 text-amber-400' 
-                      : 'bg-border-subtle text-text-muted group-hover:bg-amber-500/20 group-hover:text-amber-400'
-                  }`}>
-                    <Wand2 className="w-6 h-6" />
-                  </div>
-                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                  {/* Glow effect */}
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/5 blur-xl transition-opacity duration-300 -z-10 ${
+                    state.mode === 'scratch' ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                  }`} />
+                  <div className="text-4xl mb-4">🚀</div>
+                  <h3 className={`text-lg font-bold mb-2 transition-colors ${
                     state.mode === 'scratch' ? 'text-amber-400' : 'text-text-primary group-hover:text-amber-400'
                   }`}>
-                    Vibe Code
+                    I have an idea — build it for me
                   </h3>
-                  <p className="text-sm text-text-muted">
-                    Describe your idea, we&apos;ll build the entire NEAR dApp — no code needed
+                  <p className="text-sm text-text-muted leading-relaxed">
+                    No code needed. Describe your idea, we&apos;ll handle everything.
                   </p>
                   {state.mode !== 'scratch' && (
                     <span className="inline-block mt-3 text-[10px] font-mono uppercase tracking-wider text-amber-400/60 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                      ✨ New
+                      ✨ Most Popular
                     </span>
                   )}
                 </button>
-              </div>
 
-              {/* Visual Generator — Standalone Creative Tool */}
-              <div className="mb-12 max-w-4xl mx-auto">
+                {/* Path 2: Learn & Build */}
                 <button
-                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'visual' })}
-                  className={`w-full group p-6 rounded-2xl border-2 transition-all hover:scale-[1.01] hover:shadow-2xl ${
-                    state.mode === 'visual'
-                      ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-                      : 'border-border-subtle bg-void-gray/30 hover:border-purple-500/30 hover:bg-purple-500/5'
+                  onClick={() => {
+                    dispatch({ type: 'SET_MODE', payload: 'build' });
+                    setTimeout(() => {
+                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className={`group relative p-7 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
+                    state.mode === 'build'
+                      ? 'border-near-green/60 bg-near-green/10 shadow-lg shadow-near-green/20'
+                      : ['scratch', 'roast', 'webapp', 'visual'].includes(state.mode)
+                        ? 'border-border-subtle bg-void-gray/30 opacity-60 hover:opacity-100 hover:border-near-green/30'
+                        : 'border-border-subtle bg-void-gray/30 hover:border-near-green/40 hover:bg-near-green/5'
                   }`}
+                  style={{ animationDelay: '100ms', animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}
                 >
-                  <div className="flex items-center gap-5">
-                    <div className={`w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center transition-all ${
-                      state.mode === 'visual' 
-                        ? 'bg-purple-500/20 text-purple-400' 
-                        : 'bg-border-subtle text-text-muted group-hover:bg-purple-500/20 group-hover:text-purple-400'
-                    }`}>
-                      <Palette className="w-7 h-7" />
-                    </div>
-                    <div className="text-left">
-                      <h3 className={`text-lg font-semibold mb-1 transition-colors ${
-                        state.mode === 'visual' ? 'text-purple-400' : 'text-text-primary group-hover:text-purple-400'
-                      }`}>
-                        Visual Generator
-                      </h3>
-                      <p className="text-sm text-text-muted">
-                        AI-generated architecture diagrams, infographics, and social graphics for your NEAR project
-                      </p>
-                    </div>
-                  </div>
+                  <div className={`absolute inset-0 rounded-2xl bg-near-green/10 blur-xl transition-opacity duration-300 -z-10 ${
+                    state.mode === 'build' ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                  }`} />
+                  <div className="text-4xl mb-4">🔨</div>
+                  <h3 className={`text-lg font-bold mb-2 transition-colors ${
+                    state.mode === 'build' ? 'text-near-green' : 'text-text-primary group-hover:text-near-green'
+                  }`}>
+                    I want to learn &amp; build a smart contract
+                  </h3>
+                  <p className="text-sm text-text-muted leading-relaxed">
+                    AI guides you through Rust on NEAR, step by step.
+                  </p>
+                </button>
+
+                {/* Path 3: Already have code */}
+                <button
+                  onClick={() => {
+                    // Toggle to show sub-options — use 'roast' as initial selection for path 3
+                    if (state.mode !== 'roast' && state.mode !== 'webapp') {
+                      dispatch({ type: 'SET_MODE', payload: 'roast' });
+                    }
+                    setTimeout(() => {
+                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className={`group relative p-7 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
+                    state.mode === 'roast' || state.mode === 'webapp'
+                      ? 'border-red-500/40 bg-gradient-to-br from-red-500/10 to-cyan-500/10 shadow-lg shadow-red-500/10'
+                      : ['scratch', 'build', 'visual'].includes(state.mode)
+                        ? 'border-border-subtle bg-void-gray/30 opacity-60 hover:opacity-100 hover:border-red-500/30'
+                        : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-gradient-to-br hover:from-red-500/5 hover:to-cyan-500/5'
+                  }`}
+                  style={{ animationDelay: '200ms', animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}
+                >
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/10 to-cyan-500/10 blur-xl transition-opacity duration-300 -z-10 ${
+                    state.mode === 'roast' || state.mode === 'webapp' ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                  }`} />
+                  <div className="text-4xl mb-4">🛠️</div>
+                  <h3 className={`text-lg font-bold mb-2 transition-colors ${
+                    state.mode === 'roast' || state.mode === 'webapp' ? 'text-text-primary' : 'text-text-primary group-hover:text-text-primary'
+                  }`}>
+                    I already have code
+                  </h3>
+                  <p className="text-sm text-text-muted leading-relaxed">
+                    Audit for security vulnerabilities or generate a frontend.
+                  </p>
                 </button>
               </div>
+            </Container>
+          </div>
 
-              {/* Category Picker (Build Mode), Webapp Import, or Start Roast */}
-              {state.mode === 'build' && (
-                <div className="mb-16">
+          {/* Revealed Content — Based on selected path */}
+          <div id="sanctum-revealed">
+            {/* Path 3 sub-options: Roast or Webapp */}
+            {(state.mode === 'roast' || state.mode === 'webapp') && (
+              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
+                <Container size="xl">
+                  <div className="text-center mb-6">
+                    <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
+                      Step 2
+                    </p>
+                    <h2 className="text-xl font-bold text-text-primary">
+                      What do you want to do with your code?
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                    <button
+                      onClick={() => {
+                        dispatch({ type: 'SET_MODE', payload: 'roast' });
+                        dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+                      }}
+                      className={`group p-6 rounded-xl border-2 transition-all text-left hover:scale-[1.02] ${
+                        state.mode === 'roast'
+                          ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
+                          : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-red-500/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                          <Flame className="w-5 h-5 text-red-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-red-400">Roast Zone</h3>
+                      </div>
+                      <p className="text-sm text-text-muted">
+                        Paste any contract for a brutal security audit
+                      </p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        dispatch({ type: 'SET_MODE', payload: 'webapp' });
+                        setTimeout(() => {
+                          document.getElementById('sanctum-webapp-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
+                      className={`group p-6 rounded-xl border-2 transition-all text-left hover:scale-[1.02] ${
+                        state.mode === 'webapp'
+                          ? 'border-cyan-500/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                          : 'border-border-subtle bg-void-gray/30 hover:border-cyan-500/30 hover:bg-cyan-500/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                          <Globe className="w-5 h-5 text-cyan-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-cyan-400">Build a Web App</h3>
+                      </div>
+                      <p className="text-sm text-text-muted">
+                        Generate a frontend for your contract
+                      </p>
+                    </button>
+                  </div>
+                </Container>
+              </div>
+            )}
+
+            {/* Webapp import section */}
+            {state.mode === 'webapp' && (
+              <div id="sanctum-webapp-section" className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
+                <Container size="xl">
+                  <div className="max-w-2xl mx-auto">
+                    <div className="text-center mb-6">
+                      <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
+                        Step 2
+                      </p>
+                      <h2 className="text-xl font-bold text-text-primary">
+                        Import your contract
+                      </h2>
+                    </div>
+                    {!state.showImportContract ? (
+                      <div className="text-center">
+                        <p className="text-text-secondary mb-8">
+                          Build a beautiful frontend for your NEAR smart contract.
+                          <br />
+                          <span className="text-cyan-400">Bring your own contract or use one you just built.</span>
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                          <button
+                            onClick={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true })}
+                            className="p-6 rounded-xl bg-void-gray/50 border border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
+                          >
+                            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/30 transition-colors">
+                              <Globe className="w-6 h-6 text-cyan-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-white mb-2">Import Existing Contract</h3>
+                            <p className="text-sm text-gray-400">
+                              Have a contract already? Paste the address or code and we&apos;ll build a webapp for it.
+                            </p>
+                          </button>
+
+                          <button
+                            onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
+                            className="p-6 rounded-xl bg-void-gray/50 border border-near-green/30 hover:border-near-green/50 hover:bg-near-green/10 transition-all text-left group"
+                          >
+                            <div className="w-12 h-12 rounded-xl bg-near-green/20 flex items-center justify-center mb-4 group-hover:bg-near-green/30 transition-colors">
+                              <Hammer className="w-6 h-6 text-near-green" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-white mb-2">Build Contract First</h3>
+                            <p className="text-sm text-gray-400">
+                              Don&apos;t have a contract yet? Build one with Sanctum, then come back for the webapp.
+                            </p>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <ImportContract
+                        onImport={(data) => {
+                          dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
+                          dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
+                          if (data.code) {
+                            dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
+                          }
+                          dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
+                          dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
+                        }}
+                        onCancel={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false })}
+                      />
+                    )}
+                  </div>
+                </Container>
+              </div>
+            )}
+
+            {/* Build mode — Category Picker */}
+            {state.mode === 'build' && (
+              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
+                <Container size="xl">
+                  <div className="text-center mb-6">
+                    <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
+                      Step 2
+                    </p>
+                    <h2 className="text-xl font-bold text-text-primary">
+                      Choose a contract category
+                    </h2>
+                  </div>
                   <CategoryPicker
                     onSelect={handleCategorySelect}
                     customPrompt={state.customPrompt}
                     setCustomPrompt={(prompt) => dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt })}
                     onCustomStart={handleCustomStart}
                   />
-                </div>
-              )}
-              
-              {state.mode === 'webapp' && !state.showImportContract && (
-                <div className="text-center max-w-2xl mx-auto mb-16">
-                  <p className="text-text-secondary mb-8">
-                    Build a beautiful frontend for your NEAR smart contract. 
-                    <br />
-                    <span className="text-cyan-400">Bring your own contract or use one you just built.</span>
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <button
-                      onClick={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true })}
-                      className="p-6 rounded-xl bg-void-gray/50 border border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/30 transition-colors">
-                        <Globe className="w-6 h-6 text-cyan-400" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">Import Existing Contract</h3>
-                      <p className="text-sm text-gray-400">
-                        Have a contract already? Paste the address or code and we&apos;ll build a webapp for it.
-                      </p>
-                    </button>
-                    
-                    <button
-                      onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
-                      className="p-6 rounded-xl bg-void-gray/50 border border-near-green/30 hover:border-near-green/50 hover:bg-near-green/10 transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-near-green/20 flex items-center justify-center mb-4 group-hover:bg-near-green/30 transition-colors">
-                        <Hammer className="w-6 h-6 text-near-green" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">Build Contract First</h3>
-                      <p className="text-sm text-gray-400">
-                        Don&apos;t have a contract yet? Build one with Sanctum, then come back for the webapp.
-                      </p>
-                    </button>
-                  </div>
-                </div>
-              )}
-              
-              {state.mode === 'webapp' && state.showImportContract && (
-                <div className="mb-16">
-                  <ImportContract
-                    onImport={(data) => {
-                      dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
-                      dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
-                      // Start the interactive webapp session
-                      if (data.code) {
-                        dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
-                      }
-                      dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
-                      dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
-                    }}
-                    onCancel={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false })}
-                  />
-                </div>
-              )}
-              
-              {state.mode === 'roast' && (
-                <div className="text-center mb-16">
-                  <p className="text-text-secondary mb-6">
-                    Paste any NEAR smart contract and watch it get torn apart by our security experts.
-                  </p>
-                  <button
-                    onClick={() => dispatch({ type: 'SET_SESSION_STARTED', payload: true })}
-                    className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold text-lg hover:from-red-600 hover:to-orange-600 transition-all shadow-lg shadow-red-500/25"
-                  >
-                    <Flame className="w-6 h-6" />
-                    🔥 Enter the Roast Zone 🔥
-                  </button>
-                </div>
-              )}
+                </Container>
+              </div>
+            )}
 
-              {state.mode === 'visual' && (
-                <div className="mb-16">
+            {/* Scratch / Vibe Code */}
+            {state.mode === 'scratch' && (
+              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
+                <Container size="xl">
+                  <div className="max-w-3xl mx-auto">
+                    <div className="text-center mb-6">
+                      <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
+                        Step 2
+                      </p>
+                      <h2 className="text-xl font-bold text-text-primary mb-2">
+                        Describe your idea
+                      </h2>
+                      <p className="text-text-muted text-sm">
+                        Full-stack NEAR dApp — React, Tailwind, wallet connect — generated from your description.
+                      </p>
+                    </div>
+
+                    {/* Description input */}
+                    <div className="mb-8">
+                      <textarea
+                        value={state.scratchDescription}
+                        onChange={(e) => dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: e.target.value })}
+                        placeholder="I want to build an NFT marketplace where users can mint, list, and trade digital art on NEAR..."
+                        rows={4}
+                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-5 py-4 text-text-primary placeholder-text-muted/50 resize-none focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all text-sm leading-relaxed"
+                      />
+                    </div>
+
+                    {/* Template quick-starts */}
+                    <div className="mb-8">
+                      <p className="text-xs font-mono uppercase tracking-wider text-text-muted mb-4">
+                        Or pick a template to start fast
+                      </p>
+                      <ScratchTemplates
+                        selectedId={state.scratchTemplate}
+                        onSelect={(template) => {
+                          dispatch({ type: 'SET_SCRATCH_TEMPLATE', payload: template.id });
+                          dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: template.starterPrompt });
+                        }}
+                      />
+                    </div>
+
+                    {/* Start button */}
+                    <div className="text-center">
+                      <button
+                        onClick={() => {
+                          if (state.scratchDescription.trim()) {
+                            dispatch({ type: 'SET_SHOW_SCRATCH_SESSION', payload: true });
+                          }
+                        }}
+                        disabled={!state.scratchDescription.trim()}
+                        className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-void-black font-semibold text-lg hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-amber-500 disabled:hover:to-orange-500"
+                      >
+                        <Rocket className="w-5 h-5" />
+                        Start Building
+                      </button>
+                    </div>
+                  </div>
+                </Container>
+              </div>
+            )}
+
+            {/* Visual mode content */}
+            {state.mode === 'visual' && (
+              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
+                <Container size="xl">
                   <p className="text-text-secondary text-center mb-8">
                     Generate branded visuals for your NEAR project — architecture diagrams, user flows, infographics, and social graphics.
                   </p>
                   <VisualMode />
-                </div>
-              )}
+                </Container>
+              </div>
+            )}
+          </div>
 
-              {state.mode === 'scratch' && (
-                <div className="mb-16 max-w-3xl mx-auto">
-                  <div className="text-center mb-8">
-                    <p className="text-text-secondary text-lg mb-2">
-                      Just describe it. We&apos;ll handle everything.
-                    </p>
-                    <p className="text-text-muted text-sm">
-                      Full-stack NEAR dApp — React, Tailwind, wallet connect — generated from your description.
-                    </p>
+          {/* Divider */}
+          <div className="py-4">
+            <Container size="xl">
+              <div className="border-t border-white/[0.06]" />
+            </Container>
+          </div>
+
+          {/* Visual Generator — Compact below-fold card */}
+          <div className="pb-8">
+            <Container size="xl">
+              <div className="max-w-4xl mx-auto">
+                <button
+                  onClick={() => {
+                    dispatch({ type: 'SET_MODE', payload: 'visual' });
+                    setTimeout(() => {
+                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className={`w-full group p-5 rounded-2xl border transition-all hover:scale-[1.01] ${
+                    state.mode === 'visual'
+                      ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                      : 'border-border-subtle bg-void-gray/20 hover:border-purple-500/30 hover:bg-purple-500/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center transition-all ${
+                      state.mode === 'visual'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-border-subtle text-text-muted group-hover:bg-purple-500/20 group-hover:text-purple-400'
+                    }`}>
+                      <Palette className="w-6 h-6" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className={`text-base font-semibold mb-0.5 transition-colors ${
+                        state.mode === 'visual' ? 'text-purple-400' : 'text-text-primary group-hover:text-purple-400'
+                      }`}>
+                        Visual Generator
+                      </h3>
+                      <p className="text-xs text-text-muted">
+                        AI-generated architecture diagrams, infographics, and social graphics for your NEAR project
+                      </p>
+                    </div>
                   </div>
+                </button>
+              </div>
+            </Container>
+          </div>
 
-                  {/* Description input */}
-                  <div className="mb-8">
-                    <textarea
-                      value={state.scratchDescription}
-                      onChange={(e) => dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: e.target.value })}
-                      placeholder="I want to build an NFT marketplace where users can mint, list, and trade digital art on NEAR..."
-                      rows={4}
-                      className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-5 py-4 text-text-primary placeholder-text-muted/50 resize-none focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all text-sm leading-relaxed"
-                    />
-                  </div>
-
-                  {/* Template quick-starts */}
-                  <div className="mb-8">
-                    <p className="text-xs font-mono uppercase tracking-wider text-text-muted mb-4">
-                      Or pick a template to start fast
-                    </p>
-                    <ScratchTemplates
-                      selectedId={state.scratchTemplate}
-                      onSelect={(template) => {
-                        dispatch({ type: 'SET_SCRATCH_TEMPLATE', payload: template.id });
-                        dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: template.starterPrompt });
-                      }}
-                    />
-                  </div>
-
-                  {/* Start button */}
-                  <div className="text-center">
-                    <button
-                      onClick={() => {
-                        if (state.scratchDescription.trim()) {
-                          dispatch({ type: 'SET_SHOW_SCRATCH_SESSION', payload: true });
-                        }
-                      }}
-                      disabled={!state.scratchDescription.trim()}
-                      className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-void-black font-semibold text-lg hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-amber-500 disabled:hover:to-orange-500"
-                    >
-                      <Rocket className="w-5 h-5" />
-                      Start Building
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Void Brief — AI mission brief generator */}
+          {/* Void Brief */}
+          <div className="pb-8">
+            <Container size="xl">
               <VoidBriefCard
                 isConnected={isConnected}
                 openModal={openModal}
                 onStartBuild={(brief) => {
-                  // Start a build session with the full brief context
                   const prompt = briefToSanctumPrompt(brief);
                   dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt });
                   dispatch({ type: 'SET_SELECTED_CATEGORY', payload: 'custom' });
                   dispatch({ type: 'SET_SESSION_STARTED', payload: true });
                 }}
               />
+            </Container>
+          </div>
 
-              {/* Builder Showcase */}
-              <div className="mb-16">
-                <BuilderShowcase />
-              </div>
+          {/* Builder Showcase */}
+          <div className="pb-8">
+            <Container size="xl">
+              <BuilderShowcase />
+            </Container>
+          </div>
 
-              {/* The Sanctum Council */}
-              <div className="mb-16 max-w-4xl mx-auto">
+          {/* Social Proof — moved near bottom */}
+          <div className="pb-8">
+            <Container size="xl">
+              <SocialProof variant="banner" />
+            </Container>
+          </div>
+
+          {/* The Sanctum Council */}
+          <div className="pb-16">
+            <Container size="xl">
+              <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-6">
                   <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-purple-400/60">
                     The Sanctum Council
@@ -703,10 +794,9 @@ function SanctumPageInner() {
                       className="group relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] hover:border-white/[0.15] transition-all duration-300 hover:bg-white/[0.06] cursor-default"
                       style={{
                         animationDelay: `${i * 80}ms`,
-                        animation: 'fadeInUp 0.5s ease-out backwards',
+                        animation: 'sanctumFadeInUp 0.5s ease-out backwards',
                       }}
                     >
-                      {/* Subtle glow on hover using persona color */}
                       <div
                         className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${persona.bgColor} blur-xl -z-10`}
                       />
@@ -716,22 +806,33 @@ function SanctumPageInner() {
                     </div>
                   ))}
                 </div>
-                <style jsx>{`
-                  @keyframes fadeInUp {
-                    from {
-                      opacity: 0;
-                      transform: translateY(8px);
-                    }
-                    to {
-                      opacity: 1;
-                      transform: translateY(0);
-                    }
-                  }
-                `}</style>
               </div>
-
             </Container>
           </div>
+
+          {/* Animations */}
+          <style jsx>{`
+            @keyframes sanctumFadeInUp {
+              from {
+                opacity: 0;
+                transform: translateY(12px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+            @keyframes sanctumSlideUp {
+              from {
+                opacity: 0;
+                transform: translateY(16px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
 
           {/* Features footer */}
           <div className="py-8 border-t border-border-subtle bg-void-black/50 backdrop-blur-sm">
