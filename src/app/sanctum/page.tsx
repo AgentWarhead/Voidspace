@@ -1054,9 +1054,9 @@ function SanctumPageInner() {
 
               {/* Right Panel - Code Preview */}
               <div className="w-1/2 flex flex-col h-full">
-                <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
+                <GlassPanel className="flex-1 flex flex-col" glow glowColor="green">
                   {/* Header with inline task progress */}
-                  <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
+                  <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50 relative z-10">
                     {/* Top row: Title + Buttons */}
                     <div className="flex items-center justify-between mb-3">
                       <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
