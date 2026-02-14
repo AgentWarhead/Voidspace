@@ -32,29 +32,29 @@ const NEAR_RPC_URLS: Record<string, string> = {
 };
 
 // Internal method names to filter out from WASM exports
-const INTERNAL_METHODS = new Set([
-  'memory', '__data_end', '__heap_base', '__indirect_function_table',
-  '_start', '__wasm_call_ctors', 'allocate', 'deallocate',
-  'register_len', 'read_register', 'current_account_id',
-  'signer_account_id', 'signer_account_pk', 'predecessor_account_id',
-  'input', 'block_index', 'block_timestamp', 'epoch_height',
-  'storage_usage', 'account_balance', 'account_locked_balance',
-  'attached_deposit', 'prepaid_gas', 'used_gas', 'random_seed',
-  'sha256', 'keccak256', 'keccak512', 'ripemd160', 'ecrecover',
-  'value_return', 'panic', 'panic_utf8', 'log', 'log_utf8',
-  'promise_create', 'promise_then', 'promise_and', 'promise_batch_create',
-  'promise_batch_then', 'promise_batch_action_create_account',
-  'promise_batch_action_deploy_contract', 'promise_batch_action_function_call',
-  'promise_batch_action_function_call_weight',
-  'promise_batch_action_transfer', 'promise_batch_action_stake',
-  'promise_batch_action_add_key_with_full_access',
-  'promise_batch_action_add_key_with_function_call',
-  'promise_batch_action_delete_key', 'promise_batch_action_delete_account',
-  'promise_results_count', 'promise_result', 'promise_return',
-  'storage_write', 'storage_read', 'storage_remove', 'storage_has_key',
-  'validator_stake', 'validator_total_stake', 'alt_bn128_g1_multiexp',
-  'alt_bn128_g1_sum', 'alt_bn128_pairing_check',
-]);
+const INTERNAL_METHODS: Record<string, true> = {
+  'memory': true, '__data_end': true, '__heap_base': true, '__indirect_function_table': true,
+  '_start': true, '__wasm_call_ctors': true, 'allocate': true, 'deallocate': true,
+  'register_len': true, 'read_register': true, 'current_account_id': true,
+  'signer_account_id': true, 'signer_account_pk': true, 'predecessor_account_id': true,
+  'input': true, 'block_index': true, 'block_timestamp': true, 'epoch_height': true,
+  'storage_usage': true, 'account_balance': true, 'account_locked_balance': true,
+  'attached_deposit': true, 'prepaid_gas': true, 'used_gas': true, 'random_seed': true,
+  'sha256': true, 'keccak256': true, 'keccak512': true, 'ripemd160': true, 'ecrecover': true,
+  'value_return': true, 'panic': true, 'panic_utf8': true, 'log': true, 'log_utf8': true,
+  'promise_create': true, 'promise_then': true, 'promise_and': true, 'promise_batch_create': true,
+  'promise_batch_then': true, 'promise_batch_action_create_account': true,
+  'promise_batch_action_deploy_contract': true, 'promise_batch_action_function_call': true,
+  'promise_batch_action_function_call_weight': true,
+  'promise_batch_action_transfer': true, 'promise_batch_action_stake': true,
+  'promise_batch_action_add_key_with_full_access': true,
+  'promise_batch_action_add_key_with_function_call': true,
+  'promise_batch_action_delete_key': true, 'promise_batch_action_delete_account': true,
+  'promise_results_count': true, 'promise_result': true, 'promise_return': true,
+  'storage_write': true, 'storage_read': true, 'storage_remove': true, 'storage_has_key': true,
+  'validator_stake': true, 'validator_total_stake': true, 'alt_bn128_g1_multiexp': true,
+  'alt_bn128_g1_sum': true, 'alt_bn128_pairing_check': true,
+};
 
 // View method heuristics — names that typically indicate read-only methods
 const VIEW_METHOD_PREFIXES = ['get_', 'view_', 'is_', 'has_', 'check_', 'ft_balance_of', 'ft_total_supply', 'ft_metadata', 'nft_token', 'nft_tokens', 'nft_supply', 'nft_metadata', 'storage_balance_of'];
@@ -151,7 +151,7 @@ function extractMethodNamesFromWasm(base64Code: string): string[] {
       } else {
         if (currentStr.length >= 3 && currentStr.length <= 64) {
           // Filter: must contain at least one lowercase letter (not just constants)
-          if (/[a-z]/.test(currentStr) && !INTERNAL_METHODS.has(currentStr)) {
+          if (/[a-z]/.test(currentStr) && !INTERNAL_METHODS[currentStr]) {
             methodNames.push(currentStr);
           }
         }
@@ -160,7 +160,7 @@ function extractMethodNamesFromWasm(base64Code: string): string[] {
     }
     
     // Deduplicate and filter for likely method names
-    const unique = [...new Set(methodNames)];
+    const unique = Array.from(new Set(methodNames));
     
     // Heuristic: keep names that look like Rust/NEAR method names
     return unique.filter(name => {

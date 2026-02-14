@@ -18,6 +18,9 @@ const QUICK_ACTIONS = [
   { label: '✨ Add animations', value: 'Add smooth animations and transitions using Tailwind and CSS' },
   { label: '📊 Add charts', value: 'Add data visualization charts for displaying on-chain data' },
   { label: '🚀 Deploy ready', value: 'Make the project production-ready with proper error handling, loading states, and SEO' },
+  { label: '🔗 Add NEAR contract calls', value: 'Add functions to call NEAR smart contract methods (both view and change methods) with proper error handling, gas estimation, and transaction status display' },
+  { label: '📊 Add on-chain data display', value: 'Add a section that fetches and displays on-chain data from NEAR RPC (account info, contract state, recent transactions) with auto-refresh and loading states' },
+  { label: '🪙 Add token balance view', value: 'Add a token balance display component that shows NEP-141 fungible token balances, NEAR native balance, and token metadata with formatted amounts and token icons' },
 ];
 
 interface ScratchWebappChatProps {
