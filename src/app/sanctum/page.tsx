@@ -383,8 +383,8 @@ function SanctumPageInner() {
                 <SocialProof variant="banner" />
               </div>
 
-              {/* Friendly Mode Cards */}
-              <div id="modes" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
+              {/* Build Mode Cards — 2x2 Grid */}
+              <div id="modes" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-4xl mx-auto">
                 <button
                   onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
                   className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
@@ -460,35 +460,10 @@ function SanctumPageInner() {
                   </p>
                 </button>
 
-                <button
-                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'visual' })}
-                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
-                    state.mode === 'visual'
-                      ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-                      : 'border-border-subtle bg-void-gray/30 hover:border-purple-500/30 hover:bg-purple-500/5'
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center transition-all ${
-                    state.mode === 'visual' 
-                      ? 'bg-purple-500/20 text-purple-400' 
-                      : 'bg-border-subtle text-text-muted group-hover:bg-purple-500/20 group-hover:text-purple-400'
-                  }`}>
-                    <Palette className="w-6 h-6" />
-                  </div>
-                  <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                    state.mode === 'visual' ? 'text-purple-400' : 'text-text-primary group-hover:text-purple-400'
-                  }`}>
-                    Visual Generator
-                  </h3>
-                  <p className="text-sm text-text-muted">
-                    AI-generated diagrams, infographics, and social graphics
-                  </p>
-                </button>
-
-                {/* Vibe Code — Featured 5th Card */}
+                {/* Vibe Code */}
                 <button
                   onClick={() => dispatch({ type: 'SET_MODE', payload: 'scratch' })}
-                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl md:col-span-2 lg:col-span-1 ${
+                  className={`group p-6 rounded-2xl border-2 transition-all text-center hover:scale-[1.02] hover:shadow-2xl ${
                     state.mode === 'scratch'
                       ? 'border-amber-500/50 bg-gradient-to-br from-amber-500/15 to-orange-500/10 shadow-lg shadow-amber-500/20'
                       : 'border-border-subtle bg-void-gray/30 hover:border-amber-500/30 hover:bg-gradient-to-br hover:from-amber-500/5 hover:to-orange-500/5'
@@ -514,6 +489,38 @@ function SanctumPageInner() {
                       ✨ New
                     </span>
                   )}
+                </button>
+              </div>
+
+              {/* Visual Generator — Standalone Creative Tool */}
+              <div className="mb-12 max-w-4xl mx-auto">
+                <button
+                  onClick={() => dispatch({ type: 'SET_MODE', payload: 'visual' })}
+                  className={`w-full group p-6 rounded-2xl border-2 transition-all hover:scale-[1.01] hover:shadow-2xl ${
+                    state.mode === 'visual'
+                      ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                      : 'border-border-subtle bg-void-gray/30 hover:border-purple-500/30 hover:bg-purple-500/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-5">
+                    <div className={`w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center transition-all ${
+                      state.mode === 'visual' 
+                        ? 'bg-purple-500/20 text-purple-400' 
+                        : 'bg-border-subtle text-text-muted group-hover:bg-purple-500/20 group-hover:text-purple-400'
+                    }`}>
+                      <Palette className="w-7 h-7" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className={`text-lg font-semibold mb-1 transition-colors ${
+                        state.mode === 'visual' ? 'text-purple-400' : 'text-text-primary group-hover:text-purple-400'
+                      }`}>
+                        Visual Generator
+                      </h3>
+                      <p className="text-sm text-text-muted">
+                        AI-generated architecture diagrams, infographics, and social graphics for your NEAR project
+                      </p>
+                    </div>
+                  </div>
                 </button>
               </div>
 
