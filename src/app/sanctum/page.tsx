@@ -408,6 +408,8 @@ function SanctumPageInner() {
           onBack={() => setShowWizard(false)}
           dispatch={dispatch}
           state={state}
+          isConnected={isConnected}
+          openModal={openModal}
         />
       )}
 

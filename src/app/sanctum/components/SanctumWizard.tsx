@@ -5,9 +5,12 @@ import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { CategoryPicker } from './CategoryPicker';
 import { ScratchTemplates, SCRATCH_TEMPLATES } from './ScratchTemplates';
+import { VoidBriefCard } from './VoidBriefCard';
 import { PERSONA_LIST } from '../lib/personas';
+import { storeBriefForSanctum, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
+import type { ProjectBrief } from '@/types';
 // @ts-ignore
-import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles, Search } from 'lucide-react';
 
 export interface WizardConfig {
   mode: 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
@@ -28,19 +31,22 @@ interface SanctumWizardProps {
     scratchDescription: string;
     scratchTemplate: string | null;
   };
+  isConnected?: boolean;
+  openModal?: () => void;
 }
 
 type WizardStep = 'goal' | 'details' | 'persona';
-type GoalChoice = 'deploy-first' | 'learn' | 'build-specific' | 'idea' | 'existing-code' | 'visual';
+type GoalChoice = 'deploy-first' | 'learn' | 'build-specific' | 'idea' | 'existing-code' | 'visual' | 'discover';
 type ExistingCodeSub = 'roast' | 'webapp' | null;
 
-export function SanctumWizard({ onComplete, onBack, dispatch, state }: SanctumWizardProps) {
+export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected = false, openModal = () => {} }: SanctumWizardProps) {
   const [step, setStep] = useState<WizardStep>('goal');
   const [goal, setGoal] = useState<GoalChoice | null>(null);
   const [existingCodeSub, setExistingCodeSub] = useState<ExistingCodeSub>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPersona, setSelectedPersona] = useState<string>('shade');
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  const [briefPrompt, setBriefPrompt] = useState<string | null>(null);
 
   const goForward = useCallback((nextStep: WizardStep) => {
     setDirection('forward');
@@ -79,6 +85,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state }: SanctumWi
     } else if (choice === 'visual') {
       // Direct launch — visual mode
       onComplete({ mode: 'visual' });
+    } else if (choice === 'discover') {
+      goForward('details');
     } else if (choice === 'existing-code') {
       // Show sub-choice inline, don't advance step yet
       setExistingCodeSub(null);
@@ -107,6 +115,13 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state }: SanctumWi
       goForward('persona');
     }
   }, [goForward, state.scratchDescription]);
+
+  const handleBriefComplete = useCallback((brief: ProjectBrief) => {
+    storeBriefForSanctum(brief);
+    const prompt = briefToSanctumPrompt(brief);
+    setBriefPrompt(prompt);
+    goForward('persona');
+  }, [goForward]);
 
   const handlePersonaSelect = useCallback((personaId: string) => {
     setSelectedPersona(personaId);
@@ -138,12 +153,17 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state }: SanctumWi
       config.mode = 'scratch';
       config.scratchDescription = state.scratchDescription;
       config.scratchTemplate = state.scratchTemplate;
+    } else if (goal === 'discover') {
+      config.mode = 'build';
+      config.chatMode = 'build';
+      config.category = 'custom';
+      config.customPrompt = briefPrompt || undefined;
     } else if (goal === 'existing-code' && existingCodeSub === 'roast') {
       config.mode = 'roast';
     }
 
     onComplete(config);
-  }, [goal, selectedCategory, selectedPersona, existingCodeSub, state, onComplete]);
+  }, [goal, selectedCategory, selectedPersona, existingCodeSub, state, onComplete, briefPrompt]);
 
   const stepIndex = step === 'goal' ? 0 : step === 'details' ? 1 : 2;
   const totalSteps = goal === 'deploy-first' ? 2 : 3;
@@ -241,6 +261,16 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state }: SanctumWi
                   onClick={() => handleGoalSelect('idea')}
                   selected={goal === 'idea'}
                 />
+                <GoalCard
+                  emoji="🔍"
+                  title="Help me find something to build"
+                  description="Browse ecosystem opportunities or let AI generate a project brief for you."
+                  color="cyan"
+                  tag="Explorer"
+                  delay={320}
+                  onClick={() => handleGoalSelect('discover')}
+                  selected={goal === 'discover'}
+                />
               </div>
 
               {/* Secondary options */}
@@ -318,6 +348,38 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state }: SanctumWi
                       goForward('persona');
                     }}
                   />
+                </>
+              )}
+
+              {/* Discover mode — VoidBriefCard */}
+              {goal === 'discover' && (
+                <>
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+                      Discover your <GradientText>mission</GradientText>
+                    </h2>
+                    <p className="text-text-muted text-sm">
+                      Generate a project brief or browse ecosystem opportunities
+                    </p>
+                  </div>
+
+                  <VoidBriefCard
+                    isConnected={isConnected}
+                    openModal={openModal}
+                    onStartBuild={(brief) => {
+                      handleBriefComplete(brief);
+                    }}
+                  />
+
+                  {/* Browse opportunities link */}
+                  <div className="text-center mt-6">
+                    <a
+                      href="/opportunities"
+                      className="text-sm text-text-muted hover:text-near-green transition-colors"
+                    >
+                      Or browse all ecosystem opportunities →
+                    </a>
+                  </div>
                 </>
               )}
 
