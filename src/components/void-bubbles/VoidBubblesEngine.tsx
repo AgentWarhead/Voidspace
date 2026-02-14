@@ -7,6 +7,7 @@ import {
   Eye, RotateCcw, Clock, Activity, X, Copy, ExternalLink,
   TrendingUp, TrendingDown, Search, Settings, Brain, Link, Keyboard,
 } from 'lucide-react';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 // These icons exist but TS types are broken in v0.453 RSC mode
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const { EyeOff, Camera, Volume2, VolumeX, Share2, AlertTriangle } = require('lucide-react') as Record<string, React.ComponentType<{ className?: string }>>;
@@ -197,6 +198,9 @@ function copyToClipboard(text: string) {
 // ────────────────────── Component ──────────────────────
 
 export function VoidBubblesEngine() {
+  // Achievement tracking
+  const { trackStat, triggerCustom } = useAchievementContext();
+  
   // State
   const [tokens, setTokens] = useState<VoidBubbleToken[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1332,6 +1336,20 @@ export function VoidBubblesEngine() {
         event.stopPropagation();
         // Single click = open popup card immediately (no double-click delay)
         handleShowPopup(d.token.id, event);
+        
+        // Achievement: track bubble clicks
+        trackStat('bubblesClicked');
+        trackStat('bubblesClickedInSession');
+        
+        // Achievement: check if largest or smallest bubble
+        const currentBubbles = nodesRef.current || nodes;
+        if (currentBubbles.length > 0) {
+          const allRadii = currentBubbles.map((n: BubbleNode) => n.targetRadius);
+          const maxRadius = Math.max(...allRadii);
+          const minRadius = Math.min(...allRadii);
+          if (d.targetRadius === maxRadius) triggerCustom('largest_bubble_clicked');
+          if (d.targetRadius === minRadius) triggerCustom('smallest_bubble_clicked');
+        }
         
         // Play sounds based on token state
         const currentChange = getCurrentPriceChange(d.token);

@@ -12,6 +12,7 @@ import { ConstellationMap } from '@/components/features/ConstellationMap';
 import { VoidBubblesEngine } from '@/components/void-bubbles/VoidBubblesEngine';
 import { HotStrip } from '@/components/void-bubbles/HotStrip';
 import { cn } from '@/lib/utils';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 const TOOLS = [
   {
@@ -100,7 +101,14 @@ export default function ObservatoryContent() {
     Math.floor(Math.random() * (1000 - 200 + 1)) + 200
   );
 
+  const { trackStat } = useAchievementContext();
   const isVoidBubbles = activeTool === 'void-bubbles';
+
+  // Achievement: track observatory visit
+  useEffect(() => {
+    trackStat('observatoryVisits');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync with URL param changes
   useEffect(() => {

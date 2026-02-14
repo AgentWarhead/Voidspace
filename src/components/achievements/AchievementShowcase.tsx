@@ -1,224 +1,224 @@
+/* ─── AchievementShowcase — Full achievement section for profile ─
+ * Category tabs, achievement grid, featured pins, progress rings.
+ * ────────────────────────────────────────────────────────────── */
+
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
+import { Trophy, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 import {
   ACHIEVEMENTS,
-  ACHIEVEMENT_MAP,
-  RARITY_CONFIG,
   CATEGORY_CONFIG,
-  countByRarity,
-  getByCategory,
+  getDisplayable,
   type AchievementCategory,
-  type AchievementRarity,
 } from '@/lib/achievements';
-import { useAchievementContext } from '@/contexts/AchievementContext';
-import { AchievementCard, FeaturedAchievementCard } from './AchievementCard';
+import { AchievementCard } from './AchievementCard';
 import { AchievementProgress } from './AchievementProgress';
 import { AchievementTimeline } from './AchievementTimeline';
 
 type FilterMode = 'all' | 'unlocked' | 'locked';
 
-const CATEGORIES = Object.keys(CATEGORY_CONFIG) as AchievementCategory[];
-
 export function AchievementShowcase() {
-  const { unlocked, featured, setFeatured, timeline } = useAchievementContext();
+  const {
+    unlocked, featured, timeline, isConnected,
+    setFeatured, isUnlocked,
+  } = useAchievementContext();
+
   const [activeCategory, setActiveCategory] = useState<AchievementCategory | 'all'>('all');
   const [filter, setFilter] = useState<FilterMode>('all');
+  const [showTimeline, setShowTimeline] = useState(false);
 
-  // Rarity breakdown
-  const rarityBreakdown = useMemo(() => countByRarity(unlocked), [unlocked]);
+  // Build timeline map for unlock dates
+  const timelineMap = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const e of timeline) m.set(e.id, e.unlockedAt);
+    return m;
+  }, [timeline]);
 
-  // Featured achievements
-  const featuredDefs = useMemo(
-    () => featured
-      .map(id => ACHIEVEMENT_MAP[id])
-      .filter((d): d is NonNullable<typeof d> => !!d),
-    [featured],
-  );
+  // Filter achievements
+  const displayable = useMemo(() => getDisplayable(unlocked), [unlocked]);
+
+  const filtered = useMemo(() => {
+    let list = displayable;
+
+    // Category filter
+    if (activeCategory !== 'all') {
+      list = list.filter(a => a.category === activeCategory);
+    }
+
+    // Unlock filter
+    if (filter === 'unlocked') {
+      list = list.filter(a => unlocked.has(a.id));
+    } else if (filter === 'locked') {
+      list = list.filter(a => !unlocked.has(a.id));
+    }
+
+    return list;
+  }, [displayable, activeCategory, filter, unlocked]);
 
   // Toggle featured
   const handleToggleFeatured = useCallback((id: string) => {
-    if (featured.includes(id)) {
-      setFeatured(featured.filter(f => f !== id));
-    } else if (featured.length < 3) {
-      setFeatured([...featured, id]);
+    const current = [...featured];
+    const idx = current.indexOf(id);
+    if (idx >= 0) {
+      current.splice(idx, 1);
+    } else if (current.length < 3) {
+      current.push(id);
     }
+    setFeatured(current);
   }, [featured, setFeatured]);
 
-  // Filtered achievements
-  const filteredAchievements = useMemo(() => {
-    let list = activeCategory === 'all'
-      ? ACHIEVEMENTS
-      : getByCategory(activeCategory);
+  // Not connected
+  if (!isConnected) {
+    return (
+      <div className="rounded-xl border border-border bg-surface/50 p-8 text-center">
+        <Wallet className="w-10 h-10 text-text-muted mx-auto mb-3" />
+        <h3 className="text-lg font-semibold text-text-primary mb-1">Connect Wallet to Track Achievements</h3>
+        <p className="text-sm text-text-muted">
+          Sign in with your NEAR wallet to start earning achievements and XP.
+        </p>
+      </div>
+    );
+  }
 
-    // For secret achievements: show if unlocked, hide if locked (unless filter=all and category=secret)
-    list = list.filter(a => {
-      if (a.secret && !unlocked.has(a.id) && activeCategory !== 'secret') return false;
-      return true;
-    });
-
-    if (filter === 'unlocked') list = list.filter(a => unlocked.has(a.id));
-    if (filter === 'locked') list = list.filter(a => !unlocked.has(a.id));
-
-    return list;
-  }, [activeCategory, filter, unlocked]);
-
-  // Timeline entries with timestamps
-  const timelineMap = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const entry of timeline) {
-      map.set(entry.id, entry.unlockedAt);
-    }
-    return map;
-  }, [timeline]);
+  const categories = Object.entries(CATEGORY_CONFIG) as [AchievementCategory, typeof CATEGORY_CONFIG[AchievementCategory]][];
 
   return (
     <div className="space-y-6">
-      {/* Progress Overview */}
-      <AchievementProgress unlocked={unlocked} />
+      {/* Header + progress */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-400" />
+            Achievements
+          </h2>
+          <button
+            onClick={() => setShowTimeline(!showTimeline)}
+            className="text-xs text-near-green/70 hover:text-near-green transition-colors"
+          >
+            {showTimeline ? 'Show Grid' : 'Recent Activity'}
+          </button>
+        </div>
 
-      {/* Rarity breakdown bar */}
-      <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
-        {(Object.keys(RARITY_CONFIG) as AchievementRarity[]).map(r => {
-          const cfg = RARITY_CONFIG[r];
-          const data = rarityBreakdown[r];
-          return (
-            <span key={r} className={cn('flex items-center gap-1', cfg.color)}>
-              {data?.unlocked ?? 0}/{data?.total ?? 0} {cfg.label}
-            </span>
-          );
-        })}
+        <AchievementProgress unlocked={unlocked} />
       </div>
 
-      {/* Featured Section */}
-      {featuredDefs.length > 0 && (
+      {/* Featured showcase */}
+      {featured.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider">⭐ Featured</h4>
+          <h3 className="text-xs uppercase tracking-wider text-text-muted font-medium">
+            ⭐ Featured ({featured.length}/3)
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {featuredDefs.map(def => (
-              <FeaturedAchievementCard
-                key={def.id}
-                achievement={def}
-                unlockedAt={timelineMap.get(def.id)}
-              />
-            ))}
+            {featured.map(id => {
+              const achievement = ACHIEVEMENTS.find(a => a.id === id);
+              if (!achievement) return null;
+              return (
+                <AchievementCard
+                  key={id}
+                  achievement={achievement}
+                  isUnlocked={true}
+                  isFeatured={true}
+                  unlockedAt={timelineMap.get(id)}
+                  onToggleFeatured={handleToggleFeatured}
+                  featuredCount={featured.length}
+                />
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Recently Unlocked */}
-      {timeline.length > 0 && (
-        <AchievementTimeline timeline={timeline} limit={5} />
-      )}
+      {showTimeline ? (
+        /* Timeline view */
+        <AchievementTimeline timeline={timeline} limit={15} />
+      ) : (
+        <>
+          {/* Category tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+            <TabButton
+              active={activeCategory === 'all'}
+              onClick={() => setActiveCategory('all')}
+            >
+              All
+            </TabButton>
+            {categories.map(([cat, config]) => (
+              <TabButton
+                key={cat}
+                active={activeCategory === cat}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {config.emoji} {config.label}
+              </TabButton>
+            ))}
+          </div>
 
-      {/* Filter bar */}
-      <div className="flex items-center gap-2">
-        {(['all', 'unlocked', 'locked'] as FilterMode[]).map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={cn(
-              'px-3 py-1 text-xs rounded-full border transition-colors capitalize',
-              filter === f
-                ? 'bg-near-green/15 border-near-green/40 text-near-green'
-                : 'bg-surface border-border text-text-muted hover:border-text-muted/40',
-            )}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+          {/* Filter pills */}
+          <div className="flex items-center gap-2">
+            {(['all', 'unlocked', 'locked'] as FilterMode[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={cn(
+                  'text-xs px-3 py-1 rounded-full border transition-colors capitalize',
+                  filter === f
+                    ? 'border-near-green/50 bg-near-green/10 text-near-green'
+                    : 'border-border text-text-muted hover:text-text-secondary',
+                )}
+              >
+                {f}
+                {f === 'unlocked' && ` (${unlocked.size})`}
+                {f === 'all' && ` (${displayable.length})`}
+              </button>
+            ))}
+          </div>
 
-      {/* Category tabs */}
-      <div className="flex flex-wrap gap-1.5">
-        <CategoryTab
-          active={activeCategory === 'all'}
-          onClick={() => setActiveCategory('all')}
-          emoji="🏆"
-          label="All"
-          unlocked={unlocked.size}
-          total={ACHIEVEMENTS.length}
-        />
-        {CATEGORIES.map(cat => {
-          const cfg = CATEGORY_CONFIG[cat];
-          const catAchievements = getByCategory(cat);
-          const catUnlocked = catAchievements.filter(a => unlocked.has(a.id)).length;
-          return (
-            <CategoryTab
-              key={cat}
-              active={activeCategory === cat}
-              onClick={() => setActiveCategory(cat)}
-              emoji={cfg.emoji}
-              label={cfg.label}
-              unlocked={catUnlocked}
-              total={catAchievements.length}
-            />
-          );
-        })}
-      </div>
+          {/* Achievement grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {filtered.map(achievement => (
+              <AchievementCard
+                key={achievement.id}
+                achievement={achievement}
+                isUnlocked={isUnlocked(achievement.id)}
+                isFeatured={featured.includes(achievement.id)}
+                unlockedAt={timelineMap.get(achievement.id)}
+                onToggleFeatured={handleToggleFeatured}
+                featuredCount={featured.length}
+              />
+            ))}
+          </div>
 
-      {/* Achievement Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {filteredAchievements.map(a => (
-          <AchievementCard
-            key={a.id}
-            achievement={a}
-            isUnlocked={unlocked.has(a.id)}
-            isFeatured={featured.includes(a.id)}
-            onToggleFeatured={handleToggleFeatured}
-            unlockedAt={timelineMap.get(a.id)}
-            canFeature={featured.length < 3}
-          />
-        ))}
-      </div>
-
-      {filteredAchievements.length === 0 && (
-        <div className="text-center py-8 text-text-muted text-sm">
-          {filter === 'unlocked'
-            ? 'No achievements unlocked in this category yet.'
-            : filter === 'locked'
-              ? 'All done here! 🎉'
-              : 'No achievements to show.'}
-        </div>
+          {filtered.length === 0 && (
+            <div className="text-center py-8 text-text-muted text-sm">
+              No achievements match this filter. Keep exploring! 🚀
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 }
 
-/* ─── Category Tab ─────────────────────────────────────────── */
-
-function CategoryTab({
-  active,
-  onClick,
-  emoji,
-  label,
-  unlocked,
-  total,
+function TabButton({
+  active, onClick, children,
 }: {
   active: boolean;
   onClick: () => void;
-  emoji: string;
-  label: string;
-  unlocked: number;
-  total: number;
+  children: React.ReactNode;
 }) {
-  const percent = total > 0 ? Math.round((unlocked / total) * 100) : 0;
-
   return (
     <button
       onClick={onClick}
       className={cn(
-        'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-all',
+        'flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-all whitespace-nowrap',
         active
-          ? 'bg-near-green/10 border-near-green/40 text-near-green'
-          : 'bg-surface border-border text-text-muted hover:border-text-muted/40',
+          ? 'border-near-green/50 bg-near-green/10 text-near-green'
+          : 'border-border/50 text-text-muted hover:text-text-secondary hover:border-border',
       )}
-      title={`${label}: ${unlocked}/${total} (${percent}%)`}
     >
-      <span>{emoji}</span>
-      <span className="hidden sm:inline">{label}</span>
-      <span className="text-[10px] opacity-70">{unlocked}/{total}</span>
+      {children}
     </button>
   );
 }

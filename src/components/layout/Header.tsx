@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Search, Target, Sparkles, Globe, BookOpen, User, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
@@ -13,12 +13,27 @@ import { NearPriceTicker } from '@/components/layout/NearPriceTicker';
 import { NAV_ITEMS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useWallet } from '@/hooks/useWallet';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isImmersive, setIsImmersive] = useState(false);
   const { isConnected } = useWallet();
+  const { setStat } = useAchievementContext();
+
+  // Logo click easter egg — 3 rapid clicks within 1 second
+  const logoClickTimestamps = useRef<number[]>([]);
+  const handleLogoClick = useCallback(() => {
+    const now = Date.now();
+    logoClickTimestamps.current.push(now);
+    // Keep only clicks within last 1 second
+    logoClickTimestamps.current = logoClickTimestamps.current.filter(t => now - t < 1000);
+    if (logoClickTimestamps.current.length >= 3) {
+      setStat('logoClicks', 3);
+      logoClickTimestamps.current = [];
+    }
+  }, [setStat]);
 
   // Listen for immersive mode changes
   useEffect(() => {
@@ -64,7 +79,7 @@ export function Header() {
       <Container>
         <div className="flex items-center justify-between h-16 overflow-visible">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2" onClick={handleLogoClick}>
             <VoidspaceLogo size="sm" animate={false} />
             <span className="text-xl font-bold text-gradient">Voidspace</span>
           </Link>

@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Sparkles, Info, Loader2, ArrowRight, Rocket, X, Dices, Zap, WandSparkles, PenLine } from 'lucide-react';
 import { BriefDisplay } from '@/components/brief/BriefDisplay';
 import type { ProjectBrief } from '@/types';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 // ~20 mystery NEAR ecosystem prompts — randomly picked client-side
 const MYSTERY_PROMPTS = [
@@ -45,6 +46,7 @@ interface VoidBriefCardProps {
 }
 
 export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBriefCardProps) {
+  const { trackStat } = useAchievementContext();
   const [mode, setMode] = useState<'idle' | 'custom' | 'generating' | 'preview'>('idle');
   const [customIdea, setCustomIdea] = useState('');
   const [brief, setBrief] = useState<ProjectBrief | null>(null);
@@ -107,6 +109,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
       if (data.brief) {
         setBrief(data.brief);
         setMode('preview');
+        trackStat('briefsGenerated');
       } else {
         setError('Unexpected response. Try again.');
         setMode('idle');

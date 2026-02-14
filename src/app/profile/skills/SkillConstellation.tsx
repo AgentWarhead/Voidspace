@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Award } from 'lucide-react';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -11,11 +12,19 @@ import { ConstellationMap } from './ConstellationMap';
 import { ConstellationSidePanel } from './ConstellationSidePanel';
 import { ConstellationMobile } from './ConstellationMobile';
 import { ConstellationCelebration } from './ConstellationCelebration';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 /* ─── Thin Orchestrator ────────────────────────────────────── */
 
 export function SkillConstellation() {
   const state = useConstellationState();
+  const { trackStat } = useAchievementContext();
+
+  // Achievement: track page visit
+  useEffect(() => {
+    trackStat('constellationVisits');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const trackIds: TrackId[] = ['explorer', 'builder', 'hacker', 'founder'];
   const trackCompletions = Object.fromEntries(

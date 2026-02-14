@@ -11,6 +11,8 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
+import { useAchievementContext } from '@/contexts/AchievementContext';
+import { useWallet } from '@/hooks/useWallet';
 
 interface ReputationAnalysis {
   score: number;
@@ -135,6 +137,9 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [animatedScore, setAnimatedScore] = useState(0);
   const [showScoreAnimation, setShowScoreAnimation] = useState(false);
+  
+  const { trackStat, triggerCustom } = useAchievementContext();
+  const { accountId } = useWallet();
   
   const stageTimeouts = useRef<NodeJS.Timeout[]>([]);
   const scoreAnimationRef = useRef<number | null>(null);
@@ -277,6 +282,23 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
       clearStageTimeouts();
       setLoadingStages(prev => prev.map(stage => ({ ...stage, completed: true })));
       setResult(resultWithTimestamp);
+      
+      // ── Achievement tracking ──
+      trackStat('walletsAnalyzed');
+      
+      if (accountId && targetAddress.trim().toLowerCase() === accountId.toLowerCase()) {
+        triggerCustom('own_wallet_analyzed');
+      }
+      
+      const balance = parseFloat(data.walletData?.balance || '0');
+      if (balance >= 10000) triggerCustom('whale_wallet_analyzed');
+      if (balance === 0) triggerCustom('zero_balance_wallet');
+      
+      const defiInteractions = data.analysis?.defiActivity?.topProtocols?.reduce(
+        (sum: number, p: { interactions: number }) => sum + (p?.interactions || 0), 0
+      ) || 0;
+      if (defiInteractions >= 10) triggerCustom('defi_heavy_wallet');
+      // ── End achievement tracking ──
       
       setTimeout(() => {
         animateScore(data.analysis?.score || 0);

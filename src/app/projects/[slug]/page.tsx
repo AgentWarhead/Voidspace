@@ -16,6 +16,7 @@ import { GradientText } from '@/components/effects/GradientText';
 import { getProjectBySlug } from '@/lib/queries';
 import { formatCurrency, formatNumber, timeAgo } from '@/lib/utils';
 import { TokenMarketCard } from '@/components/projects/TokenMarketCard';
+import { ProjectViewTracker } from '@/components/tracking/ProjectViewTracker';
 
 /**
  * Known mapping from project name/slug → token symbol.
@@ -65,8 +66,11 @@ export default async function ProjectDetailPage({ params }: Props) {
   const github = raw.github as Record<string, unknown> | undefined;
   const pikespeak = raw.pikespeak as Record<string, unknown> | undefined;
 
+  const projectCategory = defillama?.category as string | undefined;
+
   return (
     <div className="min-h-screen">
+      <ProjectViewTracker category={projectCategory} />
       {/* Hero Banner */}
       <section className="relative overflow-hidden py-10 sm:py-14">
         <div

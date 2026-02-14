@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 interface SavedContextValue {
   savedIds: Set<string>;
@@ -21,6 +22,7 @@ const SavedContext = createContext<SavedContextValue>({
 
 export function SavedOpportunitiesProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
+  const { trackStat } = useAchievementContext();
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,6 +65,7 @@ export function SavedOpportunitiesProvider({ children }: { children: React.React
 
         if (res.ok) {
           setSavedIds((prev) => new Set(prev).add(opportunityId));
+          trackStat('opportunitiesSaved');
           return { success: true };
         }
 
@@ -72,7 +75,7 @@ export function SavedOpportunitiesProvider({ children }: { children: React.React
         return { success: false, error: 'Network error' };
       }
     },
-    [user?.id]
+    [user?.id, trackStat]
   );
 
   const unsave = useCallback(

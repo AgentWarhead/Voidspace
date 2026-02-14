@@ -10,6 +10,7 @@ import { HotStrip } from '@/components/void-bubbles/HotStrip';
 import { GradientText } from '@/components/effects/GradientText';
 import { VoidspaceLogo } from '@/components/brand/VoidspaceLogo';
 import { NAV_ITEMS } from '@/lib/constants';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 interface EcosystemStats {
   totalTokens: number;
@@ -51,6 +52,24 @@ function formatCount(n: number): string {
 export function VoidBubblesPageClient() {
   const [stats, setStats] = useState<EcosystemStats | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { trackStat, setStat } = useAchievementContext();
+
+  // Achievement: track page visit
+  useEffect(() => {
+    trackStat('bubblesVisits');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Achievement: track time spent on bubbles
+  useEffect(() => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const minutes = Math.floor((Date.now() - startTime) / 60000);
+      if (minutes > 0) setStat('bubblesMinutesSpent', minutes);
+    }, 60000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch aggregate stats for header
   useEffect(() => {

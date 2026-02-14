@@ -14,6 +14,7 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { ConstellationContextMenu } from './ConstellationContextMenu';
 import { ConstellationMinimap } from './ConstellationMinimap';
 import { ConstellationControls } from './ConstellationControls';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -181,6 +182,8 @@ interface ConstellationMapProps {
 }
 
 export function ConstellationMap({ initialAddress }: ConstellationMapProps = {}) {
+  const { trackStat, triggerCustom } = useAchievementContext();
+  
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -700,6 +703,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
 
       setConstellation(updatedConstellation);
       setExpandedNodes(prev => { const next = new Set(prev); next.add(nodeId); return next; });
+      trackStat('nodesExpanded');
 
       if (simulationRef.current) {
         simulationRef.current.nodes(updatedConstellation.nodes);
@@ -783,6 +787,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
   // ── Issue 3 FIX: Screenshot — properly serialize SVG with inline styles ──
   const handleScreenshot = useCallback(() => {
     if (!svgRef.current || !containerRef.current) return;
+    trackStat('screenshotsTaken');
     const svgEl = svgRef.current;
     const w = svgEl.clientWidth || containerRef.current.offsetWidth;
     const h = svgEl.clientHeight || containerRef.current.offsetHeight;
@@ -1116,7 +1121,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               onZoomIn={zoomIn}
               onZoomOut={zoomOut}
               onScreenshot={handleScreenshot}
-              onToggleFullscreen={() => setIsFullscreen(f => !f)}
+              onToggleFullscreen={() => { setIsFullscreen(f => !f); triggerCustom('fullscreen_used'); }}
               isFullscreen={isFullscreen}
             />
 

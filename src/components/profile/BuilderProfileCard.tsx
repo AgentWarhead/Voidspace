@@ -55,7 +55,7 @@ export function BuilderProfileCard({
   stats,
   reputation,
 }: BuilderProfileCardProps) {
-  const { unlocked } = useAchievementContext();
+  const { unlocked, trackStat } = useAchievementContext();
 
   // Calculate XP from stats + achievement XP
   const activityXP = (stats.voidsExplored * 10) + 
@@ -129,7 +129,7 @@ export function BuilderProfileCard({
             </div>
 
             {/* Share Button */}
-            <Button variant="ghost" size="sm" className="text-text-muted hover:text-near-green">
+            <Button variant="ghost" size="sm" className="text-text-muted hover:text-near-green" onClick={() => trackStat('profileShares')}>
               <Share2 className="w-4 h-4" />
             </Button>
           </div>

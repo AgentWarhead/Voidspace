@@ -9,6 +9,7 @@ import { TierGate } from '@/components/tier/TierGate';
 import { useUser } from '@/hooks/useUser';
 import { TIERS } from '@/lib/tiers';
 import type { ProjectBrief, TierName } from '@/types';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 interface BriefGeneratorProps {
   opportunityId: string;
@@ -16,6 +17,7 @@ interface BriefGeneratorProps {
 
 export function BriefGenerator({ opportunityId }: BriefGeneratorProps) {
   const { user, isConnected } = useUser();
+  const { trackStat } = useAchievementContext();
   const [brief, setBrief] = useState<ProjectBrief | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export function BriefGenerator({ opportunityId }: BriefGeneratorProps) {
       }
 
       setBrief(data.brief?.content || data.brief);
+      trackStat('briefsGenerated');
     } catch {
       setError('Network error. Please try again.');
     } finally {

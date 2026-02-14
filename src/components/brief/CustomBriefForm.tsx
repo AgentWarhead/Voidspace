@@ -9,9 +9,11 @@ import { TierGate } from '@/components/tier/TierGate';
 import { useUser } from '@/hooks/useUser';
 import { TIERS } from '@/lib/tiers';
 import type { ProjectBrief, TierName } from '@/types';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 
 export function CustomBriefForm() {
   const { user, isConnected } = useUser();
+  const { trackStat } = useAchievementContext();
   const [customIdea, setCustomIdea] = useState('');
   const [brief, setBrief] = useState<ProjectBrief | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,6 +51,7 @@ export function CustomBriefForm() {
       }
 
       setBrief(data.brief?.content || data.brief);
+      trackStat('briefsGenerated');
     } catch {
       setError('Network error. Please try again.');
     } finally {
