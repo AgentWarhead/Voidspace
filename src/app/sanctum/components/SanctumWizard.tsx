@@ -96,9 +96,14 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
   const handleExistingCodeSub = useCallback((sub: 'roast' | 'webapp') => {
     setExistingCodeSub(sub);
     if (sub === 'roast') {
-      // Roast mode — go to persona
+      // Roast mode — skip persona, auto-select Warden (security) and launch immediately
       setGoal('existing-code');
-      goForward('persona');
+      setSelectedPersona('warden');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sanctum-chat-persona', 'warden');
+      }
+      onComplete({ mode: 'roast', persona: 'warden' });
+      return;
     } else {
       // Webapp mode — launch directly (it has its own flow)
       onComplete({ mode: 'webapp' });
