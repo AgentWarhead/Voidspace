@@ -156,22 +156,14 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
 
           {/* Brief content — reuse the same BriefDisplay from /opportunities */}
           <div className="p-6">
-            <BriefDisplay brief={brief} />
+            <BriefDisplay brief={brief} onStartBuild={onStartBuild} />
           </div>
 
-          {/* CTA */}
+          {/* Secondary action */}
           <div className="px-6 pb-6">
             <button
-              onClick={() => onStartBuild?.(brief)}
-              className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-near-green text-void-black font-semibold text-base hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] transition-all"
-            >
-              <Rocket className="w-5 h-5" />
-              Build This in Sanctum
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
               onClick={resetState}
-              className="w-full mt-2 text-sm text-text-muted hover:text-text-primary transition-colors py-2"
+              className="w-full text-sm text-text-muted hover:text-text-primary transition-colors py-2"
             >
               Generate another brief
             </button>

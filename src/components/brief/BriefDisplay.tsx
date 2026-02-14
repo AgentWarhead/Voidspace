@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Lightbulb,
   Target,
@@ -24,14 +25,18 @@ import {
 import { Badge, Button } from '@/components/ui';
 import { BriefSection } from './BriefSection';
 import { useToast } from '@/contexts/ToastContext';
+import { storeBriefForSanctum } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
 
 interface BriefDisplayProps {
   brief: ProjectBrief;
+  /** Optional callback when user clicks "Build in Sanctum" (used on Sanctum page itself) */
+  onStartBuild?: (brief: ProjectBrief) => void;
 }
 
-export function BriefDisplay({ brief }: BriefDisplayProps) {
+export function BriefDisplay({ brief, onStartBuild }: BriefDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
   const { addToast } = useToast();
 
   // Defensive: ensure all expected arrays exist
@@ -366,6 +371,33 @@ export function BriefDisplay({ brief }: BriefDisplayProps) {
           </div>
         </BriefSection>
       )}
+
+      {/* Build This in Sanctum CTA */}
+      <div className="pt-6 pb-2">
+        <button
+          onClick={() => {
+            if (onStartBuild) {
+              // Already on Sanctum page — use the callback directly
+              onStartBuild(brief);
+            } else {
+              // On opportunity page — store brief and navigate to Sanctum
+              storeBriefForSanctum(brief);
+              router.push('/sanctum?from=brief');
+              addToast('Opening Sanctum with your brief...', 'success');
+            }
+          }}
+          className="w-full group relative overflow-hidden inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-near-green text-void-black font-semibold text-base hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+        >
+          {/* Animated shimmer */}
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <Rocket className="w-5 h-5 relative z-10" />
+          <span className="relative z-10">Build This in Sanctum</span>
+          <span className="relative z-10 text-void-black/60">→</span>
+        </button>
+        <p className="text-center text-[11px] text-text-muted mt-2">
+          AI-powered development studio • Your brief will be pre-loaded
+        </p>
+      </div>
 
       {/* Powered By Data Sources */}
       <div className="pt-4 border-t border-border">

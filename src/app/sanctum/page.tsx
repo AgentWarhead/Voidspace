@@ -33,6 +33,7 @@ import { ScratchWebappSession } from './components/ScratchWebappSession';
 import { ScratchTemplates, SCRATCH_TEMPLATES } from './components/ScratchTemplates';
 import { useSanctumState } from './hooks/useSanctumState';
 import { useWallet } from '@/hooks/useWallet';
+import { consumeStoredBrief, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 // @ts-ignore
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight, Wand2 } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
@@ -126,6 +127,31 @@ function SanctumPageInner() {
       }
     }
   }, [templateConfig, state.sessionStarted, handleCategorySelect, isConnected]);
+
+  // Auto-start session when arriving from a Void Brief (?from=brief)
+  const briefHandledRef = useRef(false);
+  useEffect(() => {
+    const fromBrief = searchParams.get('from') === 'brief';
+    if (fromBrief && !briefHandledRef.current && !state.sessionStarted) {
+      const storedBrief = consumeStoredBrief();
+      if (storedBrief) {
+        briefHandledRef.current = true;
+        const prompt = briefToSanctumPrompt(storedBrief);
+        dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt });
+        // Small delay to ensure state is set before starting
+        setTimeout(() => {
+          dispatch({ type: 'SET_SELECTED_CATEGORY', payload: 'custom' });
+          dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+        }, 50);
+        // Clean URL
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('from');
+          window.history.replaceState({}, '', url.pathname);
+        }
+      }
+    }
+  }, [searchParams, state.sessionStarted, dispatch]);
 
   // Derive the auto-message for SanctumChat (only when template triggered the session)
   const autoMessage = templateHandledRef.current && templateConfig ? templateConfig.message : undefined;
@@ -642,10 +668,11 @@ function SanctumPageInner() {
                 isConnected={isConnected}
                 openModal={openModal}
                 onStartBuild={(brief) => {
-                  // Start a build session with the brief's solution as context
-                  const briefContext = `Build this project: ${brief.projectNames?.[0] || 'Project'}. ${brief.solutionOverview}. Key features: ${brief.keyFeatures?.map(f => f.name).join(', ')}`;
-                  dispatch({ type: 'SET_CUSTOM_PROMPT', payload: briefContext });
-                  handleCustomStart();
+                  // Start a build session with the full brief context
+                  const prompt = briefToSanctumPrompt(brief);
+                  dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt });
+                  dispatch({ type: 'SET_SELECTED_CATEGORY', payload: 'custom' });
+                  dispatch({ type: 'SET_SESSION_STARTED', payload: true });
                 }}
               />
 
