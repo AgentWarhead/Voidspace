@@ -351,6 +351,13 @@ function SanctumPageInner() {
             </Container>
           </div>
 
+          {/* Social Proof Bar */}
+          <div className="pb-8">
+            <Container size="xl">
+              <SocialProof variant="banner" />
+            </Container>
+          </div>
+
           {/* Step 1: "What brings you to the Sanctum?" — 3 Path Cards */}
           <div className="pb-8">
             <Container size="xl">
@@ -814,13 +821,6 @@ function SanctumPageInner() {
           <div className="pb-8">
             <Container size="xl">
               <BuilderShowcase />
-            </Container>
-          </div>
-
-          {/* Social Proof — moved near bottom */}
-          <div className="pb-8">
-            <Container size="xl">
-              <SocialProof variant="banner" />
             </Container>
           </div>
 
