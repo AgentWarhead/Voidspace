@@ -1,3 +1,6 @@
+// AI analysis needs extended timeout
+export const maxDuration = 60;
+
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';

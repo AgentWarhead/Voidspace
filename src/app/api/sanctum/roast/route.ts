@@ -1,3 +1,6 @@
+// Claude AI generation needs extended timeout
+export const maxDuration = 60;
+
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { rateLimit } from '@/lib/auth/rate-limit';

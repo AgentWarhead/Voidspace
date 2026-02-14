@@ -7,6 +7,9 @@ import { canGenerateBrief } from '@/lib/tiers';
 import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 import type { TierName } from '@/types';
 
+// Claude brief generation takes ~20-30s — need extended timeout
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
