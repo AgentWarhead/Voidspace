@@ -22,10 +22,9 @@ import { GasEstimatorCompact } from './components/GasEstimator';
 import { ContractComparison } from './components/ContractComparison';
 import { SimulationSandbox } from './components/SimulationSandbox';
 import { PairProgramming } from './components/PairProgramming';
-import { DownloadButton } from './components/DownloadContract';
-import { FileStructure, FileStructureToggle } from './components/FileStructure';
+import { FileStructure } from './components/FileStructure';
 import { DeployInstructions } from './components/DeployInstructions';
-import { ProjectManager } from './components/ProjectManager';
+import { ContractToolbar } from './components/ContractToolbar';
 import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
@@ -1064,81 +1063,22 @@ function SanctumPageInner() {
                         <span className="text-xl">⚡</span>
                         <span className="text-near-green">Contract</span> Preview
                       </h2>
-                      <div className="flex items-center gap-2">
-                        <button 
-                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.1] rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
-                          onClick={() => navigator.clipboard.writeText(state.generatedCode)}
-                          disabled={!state.generatedCode}
-                          title="Copy code"
-                        >
-                          <Code2 className="w-4 h-4" />
-                        </button>
-                        <DownloadButton code={state.generatedCode} contractName={state.selectedCategory || 'contract'} category={state.selectedCategory || undefined} />
-                        <FileStructureToggle 
-                          code={state.generatedCode} 
-                          contractName={state.selectedCategory || 'my-contract'}
-                          isOpen={state.showFileStructure}
-                          onToggle={() => dispatch({ type: 'SET_SHOW_FILE_STRUCTURE', payload: !state.showFileStructure })}
-                        />
-                        <button 
-                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-blue-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-blue-500/30 disabled:opacity-50"
-                          onClick={() => dispatch({ type: 'SET_SHOW_COMPARISON', payload: true })}
-                          disabled={!state.generatedCode}
-                          title="Compare versions"
-                        >
-                          <GitCompare className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-green-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-green-500/30 disabled:opacity-50"
-                          onClick={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: true })}
-                          disabled={!state.generatedCode}
-                          title="Test in sandbox"
-                        >
-                          <Play className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-pink-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-pink-500/30"
-                          onClick={() => dispatch({ type: 'SET_SHOW_PAIR_PROGRAMMING', payload: true })}
-                          title="Pair programming"
-                        >
-                          <Users className="w-4 h-4" />
-                        </button>
-                        <ProjectManager
-                          code={state.generatedCode}
-                          category={state.selectedCategory}
-                          mode={state.mode}
-                          onLoadProject={(project) => {
-                            dispatch({ type: 'SET_GENERATED_CODE', payload: project.code });
-                            dispatch({ type: 'SET_SELECTED_CATEGORY', payload: project.category || 'custom' });
-                            dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
-                          }}
-                        />
-                        <button 
-                          className="px-3 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/20"
-                          onClick={handleShare}
-                          disabled={!state.generatedCode}
-                          title="Share contract"
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="px-4 py-2 text-sm bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-near-green/20"
-                          onClick={handleDeploy}
-                          disabled={!state.generatedCode || state.sanctumStage === 'thinking'}
-                        >
-                          <Rocket className="w-4 h-4" />
-                          Deploy
-                        </button>
-                        <button 
-                          className="px-4 py-2 text-sm bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-cyan-500/20"
-                          onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
-                          disabled={!state.generatedCode}
-                          title="Generate webapp for this contract"
-                        >
-                          <Globe className="w-4 h-4" />
-                          Webapp
-                        </button>
-                      </div>
+                      <ContractToolbar
+                        generatedCode={state.generatedCode}
+                        selectedCategory={state.selectedCategory}
+                        sanctumStage={state.sanctumStage}
+                        mode={state.mode}
+                        showFileStructure={state.showFileStructure}
+                        isThinking={state.isThinking}
+                        dispatch={dispatch}
+                        handleDeploy={handleDeploy}
+                        handleShare={handleShare}
+                        onLoadProject={(project) => {
+                          dispatch({ type: 'SET_GENERATED_CODE', payload: project.code });
+                          dispatch({ type: 'SET_SELECTED_CATEGORY', payload: project.category || 'custom' });
+                          dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
+                        }}
+                      />
                     </div>
                     {/* Task progress row */}
                     <TaskProgressInline task={state.currentTask} isThinking={state.isThinking} />
