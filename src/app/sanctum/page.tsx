@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Container } from '@/components/ui';
 import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
-import { CategoryPicker } from './components/CategoryPicker';
+// CategoryPicker moved to SanctumWizard
 import { SanctumChat } from './components/SanctumChat';
 import { TypewriterCode } from './components/TypewriterCode';
 import { TokenCounter } from './components/TokenCounter';
@@ -16,7 +16,7 @@ import { AchievementPopup } from './components/AchievementPopup';
 import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline } from './components/TaskProgressInline';
 import { ShareContract } from './components/ShareContract';
-import { SocialProof } from './components/SocialProof';
+// SocialProof moved to SanctumLanding
 import { ContractDNA } from './components/ContractDNA';
 import { GasEstimatorCompact } from './components/GasEstimator';
 import { ContractComparison } from './components/ContractComparison';
@@ -37,9 +37,9 @@ import { consumeStoredBrief, briefToSanctumPrompt } from '@/lib/brief-to-sanctum
 import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight, Wand2, RefreshCw } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
-import { BuilderShowcase } from './components/BuilderShowcase';
-import { VoidBriefCard } from './components/VoidBriefCard';
-import { PERSONA_LIST } from './lib/personas';
+import { DownloadButton } from './components/DownloadContract';
+import { SanctumLanding } from './components/SanctumLanding';
+import { SanctumWizard, WizardConfig } from './components/SanctumWizard';
 
 // Template slug → starter message mapping
 const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
@@ -114,12 +114,71 @@ function SanctumPageInner() {
 
   // Counter to signal chat component to reset
   const [sessionResetCounter, setSessionResetCounter] = useState(0);
+  const [showWizard, setShowWizard] = useState(false);
 
   const handleNewSession = useCallback(() => {
     clearPersistedSession();
     dispatch({ type: 'RESET_SESSION' });
     setSessionResetCounter(c => c + 1);
   }, [dispatch]);
+
+  // Check for saved session
+  const hasSavedSession = (() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const raw = localStorage.getItem('sanctum-session-state');
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      return parsed.sessionStarted === true || (parsed.messageCount && parsed.messageCount > 0);
+    } catch { return false; }
+  })();
+
+  const savedSessionInfo = (() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('sanctum-session-state');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return {
+        mode: parsed.mode,
+        selectedCategory: parsed.selectedCategory,
+        messageCount: parsed.messageCount,
+        tokensUsed: parsed.tokensUsed,
+      };
+    } catch { return null; }
+  })();
+
+  const handleResumeSession = useCallback(() => {
+    dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+  }, [dispatch]);
+
+  const handleWizardComplete = useCallback((config: WizardConfig) => {
+    dispatch({ type: 'SET_MODE', payload: config.mode });
+    if (config.category) dispatch({ type: 'SET_SELECTED_CATEGORY', payload: config.category });
+    if (config.chatMode) dispatch({ type: 'SET_CHAT_MODE', payload: config.chatMode });
+    if (config.customPrompt) dispatch({ type: 'SET_CUSTOM_PROMPT', payload: config.customPrompt });
+    if (config.scratchDescription) dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: config.scratchDescription });
+    if (config.scratchTemplate) dispatch({ type: 'SET_SCRATCH_TEMPLATE', payload: config.scratchTemplate });
+
+    if (config.mode === 'scratch') {
+      dispatch({ type: 'SET_SHOW_SCRATCH_SESSION', payload: true });
+    } else if (config.mode === 'roast') {
+      dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+    } else if (config.mode === 'visual') {
+      dispatch({ type: 'SET_MODE', payload: 'visual' });
+      // Visual mode doesn't start a session; it renders inline on the landing page
+      // But since we replaced the landing, we need to handle this differently
+      // For now, start session so the visual mode section renders
+      dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+    } else if (config.mode === 'webapp') {
+      dispatch({ type: 'SET_MODE', payload: 'webapp' });
+      dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true });
+      // Don't start session - webapp has its own import flow
+    } else {
+      handleCategorySelect(config.category || 'custom');
+    }
+    setShowWizard(false);
+  }, [dispatch, handleCategorySelect]);
 
   // Auto-start session when template query param is present AND wallet is connected
   useEffect(() => {
@@ -328,602 +387,92 @@ function SanctumPageInner() {
         </section>
       )}
 
-      {/* Landing / Category Selection */}
-      {!state.sessionStarted && !showWalletGate && (
-        <section className="relative z-10 min-h-screen flex flex-col">
-          {/* Hero — Compact */}
-          <div className="pt-16 pb-8">
-            <Container size="xl" className="text-center">
-              {/* Animated badge */}
-              <div className="flex items-center justify-center mb-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 animate-pulse-glow">
-                  <Sparkles className="w-4 h-4 text-near-green" />
-                  <span className="text-near-green text-sm font-mono font-medium">THE SANCTUM</span>
-                  <span className="text-text-muted text-sm">by Voidspace</span>
-                </div>
-              </div>
+      {/* Landing — Hero */}
+      {!state.sessionStarted && !showWalletGate && !showWizard && (
+        <SanctumLanding
+          onEnterSanctum={() => setShowWizard(true)}
+          hasSavedSession={hasSavedSession}
+          savedSessionInfo={savedSessionInfo}
+          onResumeSession={handleResumeSession}
+          onNewSession={() => {
+            handleNewSession();
+            setShowWizard(true);
+          }}
+        />
+      )}
 
-              {/* Title */}
-              <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-4">
-                <span className="text-text-primary">Build on NEAR</span>
-                <br />
-                <GradientText className="mt-2">From Idea to Launch</GradientText>
-              </h1>
+      {/* Wizard */}
+      {showWizard && !state.sessionStarted && (
+        <SanctumWizard
+          onComplete={handleWizardComplete}
+          onBack={() => setShowWizard(false)}
+          dispatch={dispatch}
+          state={state}
+        />
+      )}
 
-              {/* Subtitle */}
-              <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                AI-powered development studio for NEAR Protocol.
-                <br />
-                <span className="text-near-green">Contracts, webapps, deployment</span> — all through conversation.
-              </p>
-            </Container>
-          </div>
-
-          {/* Social Proof Bar */}
-          <div className="pb-8">
-            <Container size="xl">
-              <SocialProof variant="banner" />
-            </Container>
-          </div>
-
-          {/* Step 1: "What brings you to the Sanctum?" — 3 Path Cards */}
-          <div className="pb-8">
-            <Container size="xl">
-              <div className="text-center mb-8">
-                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
-                  Step 1
-                </p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary">
-                  What brings you to the Sanctum?
-                </h2>
-              </div>
-
-              <div id="modes" className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
-                {/* Path 1: Idea — PRIMARY (slightly larger on md+) */}
-                <button
-                  onClick={() => {
-                    dispatch({ type: 'SET_MODE', payload: 'scratch' });
-                    setTimeout(() => {
-                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className={`group relative p-7 md:p-8 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
-                    state.mode === 'scratch'
-                      ? 'border-amber-500/60 bg-gradient-to-br from-amber-500/15 to-orange-500/10 shadow-lg shadow-amber-500/20'
-                      : ['build', 'roast', 'webapp', 'visual'].includes(state.mode)
-                        ? 'border-border-subtle bg-void-gray/30 opacity-60 hover:opacity-100 hover:border-amber-500/30'
-                        : 'border-border-subtle bg-void-gray/30 hover:border-amber-500/40 hover:bg-gradient-to-br hover:from-amber-500/10 hover:to-orange-500/5'
-                  }`}
-                  style={{ animationDelay: '0ms', animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}
-                >
-                  {/* Glow effect */}
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/5 blur-xl transition-opacity duration-300 -z-10 ${
-                    state.mode === 'scratch' ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
-                  }`} />
-                  <div className="text-4xl mb-4">🚀</div>
-                  <h3 className={`text-lg font-bold mb-2 transition-colors ${
-                    state.mode === 'scratch' ? 'text-amber-400' : 'text-text-primary group-hover:text-amber-400'
-                  }`}>
-                    I have an idea — build it for me
-                  </h3>
-                  <p className="text-sm text-text-muted leading-relaxed">
-                    No code needed. Describe your idea, we&apos;ll handle everything.
-                  </p>
-                  {state.mode !== 'scratch' && (
-                    <span className="inline-block mt-3 text-[10px] font-mono uppercase tracking-wider text-amber-400/60 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                      ✨ Most Popular
-                    </span>
-                  )}
-                </button>
-
-                {/* Path 2: Learn & Build */}
-                <button
-                  onClick={() => {
-                    dispatch({ type: 'SET_MODE', payload: 'build' });
-                    setTimeout(() => {
-                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className={`group relative p-7 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
-                    state.mode === 'build'
-                      ? 'border-near-green/60 bg-near-green/10 shadow-lg shadow-near-green/20'
-                      : ['scratch', 'roast', 'webapp', 'visual'].includes(state.mode)
-                        ? 'border-border-subtle bg-void-gray/30 opacity-60 hover:opacity-100 hover:border-near-green/30'
-                        : 'border-border-subtle bg-void-gray/30 hover:border-near-green/40 hover:bg-near-green/5'
-                  }`}
-                  style={{ animationDelay: '100ms', animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}
-                >
-                  <div className={`absolute inset-0 rounded-2xl bg-near-green/10 blur-xl transition-opacity duration-300 -z-10 ${
-                    state.mode === 'build' ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
-                  }`} />
-                  <div className="text-4xl mb-4">🔨</div>
-                  <h3 className={`text-lg font-bold mb-2 transition-colors ${
-                    state.mode === 'build' ? 'text-near-green' : 'text-text-primary group-hover:text-near-green'
-                  }`}>
-                    I want to learn &amp; build a smart contract
-                  </h3>
-                  <p className="text-sm text-text-muted leading-relaxed">
-                    AI guides you through Rust on NEAR, step by step.
-                  </p>
-                </button>
-
-                {/* Path 3: Already have code */}
-                <button
-                  onClick={() => {
-                    // Toggle to show sub-options — use 'roast' as initial selection for path 3
-                    if (state.mode !== 'roast' && state.mode !== 'webapp') {
-                      dispatch({ type: 'SET_MODE', payload: 'roast' });
-                    }
-                    setTimeout(() => {
-                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className={`group relative p-7 rounded-2xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
-                    state.mode === 'roast' || state.mode === 'webapp'
-                      ? 'border-red-500/40 bg-gradient-to-br from-red-500/10 to-cyan-500/10 shadow-lg shadow-red-500/10'
-                      : ['scratch', 'build', 'visual'].includes(state.mode)
-                        ? 'border-border-subtle bg-void-gray/30 opacity-60 hover:opacity-100 hover:border-red-500/30'
-                        : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-gradient-to-br hover:from-red-500/5 hover:to-cyan-500/5'
-                  }`}
-                  style={{ animationDelay: '200ms', animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}
-                >
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/10 to-cyan-500/10 blur-xl transition-opacity duration-300 -z-10 ${
-                    state.mode === 'roast' || state.mode === 'webapp' ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
-                  }`} />
-                  <div className="text-4xl mb-4">🛠️</div>
-                  <h3 className={`text-lg font-bold mb-2 transition-colors ${
-                    state.mode === 'roast' || state.mode === 'webapp' ? 'text-text-primary' : 'text-text-primary group-hover:text-text-primary'
-                  }`}>
-                    I already have code
-                  </h3>
-                  <p className="text-sm text-text-muted leading-relaxed">
-                    Audit for security vulnerabilities or generate a frontend.
-                  </p>
-                </button>
-              </div>
-            </Container>
-          </div>
-
-          {/* Revealed Content — Based on selected path */}
-          <div id="sanctum-revealed">
-            {/* Path 3 sub-options: Roast or Webapp */}
-            {(state.mode === 'roast' || state.mode === 'webapp') && (
-              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
-                <Container size="xl">
-                  <div className="text-center mb-6">
-                    <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
-                      Step 2
-                    </p>
-                    <h2 className="text-xl font-bold text-text-primary">
-                      What do you want to do with your code?
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                    <button
-                      onClick={() => {
-                        dispatch({ type: 'SET_MODE', payload: 'roast' });
-                        dispatch({ type: 'SET_SESSION_STARTED', payload: true });
-                      }}
-                      className={`group p-6 rounded-xl border-2 transition-all text-left hover:scale-[1.02] ${
-                        state.mode === 'roast'
-                          ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
-                          : 'border-border-subtle bg-void-gray/30 hover:border-red-500/30 hover:bg-red-500/5'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                          <Flame className="w-5 h-5 text-red-400" />
-                        </div>
-                        <h3 className="text-lg font-bold text-red-400">Roast Zone</h3>
-                      </div>
-                      <p className="text-sm text-text-muted">
-                        Paste any contract for a brutal security audit
-                      </p>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        dispatch({ type: 'SET_MODE', payload: 'webapp' });
-                        setTimeout(() => {
-                          document.getElementById('sanctum-webapp-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
-                      }}
-                      className={`group p-6 rounded-xl border-2 transition-all text-left hover:scale-[1.02] ${
-                        state.mode === 'webapp'
-                          ? 'border-cyan-500/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
-                          : 'border-border-subtle bg-void-gray/30 hover:border-cyan-500/30 hover:bg-cyan-500/5'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                          <Globe className="w-5 h-5 text-cyan-400" />
-                        </div>
-                        <h3 className="text-lg font-bold text-cyan-400">Build a Web App</h3>
-                      </div>
-                      <p className="text-sm text-text-muted">
-                        Generate a frontend for your contract
-                      </p>
-                    </button>
-                  </div>
-                </Container>
-              </div>
-            )}
-
-            {/* Webapp import section */}
-            {state.mode === 'webapp' && (
-              <div id="sanctum-webapp-section" className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
-                <Container size="xl">
-                  <div className="max-w-2xl mx-auto">
-                    <div className="text-center mb-6">
-                      <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
-                        Step 2
-                      </p>
-                      <h2 className="text-xl font-bold text-text-primary">
-                        Import your contract
-                      </h2>
-                    </div>
-                    {!state.showImportContract ? (
-                      <div className="text-center">
-                        <p className="text-text-secondary mb-8">
-                          Build a beautiful frontend for your NEAR smart contract.
-                          <br />
-                          <span className="text-cyan-400">Bring your own contract or use one you just built.</span>
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                          <button
-                            onClick={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true })}
-                            className="p-6 rounded-xl bg-void-gray/50 border border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
-                          >
-                            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/30 transition-colors">
-                              <Globe className="w-6 h-6 text-cyan-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-white mb-2">Import Existing Contract</h3>
-                            <p className="text-sm text-gray-400">
-                              Have a contract already? Paste the address or code and we&apos;ll build a webapp for it.
-                            </p>
-                          </button>
-
-                          <button
-                            onClick={() => dispatch({ type: 'SET_MODE', payload: 'build' })}
-                            className="p-6 rounded-xl bg-void-gray/50 border border-near-green/30 hover:border-near-green/50 hover:bg-near-green/10 transition-all text-left group"
-                          >
-                            <div className="w-12 h-12 rounded-xl bg-near-green/20 flex items-center justify-center mb-4 group-hover:bg-near-green/30 transition-colors">
-                              <Hammer className="w-6 h-6 text-near-green" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-white mb-2">Build Contract First</h3>
-                            <p className="text-sm text-gray-400">
-                              Don&apos;t have a contract yet? Build one with Sanctum, then come back for the webapp.
-                            </p>
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <ImportContract
-                        onImport={(data) => {
-                          dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
-                          dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
-                          if (data.code) {
-                            dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
-                          }
-                          dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
-                          dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
-                        }}
-                        onCancel={() => dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false })}
-                      />
-                    )}
-                  </div>
-                </Container>
-              </div>
-            )}
-
-            {/* Build mode — Category Picker */}
-            {state.mode === 'build' && (
-              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
-                <Container size="xl">
-                  <div className="text-center mb-6">
-                    <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
-                      Step 2
-                    </p>
-                    <h2 className="text-xl font-bold text-text-primary">
-                      Choose a contract category
-                    </h2>
-                  </div>
-                  <CategoryPicker
-                    onSelect={handleCategorySelect}
-                    customPrompt={state.customPrompt}
-                    setCustomPrompt={(prompt) => dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt })}
-                    onCustomStart={handleCustomStart}
-                  />
-                </Container>
-              </div>
-            )}
-
-            {/* Scratch / Vibe Code */}
-            {state.mode === 'scratch' && (
-              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
-                <Container size="xl">
-                  <div className="max-w-3xl mx-auto">
-                    <div className="text-center mb-6">
-                      <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-text-muted/60 mb-2">
-                        Step 2
-                      </p>
-                      <h2 className="text-xl font-bold text-text-primary mb-2">
-                        Describe your idea
-                      </h2>
-                      <p className="text-text-muted text-sm">
-                        Full-stack NEAR dApp — React, Tailwind, wallet connect — generated from your description.
-                      </p>
-                    </div>
-
-                    {/* Description input */}
-                    <div className="mb-8">
-                      <textarea
-                        value={state.scratchDescription}
-                        onChange={(e) => dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: e.target.value })}
-                        placeholder="I want to build an NFT marketplace where users can mint, list, and trade digital art on NEAR..."
-                        rows={4}
-                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-5 py-4 text-text-primary placeholder-text-muted/50 resize-none focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all text-sm leading-relaxed"
-                      />
-                    </div>
-
-                    {/* Template quick-starts */}
-                    <div className="mb-8">
-                      <p className="text-xs font-mono uppercase tracking-wider text-text-muted mb-4">
-                        Or pick a template to start fast
-                      </p>
-                      <ScratchTemplates
-                        selectedId={state.scratchTemplate}
-                        onSelect={(template) => {
-                          dispatch({ type: 'SET_SCRATCH_TEMPLATE', payload: template.id });
-                          dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: template.starterPrompt });
-                        }}
-                      />
-                    </div>
-
-                    {/* Start button */}
-                    <div className="text-center">
-                      <button
-                        onClick={() => {
-                          if (state.scratchDescription.trim()) {
-                            dispatch({ type: 'SET_SHOW_SCRATCH_SESSION', payload: true });
-                          }
-                        }}
-                        disabled={!state.scratchDescription.trim()}
-                        className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-void-black font-semibold text-lg hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-amber-500 disabled:hover:to-orange-500"
-                      >
-                        <Rocket className="w-5 h-5" />
-                        Start Building
-                      </button>
-                    </div>
-                  </div>
-                </Container>
-              </div>
-            )}
-
-            {/* Visual mode content */}
-            {state.mode === 'visual' && (
-              <div className="pb-8" style={{ animation: 'sanctumSlideUp 0.4s ease-out' }}>
-                <Container size="xl">
-                  <p className="text-text-secondary text-center mb-8">
-                    Generate branded visuals for your NEAR project — architecture diagrams, user flows, infographics, and social graphics.
-                  </p>
-                  <VisualMode />
-                </Container>
-              </div>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="py-4">
-            <Container size="xl">
-              <div className="border-t border-white/[0.06]" />
-            </Container>
-          </div>
-
-          {/* Visual Generator — Premium Feature Showcase */}
-          <div className="pb-12">
-            <Container size="xl">
-              <div className="max-w-4xl mx-auto">
-                <button
-                  onClick={() => {
-                    dispatch({ type: 'SET_MODE', payload: 'visual' });
-                    setTimeout(() => {
-                      document.getElementById('sanctum-revealed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className={`w-full group relative overflow-hidden rounded-2xl border-2 transition-all hover:scale-[1.01] ${
-                    state.mode === 'visual'
-                      ? 'border-purple-500/50 bg-gradient-to-br from-purple-900/30 via-void-black to-pink-900/20 shadow-2xl shadow-purple-500/20'
-                      : 'border-purple-500/20 bg-gradient-to-br from-purple-900/10 via-void-black to-pink-900/5 hover:border-purple-500/40 hover:shadow-xl hover:shadow-purple-500/10'
-                  }`}
-                >
-                  {/* Animated background glow */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 group-hover:bg-purple-500/15 transition-all duration-700" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 group-hover:bg-pink-500/15 transition-all duration-700" />
-                  
-                  <div className="relative p-8 md:p-10">
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                      {/* Icon */}
-                      <div className={`w-16 h-16 rounded-2xl flex-shrink-0 flex items-center justify-center transition-all ${
-                        state.mode === 'visual'
-                          ? 'bg-purple-500/25 text-purple-300 shadow-lg shadow-purple-500/20'
-                          : 'bg-purple-500/15 text-purple-400 group-hover:bg-purple-500/25 group-hover:text-purple-300 group-hover:shadow-lg group-hover:shadow-purple-500/20'
-                      }`}>
-                        <Palette className="w-8 h-8" />
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 text-left">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className={`text-xl md:text-2xl font-bold transition-colors ${
-                            state.mode === 'visual' ? 'text-purple-300' : 'text-text-primary group-hover:text-purple-300'
-                          }`}>
-                            Visual Generator
-                          </h3>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-purple-500/15 text-purple-400 border border-purple-500/25">
-                            🍌 Powered by Nano Banana Pro
-                          </span>
-                        </div>
-                        <p className="text-sm md:text-base text-text-secondary leading-relaxed max-w-xl">
-                          Generate stunning architecture diagrams, user flows, infographics, and social graphics for your NEAR project — all Nano Banana Pro powered, production-ready.
-                        </p>
-                      </div>
-
-                      {/* CTA arrow */}
-                      <div className={`hidden md:flex items-center justify-center w-12 h-12 rounded-full transition-all ${
-                        state.mode === 'visual'
-                          ? 'bg-purple-500/20 text-purple-400'
-                          : 'bg-white/[0.05] text-text-muted group-hover:bg-purple-500/20 group-hover:text-purple-400'
-                      }`}>
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
-                    </div>
-
-                    {/* Visual type pills */}
-                    <div className="flex flex-wrap gap-2 mt-6">
-                      {['🏗️ Architecture', '🔀 User Flows', '📊 Infographics', '📣 Social Graphics'].map((label) => (
-                        <span key={label} className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/[0.05] text-text-muted border border-white/[0.08] group-hover:border-purple-500/20 group-hover:text-purple-400/70 transition-all">
-                          {label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </Container>
-          </div>
-
-          {/* Void Brief — Discovery CTA + Brief Generator */}
-          <div className="pb-12">
-            <Container size="xl">
-              {/* Big CTA heading for the undecided */}
-              <div className="text-center mb-8 max-w-2xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-near-green/10 border border-near-green/20 mb-5">
-                  <Sparkles className="w-4 h-4 text-near-green" />
-                  <span className="text-near-green text-sm font-mono font-medium">NOT SURE WHAT TO BUILD?</span>
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-3">
-                  Let the <GradientText>Void</GradientText> decide your mission
-                </h2>
-                <p className="text-text-secondary text-base md:text-lg leading-relaxed">
-                  Get an AI-generated project brief with market analysis, technical specs, and a week-one action plan. 
-                  Roll the dice or describe your vision — we&apos;ll map the entire journey.
-                </p>
-              </div>
-
-              <VoidBriefCard
-                isConnected={isConnected}
-                openModal={openModal}
-                onStartBuild={(brief) => {
-                  const prompt = briefToSanctumPrompt(brief);
-                  dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt });
-                  dispatch({ type: 'SET_SELECTED_CATEGORY', payload: 'custom' });
-                  dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+      {/* Visual Mode (standalone, not inside a session) */}
+      {state.sessionStarted && state.mode === 'visual' && (
+        <section className="relative z-10 min-h-screen flex flex-col pt-16">
+          <Container size="xl">
+            <div className="flex items-center gap-3 mb-8">
+              <button
+                onClick={() => {
+                  dispatch({ type: 'SET_SESSION_STARTED', payload: false });
+                  setShowWizard(false);
                 }}
-              />
-            </Container>
-          </div>
-
-          {/* Builder Showcase */}
-          <div className="pb-8">
-            <Container size="xl">
-              <BuilderShowcase />
-            </Container>
-          </div>
-
-          {/* The Sanctum Council */}
-          <div className="pb-16">
-            <Container size="xl">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-6">
-                  <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-purple-400/60">
-                    The Sanctum Council
-                  </p>
-                  <p className="text-sm text-text-muted mt-1">Guided by 8 AI Experts</p>
-                </div>
-                <div className="flex flex-wrap justify-center gap-2.5">
-                  {PERSONA_LIST.map((persona, i) => (
-                    <div
-                      key={persona.id}
-                      className="group relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] hover:border-white/[0.15] transition-all duration-300 hover:bg-white/[0.06] cursor-default"
-                      style={{
-                        animationDelay: `${i * 80}ms`,
-                        animation: 'sanctumFadeInUp 0.5s ease-out backwards',
-                      }}
-                    >
-                      <div
-                        className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${persona.bgColor} blur-xl -z-10`}
-                      />
-                      <span className="text-base">{persona.emoji}</span>
-                      <span className={`text-sm font-medium ${persona.color}`}>{persona.name}</span>
-                      <span className="text-[11px] text-text-muted hidden sm:inline">· {persona.role}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Container>
-          </div>
-
-          {/* Animations */}
-          <style jsx>{`
-            @keyframes sanctumFadeInUp {
-              from {
-                opacity: 0;
-                transform: translateY(12px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            @keyframes sanctumSlideUp {
-              from {
-                opacity: 0;
-                transform: translateY(16px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-          `}</style>
-
-          {/* Features footer */}
-          <div className="py-8 border-t border-border-subtle bg-void-black/50 backdrop-blur-sm">
-            <Container size="xl">
-              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 lg:gap-12 text-sm text-text-muted">
-                <div className="flex items-center gap-2">
-                  <Code2 className="w-4 h-4 text-near-green" />
-                  <span>Rust Smart Contracts</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                  <span>Chain Signatures</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span>Shade Agents</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Rocket className="w-4 h-4 text-cyan-400" />
-                  <span>One-Click Deploy</span>
-                </div>
-              </div>
-              <p className="text-center text-[11px] text-text-muted/50 mt-4">
-                By using Sanctum, you agree to our{' '}
-                <a href="/legal/terms" className="text-near-green/50 hover:text-near-green/80 underline underline-offset-2 transition-colors">
-                  Terms of Service
-                </a>
-                {' '}and{' '}
-                <a href="/legal/acceptable-use" className="text-near-green/50 hover:text-near-green/80 underline underline-offset-2 transition-colors">
-                  Acceptable Use Policy
-                </a>.
-              </p>
-            </Container>
-          </div>
+                className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+              >
+                ← Back
+              </button>
+              <h2 className="text-2xl font-bold text-text-primary">Visual Generator</h2>
+            </div>
+            <VisualMode />
+          </Container>
         </section>
       )}
+
+      {/* Webapp Import Flow (standalone, before session) */}
+      {!state.sessionStarted && state.mode === 'webapp' && state.showImportContract && (
+        <section className="relative z-10 min-h-screen flex flex-col pt-16">
+          <Container size="xl">
+            <div className="flex items-center gap-3 mb-8">
+              <button
+                onClick={() => {
+                  dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
+                  dispatch({ type: 'SET_MODE', payload: 'build' });
+                  setShowWizard(true);
+                }}
+                className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+              >
+                ← Back
+              </button>
+              <h2 className="text-2xl font-bold text-text-primary">Import Contract</h2>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <ImportContract
+                onImport={(data) => {
+                  dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
+                  dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
+                  if (data.code) {
+                    dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
+                  }
+                  dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
+                  dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
+                }}
+                onCancel={() => {
+                  dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
+                  dispatch({ type: 'SET_MODE', payload: 'build' });
+                  setShowWizard(true);
+                }}
+              />
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* REMOVED: Old landing section replaced by SanctumLanding + SanctumWizard above */}
+
 
       {/* Roast Session - full screen */}
       {state.sessionStarted && state.mode === 'roast' && (
