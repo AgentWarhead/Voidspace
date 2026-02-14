@@ -33,14 +33,20 @@ export function SavedOpportunitiesProvider({ children }: { children: React.React
 
     setIsLoading(true);
     fetch('/api/saved')
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch saved');
+        return r.json();
+      })
       .then((data) => {
+        const saved = Array.isArray(data?.saved) ? data.saved : [];
         const ids = new Set<string>(
-          data.saved.map((s: { opportunity_id: string }) => s.opportunity_id)
+          saved.map((s: { opportunity_id: string }) => s.opportunity_id)
         );
         setSavedIds(ids);
       })
-      .catch(() => {})
+      .catch(() => {
+        setSavedIds(new Set());
+      })
       .finally(() => setIsLoading(false));
   }, [user?.id]);
 
