@@ -55,7 +55,7 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
             <GradientText
               as="h1"
               animated
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight"
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter"
             >
               VOIDSPACE
             </GradientText>
