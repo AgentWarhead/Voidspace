@@ -21,7 +21,7 @@ export const SCRATCH_TEMPLATES: ScratchTemplate[] = [
     description: 'Token prices, portfolio tracking, swap interface',
     color: 'text-emerald-400',
     icon: BarChart3,
-    starterPrompt: 'Build me a DeFi dashboard for NEAR Protocol. I want to see token prices with live charts, a portfolio tracker showing my NEAR and NEP-141 token balances, and a simple swap interface using Ref Finance. Include wallet connection with near-wallet-selector, a clean dark theme, and responsive layout.',
+    starterPrompt: 'Build me a DeFi dashboard for NEAR Protocol. I want to see token prices with live charts, a portfolio tracker showing my NEAR and NEP-141 token balances, and a simple swap interface using Ref Finance. Include wallet connection with @hot-labs/near-connect, a clean dark theme, and responsive layout.',
   },
   {
     id: 'nft-gallery',

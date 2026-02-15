@@ -88,41 +88,35 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                     Set up a React/Next.js project with NEAR integration:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted"># Core NEAR libraries</div>
-                    <div className="text-near-green">npm install near-api-js @near-wallet-selector/core</div>
-                    <div className="text-text-muted mt-3"># Wallet modules (add the wallets you want to support)</div>
-                    <div className="text-near-green">npm install @near-wallet-selector/my-near-wallet</div>
-                    <div className="text-near-green">npm install @near-wallet-selector/meteor-wallet</div>
-                    <div className="text-near-green">npm install @near-wallet-selector/here-wallet</div>
-                    <div className="text-text-muted mt-3"># UI component for wallet selection modal</div>
-                    <div className="text-near-green">npm install @near-wallet-selector/modal-ui</div>
+                    <div className="text-text-muted"># NEAR Connector — zero-dependency wallet integration</div>
+                    <div className="text-near-green">npm install @hot-labs/near-connect</div>
+                    <div className="text-text-muted mt-3"># Core NEAR library for RPC and transactions</div>
+                    <div className="text-near-green">npm install near-api-js</div>
                   </div>
                 </section>
 
                 <section>
                   <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
                     <Plug className="w-5 h-5 text-green-400" />
-                    Setting Up Wallet Selector
+                    Setting Up NEAR Connector
                   </h4>
                   <p className="text-text-secondary mb-3">
-                    Initialize the Wallet Selector with your supported wallets:
+                    Initialize NEAR Connector — a secure, zero-dependency wallet integration:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
                     <div className="text-text-muted">{'// lib/near.ts'}</div>
-                    <div><span className="text-purple-400">import</span> {'{'} setupWalletSelector {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/core&quot;</span>;</div>
-                    <div><span className="text-purple-400">import</span> {'{'} setupMyNearWallet {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/my-near-wallet&quot;</span>;</div>
-                    <div><span className="text-purple-400">import</span> {'{'} setupModal {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/modal-ui&quot;</span>;</div>
-                    <div className="mt-2"><span className="text-purple-400">const</span> CONTRACT_ID = <span className="text-yellow-300">&quot;your-contract.testnet&quot;</span>;</div>
-                    <div className="mt-2"><span className="text-purple-400">export async function</span> <span className="text-near-green">initNear</span>() {'{'}</div>
-                    <div>  <span className="text-purple-400">const</span> selector = <span className="text-purple-400">await</span> setupWalletSelector({'{'}</div>
-                    <div>    network: <span className="text-yellow-300">&quot;testnet&quot;</span>,</div>
-                    <div>    modules: [setupMyNearWallet()],</div>
-                    <div>  {'}'});</div>
-                    <div className="mt-2">  <span className="text-purple-400">const</span> modal = setupModal(selector, {'{'}</div>
-                    <div>    contractId: CONTRACT_ID,</div>
-                    <div>  {'}'});</div>
-                    <div className="mt-2">  <span className="text-purple-400">return</span> {'{'} selector, modal {'}'};  </div>
-                    <div>{'}'}</div>
+                    <div><span className="text-purple-400">import</span> {'{'} NearConnector {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@hot-labs/near-connect&quot;</span>;</div>
+                    <div className="mt-2"><span className="text-purple-400">const</span> connector = <span className="text-purple-400">new</span> NearConnector({'{'}</div>
+                    <div>  network: <span className="text-yellow-300">&quot;testnet&quot;</span>,</div>
+                    <div>  autoConnect: <span className="text-near-green">true</span>,</div>
+                    <div>{'}'});</div>
+                    <div className="mt-2"><span className="text-text-muted">{'// Listen for wallet events'}</span></div>
+                    <div>connector.on(<span className="text-yellow-300">&quot;wallet:signIn&quot;</span>, (t) =&gt; {'{'}</div>
+                    <div>  console.log(<span className="text-yellow-300">&quot;Connected:&quot;</span>, t.accounts[0].accountId);</div>
+                    <div>{'}'});</div>
+                    <div className="mt-2"><span className="text-text-muted">{'// Show wallet selection modal'}</span></div>
+                    <div><span className="text-purple-400">const</span> walletId = <span className="text-purple-400">await</span> connector.selectWallet();</div>
+                    <div><span className="text-purple-400">await</span> connector.connect(walletId);</div>
                   </div>
                 </section>
 
@@ -135,22 +129,20 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
                     <div className="text-text-muted">{'// context/NearContext.tsx'}</div>
-                    <div><span className="text-purple-400">import</span> {'{'} createContext, useContext, useEffect, useState {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;react&quot;</span>;</div>
+                    <div><span className="text-purple-400">import</span> {'{'} createContext, useEffect, useState {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;react&quot;</span>;</div>
+                    <div><span className="text-purple-400">import</span> {'{'} NearConnector {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@hot-labs/near-connect&quot;</span>;</div>
                     <div className="mt-2"><span className="text-purple-400">const</span> NearContext = createContext&lt;any&gt;(null);</div>
                     <div className="mt-2"><span className="text-purple-400">export function</span> <span className="text-near-green">NearProvider</span>({'{'} children {'}'}) {'{'}</div>
-                    <div>  <span className="text-purple-400">const</span> [wallet, setWallet] = useState(null);</div>
                     <div>  <span className="text-purple-400">const</span> [accountId, setAccountId] = useState(<span className="text-yellow-300">&quot;&quot;</span>);</div>
+                    <div>  <span className="text-purple-400">const</span> [connector] = useState(() =&gt; <span className="text-purple-400">new</span> NearConnector({'{'} network: <span className="text-yellow-300">&quot;testnet&quot;</span>, autoConnect: <span className="text-near-green">true</span> {'}'}));</div>
                     <div className="mt-2">  useEffect(() =&gt; {'{'}</div>
-                    <div>    <span className="text-text-muted">{'// Initialize wallet selector on mount'}</span></div>
-                    <div>    initNear().then(({'{'} selector {'}'}) =&gt; {'{'}</div>
-                    <div>      selector.store.observable.subscribe((state) =&gt; {'{'}</div>
-                    <div>        <span className="text-purple-400">const</span> accounts = state.accounts;</div>
-                    <div>        <span className="text-purple-400">if</span> (accounts.length) setAccountId(accounts[0].accountId);</div>
-                    <div>      {'}'});</div>
+                    <div>    connector.on(<span className="text-yellow-300">&quot;wallet:signIn&quot;</span>, (t) =&gt; {'{'}</div>
+                    <div>      setAccountId(t.accounts[0].accountId);</div>
                     <div>    {'}'});</div>
-                    <div>  {'}'}, []);</div>
+                    <div>    connector.on(<span className="text-yellow-300">&quot;wallet:signOut&quot;</span>, () =&gt; setAccountId(<span className="text-yellow-300">&quot;&quot;</span>));</div>
+                    <div>  {'}'}, [connector]);</div>
                     <div className="mt-2">  <span className="text-purple-400">return</span> (</div>
-                    <div>    &lt;NearContext.Provider value={'{'}{'{'} wallet, accountId {'}'}{'}'}&gt;</div>
+                    <div>    &lt;NearContext.Provider value={'{'}{'{'} connector, accountId {'}'}{'}'}&gt;</div>
                     <div>      {'{'}children{'}'}</div>
                     <div>    &lt;/NearContext.Provider&gt;</div>
                     <div>  );</div>
@@ -276,7 +268,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
               <div className="space-y-3">
                 {[
                   { title: 'near-api-js Docs', url: 'https://docs.near.org/tools/near-api-js/quick-reference', desc: 'JavaScript library for NEAR' },
-                  { title: 'Wallet Selector', url: 'https://github.com/near/wallet-selector', desc: 'Multi-wallet support library' },
+                  { title: 'NEAR Connector', url: 'https://github.com/azbang/near-connect', desc: 'Zero-dependency wallet connector' },
                   { title: 'NEAR React Example', url: 'https://github.com/near-examples/hello-near-examples', desc: 'Full React frontend example' },
                   { title: 'BOS (Blockchain OS)', url: 'https://docs.near.org/bos', desc: 'Build frontends stored on-chain' },
                   { title: 'NEAR Discovery', url: 'https://near.org/applications', desc: 'Browse existing dApps for inspiration' },

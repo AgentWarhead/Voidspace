@@ -63,9 +63,9 @@ const WalletSelectorIntegration: React.FC<WalletSelectorIntegrationProps> = ({ i
                 </div>
                 <ul className="space-y-3">
                   {[
-                    'Set up @near-wallet-selector/core and its modal UI in a React app',
-                    'Support multiple NEAR wallets: Meteor, HERE, Nightly, MyNearWallet, and more',
-                    'Implement sign-in and sign-out flows with proper state management',
+                    'Set up @hot-labs/near-connect — the secure, zero-dependency wallet connector',
+                    'Support 9+ NEAR wallets: HOT, Meteor, MyNearWallet, Nightly, OKX, and more',
+                    'Implement sign-in and sign-out flows with event-driven state management',
                     'Transaction signing UX patterns for change methods and batch transactions',
                     'Best practices for wallet UX: loading states, error handling, and accessibility',
                   ].map((item, i) => (
@@ -83,35 +83,27 @@ const WalletSelectorIntegration: React.FC<WalletSelectorIntegrationProps> = ({ i
                 <section>
                   <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
                     <Wallet className="w-5 h-5 text-orange-400" />
-                    Wallet Selector Setup
+                    NEAR Connector Setup
                   </h4>
                   <p className="text-text-secondary mb-3">
-                    NEAR Wallet Selector is the official library for supporting multiple wallets in your dApp. It provides a unified API regardless of which wallet the user chooses:
+                    NEAR Connector is a secure, zero-dependency wallet integration library. Wallet scripts run in isolated sandboxed iframes for maximum security — no single registry of code needed:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">{'// Install packages'}</div>
-                    <div>npm install @near-wallet-selector/core</div>
-                    <div>npm install @near-wallet-selector/modal-ui</div>
-                    <div>npm install @near-wallet-selector/meteor-wallet</div>
-                    <div>npm install @near-wallet-selector/here-wallet</div>
-                    <div>npm install @near-wallet-selector/nightly</div>
-                    <div>npm install @near-wallet-selector/my-near-wallet</div>
-                    <div className="mt-3 text-text-muted">{'// Initialize selector'}</div>
-                    <div><span className="text-purple-400">import</span> {'{'} setupWalletSelector {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/core&quot;</span>;</div>
-                    <div><span className="text-purple-400">import</span> {'{'} setupModal {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@near-wallet-selector/modal-ui&quot;</span>;</div>
-                    <div className="mt-2"><span className="text-purple-400">const</span> selector = <span className="text-purple-400">await</span> setupWalletSelector({'{'}</div>
+                    <div className="text-text-muted">{'// Install — just one package, zero dependencies'}</div>
+                    <div className="text-near-green">npm install @hot-labs/near-connect</div>
+                    <div className="mt-3 text-text-muted">{'// Initialize connector'}</div>
+                    <div><span className="text-purple-400">import</span> {'{'} NearConnector {'}'} <span className="text-purple-400">from</span> <span className="text-yellow-300">&quot;@hot-labs/near-connect&quot;</span>;</div>
+                    <div className="mt-2"><span className="text-purple-400">const</span> connector = <span className="text-purple-400">new</span> NearConnector({'{'}</div>
                     <div>  network: <span className="text-yellow-300">&quot;mainnet&quot;</span>,</div>
-                    <div>  modules: [</div>
-                    <div>    setupMeteorWallet(),</div>
-                    <div>    setupHereWallet(),</div>
-                    <div>    setupNightly(),</div>
-                    <div>    setupMyNearWallet(),</div>
-                    <div>  ],</div>
+                    <div>  autoConnect: <span className="text-near-green">true</span>,</div>
                     <div>{'}'});</div>
+                    <div className="mt-2 text-text-muted">{'// All wallets auto-discovered from manifest:'}</div>
+                    <div className="text-text-muted">{'// HOT, Meteor, MyNearWallet, Nightly, Near Mobile,'}</div>
+                    <div className="text-text-muted">{'// Intear, Unity, OKX + any WalletConnect wallet'}</div>
                   </div>
                   <Card variant="default" padding="md" className="mt-3 border-orange-500/20 bg-orange-500/5">
                     <p className="text-sm text-text-secondary">
-                      <span className="text-orange-400 font-semibold">Key concept:</span> Each wallet module is a plugin. You only install the wallets you want to support. The modal UI gives users a clean picker interface.
+                      <span className="text-orange-400 font-semibold">Key concept:</span> Unlike wallet-selector, NEAR Connector auto-discovers all supported wallets from a manifest. No per-wallet packages needed. Each wallet runs in a secure sandbox iframe.
                     </p>
                   </Card>
                 </section>
@@ -122,21 +114,19 @@ const WalletSelectorIntegration: React.FC<WalletSelectorIntegrationProps> = ({ i
                     Sign-In and Sign-Out
                   </h4>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">{'// Show the wallet picker modal'}</div>
-                    <div><span className="text-purple-400">const</span> modal = setupModal(selector, {'{'}</div>
-                    <div>  contractId: <span className="text-yellow-300">&quot;your-contract.near&quot;</span>,</div>
+                    <div className="text-text-muted">{'// Show wallet picker and connect'}</div>
+                    <div><span className="text-purple-400">const</span> walletId = <span className="text-purple-400">await</span> connector.selectWallet();</div>
+                    <div><span className="text-purple-400">await</span> connector.connect(walletId);</div>
+                    <div className="mt-3 text-text-muted">{'// Event-driven account tracking'}</div>
+                    <div>connector.on(<span className="text-yellow-300">&quot;wallet:signIn&quot;</span>, (payload) =&gt; {'{'}</div>
+                    <div>  <span className="text-purple-400">const</span> accountId = payload.accounts[0].accountId;</div>
+                    <div>  console.log(<span className="text-yellow-300">&quot;Connected:&quot;</span>, accountId);</div>
                     <div>{'}'});</div>
-                    <div>modal.show();  <span className="text-text-muted">{'// Opens wallet picker UI'}</span></div>
-                    <div className="mt-3 text-text-muted">{'// Listen for account changes'}</div>
-                    <div>selector.store.observable</div>
-                    <div>  .pipe(map(state =&gt; state.accounts))</div>
-                    <div>  .subscribe(accounts =&gt; {'{'}</div>
-                    <div>    <span className="text-purple-400">const</span> signedIn = accounts.length &gt; 0;</div>
-                    <div>    <span className="text-purple-400">const</span> accountId = accounts[0]?.accountId;</div>
-                    <div>  {'}'});</div>
+                    <div className="mt-2">connector.on(<span className="text-yellow-300">&quot;wallet:signOut&quot;</span>, () =&gt; {'{'}</div>
+                    <div>  console.log(<span className="text-yellow-300">&quot;Disconnected&quot;</span>);</div>
+                    <div>{'}'});</div>
                     <div className="mt-3 text-text-muted">{'// Sign out'}</div>
-                    <div><span className="text-purple-400">const</span> wallet = <span className="text-purple-400">await</span> selector.wallet();</div>
-                    <div><span className="text-purple-400">await</span> wallet.signOut();</div>
+                    <div><span className="text-purple-400">await</span> connector.disconnect();</div>
                   </div>
                 </section>
 
@@ -149,7 +139,7 @@ const WalletSelectorIntegration: React.FC<WalletSelectorIntegrationProps> = ({ i
                     Once signed in, use the wallet to sign and send transactions to your contract:
                   </p>
                   <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">const</span> wallet = <span className="text-purple-400">await</span> selector.wallet();</div>
+                    <div><span className="text-purple-400">const</span> wallet = <span className="text-purple-400">await</span> connector.wallet();</div>
                     <div className="mt-2 text-text-muted">{'// Call a change method'}</div>
                     <div><span className="text-purple-400">await</span> wallet.signAndSendTransaction({'{'}</div>
                     <div>  receiverId: <span className="text-yellow-300">&quot;your-contract.near&quot;</span>,</div>
@@ -245,8 +235,8 @@ const WalletSelectorIntegration: React.FC<WalletSelectorIntegrationProps> = ({ i
             {selectedTab === 'resources' && (
               <div className="space-y-3">
                 {[
-                  { title: 'Wallet Selector Docs', url: 'https://github.com/near/wallet-selector', desc: 'Official NEAR Wallet Selector repository and documentation' },
-                  { title: 'Wallet Selector Example', url: 'https://github.com/near/wallet-selector/tree/main/examples/react', desc: 'React example app with full wallet integration' },
+                  { title: 'NEAR Connector Docs', url: 'https://github.com/azbang/near-connect', desc: 'Official NEAR Connector repository and documentation' },
+                  { title: 'NEAR Connector on npm', url: 'https://www.npmjs.com/package/@hot-labs/near-connect', desc: 'Package with API reference and examples' },
                   { title: 'Meteor Wallet', url: 'https://meteorwallet.app', desc: 'Popular NEAR browser extension wallet' },
                   { title: 'HERE Wallet', url: 'https://herewallet.app', desc: 'Mobile-first NEAR wallet with hot storage' },
                   { title: 'MyNearWallet', url: 'https://app.mynearwallet.com', desc: 'Web-based NEAR wallet (successor to wallet.near.org)' },

@@ -12,7 +12,7 @@ interface ChatMessage {
 }
 
 const QUICK_ACTIONS = [
-  { label: '🔗 Add wallet connect', value: 'Add NEAR wallet connection using near-wallet-selector with modal UI' },
+  { label: '🔗 Add wallet connect', value: 'Add NEAR wallet connection using @hot-labs/near-connect' },
   { label: '📱 Make it responsive', value: 'Make the layout fully responsive for mobile, tablet, and desktop' },
   { label: '🌙 Add dark mode', value: 'Add a dark/light mode toggle with system preference detection' },
   { label: '✨ Add animations', value: 'Add smooth animations and transitions using Tailwind and CSS' },

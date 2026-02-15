@@ -32,7 +32,7 @@ const BUILDER_MODULES: BuilderModule[] = [
   { slug: 'building-a-dao-contract', title: 'Building a DAO Contract', description: 'Governance contract architecture with proposals, voting, role-based permissions, and treasury management.', readTime: '70 min', order: 23 },
   { slug: 'defi-contract-patterns', title: 'DeFi Contract Patterns', description: 'AMM mechanics, constant product formula, liquidity pools, and swap contract architecture on NEAR.', readTime: '80 min', order: 24 },
   { slug: 'aurora-evm-compatibility', title: 'Aurora EVM Compatibility', description: 'Deploy Solidity contracts on NEAR via Aurora — EVM runtime, Rainbow Bridge, and dev tooling.', readTime: '55 min', order: 25 },
-  { slug: 'wallet-selector-integration', title: 'Wallet Selector Integration', description: 'Multi-wallet support with @near-wallet-selector/core — sign-in flows and transaction signing UX.', readTime: '50 min', order: 26 },
+  { slug: 'wallet-selector-integration', title: 'Wallet Connector Integration', description: 'Multi-wallet support with @hot-labs/near-connect — secure sandbox-based sign-in flows and transaction signing UX.', readTime: '50 min', order: 26 },
   { slug: 'near-social-bos', title: 'NEAR Social & BOS', description: 'Build composable on-chain widgets with NEAR Social, Social DB, and the Blockchain Operating System.', readTime: '60 min', order: 27 },
 ];
 

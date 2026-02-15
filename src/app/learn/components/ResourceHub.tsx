@@ -167,7 +167,7 @@ const RESOURCES: Resource[] = [
   },
   {
     name: 'NEAR Wallet Selector',
-    url: 'https://github.com/near/wallet-selector',
+    url: 'https://github.com/azbang/near-connect',
     description: 'Multi-wallet integration library — support all major NEAR wallets in your dApp',
     category: 'Tools & Infrastructure',
     difficulty: 'Intermediate',

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify NEP-413 signature using wallet-selector's built-in verifier
+    // Verify NEP-413 signature using custom NEP-413 verifier
     const nonceBuffer = Buffer.from(nonce, 'base64');
     const isValid = verifySignature({
       publicKey,

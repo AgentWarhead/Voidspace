@@ -26,7 +26,7 @@ const CONVERSATION = [
 
 **Smart Contract (Rust):** AMM pool using the constant product formula (x·y=k). You'll implement NEP-141 token deposits, LP token minting, and swap execution — all in ~400 lines of Rust.
 
-**Frontend:** Next.js + wallet-selector for seamless wallet integration. Real-time price feeds from your pool state.
+**Frontend:** Next.js + NEAR Connector for seamless wallet integration. Real-time price feeds from your pool state.
 
 **Key NEAR advantage:** With storage staking, your users pay ~0.01 NEAR per token registration instead of gas-heavy approvals. I can generate the full contract scaffold now.`,
   },

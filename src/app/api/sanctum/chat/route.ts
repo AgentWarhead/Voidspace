@@ -101,7 +101,7 @@ FIRST MESSAGE BEHAVIOR:
 - Include 2-3 suggested next steps as options
 
 NEAR INTEGRATION PATTERNS:
-- Wallet connection: near-wallet-selector with modal
+- Wallet connection: near-connect for secure wallet integration
 - Contract calls: use wallet.callMethod() and wallet.viewMethod()
 - Account display: show connected account ID
 - Token balances: query ft_balance_of for NEP-141 tokens

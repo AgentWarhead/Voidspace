@@ -282,7 +282,7 @@ const skillNodes: SkillNode[] = [
     icon: AppWindow,
     description: 'Connect a frontend to your smart contracts. Wallet integration, state queries, transaction signing, and building a full-stack NEAR application.',
     details: [
-      'near-api-js / wallet-selector setup',
+      'near-api-js / NEAR Connector setup',
       'Connect wallet to React/Next.js app',
       'Call view & change methods from frontend',
       'Handle transaction signing & results',
