@@ -45,7 +45,7 @@ The first AI-powered IDE built specifically for NEAR and Rust smart contracts.
 
 ### 📚 Learning Platform
 
-- **71 learning modules** across 4 tracks: Explorer (16) · Builder (27) · Hacker (16) · Founder (12).
+- **66 learning modules** across 4 tracks: Explorer (16) · Builder (22) · Hacker (16) · Founder (12).
 - **Quick Start guide** for new developers entering the NEAR ecosystem.
 - **7 deep dives:** Rust for Blockchain, Rust Curriculum, NEAR vs Solana, For Solana Developers, Key Technologies, Wallet Setup, Why Rust.
 - **Cross-chain content** targeting Solana and Ethereum developers exploring NEAR.
@@ -101,7 +101,7 @@ src/
 │   ├── void-lens/            # Wallet analysis tool
 │   ├── constellation/        # Transaction flow mapping
 │   ├── sanctum/              # AI development environment (50+ components)
-│   ├── learn/                # 71 learning modules across 4 tracks + 7 deep dives
+│   ├── learn/                # 66 learning modules across 4 tracks + 7 deep dives
 │   ├── pricing/              # Subscription tiers
 │   ├── profile/              # Void Command Center + Skill Constellation
 │   ├── opportunities/        # AI-detected ecosystem gaps
