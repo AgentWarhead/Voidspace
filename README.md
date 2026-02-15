@@ -1,20 +1,43 @@
 # Voidspace
 
-**AI-powered gap scanner for the NEAR Protocol ecosystem.**
+**The intelligence layer for NEAR Protocol.**
 
-Voidspace analyzes the NEAR ecosystem to surface underserved categories and generate actionable project briefs using AI. It helps builders find where to build next by quantifying opportunity gaps across DeFi, infrastructure, social, gaming, and more.
+Voidspace is a unified platform for ecosystem intelligence, AI-powered smart contract development, and structured blockchain education — built exclusively for NEAR.
 
-**Live:** [voidspace-nine.vercel.app](https://voidspace-nine.vercel.app)
+**Live:** [voidspace.io](https://voidspace.io)
 
 ---
 
-## What It Does
+## Features
 
-- **Ecosystem Dashboard** — Real-time overview of NEAR ecosystem health with category saturation charts, TVL distribution, and trending gaps.
-- **Opportunity Discovery** — Browse scored opportunities with filters by category, difficulty, and gap score. Higher scores indicate greater unmet demand.
-- **AI Project Briefs** — Generate detailed project briefs for any opportunity using Claude. Each brief includes problem statement, technical requirements, NEAR tech stack recommendations, competitive analysis, and monetization strategies.
-- **NEAR Wallet Auth** — Connect with MyNearWallet, Meteor Wallet, or HERE Wallet. No passwords — authenticate directly with your NEAR account.
-- **Save & Track** — Bookmark opportunities, track your research progress, and export briefs as Markdown or JSON.
+### 🔭 Intelligence Suite
+
+| Tool | What it does |
+|------|-------------|
+| **Observatory** | Live ecosystem dashboard — track NEAR projects across 20+ categories with real-time market data and opportunity scoring |
+| **Void Bubbles** | 3D interactive market visualization — token movements, volume, and liquidity rendered as an animated bubble field |
+| **Pulse Streams** | Real-time blockchain activity feed — transactions, deployments, and ecosystem events as they happen |
+| **Void Lens** | Deep wallet analysis — reputation scoring, DeFi tracking, portfolio valuation, security profiling, 6-axis behavioral radar |
+| **Constellation Map** | Transaction flow graph — map relationships between wallets, reveal clusters and fund flows across the network |
+
+### ⚡ Sanctum (AI Development Environment)
+
+The first AI-powered IDE built specifically for NEAR and Rust smart contracts.
+
+- **Natural language → Rust code.** Describe what you want, watch it generate production-ready smart contracts in real time.
+- **8 specialist AI personas:** Lead Architect, Rust Grandmaster, Security Overlord, Gas & Performance, Cross-Chain, Frontend & Integration, Testing & QA, DeFi & Tokenomics.
+- **3 builder modes:** Learn (guided) · Build (scaffold) · Expert (full control).
+- **Post-contract pipeline:** Downloadable project scaffold, deploy instructions, simulation sandbox.
+- **Roast Zone:** Security audit your contract ideas with brutal honesty.
+
+### 📚 Learning Platform
+
+- **66 learning modules** across 4 tracks: Explorer (16) · Builder (22) · Hacker (16) · Founder (12).
+- **Deep dives:** Rust for Blockchain, NEAR vs Solana, Key Technologies, Wallet Setup, Why Rust.
+- **Cross-chain content** targeting Solana and Ethereum developers exploring NEAR.
+- **XP system** with 107 achievements, skill constellation visualization, and capstone projects.
+
+---
 
 ## Tech Stack
 
@@ -22,104 +45,111 @@ Voidspace analyzes the NEAR ecosystem to surface underserved categories and gene
 |-------|-----------|
 | Framework | Next.js 14 (App Router, TypeScript) |
 | Styling | Tailwind CSS, Framer Motion |
+| Visualization | D3.js (force graphs), Three.js (3D bubbles) |
 | Database | Supabase (PostgreSQL) |
-| Auth | NEAR Wallet Selector |
-| AI | Claude Sonnet 4 (via Supabase Edge Functions) |
-| Data Sources | DeFiLlama, NEAR Catalog, NearBlocks, GitHub API |
-| Hosting | Vercel |
+| Auth | NEAR Wallet Selector (WalletConnect) |
+| AI | Claude Opus 4 (Sanctum code generation) |
+| Market Data | DexScreener API (real-time, cached) |
+| Chain Data | NearBlocks API (transactions, wallets) |
+| Ecosystem Data | NEAR Catalog, DeFiLlama, GitHub API |
+| Payments | Stripe (subscriptions + credit top-ups) |
+| Hosting | Vercel (edge functions, ISR) |
 
 ## Architecture
 
 ```
 src/
-├── app/                    # Next.js pages and API routes
-│   ├── api/                # REST endpoints (auth, brief, saved, sync, usage)
-│   ├── categories/         # Category browsing pages
-│   ├── opportunities/      # Opportunity listing and detail pages
-│   └── profile/            # User profile page
-├── components/
-│   ├── brief/              # AI brief generation and display
-│   ├── charts/             # Recharts visualizations
-│   ├── dashboard/          # Dashboard widgets
-│   ├── effects/            # Animations (GlowCard, PageTransition)
-│   ├── layout/             # Header, Footer
-│   ├── opportunities/      # Cards, filters, save button
-│   ├── profile/            # Profile content
-│   ├── tier/               # Tier gating
-│   ├── ui/                 # Reusable UI primitives
-│   └── wallet/             # Wallet connection button
-├── contexts/               # WalletContext, SavedOpportunities, Toast
-├── hooks/                  # useWallet, useUser, useSavedOpportunities
+├── app/
+│   ├── api/               # 15+ API routes (auth, sanctum, stripe, void-lens, etc.)
+│   ├── observatory/       # Ecosystem dashboard
+│   ├── void-bubbles/      # 3D market visualization
+│   ├── void-lens/         # Wallet analysis tool
+│   ├── constellation/     # Transaction flow mapping
+│   ├── sanctum/           # AI development environment
+│   │   ├── components/    # Chat, ModeSelector, BuilderProgress, etc.
+│   │   ├── hooks/         # Session state, persistence
+│   │   └── lib/           # Personas, tiers, XP system
+│   ├── learn/             # 66 learning modules across 4 tracks
+│   │   ├── explorer/      # Track: Explorer (16 modules)
+│   │   ├── builder/       # Track: Builder (22 modules)
+│   │   ├── hacker/        # Track: Hacker (16 modules)
+│   │   └── founder/       # Track: Founder (12 modules)
+│   ├── pricing/           # Subscription tiers
+│   ├── profile/           # User profile, achievements, skills
+│   ├── opportunities/     # Ecosystem opportunity discovery
+│   ├── categories/        # Category browsing
+│   └── legal/             # Terms, privacy, cookies, disclaimer
+├── components/            # Shared UI components
+├── contexts/              # Wallet, saved items, toast notifications
+├── hooks/                 # Custom React hooks
 ├── lib/
-│   ├── near/               # Wallet selector setup, network config
-│   ├── supabase/           # Client, server, and admin clients
-│   ├── sync/               # Data pipeline (DeFiLlama, ecosystem, opportunities)
-│   ├── gap-score.ts        # Gap score calculation algorithm
-│   ├── queries.ts          # Supabase data fetching
-│   └── tiers.ts            # Subscription tier definitions
-└── types/                  # TypeScript type definitions
-
-supabase/
-├── functions/              # Edge Functions (data sync, brief generation)
-└── migrations/             # Database schema
+│   ├── near/              # Wallet selector, network config
+│   ├── supabase/          # Database clients
+│   ├── sync/              # Data pipeline (DeFiLlama, NearBlocks, etc.)
+│   ├── dexscreener.ts     # Market data service (6 functions, 60s cache)
+│   ├── sanctum-tiers.ts   # Subscription tier definitions
+│   └── gap-score.ts       # Opportunity scoring algorithm
+└── types/                 # TypeScript definitions
 ```
 
-## Tier System
+**445 source files · ~15,000 lines of TypeScript · Zero templates**
 
-| Tier | Price | Briefs/Month | Saved | Key Features |
-|------|-------|-------------|-------|-------------|
-| Shade | Free | 0 | 5 | Browse, preview |
-| Specter | $14.99/mo | 10 | Unlimited | AI briefs, export, history |
-| Legion | $49.99/mo | 50 | Unlimited | Team access, API |
-| Leviathan | Custom | Unlimited | Unlimited | Enterprise features |
+## Subscription Tiers
+
+| Tier | Price | What you get |
+|------|-------|-------------|
+| **Shade** | Free ($2.50 one-time) | Browse intelligence tools, learning modules, limited Sanctum |
+| **Specter** | $25/mo | Full Sanctum access, all personas, export |
+| **Legion** | $60/mo | Higher limits, priority, advanced features |
+| **Leviathan** | $200/mo | Unlimited everything, enterprise support |
+
+Credit top-ups ($5–$100) available for all tiers. Never expire.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- Supabase project with the schema from `supabase/migrations/`
-- NEAR Wallet Selector compatible wallets
+- npm or yarn
+- Supabase project (for database)
+- NEAR wallet (for authentication)
 
-### Setup
+### Development
 
 ```bash
-# Install dependencies
+git clone https://github.com/AgentWarhead/Voidspace.git
+cd Voidspace
 npm install
-
-# Configure environment variables
-cp .env.local.example .env.local
-# Fill in your Supabase URL, keys, and NEAR network
-
-# Run development server
+cp .env.example .env.local  # Configure environment variables
 npm run dev
 ```
 
 ### Environment Variables
 
-| Variable | Description |
-|----------|------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `NEXT_PUBLIC_NEAR_NETWORK` | NEAR network (`testnet` or `mainnet`) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
-| `SYNC_API_KEY` | API key for triggering data sync |
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_key
+ANTHROPIC_API_KEY=your_anthropic_key
+STRIPE_SECRET_KEY=your_stripe_key
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_publishable_key
+NEARBLOCKS_API_KEY=your_nearblocks_key
+```
 
-## Data Pipeline
+## Roadmap
 
-Voidspace aggregates data from multiple sources:
-
-1. **DeFiLlama** — TVL data for NEAR Protocol projects
-2. **NEAR Catalog** — Ecosystem project directory
-3. **GitHub API** — Repository activity and health metrics
-4. **NearBlocks** — On-chain transaction data
-
-Data is synced via Supabase Edge Functions and scored using a gap analysis algorithm that factors in category saturation, project maturity, TVL concentration, and developer activity.
-
-## Competition
-
-Built for the **NEARCON 2026 Innovation Sandbox** hackathon.
+- [ ] Cloud WASM compilation (compile contracts in-browser)
+- [ ] One-click testnet deployment from Sanctum
+- [ ] Community layer (share contracts, collaborate on opportunities)
+- [ ] DAO integration (governance, treasury analysis)
+- [ ] Sanctum marketplace (community contract templates)
+- [ ] Mobile app
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+**Built for the [Nearcon Innovation Sandbox](https://nearcon.org/innovation-sandbox/) by Warhead & Urban Blazer.**
