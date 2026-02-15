@@ -138,19 +138,6 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         </div>
       </div>
 
-      {/* Void Brief — PROMOTED to 2nd position */}
-      <ScrollReveal>
-        <div className="flex items-center gap-1" data-brief-section>
-          <SectionHeader title="Void Brief" badge="POWERED BY CLAUDE AI" />
-          <InfoTooltip term={HELP_CONTENT.aiBrief.term}>
-            <p>{HELP_CONTENT.aiBrief.description}</p>
-          </InfoTooltip>
-        </div>
-        <AnimatedBorderCard padding="none">
-          <BriefGenerator opportunityId={opportunity.id} />
-        </AnimatedBorderCard>
-      </ScrollReveal>
-
       {/* Void Analysis */}
       <ScrollReveal delay={0.05}>
         <SectionHeader title="Void Analysis" />
@@ -225,6 +212,19 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </Card>
         </ScrollReveal>
       )}
+
+      {/* Void Brief — After analysis so users are primed to act */}
+      <ScrollReveal delay={0.18}>
+        <div className="flex items-center gap-1" data-brief-section>
+          <SectionHeader title="Void Brief" badge="POWERED BY CLAUDE AI" />
+          <InfoTooltip term={HELP_CONTENT.aiBrief.term}>
+            <p>{HELP_CONTENT.aiBrief.description}</p>
+          </InfoTooltip>
+        </div>
+        <AnimatedBorderCard padding="none">
+          <BriefGenerator opportunityId={opportunity.id} />
+        </AnimatedBorderCard>
+      </ScrollReveal>
 
       {/* Competition Analysis */}
       <ScrollReveal delay={0.2}>
