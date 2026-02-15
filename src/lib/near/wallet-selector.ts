@@ -1,23 +1,19 @@
-import { setupWalletSelector } from '@near-wallet-selector/core';
-import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet';
-import { setupMeteorWallet } from '@near-wallet-selector/meteor-wallet';
-import { setupHereWallet } from '@near-wallet-selector/here-wallet';
-import { setupModal } from '@near-wallet-selector/modal-ui';
+import { NearConnector } from '@hot-labs/near-connect';
 import { NEAR_NETWORK } from './config';
 
-export async function initWalletSelector() {
-  const selector = await setupWalletSelector({
-    network: NEAR_NETWORK,
-    modules: [
-      setupMyNearWallet(),
-      setupMeteorWallet(),
-      setupHereWallet(),
-    ],
+let connectorInstance: NearConnector | null = null;
+
+export function initConnector(): NearConnector {
+  if (connectorInstance) return connectorInstance;
+
+  connectorInstance = new NearConnector({
+    network: NEAR_NETWORK as 'mainnet' | 'testnet',
+    autoConnect: true,
   });
 
-  const modal = setupModal(selector, {
-    contractId: '', // No contract needed for auth-only
-  });
+  return connectorInstance;
+}
 
-  return { selector, modal };
+export function getConnector(): NearConnector | null {
+  return connectorInstance;
 }

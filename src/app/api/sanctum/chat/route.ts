@@ -88,7 +88,7 @@ CODE GENERATION RULES:
 - Generate complete, self-contained React components with TypeScript
 - Use Tailwind CSS for all styling — dark theme by default
 - Use lucide-react for icons
-- For NEAR integration, use @near-wallet-selector/core and near-api-js
+- For NEAR integration, use @hot-labs/near-connect and near-api-js
 - Include proper TypeScript types
 - Add loading states, error handling, and responsive design
 - Use modern React patterns (hooks, functional components)
@@ -112,7 +112,7 @@ TECH STACK:
 - Next.js 14+ App Router
 - Tailwind CSS
 - lucide-react for icons
-- near-api-js and @near-wallet-selector for NEAR integration
+- near-api-js and @hot-labs/near-connect for NEAR wallet integration
 - Chart.js or recharts for data visualization when needed
 
 IMPORTANT:

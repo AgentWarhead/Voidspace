@@ -1,15 +1,11 @@
 'use client';
 
-import { createContext, useCallback, useEffect, useState } from 'react';
-import type { WalletSelector, AccountState } from '@near-wallet-selector/core';
-import type { WalletSelectorModal } from '@near-wallet-selector/modal-ui';
+import { createContext, useCallback, useEffect, useState, useRef } from 'react';
+import type { NearConnector } from '@hot-labs/near-connect';
 import type { User } from '@/types';
 
-import '@near-wallet-selector/modal-ui/styles.css';
-
 export interface WalletContextValue {
-  selector: WalletSelector | null;
-  modal: WalletSelectorModal | null;
+  connector: NearConnector | null;
   accountId: string | null;
   isConnected: boolean;
   isLoading: boolean;
@@ -21,8 +17,7 @@ export interface WalletContextValue {
 }
 
 export const WalletContext = createContext<WalletContextValue>({
-  selector: null,
-  modal: null,
+  connector: null,
   accountId: null,
   isConnected: false,
   isLoading: true,
@@ -34,12 +29,12 @@ export const WalletContext = createContext<WalletContextValue>({
 });
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [selector, setSelector] = useState<WalletSelector | null>(null);
-  const [modal, setModal] = useState<WalletSelectorModal | null>(null);
+  const [connector, setConnector] = useState<NearConnector | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(false);
+  const connectorRef = useRef<NearConnector | null>(null);
 
   // Try to restore session from existing cookie (no signature needed)
   const tryRestoreSession = useCallback(async (): Promise<boolean> => {
@@ -53,29 +48,23 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch {
-      // Session restore failed silently — will fall through to sign
+      // Session restore failed silently
     }
     return false;
   }, []);
 
   // Authenticate user via signed message (NEP-413) and create/fetch in Supabase
-  const authenticateUser = useCallback(async (nearAccountId: string, walletSelector: WalletSelector) => {
+  const authenticateUser = useCallback(async (nearAccountId: string, conn: NearConnector) => {
     setUserLoading(true);
     try {
       // First, try to restore existing session (avoids re-signing)
       const restored = await tryRestoreSession();
       if (restored) return;
 
-      const wallet = await walletSelector.wallet();
-
-      // Check if wallet supports signMessage (NEP-413)
-      if (!('signMessage' in wallet) || typeof wallet.signMessage !== 'function') {
-        console.warn('[Auth] Wallet does not support signMessage (NEP-413). Skipping auth.');
-        return;
-      }
+      const wallet = await conn.wallet();
 
       // Generate nonce (32 bytes, as required by NEP-413)
-      const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
+      const nonce = crypto.getRandomValues(new Uint8Array(32));
       const message = `Sign in to Voidspace`;
       const recipient = 'voidspace.io';
 
@@ -116,84 +105,84 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, [tryRestoreSession]);
 
   const refetchUser = useCallback(async () => {
-    if (accountId && selector) {
-      await authenticateUser(accountId, selector);
+    if (accountId && connectorRef.current) {
+      await authenticateUser(accountId, connectorRef.current);
     }
-  }, [accountId, selector, authenticateUser]);
+  }, [accountId, authenticateUser]);
 
-  // Initialize wallet selector
+  // Initialize NearConnector
   useEffect(() => {
-    let subscription: { unsubscribe: () => void } | undefined;
-
     async function init() {
       try {
-        const { initWalletSelector } = await import('@/lib/near/wallet-selector');
-        const { selector: sel, modal: mod } = await initWalletSelector();
-        setSelector(sel);
-        setModal(mod);
+        const { initConnector } = await import('@/lib/near/wallet-selector');
+        const conn = initConnector();
+        connectorRef.current = conn;
+        setConnector(conn);
 
-        // Get initial account
-        const state = sel.store.getState();
-        const activeAccount = state.accounts.find(
-          (a: AccountState) => a.active
-        );
-        const initialAccountId = activeAccount?.accountId || null;
-        setAccountId(initialAccountId);
-
-        if (initialAccountId) {
-          authenticateUser(initialAccountId, sel);
-        }
-
-        // Subscribe to account changes
-        subscription = sel.store.observable.subscribe((state) => {
-          const active = state.accounts.find(
-            (a: AccountState) => a.active
-          );
-          const newAccountId = active?.accountId || null;
-          setAccountId((prev) => {
-            if (prev !== newAccountId) {
-              if (newAccountId) {
-                authenticateUser(newAccountId, sel);
-              } else {
-                setUser(null);
-              }
-            }
-            return newAccountId;
-          });
+        // Listen for sign-in events
+        conn.on('wallet:signIn', async (payload) => {
+          const newAccountId = payload.accounts?.[0]?.accountId || null;
+          if (newAccountId) {
+            setAccountId(newAccountId);
+            authenticateUser(newAccountId, conn);
+          }
         });
+
+        // Listen for sign-out events
+        conn.on('wallet:signOut', () => {
+          setAccountId(null);
+          setUser(null);
+        });
+
+        // Check for existing connection (autoConnect)
+        try {
+          const { wallet, accounts } = await conn.getConnectedWallet();
+          if (wallet && accounts.length > 0) {
+            const existingAccountId = accounts[0].accountId;
+            setAccountId(existingAccountId);
+            authenticateUser(existingAccountId, conn);
+          }
+        } catch {
+          // No existing connection — that's fine
+        }
       } catch (err) {
-        console.error('Failed to initialize wallet selector:', err);
+        console.error('Failed to initialize NearConnector:', err);
       } finally {
         setIsLoading(false);
       }
     }
 
     init();
-
-    return () => {
-      subscription?.unsubscribe();
-    };
   }, [authenticateUser]);
 
-  const openModal = useCallback(() => {
-    modal?.show();
-  }, [modal]);
+  const openModal = useCallback(async () => {
+    if (!connectorRef.current) return;
+    try {
+      const walletId = await connectorRef.current.selectWallet();
+      await connectorRef.current.connect(walletId);
+    } catch (err) {
+      // User closed modal or cancelled — that's fine
+      console.debug('[Wallet] Modal closed or connection cancelled:', err);
+    }
+  }, []);
 
   const signOut = useCallback(async () => {
-    if (!selector) return;
-    const wallet = await selector.wallet();
-    await wallet.signOut();
+    if (!connectorRef.current) return;
+    try {
+      await connectorRef.current.disconnect();
+    } catch (err) {
+      console.error('[Wallet] Disconnect error:', err);
+    }
     // Clear server session cookie
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setAccountId(null);
     setUser(null);
-  }, [selector]);
+  }, []);
 
   return (
     <WalletContext.Provider
       value={{
-        selector,
-        modal,
+        connector,
         accountId,
         isConnected: !!accountId,
         isLoading,

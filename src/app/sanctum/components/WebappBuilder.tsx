@@ -159,7 +159,7 @@ export function WebappBuilder({ code, contractName = 'my-contract', deployedAddr
               <div className="bg-gradient-to-r from-near-green/10 to-void-purple/10 rounded-xl p-4 border border-near-green/20">
                 <h4 className="text-sm font-medium text-white mb-2">Generated Stack</h4>
                 <div className="flex flex-wrap gap-2">
-                  {['Next.js 14', 'TypeScript', 'Tailwind CSS', 'near-api-js', '@near-wallet-selector/core', 'Vercel-ready'].map(tech => (
+                  {['Next.js 14', 'TypeScript', 'Tailwind CSS', 'near-api-js', '@hot-labs/near-connect', 'Vercel-ready'].map(tech => (
                     <span key={tech} className="px-2 py-1 bg-void-black/50 text-xs text-gray-300 rounded-lg">
                       {tech}
                     </span>
@@ -412,9 +412,7 @@ function generateProject(config: ProjectConfig): string {
     "react": "^18",
     "react-dom": "^18",
     "near-api-js": "^4.0.0"${includeWallet ? `,
-    "@near-wallet-selector/core": "^8.9.0",
-    "@near-wallet-selector/my-near-wallet": "^8.9.0",
-    "@near-wallet-selector/modal-ui": "^8.9.0"` : ''}
+    "@hot-labs/near-connect": "^1.0.0"` : ''}
   },
   "devDependencies": {
     "typescript": "^5",
@@ -474,8 +472,7 @@ export { CONTRACT_ID, NETWORK };
 
 import { useState, useEffect } from 'react';
 import { initNear, getContract, CONTRACT_ID, NETWORK } from '@/lib/contract';
-${includeWallet ? `import { setupWalletSelector } from '@near-wallet-selector/core';
-import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet';` : ''}
+${includeWallet ? `import { NearConnector } from '@hot-labs/near-connect';` : ''}
 
 export default function Home() {
   const [account, setAccount] = useState<any>(null);
@@ -489,17 +486,11 @@ export default function Home() {
 
   async function initApp() {
     try {
-      ${includeWallet ? `const selector = await setupWalletSelector({
-        network: NETWORK,
-        modules: [setupMyNearWallet()],
-      });
-      
-      const state = selector.store.getState();
-      if (state.accounts.length > 0) {
-        const wallet = await selector.wallet();
-        const accounts = await wallet.getAccounts();
-        setAccount(accounts[0]);
-      }` : `const near = await initNear();
+      ${includeWallet ? `const connector = new NearConnector({ network: NETWORK, autoConnect: true });
+      try {
+        const { accounts } = await connector.getConnectedWallet();
+        if (accounts.length > 0) setAccount(accounts[0]);
+      } catch {}` : `const near = await initNear();
       const account = await near.account('guest');
       setAccount(account);`}
     } catch (err) {
@@ -510,21 +501,16 @@ export default function Home() {
   }
 
   ${includeWallet ? `async function connectWallet() {
-    const selector = await setupWalletSelector({
-      network: NETWORK,
-      modules: [setupMyNearWallet()],
-    });
-    const wallet = await selector.wallet('my-near-wallet');
-    await wallet.signIn({ contractId: CONTRACT_ID });
+    const connector = new NearConnector({ network: NETWORK });
+    const walletId = await connector.selectWallet();
+    await connector.connect(walletId);
+    const { accounts } = await connector.getConnectedWallet();
+    if (accounts.length > 0) setAccount(accounts[0]);
   }
 
   async function disconnectWallet() {
-    const selector = await setupWalletSelector({
-      network: NETWORK,
-      modules: [setupMyNearWallet()],
-    });
-    const wallet = await selector.wallet();
-    await wallet.signOut();
+    const connector = new NearConnector({ network: NETWORK });
+    await connector.disconnect();
     setAccount(null);
   }` : ''}
 

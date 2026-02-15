@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createSessionToken, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/auth/session';
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { isValidNearAccountId } from '@/lib/auth/validate';
-import { verifySignature } from '@near-wallet-selector/core';
+import { verifySignature } from '@/lib/auth/verify-nep413';
 
 function respondWithSession(user: { id: string }, accountId: string) {
   const token = createSessionToken(user.id, accountId);
