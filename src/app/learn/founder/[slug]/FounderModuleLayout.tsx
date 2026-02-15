@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight, Home, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { FounderModule } from '../../types';
 import { RelatedContent } from '../../components/RelatedContent';
+import { ModuleCompletionTracker } from '@/components/tracking/ModuleCompletionTracker';
+import { WalletPromptBanner } from '@/components/tracking/WalletPromptBanner';
 
 import {
   NearGrantsFunding,
@@ -99,6 +101,9 @@ export function FounderModuleLayout({
         </Container>
       </div>
 
+      {/* ── Wallet Prompt ── */}
+      <WalletPromptBanner />
+
       {/* ── Module Content ── */}
       <main className="py-12 md:py-16">
         {ModuleComponent && <ModuleComponent isActive={true} onToggle={() => {}} />}
@@ -106,6 +111,9 @@ export function FounderModuleLayout({
 
       {/* ── Related Content ── */}
       <RelatedContent currentTrack="founder" />
+
+      {/* ── Completion Tracker ── */}
+      <ModuleCompletionTracker moduleSlug={currentModule.slug} track="founder" />
 
       {/* ── Prev / Next Navigation ── */}
       <div className="border-t border-border bg-surface/30">

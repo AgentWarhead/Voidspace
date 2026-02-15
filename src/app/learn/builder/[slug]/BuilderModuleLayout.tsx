@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight, Home, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { BuilderModule } from '../../types';
 import { RelatedContent } from '../../components/RelatedContent';
+import { ModuleCompletionTracker } from '@/components/tracking/ModuleCompletionTracker';
+import { WalletPromptBanner } from '@/components/tracking/WalletPromptBanner';
 
 import {
   DevEnvironmentSetup,
@@ -129,6 +131,9 @@ export function BuilderModuleLayout({
         </Container>
       </div>
 
+      {/* ── Wallet Prompt ── */}
+      <WalletPromptBanner />
+
       {/* ── Module Content ── */}
       <main className="py-12 md:py-16">
         {ModuleComponent && <ModuleComponent isActive={true} onToggle={() => {}} />}
@@ -136,6 +141,9 @@ export function BuilderModuleLayout({
 
       {/* ── Related Content ── */}
       <RelatedContent currentTrack="builder" />
+
+      {/* ── Completion Tracker ── */}
+      <ModuleCompletionTracker moduleSlug={currentModule.slug} track="builder" />
 
       {/* ── Prev / Next Navigation ── */}
       <div className="border-t border-border bg-surface/30">
