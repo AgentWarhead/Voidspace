@@ -16,7 +16,6 @@ Voidspace is a unified platform for ecosystem intelligence, AI-powered smart con
 |------|-------------|
 | **Observatory** | Live ecosystem dashboard — track NEAR projects across 20+ categories with real-time market data and opportunity scoring |
 | **Void Bubbles** | 3D interactive market visualization — token movements, volume, and liquidity rendered as an animated bubble field |
-| **Pulse Streams** | Real-time blockchain activity feed — transactions, deployments, and ecosystem events as they happen |
 | **Void Lens** | Deep wallet analysis — reputation scoring, DeFi tracking, portfolio valuation, security profiling, 6-axis behavioral radar |
 | **Constellation Map** | Transaction flow graph — map relationships between wallets, reveal clusters and fund flows across the network |
 
@@ -43,11 +42,11 @@ The first AI-powered IDE built specifically for NEAR and Rust smart contracts.
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 14 (App Router, TypeScript) |
+| Framework | Next.js 15 (App Router, TypeScript) |
 | Styling | Tailwind CSS, Framer Motion |
 | Visualization | D3.js (force graphs), Three.js (3D bubbles) |
 | Database | Supabase (PostgreSQL) |
-| Auth | NEAR Wallet Selector (WalletConnect) |
+| Auth | NEAR Connector (@hot-labs/near-connect) |
 | AI | Claude Opus 4 (Sanctum code generation) |
 | Market Data | DexScreener API (real-time, cached) |
 | Chain Data | NearBlocks API (transactions, wallets) |
@@ -60,7 +59,7 @@ The first AI-powered IDE built specifically for NEAR and Rust smart contracts.
 ```
 src/
 ├── app/
-│   ├── api/               # 15+ API routes (auth, sanctum, stripe, void-lens, etc.)
+│   ├── api/               # 16 API routes (auth, sanctum, stripe, void-lens, etc.)
 │   ├── observatory/       # Ecosystem dashboard
 │   ├── void-bubbles/      # 3D market visualization
 │   ├── void-lens/         # Wallet analysis tool
@@ -92,7 +91,7 @@ src/
 └── types/                 # TypeScript definitions
 ```
 
-**445 source files · ~15,000 lines of TypeScript · Zero templates**
+**448 source files · ~94,000 lines of TypeScript · Zero templates**
 
 ## Subscription Tiers
 
