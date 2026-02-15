@@ -4,10 +4,12 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Container } from '@/components/ui';
-import { GradientText } from '@/components/effects/GradientText';
 import { ParticleBackground } from './components/ParticleBackground';
 // CategoryPicker moved to SanctumWizard
 import { SanctumChat } from './components/SanctumChat';
+import { PersonaSelector } from './components/PersonaSelector';
+import { ModeSelector } from './components/ModeSelector';
+import { getPersona } from './lib/personas';
 import { TypewriterCode } from './components/TypewriterCode';
 // TokenCounter removed
 import { SanctumVisualization } from './components/SanctumVisualization';
@@ -526,36 +528,83 @@ function SanctumPageInner() {
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-near-green/10 rounded-full blur-3xl" />
           </div>
 
-          {/* Header with back button - always visible */}
-          <div className="relative z-10 flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          {/* Premium consolidated header */}
+          <div className="relative z-10 flex-shrink-0 bg-void-black/60 backdrop-blur-xl border-b border-white/[0.06]">
+            {/* Subtle gradient accent line at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+            
+            {/* Desktop header */}
+            <div className="hidden md:flex items-center justify-between px-4 py-3 gap-4">
+              {/* Left: Back + Persona */}
+              <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={handleBack}
-                  className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors group"
+                  className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors group flex-shrink-0"
                 >
                   <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
                 </button>
-                <div>
-                  <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                    <span className="text-2xl">🔮</span>
-                    <GradientText>
-                      {state.selectedCategory === 'custom' ? 'Custom Build' : state.selectedCategory?.replace('-', ' ')}
-                    </GradientText>
-                  </h2>
-                  <p className="text-sm text-text-muted">Chat with Sanctum to forge your contract</p>
-                </div>
+                <PersonaSelector
+                  currentPersona={getPersona(state.personaId)}
+                  onSelect={(p) => dispatch({ type: 'SET_PERSONA_ID', payload: p.id })}
+                  disabled={false}
+                />
+              </div>
+
+              {/* Center: Mode Selector */}
+              <div className="flex-shrink-0">
+                <ModeSelector
+                  mode={state.chatMode}
+                  onModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
+                  disabled={false}
+                />
+              </div>
+
+              {/* Right: New Session */}
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={handleNewSession}
-                  className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted hover:text-near-green rounded-lg hover:bg-white/[0.05] transition-all"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm text-text-muted hover:text-near-green rounded-lg hover:bg-white/[0.06] border border-white/[0.06] hover:border-near-green/20 transition-all"
                   title="Start a new session"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">New Session</span>
+                  <span>New Session</span>
                 </button>
               </div>
-              
-              {/* Desktop controls - cleaned up */}
+            </div>
+
+            {/* Mobile header */}
+            <div className="md:hidden px-3 py-2.5 space-y-2">
+              {/* Top row: Back + Persona + New Session */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <button
+                    onClick={handleBack}
+                    className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors group flex-shrink-0"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
+                  </button>
+                  <PersonaSelector
+                    currentPersona={getPersona(state.personaId)}
+                    onSelect={(p) => dispatch({ type: 'SET_PERSONA_ID', payload: p.id })}
+                    disabled={false}
+                  />
+                </div>
+                <button
+                  onClick={handleNewSession}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-text-muted hover:text-near-green rounded-lg hover:bg-white/[0.06] border border-white/[0.06] hover:border-near-green/20 transition-all flex-shrink-0"
+                  title="Start a new session"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {/* Bottom row: Mode Selector centered */}
+              <div className="flex justify-center">
+                <ModeSelector
+                  mode={state.chatMode}
+                  onModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
+                  disabled={false}
+                />
+              </div>
             </div>
           </div>
 
@@ -606,6 +655,8 @@ function SanctumPageInner() {
                       onThinkingChange={handleThinkingChange}
                       chatMode={state.chatMode}
                       onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
+                      personaId={state.personaId}
+                      onPersonaChange={(id) => dispatch({ type: 'SET_PERSONA_ID', payload: id })}
                       onQuizAnswer={(correct) => handleQuizAnswer(correct)}
                       onConceptLearned={(c) => { dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c }); handleConceptLearned(); }}
                       onUserMessage={checkMessageForAchievements}
@@ -755,6 +806,8 @@ function SanctumPageInner() {
                         onThinkingChange={handleThinkingChange}
                         chatMode={state.chatMode}
                         onChatModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
+                        personaId={state.personaId}
+                        onPersonaChange={(id) => dispatch({ type: 'SET_PERSONA_ID', payload: id })}
                         onQuizAnswer={(correct) => handleQuizAnswer(correct)}
                         onConceptLearned={(c) => { dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c }); handleConceptLearned(); }}
                         onUserMessage={checkMessageForAchievements}

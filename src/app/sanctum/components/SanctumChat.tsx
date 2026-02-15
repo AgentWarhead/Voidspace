@@ -3,14 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
-import { PersonaSelector } from './PersonaSelector';
-import { ModeSelector, ChatMode } from './ModeSelector';
+import { ChatMode } from './ModeSelector';
 import { CodeAnnotations, CodeAnnotation } from './CodeAnnotations';
 import { FeatureSuggestion, FeatureSuggestionData } from './FeatureSuggestion';
 import { InlineQuiz, QuizData } from './InlineQuiz';
 import { NextSteps, NextStep } from './NextSteps';
 import { CategoryLearnBanner } from './CategoryLearnBanner';
-import { PERSONAS, Persona, getPersona } from '../lib/personas';
+import { getPersona } from '../lib/personas';
 import { UpgradeModal } from '@/components/credits/UpgradeModal';
 
 interface AttachedFile {
@@ -71,6 +70,8 @@ interface SanctumChatProps {
   autoMessage?: string;
   chatMode?: ChatMode;
   onChatModeChange?: (mode: ChatMode) => void;
+  personaId: string;
+  onPersonaChange: (id: string) => void;
   onCodeGenerated: (code: string) => void;
   onTokensUsed: (input: number, output: number) => void;
   onTaskUpdate?: (task: CurrentTask | null) => void;
@@ -83,7 +84,6 @@ interface SanctumChatProps {
 
 // --- localStorage persistence for chat ---
 const CHAT_MESSAGES_KEY = 'sanctum-chat-messages';
-const CHAT_PERSONA_KEY = 'sanctum-chat-persona';
 
 function loadSavedMessages(): Message[] | null {
   if (typeof window === 'undefined') return null;
@@ -92,17 +92,6 @@ function loadSavedMessages(): Message[] | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function loadSavedPersona(): Persona | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const id = localStorage.getItem(CHAT_PERSONA_KEY);
-    if (!id) return null;
-    return getPersona(id);
   } catch {
     return null;
   }
@@ -128,9 +117,9 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset }: SanctumChatProps) {
+  const currentPersona = getPersona(personaId);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [currentPersona, setCurrentPersona] = useState<Persona>(() => loadSavedPersona() || PERSONAS.shade);
   const messagesRestoredRef = useRef(false);
   const saveMsgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [input, setInput] = useState('');
@@ -264,15 +253,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     };
   }, []);
 
-  // Save persona to localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(CHAT_PERSONA_KEY, currentPersona.id);
-      } catch { /* ignore */ }
-    }
-  }, [currentPersona]);
-
   // Handle session reset from parent
   useEffect(() => {
     if (sessionReset && sessionReset > 0) {
@@ -281,7 +261,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       if (typeof window !== 'undefined') {
         try {
           localStorage.removeItem(CHAT_MESSAGES_KEY);
-          localStorage.removeItem(CHAT_PERSONA_KEY);
         } catch { /* ignore */ }
       }
     }
@@ -710,24 +689,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
       />
-
-      {/* Chat header with mode selector and persona selector */}
-      <div className="flex-shrink-0 p-3 border-b border-border-subtle bg-void-black/30 space-y-2">
-        <div className="flex items-center justify-between">
-          <PersonaSelector 
-            currentPersona={currentPersona}
-            onSelect={setCurrentPersona}
-            disabled={isLoading}
-          />
-          {onChatModeChange && (
-            <ModeSelector
-              mode={chatMode}
-              onModeChange={onChatModeChange}
-              disabled={isLoading}
-            />
-          )}
-        </div>
-      </div>
 
       {/* Category learn banner */}
       {category && (
