@@ -7,6 +7,8 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
 
 function sanitizeUserInput(text: string): string {
   // Remove common prompt injection patterns
@@ -1142,9 +1144,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
+    // ── Resolve user tier for model routing ──
+    const { data: userSub } = await createAdminClient()
+      .from('subscriptions')
+      .select('tier')
+      .eq('user_id', user.userId)
+      .single();
+    const userTier: SanctumTier = (userSub?.tier as SanctumTier) || 'shade';
+    const tierConfig = SANCTUM_TIERS[userTier];
+    const modelId = tierConfig.aiModel;
+    const costModel = modelId.includes('opus') ? 'opus' : 'sonnet';
+
     // Primary gate: credit balance check
     // Estimate ~2000 input + ~3000 output tokens for a chat turn
-    const estimatedCost = estimateCreditCost(2000, 3000, 'sonnet');
+    const estimatedCost = estimateCreditCost(2000, 3000, costModel as 'opus' | 'sonnet');
     const hasCredits = await checkBalance(user.userId, estimatedCost);
     if (!hasCredits) {
       return NextResponse.json(
@@ -1222,9 +1235,9 @@ export async function POST(request: NextRequest) {
       content: m.role === 'user' ? sanitizeUserInput(m.content) : m.content,
     }));
 
-    // Call Claude
+    // Call Claude — model determined by user's subscription tier
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: modelId,
       max_tokens: 4096,
       system: systemPrompt,
       messages: sanitizedMessages,
@@ -1269,8 +1282,8 @@ export async function POST(request: NextRequest) {
     const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
     await logAiUsage(user.userId, 'sanctum_chat', totalTokens);
 
-    // Deduct credits based on actual token usage (Sonnet model)
-    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, 'sonnet');
+    // Deduct credits based on actual token usage and tier model
+    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, costModel as 'opus' | 'sonnet');
     const deduction = await deductCredits(user.userId, creditCost, 'Sanctum chat', {
       tokensInput: response.usage.input_tokens,
       tokensOutput: response.usage.output_tokens,

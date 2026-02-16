@@ -7,6 +7,8 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -104,8 +106,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
+    // ── Tier gate: Roast Zone requires Legion+ ──
+    const { data: userSub } = await createAdminClient()
+      .from('subscriptions')
+      .select('tier')
+      .eq('user_id', user.userId)
+      .single();
+    const userTier: SanctumTier = (userSub?.tier as SanctumTier) || 'shade';
+    if (!SANCTUM_TIERS[userTier].canAudit) {
+      return NextResponse.json(
+        {
+          error: 'Roast Zone requires a Legion or higher subscription. Upgrade to audit your contracts.',
+          code: 'TIER_REQUIRED',
+          requiredTier: 'legion',
+          currentTier: userTier,
+        },
+        { status: 403 }
+      );
+    }
+
     // Primary gate: credit balance check
-    const estimatedCost = estimateCreditCost(2000, 3000, 'sonnet');
+    const tierConfig = SANCTUM_TIERS[userTier];
+    const costModel = tierConfig.aiModel.includes('opus') ? 'opus' : 'sonnet';
+    const estimatedCost = estimateCreditCost(2000, 3000, costModel as 'opus' | 'sonnet');
     const hasCredits = await checkBalance(user.userId, estimatedCost);
     if (!hasCredits) {
       return NextResponse.json(
@@ -144,7 +167,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: tierConfig.aiModel,
       max_tokens: 4096,
       system: ROAST_SYSTEM_PROMPT,
       messages: [
@@ -183,7 +206,7 @@ export async function POST(request: NextRequest) {
     await logAiUsage(user.userId, 'sanctum_roast', totalTokens);
 
     // Deduct credits based on actual token usage
-    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, 'sonnet');
+    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, costModel as 'opus' | 'sonnet');
     const deduction = await deductCredits(user.userId, creditCost, 'Contract roast', {
       tokensInput: response.usage.input_tokens,
       tokensOutput: response.usage.output_tokens,

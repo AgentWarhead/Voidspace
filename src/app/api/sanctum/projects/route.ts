@@ -6,6 +6,8 @@ import {
   updateProject,
   deleteProject,
 } from '@/lib/sanctum-projects';
+import { canCreateProject, SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // GET /api/sanctum/projects — list user's projects
 export async function GET(request: NextRequest) {
@@ -33,6 +35,30 @@ export async function POST(request: NextRequest) {
 
     if (!name || !code) {
       return NextResponse.json({ error: 'Name and code are required' }, { status: 400 });
+    }
+
+    // ── Enforce project limit based on tier ──
+    const supabase = createAdminClient();
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('tier')
+      .eq('user_id', auth.userId)
+      .single();
+    const userTier: SanctumTier = (sub?.tier as SanctumTier) || 'shade';
+
+    const existingProjects = await listProjects(auth.accountId);
+    if (!canCreateProject(userTier, existingProjects.length)) {
+      const tierConfig = SANCTUM_TIERS[userTier];
+      return NextResponse.json(
+        {
+          error: `Project limit reached (${tierConfig.maxProjects} for ${tierConfig.name} tier). Upgrade to create more projects.`,
+          code: 'PROJECT_LIMIT',
+          currentCount: existingProjects.length,
+          maxProjects: tierConfig.maxProjects,
+          tier: userTier,
+        },
+        { status: 403 }
+      );
     }
 
     const project = await createProject({

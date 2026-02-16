@@ -17,6 +17,14 @@ export interface SanctumTierConfig {
   stripePriceIdMonthly: string;  // Set in Stripe dashboard
   stripePriceIdAnnual: string;
   popular?: boolean;
+  // ── Enforced Limits ──────────────────────────────────────
+  maxProjects: number;           // 0 = unlimited
+  aiModel: 'claude-sonnet-4-20250514' | 'claude-opus-4-20250514';
+  canExport: boolean;
+  canAudit: boolean;             // Roast Zone access
+  priorityQueue: boolean;
+  maxBriefsPerMonth: number;     // 0 = unlimited
+  maxSavedOpportunities: number; // 0 = unlimited
 }
 
 export interface TopUpPack {
@@ -37,16 +45,24 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     annualPrice: 0,
     creditsPerMonth: 0,  // One-time $2.50 grant, not monthly
     features: [
-      'Sanctum AI builder access',
+      'Sanctum AI builder (Claude Sonnet 4)',
       '$2.50 one-time starter credits',
-      'All 6 starter templates',
+      '1 active project',
+      '3 starter templates',
       'All intelligence tools (always free)',
-      'Community support',
     ],
     color: '#666666',
     glowColor: 'rgba(102, 102, 102, 0.3)',
     stripePriceIdMonthly: '',
     stripePriceIdAnnual: '',
+    // ── Enforced Limits ──
+    maxProjects: 1,
+    aiModel: 'claude-sonnet-4-20250514',
+    canExport: false,
+    canAudit: false,
+    priorityQueue: false,
+    maxBriefsPerMonth: 3,
+    maxSavedOpportunities: 5,
   },
   specter: {
     name: 'Specter',
@@ -57,15 +73,23 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     creditsPerMonth: 25,
     features: [
       '$25/mo in Sanctum credits',
-      'Claude Opus 4.6 (latest model)',
-      'All templates + project export',
+      'Claude Opus 4.6 — best AI model available',
+      'Up to 3 active projects',
+      'All 6 templates + project export',
       'Guided Rust curriculum',
-      'Unlimited projects',
     ],
     color: '#00EC97',
     glowColor: 'rgba(0, 236, 151, 0.3)',
     stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZwHUVPdiA',
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZ90gXTP4Q',
+    // ── Enforced Limits ──
+    maxProjects: 3,
+    aiModel: 'claude-opus-4-20250514',
+    canExport: true,
+    canAudit: false,
+    priorityQueue: false,
+    maxBriefsPerMonth: 10,
+    maxSavedOpportunities: 50,
   },
   legion: {
     name: 'Legion',
@@ -77,8 +101,8 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     features: [
       '$70/mo in Sanctum credits ($10 bonus)',
       'Everything in Specter',
-      'AI-powered contract auditing',
-      'Advanced NEAR developer tooling',
+      'Unlimited active projects',
+      'AI contract auditing (Roast Zone)',
       'Priority build queue',
     ],
     color: '#00D4FF',
@@ -86,6 +110,14 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZSfnTGo4G',
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZVfWYySmG',
     popular: true,
+    // ── Enforced Limits ──
+    maxProjects: 0,  // unlimited
+    aiModel: 'claude-opus-4-20250514',
+    canExport: true,
+    canAudit: true,
+    priorityQueue: true,
+    maxBriefsPerMonth: 50,
+    maxSavedOpportunities: 0,  // unlimited
   },
   leviathan: {
     name: 'Leviathan',
@@ -106,6 +138,14 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     glowColor: 'rgba(157, 78, 221, 0.3)',
     stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZxGegM9EZ',
     stripePriceIdAnnual: 'price_1SzsDV0chTjWbsnZx0gHg5id',
+    // ── Enforced Limits ──
+    maxProjects: 0,  // unlimited
+    aiModel: 'claude-opus-4-20250514',
+    canExport: true,
+    canAudit: true,
+    priorityQueue: true,
+    maxBriefsPerMonth: 0,  // unlimited
+    maxSavedOpportunities: 0,  // unlimited
   },
 };
 
@@ -147,6 +187,45 @@ export const TOPUP_PACKS: TopUpPack[] = [
 /** Get credit amount for a tier (monthly subscription reset) */
 export function getTierCredits(tier: SanctumTier): number {
   return SANCTUM_TIERS[tier].creditsPerMonth;
+}
+
+/** Get the AI model for a given tier */
+export function getTierModel(tier: SanctumTier): string {
+  return SANCTUM_TIERS[tier].aiModel;
+}
+
+/** Check if user can create another project */
+export function canCreateProject(tier: SanctumTier, currentCount: number): boolean {
+  const max = SANCTUM_TIERS[tier].maxProjects;
+  return max === 0 || currentCount < max;
+}
+
+/** Check if user can export projects */
+export function canExportProject(tier: SanctumTier): boolean {
+  return SANCTUM_TIERS[tier].canExport;
+}
+
+/** Check if user can use Roast Zone (contract auditing) */
+export function canUseRoastZone(tier: SanctumTier): boolean {
+  return SANCTUM_TIERS[tier].canAudit;
+}
+
+/** Check if user can generate a Void Brief */
+export function canGenerateVoidBrief(tier: SanctumTier, usageCount: number): boolean {
+  const max = SANCTUM_TIERS[tier].maxBriefsPerMonth;
+  return max === 0 || usageCount < max;
+}
+
+/** Check if user can save an opportunity */
+export function canSaveOpportunityByTier(tier: SanctumTier, savedCount: number): boolean {
+  const max = SANCTUM_TIERS[tier].maxSavedOpportunities;
+  return max === 0 || savedCount < max;
+}
+
+/** Get project limit for display (returns "Unlimited" or number) */
+export function getProjectLimitDisplay(tier: SanctumTier): string {
+  const max = SANCTUM_TIERS[tier].maxProjects;
+  return max === 0 ? 'Unlimited' : String(max);
 }
 
 /** Get tier config from a Stripe price ID */
