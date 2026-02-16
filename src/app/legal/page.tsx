@@ -2,8 +2,23 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Legal | Voidspace',
-  description: 'Legal information for Voidspace — Terms, Privacy, Disclaimer, Cookies, and Acceptable Use.',
+  title: 'Legal — Terms, Privacy & Policies | Voidspace',
+  description: 'Voidspace legal documentation — Terms of Service, Privacy Policy, Disclaimer, Cookie Policy, and Acceptable Use Policy. Transparent and straightforward.',
+  alternates: { canonical: 'https://voidspace.io/legal' },
+  openGraph: {
+    title: 'Legal — Terms, Privacy & Policies | Voidspace',
+    description: 'Voidspace legal documentation — Terms of Service, Privacy Policy, Disclaimer, Cookie Policy, and Acceptable Use.',
+    url: 'https://voidspace.io/legal',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Legal — Voidspace',
+    description: 'Terms, Privacy, Disclaimer, Cookies, and Acceptable Use policies for Voidspace.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 const legalPages = [

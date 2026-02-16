@@ -1,8 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy | Voidspace',
-  description: 'Cookie Policy for Voidspace — what cookies we use and why.',
+  title: 'Cookie Policy — Voidspace',
+  description: 'What cookies Voidspace uses, why we use them, and how to manage your preferences. Minimal cookies for analytics and essential functionality.',
+  alternates: { canonical: 'https://voidspace.io/legal/cookies' },
+  openGraph: {
+    title: 'Cookie Policy — Voidspace',
+    description: 'What cookies Voidspace uses and how to manage them. Minimal cookies for essential functionality.',
+    url: 'https://voidspace.io/legal/cookies',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Cookie Policy — Voidspace',
+    description: 'Minimal cookies for analytics and essential functionality. Manage your preferences.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function CookiesPage() {

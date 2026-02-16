@@ -1,8 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | Voidspace',
-  description: 'Terms of Service for Voidspace — NEAR Protocol ecosystem intelligence platform.',
+  title: 'Terms of Service — Voidspace',
+  description: 'Terms of Service for Voidspace — rules and conditions for using our NEAR Protocol intelligence, education, and AI builder platform.',
+  alternates: { canonical: 'https://voidspace.io/legal/terms' },
+  openGraph: {
+    title: 'Terms of Service — Voidspace',
+    description: 'Rules and conditions for using Voidspace and Sanctum — NEAR Protocol ecosystem intelligence platform.',
+    url: 'https://voidspace.io/legal/terms',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service — Voidspace',
+    description: 'Terms and conditions for using Voidspace — NEAR Protocol ecosystem intelligence platform.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function TermsPage() {

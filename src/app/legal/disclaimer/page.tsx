@@ -1,8 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Disclaimer | Voidspace',
-  description: 'Disclaimer for Voidspace — important limitations and risk disclosures.',
+  title: 'Disclaimer — Voidspace',
+  description: 'Important limitations, risk disclosures, and liability information for Voidspace. Not financial advice — educational and informational purposes only.',
+  alternates: { canonical: 'https://voidspace.io/legal/disclaimer' },
+  openGraph: {
+    title: 'Disclaimer — Voidspace',
+    description: 'Risk disclosures and liability information. Voidspace is not financial advice — educational purposes only.',
+    url: 'https://voidspace.io/legal/disclaimer',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Disclaimer — Voidspace',
+    description: 'Important limitations and risk disclosures for Voidspace. Not financial advice.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function DisclaimerPage() {

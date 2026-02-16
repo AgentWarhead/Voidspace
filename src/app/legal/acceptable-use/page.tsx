@@ -1,8 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Acceptable Use Policy | Voidspace',
-  description: 'Acceptable Use Policy for Voidspace — rules for using our platform responsibly.',
+  title: 'Acceptable Use Policy — Voidspace',
+  description: 'Rules for responsible use of Voidspace and Sanctum. No malicious contracts, no abuse of AI tools, no exploitation of the platform or its users.',
+  alternates: { canonical: 'https://voidspace.io/legal/acceptable-use' },
+  openGraph: {
+    title: 'Acceptable Use Policy — Voidspace',
+    description: 'Rules for responsible use of Voidspace and Sanctum. Build responsibly on NEAR Protocol.',
+    url: 'https://voidspace.io/legal/acceptable-use',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Acceptable Use Policy — Voidspace',
+    description: 'Rules for responsible use of Voidspace — no malicious contracts, no platform abuse.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function AcceptableUsePage() {

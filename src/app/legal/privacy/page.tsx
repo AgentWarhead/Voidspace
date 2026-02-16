@@ -1,8 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Voidspace',
-  description: 'Privacy Policy for Voidspace — how we collect, use, and protect your data.',
+  title: 'Privacy Policy — Voidspace',
+  description: 'How Voidspace collects, uses, and protects your data. Minimal data collection, NEAR wallet authentication, no unnecessary tracking.',
+  alternates: { canonical: 'https://voidspace.io/legal/privacy' },
+  openGraph: {
+    title: 'Privacy Policy — Voidspace',
+    description: 'How Voidspace collects, uses, and protects your data. Minimal collection, transparent practices.',
+    url: 'https://voidspace.io/legal/privacy',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy — Voidspace',
+    description: 'Minimal data collection, NEAR wallet auth, transparent practices. How we protect your data.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function PrivacyPage() {
