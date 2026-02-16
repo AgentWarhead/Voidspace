@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function VoidLensPage() {
   return (
-    <Container className="py-12">
+    <Container className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <VoidLens />
     </Container>
   );

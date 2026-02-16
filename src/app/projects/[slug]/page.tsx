@@ -85,13 +85,13 @@ export default async function ProjectDetailPage({ params }: Props) {
         <Container size="lg" className="relative z-10">
           <Link
             href="/categories"
-            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors mb-6"
+            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors mb-6 min-h-[44px] min-w-[44px] active:scale-[0.97]"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Link>
 
-          <div className="flex items-start gap-4">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
             {project.logo_url ? (
               <Image
                 src={project.logo_url}
@@ -108,7 +108,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
-                <GradientText as="h1" className="text-3xl font-bold">
+                <GradientText as="h1" className="text-2xl sm:text-3xl md:text-4xl font-bold break-words">
                   {project.name}
                 </GradientText>
                 {project.is_active ? (
@@ -124,21 +124,21 @@ export default async function ProjectDetailPage({ params }: Props) {
                 )}
               </div>
               {project.description && (
-                <p className="text-text-secondary mt-2">{project.description}</p>
+                <p className="text-sm sm:text-base text-text-secondary mt-2 break-words">{project.description}</p>
               )}
-              <div className="flex items-center gap-3 mt-3">
+              <div className="flex items-center gap-3 sm:gap-4 mt-3 flex-wrap">
                 {project.website_url && (
-                  <a href={project.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-near-green transition-colors">
+                  <a href={project.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-near-green transition-colors min-h-[44px] min-w-[44px] active:scale-[0.97]">
                     <Globe className="w-4 h-4" /> Website
                   </a>
                 )}
                 {project.github_url && (
-                  <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-near-green transition-colors">
+                  <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-near-green transition-colors min-h-[44px] min-w-[44px] active:scale-[0.97]">
                     <Github className="w-4 h-4" /> GitHub
                   </a>
                 )}
                 {project.twitter_url && (
-                  <a href={project.twitter_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-near-green transition-colors">
+                  <a href={project.twitter_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-near-green transition-colors min-h-[44px] min-w-[44px] active:scale-[0.97]">
                     <ExternalLink className="w-4 h-4" /> Twitter
                   </a>
                 )}
@@ -148,7 +148,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         </Container>
       </section>
 
-      <Container size="lg" className="py-8 space-y-8">
+      <Container size="lg" className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Token Market Data — shown when a matching token exists */}
         {(() => {
           const tokenSymbol = PROJECT_TOKEN_MAP[project.slug] || null;
@@ -276,12 +276,12 @@ export default async function ProjectDetailPage({ params }: Props) {
 
 function StatBox({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="space-y-1">
-      <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center gap-1">
+    <div className="space-y-1 min-w-0">
+      <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-wide font-mono flex items-center gap-1">
         {icon}
         {label}
       </p>
-      <p className="text-lg font-bold text-text-primary font-mono">{value}</p>
+      <p className="text-base sm:text-lg font-bold text-text-primary font-mono break-words">{value}</p>
     </div>
   );
 }

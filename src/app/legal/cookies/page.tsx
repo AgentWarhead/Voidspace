@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 export default function CookiesPage() {
   return (
     <article className="legal-content">
-      <header className="mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3">Cookie Policy</h1>
-        <p className="text-sm text-text-muted">Last updated: February 2026</p>
+      <header className="mb-8 sm:mb-10">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-3">Cookie Policy</h1>
+        <p className="text-xs sm:text-sm text-text-muted">Last updated: February 2026</p>
       </header>
 
       <Section title="What Are Cookies?">
@@ -22,13 +22,13 @@ export default function CookiesPage() {
       </Section>
 
       <Section title="Cookies We Use">
-        <div className="overflow-x-auto my-4">
-          <table className="w-full text-sm border-collapse">
+        <div className="overflow-x-auto my-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full text-xs sm:text-sm border-collapse min-w-[480px]">
             <thead>
               <tr className="border-b border-white/[0.1]">
-                <th className="text-left py-3 pr-4 text-text-primary font-medium">Cookie</th>
-                <th className="text-left py-3 pr-4 text-text-primary font-medium">Provider</th>
-                <th className="text-left py-3 pr-4 text-text-primary font-medium">Purpose</th>
+                <th className="text-left py-3 pr-3 sm:pr-4 text-text-primary font-medium">Cookie</th>
+                <th className="text-left py-3 pr-3 sm:pr-4 text-text-primary font-medium">Provider</th>
+                <th className="text-left py-3 pr-3 sm:pr-4 text-text-primary font-medium">Purpose</th>
                 <th className="text-left py-3 text-text-primary font-medium">Duration</th>
               </tr>
             </thead>
@@ -135,9 +135,9 @@ export default function CookiesPage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8">
-      <h2 className="text-xl font-semibold text-text-primary mb-3">{title}</h2>
-      <div className="space-y-3 text-text-secondary text-[15px] leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:text-text-secondary [&_strong]:text-text-primary [&_h3]:text-text-primary">
+    <section className="mb-6 sm:mb-8">
+      <h2 className="text-lg sm:text-xl font-semibold text-text-primary mb-2 sm:mb-3">{title}</h2>
+      <div className="space-y-3 text-text-secondary text-sm sm:text-[15px] leading-relaxed max-w-prose [&_ul]:list-disc [&_ul]:pl-5 sm:[&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:text-text-secondary [&_strong]:text-text-primary [&_h3]:text-text-primary [&_a]:min-h-[44px] [&_a]:inline-flex [&_a]:items-center break-words">
         {children}
       </div>
     </section>

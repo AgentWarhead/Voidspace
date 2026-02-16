@@ -94,7 +94,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
         </Container>
       </section>
 
-      <Container size="xl" className="py-8 space-y-8">
+      <Container size="xl" className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         <ScrollReveal>
           <section>
             <CategoryTokenStats

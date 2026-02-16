@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <article className="legal-content">
-      <header className="mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3">Privacy Policy</h1>
-        <p className="text-sm text-text-muted">Last updated: February 2026</p>
+      <header className="mb-8 sm:mb-10">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-3">Privacy Policy</h1>
+        <p className="text-xs sm:text-sm text-text-muted">Last updated: February 2026</p>
       </header>
 
       <Section title="1. Overview">
@@ -138,9 +138,9 @@ export default function PrivacyPage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8">
-      <h2 className="text-xl font-semibold text-text-primary mb-3">{title}</h2>
-      <div className="space-y-3 text-text-secondary text-[15px] leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:text-text-secondary [&_strong]:text-text-primary [&_h3]:text-text-primary">
+    <section className="mb-6 sm:mb-8">
+      <h2 className="text-lg sm:text-xl font-semibold text-text-primary mb-2 sm:mb-3">{title}</h2>
+      <div className="space-y-3 text-text-secondary text-sm sm:text-[15px] leading-relaxed max-w-prose [&_ul]:list-disc [&_ul]:pl-5 sm:[&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:text-text-secondary [&_strong]:text-text-primary [&_h3]:text-text-primary [&_a]:min-h-[44px] [&_a]:inline-flex [&_a]:items-center break-words">
         {children}
       </div>
     </section>

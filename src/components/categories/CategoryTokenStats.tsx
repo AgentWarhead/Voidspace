@@ -109,7 +109,7 @@ export function CategoryTokenStats({ categoryName, categorySlug }: CategoryToken
   // Don't render if loading, error, or no tokens
   if (loading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-pulse">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-24 rounded-xl bg-surface border border-border" />
         ))}
@@ -164,7 +164,7 @@ export function CategoryTokenStats({ categoryName, categorySlug }: CategoryToken
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-text-secondary uppercase tracking-wider flex items-center gap-2">
+      <h3 className="text-xs sm:text-sm font-medium text-text-secondary uppercase tracking-wider flex items-center gap-2 flex-wrap">
         <Coins className="w-4 h-4 text-near-green" />
         Token Market Data
         <span className="text-xs text-text-tertiary font-normal normal-case">
@@ -172,16 +172,16 @@ export function CategoryTokenStats({ categoryName, categorySlug }: CategoryToken
         </span>
       </h3>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.label}
               className={cn(
-                'relative rounded-xl border border-border bg-surface/50 p-4',
+                'relative rounded-xl border border-border bg-surface/50 p-3 sm:p-4',
                 'backdrop-blur-sm transition-colors hover:bg-surface/80',
-                stat.link && 'cursor-pointer'
+                stat.link && 'cursor-pointer active:scale-[0.98]'
               )}
               onClick={() => {
                 if (stat.link) window.open(stat.link, '_blank', 'noopener');
@@ -189,9 +189,9 @@ export function CategoryTokenStats({ categoryName, categorySlug }: CategoryToken
             >
               <div className="flex items-center gap-2 mb-2">
                 <Icon className={cn('w-4 h-4', stat.color)} />
-                <span className="text-xs text-text-secondary">{stat.label}</span>
+                <span className="text-xs sm:text-sm text-text-secondary">{stat.label}</span>
               </div>
-              <div className="text-lg font-semibold text-text-primary font-mono">
+              <div className="text-base sm:text-lg font-semibold text-text-primary font-mono break-words">
                 {stat.value}
               </div>
               {stat.subValue && (

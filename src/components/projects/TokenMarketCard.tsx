@@ -32,9 +32,9 @@ function PriceChange({ value }: { value: number }) {
 
 function MiniStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="space-y-1">
-      <p className="text-xs text-text-muted uppercase tracking-wide font-mono">{label}</p>
-      <p className="text-sm font-bold text-text-primary font-mono">{value}</p>
+    <div className="space-y-1 min-w-0">
+      <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-wide font-mono">{label}</p>
+      <p className="text-sm sm:text-base font-bold text-text-primary font-mono break-words">{value}</p>
     </div>
   );
 }
@@ -89,9 +89,9 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-surface/50 p-6 animate-pulse">
+      <div className="rounded-xl border border-white/[0.06] bg-surface/50 p-4 sm:p-6 animate-pulse">
         <div className="h-5 w-40 bg-white/10 rounded mb-4" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="space-y-2">
               <div className="h-3 w-16 bg-white/10 rounded" />
@@ -115,9 +115,9 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
       {/* Subtle scan line effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-near-green/[0.02] to-transparent pointer-events-none" />
 
-      <div className="relative z-10 p-6">
+      <div className="relative z-10 p-4 sm:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5">
           <div className="flex items-center gap-3">
             {token.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -139,8 +139,8 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-lg font-bold text-text-primary font-mono">
+          <div className="text-left sm:text-right">
+            <p className="text-lg sm:text-xl font-bold text-text-primary font-mono">
               {formatUsd(token.price)}
             </p>
             <PriceChange value={token.priceChange24h} />
@@ -148,7 +148,7 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
           <MiniStat label="1h Change" value={<PriceChange value={token.priceChange1h} />} />
           <MiniStat label="6h Change" value={<PriceChange value={token.priceChange6h} />} />
           <MiniStat label="24h Volume" value={formatUsd(token.volume24h)} />
@@ -163,7 +163,7 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
           <MiniStat label="Market Cap" value={token.marketCap > 0 ? formatUsd(token.marketCap) : '-'} />
           <MiniStat label="FDV" value={token.fdv ? formatUsd(token.fdv) : '-'} />
           <MiniStat
@@ -187,7 +187,7 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
               href={token.dexScreenerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-near-green transition-colors px-3 py-1.5 rounded-lg border border-white/[0.06] hover:border-near-green/30"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-text-muted hover:text-near-green transition-colors px-3 py-2 rounded-lg border border-white/[0.06] hover:border-near-green/30 min-h-[44px] min-w-[44px] active:scale-[0.97]"
             >
               <ExternalLink className="w-3 h-3" />
               DexScreener
@@ -198,7 +198,7 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
               href={token.refFinanceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-near-green transition-colors px-3 py-1.5 rounded-lg border border-white/[0.06] hover:border-near-green/30"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-text-muted hover:text-near-green transition-colors px-3 py-2 rounded-lg border border-white/[0.06] hover:border-near-green/30 min-h-[44px] min-w-[44px] active:scale-[0.97]"
             >
               <ExternalLink className="w-3 h-3" />
               Ref Finance
@@ -210,7 +210,7 @@ export function TokenMarketCard({ symbol, address }: TokenMarketCardProps) {
               href={w.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-near-green transition-colors px-3 py-1.5 rounded-lg border border-white/[0.06] hover:border-near-green/30"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-text-muted hover:text-near-green transition-colors px-3 py-2 rounded-lg border border-white/[0.06] hover:border-near-green/30 min-h-[44px] min-w-[44px] active:scale-[0.97]"
             >
               <ExternalLink className="w-3 h-3" />
               {w.label || 'Website'}

@@ -41,10 +41,10 @@ export default async function SearchPage({ searchParams }: Props) {
           }}
         />
         <Container size="xl" className="relative z-10 text-center">
-          <GradientText as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight">
+          <GradientText as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             Search
           </GradientText>
-          <p className="text-text-secondary mt-3 max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-text-secondary mt-3 max-w-lg mx-auto px-4 sm:px-0">
             Search across projects, voids, and categories in the NEAR ecosystem.
           </p>
 
@@ -59,7 +59,7 @@ export default async function SearchPage({ searchParams }: Props) {
         </Container>
       </section>
 
-      <Container size="xl" className="py-8">
+      <Container size="xl" className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <SearchResults
             projects={results.projects}

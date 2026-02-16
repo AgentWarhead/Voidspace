@@ -92,12 +92,12 @@ export function SearchInput({
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={placeholder}
-            className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted px-4 py-3 text-sm outline-none"
+            className="flex-1 min-w-0 bg-transparent text-text-primary placeholder:text-text-muted px-3 sm:px-4 py-3 text-sm sm:text-base outline-none min-h-[44px]"
             autoFocus
           />
           <button
             type="submit"
-            className="px-4 py-3 text-sm font-medium text-near-green hover:bg-near-green/10 transition-colors"
+            className="px-4 py-3 text-sm sm:text-base font-medium text-near-green hover:bg-near-green/10 transition-colors min-h-[44px] min-w-[44px] active:scale-[0.97]"
           >
             Search
           </button>

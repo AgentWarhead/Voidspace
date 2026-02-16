@@ -55,12 +55,12 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
   return (
     <div className="space-y-4">
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-border pb-2">
+      <div className="flex gap-1 border-b border-border pb-2 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-t-lg transition-colors ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-t-lg transition-colors min-h-[44px] min-w-[44px] shrink-0 active:scale-[0.97] ${
               activeTab === tab.key
                 ? 'text-near-green bg-near-green/10 border-b-2 border-near-green'
                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -76,13 +76,13 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
       {/* Results */}
       <div className="space-y-2">
         {activeTab === 'projects' && projects.map((project) => (
-          <Link key={project.id} href={`/projects/${project.slug}`}>
+          <Link key={project.id} href={`/projects/${project.slug}`} className="block min-h-[44px] active:scale-[0.98]">
             <Card variant="glass" padding="md" className="relative overflow-hidden hover:border-near-green/30 transition-colors cursor-pointer">
               <ScanLine />
-              <div className="relative z-10 flex items-center justify-between gap-4">
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-text-primary">{project.name}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm sm:text-base font-semibold text-text-primary break-words">{project.name}</span>
                     {project.is_active ? (
                       <Badge variant="default" className="text-[10px] bg-near-green/10 text-near-green">Active</Badge>
                     ) : (
@@ -90,7 +90,7 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
                     )}
                   </div>
                   {project.description && (
-                    <p className="text-xs text-text-muted mt-1 line-clamp-1">{project.description}</p>
+                    <p className="text-xs sm:text-sm text-text-muted mt-1 line-clamp-2 sm:line-clamp-1 break-words">{project.description}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-3 shrink-0 text-xs text-text-muted">
@@ -116,19 +116,19 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
         ))}
 
         {activeTab === 'opportunities' && opportunities.map((opp) => (
-          <Link key={opp.id} href={`/opportunities/${opp.id}`}>
+          <Link key={opp.id} href={`/opportunities/${opp.id}`} className="block min-h-[44px] active:scale-[0.98]">
             <Card variant="glass" padding="md" className="relative overflow-hidden hover:border-near-green/30 transition-colors cursor-pointer">
               <ScanLine />
-              <div className="relative z-10 flex items-center justify-between gap-4">
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-text-primary">{opp.title}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm sm:text-base font-semibold text-text-primary break-words">{opp.title}</span>
                     <Badge variant="difficulty" difficulty={opp.difficulty}>
                       {opp.difficulty}
                     </Badge>
                   </div>
                   {opp.description && (
-                    <p className="text-xs text-text-muted mt-1 line-clamp-1">{opp.description}</p>
+                    <p className="text-xs sm:text-sm text-text-muted mt-1 line-clamp-2 sm:line-clamp-1 break-words">{opp.description}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
@@ -153,19 +153,19 @@ export function SearchResults({ projects, opportunities, categories, query }: Se
         ))}
 
         {activeTab === 'categories' && categories.map((cat) => (
-          <Link key={cat.id} href={`/categories/${cat.slug}`}>
+          <Link key={cat.id} href={`/categories/${cat.slug}`} className="block min-h-[44px] active:scale-[0.98]">
             <Card variant="glass" padding="md" className="relative overflow-hidden hover:border-near-green/30 transition-colors cursor-pointer">
               <ScanLine />
               <div className="relative z-10 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-text-primary">{cat.name}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm sm:text-base font-semibold text-text-primary break-words">{cat.name}</span>
                     {cat.is_strategic && (
                       <Badge variant="default" className="text-[10px] bg-near-green/10 text-near-green">NEAR Priority</Badge>
                     )}
                   </div>
                   {cat.description && (
-                    <p className="text-xs text-text-muted mt-1 line-clamp-1">{cat.description}</p>
+                    <p className="text-xs sm:text-sm text-text-muted mt-1 line-clamp-2 sm:line-clamp-1 break-words">{cat.description}</p>
                   )}
                 </div>
               </div>
