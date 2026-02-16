@@ -50,8 +50,8 @@ export function CrossChainSection({ cards }: { cards: CrossChainCard[] }) {
   return (
     <div ref={ref}>
       {/* Section intro with terminal accent */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface/60 border border-white/[0.06] font-mono text-xs text-text-muted">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-5">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface/60 border border-white/[0.06] font-mono text-xs text-text-muted flex-shrink-0">
           <span className="text-near-green">$</span>
           <span>your_rust_skills</span>
           <span className="text-near-green animate-pulse">→</span>
@@ -62,7 +62,7 @@ export function CrossChainSection({ cards }: { cards: CrossChainCard[] }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
         {cards.map((card, i) => {
           const theme = CARD_THEMES[i];
           return (

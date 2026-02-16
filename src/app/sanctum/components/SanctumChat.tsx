@@ -737,7 +737,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                   )}
                   
                   {/* Message content */}
-                  <p className="text-text-primary whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm sm:text-base text-text-primary whitespace-pre-wrap break-words">{message.content}</p>
                   
                   {/* Learn tips (array — new format) */}
                   {message.learnTips && message.learnTips.length > 0 ? (
@@ -791,7 +791,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                         <button
                           key={i}
                           onClick={() => handleOptionClick(opt.value)}
-                          className="px-3 py-1.5 text-sm bg-void-black/50 hover:bg-near-green/20 border border-border-subtle hover:border-near-green/30 rounded-lg transition-all text-text-secondary hover:text-near-green"
+                          className="px-3 py-2 min-h-[44px] text-sm bg-void-black/50 hover:bg-near-green/20 border border-border-subtle hover:border-near-green/30 rounded-lg transition-all text-text-secondary hover:text-near-green text-left"
                         >
                           {opt.label}
                         </button>
@@ -828,7 +828,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 p-4 border-t border-border-subtle bg-void-black/30">
+      <div className="flex-shrink-0 p-3 sm:p-4 border-t border-border-subtle bg-void-black/30">
         {/* Voice mode indicator */}
         {isListening && (
           <div className="mb-3">

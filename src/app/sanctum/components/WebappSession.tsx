@@ -94,30 +94,30 @@ export function WebappSession({
   return (
     <div className="fixed inset-0 z-50 bg-void-black flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 px-4 py-3 border-b border-void-purple/20 bg-void-darker/80 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="flex-shrink-0 px-3 sm:px-4 py-3 border-b border-void-purple/20 bg-void-darker/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={onBack}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white flex-shrink-0"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="text-xl">🌐</span>
-                <GradientText>{contractName}</GradientText>
-                <span className="text-sm text-gray-500 font-normal">Webapp Builder</span>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <span className="text-xl hidden sm:inline">🌐</span>
+                <GradientText className="truncate">{contractName}</GradientText>
+                <span className="text-sm text-gray-500 font-normal hidden md:inline">Webapp Builder</span>
               </h1>
               {contractAddress && (
-                <p className="text-xs text-gray-500 font-mono">{contractAddress}</p>
+                <p className="text-xs text-gray-500 font-mono truncate">{contractAddress}</p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Stats */}
-            <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            {/* Stats - hidden on mobile */}
+            <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5 text-amber-400">
                 <Zap className="w-4 h-4" />
                 <span>{tokensUsed.toLocaleString()}</span>
@@ -129,30 +129,30 @@ export function WebappSession({
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={handleSave}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                   isSaved 
                     ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                     : 'bg-void-purple/20 text-void-purple border border-void-purple/30 hover:bg-void-purple/30'
                 }`}
               >
                 <span>💾</span>
-                {isSaved ? 'Saved!' : 'Save'}
+                <span className="hidden sm:inline">{isSaved ? 'Saved!' : 'Save'}</span>
               </button>
               <button
                 onClick={handleDownload}
                 disabled={!previewHtml}
-                className="px-4 py-2 bg-void-gray border border-void-purple/30 rounded-lg text-gray-300 hover:bg-void-purple/20 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="min-h-[44px] px-3 sm:px-4 py-2 bg-void-gray border border-void-purple/30 rounded-lg text-gray-300 hover:bg-void-purple/20 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Download
+                <span className="hidden sm:inline">Download</span>
               </button>
               <button
                 onClick={onDeploy}
                 disabled={!previewHtml}
-                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="hidden sm:flex min-h-[44px] px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-medium rounded-lg transition-colors disabled:opacity-50 items-center gap-2"
               >
                 <Rocket className="w-4 h-4" />
                 Deploy to Vercel
