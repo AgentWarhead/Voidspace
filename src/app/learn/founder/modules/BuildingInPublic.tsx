@@ -1,328 +1,450 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Megaphone, ExternalLink, CheckCircle, Users, Share2, MessageSquare, TrendingUp, Eye } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  Lightbulb,
+  CheckCircle,
+  AlertTriangle,
+  Star,
+  Code,
+  BarChart3,
+  Flag,
+  Users,
+  Calendar,
+  MessageSquare,
+  Eye,
+  Heart,
+  Shield,
+  Megaphone,
+  GitBranch,
+  Target,
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType; title: string; preview: string; details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer border border-border rounded-xl p-4 hover:border-near-green/30 transition-all bg-black/20">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }}><ChevronDown className="w-4 h-4 text-text-muted" /></motion.div>
+          </div>
+          <p className="text-xs text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-xs text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const contentTypes = [
+  {
+    key: 'devlog',
+    label: 'Dev Logs',
+    icon: Code,
+    color: 'from-blue-400 to-blue-600',
+    day: 'Mon',
+    desc: 'Technical updates, code snippets, architecture decisions. Show the engineering behind the product.',
+    examples: ['New smart contract deployment walkthrough', 'Refactoring our indexer for 10x throughput', 'Why we chose Rust over Solidity for our core contracts'],
+    platform: 'Twitter threads + GitHub discussions',
+  },
+  {
+    key: 'metrics',
+    label: 'Metrics',
+    icon: BarChart3,
+    color: 'from-emerald-400 to-emerald-600',
+    day: 'Wed',
+    desc: 'Share real numbers — DAU, TVL, revenue. Transparency builds trust, even when numbers are small.',
+    examples: ['Weekly metrics dashboard screenshot', 'Month-over-month growth analysis', 'Honest breakdown of what worked and what didn\'t'],
+    platform: 'Twitter + Blog post',
+  },
+  {
+    key: 'milestones',
+    label: 'Milestones',
+    icon: Flag,
+    color: 'from-purple-400 to-purple-600',
+    day: 'Fri',
+    desc: 'Celebrate wins and acknowledge setbacks. Roadmap progress, launches, partnerships, and pivots.',
+    examples: ['Mainnet launch retrospective', 'Partnership announcement with context', 'Why we pivoted our roadmap and what we learned'],
+    platform: 'Twitter + Discord announcement',
+  },
+  {
+    key: 'community',
+    label: 'Community',
+    icon: Users,
+    color: 'from-amber-400 to-amber-600',
+    day: 'Sat',
+    desc: 'Contributor spotlights, governance decisions, community proposals, and user stories.',
+    examples: ['Developer spotlight: how @dev built X with our SDK', 'Governance proposal results and next steps', 'User story: how someone uses our protocol in real life'],
+    platform: 'Discord + Twitter',
+  },
+];
 
 interface BuildingInPublicProps {
   isActive: boolean;
   onToggle: () => void;
 }
 
-const BuildingInPublic: React.FC<BuildingInPublicProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+export default function BuildingInPublic({ isActive, onToggle }: BuildingInPublicProps) {
+  const [activeContent, setActiveContent] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
+
+  const quizOptions = [
+    'It generates more social media impressions',
+    'Builds trust and attracts contributors who become advocates',
+    'It replaces the need for marketing spend',
+    'Investors require it before funding decisions',
+  ];
+  const correctAnswer = 1;
+
+  const handleAnswer = (idx: number) => {
+    setSelectedAnswer(idx);
+    setShowResult(true);
+  };
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-            <Megaphone className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
+            <Globe className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Building in Public</h3>
-            <p className="text-text-muted text-sm">Grow your community by sharing your journey — devlogs, metrics, and transparent development</p>
+            <p className="text-text-muted text-sm">Transparency, content cadence & community trust</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Founder</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">35 min</Badge>
+          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
       {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+        <div className="border-t border-near-green/20 p-6 space-y-8">
+          {/* The Big Idea */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-xl p-5"
+          >
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-bold text-text-primary mb-1">The Big Idea</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">
+                  Building in public is like cooking in an open kitchen — customers trust you more when they can see
+                  the ingredients and the process. In Web3, where trust is everything and anonymity is common,
+                  transparency becomes your ultimate competitive advantage.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Interactive: Content Calendar */}
+          <div>
+            <h4 className="text-lg font-bold text-text-primary mb-2">📅 Build-in-Public Content Calendar</h4>
+            <p className="text-xs text-text-muted mb-4">Click each content type to see how it fits your weekly cadence</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              {contentTypes.map((ct) => (
+                <motion.button
+                  key={ct.key}
+                  onClick={() => setActiveContent(activeContent === ct.key ? null : ct.key)}
+                  className={cn(
+                    'relative p-4 rounded-xl border text-left transition-all',
+                    activeContent === ct.key
+                      ? 'border-emerald-500/40 bg-emerald-500/10'
+                      : 'border-border bg-black/20 hover:border-near-green/20'
+                  )}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className={cn('w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center mb-3', ct.color)}>
+                    <ct.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h5 className="font-semibold text-text-primary text-sm">{ct.label}</h5>
+                  <p className="text-xs text-text-muted mt-1">{ct.day}</p>
+                  {activeContent === ct.key && (
+                    <motion.div
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    />
+                  )}
+                </motion.button>
+              ))}
+            </div>
+            {/* Content details */}
+            <AnimatePresence mode="wait">
+              {activeContent && (
+                <motion.div
+                  key={activeContent}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-black/30 border border-border rounded-xl p-4"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-4 h-4 text-emerald-400" />
+                    <span className="font-semibold text-text-primary text-sm">
+                      {contentTypes.find(c => c.key === activeContent)?.label}
+                    </span>
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/20 text-xs">
+                      Every {contentTypes.find(c => c.key === activeContent)?.day}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-text-secondary mb-3">
+                    {contentTypes.find(c => c.key === activeContent)?.desc}
+                  </p>
+                  <div className="border-t border-border pt-3">
+                    <p className="text-xs font-semibold text-text-primary mb-2">Content Examples:</p>
+                    <ul className="space-y-1.5">
+                      {contentTypes.find(c => c.key === activeContent)?.examples.map((ex, ei) => (
+                        <li key={ei} className="flex items-start gap-2">
+                          <span className="text-emerald-400 text-xs mt-px">•</span>
+                          <span className="text-xs text-text-muted">{ex}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-text-muted mt-2">
+                      <span className="font-semibold text-text-secondary">Best platform: </span>
+                      {contentTypes.find(c => c.key === activeContent)?.platform}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Megaphone className="w-5 h-5 text-orange-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+          {/* Transparency Spectrum */}
+          <div>
+            <h4 className="text-lg font-bold text-text-primary mb-4">🔍 Transparency Spectrum</h4>
+            <p className="text-xs text-text-muted mb-3">Understanding what to share at each level of openness</p>
+            <div className="space-y-2">
+              {[
+                {
+                  level: 'Always Public',
+                  color: 'border-emerald-500/30 bg-emerald-500/5',
+                  labelColor: 'text-emerald-400',
+                  items: ['Roadmap progress & shipped features', 'Aggregate metrics (DAU, TVL, revenue)', 'Post-mortems and incident reports', 'Team composition and hiring plans'],
+                },
+                {
+                  level: 'Selectively Public',
+                  color: 'border-amber-500/30 bg-amber-500/5',
+                  labelColor: 'text-amber-400',
+                  items: ['Partnership discussions in progress', 'Detailed financial runway', 'Internal team debates on direction', 'Upcoming feature specifics'],
+                },
+                {
+                  level: 'Private',
+                  color: 'border-red-500/30 bg-red-500/5',
+                  labelColor: 'text-red-400',
+                  items: ['Security vulnerabilities pre-patch', 'Token launch exact timing', 'Team personal information', 'Investor term sheet details'],
+                },
+              ].map((tier) => (
+                <div key={tier.level} className={cn('border rounded-xl p-4', tier.color)}>
+                  <h5 className={cn('font-semibold text-sm mb-2', tier.labelColor)}>{tier.level}</h5>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {tier.items.map((item, ii) => (
+                      <span key={ii} className="text-xs text-text-muted">• {item}</span>
+                    ))}
+                  </div>
                 </div>
-                <ul className="space-y-3">
-                  {[
-                    'Why building in public is the most powerful growth strategy in Web3',
-                    'Content frameworks that turn development updates into community engagement',
-                    'Platform strategies — X/Twitter, NEAR Social, Discord, and dev blogs',
-                    'Metrics transparency: sharing the right numbers without exposing vulnerabilities',
-                    'Converting followers into contributors, users, and advocates',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Card variant="default" padding="md" className="mt-4 border-orange-500/20 bg-orange-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-orange-400 font-semibold">Why this matters:</span> In Web3, community IS your moat. The projects that win aren&apos;t just technically superior — they have passionate communities built through transparency and shared journey. Mintbase, Ref Finance, and Aurora all grew through public development.
-                  </p>
-                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Concept Cards */}
+          <div>
+            <h4 className="text-lg font-bold text-text-primary mb-4">📚 Key Concepts</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <ConceptCard
+                icon={Eye}
+                title="Transparency Framework"
+                preview="What to share, what to protect, and when"
+                details="Not everything should be public. Build a transparency framework with three tiers: Always Public (roadmap progress, metrics, post-mortems), Selectively Public (hiring plans, partnership discussions in progress), and Private (security vulnerabilities pre-patch, token launch exact timing, team personal info). The framework prevents over-sharing while maintaining trust. Update your community on the framework itself — meta-transparency builds deeper trust."
+              />
+              <ConceptCard
+                icon={Calendar}
+                title="Content Cadence"
+                preview="Consistency beats virality in building trust"
+                details="The best build-in-public founders follow a predictable cadence: weekly dev updates, monthly metrics reports, quarterly roadmap reviews. Consistency signals commitment and professionalism. Use a content calendar with dedicated themes: Technical Tuesdays, Metrics Mondays, or Feature Fridays. The cadence should be sustainable — it's better to post quality weekly updates than burn out on daily posts. Batch content creation for efficiency."
+              />
+              <ConceptCard
+                icon={GitBranch}
+                title="Developer Relations"
+                preview="Turning builders into your biggest advocates"
+                details="DevRel in Web3 goes beyond documentation. Successful strategies include: open-source everything possible, maintain excellent SDK docs with working examples, create bounty programs for contributions, host regular developer calls, and spotlight community-built tools. NEAR's developer community grew through accessible tooling (near-cli, near-api-js) and strong documentation. Your developers are your distribution — invest in their success."
+              />
+              <ConceptCard
+                icon={Flag}
+                title="Open Roadmaps"
+                preview="Public planning that invites participation"
+                details="An open roadmap isn't just a Notion board — it's a social contract with your community. Use tools like GitHub Projects or dedicated governance forums to share planned features, gather feedback, and let the community vote on priorities. Include status labels (Planning, In Progress, Shipped, Paused) and regular update cadence. The most powerful roadmaps include community-proposed features alongside team priorities."
+              />
+              <ConceptCard
+                icon={MessageSquare}
+                title="Community Feedback Loops"
+                preview="Structured channels for community input"
+                details="Effective feedback loops include: governance forums for major decisions, Discord channels for feature requests, regular AMAs (Ask Me Anything) sessions, and on-chain governance votes for protocol changes. The key is closing the loop — always report back on what you heard and what you're doing about it. Silent feedback collection destroys trust faster than no feedback at all. Create a public 'You Said, We Did' tracker."
+              />
+              <ConceptCard
+                icon={Shield}
+                title="Vulnerability in Leadership"
+                preview="How honest leadership builds unshakeable trust"
+                details="The most trusted Web3 leaders share failures openly: missed deadlines, technical setbacks, and strategic pivots. This vulnerability is counterintuitive but powerful — it signals confidence and integrity. Write post-mortems for incidents, explain why decisions changed, and acknowledge when community feedback was right. Vulnerability doesn't mean weakness — it means you trust your community enough to be honest. This is rare in crypto and therefore extremely valuable."
+              />
+            </div>
+          </div>
+
+          {/* Case Studies */}
+          <div>
+            <h4 className="text-lg font-bold text-text-primary mb-4">🔍 NEAR Ecosystem Case Studies</h4>
+            <div className="space-y-3">
+              <div className="bg-black/20 border border-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-4 h-4 text-amber-400" />
+                  <h5 className="font-semibold text-text-primary text-sm">NEAR Protocol — Open Development Culture</h5>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  NEAR Protocol built its reputation through radical openness. Their GitHub is fully public with
+                  active commit history, their protocol specifications are published and discussed in community
+                  forums, and their technical decisions are debated in public NEPs (NEAR Enhancement Proposals).
+                  This openness attracted a deeply technical community who became core contributors. The lesson:
+                  when your code is your product, open-source development isn&apos;t just marketing — it&apos;s your
+                  primary distribution channel.
+                </p>
               </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Why Build in Public */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-orange-400" />
-                    Why Build in Public?
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Building in public isn&apos;t just marketing — it&apos;s a founder superpower that compounds over time.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="font-semibold text-orange-400 text-sm mb-2">Benefits</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Trust:</strong> Transparency builds credibility in a space full of rugs</li>
-                        <li>• <strong className="text-text-secondary">Feedback:</strong> Real-time user input shapes better products</li>
-                        <li>• <strong className="text-text-secondary">Hiring:</strong> Talented devs want to join visible projects</li>
-                        <li>• <strong className="text-text-secondary">Funding:</strong> VCs notice traction. Public building IS traction</li>
-                        <li>• <strong className="text-text-secondary">Accountability:</strong> Public commitments drive follow-through</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">Common Fears (Debunked)</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">&quot;Competitors will copy me&quot;</strong> — Execution &gt; ideas. Always.</li>
-                        <li>• <strong className="text-text-secondary">&quot;I&apos;ll look dumb&quot;</strong> — Vulnerability builds connection</li>
-                        <li>• <strong className="text-text-secondary">&quot;It takes too much time&quot;</strong> — 15 min/day max. It compounds.</li>
-                        <li>• <strong className="text-text-secondary">&quot;Nobody cares&quot;</strong> — Start at 0. Everyone does. Consistency wins.</li>
-                        <li>• <strong className="text-text-secondary">&quot;I&apos;m not ready&quot;</strong> — You never will be. Start messy.</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 2: Content Framework */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Share2 className="w-5 h-5 text-blue-400" />
-                    The Build-in-Public Content Framework
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Not every update is interesting. Use this framework to create content people actually want to follow:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    {[
-                      { day: 'Monday', type: 'Weekly Goals', example: '"This week: ship token-gated access, fix the indexer bug, write docs for v2 API"', color: 'text-blue-400' },
-                      { day: 'Tuesday-Thursday', type: 'Dev Updates', example: '"Just shipped chain signatures integration. Here\'s what I learned about MPC key derivation..."', color: 'text-green-400' },
-                      { day: 'Wednesday', type: 'Metric Share', example: '"Week 4: 847 unique wallets, 12K transactions, $45K TVL. Up 32% from last week"', color: 'text-purple-400' },
-                      { day: 'Friday', type: 'Weekly Recap + Learnings', example: '"Shipped 3/4 goals. The indexer is harder than expected. Here\'s the architecture decision we made..."', color: 'text-orange-400' },
-                      { day: 'Anytime', type: 'Behind the Scenes', example: 'Screenshots, architecture diagrams, team discussions, failed experiments, celebrations', color: 'text-cyan-400' },
-                    ].map((item, i) => (
-                      <div key={i}>
-                        <span className={cn('font-semibold', item.color)}>{item.day}: {item.type}</span>
-                        <p className="text-text-muted mt-1 italic">{item.example}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 3: Platform Strategy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-purple-400" />
-                    Platform Strategy
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Different platforms serve different purposes. Don&apos;t try to be everywhere — pick 2-3 and go deep.
-                  </p>
-                  <div className="space-y-3">
-                    {[
-                      { platform: 'X / Twitter', purpose: 'Reach & discovery', strategy: 'Short updates, threads on learnings, engage with NEAR ecosystem accounts. Use #BUIDLonNEAR and #BuildInPublic hashtags.', priority: 'Essential' },
-                      { platform: 'Discord / Telegram', purpose: 'Deep community', strategy: 'Create a server for your project. Share dev updates in a #building channel. This is where power users and contributors live.', priority: 'Essential' },
-                      { platform: 'NEAR Social', purpose: 'On-chain presence', strategy: 'Native NEAR social platform. Post updates that live on-chain. Great for ecosystem visibility and signaling NEAR alignment.', priority: 'Recommended' },
-                      { platform: 'Dev Blog / Mirror', purpose: 'Long-form depth', strategy: 'Technical deep-dives, architecture decisions, postmortems. These become reference material and SEO assets.', priority: 'Nice to have' },
-                    ].map((item, i) => (
-                      <Card key={i} variant="default" padding="md" className="border-purple-500/20">
-                        <div className="flex justify-between items-start mb-1">
-                          <h5 className="font-semibold text-purple-400 text-sm">{item.platform}</h5>
-                          <span className={cn('text-xs font-mono', item.priority === 'Essential' ? 'text-emerald-400' : item.priority === 'Recommended' ? 'text-blue-400' : 'text-text-muted')}>{item.priority}</span>
-                        </div>
-                        <p className="text-xs text-text-muted"><strong className="text-text-secondary">{item.purpose}:</strong> {item.strategy}</p>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 4: Metrics Transparency */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-green-400" />
-                    Metrics Transparency
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Sharing numbers builds trust — but be strategic about what you share and how:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">✅ Share These</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Unique active wallets / users (growth trends)</li>
-                        <li>• Transaction volume (shows product-market fit)</li>
-                        <li>• GitHub stars, PRs merged, contributors</li>
-                        <li>• Community growth (Discord members, followers)</li>
-                        <li>• Milestones hit (launches, partnerships, integrations)</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">⚠️ Be Careful With</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Exact revenue numbers (competitive intelligence)</li>
-                        <li>• Security architecture details (attack surface)</li>
-                        <li>• Fundraising specifics before closing</li>
-                        <li>• Internal team conflicts or struggles</li>
-                        <li>• Exact treasury holdings (whale target)</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 5: Community Conversion */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-cyan-400" />
-                    Converting Followers → Contributors
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    The ultimate goal: turn passive followers into active community members who contribute to your project.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div>
-                      <span className="text-cyan-400 font-semibold">The Engagement Funnel</span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-text-muted font-mono w-24">Awareness</span>
-                        <div className="flex-1 h-4 bg-cyan-500/20 rounded-full" />
-                        <span className="text-text-muted w-32 text-right">Twitter follows, likes</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-text-muted font-mono w-24">Interest</span>
-                        <div className="flex-1 h-4 bg-cyan-500/30 rounded-full max-w-[80%]" />
-                        <span className="text-text-muted w-32 text-right">Joins Discord, reads blog</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-text-muted font-mono w-24">Trial</span>
-                        <div className="flex-1 h-4 bg-cyan-500/40 rounded-full max-w-[50%]" />
-                        <span className="text-text-muted w-32 text-right">Uses testnet, gives feedback</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-text-muted font-mono w-24">Adoption</span>
-                        <div className="flex-1 h-4 bg-cyan-500/60 rounded-full max-w-[25%]" />
-                        <span className="text-text-muted w-32 text-right">Active mainnet user</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-text-muted font-mono w-24">Advocate</span>
-                        <div className="flex-1 h-4 bg-cyan-500 rounded-full max-w-[10%]" />
-                        <span className="text-text-muted w-32 text-right">Contributes, evangelizes</span>
-                      </div>
-                    </div>
-                    <p className="text-text-muted mt-2">Each stage needs specific content and calls-to-action. Don&apos;t ask for contributions from people who haven&apos;t even tried your product yet.</p>
-                  </div>
-                </section>
+              <div className="bg-black/20 border border-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-4 h-4 text-amber-400" />
+                  <h5 className="font-semibold text-text-primary text-sm">Pagoda — Transparency Reports</h5>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Pagoda (formerly NEAR Inc) pioneered detailed transparency reports for the NEAR ecosystem,
+                  publishing quarterly updates on ecosystem fund allocation, development milestones, and treasury
+                  management. These reports included both wins and challenges, with honest assessments of what
+                  didn&apos;t work. The transparency reports became a template that other NEAR projects adopted,
+                  creating an ecosystem-wide culture of openness. Key takeaway: institutional-grade transparency
+                  raises the bar for the entire ecosystem.
+                </p>
               </div>
-            )}
+            </div>
+          </div>
 
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-orange-500/20">
-                  <h5 className="font-semibold text-orange-400 text-sm mb-2">🟠 Exercise 1: Write Your First Build Update</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Write a Twitter/X thread (5-7 tweets) announcing your project and what you&apos;re building. Include: the problem, your approach, a screenshot or diagram, and a call-to-action. Post it. Today.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-orange-500/20">
-                  <h5 className="font-semibold text-orange-400 text-sm mb-2">🟠 Exercise 2: Create a Content Calendar</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Plan 2 weeks of build-in-public content using the framework above. Include: platform, content type, and key message for each post. Aim for 4-5 posts per week across your chosen platforms.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-orange-500/20">
-                  <h5 className="font-semibold text-orange-400 text-sm mb-2">🟠 Exercise 3: Set Up Your Public Dashboard</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Create a public metrics page or pinned tweet with your project&apos;s key numbers. Update it weekly. Include: users, transactions, TVL (if applicable), GitHub activity, and community size.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-orange-500/20">
-                  <h5 className="font-semibold text-orange-400 text-sm mb-2">🟠 Exercise 4: Write a Postmortem</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Pick a mistake or failed experiment from your project. Write a transparent postmortem: what happened, why, what you learned, and what changed. Vulnerability builds the strongest communities.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-orange-500/20">
-                  <h5 className="font-semibold text-orange-400 text-sm mb-2">🟠 Exercise 5: Engage the Ecosystem</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Spend 30 minutes engaging with other NEAR builders on Twitter and Discord. Reply to their updates, share their wins, ask genuine questions. Build relationships before you need them.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'NEAR Social', url: 'https://near.social/', desc: 'NEAR\'s on-chain social platform — post updates that live on the blockchain' },
-                  { title: 'Build in Public Guide (KP)', url: 'https://www.buildinpublic.xyz/', desc: 'Comprehensive guide and community for building in public' },
-                  { title: 'NEAR Developer Twitter List', url: 'https://twitter.com/i/lists/1590722489562251265', desc: 'Curated list of NEAR developers and projects building in public' },
-                  { title: 'Mirror.xyz', url: 'https://mirror.xyz/', desc: 'Web3-native publishing platform for long-form dev blogs and updates' },
-                  { title: 'Ship 30 for 30', url: 'https://www.ship30for30.com/', desc: 'Framework for consistent writing and building an audience' },
-                  { title: 'NEAR Community Discord', url: 'https://near.chat/', desc: 'Official NEAR Discord — share your project and get feedback' },
-                  { title: 'Mintbase Build Story', url: 'https://mintbase.xyz/', desc: 'How Mintbase built a thriving NFT infrastructure through public development' },
-                ].map((link, i) => (
-                  <a
+          {/* Mini Quiz */}
+          <div>
+            <h4 className="text-lg font-bold text-text-primary mb-4">🧠 Quick Check</h4>
+            <div className="bg-black/30 border border-border rounded-xl p-5">
+              <p className="text-sm text-text-primary font-medium mb-4">What&apos;s the main benefit of building in public for Web3 projects?</p>
+              <div className="space-y-2">
+                {quizOptions.map((opt, i) => (
+                  <button
                     key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
+                    onClick={() => handleAnswer(i)}
+                    disabled={showResult}
+                    className={cn(
+                      'w-full text-left p-3 rounded-lg border text-sm transition-all',
+                      showResult && i === correctAnswer
+                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
+                        : showResult && i === selectedAnswer && i !== correctAnswer
+                        ? 'border-red-500 bg-red-500/10 text-red-300'
+                        : 'border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary'
+                    )}
                   >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
+                    <span className="font-medium mr-2">{String.fromCharCode(65 + i)}.</span> {opt}
+                  </button>
                 ))}
               </div>
-            )}
+              <AnimatePresence>
+                {showResult && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-4 overflow-hidden"
+                  >
+                    <div className={cn(
+                      'p-3 rounded-lg text-sm',
+                      selectedAnswer === correctAnswer ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-amber-500/10 border border-amber-500/20'
+                    )}>
+                      {selectedAnswer === correctAnswer ? (
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                          <p className="text-emerald-300">Correct! Building in public creates trust that converts observers into contributors and contributors into advocates. This organic community growth is the most durable distribution advantage in Web3.</p>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                          <p className="text-amber-300">Not quite. While building in public has many benefits, the core value is trust-building that attracts genuine contributors who become your strongest advocates. Impressions, marketing savings, and investor requirements are secondary effects.</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Key Takeaways */}
+          <div>
+            <h4 className="text-lg font-bold text-text-primary mb-4">💡 Key Takeaways</h4>
+            <div className="space-y-2">
+              {[
+                'Create a transparency framework — not everything should be public, but define what is',
+                'Consistency beats virality: a reliable weekly cadence outperforms sporadic viral posts',
+                'Close the feedback loop — always report back on what you heard from the community',
+                'Vulnerability in leadership builds stronger trust than projecting perfection',
+                'Developer relations is distribution — invest in your builders\' success',
+              ].map((t, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-text-secondary">{t}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Items */}
+          <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Megaphone className="w-5 h-5 text-amber-400" />
+              <h4 className="font-bold text-text-primary">Action Items</h4>
+            </div>
+            <ul className="space-y-2">
+              {[
+                'Define your transparency framework: list what\'s Always Public, Selectively Public, and Private',
+                'Set up a content calendar with at least 2 recurring weekly content types',
+                'Write your first post-mortem or "lessons learned" post about a recent challenge',
+                'Create a public "You Said, We Did" tracker for community feedback',
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-amber-400 font-bold text-sm mt-px">→</span>
+                  <p className="text-sm text-text-secondary">{item}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
     </Card>
   );
-};
-
-export default BuildingInPublic;
+}

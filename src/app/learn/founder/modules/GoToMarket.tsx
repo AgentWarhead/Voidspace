@@ -1,8 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Rocket, ExternalLink, CheckCircle, Target, Zap, Users, TrendingUp, Gift } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronUp,
+  Rocket,
+  Clock,
+  Compass,
+  Zap,
+  Handshake,
+  Users,
+  RefreshCw,
+  Lightbulb,
+  CheckCircle,
+  AlertTriangle,
+  ArrowDown,
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 
 interface GoToMarketProps {
@@ -10,308 +26,373 @@ interface GoToMarketProps {
   onToggle: () => void;
 }
 
-const GoToMarket: React.FC<GoToMarketProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+const funnelStages = [
+  { label: 'Awareness', desc: 'They know you exist', color: 'from-violet-500 to-purple-600', width: 100, users: '100K' },
+  { label: 'Interest', desc: 'They join your Discord/Twitter', color: 'from-blue-500 to-cyan-600', width: 82, users: '25K' },
+  { label: 'Trial', desc: 'They connect a wallet and try it', color: 'from-cyan-500 to-teal-600', width: 60, users: '8K' },
+  { label: 'Adoption', desc: 'They use it regularly', color: 'from-emerald-500 to-green-600', width: 38, users: '2K' },
+  { label: 'Advocacy', desc: 'They bring others', color: 'from-green-500 to-lime-600', width: 20, users: '500' },
+];
+
+function GTMFunnel() {
+  const [activeStage, setActiveStage] = useState<number | null>(null);
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <div className="space-y-3">
+      {funnelStages.map((stage, i) => (
+        <motion.div
+          key={stage.label}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.1, duration: 0.4 }}
+          className="relative"
+          onMouseEnter={() => setActiveStage(i)}
+          onMouseLeave={() => setActiveStage(null)}
+        >
+          <motion.div
+            className={cn(
+              'relative cursor-pointer rounded-lg border transition-all overflow-hidden',
+              activeStage === i ? 'border-near-green/40' : 'border-border'
+            )}
+            style={{ width: `${stage.width}%`, marginLeft: `${(100 - stage.width) / 2}%` }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className={cn('absolute inset-0 opacity-20 bg-gradient-to-r', stage.color)} />
+            <div className="relative p-3 flex items-center justify-between">
+              <div>
+                <span className="text-sm font-semibold text-text-primary">{stage.label}</span>
+                {activeStage === i && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-text-muted mt-0.5"
+                  >
+                    {stage.desc}
+                  </motion.p>
+                )}
+              </div>
+              <span className="text-xs font-mono text-text-muted">{stage.users}</span>
+            </div>
+          </motion.div>
+          {i < funnelStages.length - 1 && (
+            <div className="flex justify-center py-1">
+              <ArrowDown className="w-4 h-4 text-text-muted/40" />
+            </div>
+          )}
+        </motion.div>
+      ))}
+      <p className="text-xs text-text-muted text-center mt-2">
+        Typical Web3 funnel: ~0.5% awareness-to-advocacy conversion
+      </p>
+    </div>
+  );
+}
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType; title: string; preview: string; details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer border border-border rounded-xl p-4 hover:border-near-green/30 transition-all bg-black/20">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }}><ChevronDown className="w-4 h-4 text-text-muted" /></motion.div>
+          </div>
+          <p className="text-xs text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-xs text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 1;
+  const options = [
+    'Paid advertising on crypto media sites',
+    'Community-led growth through existing ecosystem users',
+    'Influencer marketing with celebrity endorsements',
+    'Listing on as many exchanges as possible at launch',
+  ];
+
+  return (
+    <div className="border border-border rounded-xl p-5 bg-black/20">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-amber-400" />
+        <h4 className="font-semibold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-sm text-text-secondary mb-4">What&apos;s the most effective Web3 GTM channel?</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left p-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'border-red-500/50 bg-red-500/10 text-red-300'
+                  : selected === i
+                    ? 'border-near-green/50 bg-near-green/10 text-text-primary'
+                    : 'border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary'
+            )}
+          >
+            <span className="font-medium mr-2">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className={cn(
+              'mt-4 p-3 rounded-lg border text-sm',
+              selected === correctAnswer
+                ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-300'
+                : 'border-amber-500/30 bg-amber-500/5 text-amber-300'
+            )}>
+              {selected === correctAnswer ? (
+                <p><CheckCircle className="w-4 h-4 inline mr-1" /> Correct! Web3 users already live in ecosystems. Tapping into existing communities — through integrations, partnerships, and genuine value — converts far better than cold advertising. Sweat Economy acquired millions through existing Web2 fitness app users.</p>
+              ) : (
+                <p><AlertTriangle className="w-4 h-4 inline mr-1" /> Not quite. Community-led growth through ecosystem users is the most effective channel. Web3 users are embedded in communities and trust peer recommendations far more than ads or celebrity endorsements.</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export default function GoToMarket({ isActive, onToggle }: GoToMarketProps) {
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
             <Rocket className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-text-primary">Go-to-Market Strategy</h3>
-            <p className="text-text-muted text-sm">Launch strategies, user acquisition, growth hacking, and case studies from NEAR</p>
+            <h3 className="text-xl font-bold text-text-primary">Go-To-Market Strategy</h3>
+            <p className="text-text-muted text-sm">Launch your Web3 product with ecosystem-native distribution</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Founder</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
+          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
       {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+        <div className="border-t border-near-green/20 p-6 space-y-8">
+          {/* The Big Idea */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 border border-emerald-500/20 rounded-xl p-5"
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-2">💡 The Big Idea</h4>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Launching a Web3 product is like opening a restaurant in a food court — your neighbors are your distribution. 
+              The protocols, DAOs, and communities already in your ecosystem are both your competitors and your best marketing channels. 
+              The smartest founders don&apos;t fight for attention — they plug into existing flows of users, capital, and attention.
+            </p>
+          </motion.div>
+
+          {/* Interactive Funnel */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <Rocket className="w-5 h-5 text-emerald-400" />
+              Web3 GTM Funnel
+            </h4>
+            <div className="border border-border rounded-xl p-5 bg-black/20">
+              <GTMFunnel />
+            </div>
           </div>
 
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Rocket className="w-5 h-5 text-green-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+          {/* GTM Checklist */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">📋 Pre-Launch GTM Checklist</h4>
+            <div className="border border-border rounded-xl p-5 bg-black/20 space-y-3">
+              {[
+                { item: 'Ecosystem map completed', desc: 'All protocols, wallets, and communities in your chain catalogued with integration opportunities' },
+                { item: 'Top 5 partners identified', desc: 'Active conversations with complementary protocols for co-launch amplification' },
+                { item: 'Community seeded', desc: 'At least 200 genuine early users in Discord/Telegram who\'ve tested the product' },
+                { item: 'Content pipeline loaded', desc: '30 days of content pre-written: launch announcement, tutorials, partnership reveals, AMAs' },
+                { item: 'Metrics dashboard live', desc: 'On-chain analytics tracking DAU, transactions, TVL, and retention before launch day' },
+                { item: 'Launch narrative crafted', desc: 'One-sentence pitch that non-crypto people understand, tested on 10 outsiders' },
+                { item: 'Rollback plan ready', desc: 'If launch goes wrong — critical bug, low traction, negative sentiment — what\'s Plan B?' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded border border-near-green/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[10px] text-near-green font-mono">{i + 1}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-text-primary">{item.item}</span>
+                    <p className="text-xs text-text-muted">{item.desc}</p>
+                  </div>
                 </div>
-                <ul className="space-y-3">
-                  {[
-                    'dApp launch strategy — from pre-launch hype to sustained growth post-launch',
-                    'User acquisition channels in Web3: airdrops, quests, referrals, and partnerships',
-                    'Growth hacking techniques specific to crypto — what works and what\'s just noise',
-                    'Building a waitlist and running effective beta programs for early traction',
-                    'Case studies from successful NEAR project launches: what they did right',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Card variant="default" padding="md" className="mt-4 border-green-500/20 bg-green-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-green-400 font-semibold">Why this matters:</span> Building a great product isn&apos;t enough. Most dApps fail not because of bad tech, but because of bad distribution. Your go-to-market strategy determines whether anyone actually uses what you build.
-                  </p>
-                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Concept Cards */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">Core Concepts</h4>
+            <div className="grid gap-3">
+              <ConceptCard
+                icon={Clock}
+                title="Market Timing"
+                preview="In crypto, timing isn't everything — it's the only thing"
+                details="Launching in a bear market means fewer users but less competition and more serious builders. Bull markets bring attention but also noise. Sweat Economy launched their token during a bear market but had already built 120M+ users on their Web2 app — when the bull returned, they were positioned perfectly. Key timing signals: ecosystem grant cycles, major protocol upgrades, and narrative shifts (DeFi summer, NFT boom, AI season)."
+              />
+              <ConceptCard
+                icon={Compass}
+                title="Ecosystem Positioning"
+                preview="Where you build is as important as what you build"
+                details="Every blockchain ecosystem has gaps. NEAR's ecosystem in 2023-24 needed better DeFi tooling, social apps, and AI integrations. Mintbase positioned as the NFT infrastructure layer — not competing with OpenSea, but serving NEAR-native creators. Map your ecosystem's existing projects, identify underserved niches, and position as complementary rather than competitive. Your positioning statement should complete: 'We are the [category] for [ecosystem] that [unique value]'."
+              />
+              <ConceptCard
+                icon={Zap}
+                title="Launch Strategy"
+                preview="The first 72 hours define your trajectory for the next 12 months"
+                details="Web3 launches have unique mechanics: testnet phases build anticipation, mainnet launch creates a news event, and token generation events (TGE) are your IPO moment. Best practice: progressive rollout (closed alpha → open beta → mainnet → TGE). Each phase builds social proof. Mintbase ran months of creator onboarding before their marketplace launch, ensuring day-one activity. Never launch a token before product-market fit."
+              />
+              <ConceptCard
+                icon={Handshake}
+                title="Partnership Leverage"
+                preview="In Web3, a single integration can be worth more than a year of marketing"
+                details="Ecosystem partnerships create compounding distribution. When a DEX integrates your token, every trader becomes a potential user. When a wallet adds your dApp, every wallet holder sees you. Strategic partnerships to pursue: wallet integrations (NEAR Wallet, Meteor), DEX listings (Ref Finance), launchpad features (Skyward), ecosystem grants (NEAR Foundation), and cross-chain bridges. Each partnership should answer: 'How does this put us in front of users who need us?'"
+              />
+              <ConceptCard
+                icon={Users}
+                title="User Acquisition"
+                preview="In Web3, your best users are already someone else's users"
+                details="Web3 user acquisition is fundamentally different from Web2. Users already have wallets, already understand tokens, and already participate in ecosystems. Sweat Economy bridged 120M Web2 users into Web3 by meeting them in an app they already used (Sweatcoin). For native Web3 acquisition: liquidity mining, retroactive airdrops, quest platforms (Galxe, Layer3), referral programs with on-chain rewards, and ambassador programs in target geographies."
+              />
+              <ConceptCard
+                icon={RefreshCw}
+                title="Retention Loops"
+                preview="Acquisition without retention is an expensive way to burn your treasury"
+                details="Web3 retention mechanics: staking rewards (lock tokens for yield), governance participation (vote to shape the product), progressive rewards (increasing benefits for long-term users), social features (on-chain reputation, achievement NFTs), and ecosystem lock-in (composability with other protocols). Ref Finance retains liquidity providers through veREF mechanics — longer locking = higher yield multiplier. Design your retention loop before your acquisition strategy."
+              />
+            </div>
+          </div>
+
+          {/* Mini Quiz */}
+          <MiniQuiz />
+
+          {/* Case Studies */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">📚 NEAR Ecosystem Case Studies</h4>
+            <div className="space-y-3">
+              <div className="border border-border rounded-xl p-4 bg-black/20">
+                <h5 className="font-semibold text-emerald-400 text-sm mb-1">Mintbase — NFT Marketplace Infrastructure Play</h5>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Mintbase didn&apos;t try to out-OpenSea OpenSea. Instead, they positioned as NFT infrastructure for NEAR — providing minting tools, 
+                  marketplace APIs, and creator-friendly UX. Their GTM focused on onboarding creators directly, running workshops in emerging markets 
+                  (Africa, Latin America), and building integrations with NEAR wallets. By the time they launched their marketplace, they had a built-in 
+                  creator base already minting and trading.
+                </p>
               </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Launch Strategy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-green-400" />
-                    dApp Launch Strategy
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    A Web3 launch has unique dynamics — you&apos;re building hype, managing expectations, and often coordinating token events simultaneously.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-green-400 font-semibold mb-2">Launch Timeline</div>
-                    {[
-                      { phase: 'T-90 days', action: 'Brand & Narrative', details: 'Establish brand, publish vision, start building community on Discord/Telegram' },
-                      { phase: 'T-60 days', action: 'Waitlist & Testnet', details: 'Launch waitlist, deploy to testnet, recruit beta testers from community' },
-                      { phase: 'T-30 days', action: 'Pre-Launch Hype', details: 'KOL partnerships, X/Twitter campaign, teaser content, launch countdown' },
-                      { phase: 'T-7 days', action: 'Final Push', details: 'Security audit results published, demo video, press outreach, community AMAs' },
-                      { phase: 'Launch Day', action: 'Go Live', details: 'Mainnet deploy, initial liquidity, real-time community support war room' },
-                      { phase: 'T+30 days', action: 'Retention Phase', details: 'Feature drops, community events, user feedback loops, growth campaigns' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="text-green-400 font-mono w-20 text-right flex-shrink-0">{item.phase}</span>
-                        <div className="flex-1">
-                          <span className="text-text-secondary font-semibold">{item.action}</span>
-                          <span className="text-text-muted ml-2">— {item.details}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 2: User Acquisition */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-teal-400" />
-                    User Acquisition in Web3
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Web3 user acquisition is fundamentally different from Web2. Wallets are your users, on-chain actions are your conversions.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-teal-500/20">
-                      <h5 className="font-semibold text-teal-400 text-sm mb-2">High-Quality Channels</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Quest platforms:</strong> Galxe, Layer3, Zealy — gamified onboarding</li>
-                        <li>• <strong className="text-text-secondary">Referral programs:</strong> On-chain referral tracking with rewards</li>
-                        <li>• <strong className="text-text-secondary">Builder partnerships:</strong> Integrate with complementary dApps</li>
-                        <li>• <strong className="text-text-secondary">Developer relations:</strong> Hackathons, grants, SDKs</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="font-semibold text-orange-400 text-sm mb-2">Channels to Use Carefully</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Airdrops:</strong> Great for awareness, but attracts farmers. Use sybil filters</li>
-                        <li>• <strong className="text-text-secondary">Paid ads:</strong> Limited on X/Google for crypto. Focus on organic first</li>
-                        <li>• <strong className="text-text-secondary">Exchange listings:</strong> Drives token volume, not necessarily product users</li>
-                        <li>• <strong className="text-text-secondary">Influencer shills:</strong> Short-term spikes, poor retention. Vet carefully</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 3: Growth Hacking */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-400" />
-                    Crypto-Native Growth Hacking
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Growth in Web3 follows patterns that don&apos;t exist in Web2. Here are proven techniques:
-                  </p>
-                  <div className="space-y-3">
-                    {[
-                      { tactic: 'Points Programs', desc: 'Pre-token points systems that reward early users. Blur pioneered this — users earn points for activity, convertible to tokens later. Creates sustained engagement without immediate sell pressure.', example: 'Blur, EigenLayer, Hyperliquid' },
-                      { tactic: 'NFT-Based Onboarding', desc: 'Free mint NFTs as entry tickets. Users claim an NFT to join your ecosystem, creating on-chain identity and FOMO for latecomers.', example: 'ShardDog on NEAR, Pudgy Penguins' },
-                      { tactic: 'Composability Hooks', desc: 'Build on top of existing protocols so their users become yours. Integrate with popular DeFi protocols, wallets, and aggregators.', example: 'Ref Finance integrations on NEAR' },
-                      { tactic: 'Gas Subsidies via Relayers', desc: 'NEAR\'s meta-transactions let you pay gas for users. Zero-friction onboarding — users don\'t need NEAR tokens to start.', example: 'NEAR meta-transactions, Fastauth' },
-                    ].map((item, i) => (
-                      <Card key={i} variant="default" padding="md" className="border-yellow-500/20">
-                        <div className="flex justify-between items-start mb-1">
-                          <h5 className="font-semibold text-yellow-400 text-sm">{item.tactic}</h5>
-                          <span className="text-xs text-near-green font-mono">{item.example}</span>
-                        </div>
-                        <p className="text-xs text-text-muted">{item.desc}</p>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 4: Waitlist & Beta */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Gift className="w-5 h-5 text-purple-400" />
-                    Waitlists &amp; Beta Programs
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    A waitlist isn&apos;t just a list — it&apos;s your first growth engine and feedback loop.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-purple-500/20">
-                      <h5 className="font-semibold text-purple-400 text-sm mb-2">Waitlist Best Practices</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Connect wallet to join:</strong> Filters to real crypto users</li>
-                        <li>• <strong className="text-text-secondary">Referral leaderboard:</strong> Move up by inviting friends</li>
-                        <li>• <strong className="text-text-secondary">Weekly updates:</strong> Keep waitlisters engaged with dev progress</li>
-                        <li>• <strong className="text-text-secondary">Early access tiers:</strong> Top referrers get first access</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-purple-500/20">
-                      <h5 className="font-semibold text-purple-400 text-sm mb-2">Beta Program Structure</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Closed beta:</strong> 50-200 power users, high-touch feedback</li>
-                        <li>• <strong className="text-text-secondary">Bug bounty:</strong> Reward beta testers who find issues</li>
-                        <li>• <strong className="text-text-secondary">Feedback channels:</strong> Dedicated Discord channel + weekly surveys</li>
-                        <li>• <strong className="text-text-secondary">OG rewards:</strong> Beta testers get special NFTs or early token allocation</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 5: NEAR Case Studies */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-near-green" />
-                    NEAR Launch Case Studies
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Real launches from the NEAR ecosystem — what worked and what we can learn:
-                  </p>
-                  <div className="space-y-3">
-                    <Card variant="default" padding="md" className="border-near-green/20">
-                      <h5 className="font-semibold text-near-green text-sm mb-2">Ref Finance</h5>
-                      <p className="text-xs text-text-muted">
-                        <strong className="text-text-secondary">Strategy:</strong> Launched as the first AMM DEX on NEAR with aggressive liquidity mining incentives. Partnered with Proximity Labs for initial liquidity. <strong className="text-text-secondary">Result:</strong> Became NEAR&apos;s leading DEX with millions in TVL. Key lesson: being first mover on a chain with strong ecosystem support creates lasting advantage.
-                      </p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-near-green/20">
-                      <h5 className="font-semibold text-near-green text-sm mb-2">Mintbase</h5>
-                      <p className="text-xs text-text-muted">
-                        <strong className="text-text-secondary">Strategy:</strong> Pivoted from Ethereum to NEAR for lower costs and better UX. Focused on developer tooling and infrastructure, not just a marketplace. <strong className="text-text-secondary">Result:</strong> Built the leading NFT infrastructure on NEAR. Key lesson: solving real developer pain points creates organic B2B growth.
-                      </p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-near-green/20">
-                      <h5 className="font-semibold text-near-green text-sm mb-2">NEAR.ai</h5>
-                      <p className="text-xs text-text-muted">
-                        <strong className="text-text-secondary">Strategy:</strong> Leveraged NEAR&apos;s chain abstraction narrative and AI + blockchain intersection. Built developer tools for AI agents interacting with NEAR Protocol. <strong className="text-text-secondary">Result:</strong> Captured the AI x crypto narrative with real infrastructure. Key lesson: timing your launch with a strong industry narrative amplifies reach.
-                      </p>
-                    </Card>
-                  </div>
-                </section>
+              <div className="border border-border rounded-xl p-4 bg-black/20">
+                <h5 className="font-semibold text-cyan-400 text-sm mb-1">Sweat Economy — Web2 → Web3 Bridge Masterclass</h5>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Sweat Economy is the gold standard for Web2-to-Web3 GTM. They built Sweatcoin as a Web2 fitness app, acquired 120M+ users, then 
+                  introduced a token on NEAR. Users didn&apos;t need to understand blockchain — they earned tokens by walking. The Web3 transition happened 
+                  gradually: first earning, then wallets, then staking, then governance. This funnel converted millions of non-crypto users into Web3 
+                  participants with zero cold-start problem.
+                </p>
               </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-green-500/20">
-                  <h5 className="font-semibold text-green-400 text-sm mb-2">🟢 Exercise 1: Launch Timeline</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Create a 90-day launch timeline for your dApp. Map every milestone: community setup, testnet deploy, beta program, marketing push, and mainnet launch. Include specific dates, owners, and dependencies.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-green-500/20">
-                  <h5 className="font-semibold text-green-400 text-sm mb-2">🟢 Exercise 2: User Acquisition Funnel</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Map your user acquisition funnel: Awareness → Interest → Wallet Connect → First Transaction → Retention. For each stage, identify 2-3 channels and estimate conversion rates. What&apos;s your target CAC?
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-green-500/20">
-                  <h5 className="font-semibold text-green-400 text-sm mb-2">🟢 Exercise 3: Quest Campaign Design</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design a quest campaign on Galxe or Layer3: 5 tasks that onboard users to your dApp. Each task should teach one feature. Calculate the reward budget and expected user acquisition numbers.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-green-500/20">
-                  <h5 className="font-semibold text-green-400 text-sm mb-2">🟢 Exercise 4: Referral Program</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design an on-chain referral program: referral link structure, reward tiers (referrer + referee), anti-gaming measures, and smart contract logic. What percentage of new users should come from referrals?
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-green-500/20">
-                  <h5 className="font-semibold text-green-400 text-sm mb-2">🟢 Exercise 5: Competitive Launch Analysis</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Analyze 3 successful dApp launches (on any chain). Document their timeline, channels, growth metrics, and what made them work. Apply 2-3 tactics to your own launch plan.
-                  </p>
-                </Card>
+              <div className="border border-border rounded-xl p-4 bg-black/20">
+                <h5 className="font-semibold text-violet-400 text-sm mb-1">Ref Finance — DeFi Ecosystem Hub Strategy</h5>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Ref Finance positioned itself as NEAR&apos;s one-stop DeFi hub rather than just another DEX. Their GTM leveraged every new NEAR project launch — 
+                  each new token needed liquidity, and Ref was the default venue. By building the deepest liquidity pools and integrating with every major NEAR 
+                  wallet, they created a gravitational pull. Their partnership strategy was simple: &quot;Every new NEAR token needs us on day one.&quot; This made them 
+                  infrastructure rather than just a product — a powerful GTM position because infrastructure gets adopted by default, not by choice.
+                </p>
               </div>
-            )}
+            </div>
+          </div>
 
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Galxe', url: 'https://galxe.com/', desc: 'Leading Web3 quest and credential platform for user acquisition campaigns' },
-                  { title: 'Layer3', url: 'https://layer3.xyz/', desc: 'Quest platform focused on education and onboarding — great for dApp discovery' },
-                  { title: 'Zealy (formerly Crew3)', url: 'https://zealy.io/', desc: 'Community quest platform with leaderboards and XP systems' },
-                  { title: 'NEAR FastAuth', url: 'https://near.org/fastauth', desc: 'Frictionless onboarding — email-based wallet creation for new users' },
-                  { title: 'a16z Crypto GTM Guide', url: 'https://a16zcrypto.com/', desc: 'Go-to-market frameworks from Andreessen Horowitz for crypto startups' },
-                  { title: 'Delphi Digital Research', url: 'https://delphidigital.io/', desc: 'In-depth research on crypto growth strategies and market trends' },
-                  { title: 'NEAR Ecosystem Hub', url: 'https://near.org/ecosystem', desc: 'Discover NEAR ecosystem projects and partnership opportunities' },
-                  { title: 'Product-Led Growth for Web3', url: 'https://www.lennysnewsletter.com/', desc: 'Lenny Rachitsky\'s newsletter — applicable growth frameworks for any product' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
+          {/* Key Takeaways */}
+          <div className="bg-gradient-to-br from-emerald-500/5 to-transparent border border-emerald-500/20 rounded-xl p-5">
+            <h4 className="font-semibold text-text-primary mb-3">🎯 Key Takeaways</h4>
+            <ul className="space-y-2">
+              {[
+                'Your ecosystem is your distribution — partner with protocols, not against them',
+                'Time your launch to ecosystem momentum, not just your roadmap',
+                'Progressive rollout (alpha → beta → mainnet → TGE) builds compounding social proof',
+                'Web3 users are already active in crypto — acquisition means redirecting, not educating',
+                'Design retention loops before acquisition funnels — sustainable growth compounds',
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Common Mistakes */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">⚠️ Common GTM Mistakes</h4>
+            <div className="space-y-3">
+              {[
+                { mistake: 'Launching token before product-market fit', fix: 'Your token is your biggest marketing moment. Wasting it on a product nobody wants yet means you can\'t use that lever again. Ship the product first, prove demand, then launch the token.' },
+                { mistake: 'Targeting "crypto users" as a segment', fix: '"Crypto users" is not a market segment. DeFi degens, NFT collectors, DAOs, and retail holders have completely different needs and channels. Pick ONE to dominate first.' },
+                { mistake: 'Ignoring geographic distribution', fix: 'NEAR has strong communities in specific regions (Africa, Asia, Eastern Europe). Geographic focus lets you dominate a market before expanding. Mintbase focused on African creators first.' },
+                { mistake: 'No retention plan at launch', fix: 'Most Web3 launches see 90% user drop after incentives end. Build sticky features (staking, governance, social) before you turn on the acquisition firehose.' },
+                { mistake: 'Copying a Web2 GTM playbook', fix: 'Web3 GTM is fundamentally different. Users own assets, communities have governance power, and composability means your product can integrate into others. Lean into these Web3-native advantages.' },
+              ].map((item, i) => (
+                <div key={i} className="border border-red-500/20 rounded-lg p-3 bg-red-500/5">
+                  <p className="text-xs text-red-300 font-semibold mb-1">❌ {item.mistake}</p>
+                  <p className="text-xs text-text-muted">{item.fix}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Items */}
+          <div className="border-l-4 border-amber-500 bg-amber-500/5 rounded-r-xl p-4">
+            <h4 className="font-semibold text-amber-300 text-sm mb-1">⚡ Action Item: GTM Map</h4>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Create a &quot;GTM Map&quot; for your project: list every protocol, wallet, and community in your ecosystem. 
+              For each, write one sentence on how you could integrate with or distribute through them. Rank by potential user overlap 
+              and effort required. Your top 3 partnerships should be active conversations within 2 weeks of reading this.
+            </p>
+          </div>
+
+          <div className="border-l-4 border-cyan-500 bg-cyan-500/5 rounded-r-xl p-4">
+            <h4 className="font-semibold text-cyan-300 text-sm mb-1">📋 Action Item: 72-Hour Launch Plan</h4>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Draft your first 72 hours post-launch. Hour by hour: What announcements go out? On which channels? Who are the pre-committed 
+              amplifiers (KOLs, partner projects, ecosystem accounts)? What&apos;s the first milestone users should hit? The best launches feel 
+              like events, not announcements. Pre-arrange at least 10 ecosystem partners to co-announce within 24 hours of your launch.
+            </p>
           </div>
         </div>
       )}
     </Card>
   );
-};
-
-export default GoToMarket;
+}

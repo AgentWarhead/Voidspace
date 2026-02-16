@@ -1,8 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Vault, ExternalLink, CheckCircle, PieChart, Shield, TrendingDown, Lock, BarChart3 } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronUp,
+  Landmark,
+  PieChart,
+  Shield,
+  DollarSign,
+  TrendingUp,
+  Lock,
+  FileText,
+  Lightbulb,
+  CheckCircle2,
+  AlertTriangle,
+  Target,
+  Coins,
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 
 interface TreasuryManagementProps {
@@ -10,325 +27,395 @@ interface TreasuryManagementProps {
   onToggle: () => void;
 }
 
-const TreasuryManagement: React.FC<TreasuryManagementProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType; title: string; preview: string; details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer border border-border rounded-xl p-4 hover:border-near-green/30 transition-all bg-black/20">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }}><ChevronDown className="w-4 h-4 text-text-muted" /></motion.div>
+          </div>
+          <p className="text-xs text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-xs text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const treasurySegments = [
+  { label: 'Stablecoins', percentage: 35, color: 'from-green-400 to-emerald-500', offset: 0 },
+  { label: 'Native Token', percentage: 25, color: 'from-cyan-400 to-blue-500', offset: 35 },
+  { label: 'ETH / BTC', percentage: 20, color: 'from-purple-400 to-violet-500', offset: 60 },
+  { label: 'Yield Strategies', percentage: 12, color: 'from-amber-400 to-orange-500', offset: 80 },
+  { label: 'Operations', percentage: 8, color: 'from-rose-400 to-pink-500', offset: 92 },
+];
+
+const segmentColors = [
+  'bg-gradient-to-r from-green-400 to-emerald-500',
+  'bg-gradient-to-r from-cyan-400 to-blue-500',
+  'bg-gradient-to-r from-purple-400 to-violet-500',
+  'bg-gradient-to-r from-amber-400 to-orange-500',
+  'bg-gradient-to-r from-rose-400 to-pink-500',
+];
+
+function TreasuryPieChart() {
+  const [activeSegment, setActiveSegment] = useState<number | null>(null);
+  const radius = 80;
+  const cx = 100;
+  const cy = 100;
+
+  function getArc(startPct: number, endPct: number) {
+    const startAngle = (startPct / 100) * 360 - 90;
+    const endAngle = (endPct / 100) * 360 - 90;
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+    const largeArc = endPct - startPct > 50 ? 1 : 0;
+    const x1 = cx + radius * Math.cos(startRad);
+    const y1 = cy + radius * Math.sin(startRad);
+    const x2 = cx + radius * Math.cos(endRad);
+    const y2 = cy + radius * Math.sin(endRad);
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  }
+
+  const sliceColors = ['#34d399', '#22d3ee', '#a78bfa', '#fbbf24', '#fb7185'];
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <div className="flex flex-col sm:flex-row items-center gap-6">
+      <div className="relative">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          {treasurySegments.map((seg, i) => {
+            const isHovered = activeSegment === i;
+            const endPct = seg.offset + seg.percentage;
+            return (
+              <motion.path
+                key={seg.label}
+                d={getArc(seg.offset, endPct)}
+                fill={sliceColors[i]}
+                stroke="rgba(0,0,0,0.3)"
+                strokeWidth={1}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: activeSegment === null || isHovered ? 1 : 0.4,
+                  scale: isHovered ? 1.05 : 1,
+                }}
+                transition={{ delay: i * 0.12, duration: 0.4 }}
+                style={{ transformOrigin: `${cx}px ${cy}px` }}
+                onMouseEnter={() => setActiveSegment(i)}
+                onMouseLeave={() => setActiveSegment(null)}
+                className="cursor-pointer"
+              />
+            );
+          })}
+          <circle cx={cx} cy={cy} r={35} fill="rgba(0,0,0,0.6)" />
+          <text x={cx} y={cy - 6} textAnchor="middle" className="fill-white text-[10px] font-bold">
+            {activeSegment !== null ? `${treasurySegments[activeSegment].percentage}%` : 'Treasury'}
+          </text>
+          <text x={cx} y={cy + 8} textAnchor="middle" className="fill-gray-400 text-[7px]">
+            {activeSegment !== null ? treasurySegments[activeSegment].label : 'Hover to explore'}
+          </text>
+        </svg>
+      </div>
+      <div className="flex flex-col gap-2">
+        {treasurySegments.map((seg, i) => (
+          <motion.div
+            key={seg.label}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 + i * 0.08 }}
+            onMouseEnter={() => setActiveSegment(i)}
+            onMouseLeave={() => setActiveSegment(null)}
+            className={cn(
+              'flex items-center gap-2 text-xs cursor-pointer px-2 py-1 rounded-lg transition-colors',
+              activeSegment === i ? 'bg-white/10' : 'hover:bg-white/5'
+            )}
+          >
+            <div className={cn('w-3 h-3 rounded-sm', segmentColors[i])} />
+            <span className="text-text-secondary">{seg.label}</span>
+            <span className="text-text-muted ml-auto font-mono">{seg.percentage}%</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const quizOptions = [
+  { id: 'a', text: 'Not having a treasury multisig wallet' },
+  { id: 'b', text: 'Holding 100% of treasury in native token' },
+  { id: 'c', text: 'Paying team salaries in crypto' },
+  { id: 'd', text: 'Not publishing quarterly reports' },
+];
+
+export default function TreasuryManagement({ isActive, onToggle }: TreasuryManagementProps) {
+  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
+  const correctAnswer = 'b';
+
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center">
-            <Vault className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
+            <Landmark className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Treasury Management</h3>
-            <p className="text-text-muted text-sm">On-chain treasury, diversification, DAO governance, runway planning, and multi-sig</p>
+            <p className="text-text-muted text-sm">Safeguard and grow your project&apos;s financial reserves</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Founder</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
+          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
       {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Vault className="w-5 h-5 text-amber-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
-                </div>
-                <ul className="space-y-3">
-                  {[
-                    'Managing a project treasury on-chain — wallets, accounting, and transparency',
-                    'Diversification strategies: stablecoins, native tokens, BTC/ETH, and yield-bearing positions',
-                    'DAO-governed treasury — proposals, voting, and spending accountability',
-                    'Runway planning and burn rate management — surviving bear markets',
-                    'Multi-sig setup best practices on NEAR using Astro DAO and NEAR multi-sig',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Card variant="default" padding="md" className="mt-4 border-amber-500/20 bg-amber-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-amber-400 font-semibold">Why this matters:</span> Projects that survive bear markets have disciplined treasury management. Most crypto projects that fail do so because they run out of money — not because of bad tech. Your treasury is your lifeline.
-                  </p>
-                </Card>
+        <div className="border-t border-near-green/20 p-6 space-y-8">
+          {/* The Big Idea */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-xl p-5"
+          >
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-bold text-text-primary mb-1">The Big Idea</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">
+                  Managing a crypto treasury is like sailing — you need enough <span className="text-emerald-400 font-medium">ballast (stablecoins)</span> to survive storms, but enough <span className="text-cyan-400 font-medium">sail (native tokens)</span> to catch the wind. Too much ballast and you go nowhere. Too much sail and one gust can capsize you.
+                </p>
               </div>
-            )}
+            </div>
+          </motion.div>
 
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Treasury Basics */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <PieChart className="w-5 h-5 text-amber-400" />
-                    On-Chain Treasury Fundamentals
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Your treasury is the financial backbone of your project. On-chain treasuries offer transparency but require careful management.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-amber-400 font-semibold mb-2">Treasury Structure</div>
-                    {[
-                      { component: 'Operating Wallet', purpose: 'Day-to-day expenses (team, infra, marketing)', allocation: '10-15%', access: 'Multi-sig (2/3)' },
-                      { component: 'Strategic Reserve', purpose: 'Partnerships, acquisitions, emergency fund', allocation: '25-35%', access: 'Multi-sig (3/5)' },
-                      { component: 'Community Fund', purpose: 'Grants, bounties, ambassador programs', allocation: '20-30%', access: 'DAO governance' },
-                      { component: 'Locked Vesting', purpose: 'Team tokens, advisor tokens, future incentives', allocation: '20-30%', access: 'Time-locked smart contract' },
-                      { component: 'Yield Positions', purpose: 'Generate passive income on idle treasury', allocation: '5-15%', access: 'Multi-sig with timelock' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <span className="text-amber-400 font-mono w-12 text-right flex-shrink-0">{item.allocation}</span>
-                        <div className="flex-1">
-                          <span className="text-text-secondary font-semibold">{item.component}</span>
-                          <span className="text-text-muted ml-2">— {item.purpose}</span>
-                          <span className="text-near-green ml-2 font-mono text-[10px]">[{item.access}]</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
+          {/* Interactive Pie Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <PieChart className="w-5 h-5 text-emerald-400" />
+              Recommended Treasury Allocation
+            </h4>
+            <div className="bg-black/30 rounded-xl p-6 border border-border">
+              <TreasuryPieChart />
+              <p className="text-xs text-text-muted mt-4 text-center">Hover segments to explore. This is a sample allocation — adjust based on your project&apos;s stage and risk tolerance.</p>
+            </div>
+          </motion.div>
 
-                {/* Section 2: Diversification */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-green-400" />
-                    Diversification Strategies
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Holding 100% of your treasury in your own token is a recipe for disaster. Diversification ensures you can operate regardless of market conditions.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">Recommended Allocation</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Stablecoins (40-60%):</strong> USDC, USDT on NEAR. Covers 12-24 months of expenses</li>
-                        <li>• <strong className="text-text-secondary">Native token (20-30%):</strong> Your own token for governance and ecosystem incentives</li>
-                        <li>• <strong className="text-text-secondary">NEAR (10-20%):</strong> Ecosystem alignment and gas reserves</li>
-                        <li>• <strong className="text-text-secondary">BTC/ETH (5-10%):</strong> Blue-chip crypto exposure for long-term value</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">Diversification Anti-Patterns</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">100% own token:</strong> One crash and you can&apos;t pay team or bills</li>
-                        <li>• <strong className="text-text-secondary">Market-timing sales:</strong> Don&apos;t try to time token sales — use DCA</li>
-                        <li>• <strong className="text-text-secondary">Complex DeFi strategies:</strong> Avoid risky yield farming with treasury funds</li>
-                        <li>• <strong className="text-text-secondary">No stablecoin buffer:</strong> Always keep 12+ months of runway in stables</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
+          {/* Concept Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-4">Core Concepts</h4>
+            <div className="grid gap-3">
+              <ConceptCard
+                icon={TrendingUp}
+                title="Asset Diversification"
+                preview="Don't put all your eggs in one volatile basket."
+                details="A healthy treasury mixes stablecoins (USDC, USDT, DAI) for runway certainty, blue-chip crypto (ETH, BTC) for long-term appreciation, and native tokens for ecosystem alignment. The NEAR Foundation maintains reserves across multiple asset classes to ensure operational continuity regardless of market conditions. Aim for at least 40-50% in stable assets during early stages."
+              />
+              <ConceptCard
+                icon={DollarSign}
+                title="Runway Calculation"
+                preview="How many months can you survive at current burn rate?"
+                details="Runway = Total Liquid Assets ÷ Monthly Burn Rate. Track this weekly. Most successful Web3 projects maintain 18-24 months of runway in stablecoins alone. Factor in worst-case scenarios: if your native token drops 80%, can you still pay the team for 12 months? If not, you need more stables. Include salaries, infrastructure, audits, legal, and marketing in burn calculations."
+              />
+              <ConceptCard
+                icon={Coins}
+                title="Stablecoin Strategy"
+                preview="Not all stablecoins are created equal — diversify your stability."
+                details="Spread stablecoin holdings across multiple issuers: USDC (Circle — regulated, US-based), USDT (Tether — highest liquidity), and DAI (decentralized, crypto-backed). Consider on-chain yield strategies for a portion — lending on platforms like Burrow on NEAR can earn 3-8% APY on stables. But never put more than 20% of stablecoin reserves into yield strategies; the rest should stay liquid."
+              />
+              <ConceptCard
+                icon={Shield}
+                title="DAO Treasuries & Sputnik"
+                preview="On-chain governance for transparent fund management."
+                details="Sputnik DAO on NEAR enables transparent, on-chain treasury governance. Set up councils for different spending categories — development, marketing, partnerships — each with their own approval thresholds. The NEAR ecosystem uses Sputnik extensively: AstroDAO provides a user-friendly interface for proposal creation, voting, and fund disbursement. Key benefit: every transaction is publicly auditable."
+              />
+              <ConceptCard
+                icon={Lock}
+                title="Multisig Security"
+                preview="No single person should control project funds. Period."
+                details="Use a multisig wallet requiring 3-of-5 or 4-of-7 signatures for treasury transactions. On NEAR, Sputnik DAO provides built-in multisig functionality. Distribute signers across different time zones and jurisdictions. Implement tiered approval: small operational expenses (< $5K) need 2 signatures, medium ($5K-$50K) need 3, and large (> $50K) need 4+. Never store all signer keys on the same infrastructure."
+              />
+              <ConceptCard
+                icon={FileText}
+                title="Reporting Transparency"
+                preview="Regular treasury reports build trust and attract investors."
+                details="Publish quarterly treasury reports covering: total holdings by asset type, burn rate trends, runway projection, significant expenditures, and upcoming financial commitments. The NEAR Foundation publishes regular transparency reports. Use on-chain analytics tools to make reports verifiable. Open treasury management correlates with stronger community trust, higher governance participation, and easier fundraising for future rounds."
+              />
+            </div>
+          </motion.div>
 
-                {/* Section 3: DAO Treasury */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-purple-400" />
-                    DAO-Governed Treasury
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Transitioning treasury control to a DAO builds trust and decentralizes power. But it requires careful governance design.
-                  </p>
-                  <div className="space-y-3">
-                    {[
-                      { model: 'Full DAO Control', desc: 'Every expenditure requires a governance vote. Maximum transparency but slow execution. Best for community-owned projects with large treasuries.', example: 'Uniswap Governance, NEAR Community Fund' },
-                      { model: 'Council + DAO Hybrid', desc: 'Elected council handles routine expenses (under threshold). Large expenditures require full DAO vote. Balances speed with accountability.', example: 'Astro DAO on NEAR, Gitcoin' },
-                      { model: 'Budget Committees', desc: 'DAO allocates quarterly budgets to working groups. Each group manages their own sub-treasury. Scalable and efficient.', example: 'MakerDAO Core Units, NEAR DevHub' },
-                    ].map((item, i) => (
-                      <Card key={i} variant="default" padding="md" className="border-purple-500/20">
-                        <div className="flex justify-between items-start mb-1">
-                          <h5 className="font-semibold text-purple-400 text-sm">{item.model}</h5>
-                          <span className="text-xs text-near-green font-mono">{item.example}</span>
-                        </div>
-                        <p className="text-xs text-text-muted">{item.desc}</p>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 4: Runway Planning */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <TrendingDown className="w-5 h-5 text-red-400" />
-                    Runway Planning &amp; Burn Rate
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Burn rate is how fast you&apos;re spending. Runway is how long you can survive. In crypto, plan for the worst case.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-red-400 font-semibold mb-2">Runway Calculator</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-amber-400 font-semibold">Monthly Burn Rate</span>
-                          <p className="text-text-muted">Team salaries + infrastructure + marketing + legal + misc. Be brutally honest.</p>
-                        </div>
-                        <div>
-                          <span className="text-green-400 font-semibold">Runway (months)</span>
-                          <p className="text-text-muted">= Liquid treasury (stables + reliable assets) ÷ monthly burn. Ignore speculative token value.</p>
-                        </div>
-                        <div>
-                          <span className="text-red-400 font-semibold">Bear Market Scenario</span>
-                          <p className="text-text-muted">Assume token drops 80%, DeFi yields drop 90%. Can you still operate for 12 months?</p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-blue-400 font-semibold">Target: 18-24 Months</span>
-                          <p className="text-text-muted">Minimum runway in stablecoins. Bear markets last 12-18 months on average.</p>
-                        </div>
-                        <div>
-                          <span className="text-purple-400 font-semibold">Burn Reduction Levers</span>
-                          <p className="text-text-muted">Cut marketing first, renegotiate contracts, reduce team to core contributors, defer non-essential features.</p>
-                        </div>
-                        <div>
-                          <span className="text-cyan-400 font-semibold">Revenue Offset</span>
-                          <p className="text-text-muted">Net burn = gross burn - revenue. As revenue grows, effective runway extends automatically.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Section 5: Multi-Sig */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-cyan-400" />
-                    Multi-Sig Setup Best Practices
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    A multi-sig wallet requires multiple approvals for transactions. It&apos;s the baseline security for any serious project treasury.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">Multi-Sig Configuration</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Operating (2/3):</strong> Quick access for routine expenses</li>
-                        <li>• <strong className="text-text-secondary">Strategic (3/5):</strong> Major decisions need broader consensus</li>
-                        <li>• <strong className="text-text-secondary">Emergency (4/7):</strong> Critical actions like contract upgrades</li>
-                        <li>• <strong className="text-text-secondary">Key holders:</strong> Mix of team, advisors, and community members</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">NEAR Multi-Sig Options</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Astro DAO:</strong> Full DAO with multi-sig treasury, proposals, and voting</li>
-                        <li>• <strong className="text-text-secondary">NEAR Multi-Sig Contract:</strong> Native multi-sig with configurable thresholds</li>
-                        <li>• <strong className="text-text-secondary">Keypom:</strong> Advanced access control and key management on NEAR</li>
-                        <li>• <strong className="text-text-secondary">Ledger support:</strong> Hardware wallet signing for maximum security</li>
-                      </ul>
-                    </Card>
-                  </div>
-                  <Card variant="default" padding="md" className="mt-4 border-yellow-500/20 bg-yellow-500/5">
-                    <p className="text-sm text-text-secondary">
-                      <span className="text-yellow-400 font-semibold">Security tip:</span> Never have a single person control treasury access. Use geographically distributed key holders and require hardware wallets. Practice recovery procedures — a multi-sig is useless if signers lose their keys.
-                    </p>
-                  </Card>
-                </section>
+          {/* Case Studies */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <Target className="w-5 h-5 text-cyan-400" />
+              NEAR Ecosystem Case Studies
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="bg-black/30 rounded-xl p-4 border border-border">
+                <h5 className="font-semibold text-text-primary text-sm mb-2">NEAR Foundation Treasury</h5>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  The NEAR Foundation maintains a diversified treasury with stablecoin reserves covering multi-year operations. They publish regular transparency reports, use multisig for all significant transactions, and separate operational funds from ecosystem grant pools. Their approach of maintaining substantial stablecoin reserves allowed them to continue funding ecosystem development through the 2022-2023 bear market.
+                </p>
               </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-amber-500/20">
-                  <h5 className="font-semibold text-amber-400 text-sm mb-2">🟡 Exercise 1: Treasury Allocation Plan</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design your treasury allocation across the 5 components (operating, strategic, community, vesting, yield). Define exact percentages, asset types, and access controls for each bucket.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-amber-500/20">
-                  <h5 className="font-semibold text-amber-400 text-sm mb-2">🟡 Exercise 2: Burn Rate Spreadsheet</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Create a monthly expense budget: team salaries, infrastructure, marketing, legal, and reserves. Calculate your monthly burn rate and runway at current treasury. Model a 80% token crash — what&apos;s your emergency runway?
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-amber-500/20">
-                  <h5 className="font-semibold text-amber-400 text-sm mb-2">🟡 Exercise 3: Multi-Sig Setup</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Set up an Astro DAO on NEAR testnet. Configure a 2/3 multi-sig for your operating wallet. Practice submitting and approving a transfer proposal. Document the process for your team.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-amber-500/20">
-                  <h5 className="font-semibold text-amber-400 text-sm mb-2">🟡 Exercise 4: Diversification Strategy</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    If you had $500K in treasury (all in your native token), design a diversification plan: what to sell, over what timeline (DCA schedule), target allocations, and which DEXs/OTC desks to use on NEAR.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-amber-500/20">
-                  <h5 className="font-semibold text-amber-400 text-sm mb-2">🟡 Exercise 5: DAO Treasury Governance</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Draft a treasury governance framework: spending thresholds, proposal templates, voting periods, and quarterly reporting requirements. Model it after NEAR DevHub or MakerDAO&apos;s governance structure.
-                  </p>
-                </Card>
+              <div className="bg-black/30 rounded-xl p-4 border border-border">
+                <h5 className="font-semibold text-text-primary text-sm mb-2">Sputnik DAO Treasury Tools</h5>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Sputnik DAO (AstroDAO) provides NEAR projects with on-chain treasury management including proposal-based spending, role-based access control, and automatic fund disbursement. Projects like Ref Finance and Mintbase use Sputnik for transparent budget allocation, allowing token holders to verify every expense and vote on major financial decisions.
+                </p>
               </div>
-            )}
+            </div>
+          </motion.div>
 
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Astro DAO', url: 'https://astrodao.com/', desc: 'NEAR-native DAO platform with built-in treasury management and multi-sig' },
-                  { title: 'DeepDAO Treasury Analytics', url: 'https://deepdao.io/', desc: 'Track and compare DAO treasuries across chains — benchmarks and best practices' },
-                  { title: 'Open Zeppelin Multi-Sig Guide', url: 'https://blog.openzeppelin.com/', desc: 'Security best practices for multi-sig wallet setup and management' },
-                  { title: 'Hasu on Treasury Management', url: 'https://uncommoncore.co/', desc: 'Research on optimal treasury management strategies for crypto protocols' },
-                  { title: 'Karpatkey (DAO Treasury Mgmt)', url: 'https://www.karpatkey.com/', desc: 'Professional DAO treasury management — case studies from Gnosis, ENS, and others' },
-                  { title: 'DeFi Llama Treasury Dashboard', url: 'https://defillama.com/treasuries', desc: 'Real-time treasury data for major protocols — see how others manage their funds' },
-                  { title: 'Messari Governor', url: 'https://messari.io/governor', desc: 'DAO governance analytics — track proposals, voting, and treasury flows' },
-                  { title: 'NEAR Wallet (Multi-Sig)', url: 'https://wallet.near.org/', desc: 'NEAR native wallet with multi-sig support for treasury management' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
+          {/* Quiz */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-black/30 rounded-xl p-5 border border-border"
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-1">Quick Quiz</h4>
+            <p className="text-sm text-text-secondary mb-4">What&apos;s the biggest treasury management mistake for Web3 projects?</p>
+            <div className="grid gap-2">
+              {quizOptions.map((option) => {
+                const isSelected = quizAnswer === option.id;
+                const isCorrect = option.id === correctAnswer;
+                const showResult = quizAnswer !== null;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => !quizAnswer && setQuizAnswer(option.id)}
+                    disabled={quizAnswer !== null}
+                    className={cn(
+                      'text-left p-3 rounded-lg border text-sm transition-all',
+                      !showResult && 'border-border hover:border-near-green/30 hover:bg-white/5',
+                      showResult && isCorrect && 'border-emerald-500/50 bg-emerald-500/10',
+                      showResult && isSelected && !isCorrect && 'border-red-500/50 bg-red-500/10',
+                      showResult && !isSelected && !isCorrect && 'border-border opacity-50'
+                    )}
                   >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
+                    <span className="text-text-muted mr-2 font-mono">{option.id.toUpperCase()}.</span>
+                    <span className={cn(
+                      showResult && isCorrect ? 'text-emerald-300' : 'text-text-secondary',
+                      showResult && isSelected && !isCorrect && 'text-red-300'
+                    )}>{option.text}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <AnimatePresence>
+              {quizAnswer && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className={cn(
+                    'mt-4 p-4 rounded-lg border text-sm',
+                    quizAnswer === correctAnswer
+                      ? 'border-emerald-500/30 bg-emerald-500/10'
+                      : 'border-amber-500/30 bg-amber-500/10'
+                  )}>
+                    {quizAnswer === correctAnswer ? (
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-text-secondary">
+                          <span className="text-emerald-300 font-medium">Correct!</span> Holding 100% of treasury in your native token means one market crash can wipe out years of runway overnight. Projects like Terra/Luna proved this catastrophically. Always diversify into stablecoins and blue-chip assets.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-text-secondary">
+                          <span className="text-amber-300 font-medium">Not quite.</span> The answer is <span className="text-emerald-300">B</span> — holding 100% in native token. While multisig security, salary payments, and reporting are all important, a concentrated native token position is an existential risk. One crash can eliminate your entire runway.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Key Takeaways */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-3">Key Takeaways</h4>
+            <div className="space-y-2">
+              {[
+                'Maintain 18-24 months of runway in stablecoins — this is non-negotiable',
+                'Use multisig wallets (3-of-5 minimum) for all treasury operations',
+                'Diversify across asset types: stables, native token, ETH/BTC, and yield',
+                'Publish quarterly treasury reports to build community trust',
+                'Leverage Sputnik DAO on NEAR for transparent on-chain governance',
+              ].map((takeaway, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-text-secondary">{takeaway}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Action Items */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5"
+          >
+            <h4 className="font-bold text-text-primary mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              Action Items
+            </h4>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">1.</span>
+                Calculate your current runway — divide stable assets by monthly burn rate
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">2.</span>
+                Set up a Sputnik DAO with multisig for your project treasury
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">3.</span>
+                Create a diversification plan: target allocation percentages for each asset class
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">4.</span>
+                Draft your first treasury transparency report — even a simple one builds trust
+              </li>
+            </ul>
+          </motion.div>
         </div>
       )}
     </Card>
   );
-};
-
-export default TreasuryManagement;
+}

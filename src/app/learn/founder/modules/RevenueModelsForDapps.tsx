@@ -1,8 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Briefcase, ExternalLink, CheckCircle, DollarSign, Layers, ArrowRightLeft, Globe, BarChart } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronUp,
+  CircleDollarSign,
+  Lightbulb,
+  CheckCircle2,
+  AlertTriangle,
+  Target,
+  Zap,
+  CreditCard,
+  Gift,
+  Flame,
+  ArrowRightLeft,
+  Building2,
+  Layers,
+  TrendingUp,
+  ThumbsUp,
+  ThumbsDown,
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 
 interface RevenueModelsForDappsProps {
@@ -10,366 +30,480 @@ interface RevenueModelsForDappsProps {
   onToggle: () => void;
 }
 
-const RevenueModelsForDapps: React.FC<RevenueModelsForDappsProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType; title: string; preview: string; details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer border border-border rounded-xl p-4 hover:border-near-green/30 transition-all bg-black/20">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }}><ChevronDown className="w-4 h-4 text-text-muted" /></motion.div>
+          </div>
+          <p className="text-xs text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-xs text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const revenueModels = [
+  {
+    id: 'fees',
+    name: 'Transaction Fees',
+    icon: ArrowRightLeft,
+    color: 'from-emerald-400 to-green-500',
+    sustainability: 85,
+    complexity: 30,
+    pros: ['Scales with usage automatically', 'Aligned with user value', 'Predictable with volume'],
+    cons: ['Race to zero with competitors', 'Users feel the cost directly', 'Volume-dependent — no users, no revenue'],
+    example: 'Ref Finance charges 0.3% per swap, split between LPs and protocol treasury',
+  },
+  {
+    id: 'subscriptions',
+    name: 'Subscriptions / SaaS',
+    icon: CreditCard,
+    color: 'from-blue-400 to-indigo-500',
+    sustainability: 90,
+    complexity: 60,
+    pros: ['Predictable recurring revenue', 'Higher retention incentive', 'Works for B2B and premium features'],
+    cons: ['Harder to implement on-chain', 'Users resist recurring crypto payments', 'Requires clear premium value'],
+    example: 'Mintbase offers API access tiers for developers building NFT experiences',
+  },
+  {
+    id: 'freemium',
+    name: 'Freemium Tiers',
+    icon: Gift,
+    color: 'from-purple-400 to-violet-500',
+    sustainability: 70,
+    complexity: 50,
+    pros: ['Low barrier to entry', 'Large user base for network effects', 'Upsell path to premium'],
+    cons: ['Most users never pay', 'Must fund free tier somehow', 'Feature gating can fragment UX'],
+    example: 'Paras offers free minting with premium analytics and promotion tools',
+  },
+  {
+    id: 'burns',
+    name: 'Token Burns / Buybacks',
+    icon: Flame,
+    color: 'from-orange-400 to-red-500',
+    sustainability: 55,
+    complexity: 40,
+    pros: ['Reduces supply (deflationary pressure)', 'Aligns protocol with token holders', 'Simple to implement'],
+    cons: ['Not direct revenue — relies on price', 'Regulatory scrutiny (looks like dividends)', 'Unsustainable without other revenue'],
+    example: 'Protocols like Ref Finance can implement fee-based buyback and burn mechanisms',
+  },
+  {
+    id: 'protocol',
+    name: 'Protocol Fees',
+    icon: CircleDollarSign,
+    color: 'from-cyan-400 to-teal-500',
+    sustainability: 92,
+    complexity: 45,
+    pros: ['Aligns incentives long-term', 'Distributed to stakeholders', 'Compounds with TVL growth'],
+    cons: ['Must balance fee vs. competitiveness', 'Governance overhead for fee changes', 'Requires significant volume'],
+    example: 'Burrow takes a spread between lending and borrowing rates as protocol revenue',
+  },
+];
+
+function RevenueModelChart() {
+  const [activeModel, setActiveModel] = useState<string | null>(null);
+  const active = revenueModels.find(m => m.id === activeModel);
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <div className="space-y-4">
+      {/* Model selector buttons */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {revenueModels.map((model) => {
+          const Icon = model.icon;
+          const isSelected = activeModel === model.id;
+          return (
+            <motion.button
+              key={model.id}
+              onClick={() => setActiveModel(isSelected ? null : model.id)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                'flex flex-col items-center gap-2 p-3 rounded-xl border transition-all',
+                isSelected
+                  ? 'border-near-green/50 bg-near-green/10'
+                  : 'border-border bg-black/20 hover:border-near-green/20'
+              )}
+            >
+              <div className={cn('w-9 h-9 rounded-lg bg-gradient-to-br flex items-center justify-center', model.color)}>
+                <Icon className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-[11px] font-medium text-text-primary text-center leading-tight">{model.name}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Detail panel */}
+      <AnimatePresence mode="wait">
+        {active && (
+          <motion.div
+            key={active.id}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-black/30 border border-border rounded-xl p-4 space-y-4">
+              {/* Metrics bars */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-text-muted">Sustainability</span>
+                    <span className="text-xs font-mono text-emerald-400">{active.sustainability}%</span>
+                  </div>
+                  <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${active.sustainability}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-text-muted">Complexity</span>
+                    <span className="text-xs font-mono text-amber-400">{active.complexity}%</span>
+                  </div>
+                  <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${active.complexity}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pros and Cons */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs font-semibold text-emerald-400">Pros</span>
+                  </div>
+                  {active.pros.map((pro, i) => (
+                    <p key={i} className="text-[11px] text-text-secondary mb-1 flex items-start gap-1.5">
+                      <span className="text-emerald-500 mt-0.5">+</span> {pro}
+                    </p>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <ThumbsDown className="w-3.5 h-3.5 text-red-400" />
+                    <span className="text-xs font-semibold text-red-400">Cons</span>
+                  </div>
+                  {active.cons.map((con, i) => (
+                    <p key={i} className="text-[11px] text-text-secondary mb-1 flex items-start gap-1.5">
+                      <span className="text-red-500 mt-0.5">−</span> {con}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* NEAR Example */}
+              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
+                <p className="text-xs text-text-secondary">
+                  <span className="text-emerald-400 font-medium">NEAR Example:</span> {active.example}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+const quizOptions = [
+  { id: 'a', text: 'Token burns that create scarcity' },
+  { id: 'b', text: 'One-time NFT sale revenue' },
+  { id: 'c', text: 'Protocol fees distributed to stakeholders' },
+  { id: 'd', text: 'Venture capital funding rounds' },
+];
+
+export default function RevenueModelsForDapps({ isActive, onToggle }: RevenueModelsForDappsProps) {
+  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
+  const correctAnswer = 'c';
+
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
-            <Briefcase className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
+            <CircleDollarSign className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Revenue Models for dApps</h3>
-            <p className="text-text-muted text-sm">Sustainable business models — protocol fees, subscriptions, freemium, and hybrid approaches</p>
+            <p className="text-text-muted text-sm">Build sustainable income streams for your Web3 product</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Founder</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">55 min</Badge>
+          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
       {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Briefcase className="w-5 h-5 text-yellow-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
-                </div>
-                <ul className="space-y-3">
-                  {[
-                    'Why "free and decentralized" isn\'t a business model — and what to do instead',
-                    'Protocol fee structures: swap fees, listing fees, minting fees, and transaction taxes',
-                    'Subscription and SaaS models adapted for Web3 — recurring revenue on-chain',
-                    'Freemium strategies that convert free users into paying power users',
-                    'Real revenue analysis of NEAR protocols: who\'s actually making money and how',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Card variant="default" padding="md" className="mt-4 border-yellow-500/20 bg-yellow-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-yellow-400 font-semibold">Why this matters:</span> Grants run out. Token pumps end. The projects that survive long-term have real revenue. This module is about building a dApp that pays for itself — and eventually, pays you.
-                  </p>
-                </Card>
+        <div className="border-t border-near-green/20 p-6 space-y-8">
+          {/* The Big Idea */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-xl p-5"
+          >
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-bold text-text-primary mb-1">The Big Idea</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">
+                  Revenue in Web3 is like <span className="text-emerald-400 font-medium">electricity</span> — it needs to flow through the system to keep everything running, and the best models make users <span className="text-cyan-400 font-medium">barely notice the meter</span>. The magic is capturing value without creating friction.
+                </p>
               </div>
-            )}
+            </div>
+          </motion.div>
 
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Revenue Model Overview */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-emerald-400" />
-                    The Revenue Model Spectrum
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Web3 revenue models range from fully on-chain protocol fees to traditional SaaS. Most successful projects use a hybrid.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-emerald-400 font-semibold mb-2">Revenue Models by Type</div>
-                    {[
-                      { model: 'Protocol Fees', revenue: 'Per-transaction', examples: 'DEX swap fees, marketplace commissions', sustainability: '★★★★★' },
-                      { model: 'Subscription / SaaS', revenue: 'Recurring', examples: 'Premium features, API access, analytics', sustainability: '★★★★☆' },
-                      { model: 'Freemium + Premium', revenue: 'Conversion-based', examples: 'Free basic, paid advanced features', sustainability: '★★★★☆' },
-                      { model: 'Token Value Capture', revenue: 'Indirect', examples: 'Buy-and-burn, staking rewards from fees', sustainability: '★★★☆☆' },
-                      { model: 'Data / Analytics', revenue: 'B2B sales', examples: 'On-chain data, API access, dashboards', sustainability: '★★★★☆' },
-                      { model: 'Minting / Creation Fees', revenue: 'Per-action', examples: 'NFT minting fees, token creation fees', sustainability: '★★★☆☆' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <span className="text-yellow-400 font-mono w-8 text-right">{item.sustainability}</span>
-                        <div className="flex-1">
-                          <span className="text-text-secondary font-semibold">{item.model}</span>
-                          <span className="text-text-muted ml-2">({item.revenue})</span>
-                          <span className="text-text-muted ml-1">— {item.examples}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
+          {/* Interactive Revenue Model Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-400" />
+              Revenue Model Comparison
+            </h4>
+            <div className="bg-black/30 rounded-xl p-5 border border-border">
+              <RevenueModelChart />
+              <p className="text-xs text-text-muted mt-3 text-center">Click a model to explore sustainability, complexity, pros/cons, and NEAR examples.</p>
+            </div>
+          </motion.div>
 
-                {/* Section 2: Protocol Fees */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <ArrowRightLeft className="w-5 h-5 text-blue-400" />
-                    Protocol Fee Design
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Protocol fees are the most native Web3 revenue model — your smart contract charges a small fee on every transaction.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-blue-500/20">
-                      <h5 className="font-semibold text-blue-400 text-sm mb-2">Fee Structures</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Percentage fee:</strong> 0.1%-1% per transaction (DEXs, marketplaces)</li>
-                        <li>• <strong className="text-text-secondary">Flat fee:</strong> Fixed NEAR per action (minting, listing)</li>
-                        <li>• <strong className="text-text-secondary">Tiered fee:</strong> Lower fees for higher volume (loyalty incentive)</li>
-                        <li>• <strong className="text-text-secondary">Dynamic fee:</strong> Adjusts based on demand (congestion pricing)</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">Fee Distribution</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Treasury:</strong> Fund development and operations</li>
-                        <li>• <strong className="text-text-secondary">Token buyback:</strong> Buy and burn to reduce supply</li>
-                        <li>• <strong className="text-text-secondary">Staker rewards:</strong> Share revenue with token stakers</li>
-                        <li>• <strong className="text-text-secondary">LP rewards:</strong> Incentivize liquidity providers</li>
-                      </ul>
-                    </Card>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border mt-4">
-                    <div className="text-blue-400 mb-2">{'// Example: Protocol fee in a NEAR marketplace contract'}</div>
-                    <div className="text-near-green">{'const PROTOCOL_FEE_BPS: u128 = 250; // 2.5%'}</div>
-                    <div className="text-near-green">{'const FEE_DENOMINATOR: u128 = 10_000;'}</div>
-                    <div className="mt-2 text-near-green">{'// On every sale:'}</div>
-                    <div className="text-near-green">{'let fee = sale_price * PROTOCOL_FEE_BPS / FEE_DENOMINATOR;'}</div>
-                    <div className="text-near-green">{'let seller_receives = sale_price - fee;'}</div>
-                    <div className="mt-2 text-near-green">{'// Fee split: 60% treasury, 40% token buyback'}</div>
-                    <div className="text-near-green">{'let treasury_share = fee * 60 / 100;'}</div>
-                    <div className="text-near-green">{'let buyback_share = fee * 40 / 100;'}</div>
-                  </div>
-                </section>
+          {/* Concept Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-4">Core Concepts</h4>
+            <div className="grid gap-3">
+              <ConceptCard
+                icon={ArrowRightLeft}
+                title="Transaction Fee Models"
+                preview="The bread and butter of DeFi — taking a small cut of every transaction."
+                details="Transaction fees are the most common revenue model in DeFi. DEXs charge 0.1-0.3% per swap, lending protocols take a spread between lend/borrow rates, and NFT marketplaces charge 1-5% on sales. On NEAR, gas costs are extremely low (~$0.001 per transaction), so protocol fees can be competitive while still generating meaningful revenue at scale. Key metrics to track: daily volume, fee revenue, and fee/TVL ratio. The challenge: as competition increases, there's downward pressure on fees."
+              />
+              <ConceptCard
+                icon={CreditCard}
+                title="Subscription / SaaS Models"
+                preview="Recurring revenue through premium access — the Web2 model, Web3-adapted."
+                details="While subscriptions are rare in DeFi, they work well for developer tools, analytics platforms, and infrastructure services on NEAR. Charge monthly/yearly for API access, advanced analytics, or premium features. Implementation options: off-chain payment with on-chain access tokens, or smart contract-based subscriptions with auto-renewal. The key advantage is predictable revenue that doesn't depend on transaction volume. Challenge: crypto users expect things to be free, so the premium tier must deliver clear, measurable value."
+              />
+              <ConceptCard
+                icon={Gift}
+                title="Freemium Tiers"
+                preview="Free for everyone, premium for power users — growth through accessibility."
+                details="Freemium works by offering core functionality for free while charging for advanced features. In Web3: free trading with premium analytics, free minting with promotional tools, or free storage with enhanced API limits. The conversion funnel matters: typically 2-5% of free users upgrade to paid tiers. On NEAR, low gas costs make free-tier subsidization feasible. Design your free tier to create network effects (more users = more valuable platform) while ensuring the premium tier has clear ROI for paying users."
+              />
+              <ConceptCard
+                icon={Zap}
+                title="Protocol-Owned Liquidity (POL)"
+                preview="Own the liquidity instead of renting it — a paradigm shift in DeFi economics."
+                details="Instead of paying liquidity providers with token emissions (which dilute your token), Protocol-Owned Liquidity means the protocol itself provides liquidity using treasury funds and earns trading fees. Pioneered by OlympusDAO, this model reduces dependency on mercenary capital and creates a sustainable revenue stream. On NEAR, protocols can deploy treasury stablecoins as liquidity on Ref Finance, earning fees while maintaining protocol stability. The downside: requires significant upfront capital and smart contract risk management."
+              />
+              <ConceptCard
+                icon={Building2}
+                title="B2B Revenue"
+                preview="Enterprise and protocol-to-protocol services — the hidden goldmine."
+                details="B2B revenue in Web3 includes: white-label infrastructure licensing (let other projects use your technology), data API access for analytics providers, integration fees for cross-protocol composability, and consulting/implementation services. Mintbase generates B2B revenue by providing NFT infrastructure to other projects. On NEAR, the low-cost chain operation makes B2B services particularly competitive. This model is often overlooked but provides the most stable revenue because business customers have longer retention and higher willingness to pay."
+              />
+              <ConceptCard
+                icon={Layers}
+                title="Hybrid Models"
+                preview="The best protocols combine multiple revenue streams for resilience."
+                details="No single revenue model is perfect. The most successful dApps combine 2-3 models: base transaction fees + premium subscriptions, or freemium user tier + B2B API revenue + protocol-owned liquidity earnings. On NEAR, Ref Finance combines swap fees with potential premium analytics tools. Burrow combines lending spreads with liquidation fees. The key is ensuring revenue streams don't conflict — each should serve a different user segment or use case. Start with one model, prove it works, then layer additional streams."
+              />
+            </div>
+          </motion.div>
 
-                {/* Section 3: SaaS and Subscriptions */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-purple-400" />
-                    Web3 SaaS &amp; Subscriptions
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Recurring revenue is the holy grail. Here&apos;s how to implement subscription models in a decentralized context:
-                  </p>
-                  <div className="space-y-3">
-                    {[
-                      { model: 'API Access Tiers', desc: 'Free tier (100 calls/day) → Pro ($49/mo, 10K calls) → Enterprise (unlimited). Example: Indexer APIs, analytics dashboards.', nearExample: 'Pagoda RPC tiers' },
-                      { model: 'Token-Gated Features', desc: 'Hold X tokens to access premium features. No recurring payment — just hold. Creates sustained token demand.', nearExample: 'NFT-gated communities on Mintbase' },
-                      { model: 'On-Chain Subscriptions', desc: 'Smart contract that charges monthly via allowance. Auto-renews until cancelled. Fully on-chain and transparent.', nearExample: 'Emerging pattern on NEAR' },
-                      { model: 'Infrastructure as a Service', desc: 'Charge projects for hosted infrastructure: indexers, relayers, oracles, bridges. B2B recurring revenue.', nearExample: 'Fastnear, Pikespeak' },
-                    ].map((item, i) => (
-                      <Card key={i} variant="default" padding="md" className="border-purple-500/20">
-                        <div className="flex justify-between items-start mb-1">
-                          <h5 className="font-semibold text-purple-400 text-sm">{item.model}</h5>
-                          <span className="text-xs text-near-green font-mono">{item.nearExample}</span>
-                        </div>
-                        <p className="text-xs text-text-muted">{item.desc}</p>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 4: NEAR Revenue Case Studies */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <BarChart className="w-5 h-5 text-cyan-400" />
-                    NEAR Revenue Case Studies
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Real revenue data from NEAR ecosystem projects — what works in practice:
-                  </p>
-                  <div className="space-y-3">
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">Ref Finance (DEX)</h5>
-                      <p className="text-xs text-text-muted">
-                        <strong className="text-text-secondary">Model:</strong> 0.3% swap fee on every trade. Split between LPs (0.25%) and protocol treasury (0.05%). <strong className="text-text-secondary">Result:</strong> Consistent fee revenue proportional to trading volume. During peak DeFi seasons, protocol fees can reach $10K+/day. The treasury funds ongoing development without relying on grants.
-                      </p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">Mintbase (NFT Infrastructure)</h5>
-                      <p className="text-xs text-text-muted">
-                        <strong className="text-text-secondary">Model:</strong> Marketplace commission (2.5% on sales) + infrastructure services for other NFT platforms. <strong className="text-text-secondary">Result:</strong> Dual revenue stream — B2C marketplace fees and B2B infrastructure licensing. The B2B side provides more stable revenue than volatile marketplace volume.
-                      </p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">Burrow (Lending)</h5>
-                      <p className="text-xs text-text-muted">
-                        <strong className="text-text-secondary">Model:</strong> Interest rate spread — borrowers pay interest, lenders receive most of it, protocol keeps the spread. <strong className="text-text-secondary">Result:</strong> Revenue scales with TVL and utilization. Higher utilization = higher rates = higher protocol revenue. Reserve factor ensures the protocol captures value.
-                      </p>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 5: Unit Economics */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Globe className="w-5 h-5 text-orange-400" />
-                    Unit Economics for dApps
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Even in Web3, you need to understand your unit economics. How much does each user cost and generate?
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-orange-400 font-semibold mb-2">Key Metrics to Track</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-emerald-400 font-semibold">CAC (Customer Acquisition Cost)</span>
-                          <p className="text-text-muted">Total marketing spend ÷ new users. Include gas subsidies, airdrops, and incentives.</p>
-                        </div>
-                        <div>
-                          <span className="text-blue-400 font-semibold">LTV (Lifetime Value)</span>
-                          <p className="text-text-muted">Average revenue per user × average lifespan. For DeFi: fees generated per wallet over time.</p>
-                        </div>
-                        <div>
-                          <span className="text-purple-400 font-semibold">LTV:CAC Ratio</span>
-                          <p className="text-text-muted">Target: 3:1 or higher. Below 1:1 means you&apos;re losing money on every user.</p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-orange-400 font-semibold">Monthly Burn Rate</span>
-                          <p className="text-text-muted">Infrastructure + team + marketing costs. Know your runway at current burn.</p>
-                        </div>
-                        <div>
-                          <span className="text-cyan-400 font-semibold">Revenue per Transaction</span>
-                          <p className="text-text-muted">Average fee × number of transactions. Your most granular revenue metric.</p>
-                        </div>
-                        <div>
-                          <span className="text-yellow-400 font-semibold">Break-Even Analysis</span>
-                          <p className="text-text-muted">How many daily active users / transactions to cover monthly costs?</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Section 6: Pricing Strategy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-yellow-400" />
-                    Pricing Strategy
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Pricing in Web3 is tricky — users expect &quot;free and decentralized.&quot; Here&apos;s how to charge without losing users:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-yellow-500/20">
-                      <h5 className="font-semibold text-yellow-400 text-sm mb-2">Pricing Principles</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Start low, earn trust:</strong> Launch with 0 or minimal fees</li>
-                        <li>• <strong className="text-text-secondary">Transparent fees:</strong> Users see exactly what they pay and why</li>
-                        <li>• <strong className="text-text-secondary">Value-aligned:</strong> Charge when users get value, not before</li>
-                        <li>• <strong className="text-text-secondary">Governance-adjustable:</strong> Let DAO vote on fee changes</li>
-                        <li>• <strong className="text-text-secondary">Competitive:</strong> Check what similar protocols charge</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">Pricing Anti-Patterns</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Hidden fees that surprise users</li>
-                        <li>• Fees higher than centralized alternatives</li>
-                        <li>• Charging before proving value (users will fork you)</li>
-                        <li>• Extracting too much too early (community backlash)</li>
-                        <li>• No fee at all — &quot;we&apos;ll figure it out later&quot; (you won&apos;t)</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
+          {/* Case Studies */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <Target className="w-5 h-5 text-cyan-400" />
+              NEAR Ecosystem Case Studies
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="bg-black/30 rounded-xl p-4 border border-border">
+                <h5 className="font-semibold text-text-primary text-sm mb-2">Ref Finance — Fee Model</h5>
+                <p className="text-xs text-text-secondary leading-relaxed mb-2">
+                  NEAR&apos;s leading DEX charges a 0.3% fee per swap, with the split between liquidity providers and the protocol treasury governed by the DAO. During high-volume periods, the protocol earns thousands in daily fees. Their model proves that even with NEAR&apos;s low gas costs, meaningful protocol revenue is achievable through volume. They&apos;re exploring additional revenue through concentrated liquidity and cross-chain routing.
+                </p>
+                <Badge className="text-[10px] bg-emerald-500/20 text-emerald-300 border-emerald-500/20">Model: Transaction Fees + DAO Treasury</Badge>
               </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-yellow-500/20">
-                  <h5 className="font-semibold text-yellow-400 text-sm mb-2">🟡 Exercise 1: Revenue Model Canvas</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Map out every possible revenue stream for your dApp. For each stream, estimate: revenue per unit, volume potential, implementation complexity, and time to revenue. Pick the top 2-3 to implement first.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-yellow-500/20">
-                  <h5 className="font-semibold text-yellow-400 text-sm mb-2">🟡 Exercise 2: Fee Structure Design</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design a protocol fee for your dApp. Define: fee percentage/amount, what triggers the fee, where fees go (treasury, buyback, stakers), and how fees can be changed (governance, multisig). Write the smart contract logic.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-yellow-500/20">
-                  <h5 className="font-semibold text-yellow-400 text-sm mb-2">🟡 Exercise 3: Unit Economics Spreadsheet</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a spreadsheet with: CAC, LTV, revenue per transaction, monthly burn rate, and break-even point. Model three scenarios: conservative (100 users), moderate (1K users), and optimistic (10K users). When do you become self-sustaining?
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-yellow-500/20">
-                  <h5 className="font-semibold text-yellow-400 text-sm mb-2">🟡 Exercise 4: Competitive Pricing Analysis</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Research 5 protocols similar to yours (on NEAR and other chains). Document their fee structures, revenue numbers (if public), and pricing tiers. Position your pricing relative to them and justify your choice.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-yellow-500/20">
-                  <h5 className="font-semibold text-yellow-400 text-sm mb-2">🟡 Exercise 5: Revenue Diversification Plan</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design a 3-phase revenue plan: Phase 1 (0-6 months) — primary revenue stream, Phase 2 (6-12 months) — add secondary stream, Phase 3 (12-24 months) — full diversification. No single revenue source should be more than 60% of total.
-                  </p>
-                </Card>
+              <div className="bg-black/30 rounded-xl p-4 border border-border">
+                <h5 className="font-semibold text-text-primary text-sm mb-2">Mintbase — Marketplace Royalties</h5>
+                <p className="text-xs text-text-secondary leading-relaxed mb-2">
+                  Mintbase earns revenue through marketplace fees on NFT sales plus B2B revenue from their infrastructure-as-a-service model. Creators set royalty percentages enforced by smart contracts, and Mintbase takes a platform fee. Their dual model (consumer marketplace + developer infrastructure) provides revenue diversification that pure-play marketplaces lack.
+                </p>
+                <Badge className="text-[10px] bg-cyan-500/20 text-cyan-300 border-cyan-500/20">Model: Marketplace Fees + B2B Infrastructure</Badge>
               </div>
-            )}
+              <div className="bg-black/30 rounded-xl p-4 border border-border sm:col-span-2">
+                <h5 className="font-semibold text-text-primary text-sm mb-2">Burrow — Lending Spreads</h5>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Burrow generates revenue through the interest rate spread between lenders and borrowers — the protocol takes a portion of the interest paid by borrowers before distributing to lenders. Additional revenue comes from liquidation fees when under-collateralized positions are liquidated. This dual-stream model (spreads + liquidations) means Burrow earns more during both calm markets (steady lending) and volatile markets (liquidation events), creating natural revenue hedging.
+                </p>
+              </div>
+            </div>
+          </motion.div>
 
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Token Terminal', url: 'https://tokenterminal.com/', desc: 'Real revenue and financial data for crypto protocols' },
-                  { title: 'DeFi Llama', url: 'https://defillama.com/chain/Near', desc: 'TVL, revenue, and protocol metrics for NEAR ecosystem' },
-                  { title: 'Ref Finance Analytics', url: 'https://stats.ref.finance/', desc: 'Real-time fee revenue and volume data from NEAR\'s leading DEX' },
-                  { title: 'Crypto Business Models (Messari)', url: 'https://messari.io/', desc: 'Research on sustainable crypto business models and revenue analysis' },
-                  { title: 'Web3 Business Model Navigator', url: 'https://bmn.wtf/', desc: 'Framework for designing Web3-native business models' },
-                  { title: 'NEAR Protocol Economics', url: 'https://near.org/papers/economics-in-sharded-blockchain/', desc: 'Understanding NEAR\'s economic model — fees, storage, and validator economics' },
-                  { title: 'Fat Protocols Thesis', url: 'https://www.usv.com/writing/2016/08/fat-protocols/', desc: 'Joel Monegro\'s thesis on value capture in protocol layers' },
-                  { title: 'Dune Analytics', url: 'https://dune.com/', desc: 'Build custom dashboards to track your protocol\'s on-chain revenue' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
+          {/* Quiz */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-black/30 rounded-xl p-5 border border-border"
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-1">Quick Quiz</h4>
+            <p className="text-sm text-text-secondary mb-4">Which revenue model is most sustainable for DeFi protocols?</p>
+            <div className="grid gap-2">
+              {quizOptions.map((option) => {
+                const isSelected = quizAnswer === option.id;
+                const isCorrect = option.id === correctAnswer;
+                const showResult = quizAnswer !== null;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => !quizAnswer && setQuizAnswer(option.id)}
+                    disabled={quizAnswer !== null}
+                    className={cn(
+                      'text-left p-3 rounded-lg border text-sm transition-all',
+                      !showResult && 'border-border hover:border-near-green/30 hover:bg-white/5',
+                      showResult && isCorrect && 'border-emerald-500/50 bg-emerald-500/10',
+                      showResult && isSelected && !isCorrect && 'border-red-500/50 bg-red-500/10',
+                      showResult && !isSelected && !isCorrect && 'border-border opacity-50'
+                    )}
                   >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
+                    <span className="text-text-muted mr-2 font-mono">{option.id.toUpperCase()}.</span>
+                    <span className={cn(
+                      showResult && isCorrect ? 'text-emerald-300' : 'text-text-secondary',
+                      showResult && isSelected && !isCorrect && 'text-red-300'
+                    )}>{option.text}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <AnimatePresence>
+              {quizAnswer && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className={cn(
+                    'mt-4 p-4 rounded-lg border text-sm',
+                    quizAnswer === correctAnswer
+                      ? 'border-emerald-500/30 bg-emerald-500/10'
+                      : 'border-amber-500/30 bg-amber-500/10'
+                  )}>
+                    {quizAnswer === correctAnswer ? (
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-text-secondary">
+                          <span className="text-emerald-300 font-medium">Correct!</span> Protocol fees distributed to stakeholders create a flywheel: users generate fees → stakeholders earn revenue → stakeholders promote the protocol → more users. This aligns incentives long-term and creates sustainable growth, unlike one-time sales or unsustainable token emissions.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-text-secondary">
+                          <span className="text-amber-300 font-medium">Not quite.</span> The answer is <span className="text-emerald-300">C</span> — protocol fees distributed to stakeholders. This model aligns incentives between protocol, token holders, and users. Token burns rely on price appreciation, one-time sales aren&apos;t recurring, and VC funding eventually runs out. Sustainable revenue comes from ongoing value capture.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Key Takeaways */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-3">Key Takeaways</h4>
+            <div className="space-y-2">
+              {[
+                'Protocol fees distributed to stakeholders are the most sustainable DeFi revenue model',
+                'Combine 2-3 revenue streams for resilience — don\'t depend on a single source',
+                'NEAR\'s low gas costs make it feasible to subsidize free tiers while charging for premium',
+                'B2B revenue is often overlooked but provides the most stable, predictable income',
+                'Design revenue capture to be invisible to users — value extraction should feel like value exchange',
+              ].map((takeaway, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-text-secondary">{takeaway}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Action Items */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5"
+          >
+            <h4 className="font-bold text-text-primary mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              Action Items
+            </h4>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">1.</span>
+                Map your current and potential revenue streams — identify which models fit your dApp
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">2.</span>
+                Calculate your break-even volume — how many daily transactions/users to cover costs?
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">3.</span>
+                Research how 3 successful NEAR dApps monetize — adapt their strategies to your context
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">4.</span>
+                Design a revenue model that creates a stakeholder flywheel — fees → rewards → growth → more fees
+              </li>
+            </ul>
+          </motion.div>
         </div>
       )}
     </Card>
   );
-};
-
-export default RevenueModelsForDapps;
+}

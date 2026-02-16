@@ -1,8 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Megaphone, ExternalLink, CheckCircle, Pen, UserCheck, Gift, Twitter, Handshake } from 'lucide-react';
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronUp,
+  Megaphone,
+  Users,
+  FileText,
+  Star,
+  Gift,
+  Palette,
+  Shield,
+  Lightbulb,
+  CheckCircle,
+  AlertTriangle,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 
 interface MarketingForWeb3Props {
@@ -10,311 +27,374 @@ interface MarketingForWeb3Props {
   onToggle: () => void;
 }
 
-const MarketingForWeb3: React.FC<MarketingForWeb3Props> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+const channels = [
+  { name: 'Twitter/X', roi: 'High', effort: 'Medium', best: 'Narrative building, thought leadership', color: 'text-blue-400' },
+  { name: 'Discord', roi: 'High', effort: 'High', best: 'Community depth, power users, governance', color: 'text-indigo-400' },
+  { name: 'Telegram', roi: 'Medium', effort: 'Low', best: 'Announcements, quick updates, regional groups', color: 'text-cyan-400' },
+  { name: 'YouTube', roi: 'High', effort: 'High', best: 'Education, tutorials, long-form content', color: 'text-red-400' },
+  { name: 'Podcasts', roi: 'Medium', effort: 'Medium', best: 'Founder credibility, deep dives', color: 'text-purple-400' },
+  { name: 'Paid Ads', roi: 'Low', effort: 'High', best: 'Retargeting only, broad awareness is wasteful', color: 'text-amber-400' },
+  { name: 'KOL Deals', roi: 'Variable', effort: 'Medium', best: 'Token launches, major announcements', color: 'text-emerald-400' },
+  { name: 'Quests (Galxe)', roi: 'Medium', effort: 'Low', best: 'User onboarding, testnet participation', color: 'text-pink-400' },
+];
+
+function ChannelGrid() {
+  const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {channels.map((ch, i) => (
+          <motion.div
+            key={ch.name}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.06 }}
+            onClick={() => setSelected(selected === i ? null : i)}
+            className={cn(
+              'cursor-pointer border rounded-lg p-3 text-center transition-all',
+              selected === i
+                ? 'border-near-green/50 bg-near-green/5'
+                : 'border-border hover:border-near-green/30 bg-black/20'
+            )}
+          >
+            <span className={cn('text-sm font-semibold', ch.color)}>{ch.name}</span>
+            <div className="flex justify-center gap-2 mt-1">
+              <span className={cn(
+                'text-[10px] px-1.5 py-0.5 rounded-full',
+                ch.roi === 'High' ? 'bg-emerald-500/20 text-emerald-300'
+                  : ch.roi === 'Medium' ? 'bg-amber-500/20 text-amber-300'
+                    : ch.roi === 'Low' ? 'bg-red-500/20 text-red-300'
+                      : 'bg-purple-500/20 text-purple-300'
+              )}>
+                ROI: {ch.roi}
+              </span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <AnimatePresence mode="wait">
+        {selected !== null && (
+          <motion.div
+            key={selected}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="border border-near-green/30 rounded-lg p-4 bg-near-green/5">
+              <div className="flex items-center justify-between mb-2">
+                <span className={cn('font-semibold', channels[selected].color)}>{channels[selected].name}</span>
+                <div className="flex gap-2">
+                  <span className="text-xs bg-white/10 px-2 py-0.5 rounded text-text-muted">ROI: {channels[selected].roi}</span>
+                  <span className="text-xs bg-white/10 px-2 py-0.5 rounded text-text-muted">Effort: {channels[selected].effort}</span>
+                </div>
+              </div>
+              <p className="text-xs text-text-secondary">Best for: {channels[selected].best}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-xs text-text-muted text-center">Click a channel to see ROI/effort analysis</p>
+    </div>
+  );
+}
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType; title: string; preview: string; details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer border border-border rounded-xl p-4 hover:border-near-green/30 transition-all bg-black/20">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }}><ChevronDown className="w-4 h-4 text-text-muted" /></motion.div>
+          </div>
+          <p className="text-xs text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-xs text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 2;
+  const options = [
+    'Ad platforms ban crypto content too aggressively',
+    'Web3 users use ad blockers more than average',
+    'Crypto-native users trust community signals over ads',
+    'The cost per click is too high in crypto verticals',
+  ];
+
+  return (
+    <div className="border border-border rounded-xl p-5 bg-black/20">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-amber-400" />
+        <h4 className="font-semibold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-sm text-text-secondary mb-4">Why do traditional paid ads often fail in Web3?</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left p-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'border-red-500/50 bg-red-500/10 text-red-300'
+                  : selected === i
+                    ? 'border-near-green/50 bg-near-green/10 text-text-primary'
+                    : 'border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary'
+            )}
+          >
+            <span className="font-medium mr-2">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className={cn(
+              'mt-4 p-3 rounded-lg border text-sm',
+              selected === correctAnswer
+                ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-300'
+                : 'border-amber-500/30 bg-amber-500/5 text-amber-300'
+            )}>
+              {selected === correctAnswer ? (
+                <p><CheckCircle className="w-4 h-4 inline mr-1" /> Correct! Crypto-native users have been conditioned to distrust ads due to years of scams and rug pulls. They rely on community signals — what their trusted follows are talking about, what&apos;s being discussed in Discord, and what builders they respect are endorsing.</p>
+              ) : (
+                <p><AlertTriangle className="w-4 h-4 inline mr-1" /> Not quite. While ad restrictions and costs are real issues, the fundamental problem is trust. Crypto-native users trust community signals — peer recommendations, builder endorsements, and organic discussion — far more than any advertisement.</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export default function MarketingForWeb3({ isActive, onToggle }: MarketingForWeb3Props) {
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
             <Megaphone className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Marketing for Web3</h3>
-            <p className="text-text-muted text-sm">Content strategy, KOL partnerships, airdrop marketing, X/Twitter, and co-marketing</p>
+            <p className="text-text-muted text-sm">Build movements, not ad campaigns — Web3 marketing decoded</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Founder</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
+          <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
       {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+        <div className="border-t border-near-green/20 p-6 space-y-8">
+          {/* The Big Idea */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 border border-emerald-500/20 rounded-xl p-5"
+          >
+            <h4 className="text-lg font-bold text-text-primary mb-2">💡 The Big Idea</h4>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Web3 marketing is more like politics than advertising — you&apos;re building a movement, not selling a product. 
+              Your &quot;customers&quot; are voters who choose to support your vision with their capital, time, and reputation. 
+              The best Web3 marketing doesn&apos;t feel like marketing at all — it feels like joining a cause.
+            </p>
+          </motion.div>
+
+          {/* Interactive Channel Grid */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-400" />
+              Channel Effectiveness Grid
+            </h4>
+            <div className="border border-border rounded-xl p-5 bg-black/20">
+              <ChannelGrid />
+            </div>
           </div>
 
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Megaphone className="w-5 h-5 text-pink-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+          {/* Marketing Budget Framework */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">💰 Web3 Marketing Budget Framework</h4>
+            <div className="border border-border rounded-xl p-5 bg-black/20 space-y-3">
+              <p className="text-xs text-text-muted mb-2">Allocate your marketing budget across these categories based on your stage:</p>
+              {[
+                { category: 'Community Building', pct: '30-40%', desc: 'Discord/Telegram management, events, AMAs, contributor incentives' },
+                { category: 'Content & Education', pct: '20-25%', desc: 'Blog posts, tutorials, video content, documentation, courses' },
+                { category: 'Ecosystem Partnerships', pct: '15-20%', desc: 'Co-marketing, integrations, hackathon sponsorships, grants' },
+                { category: 'KOL & Ambassador', pct: '10-15%', desc: 'Long-term relationships with authentic voices in your niche' },
+                { category: 'PR & Comms', pct: '5-10%', desc: 'Media outreach, crisis comms prep, press releases for milestones' },
+                { category: 'Experimental', pct: '5-10%', desc: 'New channels, quest platforms, airdrops, guerrilla marketing tests' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-near-green font-mono text-xs font-bold whitespace-nowrap w-14 text-right">{item.pct}</span>
+                  <div>
+                    <span className="text-xs font-semibold text-text-primary">{item.category}</span>
+                    <span className="text-xs text-text-muted ml-2">— {item.desc}</span>
+                  </div>
                 </div>
-                <ul className="space-y-3">
-                  {[
-                    'Content strategy for crypto projects — what to post, how often, and where',
-                    'KOL (Key Opinion Leader) partnerships — finding, vetting, and working with influencers',
-                    'Airdrop marketing and quest platforms: Galxe, Layer3, and Zealy campaigns',
-                    'Twitter/X strategy for builders — building a founder brand in crypto',
-                    'Partnership playbooks and co-marketing tactics that create mutual growth',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Card variant="default" padding="md" className="mt-4 border-pink-500/20 bg-pink-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-pink-400 font-semibold">Why this matters:</span> Web3 marketing is a different beast. Traditional playbooks don&apos;t work. Paid ads are restricted, audiences are skeptical, and attention is the scarcest resource. This module teaches what actually works in crypto marketing.
-                  </p>
-                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Concept Cards */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">Core Concepts</h4>
+            <div className="grid gap-3">
+              <ConceptCard
+                icon={Users}
+                title="Community Marketing"
+                preview="Your community IS your marketing department — empower them, don't manage them"
+                details="Community marketing flips the traditional model: instead of broadcasting messages, you empower community members to spread your story in their own voice. NEAR Foundation built regional communities (guilds) that marketed NEAR in local languages and cultural contexts — far more effective than any global campaign. Tactics: ambassador programs, community-generated content bounties, governance-as-marketing (letting the community shape the product creates ownership narratives), and 'build in public' transparency."
+              />
+              <ConceptCard
+                icon={FileText}
+                title="Content Strategy"
+                preview="In Web3, your content is your product demo, whitepaper, and marketing rolled into one"
+                details="Web3 content hierarchy: Twitter threads (top-of-funnel awareness), blog posts (mid-funnel education), documentation (bottom-funnel conversion), and governance proposals (retention). The best Web3 content is educational — it teaches something genuinely useful while naturally showcasing your product. Paras NFT grew their artist community through creator education content — tutorials, artist spotlights, and marketplace guides that served the community while building the brand."
+              />
+              <ConceptCard
+                icon={Star}
+                title="KOL Partnerships"
+                preview="Influencer marketing in Web3 is a minefield — but done right, it's rocket fuel"
+                details="Web3 KOLs (Key Opinion Leaders) range from respected researchers to paid shills. The distinction matters enormously. A genuine endorsement from a respected builder can drive more conversion than a $50K paid promotion. Best practices: long-term partnerships over one-off posts, equity/token alignment over cash payments, authentic product usage over scripted endorsements, and micro-KOLs (1K-10K followers with high engagement) over mega-influencers with passive audiences."
+              />
+              <ConceptCard
+                icon={Gift}
+                title="Airdrop Marketing"
+                preview="Airdrops are the most powerful and most abused marketing tool in Web3"
+                details="Done well (Uniswap, ENS), airdrops create lifelong community members. Done poorly, they attract mercenary farmers who dump instantly. Best practices: retroactive rewards for genuine usage (not prospective tasks), anti-sybil measures (proof of humanity, on-chain activity thresholds), tiered rewards (more tokens for deeper engagement), and vesting periods for large allocations. NEAR ecosystem airdrops that worked targeted users who had already been actively participating."
+              />
+              <ConceptCard
+                icon={Palette}
+                title="Brand Building"
+                preview="In a sea of generic crypto projects, brand is your moat"
+                details="Web3 brand extends beyond logos and colors — it's your protocol's personality, values, and vibe. NEAR's brand as the 'user-friendly' L1 differentiated it from Ethereum's complexity and Solana's speed narrative. Strong Web3 brands have: a clear narrative position (what you stand for), visual consistency across touchpoints, a distinctive voice on social media, memorable memes and culture (community-generated > corporate-designed), and transparency as a brand value (public treasury, open governance)."
+              />
+              <ConceptCard
+                icon={Shield}
+                title="Narrative Control"
+                preview="In crypto, narrative IS reality — whoever controls the story controls the market"
+                details="Crypto narratives move markets more than fundamentals. 'DeFi Summer,' 'NFT boom,' 'L2 season' — each narrative created billions in value for projects positioned within them. To leverage narratives: identify emerging macro narratives early (AI + crypto, RWA, DePIN), position your project within the narrative authentically, create sub-narratives within your community, and prepare counter-narratives for FUD. NEAR's 'chain abstraction' narrative positioned it at the center of the multi-chain future discussion."
+              />
+            </div>
+          </div>
+
+          {/* Mini Quiz */}
+          <MiniQuiz />
+
+          {/* Case Studies */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">📚 NEAR Ecosystem Case Studies</h4>
+            <div className="space-y-3">
+              <div className="border border-border rounded-xl p-4 bg-black/20">
+                <h5 className="font-semibold text-emerald-400 text-sm mb-1">NEAR Foundation — Ecosystem Marketing at Scale</h5>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  NEAR Foundation&apos;s marketing strategy centered on ecosystem growth rather than token promotion. They funded regional hubs (Ukraine, Kenya, Vietnam, Balkans) 
+                  that marketed NEAR in local contexts. Instead of running global ad campaigns, they empowered local builders to tell NEAR&apos;s story. This grassroots approach 
+                  built genuine developer communities in regions underserved by other L1s, creating sustainable organic growth through local events, hackathons, and education.
+                </p>
               </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Content Strategy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Pen className="w-5 h-5 text-pink-400" />
-                    Content Strategy for Crypto Projects
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Content is king in crypto. Your content educates, builds trust, and drives organic discovery. Here&apos;s how to do it right:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-pink-400 font-semibold mb-2">Content Pillars Framework</div>
-                    {[
-                      { pillar: 'Educational', ratio: '40%', examples: 'Tutorials, explainers, how-to threads, technical deep dives', goal: 'Build authority and SEO' },
-                      { pillar: 'Product Updates', ratio: '25%', examples: 'Launch announcements, feature reveals, roadmap updates, changelogs', goal: 'Drive feature adoption' },
-                      { pillar: 'Community & Culture', ratio: '20%', examples: 'Memes, community highlights, team intros, behind-the-scenes', goal: 'Build brand affinity' },
-                      { pillar: 'Industry Commentary', ratio: '15%', examples: 'Market analysis, competitor comparison, trend takes', goal: 'Thought leadership' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <span className="text-pink-400 font-mono w-8 text-right flex-shrink-0">{item.ratio}</span>
-                        <div className="flex-1">
-                          <span className="text-text-secondary font-semibold">{item.pillar}</span>
-                          <span className="text-text-muted ml-2">— {item.examples}</span>
-                          <div className="text-near-green text-[10px] mt-0.5">Goal: {item.goal}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Card variant="default" padding="md" className="mt-4 border-yellow-500/20 bg-yellow-500/5">
-                    <p className="text-sm text-text-secondary">
-                      <span className="text-yellow-400 font-semibold">Pro tip:</span> Write long-form content on Mirror.xyz — it&apos;s the Medium of Web3. Content is stored on Arweave (permanent), and you can mint articles as NFTs. Great for building a content moat.
-                    </p>
-                  </Card>
-                </section>
-
-                {/* Section 2: KOL Partnerships */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <UserCheck className="w-5 h-5 text-purple-400" />
-                    KOL (Key Opinion Leader) Partnerships
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Influencer marketing is the most powerful (and most dangerous) tool in Web3 marketing. Here&apos;s how to use it wisely:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-purple-500/20">
-                      <h5 className="font-semibold text-purple-400 text-sm mb-2">KOL Tiers</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Nano (1K-10K):</strong> $100-500/post. Highly engaged, niche audiences. Best ROI</li>
-                        <li>• <strong className="text-text-secondary">Micro (10K-50K):</strong> $500-2K/post. Good reach with still-engaged followers</li>
-                        <li>• <strong className="text-text-secondary">Mid (50K-200K):</strong> $2K-10K/post. Broad reach, decent engagement</li>
-                        <li>• <strong className="text-text-secondary">Macro (200K+):</strong> $10K-50K+/post. Maximum reach, often lower engagement</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">KOL Red Flags</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Fake engagement (check reply quality, not just likes)</li>
-                        <li>• Promotes every project — no selectivity = no credibility</li>
-                        <li>• Demands payment in your token + immediate listing</li>
-                        <li>• History of promoting rugs or scams (check their timeline)</li>
-                        <li>• Won&apos;t disclose sponsorship (violates FTC guidelines)</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 3: Airdrop Marketing */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Gift className="w-5 h-5 text-emerald-400" />
-                    Airdrop Marketing &amp; Quest Platforms
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Quests and airdrops gamify user acquisition. When designed well, they educate users while onboarding them to your product.
-                  </p>
-                  <div className="space-y-3">
-                    {[
-                      { platform: 'Galxe', desc: 'The largest Web3 quest platform. Create campaigns with on-chain and off-chain tasks. Users earn OATs (on-chain achievement tokens). Best for broad reach and complex multi-step campaigns.', strength: 'Largest user base, cross-chain' },
-                      { platform: 'Layer3', desc: 'Education-focused quests. Users learn about your protocol by completing interactive tasks. Better for quality over quantity — users actually understand your product after completing quests.', strength: 'Higher quality users, educational' },
-                      { platform: 'Zealy', desc: 'Community-focused quest platform (formerly Crew3). Combines social tasks (Twitter, Discord) with on-chain tasks. Leaderboard system drives competition. Good for community building.', strength: 'Community engagement, leaderboards' },
-                    ].map((item, i) => (
-                      <Card key={i} variant="default" padding="md" className="border-emerald-500/20">
-                        <div className="flex justify-between items-start mb-1">
-                          <h5 className="font-semibold text-emerald-400 text-sm">{item.platform}</h5>
-                          <span className="text-xs text-near-green font-mono">{item.strength}</span>
-                        </div>
-                        <p className="text-xs text-text-muted">{item.desc}</p>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 4: Twitter/X Strategy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Twitter className="w-5 h-5 text-blue-400" />
-                    Twitter/X Strategy for Builders
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Crypto Twitter (CT) is where attention lives. Your project and founder accounts need a deliberate strategy:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 text-xs border border-border space-y-3">
-                    <div className="text-blue-400 font-semibold mb-2">X/Twitter Playbook</div>
-                    {[
-                      { tactic: 'Posting frequency', detail: '2-3x/day for project account, 1-2x/day for founder. Consistency > virality.' },
-                      { tactic: 'Thread game', detail: 'Weekly educational threads (5-10 tweets). Share alpha, tutorials, or analysis. Threads get 3-5x more engagement than single tweets.' },
-                      { tactic: 'Engagement before promotion', detail: 'Reply to 20+ tweets/day in your niche BEFORE posting. Build relationships with other founders, VCs, and thought leaders.' },
-                      { tactic: 'Build in public', detail: 'Share progress updates, challenges, and milestones. Vulnerability builds trust. "We hit a bug today…" outperforms "We\'re crushing it."' },
-                      { tactic: 'Spaces & live content', detail: 'Host weekly Twitter Spaces on relevant topics. Co-host with partners. Live content builds deeper connection than tweets.' },
-                      { tactic: 'Visual content', detail: 'Infographics, charts, and product demos get 2x+ engagement. Use Canva or Figma for quick graphics.' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="text-blue-400">•</span>
-                        <div className="flex-1">
-                          <span className="text-text-secondary font-semibold">{item.tactic}:</span>
-                          <span className="text-text-muted ml-1">{item.detail}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 5: Partnerships */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Handshake className="w-5 h-5 text-teal-400" />
-                    Partnership Playbooks &amp; Co-Marketing
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Strategic partnerships amplify your reach exponentially. Every partnership should benefit both sides.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-teal-500/20">
-                      <h5 className="font-semibold text-teal-400 text-sm mb-2">Partnership Types</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Integration partners:</strong> Technical integrations (cross-list, composability)</li>
-                        <li>• <strong className="text-text-secondary">Co-marketing:</strong> Joint content, AMAs, and campaigns</li>
-                        <li>• <strong className="text-text-secondary">Ecosystem grants:</strong> NEAR Foundation, Proximity Labs partnerships</li>
-                        <li>• <strong className="text-text-secondary">Liquidity partners:</strong> Shared liquidity pools and incentive programs</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-teal-500/20">
-                      <h5 className="font-semibold text-teal-400 text-sm mb-2">Co-Marketing Tactics</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Joint Twitter Spaces:</strong> Share audiences with complementary projects</li>
-                        <li>• <strong className="text-text-secondary">Co-authored content:</strong> Blog posts and threads featuring both projects</li>
-                        <li>• <strong className="text-text-secondary">Shared quest campaigns:</strong> Galxe/Layer3 quests that involve both protocols</li>
-                        <li>• <strong className="text-text-secondary">Cross-community events:</strong> Joint AMAs, hackathons, and contests</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
+              <div className="border border-border rounded-xl p-4 bg-black/20">
+                <h5 className="font-semibold text-cyan-400 text-sm mb-1">Paras — Community-Driven NFT Growth</h5>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Paras NFT marketplace grew through creator-first marketing. Instead of chasing collectors with hype, they invested in onboarding artists — 
+                  running creator workshops, spotlighting artists on social media, and building tools that made minting accessible. This created a flywheel: 
+                  happy artists brought their audiences, those audiences became collectors, collectors attracted more artists. Their marketing budget was minimal — 
+                  the community itself was the marketing engine.
+                </p>
               </div>
-            )}
+            </div>
+          </div>
 
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
+          {/* Key Takeaways */}
+          <div className="bg-gradient-to-br from-emerald-500/5 to-transparent border border-emerald-500/20 rounded-xl p-5">
+            <h4 className="font-semibold text-text-primary mb-3">🎯 Key Takeaways</h4>
+            <ul className="space-y-2">
+              {[
+                'Web3 marketing is movement-building — empower your community to tell your story',
+                'Educational content converts better than promotional content in crypto',
+                'KOL partnerships work best with long-term alignment, not one-off payments',
+                'Airdrops should reward genuine past behavior, not incentivize mercenary farming',
+                'Control your narrative or the market will create one for you — and you won\'t like it',
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                <Card variant="default" padding="md" className="border-pink-500/20">
-                  <h5 className="font-semibold text-pink-400 text-sm mb-2">🩷 Exercise 1: Content Calendar</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Create a 4-week content calendar for your project. Plan 3 posts/day across X and Discord. Follow the content pillars framework (40% educational, 25% product, 20% community, 15% commentary). Include one weekly thread.
-                  </p>
-                </Card>
+          {/* Common Mistakes */}
+          <div>
+            <h4 className="text-base font-semibold text-text-primary mb-4">⚠️ Common Web3 Marketing Mistakes</h4>
+            <div className="space-y-3">
+              {[
+                { mistake: 'Spending treasury on Facebook/Google ads', fix: 'Most crypto ad accounts get banned within weeks. Even if they don\'t, crypto-native users don\'t discover projects through display ads. Invest in ecosystem presence instead.' },
+                { mistake: 'Paying influencers for one-off shills', fix: 'A single KOL tweet has a 24-hour shelf life. Long-term ambassador relationships where KOLs actually use your product create sustained, authentic promotion that their audience trusts.' },
+                { mistake: 'Running airdrops without Sybil protection', fix: 'Unprotected airdrops attract farmers who dump immediately. Use on-chain identity verification, activity requirements, and tiered rewards based on genuine protocol usage.' },
+                { mistake: 'Ignoring negative narratives', fix: 'In crypto, FUD spreads 10x faster than positive news. Have a rapid-response playbook: acknowledge issues within 1 hour, provide transparent updates, and never delete criticism — address it publicly.' },
+                { mistake: 'Marketing before product', fix: 'Hype without substance creates expectations you can\'t meet. Every disappointed user becomes a vocal critic. Build first, create genuine users, then amplify their authentic stories.' },
+              ].map((item, i) => (
+                <div key={i} className="border border-red-500/20 rounded-lg p-3 bg-red-500/5">
+                  <p className="text-xs text-red-300 font-semibold mb-1">❌ {item.mistake}</p>
+                  <p className="text-xs text-text-muted">{item.fix}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                <Card variant="default" padding="md" className="border-pink-500/20">
-                  <h5 className="font-semibold text-pink-400 text-sm mb-2">🩷 Exercise 2: KOL Outreach Plan</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Identify 10 KOLs relevant to your project (mix of nano, micro, and mid-tier). For each, document: follower count, engagement rate, content style, estimated cost, and why they&apos;re a good fit. Draft an outreach DM template.
-                  </p>
-                </Card>
+          {/* Action Items */}
+          <div className="border-l-4 border-amber-500 bg-amber-500/5 rounded-r-xl p-4">
+            <h4 className="font-semibold text-amber-300 text-sm mb-1">⚡ Action Item: Channel Audit</h4>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Audit your current marketing channels. For each, calculate the rough cost-per-engaged-user (not impressions — actual 
+              wallet connections or meaningful interactions). Kill any channel below your threshold and reallocate to community-driven 
+              initiatives. Start a &quot;build in public&quot; practice: post one genuine development update per week on Twitter showing real 
+              progress, decisions, and even mistakes. Authenticity compounds.
+            </p>
+          </div>
 
-                <Card variant="default" padding="md" className="border-pink-500/20">
-                  <h5 className="font-semibold text-pink-400 text-sm mb-2">🩷 Exercise 3: Quest Campaign Design</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design a Galxe or Layer3 quest campaign with 5-7 tasks. Each task should teach users one feature of your dApp. Define rewards, budget, expected participants, and success metrics (retention after quest completion).
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-pink-500/20">
-                  <h5 className="font-semibold text-pink-400 text-sm mb-2">🩷 Exercise 4: Founder Brand Build</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Audit your personal X/Twitter presence. Post 1x/day for 2 weeks following the builder playbook. Track impressions, engagement, and follower growth. Write a thread about a lesson learned building your project.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-pink-500/20">
-                  <h5 className="font-semibold text-pink-400 text-sm mb-2">🩷 Exercise 5: Partnership Pitch</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Identify 3 complementary NEAR ecosystem projects. Draft a partnership proposal for each: what you offer, what you need, joint campaign idea, and expected outcomes for both sides. Send at least one.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Mirror.xyz', url: 'https://mirror.xyz/', desc: 'Web3-native publishing platform — write content stored permanently on Arweave' },
-                  { title: 'Galxe', url: 'https://galxe.com/', desc: 'Largest Web3 quest platform — create on-chain campaigns for user acquisition' },
-                  { title: 'Layer3', url: 'https://layer3.xyz/', desc: 'Education-focused quest platform — onboard users while teaching them' },
-                  { title: 'Zealy', url: 'https://zealy.io/', desc: 'Community quest platform with leaderboards and gamification' },
-                  { title: 'Typefully', url: 'https://typefully.com/', desc: 'Twitter/X scheduling and analytics — essential for consistent posting' },
-                  { title: 'LunarCrush', url: 'https://lunarcrush.com/', desc: 'Social media analytics for crypto — track sentiment and influence' },
-                  { title: 'Crypto Marketing Guide (Web3 Academy)', url: 'https://www.web3academy.com/', desc: 'Comprehensive Web3 marketing education and community' },
-                  { title: 'NEAR Marketing DAO (Archive)', url: 'https://gov.near.org/', desc: 'Historical examples of NEAR ecosystem marketing proposals and campaigns' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
+          <div className="border-l-4 border-cyan-500 bg-cyan-500/5 rounded-r-xl p-4">
+            <h4 className="font-semibold text-cyan-300 text-sm mb-1">📋 Action Item: Content Calendar</h4>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Build a 30-day content calendar with 4 content types rotating weekly: (1) Technical deep-dive — explain your architecture decisions, 
+              (2) Community spotlight — feature a user, contributor, or partner, (3) Ecosystem insight — share your perspective on a NEAR trend, 
+              (4) Behind-the-scenes — show your team working, failing, and learning. Batch-produce a week&apos;s content every Monday. Consistency 
+              beats virality — your 50th post will perform better than your 1st because you&apos;ve earned algorithmic trust.
+            </p>
           </div>
         </div>
       )}
     </Card>
   );
-};
-
-export default MarketingForWeb3;
+}
