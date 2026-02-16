@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Code2, Rocket, Share2, GitCompare, Play, Users, Globe, FolderTree, Wrench, ChevronDown, Check } from 'lucide-react';
+import { Code2, Rocket, Share2, GitCompare, Play, Users, Globe, FolderTree, Wrench, ChevronDown, Check, Lock } from 'lucide-react';
 import { DownloadButton } from './DownloadContract';
 import { FileStructureToggle } from './FileStructure';
 import { ProjectManager } from './ProjectManager';
+import { useWallet } from '@/hooks/useWallet';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import Link from 'next/link';
 
 interface ContractToolbarProps {
   generatedCode: string;
@@ -128,6 +131,9 @@ export function ContractToolbar({
 }: ContractToolbarProps) {
   const hasCode = !!generatedCode;
   const [copied, setCopied] = useState(false);
+  const { user } = useWallet();
+  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
+  const canPairProgram = userTier === 'leviathan';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedCode);
@@ -206,13 +212,23 @@ export function ContractToolbar({
           disabled={!hasCode}
           color="green"
         />
-        <DropdownItem
-          icon={Users}
-          label="Pair Programming"
-          description="Collaborative mode"
-          onClick={() => dispatch({ type: 'SET_SHOW_PAIR_PROGRAMMING', payload: true })}
-          color="pink"
-        />
+        {canPairProgram ? (
+          <DropdownItem
+            icon={Users}
+            label="Pair Programming"
+            description="Collaborative mode"
+            onClick={() => dispatch({ type: 'SET_SHOW_PAIR_PROGRAMMING', payload: true })}
+            color="pink"
+          />
+        ) : (
+          <DropdownItem
+            icon={Lock}
+            label="Pair Programming"
+            description="Leviathan tier only"
+            onClick={() => window.location.href = '/pricing'}
+            color="gray"
+          />
+        )}
       </ToolbarDropdown>
 
       {/* Project Manager (already has its own UI/dropdown) */}
