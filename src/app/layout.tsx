@@ -110,7 +110,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col">
+      <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col overflow-x-hidden">
         <Providers>
           <SearchShortcut />
           <Header />

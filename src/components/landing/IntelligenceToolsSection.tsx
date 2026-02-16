@@ -54,8 +54,8 @@ export function IntelligenceToolsSection() {
       <SectionHeader title="Intelligence Tools" badge="YOUR EDGE IN THE ECOSYSTEM" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {tools.map((tool) => (
-          <Link key={tool.href} href={tool.href} className="group">
-            <div className={`relative p-4 sm:p-6 rounded-xl border ${tool.borderClass} bg-surface/30 transition-all duration-300 h-full`}>
+          <Link key={tool.href} href={tool.href} className="group active:scale-[0.98] transition-transform">
+            <div className={`relative p-4 sm:p-6 rounded-xl border ${tool.borderClass} bg-surface/30 transition-all duration-300 h-full min-h-[44px]`}>
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-br from-transparent to-transparent ${tool.hoverBgClass} transition-all duration-300`} />
               <div className="relative z-10">
                 <div className="flex items-start sm:items-center gap-3 mb-3">

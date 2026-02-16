@@ -171,7 +171,7 @@ export function HeroCTA() {
           Powered by Claude AI
         </p>
         <span className="hidden sm:inline text-text-muted/30">·</span>
-        <Link href="/learn" className="text-xs text-near-green/70 hover:text-near-green font-mono transition-colors">
+        <Link href="/learn" className="text-xs text-near-green/70 hover:text-near-green font-mono transition-colors min-h-[44px] flex items-center active:scale-[0.97]">
           New to NEAR? Start learning →
         </Link>
       </motion.div>

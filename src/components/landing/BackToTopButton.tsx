@@ -22,7 +22,7 @@ export function BackToTopButton() {
     <button
       onClick={scrollToTop}
       aria-label="Back to top"
-      className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-surface border border-border hover:border-near-green/40 active:border-near-green/60 text-text-muted hover:text-near-green flex items-center justify-center shadow-lg transition-all duration-300 ${
+      className={`fixed bottom-[max(1rem,env(safe-area-inset-bottom,1rem))] right-4 sm:bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] sm:right-6 z-50 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-surface border border-border hover:border-near-green/40 active:border-near-green/60 active:scale-[0.97] text-text-muted hover:text-near-green flex items-center justify-center shadow-lg transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
     >

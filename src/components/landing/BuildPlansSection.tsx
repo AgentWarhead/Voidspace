@@ -42,7 +42,7 @@ export function BuildPlansSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 mb-8 max-w-3xl mx-auto">
             {features.map((item) => (
               <div key={item.label} className="group p-3 rounded-lg bg-surface/60 border border-border hover:border-near-green/30 transition-all text-center">
                 <div className="w-8 h-8 rounded-lg bg-near-green/10 border border-near-green/15 flex items-center justify-center mx-auto mb-2">
@@ -57,7 +57,7 @@ export function BuildPlansSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             <Link
               href="/opportunities"
-              className="group relative p-4 sm:p-5 rounded-xl bg-surface/60 border border-near-green/20 hover:border-near-green/50 active:border-near-green/60 transition-all text-center min-h-[44px]"
+              className="group relative p-4 sm:p-5 rounded-xl bg-surface/60 border border-near-green/20 hover:border-near-green/50 active:border-near-green/60 active:scale-[0.98] transition-all text-center min-h-[44px]"
             >
               <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/15 flex items-center justify-center mx-auto mb-3">
                 <Search className="w-5 h-5 text-near-green" />
@@ -73,7 +73,7 @@ export function BuildPlansSection() {
 
             <Link
               href="/opportunities#custom-brief"
-              className="group relative p-4 sm:p-5 rounded-xl bg-surface/60 border border-accent-cyan/20 hover:border-accent-cyan/50 active:border-accent-cyan/60 transition-all text-center min-h-[44px]"
+              className="group relative p-4 sm:p-5 rounded-xl bg-surface/60 border border-accent-cyan/20 hover:border-accent-cyan/50 active:border-accent-cyan/60 active:scale-[0.98] transition-all text-center min-h-[44px]"
             >
               <div className="w-10 h-10 rounded-lg bg-accent-cyan/10 border border-accent-cyan/15 flex items-center justify-center mx-auto mb-3">
                 <Lightbulb className="w-5 h-5 text-accent-cyan" />

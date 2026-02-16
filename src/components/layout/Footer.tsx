@@ -75,7 +75,7 @@ export function Footer() {
           <div className="flex items-center justify-center md:justify-end gap-3 flex-wrap">
             <a
               href="mailto:team@voidspace.io"
-              className="text-[10px] text-text-muted hover:text-near-green transition-colors"
+              className="text-[10px] text-text-muted hover:text-near-green transition-colors min-h-[44px] flex items-center active:scale-[0.97]"
               aria-label="Email Voidspace"
             >
               team@voidspace.io
@@ -84,7 +84,7 @@ export function Footer() {
               href="https://x.com/voidspacenear"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-text-muted hover:text-text-secondary transition-colors"
+              className="text-text-muted hover:text-text-secondary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-[0.97]"
               aria-label="Follow Voidspace on X"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -108,24 +108,24 @@ export function Footer() {
         </div>
 
         {/* Legal links */}
-        <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pb-6 pt-2 border-t border-white/[0.04]">
-          <Link href="/legal/terms" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pb-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 border-t border-white/[0.04]">
+          <Link href="/legal/terms" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors py-2 min-h-[44px] flex items-center">
             Terms
           </Link>
           <span className="text-text-muted/30 text-[10px]">·</span>
-          <Link href="/legal/privacy" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+          <Link href="/legal/privacy" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors py-2 min-h-[44px] flex items-center">
             Privacy
           </Link>
           <span className="text-text-muted/30 text-[10px]">·</span>
-          <Link href="/legal/disclaimer" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+          <Link href="/legal/disclaimer" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors py-2 min-h-[44px] flex items-center">
             Disclaimer
           </Link>
           <span className="text-text-muted/30 text-[10px]">·</span>
-          <Link href="/legal/cookies" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+          <Link href="/legal/cookies" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors py-2 min-h-[44px] flex items-center">
             Cookies
           </Link>
           <span className="text-text-muted/30 text-[10px]">·</span>
-          <Link href="/legal/acceptable-use" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">
+          <Link href="/legal/acceptable-use" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors py-2 min-h-[44px] flex items-center">
             Acceptable Use
           </Link>
         </div>

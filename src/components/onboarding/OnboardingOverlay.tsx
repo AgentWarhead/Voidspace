@@ -107,7 +107,7 @@ export function OnboardingOverlay() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', duration: 0.5 }}
-          className="relative z-10 w-full max-w-lg"
+          className="relative z-10 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto"
         >
           <Card 
             variant="glass" 
@@ -117,13 +117,13 @@ export function OnboardingOverlay() {
             {/* Close button */}
             <button
               onClick={handleSkip}
-              className="absolute top-4 right-4 p-2 text-text-secondary hover:text-text-primary transition-colors"
+              className="absolute top-3 right-3 p-2 text-text-secondary hover:text-text-primary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-[0.97]"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Content */}
-            <div className="p-8 text-center">
+            <div className="p-5 sm:p-8 text-center">
               {/* Icon */}
               <motion.div
                 key={currentSlide}
@@ -146,10 +146,10 @@ export function OnboardingOverlay() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-2xl font-bold text-text-primary mb-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 sm:mb-4">
                     {slides[currentSlide].title}
                   </h2>
-                  <p className="text-text-secondary leading-relaxed mb-8">
+                  <p className="text-sm sm:text-base text-text-secondary leading-relaxed mb-6 sm:mb-8">
                     {slides[currentSlide].description}
                   </p>
                 </motion.div>
@@ -161,10 +161,10 @@ export function OnboardingOverlay() {
                   <button
                     key={index}
                     onClick={() => handleDotClick(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    className={`h-2 rounded-full transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center relative before:absolute before:rounded-full before:transition-all before:duration-200 ${
                       index === currentSlide 
-                        ? 'bg-near-green w-6' 
-                        : 'bg-text-muted hover:bg-text-secondary'
+                        ? 'before:bg-near-green before:w-6 before:h-2' 
+                        : 'before:bg-text-muted hover:before:bg-text-secondary before:w-2 before:h-2'
                     }`}
                   />
                 ))}
@@ -174,7 +174,7 @@ export function OnboardingOverlay() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleSkip}
-                  className="text-text-muted hover:text-text-secondary transition-colors text-sm"
+                  className="text-text-muted hover:text-text-secondary transition-colors text-sm min-h-[44px] min-w-[44px] active:scale-[0.97]"
                 >
                   Skip
                 </button>

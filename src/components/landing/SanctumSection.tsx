@@ -56,7 +56,7 @@ export function SanctumSection() {
                 <span className="text-[10px] font-mono text-text-muted ml-2">sanctum — vibe-coding session</span>
               </div>
               {/* Terminal content */}
-              <div className="p-3 sm:p-4 font-mono text-[10px] sm:text-xs leading-relaxed space-y-2 overflow-x-auto">
+              <div className="p-3 sm:p-4 font-mono text-[10px] sm:text-xs leading-relaxed space-y-2 overflow-x-auto max-w-full">
                 <p><span className="text-purple-400">you:</span> <span className="text-text-secondary">Build me a token staking contract on NEAR</span></p>
                 <p><span className="text-near-green">sanctum:</span> <span className="text-text-secondary">Let&apos;s build it step by step. First, I&apos;ll create the</span></p>
                 <p className="text-text-secondary pl-[4.5rem]">contract struct with staking pools and reward tracking...</p>
@@ -156,7 +156,7 @@ export function SanctumSection() {
                   key={persona.id}
                   className="group relative"
                 >
-                  <div className={`w-9 h-9 sm:w-9 sm:h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-base hover:border-white/[0.2] hover:bg-white/[0.08] transition-all duration-200 cursor-default hover:scale-110`}>
+                  <div className={`w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-base hover:border-white/[0.2] hover:bg-white/[0.08] transition-all duration-200 cursor-default hover:scale-110`}>
                     {persona.emoji}
                   </div>
                   {/* Tooltip */}

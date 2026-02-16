@@ -76,7 +76,7 @@ export function ConnectWalletButton() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-64 z-50"
+              className="absolute top-full right-0 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 mt-2 w-64 max-w-[calc(100vw-2rem)] z-50"
             >
               <div className="bg-surface/95 backdrop-blur-sm border border-near-green/30 rounded-lg p-3 shadow-lg">
                 <div className="text-sm text-text-secondary leading-relaxed">
@@ -96,7 +96,7 @@ export function ConnectWalletButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-near-green bg-near-green/10 rounded-lg hover:bg-near-green/20 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-near-green bg-near-green/10 rounded-lg hover:bg-near-green/20 transition-colors min-h-[44px] active:scale-[0.97]"
       >
         <span>{truncateAddress(accountId)}</span>
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -107,7 +107,7 @@ export function ConnectWalletButton() {
           <Link
             href="/profile"
             onClick={() => setDropdownOpen(false)}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors min-h-[44px] active:scale-[0.97]"
           >
             <User className="w-4 h-4" />
             Profile
@@ -117,7 +117,7 @@ export function ConnectWalletButton() {
               setDropdownOpen(false);
               await signOut();
             }}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors w-full text-left border-t border-border"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors w-full text-left border-t border-border min-h-[44px] active:scale-[0.97]"
           >
             <LogOut className="w-4 h-4" />
             Disconnect

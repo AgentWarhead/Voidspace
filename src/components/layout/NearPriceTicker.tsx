@@ -89,7 +89,7 @@ export function NearPriceTicker() {
       </svg>
       
       {/* Price */}
-      <span className="text-xs font-medium text-text-primary font-mono">
+      <span className="text-xs font-medium text-text-primary font-mono truncate">
         {formattedPrice}
       </span>
       

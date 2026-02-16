@@ -154,12 +154,12 @@ export function DataSourcesSection() {
           return (
             <motion.div key={source.name} variants={itemVariants}>
               <GlowCard padding="sm" className="h-full">
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${source.bgColor} shrink-0`}>
-                    <Icon className={`w-4 h-4 ${source.color}`} />
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className={`p-1.5 sm:p-2 rounded-lg ${source.bgColor} shrink-0`}>
+                    <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${source.color}`} />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-text-primary truncate">
+                  <div className="min-w-0 break-words">
+                    <h3 className="text-xs sm:text-sm font-semibold text-text-primary truncate">
                       {source.name}
                     </h3>
                     <p className="text-xs text-text-muted leading-relaxed mt-0.5">
