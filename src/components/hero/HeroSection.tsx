@@ -71,7 +71,6 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
               lines={[
                 'See everything. Build anything.',
                 'NEAR\'s first AI-native intelligence and builder platform.',
-                'Learn Rust. Vibe-code contracts. Zero to dangerous.',
               ]}
               speed={35}
               className="max-w-lg mx-auto"
