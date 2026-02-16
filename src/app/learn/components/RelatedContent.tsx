@@ -53,12 +53,12 @@ export function RelatedContent({ currentTrack }: RelatedContentProps) {
       <Container size="lg">
         <div className="py-12">
           <h3 className="text-lg font-semibold text-text-primary mb-6">Continue Learning</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {suggestions.map((mod) => (
               <Link
                 key={mod.href}
                 href={mod.href}
-                className="group p-4 rounded-xl border border-border bg-surface hover:bg-surface-hover transition-all duration-200"
+                className="group p-4 rounded-xl border border-border bg-surface hover:bg-surface-hover transition-all duration-200 min-h-[44px]"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-surface-hover ${mod.trackColor}`}>

@@ -336,7 +336,7 @@ function TemplateCard({ template, index }: { template: Template; index: number }
           </div>
 
           {/* Badges row */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <span className={cn(
               'text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wide',
               styles.badge,
@@ -418,8 +418,8 @@ function TemplateCard({ template, index }: { template: Template; index: number }
                     </div>
                     <span className="text-[9px] font-mono text-text-muted/50">PREVIEW</span>
                   </div>
-                  <pre className="p-3 text-[11px] font-mono text-text-secondary leading-relaxed overflow-x-auto">
-                    {template.codePreview}
+                  <pre className="p-3 text-[10px] sm:text-[11px] font-mono text-text-secondary leading-relaxed overflow-x-auto max-w-full">
+                    <code>{template.codePreview}</code>
                   </pre>
                 </div>
               </motion.div>
@@ -511,14 +511,14 @@ export default function ProjectTemplates() {
 
       {/* Difficulty Filter */}
       <ScrollReveal delay={0.05}>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Filter className="w-4 h-4 text-text-muted" />
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-x-visible sm:pb-0">
+          <Filter className="w-4 h-4 text-text-muted flex-shrink-0" />
           {FILTERS.map((f) => (
             <motion.button
               key={f}
               onClick={() => setActiveFilter(f)}
               className={cn(
-                'px-4 py-1.5 rounded-full text-sm font-medium border transition-colors',
+                'px-4 py-1.5 rounded-full text-sm font-medium border transition-colors flex-shrink-0 whitespace-nowrap',
                 activeFilter === f
                   ? f === 'All' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/30 shadow-sm shadow-emerald-500/10'
                     : DIFFICULTY_STYLES[f as Difficulty].badge

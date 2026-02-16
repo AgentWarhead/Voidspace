@@ -300,7 +300,7 @@ function FAQAccordionItem({
       >
         <button
           onClick={onToggle}
-          className="w-full flex items-center justify-between p-5 md:p-6 text-left hover:bg-white/[0.02] transition-colors"
+          className="w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left hover:bg-white/[0.02] transition-colors min-h-[44px]"
         >
           <span className="text-sm font-medium text-text-primary pr-4">{question}</span>
           <motion.div
@@ -458,9 +458,9 @@ export function FAQ() {
         {/* Controls */}
         <div className="max-w-4xl mx-auto mb-8 space-y-4">
           {/* Search + Expand All row */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Search input */}
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative flex-1 max-w-full sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
               <input
                 type="text"
@@ -500,12 +500,12 @@ export function FAQ() {
           </div>
 
           {/* Category pills */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-x-visible sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
             {/* All pill */}
             <button
               onClick={() => setActiveCategory('All')}
               className={cn(
-                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium',
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium flex-shrink-0',
                 'backdrop-blur-sm border transition-all duration-300',
                 activeCategory === 'All'
                   ? 'bg-near-green/15 border-near-green/30 text-near-green shadow-[0_0_12px_rgba(0,236,151,0.1)]'
@@ -530,7 +530,7 @@ export function FAQ() {
                 key={name}
                 onClick={() => setActiveCategory(name)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium',
+                  'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium flex-shrink-0 whitespace-nowrap',
                   'backdrop-blur-sm border transition-all duration-300',
                   activeCategory === name
                     ? 'bg-near-green/15 border-near-green/30 text-near-green shadow-[0_0_12px_rgba(0,236,151,0.1)]'

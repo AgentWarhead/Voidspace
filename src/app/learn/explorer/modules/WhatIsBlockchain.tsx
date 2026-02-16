@@ -32,7 +32,7 @@ function BlockChainVisual() {
           <div key={block.id} className="flex items-center flex-shrink-0">
             <motion.div
               className={cn(
-                'relative border rounded-xl p-4 w-56 cursor-pointer transition-all duration-300',
+                'relative border rounded-xl p-3 sm:p-4 w-full md:w-56 cursor-pointer transition-all duration-300',
                 activeBlock === block.id
                   ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/50 shadow-[0_0_20px_rgba(0,236,151,0.15)]'
                   : 'bg-surface border-border hover:border-border-hover'
@@ -206,7 +206,7 @@ function MiniQuiz() {
             key={i}
             onClick={() => { setSelected(i); setRevealed(true); }}
             className={cn(
-              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              'w-full text-left px-4 py-3.5 sm:py-3 rounded-lg border text-sm transition-all min-h-[44px]',
               revealed && i === correctAnswer
                 ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 border-emerald-500/50 text-emerald-400'
                 : revealed && i === selected && i !== correctAnswer
@@ -296,10 +296,10 @@ export function WhatIsBlockchain() {
             <Clock className="w-3 h-3" />
             15 min read
           </div>
-          <GradientText as="h1" animated className="text-4xl md:text-5xl font-bold mb-4">
+          <GradientText as="h1" animated className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
             What is Blockchain?
           </GradientText>
-          <p className="text-lg text-text-secondary max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto">
             Before you build on NEAR, you need to understand the foundation.
             Think of this as understanding electricity before building a circuit.
           </p>

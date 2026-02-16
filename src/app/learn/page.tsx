@@ -418,22 +418,22 @@ export default function LearnPage() {
       </div>
 
       {/* Sanctum AI Preview */}
-      <Container className="py-12">
+      <Container className="py-8 sm:py-12">
         <SanctumPreview />
       </Container>
 
       {/* Track Your Progress */}
-      <Container className="py-12">
+      <Container className="py-8 sm:py-12">
         <ProgressTracker />
       </Container>
 
       {/* Earn Your Certificate */}
-      <Container className="pb-20">
+      <Container className="pb-12 sm:pb-20">
         <CertificateShowcase />
       </Container>
 
       {/* Deep Dive Cards — premium bento layout with glassmorphism */}
-      <Container className="pb-20">
+      <Container className="pb-12 sm:pb-20">
         <ScrollReveal>
           <div id="deep-dives">
             <SectionHeader title="Deep Dives" badge="EXPLORE" />
@@ -443,7 +443,7 @@ export default function LearnPage() {
       </Container>
 
       {/* Cross-Chain Guides — developer-oriented with code-themed styling */}
-      <Container className="pb-20">
+      <Container className="pb-12 sm:pb-20">
         <ScrollReveal>
           <div id="cross-chain">
             <SectionHeader title="Cross-Chain Guides" badge="MULTI-CHAIN" />
@@ -453,7 +453,7 @@ export default function LearnPage() {
       </Container>
 
       {/* Project Templates */}
-      <Container className="pb-20">
+      <Container className="pb-12 sm:pb-20">
         <ScrollReveal delay={0.15}>
           <div id="templates">
             <ProjectTemplates />
@@ -462,7 +462,7 @@ export default function LearnPage() {
       </Container>
 
       {/* Resources */}
-      <Container className="pb-20">
+      <Container className="pb-12 sm:pb-20">
         <ScrollReveal delay={0.18}>
           <div id="resources">
             <ResourceHub />
@@ -471,7 +471,7 @@ export default function LearnPage() {
       </Container>
 
       {/* FAQ */}
-      <Container className="pb-20">
+      <Container className="pb-12 sm:pb-20">
         <FAQ />
       </Container>
 

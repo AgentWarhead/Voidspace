@@ -173,7 +173,7 @@ export function ProgressTracker() {
           </div>
 
           {/* Track Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-6 pt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 p-4 sm:p-6 pt-4">
             {TRACKS.map((track, i) => {
               const colors = colorMap[track.color];
               return (
@@ -184,7 +184,7 @@ export function ProgressTracker() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
                   className={cn(
-                    'rounded-xl p-4 bg-gradient-to-br border backdrop-blur-sm',
+                    'rounded-xl p-3 sm:p-4 bg-gradient-to-br border backdrop-blur-sm',
                     colors.bg,
                     colors.border
                   )}
@@ -211,7 +211,7 @@ export function ProgressTracker() {
           </div>
 
           {/* CTA */}
-          <div className="px-6 pb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
               <span className="text-sm text-text-muted">Complete modules to light up your constellation</span>

@@ -222,7 +222,7 @@ function PulsingButton({
           variant={s.buttonVariant}
           size="lg"
           className={cn(
-            'relative font-bold text-base px-8 py-4',
+            'relative font-bold text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4 min-h-[44px]',
             variant === 'primary' && cn(s.bg, s.text, s.shadow),
             variant === 'ghost' && 'border border-border/50 hover:border-near-green/30',
           )}
@@ -238,7 +238,7 @@ function PulsingButton({
 
 export default function BottomCTA() {
   return (
-    <section id="cta" className="relative py-32 md:py-40 overflow-hidden">
+    <section id="cta" className="relative py-20 sm:py-32 md:py-40 overflow-hidden">
       {/* Multi-layer background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
@@ -287,13 +287,13 @@ export default function BottomCTA() {
         </motion.div>
 
         {/* Headline */}
-        <GradientText as="h2" animated className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+        <GradientText as="h2" animated className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
           The Void Won&apos;t Fill Itself
         </GradientText>
 
         {/* Subtext */}
         <motion.p
-          className="text-text-secondary text-lg md:text-xl leading-relaxed mb-8 max-w-2xl mx-auto"
+          className="text-text-secondary text-base sm:text-lg md:text-xl leading-relaxed mb-8 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -317,7 +317,7 @@ export default function BottomCTA() {
 
         {/* Three CTA Buttons */}
         <motion.div
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 flex-wrap"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

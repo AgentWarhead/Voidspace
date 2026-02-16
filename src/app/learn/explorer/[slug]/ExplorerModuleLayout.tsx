@@ -85,9 +85,9 @@ export function ExplorerModuleLayout({
       {/* ── Breadcrumbs ── */}
       <div className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-40">
         <Container size="lg">
-          <div className="flex items-center justify-between py-3">
-            <nav className="flex items-center gap-2 text-sm text-text-muted overflow-x-auto">
-              <Link href="/" className="hover:text-text-secondary transition-colors flex-shrink-0">
+          <div className="flex items-center justify-between py-3 gap-2">
+            <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-text-muted overflow-x-auto min-w-0">
+              <Link href="/" className="hover:text-text-secondary transition-colors flex-shrink-0 p-1 min-w-[28px] min-h-[28px] flex items-center justify-center">
                 <Home className="w-4 h-4" />
               </Link>
               <ChevronRight className="w-3 h-3 flex-shrink-0" />
@@ -95,12 +95,13 @@ export function ExplorerModuleLayout({
                 Learn
               </Link>
               <ChevronRight className="w-3 h-3 flex-shrink-0" />
-              <span className="text-near-green font-medium flex-shrink-0">Explorer Track</span>
+              <span className="text-near-green font-medium flex-shrink-0 hidden sm:inline">Explorer Track</span>
+              <span className="text-near-green font-medium flex-shrink-0 sm:hidden">Explorer</span>
               <ChevronRight className="w-3 h-3 flex-shrink-0" />
               <span className="text-text-secondary truncate">{currentModule.title}</span>
             </nav>
-            <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-              <BookOpen className="w-4 h-4 text-text-muted" />
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <BookOpen className="w-4 h-4 text-text-muted hidden sm:block" />
               <span className="text-xs text-text-muted font-mono">
                 {currentIndex + 1}/{totalModules}
               </span>
@@ -126,43 +127,43 @@ export function ExplorerModuleLayout({
       {/* ── Prev / Next Navigation ── */}
       <div className="border-t border-border bg-surface/30">
         <Container size="lg">
-          <div className="flex items-center justify-between py-6 gap-4">
+          <div className="flex items-center justify-between py-4 sm:py-6 gap-2 sm:gap-4">
             {prevModule ? (
-              <Link href={`/learn/explorer/${prevModule.slug}`} className="group flex-1 max-w-xs">
-                <Button variant="ghost" size="md" className="w-full justify-start gap-2">
-                  <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                  <div className="text-left">
+              <Link href={`/learn/explorer/${prevModule.slug}`} className="group flex-1 max-w-[40%] sm:max-w-xs">
+                <Button variant="ghost" size="md" className="w-full justify-start gap-1.5 sm:gap-2 min-h-[44px] px-2 sm:px-4">
+                  <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform flex-shrink-0" />
+                  <div className="text-left min-w-0">
                     <div className="text-[10px] uppercase tracking-widest text-text-muted">Previous</div>
-                    <div className="text-sm text-text-secondary group-hover:text-text-primary transition-colors truncate">
+                    <div className="text-xs sm:text-sm text-text-secondary group-hover:text-text-primary transition-colors truncate">
                       {prevModule.title}
                     </div>
                   </div>
                 </Button>
               </Link>
             ) : (
-              <div className="flex-1 max-w-xs" />
+              <div className="flex-1 max-w-[40%] sm:max-w-xs" />
             )}
 
-            <Link href="/learn#tracks">
-              <Button variant="ghost" size="sm" className="text-text-muted">
+            <Link href="/learn#tracks" className="flex-shrink-0">
+              <Button variant="ghost" size="sm" className="text-text-muted min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm">
                 All Modules
               </Button>
             </Link>
 
             {nextModule ? (
-              <Link href={`/learn/explorer/${nextModule.slug}`} className="group flex-1 max-w-xs">
-                <Button variant="ghost" size="md" className="w-full justify-end gap-2">
-                  <div className="text-right">
+              <Link href={`/learn/explorer/${nextModule.slug}`} className="group flex-1 max-w-[40%] sm:max-w-xs">
+                <Button variant="ghost" size="md" className="w-full justify-end gap-1.5 sm:gap-2 min-h-[44px] px-2 sm:px-4">
+                  <div className="text-right min-w-0">
                     <div className="text-[10px] uppercase tracking-widest text-text-muted">Next</div>
-                    <div className="text-sm text-text-secondary group-hover:text-text-primary transition-colors truncate">
+                    <div className="text-xs sm:text-sm text-text-secondary group-hover:text-text-primary transition-colors truncate">
                       {nextModule.title}
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                 </Button>
               </Link>
             ) : (
-              <div className="flex-1 max-w-xs" />
+              <div className="flex-1 max-w-[40%] sm:max-w-xs" />
             )}
           </div>
         </Container>

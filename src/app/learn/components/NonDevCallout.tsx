@@ -22,7 +22,7 @@ export function NonDevCallout() {
         onClick={() =>
           document.getElementById('tracks')?.scrollIntoView({ behavior: 'smooth' })
         }
-        className="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors"
+        className="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors min-h-[44px] py-2"
       >
         Go to Founder Track
         <ArrowRight className="w-3.5 h-3.5" />

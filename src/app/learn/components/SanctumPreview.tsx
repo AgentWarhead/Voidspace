@@ -183,7 +183,7 @@ function ChatMessage({
         </div>
       )}
       <div className={cn(
-        'rounded-xl p-3 max-w-[85%]',
+        'rounded-xl p-2.5 sm:p-3 max-w-[90%] sm:max-w-[85%]',
         isUser
           ? 'bg-accent-cyan/10 border border-accent-cyan/20 text-text-primary text-sm'
           : 'bg-surface/80 border border-border/50'
@@ -253,7 +253,7 @@ export function SanctumPreview() {
             </div>
           </div>
 
-          <div ref={scrollRef} className="p-4 space-y-4 max-h-[400px] overflow-y-auto">
+          <div ref={scrollRef} className="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[350px] sm:max-h-[400px] overflow-y-auto">
             {CONVERSATION.map((msg, i) => (
               <ChatMessage
                 key={i}

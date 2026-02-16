@@ -404,7 +404,7 @@ export function ResourceHub() {
 
       {/* Category Filter Tabs */}
       <ScrollReveal delay={0.05}>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-x-visible sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
           {CATEGORIES.map((cat) => {
             const config = cat !== 'All' ? CATEGORY_CONFIG[cat] : null;
             const CatIcon = config?.icon;
@@ -414,7 +414,7 @@ export function ResourceHub() {
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors flex-shrink-0 whitespace-nowrap',
                   activeCategory === cat
                     ? cat === 'All'
                       ? 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/15 text-emerald-400 border-emerald-500/30'
