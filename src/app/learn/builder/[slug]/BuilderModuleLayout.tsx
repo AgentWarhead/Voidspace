@@ -13,11 +13,6 @@ import { WalletPromptBanner } from '@/components/tracking/WalletPromptBanner';
 import {
   DevEnvironmentSetup,
   RustFundamentals,
-  OwnershipBorrowing,
-  StructsEnums,
-  ErrorHandling,
-  TraitsGenerics,
-  CollectionsIterators,
   YourFirstContract,
   AccountModelAccessKeys,
   StateManagement,
@@ -45,11 +40,6 @@ import {
 const MODULE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'dev-environment-setup': DevEnvironmentSetup,
   'rust-fundamentals': RustFundamentals,
-  'ownership-borrowing': OwnershipBorrowing,
-  'structs-enums': StructsEnums,
-  'error-handling': ErrorHandling,
-  'traits-generics': TraitsGenerics,
-  'collections-iterators': CollectionsIterators,
   'your-first-contract': YourFirstContract,
   'account-model-access-keys': AccountModelAccessKeys,
   'state-management': StateManagement,
