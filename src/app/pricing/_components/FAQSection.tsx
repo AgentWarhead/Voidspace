@@ -6,7 +6,11 @@ import { GradientText } from '@/components/effects/GradientText';
 const faqs = [
   {
     q: 'What is 1 credit?',
-    a: '$1 of AI compute in Sanctum — powered by Claude Opus 4.6, Anthropic\'s most capable model. A typical build session (generating a full smart contract) uses ~$3–5 in credits.',
+    a: '$1 of AI compute in Sanctum. Free tier runs on Claude Sonnet 4.5 — fast and capable. Paid tiers unlock Claude Opus 4.6, Anthropic\'s most powerful model, for deeper reasoning and better code. A typical build session uses ~$3–5 in credits.',
+  },
+  {
+    q: 'Why is Opus 4.6 worth upgrading for?',
+    a: 'Opus 4.6 produces more complete contracts, catches edge cases Sonnet misses, and handles complex multi-contract architectures that Sonnet struggles with. It\'s the difference between a working prototype and production-ready code. Credits burn faster (bigger model = more tokens), but the output quality makes up for it.',
   },
   {
     q: 'Do subscription credits roll over?',
@@ -22,7 +26,7 @@ const faqs = [
   },
   {
     q: 'Can I top up on the Free tier?',
-    a: 'Absolutely. You don\'t need a subscription to buy credits. Start free, top up $5 when you need more, and only subscribe when you\'re building consistently.',
+    a: 'Absolutely. You don\'t need a subscription to buy credits. Start free, top up $5 when you need more, and only subscribe when you\'re building consistently. Top-up purchasers also get cloud conversation history.',
   },
   {
     q: 'What happens when I run out of credits?',

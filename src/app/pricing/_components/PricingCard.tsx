@@ -107,8 +107,9 @@ export function PricingCard({
                   <span className="text-text-muted text-sm">/mo</span>
                 </div>
                 {billingPeriod === 'annual' && (
-                  <p className="text-text-muted text-xs mt-1">
-                    ${price}/yr — billed annually
+                  <p className="text-xs mt-1">
+                    <span className="text-text-muted">${price}/yr — </span>
+                    <span className="text-near-green font-medium">save ${tier.monthlyPrice * 2}/yr</span>
                   </p>
                 )}
               </div>
@@ -152,6 +153,16 @@ export function PricingCard({
               </li>
             ))}
           </ul>
+
+          {/* Shade upgrade nudge */}
+          {tierKey === 'shade' && (
+            <div className="mb-4 px-3 py-2.5 rounded-lg border border-white/[0.06] bg-white/[0.02]">
+              <p className="text-xs text-text-muted leading-relaxed">
+                <span className="text-amber-400/80 font-medium">Upgrade to unlock:</span>{' '}
+                Opus 4.6, project export, Roast Zone, cloud history, and more projects.
+              </p>
+            </div>
+          )}
 
           {/* CTA Button */}
           {tierKey === 'shade' ? (

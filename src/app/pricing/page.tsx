@@ -10,6 +10,7 @@ import { type SanctumTier } from '@/lib/sanctum-tiers';
 import { useWallet } from '@/hooks/useWallet';
 import { truncateAddress } from '@/lib/utils';
 import { PricingCard } from './_components/PricingCard';
+import { ComparisonTable } from './_components/ComparisonTable';
 import { TopUpSection } from './_components/TopUpSection';
 import { FAQSection } from './_components/FAQSection';
 
@@ -215,6 +216,9 @@ export default function PricingPage() {
             />
           ))}
         </div>
+
+        {/* Feature Comparison Table */}
+        <ComparisonTable />
 
         {/* Top-Up Packs */}
         <TopUpSection
