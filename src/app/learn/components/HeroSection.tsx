@@ -346,7 +346,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-lg sm:text-xl md:text-2xl text-text-secondary max-w-3xl mb-10 leading-relaxed"
             >
-              Join builders learning to ship real dApps on NEAR Protocol.
+              66 free modules. 4 tracks. Go from zero Rust to deployed NEAR dApps — with AI guiding every step.
             </motion.p>
 
             {/* CTA Buttons */}

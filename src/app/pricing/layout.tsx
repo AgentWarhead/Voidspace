@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Voidspace',
-  description: 'Sanctum AI builder pricing. Free tier with $2.50 credits. Upgrade for unlimited NEAR development with Claude AI.',
+  title: 'Pricing — Sanctum AI Builder for NEAR | Voidspace',
+  description: 'Start free with $2.50 in credits. Scale your NEAR builds with Claude-powered AI. Plans from $0 to $200/mo.',
   openGraph: {
-    title: 'Pricing — Voidspace',
-    description: 'Sanctum AI builder pricing. Free tier with $2.50 credits. Upgrade for unlimited NEAR development.',
+    title: 'Pricing — Sanctum AI Builder for NEAR | Voidspace',
+    description: 'Start free with $2.50 in credits. Scale your NEAR builds with Claude-powered AI.',
   },
 };
 

@@ -6,9 +6,9 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Globe } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Observatory — Voidspace',
-  description: 'Intelligence tools to analyze wallets, map relationships, and monitor the NEAR ecosystem in real-time.',
-  keywords: ['NEAR', 'wallet', 'analytics', 'blockchain', 'monitoring', 'reputation'],
+  title: 'Observatory — NEAR Wallet Analytics & Market Intelligence | Voidspace',
+  description: 'Free tools: live token bubbles, AI wallet analysis, and transaction mapping for NEAR Protocol.',
+  keywords: ['NEAR', 'wallet', 'analytics', 'blockchain', 'monitoring', 'reputation', 'Void Bubbles', 'Void Lens'],
 };
 
 function ObservatoryLoading() {

@@ -56,10 +56,10 @@ export default async function DashboardPage() {
       <Container size="xl" className="py-6 sm:py-8 space-y-8 sm:space-y-12">
         {/* SECTION 3: Priority Voids */}
         <section>
-          <SectionHeader title="Here's what NEAR needs" badge="NEARCON TRACKS" />
+          <SectionHeader title="Win the Nearcon Sandbox" badge="NEARCON TRACKS" />
           <div className="mb-6 sm:mb-8 px-2 sm:px-0">
             <p className="text-text-secondary max-w-3xl mx-auto text-center text-sm sm:text-base">
-              Explore the highest-impact voids aligned with Nearcon Innovation Sandbox prize tracks. Each track maps to real ecosystem gaps where builders can win.
+              Highest-impact voids aligned with Innovation Sandbox prize tracks. Each maps to a real ecosystem gap where builders can win.
             </p>
           </div>
           <PriorityVoids categories={categories} opportunities={opportunities} />

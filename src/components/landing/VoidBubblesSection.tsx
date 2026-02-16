@@ -17,10 +17,10 @@ export function VoidBubblesSection() {
           <div className="text-center mb-8">
             <div className="text-5xl sm:text-6xl md:text-7xl mb-4">🫧</div>
             <GradientText as="h2" className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-              Void Bubbles — Live Ecosystem Visualization
+              Watch the Entire NEAR Market — Live
             </GradientText>
             <p className="text-text-secondary text-sm sm:text-base mt-3 max-w-2xl mx-auto">
-              See everything. Watch every NEAR token breathe in real-time — AI health scores, whale alerts, rug detection, and sonic feedback in one mesmerizing bubble map.
+              Every NEAR token as a living bubble. Real-time prices, AI health scores, whale alerts, and sonic feedback — spot opportunities at a glance.
             </p>
           </div>
 

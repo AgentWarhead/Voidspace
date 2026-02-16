@@ -46,18 +46,18 @@ const FAQ = dynamic(() => import('./components/FAQ').then(m => ({ default: m.FAQ
 });
 
 export const metadata: Metadata = {
-  title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
+  title: 'Learn NEAR Protocol — Free Rust & Smart Contract Course | Voidspace',
   description:
-    'Master Rust, build smart contracts, and ship dApps on NEAR Protocol. Free, self-paced, AI-powered learning tracks for beginners to advanced developers.',
+    'Master Rust and ship smart contracts on NEAR. 66 free modules across 4 tracks — from wallet setup to production dApps. AI-powered, self-paced.',
   keywords:
     'learn NEAR Protocol, NEAR developer tutorial, Rust smart contract tutorial, blockchain course free, Web3 developer guide, learn Rust blockchain, Solana Rust developer',
   alternates: {
     canonical: 'https://voidspace.io/learn',
   },
   openGraph: {
-    title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
+    title: 'Learn NEAR Protocol — Free Rust & Smart Contract Course | Voidspace',
     description:
-      'Master Rust, build smart contracts, and ship dApps on NEAR Protocol. Free, self-paced, AI-powered learning tracks.',
+      'Master Rust and ship smart contracts on NEAR. 66 free modules across 4 tracks — AI-powered, self-paced.',
     url: 'https://voidspace.io/learn',
     siteName: 'Voidspace',
     locale: 'en_US',
@@ -65,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Learn NEAR Protocol — Free Blockchain Developer Course | Voidspace',
+    title: 'Learn NEAR Protocol — Free Rust & Smart Contract Course | Voidspace',
     description:
-      'Master Rust, build smart contracts, and ship dApps. Free, AI-powered tracks from beginner to advanced.',
+      'Master Rust and ship smart contracts on NEAR. 66 free modules — AI-powered, self-paced.',
     creator: '@VoidSpaceNear',
   },
 };

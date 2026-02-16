@@ -35,11 +35,11 @@ export function SanctumSection() {
               The Sanctum
             </h2>
             <p className="text-text-secondary text-base sm:text-lg mt-3 max-w-2xl mx-auto leading-relaxed">
-              <span className="text-purple-300 font-medium">Describe it. Deploy it.</span><br />
-              AI-powered development studio for NEAR Protocol — entirely through conversation.
+              <span className="text-purple-300 font-medium">Describe it. Build it. Deploy it.</span><br />
+              The only AI development studio purpose-built for NEAR Protocol.
             </p>
             <p className="text-text-muted text-sm mt-2 max-w-xl mx-auto">
-              Build like you have a team. You do. 8 expert AI personas handle Rust, security, DeFi, testing, and deployment — so you don&apos;t have to.
+              8 expert AI personas handle Rust, security, DeFi, testing, and deployment. You bring the idea — they bring the execution.
             </p>
           </div>
 
@@ -83,16 +83,16 @@ export function SanctumSection() {
                 <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/20 flex items-center justify-center mb-4">
                   <Zap className="w-5 h-5 text-near-green" />
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Build NEAR Projects</h3>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">Ship Smart Contracts</h3>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  Describe what you want to build. AI walks you through creating Rust smart contracts and web frontends — step by step, from idea to deployment.
+                  Describe your idea. AI generates production-ready Rust contracts and React frontends — step by step, from concept to testnet.
                 </p>
                 <ul className="space-y-1.5 mb-4">
                   {[
-                    'AI explains every line of code',
-                    'Smart contracts → tested → deployed',
+                    'Every line of code explained',
+                    'Contracts → tested → deployed',
                     'Full-stack dApps with React frontends',
-                    'From zero to mainnet in hours',
+                    'Zero to testnet in hours',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-xs text-text-secondary">
                       <span className="text-near-green mt-0.5">▸</span>
@@ -117,15 +117,15 @@ export function SanctumSection() {
                 <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4">
                   <BookOpen className="w-5 h-5 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Learn Rust as You Build</h3>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">Learn Rust While You Ship</h3>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  No Rust experience? No problem. The AI teaches you as you create — explaining every pattern, every NEAR concept in real time.
+                  No Rust experience needed. AI teaches you as you build — every pattern, every NEAR concept explained in context.
                 </p>
                 <ul className="space-y-1.5 mb-4">
                   {[
-                    '66 modules of structured learning',
-                    'AI explains every concept interactively',
-                    'Hands-on projects, not toy examples',
+                    '66 structured learning modules',
+                    'Interactive AI explanations',
+                    'Real projects, not toy examples',
                     'Earn completion certificates',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-xs text-text-secondary">
@@ -192,11 +192,11 @@ export function SanctumSection() {
               className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.98] hover:scale-[1.02] transition-all duration-300 min-h-[44px]"
             >
               <Sparkles className="w-4 h-4" />
-              Start Vibe-Coding on NEAR
+              Open the Sanctum
               <ChevronRight className="w-4 h-4" />
             </Link>
             <p className="text-xs text-text-muted font-mono mt-3">
-              Powered by Claude Opus · 8 Expert AI Personas · Free credits to start
+              Powered by Claude · 8 AI Personas · Free credits included
             </p>
           </div>
         </div>

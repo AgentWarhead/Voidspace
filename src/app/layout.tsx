@@ -17,9 +17,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://voidspace.io'),
-  title: 'Voidspace — NEAR Ecosystem Intelligence',
-  description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
-  keywords: ['NEAR', 'blockchain', 'ecosystem', 'gap analysis', 'AI', 'web3', 'intelligence', 'Voidspace'],
+  title: 'Voidspace — AI-Native Intelligence & Builder Platform for NEAR',
+  description: 'Find gaps, build smart contracts, and ship dApps on NEAR. AI-powered ecosystem scanner, builder studio, and free developer education.',
+  keywords: ['NEAR', 'blockchain', 'ecosystem', 'gap analysis', 'AI', 'web3', 'intelligence', 'Voidspace', 'smart contracts', 'Rust', 'developer tools'],
   manifest: '/site.webmanifest',
   icons: {
     icon: [
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: 'Voidspace — NEAR Ecosystem Intelligence',
-    description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
+    title: 'Voidspace — AI-Native Intelligence & Builder Platform for NEAR',
+    description: 'Find gaps, build smart contracts, and ship dApps on NEAR. AI-powered ecosystem scanner, builder studio, and free developer education.',
     url: 'https://voidspace.io',
     siteName: 'Voidspace',
     images: [
@@ -49,8 +49,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Voidspace — NEAR Ecosystem Intelligence',
-    description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
+    title: 'Voidspace — AI-Native Intelligence & Builder Platform for NEAR',
+    description: 'Find gaps, build smart contracts, and ship dApps on NEAR. AI-powered ecosystem scanner, builder studio, and free developer education.',
     images: ['/twitter-image.jpg'],
     creator: '@VoidSpaceNear',
   },
@@ -70,7 +70,7 @@ export default function RootLayout({
     '@type': 'WebApplication',
     name: 'Voidspace',
     url: 'https://voidspace.io',
-    description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
+    description: 'Find gaps, build smart contracts, and ship dApps on NEAR. AI-powered ecosystem scanner, builder studio, and free developer education.',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Web',
     image: 'https://voidspace.io/og-image.jpg',

@@ -19,7 +19,7 @@ const TOOLS = [
     id: 'void-bubbles',
     label: '🫧 Void Bubbles',
     icon: Globe,
-    description: 'Live ecosystem visualization — 150+ tokens as living, breathing bubbles',
+    description: '150+ NEAR tokens as living bubbles — spot trends, whale moves, and momentum in real time',
     iconTint: 'text-near-green',
     hero: true,
   },
@@ -27,7 +27,7 @@ const TOOLS = [
     id: 'void-lens',
     label: 'Void Lens',
     icon: Eye,
-    description: 'Analyze wallet reputation and trust signals',
+    description: 'AI-powered wallet analysis — reputation, holdings, and security in 60 seconds',
     iconTint: 'text-cyan-400',
     hero: false,
   },
@@ -35,7 +35,7 @@ const TOOLS = [
     id: 'constellation',
     label: 'Constellation',
     icon: Network,
-    description: 'Map wallet relationships and transaction patterns',
+    description: 'Map wallet relationships and on-chain transaction flows as an interactive graph',
     iconTint: 'text-purple-400',
     hero: false,
   },
@@ -330,7 +330,7 @@ export default function ObservatoryContent() {
                 </GradientText>
               </div>
               <p className="text-text-secondary text-sm sm:text-base max-w-lg">
-                Your command center for NEAR ecosystem intelligence. Visualize, analyze, and monitor — all in real-time.
+                Three free intelligence tools. Visualize markets, analyze wallets, and map on-chain relationships — live.
               </p>
             </div>
 

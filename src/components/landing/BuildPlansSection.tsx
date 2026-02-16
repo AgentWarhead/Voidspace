@@ -35,10 +35,10 @@ export function BuildPlansSection() {
               AI-POWERED MISSION BRIEFS
             </div>
             <GradientText as="h2" className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-              Found Your Void? Plan Your Attack.
+              Go from Void to Build Plan in 60 Seconds
             </GradientText>
             <p className="text-text-secondary text-sm sm:text-base mt-3 max-w-2xl mx-auto leading-relaxed">
-              Your next project starts in 60 seconds. Get your AI-powered Build Plan — market analysis, tech specs, NEAR integration strategy, and your first week&apos;s action plan.
+              Pick any void and get an AI-generated mission brief — market analysis, tech architecture, NEAR strategy, and a day-by-day Week 1 plan.
             </p>
           </div>
 
@@ -64,10 +64,10 @@ export function BuildPlansSection() {
               </div>
               <h3 className="text-sm font-semibold text-text-primary mb-1.5">Explore Voids</h3>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Browse AI-detected gaps in the NEAR ecosystem and generate a build plan for any of them
+                Browse AI-detected ecosystem gaps and generate a build plan for any void
               </p>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-near-green mt-3">
-                Browse Opportunities <ChevronRight className="w-3 h-3" />
+                Find Your Void <ChevronRight className="w-3 h-3" />
               </span>
             </Link>
 
@@ -80,15 +80,15 @@ export function BuildPlansSection() {
               </div>
               <h3 className="text-sm font-semibold text-text-primary mb-1.5">Bring Your Own Idea</h3>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Have your own project idea? Describe it and get a full AI-powered build plan
+                Already have a project in mind? Describe it and get a full strategic build plan
               </p>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent-cyan mt-3">
-                Start Building <ChevronRight className="w-3 h-3" />
+                Generate Brief <ChevronRight className="w-3 h-3" />
               </span>
             </Link>
           </div>
           <p className="text-xs text-text-muted font-mono text-center mt-4">
-            Powered by Claude AI · Full strategic brief in 60s
+            Powered by Claude AI · Market analysis + tech specs + action plan in 60s
           </p>
         </div>
       </div>

@@ -29,8 +29,8 @@ interface Props {
 }
 
 export const metadata = {
-  title: 'Explore the Voids — Voidspace',
-  description: 'Discover voids in the NEAR ecosystem. Find your next build.',
+  title: 'Explore Voids — NEAR Ecosystem Gaps & Build Opportunities | Voidspace',
+  description: 'AI-detected gaps in the NEAR ecosystem. Find high-impact opportunities, generate build plans, and start shipping.',
 };
 
 export default async function OpportunitiesPage({ searchParams }: Props) {
@@ -75,7 +75,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
             Explore the Voids
           </GradientText>
           <p className="text-text-secondary mt-2 max-w-lg mx-auto text-sm sm:text-base">
-            Ecosystem gaps waiting to be filled. Higher scores = deeper opportunities.
+            AI-detected ecosystem gaps ranked by impact. Higher score = bigger opportunity.
           </p>
 
           <div className="mt-3 inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">

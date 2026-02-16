@@ -69,7 +69,7 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
           >
             <TypewriterText
               lines={[
-                'See everything. Build anything.',
+                'Find the gaps. Ship what\'s missing.',
                 'NEAR\'s first AI-native intelligence and builder platform.',
               ]}
               speed={35}

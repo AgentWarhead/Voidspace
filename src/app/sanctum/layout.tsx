@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sanctum — AI Development Studio | Voidspace',
-  description: 'AI-powered development studio for NEAR Protocol. Build smart contracts, web apps, and deploy dApps through conversation with Claude AI.',
+  title: 'Sanctum — AI Builder for NEAR Smart Contracts & dApps | Voidspace',
+  description: 'Describe your idea, ship a NEAR dApp. AI writes Rust contracts, builds frontends, and deploys — all through conversation.',
   openGraph: {
-    title: 'Sanctum — AI Development Studio | Voidspace',
-    description: 'Build on NEAR through conversation. Smart contracts, web apps, deployment — all AI-powered.',
+    title: 'Sanctum — AI Builder for NEAR Smart Contracts & dApps | Voidspace',
+    description: 'Describe your idea, ship a NEAR dApp. AI writes Rust contracts, builds frontends, and deploys.',
   },
 };
 

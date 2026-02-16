@@ -149,7 +149,7 @@ export function HeroCTA() {
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
             />
             
-            <span className="relative z-10">Explore the Void</span>
+            <span className="relative z-10">Explore Voids</span>
             <motion.span
               animate={isHovered ? { x: [0, 4, 0] } : { x: 0 }}
               transition={{ duration: 0.8, repeat: Infinity }}
@@ -172,7 +172,7 @@ export function HeroCTA() {
         </p>
         <span className="hidden sm:inline text-text-muted/30">·</span>
         <Link href="/learn" className="text-xs text-near-green/70 hover:text-near-green font-mono transition-colors min-h-[44px] flex items-center active:scale-[0.97]">
-          New to NEAR? Start learning →
+          New to NEAR? Start here →
         </Link>
       </motion.div>
     </div>

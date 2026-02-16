@@ -2,9 +2,9 @@ import { Layers, GraduationCap, Database, Radio } from 'lucide-react';
 import { Container } from '@/components/ui';
 
 const stats = [
-  { value: '20+', label: 'CATEGORIES ANALYZED', icon: Layers, delay: '0s' },
-  { value: '66', label: 'LEARNING MODULES', icon: GraduationCap, delay: '0.5s' },
-  { value: '10+', label: 'DATA SOURCES', icon: Database, delay: '1s' },
+  { value: '20+', label: 'CATEGORIES SCANNED', icon: Layers, delay: '0s' },
+  { value: '66', label: 'FREE MODULES', icon: GraduationCap, delay: '0.5s' },
+  { value: '10+', label: 'LIVE DATA SOURCES', icon: Database, delay: '1s' },
   { value: 'LIVE', label: 'REAL-TIME INTEL', icon: Radio, delay: '1.5s' },
 ];
 

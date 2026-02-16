@@ -136,7 +136,6 @@ export function DataSourcesSection() {
       />
 
       <p className="text-text-secondary text-sm sm:text-base max-w-3xl mx-auto text-center mb-8 sm:mb-10 px-2 sm:px-0">
-        Every insight on Voidspace is backed by verifiable, real-time blockchain data.
         No synthetic data. No hallucinated metrics.{' '}
         <GradientText>Every number you see is verifiable on-chain.</GradientText>
       </p>

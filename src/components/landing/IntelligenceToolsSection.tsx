@@ -7,7 +7,7 @@ const tools = [
   {
     href: '/void-bubbles',
     title: 'Void Bubbles',
-    desc: 'Live visualization of 150+ NEAR tokens. Real-time prices, volume, and market movements.',
+    desc: '150+ NEAR tokens as living bubbles. Spot trends, whale moves, and momentum shifts instantly.',
     icon: Circle,
     tags: ['Live Data', 'Token Prices', 'Volume', 'Market Overview'],
     badge: 'FREE',
@@ -21,7 +21,7 @@ const tools = [
   {
     href: '/observatory?tool=constellation',
     title: 'Constellation Map',
-    desc: 'See the patterns others miss. Map wallet relationships and transaction flows across NEAR.',
+    desc: 'Map wallet relationships and transaction flows. See the connections others miss.',
     icon: Network,
     tags: ['Wallet Graph', 'Relationships', 'Patterns', 'Network'],
     badge: null,
@@ -35,7 +35,7 @@ const tools = [
   {
     href: '/observatory?tool=void-lens',
     title: 'Void Lens',
-    desc: 'Every wallet tells a story. AI-powered analysis in 60 seconds — reputation, holdings, security.',
+    desc: 'AI-powered wallet analysis in 60 seconds. Reputation scoring, holdings breakdown, and security signals.',
     icon: Zap,
     tags: ['60s Analysis', 'AI Summary', 'Opportunity Score', 'Free Forever'],
     badge: 'FREE',
@@ -51,7 +51,7 @@ const tools = [
 export function IntelligenceToolsSection() {
   return (
     <section>
-      <SectionHeader title="Intelligence Tools" badge="YOUR EDGE IN THE ECOSYSTEM" />
+      <SectionHeader title="Your Intelligence Edge" badge="FREE TOOLS" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {tools.map((tool) => (
           <Link key={tool.href} href={tool.href} className="group active:scale-[0.98] transition-transform">

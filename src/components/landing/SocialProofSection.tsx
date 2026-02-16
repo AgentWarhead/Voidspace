@@ -10,9 +10,9 @@ const stats = [
 ];
 
 const signals = [
-  'Built for the Nearcon 2026 Innovation Sandbox',
-  'Powered by Claude AI, DexScreener, and NEAR Protocol data',
-  'The most comprehensive NEAR developer education platform — completely free',
+  'Built for Nearcon 2026 Innovation Sandbox',
+  'Powered by Claude AI · DexScreener · NEAR Protocol data',
+  'The most comprehensive free NEAR developer education platform',
 ];
 
 export function SocialProofSection() {

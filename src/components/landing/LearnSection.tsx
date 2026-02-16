@@ -37,10 +37,10 @@ export function LearnSection() {
               THE MOST COMPREHENSIVE NEAR CURRICULUM — FREE
             </div>
             <GradientText as="h2" className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
-              We&apos;ll Teach You Everything
+              Zero to NEAR Builder — Free
             </GradientText>
             <p className="text-text-secondary text-sm sm:text-base md:text-lg mt-3 sm:mt-4 max-w-2xl mx-auto leading-relaxed">
-              Then build it with you. 66 interactive modules across 4 structured tracks — from your first Rust line to deploying production dApps. Zero to deployed. No permission needed.
+              66 interactive modules across 4 tracks. Learn Rust, build contracts, ship dApps — then Sanctum helps you build for real.
             </p>
           </div>
 
@@ -74,7 +74,7 @@ export function LearnSection() {
               className="shimmer-btn text-background font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg text-sm sm:text-base inline-flex items-center gap-2 mb-3 active:scale-[0.98] hover:scale-[1.02] transition-transform duration-200 min-h-[44px]"
             >
               <BookOpen className="w-4 h-4" />
-              Start Your Journey →
+              Start Learning Free →
             </Link>
             <p className="text-xs text-text-muted font-mono">
               No prerequisites · No paywall · No time limit

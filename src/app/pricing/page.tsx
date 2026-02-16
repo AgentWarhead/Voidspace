@@ -148,13 +148,13 @@ export default function PricingPage() {
             Sanctum AI Builder
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-4 tracking-tight">
-            Power your builds with{' '}
+            Start free.{' '}
             <GradientText as="span" animated>
-              the void
+              Scale when ready.
             </GradientText>
           </h1>
           <p className="text-text-secondary text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Build like you have a team. You do. All Voidspace tools are free — Sanctum is the AI builder. Choose your tier.
+            All intelligence tools are free forever. Sanctum AI builder starts with free credits — upgrade as you build more.
           </p>
         </motion.div>
 

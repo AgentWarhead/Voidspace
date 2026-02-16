@@ -26,14 +26,14 @@ export function BottomCtaSection() {
           The Void Won&apos;t Fill Itself
         </GradientText>
         <p className="text-text-secondary mt-3 max-w-md mx-auto text-sm">
-          Stop researching. Start building. Find your opportunity, generate your mission brief, and ship it — your next project starts in 60 seconds.
+          Find your void. Generate a build plan. Ship it. Your next NEAR project starts in 60 seconds.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <Link
             href="/opportunities"
             className="shimmer-btn text-background font-semibold px-5 sm:px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 active:scale-[0.98] hover:scale-[1.03] transition-transform duration-200 min-h-[44px]"
           >
-            Explore Voids
+            Find Your Void
             <ChevronRight className="w-4 h-4" />
           </Link>
           <Link
@@ -41,7 +41,7 @@ export function BottomCtaSection() {
             className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-purple-500/20 border border-purple-500/30 hover:bg-purple-500/30 active:scale-[0.98] hover:scale-[1.02] text-purple-300 rounded-lg transition-all duration-200 text-sm min-h-[44px]"
           >
             <Sparkles className="w-4 h-4" />
-            Sanctum
+            Build Now
           </Link>
           <Link
             href="/void-bubbles"
