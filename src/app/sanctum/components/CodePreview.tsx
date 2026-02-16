@@ -32,56 +32,78 @@ export function CodePreview({ code }: CodePreviewProps) {
     URL.revokeObjectURL(url);
   };
 
-  // Simple syntax highlighting for Rust
+  // Token-based syntax highlighting for Rust (prevents regex self-corruption)
   const highlightRust = (code: string): string => {
     if (!code) return '';
-    
-    // Keywords
-    const keywords = ['fn', 'pub', 'struct', 'impl', 'let', 'mut', 'const', 'use', 'mod', 'self', 'Self', 'return', 'if', 'else', 'match', 'for', 'while', 'loop', 'break', 'continue', 'true', 'false', 'None', 'Some', 'Ok', 'Err'];
-    
-    // Types
-    const types = ['u8', 'u16', 'u32', 'u64', 'u128', 'i8', 'i16', 'i32', 'i64', 'i128', 'f32', 'f64', 'bool', 'String', 'str', 'Vec', 'Option', 'Result', 'Balance', 'AccountId', 'Promise'];
-    
-    // NEAR-specific
-    const nearKeywords = ['near', 'near_bindgen', 'contract_state', 'payable', 'private', 'init', 'PanicOnDefault', 'BorshDeserialize', 'BorshSerialize'];
 
-    let highlighted = code
-      // Escape HTML
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      // Comments
-      .replace(/(\/\/.*$)/gm, '<span class="text-slate-500">$1</span>')
-      // Strings
-      .replace(/(".*?")/g, '<span class="text-emerald-400">$1</span>')
-      // Attributes/macros
-      .replace(/(#\[.*?\])/g, '<span class="text-amber-400">$1</span>');
-    
-    // Keywords
-    keywords.forEach(kw => {
-      const regex = new RegExp(`\\b(${kw})\\b`, 'g');
-      highlighted = highlighted.replace(regex, '<span class="text-purple-400">$1</span>');
-    });
-    
-    // Types
-    types.forEach(t => {
-      const regex = new RegExp(`\\b(${t})\\b`, 'g');
-      highlighted = highlighted.replace(regex, '<span class="text-cyan-400">$1</span>');
-    });
-    
-    // NEAR keywords
-    nearKeywords.forEach(nk => {
-      const regex = new RegExp(`\\b(${nk})\\b`, 'g');
-      highlighted = highlighted.replace(regex, '<span class="text-near-green">$1</span>');
-    });
-    
-    // Numbers
-    highlighted = highlighted.replace(/\b(\d+)\b/g, '<span class="text-orange-400">$1</span>');
-    
-    // Function names
-    highlighted = highlighted.replace(/\b(fn\s+)(\w+)/g, '$1<span class="text-blue-400">$2</span>');
-    
-    return highlighted;
+    const keywordSet = new Set(['fn', 'pub', 'struct', 'impl', 'let', 'mut', 'const', 'use', 'mod', 'self', 'Self', 'return', 'if', 'else', 'match', 'for', 'while', 'loop', 'break', 'continue', 'true', 'false', 'None', 'Some', 'Ok', 'Err', 'where', 'as', 'in', 'ref', 'type', 'enum', 'trait', 'crate', 'super', 'async', 'await', 'move', 'dyn', 'static', 'extern']);
+    const typeSet = new Set(['u8', 'u16', 'u32', 'u64', 'u128', 'i8', 'i16', 'i32', 'i64', 'i128', 'f32', 'f64', 'bool', 'String', 'str', 'Vec', 'Option', 'Result', 'Balance', 'AccountId', 'Promise', 'LookupMap', 'UnorderedMap', 'LazyOption', 'Gas', 'NearToken']);
+    const nearSet = new Set(['near', 'near_bindgen', 'contract_state', 'payable', 'private', 'init', 'PanicOnDefault', 'BorshDeserialize', 'BorshSerialize', 'Deserialize', 'Serialize', 'near_sdk', 'serde']);
+
+    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    return code.split('\n').map(line => {
+      const commentIdx = line.indexOf('//');
+      let codePart = commentIdx >= 0 ? line.slice(0, commentIdx) : line;
+      const commentPart = commentIdx >= 0 ? line.slice(commentIdx) : '';
+
+      const tokens: string[] = [];
+      let remaining = codePart;
+
+      while (remaining.length > 0) {
+        const strMatch = remaining.match(/^"(?:[^"\\]|\\.)*"/);
+        if (strMatch) {
+          tokens.push(`<span class="text-emerald-400">${esc(strMatch[0])}</span>`);
+          remaining = remaining.slice(strMatch[0].length);
+          continue;
+        }
+
+        const attrMatch = remaining.match(/^#\[([^\]]*)\]/);
+        if (attrMatch) {
+          tokens.push(`<span class="text-amber-400">${esc(attrMatch[0])}</span>`);
+          remaining = remaining.slice(attrMatch[0].length);
+          continue;
+        }
+
+        const wordMatch = remaining.match(/^[a-zA-Z_]\w*/);
+        if (wordMatch) {
+          const word = wordMatch[0];
+          if (nearSet.has(word)) {
+            tokens.push(`<span class="text-near-green">${esc(word)}</span>`);
+          } else if (keywordSet.has(word)) {
+            tokens.push(`<span class="text-purple-400">${esc(word)}</span>`);
+          } else if (typeSet.has(word)) {
+            tokens.push(`<span class="text-cyan-400">${esc(word)}</span>`);
+          } else {
+            tokens.push(esc(word));
+          }
+          remaining = remaining.slice(word.length);
+          continue;
+        }
+
+        const numMatch = remaining.match(/^\d[\d_]*/);
+        if (numMatch) {
+          tokens.push(`<span class="text-orange-400">${esc(numMatch[0])}</span>`);
+          remaining = remaining.slice(numMatch[0].length);
+          continue;
+        }
+
+        tokens.push(esc(remaining[0]));
+        remaining = remaining.slice(1);
+      }
+
+      const commentHtml = commentPart
+        ? `<span class="text-slate-500">${esc(commentPart)}</span>`
+        : '';
+
+      let result = tokens.join('') + commentHtml;
+      result = result.replace(
+        /(<span class="text-purple-400">fn<\/span>\s+)([a-zA-Z_]\w*)/g,
+        '$1<span class="text-blue-400">$2</span>'
+      );
+
+      return result;
+    }).join('\n');
   };
 
   if (!code) {
