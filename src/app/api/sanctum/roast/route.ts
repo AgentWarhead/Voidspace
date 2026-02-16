@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    // ── Tier gate: Roast Zone requires Legion+ ──
+    // ── Tier gate: Roast Zone requires Specter+ ──
     const { data: userSub } = await createAdminClient()
       .from('subscriptions')
       .select('tier')
@@ -116,9 +116,9 @@ export async function POST(request: NextRequest) {
     if (!SANCTUM_TIERS[userTier].canAudit) {
       return NextResponse.json(
         {
-          error: 'Roast Zone requires a Legion or higher subscription. Upgrade to audit your contracts.',
+          error: 'Roast Zone requires a Specter or higher subscription. Upgrade to audit your contracts.',
           code: 'TIER_REQUIRED',
-          requiredTier: 'legion',
+          requiredTier: 'specter',
           currentTier: userTier,
         },
         { status: 403 }

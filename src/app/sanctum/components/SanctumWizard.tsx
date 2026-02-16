@@ -382,7 +382,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                       >
                         <Lock className="w-4 h-4" />
                         Roast Zone
-                        <span className="text-xs text-near-green ml-1">Legion+</span>
+                        <span className="text-xs text-near-green ml-1">Specter+</span>
                       </Link>
                     )}
                     <button
