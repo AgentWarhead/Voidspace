@@ -1,21 +1,199 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Terminal, CheckCircle, ExternalLink, Settings, FolderOpen } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, BookOpen, Clock, CheckCircle2,
+  Lightbulb, Zap, Terminal, ArrowRight, FolderOpen, Wrench, Settings,
+  Rocket, GitBranch,
+} from 'lucide-react';
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface DevEnvironmentSetupProps {
   isActive: boolean;
   onToggle: () => void;
 }
 
-const DevEnvironmentSetup: React.FC<DevEnvironmentSetupProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+// ─── Interactive Visual: Toolchain Stack ───────────────────────────────────────
+
+const toolchainLayers = [
+  { id: 'rust', label: 'Rust', desc: 'rustup + cargo + wasm32-unknown-unknown target', icon: '🦀', color: 'from-orange-500/20 to-orange-500/10', border: 'border-orange-500/30' },
+  { id: 'node', label: 'Node.js', desc: 'nvm install --lts → npm for CLI and frontend tools', icon: '📦', color: 'from-green-500/20 to-green-500/10', border: 'border-green-500/30' },
+  { id: 'cli', label: 'NEAR CLI', desc: 'npm i -g near-cli-rs → interactive Rust-based CLI', icon: '⚡', color: 'from-purple-500/20 to-purple-500/10', border: 'border-purple-500/30' },
+  { id: 'cargo-near', label: 'cargo-near', desc: 'cargo install cargo-near → scaffold + build projects', icon: '🔧', color: 'from-cyan-500/20 to-cyan-500/10', border: 'border-cyan-500/30' },
+  { id: 'editor', label: 'VS Code', desc: 'rust-analyzer + Even Better TOML + Error Lens', icon: '💻', color: 'from-blue-500/20 to-blue-500/10', border: 'border-blue-500/30' },
+];
+
+function ToolchainDiagram() {
+  const [activeStep, setActiveStep] = useState<number | null>(null);
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      {/* Header */}
+    <div className="relative py-4">
+      <div className="flex items-center justify-between gap-1">
+        {toolchainLayers.map((step, i) => (
+          <React.Fragment key={step.id}>
+            <motion.div
+              className={cn(
+                'flex-1 cursor-pointer rounded-lg border p-3 transition-all text-center',
+                step.border,
+                activeStep === i ? `bg-gradient-to-b ${step.color}` : 'bg-black/20'
+              )}
+              whileHover={{ scale: 1.05, y: -4 }}
+              onClick={() => setActiveStep(activeStep === i ? null : i)}
+            >
+              <div className="text-xl mb-1">{step.icon}</div>
+              <div className="text-xs font-bold text-text-primary">{step.label}</div>
+            </motion.div>
+            {i < toolchainLayers.length - 1 && (
+              <ArrowRight className="w-4 h-4 text-text-muted/40 flex-shrink-0" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+      <AnimatePresence>
+        {activeStep !== null && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 bg-black/30 rounded-lg p-3 border border-border">
+              <code className="text-sm text-near-green font-mono">{toolchainLayers[activeStep].desc}</code>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-center text-xs text-text-muted mt-4">
+        👆 Click each tool to see what it does in your dev stack
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ──────────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="glass" padding="md" className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-purple-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">
+                  {details}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ─────────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 1;
+  const options = [
+    'You can write NEAR contracts in any language — Rust is just a suggestion',
+    'The wasm32-unknown-unknown target compiles Rust to WebAssembly, the format NEAR runs on-chain',
+    'near-cli-rs requires Python 3.10+ to run on your machine',
+    'cargo-near is only used for deployment — you create projects manually',
+  ];
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">Which statement about the NEAR dev environment is correct?</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+              'mt-4 p-3 rounded-lg text-sm',
+              selected === correctAnswer
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+            )}
+          >
+            {selected === correctAnswer
+              ? '✓ Correct! NEAR runs WebAssembly on-chain. The wasm32-unknown-unknown Rust target compiles your contract code into a .wasm binary that NEAR validators execute.'
+              : '✗ Not quite. The wasm32-unknown-unknown target is essential — it compiles Rust into WebAssembly format that NEAR runs on-chain. Without it, your code can\'t be deployed.'}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ───────────────────────────────────────────────────────────────
+
+const DevEnvironmentSetup: React.FC<DevEnvironmentSetupProps> = ({ isActive, onToggle }) => {
+  const [completed, setCompleted] = useState(false);
+
+  const handleComplete = () => {
+    setCompleted(true);
+    const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+    progress['dev-environment-setup'] = true;
+    localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+  };
+
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      {/* ── Accordion Header ── */}
       <div
         onClick={onToggle}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
@@ -30,297 +208,217 @@ const DevEnvironmentSetup: React.FC<DevEnvironmentSetupProps> = ({ isActive, onT
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Beginner</Badge>
+          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Beginner</Badge>
           <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">30 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {/* Expanded Content */}
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          {/* Tab Navigation */}
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
+      {/* ── Expanded Content ── */}
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-near-green/20 p-6 space-y-8">
+              {/* Module Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
+                <BookOpen className="w-3 h-3" />
+                Builder Track
+                <span className="text-text-muted">•</span>
+                <Clock className="w-3 h-3" />
+                30 min read
+              </div>
 
-          {/* Tab Content */}
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Settings className="w-5 h-5 text-purple-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <h2 className="text-xl font-bold text-text-primary">The Big Idea</h2>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Setting up your dev environment is like building a <span className="text-near-green font-medium">workshop before crafting furniture</span>.
+                  You need the right <span className="text-near-green font-medium">power tools</span> (Rust compiler, Node.js),
+                  a <span className="text-near-green font-medium">workbench</span> (VS Code with extensions),
+                  and <span className="text-near-green font-medium">blueprints</span> (cargo-near templates).
+                  Skipping setup leads to fighting tools instead of writing code. Invest 30 minutes now, save hours later.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-2">🔧 Your Toolchain Stack</h3>
+                <p className="text-sm text-text-muted mb-4">Each tool builds on the last — install them in order from left to right.</p>
+                <ToolchainDiagram />
+              </div>
+
+              {/* Code Example — Full Setup Script */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-3">💻 Quick Setup Script</h3>
+                <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border overflow-x-auto">
+                  <div className="text-text-muted">{'# Step 1: Install Rust via rustup'}</div>
+                  <div><span className="text-near-green">curl</span> --proto <span className="text-yellow-300">&apos;=https&apos;</span> --tlsv1.2 -sSf https://sh.rustup.rs | sh</div>
+                  <div><span className="text-near-green">source</span> $HOME/.cargo/env</div>
+                  <div className="mt-2 text-text-muted">{'# Step 2: Add WebAssembly compilation target'}</div>
+                  <div><span className="text-near-green">rustup</span> target add wasm32-unknown-unknown</div>
+                  <div className="mt-2 text-text-muted">{'# Step 3: Install Node.js (needed for NEAR CLI)'}</div>
+                  <div><span className="text-near-green">curl</span> -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</div>
+                  <div><span className="text-near-green">nvm</span> install --lts</div>
+                  <div className="mt-2 text-text-muted">{'# Step 4: Install NEAR CLI and cargo-near'}</div>
+                  <div><span className="text-near-green">npm</span> i -g near-cli-rs</div>
+                  <div><span className="text-near-green">cargo</span> install cargo-near</div>
+                  <div className="mt-2 text-text-muted">{'# Step 5: Scaffold your first project'}</div>
+                  <div><span className="text-near-green">cargo</span> near new my-first-contract</div>
+                  <div><span className="text-near-green">cd</span> my-first-contract</div>
+                  <div className="mt-2 text-text-muted">{'# Step 6: Verify everything works'}</div>
+                  <div><span className="text-near-green">rustc</span> --version    <span className="text-text-muted">{'# should show 1.7x+'}</span></div>
+                  <div><span className="text-near-green">near</span> --version     <span className="text-text-muted">{'# should show near-cli-rs'}</span></div>
+                  <div><span className="text-near-green">cargo</span> near build   <span className="text-text-muted">{'# compiles to .wasm ✓'}</span></div>
+                </div>
+              </div>
+
+              {/* Pro Tip */}
+              <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/5 border border-emerald-500/20 rounded-xl p-5">
+                <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4" /> Pro Tip
+                </h4>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Run <span className="text-emerald-400 font-medium">cargo near build</span> after every setup step to catch issues early.
+                  If it fails on the WASM target, run <span className="text-emerald-400 font-medium">rustup target list --installed</span> to
+                  verify wasm32-unknown-unknown is present. Also, add <span className="text-emerald-400 font-medium">rust-analyzer.cargo.target:
+                  &quot;wasm32-unknown-unknown&quot;</span> to your VS Code settings so the language server analyzes your code
+                  against the same target you&apos;re compiling for — this catches platform-specific errors in real time.
+                </p>
+              </div>
+
+              {/* Concept Cards */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <ConceptCard
+                    icon={Wrench}
+                    title="Rust & WASM Target"
+                    preview="Install Rust via rustup, then add the wasm32 compilation target"
+                    details="Run curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh to install Rust. Then add the WASM target with rustup target add wasm32-unknown-unknown. This target compiles your Rust code into WebAssembly — the binary format that NEAR validators execute on-chain. Without it, cargo near build will fail."
+                  />
+                  <ConceptCard
+                    icon={Terminal}
+                    title="NEAR CLI (near-cli-rs)"
+                    preview="Your command-line Swiss Army knife for NEAR development"
+                    details="Install with npm i -g near-cli-rs. The Rust-based CLI is faster than the legacy JS version and has interactive prompts that guide you through complex operations. Use it to create accounts, deploy contracts, call methods, manage keys, and inspect transactions. Run near --help to explore all subcommands."
+                  />
+                  <ConceptCard
+                    icon={FolderOpen}
+                    title="Project Scaffolding"
+                    preview="cargo near new creates a complete project template in seconds"
+                    details="Run cargo near new my-contract to generate a project with Cargo.toml (dependencies configured), src/lib.rs (contract boilerplate), and tests/ (integration test template). The Cargo.toml includes near-sdk and sets crate-type = ['cdylib'] which tells Rust to produce a dynamic library suitable for WASM compilation."
+                  />
+                  <ConceptCard
+                    icon={Settings}
+                    title="VS Code Extensions"
+                    preview="Four extensions that transform VS Code into a Rust IDE"
+                    details="rust-analyzer provides autocomplete, inline type hints, and real-time error detection. Even Better TOML adds syntax highlighting for Cargo.toml. CodeLLDB enables Rust debugging. Error Lens shows errors inline next to the offending code. Together they catch most mistakes before you even try to compile."
+                  />
+                  <ConceptCard
+                    icon={Zap}
+                    title="Testnet Account"
+                    preview="Create a free testnet account for development and testing"
+                    details="Use near account create-account fund-later use-auto-generation save-to-folder ~/.near-credentials/testnet or visit testnet.mynearwallet.com. Fund it from near-faucet.io with free testnet NEAR. This account is your sandbox — deploy contracts, send transactions, and break things without spending real money."
+                  />
+                  <ConceptCard
+                    icon={GitBranch}
+                    title="Git & Version Control"
+                    preview="Track changes and collaborate with proper project structure"
+                    details="Initialize git in your project with git init, then add a .gitignore that excludes target/, *.wasm, and ~/.near-credentials. Commit after each working milestone. Use branches for experiments — if a contract change breaks things, you can always revert. The cargo near new template already includes a sensible .gitignore to get you started."
+                  />
+                </div>
+              </div>
+
+              {/* Real World Example */}
+              <Card variant="glass" padding="lg" className="border-cyan-500/20">
+                <h3 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
+                  <Rocket className="w-5 h-5 text-cyan-400" /> Real World Example
+                </h3>
+                <p className="text-sm text-text-secondary leading-relaxed mb-3">
+                  Here&apos;s a typical workflow after setup is complete. You scaffold a project, write your contract,
+                  build the WASM binary, deploy to testnet, and call methods — all from the terminal. This is the
+                  loop you&apos;ll repeat hundreds of times during development.
+                </p>
+                <div className="bg-black/40 rounded-lg p-3 font-mono text-xs text-text-secondary border border-border">
+                  <div><span className="text-text-muted">{'# Create and build'}</span></div>
+                  <div><span className="text-near-green">cargo</span> near new token-contract</div>
+                  <div><span className="text-near-green">cd</span> token-contract</div>
+                  <div><span className="text-text-muted">{'# ... edit src/lib.rs ...'}</span></div>
+                  <div><span className="text-near-green">cargo</span> near build</div>
+                  <div className="mt-1"><span className="text-text-muted">{'# Deploy to your testnet account'}</span></div>
+                  <div><span className="text-near-green">near</span> contract deploy myaccount.testnet \</div>
+                  <div>  use-file ./target/near/token_contract.wasm</div>
+                  <div className="mt-1"><span className="text-text-muted">{'# Call a method to verify it works'}</span></div>
+                  <div><span className="text-near-green">near</span> contract call-function as-transaction \</div>
+                  <div>  myaccount.testnet set_greeting \</div>
+                  <div>  json-args <span className="text-yellow-300">&apos;{'{'}&quot;greeting&quot;:&quot;Hello NEAR!&quot;{'}'}&apos;</span></div>
+                </div>
+              </Card>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-red-500/20 bg-red-500/5">
+                <h4 className="font-semibold text-red-400 mb-2">⚠️ Security Gotcha</h4>
+                <ul className="space-y-1 text-sm text-text-secondary">
+                  <li>• Never pipe install scripts to sh without reviewing them first — check rustup.rs and nvm.sh are legit</li>
+                  <li>• Store credentials in ~/.near-credentials, not in your project repo — add it to .gitignore</li>
+                  <li>• Don&apos;t mix testnet and mainnet credentials in the same directory — use separate folders</li>
+                  <li>• Keep your Rust toolchain updated — run rustup update regularly for security patches</li>
+                </ul>
+              </Card>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-emerald-500/20">
+                <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  Key Takeaways
+                </h3>
+                <ul className="space-y-2">
                   {[
-                    'Install Rust, Node.js, and the NEAR CLI toolchain',
-                    'Set up VS Code with NEAR-specific extensions',
-                    'Create your first NEAR project from a template',
-                    'Understand the project file structure and Cargo.toml',
-                    'Configure testnet accounts for development',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'Install in order: Rust → wasm32 target → Node.js → near-cli-rs → cargo-near → VS Code extensions.',
+                    'The wasm32-unknown-unknown target is what makes Rust compile to WebAssembly for NEAR.',
+                    'cargo near new gives you a complete project template — don\'t start from scratch.',
+                    'Create a testnet account with free tokens to experiment safely before touching mainnet.',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <span className="text-near-green mt-0.5 font-bold">→</span>
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-near-green/20 bg-near-green/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-near-green font-semibold">Prerequisites:</span> Basic command line knowledge, a code editor, and completion of the Explorer track.
-                  </p>
-                </Card>
-              </div>
-            )}
+              </Card>
 
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Rust */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-orange-400">🦀</span> Installing Rust
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    NEAR smart contracts are written in Rust (or JavaScript via the JS SDK, but Rust is the standard for production). Install Rust via <code className="text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded text-sm">rustup</code>:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted mb-1"># Install Rust</div>
-                    <div className="text-near-green">curl --proto &apos;=https&apos; --tlsv1.2 -sSf https://sh.rustup.rs | sh</div>
-                    <div className="text-text-muted mt-3 mb-1"># Add the WASM target (required for NEAR contracts)</div>
-                    <div className="text-near-green">rustup target add wasm32-unknown-unknown</div>
-                    <div className="text-text-muted mt-3 mb-1"># Verify installation</div>
-                    <div className="text-near-green">rustc --version</div>
-                    <div className="text-text-muted"># → rustc 1.7x.x</div>
-                  </div>
-                  <p className="text-text-muted text-sm mt-2">
-                    The <code className="text-purple-400 bg-purple-500/10 px-1 rounded">wasm32-unknown-unknown</code> target compiles Rust to WebAssembly — the format NEAR runs on-chain.
-                  </p>
-                </section>
-
-                {/* Section 2: Node.js */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-green-400">📦</span> Node.js &amp; npm
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    The NEAR CLI and many frontend tools require Node.js. Install v18+ via nvm:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted mb-1"># Install nvm</div>
-                    <div className="text-near-green">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</div>
-                    <div className="text-text-muted mt-3 mb-1"># Install Node.js LTS</div>
-                    <div className="text-near-green">nvm install --lts</div>
-                    <div className="text-near-green">nvm use --lts</div>
-                  </div>
-                </section>
-
-                {/* Section 3: NEAR CLI */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Terminal className="w-5 h-5 text-purple-400" />
-                    NEAR CLI
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    The NEAR CLI is your command-line interface for interacting with NEAR. There are two versions:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary mb-1">near-cli-rs (Recommended)</h5>
-                      <p className="text-sm text-text-secondary mb-2">Rust-based, faster, interactive prompts.</p>
-                      <code className="text-near-green text-sm bg-black/30 px-2 py-1 rounded block">npm install -g near-cli-rs</code>
-                    </Card>
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary mb-1">near-cli (Legacy)</h5>
-                      <p className="text-sm text-text-secondary mb-2">JavaScript-based, widely documented.</p>
-                      <code className="text-near-green text-sm bg-black/30 px-2 py-1 rounded block">npm install -g near-cli</code>
-                    </Card>
-                  </div>
-                  <p className="text-text-muted text-sm">We recommend <code className="text-purple-400 bg-purple-500/10 px-1 rounded">near-cli-rs</code> for its speed and interactive mode.</p>
-                </section>
-
-                {/* Section 4: VS Code */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-blue-400">💻</span> VS Code Extensions
-                  </h4>
-                  <p className="text-text-secondary mb-3">Install these VS Code extensions for a great NEAR development experience:</p>
-                  <ul className="space-y-2 text-text-secondary text-sm">
-                    <li className="flex items-center gap-2"><span className="text-near-green">→</span> <strong>rust-analyzer</strong> — Rust language support with autocomplete and inline errors</li>
-                    <li className="flex items-center gap-2"><span className="text-near-green">→</span> <strong>Even Better TOML</strong> — Syntax highlighting for Cargo.toml</li>
-                    <li className="flex items-center gap-2"><span className="text-near-green">→</span> <strong>CodeLLDB</strong> — Debugger for Rust</li>
-                    <li className="flex items-center gap-2"><span className="text-near-green">→</span> <strong>Error Lens</strong> — Inline error messages</li>
-                  </ul>
-                </section>
-
-                {/* Section 5: Project Scaffold */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <FolderOpen className="w-5 h-5 text-yellow-400" />
-                    Creating Your First Project
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">cargo-near</code> to scaffold a new NEAR project:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted mb-1"># Install cargo-near</div>
-                    <div className="text-near-green">cargo install cargo-near</div>
-                    <div className="text-text-muted mt-3 mb-1"># Create a new project</div>
-                    <div className="text-near-green">cargo near new my-first-contract</div>
-                    <div className="text-near-green">cd my-first-contract</div>
-                    <div className="text-text-muted mt-3 mb-1"># Project structure:</div>
-                    <div className="text-text-secondary">├── Cargo.toml        <span className="text-text-muted"># Dependencies &amp; config</span></div>
-                    <div className="text-text-secondary">├── src/</div>
-                    <div className="text-text-secondary">│   └── lib.rs        <span className="text-text-muted"># Your contract code</span></div>
-                    <div className="text-text-secondary">└── tests/</div>
-                    <div className="text-text-secondary">    └── test.rs       <span className="text-text-muted"># Integration tests</span></div>
-                  </div>
-                </section>
-
-                {/* Section 6: Testnet Account */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-cyan-400">🔑</span> Setting Up a Testnet Account
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    You need a testnet account for deploying and testing. Create one via the CLI:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted mb-1"># Create a testnet account (interactive)</div>
-                    <div className="text-near-green">near account create-account fund-later use-auto-generation save-to-folder ~/.near-credentials/testnet</div>
-                    <div className="text-text-muted mt-3 mb-1"># Or use the web wallet</div>
-                    <div className="text-text-muted"># Visit: https://testnet.mynearwallet.com</div>
-                  </div>
-                  <p className="text-text-muted text-sm mt-2">
-                    Testnet NEAR tokens are free! You can request them from the faucet at <code className="text-purple-400 bg-purple-500/10 px-1 rounded">https://near-faucet.io</code>
-                  </p>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                {/* Exercise 1 */}
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">1</div>
-                    <h5 className="font-semibold text-text-primary">Verify Your Toolchain</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Run the following commands and confirm each returns a version number:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div>rustc --version</div>
-                    <div>cargo --version</div>
-                    <div>node --version</div>
-                    <div>near --version</div>
-                    <div>rustup target list --installed | grep wasm32</div>
-                  </div>
-                  <p className="text-text-muted text-xs mt-2">
-                    💡 If <code className="text-purple-400 bg-purple-500/10 px-1 rounded">wasm32-unknown-unknown</code> doesn&apos;t appear, run <code className="text-purple-400 bg-purple-500/10 px-1 rounded">rustup target add wasm32-unknown-unknown</code>.
-                  </p>
-                </Card>
-
-                {/* Exercise 2 */}
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">2</div>
-                    <h5 className="font-semibold text-text-primary">Scaffold a Project</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Create a new NEAR contract project and explore the generated files:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div>cargo near new hello-near</div>
-                    <div>cd hello-near</div>
-                    <div>cat Cargo.toml</div>
-                    <div>cat src/lib.rs</div>
-                  </div>
-                  <p className="text-text-muted text-xs mt-2">
-                    💡 Read through <code className="text-purple-400 bg-purple-500/10 px-1 rounded">Cargo.toml</code> — notice the <code className="text-purple-400 bg-purple-500/10 px-1 rounded">near-sdk</code> dependency and the <code className="text-purple-400 bg-purple-500/10 px-1 rounded">crate-type = [&quot;cdylib&quot;]</code> setting.
-                  </p>
-                </Card>
-
-                {/* Exercise 3 */}
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">3</div>
-                    <h5 className="font-semibold text-text-primary">Build Your First Contract</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Compile the template contract to WASM:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div>cargo near build</div>
-                    <div className="text-text-muted mt-1"># Output: target/near/hello_near.wasm</div>
-                  </div>
-                  <p className="text-text-muted text-xs mt-2">
-                    💡 The .wasm file is your compiled smart contract — this is what gets deployed to NEAR.
-                  </p>
-                </Card>
-
-                {/* Exercise 4 */}
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">4</div>
-                    <h5 className="font-semibold text-text-primary">Create a Testnet Account</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Create a testnet account and fund it from the faucet. Verify it works:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div>near account view-account-summary your-name.testnet network-config testnet now</div>
-                  </div>
-                  <p className="text-text-muted text-xs mt-2">
-                    💡 You should see your account balance and storage usage.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-3">
-                {[
-                  { title: 'NEAR SDK Quickstart', url: 'https://docs.near.org/build/smart-contracts/quickstart', desc: 'Official getting-started guide' },
-                  { title: 'Rust Installation', url: 'https://www.rust-lang.org/tools/install', desc: 'Official Rust installer' },
-                  { title: 'NEAR CLI Documentation', url: 'https://docs.near.org/tools/near-cli', desc: 'Full CLI reference' },
-                  { title: 'cargo-near GitHub', url: 'https://github.com/near/cargo-near', desc: 'Project scaffolding tool' },
-                  { title: 'NEAR Testnet Faucet', url: 'https://near-faucet.io', desc: 'Get free testnet tokens' },
-                  { title: 'NEAR Examples Repo', url: 'https://github.com/near-examples', desc: 'Official example contracts' },
-                  { title: 'VS Code rust-analyzer', url: 'https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer', desc: 'Essential Rust extension' },
-                ].map((link) => (
-                  <a
-                    key={link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-surface/50 border border-border hover:border-purple-500/30 transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-300 flex-shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-text-primary group-hover:text-purple-300">{link.title}</div>
-                      <div className="text-xs text-text-muted">{link.desc}</div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              {/* Mark Complete */}
+              <motion.button
+                onClick={handleComplete}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  'w-full py-3 rounded-xl font-semibold text-sm transition-all',
+                  completed
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-near-green/10 text-near-green border border-near-green/30 hover:bg-near-green/20'
+                )}
+              >
+                {completed ? '✓ Module Complete' : 'Mark as Complete'}
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

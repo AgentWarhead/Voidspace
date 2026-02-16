@@ -1,316 +1,462 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, FileCode, ExternalLink, CheckCircle, Rocket, Zap, Database } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, BookOpen, Clock, CheckCircle2,
+  Lightbulb, Zap, FileCode, ArrowRight, Play, Rocket, Code,
+  Package,
+} from 'lucide-react';
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface YourFirstContractProps {
   isActive: boolean;
   onToggle: () => void;
 }
 
-const YourFirstContract: React.FC<YourFirstContractProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+// ─── Interactive Visual: Contract Lifecycle ────────────────────────────────────
+
+const lifecycleStages = [
+  { id: 'write', label: 'Write', icon: '✍️', desc: 'Define your contract struct, methods, and storage in Rust. Use #[near] macros to expose endpoints.', color: 'from-violet-500 to-purple-500' },
+  { id: 'build', label: 'Build', icon: '🔨', desc: 'Run cargo near build to compile Rust into a .wasm binary optimized for the NEAR VM.', color: 'from-blue-500 to-cyan-500' },
+  { id: 'deploy', label: 'Deploy', icon: '🚀', desc: 'Use near deploy to upload your .wasm to a NEAR account. The account becomes your contract.', color: 'from-emerald-500 to-green-500' },
+  { id: 'interact', label: 'Interact', icon: '🔗', desc: 'Call view methods (free) and change methods (costs gas) via near call or any NEAR client.', color: 'from-amber-500 to-yellow-500' },
+];
+
+function ContractLifecycle() {
+  const [activeStage, setActiveStage] = useState<number>(0);
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
+    <div className="relative py-4">
+      <div className="flex items-center justify-between mb-6">
+        {lifecycleStages.map((stage, i) => (
+          <React.Fragment key={stage.id}>
+            <motion.button
+              onClick={() => setActiveStage(i)}
+              className={cn(
+                'flex flex-col items-center gap-2 p-3 rounded-xl border transition-all flex-1',
+                activeStage === i
+                  ? 'border-near-green/40 bg-near-green/5'
+                  : 'border-border bg-black/20 hover:border-border-hover'
+              )}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <div className={cn('w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center text-lg', stage.color)}>
+                {stage.icon}
+              </div>
+              <span className={cn('text-xs font-bold', activeStage === i ? 'text-near-green' : 'text-text-muted')}>
+                {stage.label}
+              </span>
+            </motion.button>
+            {i < lifecycleStages.length - 1 && (
+              <ArrowRight className="w-4 h-4 text-text-muted/40 flex-shrink-0 mx-1" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeStage}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          className="bg-black/30 rounded-lg p-4 border border-border"
+        >
+          <p className="text-sm text-text-secondary leading-relaxed">{lifecycleStages[activeStage].desc}</p>
+        </motion.div>
+      </AnimatePresence>
+      <p className="text-center text-xs text-text-muted mt-4">
+        👆 Click each stage to learn the contract lifecycle
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ──────────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="glass" padding="md" className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-green-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">
+                  {details}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ─────────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 2;
+  const options = [
+    'A standalone binary that runs on your computer',
+    'A JavaScript file uploaded to NEAR nodes',
+    'A WebAssembly binary deployed to a NEAR account',
+    'A Docker container running on NEAR validators',
+  ];
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">What is a NEAR smart contract at the lowest level?</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+              'mt-4 p-3 rounded-lg text-sm',
+              selected === correctAnswer
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+            )}
+          >
+            {selected === correctAnswer
+              ? '✓ Correct! Rust compiles to WebAssembly (.wasm), which is deployed to a NEAR account. The NEAR runtime executes this Wasm binary when methods are called.'
+              : '✗ Not quite. NEAR contracts are compiled from Rust to WebAssembly (.wasm) and deployed to a NEAR account. The VM executes the Wasm binary on-chain.'}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ───────────────────────────────────────────────────────────────
+
+const YourFirstContract: React.FC<YourFirstContractProps> = ({ isActive, onToggle }) => {
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      if (progress['your-first-contract']) setCompleted(true);
+    }
+  }, []);
+
+  const handleComplete = () => {
+    if (typeof window !== 'undefined') {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      progress['your-first-contract'] = true;
+      localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    }
+  };
+
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      {/* ── Accordion Header ── */}
       <div
         onClick={onToggle}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-            <FileCode className="w-6 h-6 text-white" />
+          <div className={cn(
+            'w-12 h-12 rounded-xl flex items-center justify-center',
+            completed
+              ? 'bg-gradient-to-br from-emerald-500 to-green-600'
+              : 'bg-gradient-to-br from-green-500 to-emerald-500'
+          )}>
+            {completed ? <CheckCircle2 className="w-6 h-6 text-white" /> : <FileCode className="w-6 h-6 text-white" />}
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Your First Contract</h3>
-            <p className="text-text-muted text-sm">Write, build, deploy, and interact with a real NEAR smart contract</p>
+            <p className="text-text-muted text-sm">Write, build, and deploy a smart contract on NEAR</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Beginner</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">60 min</Badge>
+          {completed && (
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">✓ Complete</Badge>
+          )}
+          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Beginner</Badge>
+          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">40 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
+      {/* ── Expanded Content ── */}
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-near-green/20 p-6 space-y-8">
+              {/* Module Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
+                <BookOpen className="w-3 h-3" />
+                Module 2 of 22
+                <span className="text-text-muted">•</span>
+                <Clock className="w-3 h-3" />
+                40 min read
+              </div>
 
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Rocket className="w-5 h-5 text-green-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-green-400" />
+                  </div>
+                  <h2 className="text-xl font-bold text-text-primary">The Big Idea</h2>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  A smart contract is like a <span className="text-near-green font-medium">vending machine</span> — you put money in, press a button,
+                  and it does exactly what it&apos;s programmed to do, every time, with no human middleman. On NEAR, your Rust code compiles into a
+                  tiny program (<span className="text-near-green font-medium">WebAssembly</span>) that lives on an account and responds to function calls
+                  from anyone in the world. Once deployed, it runs exactly as written — no take-backs.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-2">🔧 Contract Lifecycle</h3>
+                <p className="text-sm text-text-muted mb-4">Follow a contract from code to live on-chain in four stages.</p>
+                <ContractLifecycle />
+              </div>
+
+              {/* Code Example */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-3">💻 Your First Contract</h3>
+                <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border overflow-x-auto">
+                  <div><span className="text-purple-400">use</span> near_sdk::{'{'}<span className="text-cyan-400">near</span>, <span className="text-cyan-400">env</span>, <span className="text-cyan-400">log</span>{'}'};</div>
+                  <div className="mt-2"><span className="text-purple-400">#[near(contract_state)]</span></div>
+                  <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">HelloNear</span> {'{'}</div>
+                  <div>    greeting: <span className="text-cyan-400">String</span>,</div>
+                  <div>{'}'}</div>
+                  <div className="mt-2"><span className="text-purple-400">impl</span> <span className="text-cyan-400">Default</span> <span className="text-purple-400">for</span> <span className="text-cyan-400">HelloNear</span> {'{'}</div>
+                  <div>    <span className="text-purple-400">fn</span> <span className="text-near-green">default</span>() -&gt; <span className="text-cyan-400">Self</span> {'{'}</div>
+                  <div>        <span className="text-cyan-400">Self</span> {'{'} greeting: <span className="text-yellow-300">&quot;Hello&quot;</span>.to_string() {'}'}</div>
+                  <div>    {'}'}</div>
+                  <div>{'}'}</div>
+                  <div className="mt-2"><span className="text-purple-400">#[near]</span></div>
+                  <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">HelloNear</span> {'{'}</div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_greeting</span>(&amp;self) -&gt; &amp;<span className="text-cyan-400">str</span> {'{'}</div>
+                  <div>        &amp;self.greeting</div>
+                  <div>    {'}'}</div>
+                  <div className="mt-1">    <span className="text-purple-400">pub fn</span> <span className="text-near-green">set_greeting</span>(&amp;<span className="text-purple-400">mut</span> self, greeting: <span className="text-cyan-400">String</span>) {'{'}</div>
+                  <div>        log!(<span className="text-yellow-300">&quot;Saving: {'{}'}&quot;</span>, &amp;greeting);</div>
+                  <div>        self.greeting = greeting;</div>
+                  <div>    {'}'}</div>
+                  <div>{'}'}</div>
+                </div>
+              </div>
+
+              {/* Pro Tip */}
+              <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/5 border border-emerald-500/20 rounded-xl p-5">
+                <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4" /> Pro Tip
+                </h4>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Use <code className="text-emerald-400 bg-emerald-500/10 px-1 rounded">cargo near build --no-docker</code> for
+                  faster development builds. The Docker-based build ensures reproducibility for production, but local builds
+                  are 3-5x faster for iteration. Also, run <code className="text-emerald-400 bg-emerald-500/10 px-1 rounded">cargo clippy</code> after
+                  builds to catch common Rust anti-patterns before they become on-chain bugs.
+                </p>
+              </div>
+
+              {/* Real World Example */}
+              <Card variant="glass" padding="lg" className="border-cyan-500/20">
+                <h3 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
+                  <Rocket className="w-5 h-5 text-cyan-400" /> Real World Example
+                </h3>
+                <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                  Here&apos;s a counter contract — the &quot;Hello World&quot; of NEAR. It uses{' '}
+                  <code className="text-cyan-400">#[init]</code> for custom initialization, shows view vs change methods,
+                  and demonstrates the <code className="text-cyan-400">#[payable]</code> attribute.
+                </p>
+                <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border overflow-x-auto">
+                  <div><span className="text-purple-400">use</span> near_sdk::{'{'}<span className="text-cyan-400">near</span>, <span className="text-cyan-400">env</span>, <span className="text-cyan-400">log</span>, <span className="text-cyan-400">NearToken</span>{'}'};</div>
+                  <div className="mt-2"><span className="text-purple-400">#[near(contract_state)]</span></div>
+                  <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Counter</span> {'{'}</div>
+                  <div>    count: <span className="text-cyan-400">i64</span>,</div>
+                  <div>    owner: <span className="text-cyan-400">AccountId</span>,</div>
+                  <div>{'}'}</div>
+                  <div className="mt-2"><span className="text-purple-400">#[near]</span></div>
+                  <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Counter</span> {'{'}</div>
+                  <div>    <span className="text-text-muted">// Custom init — replaces Default</span></div>
+                  <div>    <span className="text-purple-400">#[init]</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">new</span>(start: <span className="text-cyan-400">i64</span>) -&gt; <span className="text-cyan-400">Self</span> {'{'}</div>
+                  <div>        <span className="text-cyan-400">Self</span> {'{'} count: start, owner: env::predecessor_account_id() {'}'}</div>
+                  <div>    {'}'}</div>
+                  <div className="mt-2">    <span className="text-text-muted">// View method — free to call</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_count</span>(&amp;self) -&gt; <span className="text-cyan-400">i64</span> {'{'}</div>
+                  <div>        self.count</div>
+                  <div>    {'}'}</div>
+                  <div className="mt-2">    <span className="text-text-muted">// Change method — costs gas</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">increment</span>(&amp;<span className="text-purple-400">mut</span> self) {'{'}</div>
+                  <div>        self.count += 1;</div>
+                  <div>        log!(<span className="text-yellow-300">&quot;Count: {'{}'}&quot;</span>, self.count);</div>
+                  <div>    {'}'}</div>
+                  <div className="mt-2">    <span className="text-text-muted">// Payable — accepts attached NEAR</span></div>
+                  <div>    <span className="text-purple-400">#[payable]</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">increment_by</span>(&amp;<span className="text-purple-400">mut</span> self, amount: <span className="text-cyan-400">i64</span>) {'{'}</div>
+                  <div>        <span className="text-purple-400">let</span> deposit = env::attached_deposit();</div>
+                  <div>        assert!(deposit &gt;= NearToken::from_yoctonear(1), <span className="text-yellow-300">&quot;Attach NEAR&quot;</span>);</div>
+                  <div>        self.count += amount;</div>
+                  <div>    {'}'}</div>
+                  <div>{'}'}</div>
+                </div>
+                <p className="text-xs text-text-muted mt-3 leading-relaxed">
+                  Deploy with: <code className="text-cyan-400 bg-cyan-500/10 px-1 rounded">near deploy counter.testnet ./target/near/counter.wasm --initFunction new --initArgs &apos;{'{&quot;start&quot;: 0}'}&apos;</code>
+                </p>
+              </Card>
+
+              {/* Concept Cards */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <ConceptCard
+                    icon={Code}
+                    title="#[near(contract_state)]"
+                    preview="Marks your struct as the contract's persistent storage"
+                    details="This macro tells the NEAR SDK which struct holds your on-chain state. It automatically generates serialization/deserialization code so your data persists between calls. Every contract needs exactly one struct with this attribute. Fields are stored as key-value pairs in the account's storage."
+                  />
+                  <ConceptCard
+                    icon={Play}
+                    title="Default Implementation"
+                    preview="How your contract initializes when first deployed"
+                    details="The Default trait provides the initial state when a contract is deployed without an explicit init call. It's the simplest way to bootstrap. For more complex initialization, use #[init] on a custom function. Without either, calling your contract before initialization will panic."
+                  />
+                  <ConceptCard
+                    icon={Rocket}
+                    title="View vs Change Methods"
+                    preview="Read for free, write for gas"
+                    details="Methods with &self are view methods — they read state without modifying it and are free to call. Methods with &mut self are change methods — they modify state and require a transaction with gas. This is a fundamental design pattern: separate reads (free) from writes (paid) to minimize user costs."
+                  />
+                  <ConceptCard
+                    icon={Zap}
+                    title="Deploying with cargo-near"
+                    preview="From Rust source to live on NEAR in two commands"
+                    details="Run 'cargo near build' to compile your contract into an optimized .wasm file (typically 50-200KB). Then 'near deploy <account> ./target/near/<name>.wasm' uploads it. The contract is now live — anyone can call its public methods. Use --accountId to specify which NEAR account to deploy to."
+                  />
+                  <ConceptCard
+                    icon={Package}
+                    title="Cargo.toml Configuration"
+                    preview="Essential project settings for NEAR contract compilation"
+                    details="Your Cargo.toml needs [lib] crate-type = ['cdylib'] to output a C-compatible dynamic library that compiles to WebAssembly. Add near-sdk as your main dependency. Use [profile.release] with opt-level = 'z' and lto = true to minimize .wasm size — smaller contracts cost less to deploy and execute. The cargo-near tool reads these settings automatically during builds."
+                  />
+                </div>
+              </div>
+
+              {/* Common Mistakes */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <h4 className="font-semibold text-orange-400 mb-2">⚠️ Common Mistakes</h4>
+                <ul className="space-y-1 text-sm text-text-secondary">
+                  <li>• Forgetting Default — without it, your contract panics on first call if no init function is provided</li>
+                  <li>• Making change methods &amp;self instead of &amp;mut self — state changes silently don&apos;t persist</li>
+                  <li>• Deploying to a non-existent account — create the account first with near create-account</li>
+                  <li>• Not reserving enough NEAR for storage — each byte stored costs ~0.00001 NEAR</li>
+                </ul>
+              </Card>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h3>
+                <ul className="space-y-2">
                   {[
-                    'The anatomy of a NEAR smart contract — #[near] macros explained',
-                    'Writing a greeting contract with get/set methods',
-                    'Building the contract to WASM with cargo near build',
-                    'Deploying to NEAR testnet using the CLI',
-                    'Calling view and change methods from the command line',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'A NEAR contract = Rust struct + methods, compiled to WebAssembly and deployed to an account.',
+                    'View methods (&self) are free; change methods (&mut self) cost gas.',
+                    'Default provides initial state — every contract needs initialization.',
+                    'The lifecycle is Write → Build → Deploy → Interact. Master this loop.',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <span className="text-near-green mt-0.5 font-bold">→</span>
+                      {point}
                     </li>
                   ))}
                 </ul>
+              </Card>
+
+              {/* Mark Complete Button */}
+              <div className="flex justify-center pt-2">
+                <motion.button
+                  onClick={handleComplete}
+                  disabled={completed}
+                  className={cn(
+                    'px-8 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2',
+                    completed
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
+                      : 'bg-gradient-to-r from-near-green to-emerald-500 text-white hover:shadow-lg hover:shadow-near-green/20'
+                  )}
+                  whileHover={completed ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={completed ? {} : { scale: 0.97 }}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {completed ? 'Module Completed ✓' : 'Mark as Complete'}
+                </motion.button>
               </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Anatomy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-400" />
-                    Contract Anatomy
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    A NEAR smart contract is a Rust struct with methods. The <code className="text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded text-sm">#[near(contract_state)]</code> macro tells the SDK this struct holds your on-chain state.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">use</span> near_sdk::{'{'}near, env{'}'};</div>
-                    <div className="mt-2"><span className="text-purple-400">#[near(contract_state)]</span></div>
-                    <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Greeting</span> {'{'}</div>
-                    <div>    greeting: <span className="text-cyan-400">String</span>,</div>
-                    <div>{'}'}</div>
-                    <div className="mt-2 text-text-muted">{'// Default state when contract is first deployed'}</div>
-                    <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Default</span> <span className="text-purple-400">for</span> <span className="text-cyan-400">Greeting</span> {'{'}</div>
-                    <div>    <span className="text-purple-400">fn</span> <span className="text-near-green">default</span>() -&gt; Self {'{'}</div>
-                    <div>        Self {'{'} greeting: <span className="text-yellow-300">&quot;Hello, NEAR!&quot;</span>.to_string() {'}'}</div>
-                    <div>    {'}'}</div>
-                    <div>{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 2: Methods */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-blue-400">⚙️</span> View &amp; Change Methods
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    NEAR has two types of methods: <strong>view</strong> (read-only, free) and <strong>change</strong> (modifies state, costs gas).
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">#[near]</span></div>
-                    <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Greeting</span> {'{'}</div>
-                    <div>    <span className="text-text-muted">{'// VIEW method — &amp;self (immutable reference)'}</span></div>
-                    <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_greeting</span>(&amp;self) -&gt; &amp;<span className="text-cyan-400">String</span> {'{'}</div>
-                    <div>        &amp;self.greeting</div>
-                    <div>    {'}'}</div>
-                    <div className="mt-2">    <span className="text-text-muted">{'// CHANGE method — &amp;mut self (mutable reference)'}</span></div>
-                    <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">set_greeting</span>(&amp;<span className="text-purple-400">mut</span> self, greeting: String) {'{'}</div>
-                    <div>        log!(<span className="text-yellow-300">&quot;Changing greeting to {'{'}{'}'}&quot;</span>, greeting);</div>
-                    <div>        self.greeting = greeting;</div>
-                    <div>    {'}'}</div>
-                    <div>{'}'}</div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="text-sm font-semibold text-green-400 mb-1">View Methods</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Use <code className="text-purple-400">&amp;self</code></li>
-                        <li>• Free to call (no gas cost to caller)</li>
-                        <li>• Cannot modify state</li>
-                        <li>• Return data immediately</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="text-sm font-semibold text-orange-400 mb-1">Change Methods</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Use <code className="text-purple-400">&amp;mut self</code></li>
-                        <li>• Require gas (caller pays)</li>
-                        <li>• Can modify on-chain state</li>
-                        <li>• Can attach NEAR tokens</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 3: Build */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-orange-400">🔨</span> Building Your Contract
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Compile your Rust contract to WebAssembly:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted"># Build with cargo-near (recommended)</div>
-                    <div className="text-near-green">cargo near build</div>
-                    <div className="text-text-muted mt-3"># Output location</div>
-                    <div>target/near/greeting.wasm</div>
-                    <div className="text-text-muted mt-3"># Check the file size (smaller = cheaper)</div>
-                    <div className="text-near-green">ls -lh target/near/greeting.wasm</div>
-                    <div className="text-text-muted"># → ~100KB is typical for a simple contract</div>
-                  </div>
-                </section>
-
-                {/* Section 4: Deploy */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Rocket className="w-5 h-5 text-green-400" />
-                    Deploying to Testnet
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Deploy your compiled WASM to a testnet account:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted"># Deploy the contract</div>
-                    <div className="text-near-green">near contract deploy your-account.testnet \</div>
-                    <div className="text-near-green">  use-file target/near/greeting.wasm \</div>
-                    <div className="text-near-green">  without-init-call \</div>
-                    <div className="text-near-green">  network-config testnet \</div>
-                    <div className="text-near-green">  sign-with-keychain send</div>
-                  </div>
-                </section>
-
-                {/* Section 5: Interact */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-cyan-400">📡</span> Interacting with Your Contract
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Call your deployed contract methods from the CLI:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted"># Call a VIEW method (free)</div>
-                    <div className="text-near-green">near contract call-function as-read-only \</div>
-                    <div className="text-near-green">  your-account.testnet get_greeting json-args {'\'{}'}\' \</div>
-                    <div className="text-near-green">  network-config testnet now</div>
-                    <div className="text-text-muted mt-1"># → &quot;Hello, NEAR!&quot;</div>
-                    <div className="text-text-muted mt-3"># Call a CHANGE method (costs gas)</div>
-                    <div className="text-near-green">near contract call-function as-transaction \</div>
-                    <div className="text-near-green">  your-account.testnet set_greeting \</div>
-                    <div className="text-near-green">  json-args &apos;{'{'}&quot;greeting&quot;: &quot;Hello, Builder!&quot;{'}'}&apos; \</div>
-                    <div className="text-near-green">  prepaid-gas &apos;30 Tgas&apos; attached-deposit &apos;0 NEAR&apos; \</div>
-                    <div className="text-near-green">  sign-as your-account.testnet \</div>
-                    <div className="text-near-green">  network-config testnet sign-with-keychain send</div>
-                  </div>
-                </section>
-
-                {/* Section 6: Lifecycle */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Database className="w-5 h-5 text-purple-400" />
-                    Contract Lifecycle
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Understanding the full lifecycle of a transaction calling your contract:
-                  </p>
-                  <div className="bg-black/30 rounded-lg p-4 border border-border">
-                    <div className="flex flex-col gap-2 text-sm text-text-secondary">
-                      <div className="flex items-center gap-2"><span className="text-near-green font-mono">1.</span> User signs a transaction calling <code className="text-purple-400">set_greeting</code></div>
-                      <div className="flex items-center gap-2"><span className="text-near-green font-mono">2.</span> Transaction is sent to NEAR validators</div>
-                      <div className="flex items-center gap-2"><span className="text-near-green font-mono">3.</span> Validators load your contract WASM + state from storage</div>
-                      <div className="flex items-center gap-2"><span className="text-near-green font-mono">4.</span> WASM executes <code className="text-purple-400">set_greeting</code> in a sandbox</div>
-                      <div className="flex items-center gap-2"><span className="text-near-green font-mono">5.</span> New state is written back to storage</div>
-                      <div className="flex items-center gap-2"><span className="text-near-green font-mono">6.</span> Transaction receipt is returned with result</div>
-                    </div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">1</div>
-                    <h5 className="font-semibold text-text-primary">Deploy the Greeting Contract</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Follow the full flow: create project → write contract → build → deploy → call methods. Verify the greeting changes on-chain.
-                  </p>
-                  <p className="text-text-muted text-xs mt-2">💡 Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">near contract call-function as-read-only</code> to verify the change persisted.</p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">2</div>
-                    <h5 className="font-semibold text-text-primary">Add a Counter</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Extend the greeting contract: add a <code className="text-purple-400 bg-purple-500/10 px-1 rounded">visit_count: u64</code> field that increments every time <code className="text-purple-400 bg-purple-500/10 px-1 rounded">set_greeting</code> is called. Add a <code className="text-purple-400 bg-purple-500/10 px-1 rounded">get_visit_count</code> view method.
-                  </p>
-                  <p className="text-text-muted text-xs mt-2">💡 Don&apos;t forget to update the Default impl to initialize visit_count to 0.</p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">3</div>
-                    <h5 className="font-semibold text-text-primary">Track the Caller</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">env::predecessor_account_id()</code> to store <em>who</em> last changed the greeting. Add a <code className="text-purple-400 bg-purple-500/10 px-1 rounded">last_sender: AccountId</code> field and a view method to read it.
-                  </p>
-                  <p className="text-text-muted text-xs mt-2">💡 Import <code className="text-purple-400 bg-purple-500/10 px-1 rounded">AccountId</code> from <code className="text-purple-400 bg-purple-500/10 px-1 rounded">near_sdk</code>.</p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">4</div>
-                    <h5 className="font-semibold text-text-primary">View on NearBlocks</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    After deploying and calling your contract, look it up on the testnet explorer. Find your transactions and see the method calls.
-                  </p>
-                  <p className="text-text-muted text-xs mt-2">💡 Visit <code className="text-purple-400 bg-purple-500/10 px-1 rounded">https://testnet.nearblocks.io</code> and search your account.</p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-3">
-                {[
-                  { title: 'NEAR Smart Contract Quickstart', url: 'https://docs.near.org/build/smart-contracts/quickstart', desc: 'Official step-by-step guide' },
-                  { title: 'Hello NEAR Example', url: 'https://github.com/near-examples/hello-near-examples', desc: 'Template greeting contract' },
-                  { title: 'Contract Anatomy', url: 'https://docs.near.org/build/smart-contracts/anatomy', desc: 'How contracts are structured' },
-                  { title: 'NEAR Testnet Explorer', url: 'https://testnet.nearblocks.io', desc: 'View your deployed contracts' },
-                  { title: 'cargo-near Documentation', url: 'https://github.com/near/cargo-near', desc: 'Build and deploy tool' },
-                  { title: 'NEAR SDK API Reference', url: 'https://docs.rs/near-sdk/', desc: 'Full Rust SDK docs' },
-                  { title: 'Contract Environment (env)', url: 'https://docs.near.org/build/smart-contracts/anatomy/environment', desc: 'Available runtime info' },
-                ].map((link) => (
-                  <a
-                    key={link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-surface/50 border border-border hover:border-purple-500/30 transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-300 flex-shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-text-primary group-hover:text-purple-300">{link.title}</div>
-                      <div className="text-xs text-text-muted">{link.desc}</div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

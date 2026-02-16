@@ -1,20 +1,198 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Code, ExternalLink, CheckCircle, BookOpen, Cpu, Layers } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, BookOpen, Clock, CheckCircle2,
+  Lightbulb, Zap, Code, ArrowRight, Lock, Unlock, Eye, Rocket, Shield,
+} from 'lucide-react';
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface RustFundamentalsProps {
   isActive: boolean;
   onToggle: () => void;
 }
 
-const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
+// ─── Interactive Visual: Ownership Flow Diagram ────────────────────────────────
+
+const ownershipSteps = [
+  { id: 'create', label: 'Create', desc: 'let name = String::from("alice")', icon: '📦', color: 'from-emerald-500/20 to-emerald-500/10', border: 'border-emerald-500/30' },
+  { id: 'move', label: 'Move', desc: 'let owner = name; // name is gone!', icon: '➡️', color: 'from-orange-500/20 to-orange-500/10', border: 'border-orange-500/30' },
+  { id: 'borrow', label: 'Borrow', desc: 'let view = &name; // read-only ref', icon: '👁️', color: 'from-blue-500/20 to-blue-500/10', border: 'border-blue-500/30' },
+  { id: 'mut-borrow', label: 'Mut Borrow', desc: 'let edit = &mut name; // exclusive', icon: '✏️', color: 'from-purple-500/20 to-purple-500/10', border: 'border-purple-500/30' },
+  { id: 'drop', label: 'Drop', desc: 'Scope ends → memory freed', icon: '🗑️', color: 'from-red-500/20 to-red-500/10', border: 'border-red-500/30' },
+];
+
+function OwnershipFlowDiagram() {
+  const [activeStep, setActiveStep] = useState<number | null>(null);
 
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
+    <div className="relative py-4">
+      <div className="flex items-center justify-between gap-1">
+        {ownershipSteps.map((step, i) => (
+          <React.Fragment key={step.id}>
+            <motion.div
+              className={cn(
+                'flex-1 cursor-pointer rounded-lg border p-3 transition-all text-center',
+                step.border,
+                activeStep === i ? `bg-gradient-to-b ${step.color}` : 'bg-black/20'
+              )}
+              whileHover={{ scale: 1.05, y: -4 }}
+              onClick={() => setActiveStep(activeStep === i ? null : i)}
+            >
+              <div className="text-xl mb-1">{step.icon}</div>
+              <div className="text-xs font-bold text-text-primary">{step.label}</div>
+            </motion.div>
+            {i < ownershipSteps.length - 1 && (
+              <ArrowRight className="w-4 h-4 text-text-muted/40 flex-shrink-0" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+      <AnimatePresence>
+        {activeStep !== null && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 bg-black/30 rounded-lg p-3 border border-border">
+              <code className="text-sm text-near-green font-mono">{ownershipSteps[activeStep].desc}</code>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-center text-xs text-text-muted mt-4">
+        👆 Click each stage to see Rust&apos;s ownership in action
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ──────────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="glass" padding="md" className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-orange-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">
+                  {details}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ─────────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 1;
+  const options = [
+    'Values can have multiple owners at the same time',
+    'Each value has exactly one owner, and the value is dropped when the owner goes out of scope',
+    'Ownership is optional — you can disable it with unsafe blocks',
+    'Borrowed references can outlive the original owner',
+  ];
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">Which statement about Rust&apos;s ownership rules is correct?</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+              'mt-4 p-3 rounded-lg text-sm',
+              selected === correctAnswer
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+            )}
+          >
+            {selected === correctAnswer
+              ? '✓ Correct! Rust enforces single ownership — when the owner goes out of scope, the value is automatically freed. No garbage collector needed.'
+              : '✗ Not quite. Rust enforces single ownership: one owner per value, dropped when the owner exits scope. Borrowing creates temporary references but doesn\'t transfer ownership.'}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ───────────────────────────────────────────────────────────────
+
+const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle }) => {
+  const [completed, setCompleted] = useState(false);
+
+  const handleComplete = () => {
+    setCompleted(true);
+    const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+    progress['rust-fundamentals'] = true;
+    localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+  };
+
+  return (
+    <Card variant="glass" padding="none" className="border-near-green/20">
+      {/* ── Accordion Header ── */}
       <div
         onClick={onToggle}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
@@ -29,299 +207,229 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/10">Beginner</Badge>
+          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Beginner</Badge>
           <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">45 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
+      {/* ── Expanded Content ── */}
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-near-green/20 p-6 space-y-8">
+              {/* Module Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
+                <BookOpen className="w-3 h-3" />
+                Module 1 of 22
+                <span className="text-text-muted">•</span>
+                <Clock className="w-3 h-3" />
+                45 min read
+              </div>
 
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="w-5 h-5 text-orange-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-orange-400" />
+                  </div>
+                  <h2 className="text-xl font-bold text-text-primary">The Big Idea</h2>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Think of Rust&apos;s ownership like a library book system. Each book (value) has exactly <span className="text-near-green font-medium">one borrower card</span> (owner).
+                  You can let a friend read the book (<span className="text-near-green font-medium">borrow</span>), but they can&apos;t take it home.
+                  Only one person can write notes in the margins at a time (<span className="text-near-green font-medium">mutable borrow</span>).
+                  When you&apos;re done, the book is automatically returned — no overdue fees, no memory leaks.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-2">🔧 Ownership Flow</h3>
+                <p className="text-sm text-text-muted mb-4">See how values move through Rust&apos;s ownership system — from creation to cleanup.</p>
+                <OwnershipFlowDiagram />
+              </div>
+
+              {/* Code Example */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-3">💻 Code In Action</h3>
+                <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border overflow-x-auto">
+                  <div className="text-text-muted">{'// A NEAR contract using ownership fundamentals'}</div>
+                  <div><span className="text-purple-400">use</span> near_sdk::{'{'}<span className="text-cyan-400">near</span>, <span className="text-cyan-400">env</span>, <span className="text-cyan-400">log</span>{'}'};</div>
+                  <div className="mt-2"><span className="text-text-muted">{'// Derive Default so the contract can initialize with empty state'}</span></div>
+                  <div><span className="text-purple-400">#[near(contract_state)]</span></div>
+                  <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Greeter</span> {'{'}</div>
+                  <div>    greeting: <span className="text-cyan-400">String</span>,</div>
+                  <div>    <span className="text-text-muted">{'// Track how many times the greeting was changed'}</span></div>
+                  <div>    update_count: <span className="text-cyan-400">u64</span>,</div>
+                  <div>{'}'}</div>
+                  <div className="mt-2"><span className="text-text-muted">{'// Default implementation — called on first deploy'}</span></div>
+                  <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Default</span> <span className="text-purple-400">for</span> <span className="text-cyan-400">Greeter</span> {'{'}</div>
+                  <div>    <span className="text-purple-400">fn</span> <span className="text-near-green">default</span>() -&gt; <span className="text-cyan-400">Self</span> {'{'}</div>
+                  <div>        <span className="text-cyan-400">Self</span> {'{'} greeting: <span className="text-yellow-300">&quot;Hello&quot;</span>.to_string(), update_count: <span className="text-orange-400">0</span> {'}'}</div>
+                  <div>    {'}'}</div>
+                  <div>{'}'}</div>
+                  <div className="mt-2"><span className="text-purple-400">#[near]</span></div>
+                  <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Greeter</span> {'{'}</div>
+                  <div>    <span className="text-text-muted">{'// &self = borrow (view method, free to call)'}</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_greeting</span>(&amp;self) -&gt; &amp;<span className="text-cyan-400">str</span> {'{'}</div>
+                  <div>        &amp;self.greeting</div>
+                  <div>    {'}'}</div>
+                  <div className="mt-1">    <span className="text-text-muted">{'// &mut self = exclusive borrow (change method, costs gas)'}</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">set_greeting</span>(&amp;<span className="text-purple-400">mut</span> self, greeting: <span className="text-cyan-400">String</span>) {'{'}</div>
+                  <div>        <span className="text-text-muted">{'// Log who called and what changed — useful for debugging'}</span></div>
+                  <div>        log!(<span className="text-yellow-300">&quot;Account {} changed greeting to: {'{}'}&quot;</span>, env::predecessor_account_id(), &amp;greeting);</div>
+                  <div>        self.greeting = greeting; <span className="text-text-muted">{'// ownership moves into struct'}</span></div>
+                  <div>        self.update_count += <span className="text-orange-400">1</span>;</div>
+                  <div>    {'}'}</div>
+                  <div className="mt-1">    <span className="text-text-muted">{'// Return a copy — caller gets owned data'}</span></div>
+                  <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_update_count</span>(&amp;self) -&gt; <span className="text-cyan-400">u64</span> {'{'}</div>
+                  <div>        self.update_count</div>
+                  <div>    {'}'}</div>
+                  <div>{'}'}</div>
+                </div>
+              </div>
+
+              {/* Pro Tip */}
+              <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/5 border border-emerald-500/20 rounded-xl p-5">
+                <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4" /> Pro Tip
+                </h4>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  When you see a compiler error about &quot;value used after move,&quot; don&apos;t panic — it&apos;s Rust protecting you.
+                  The fix is usually one of three things: <span className="text-emerald-400 font-medium">.clone()</span> the value if you need two copies,
+                  pass a <span className="text-emerald-400 font-medium">reference (&amp;value)</span> instead of the value itself,
+                  or restructure so the value is only used once. In NEAR contracts, prefer references for read operations
+                  and owned values only when you need to store data permanently in contract state.
+                </p>
+              </div>
+
+              {/* Concept Cards */}
+              <div>
+                <h3 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <ConceptCard
+                    icon={Lock}
+                    title="Ownership"
+                    preview="Every value in Rust has exactly one owner"
+                    details="When a variable is assigned to another, ownership moves — the original is invalidated. This prevents double-free bugs at compile time. In NEAR contracts, your contract struct owns its state. When you return a String from a method, ownership transfers to the caller. Use .clone() if you need to keep a copy."
+                  />
+                  <ConceptCard
+                    icon={Eye}
+                    title="Borrowing & References"
+                    preview="Temporary access without taking ownership"
+                    details="Use &value for read-only borrows (unlimited simultaneous readers) or &mut value for exclusive write access (only one at a time). NEAR view methods use &self (borrow), change methods use &mut self (mutable borrow). The compiler enforces these rules at compile time — no race conditions possible."
+                  />
+                  <ConceptCard
+                    icon={Code}
+                    title="Structs & Enums"
+                    preview="Custom types for modeling your contract state"
+                    details="Structs group related data (like a contract's state fields). Enums represent variants — perfect for status fields like Pending/Active/Complete. Combined with #[near(contract_state)], structs become your on-chain storage. Enums with data variants (like Result<T,E>) are Rust's alternative to null pointers and exceptions."
+                  />
+                  <ConceptCard
+                    icon={Unlock}
+                    title="Pattern Matching"
+                    preview="Exhaustive branching that the compiler verifies"
+                    details="match expressions force you to handle every possible case — the compiler won't let you forget a variant. This is critical in contract code where missing a case could mean lost funds. Use match with enums for state machines, with Option<T> to handle missing values safely, and with Result<T,E> for error handling."
+                  />
+                  <ConceptCard
+                    icon={Zap}
+                    title="Traits & Implementations"
+                    preview="Shared behavior — Rust's version of interfaces"
+                    details="Traits define method signatures that types can implement. The NEAR SDK uses #[near] on impl blocks to expose methods as contract endpoints. Default trait implementations (like Default for contract initialization) reduce boilerplate. You'll implement traits like BorshSerialize and BorshDeserialize for custom types."
+                  />
+                  <ConceptCard
+                    icon={Shield}
+                    title="Error Handling with Result"
+                    preview="No exceptions — Rust uses Result<T, E> for recoverable errors"
+                    details="Instead of try/catch, Rust returns Result::Ok(value) on success and Result::Err(error) on failure. The ? operator propagates errors up the call chain cleanly. In NEAR contracts, panicking (via unwrap or panic!) rolls back the entire transaction and wastes gas. Use require!() from near-sdk for guard clauses, and return meaningful errors so callers know what went wrong."
+                  />
+                </div>
+              </div>
+
+              {/* Real World Example */}
+              <Card variant="glass" padding="lg" className="border-cyan-500/20">
+                <h3 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
+                  <Rocket className="w-5 h-5 text-cyan-400" /> Real World Example
+                </h3>
+                <p className="text-sm text-text-secondary leading-relaxed mb-3">
+                  Imagine building a token transfer function. Ownership rules prevent you from accidentally spending
+                  the same tokens twice. When you move a balance from sender to receiver, the compiler ensures the
+                  sender&apos;s original value is consumed — you literally can&apos;t reference it again without
+                  the compiler stopping you.
+                </p>
+                <div className="bg-black/40 rounded-lg p-3 font-mono text-xs text-text-secondary border border-border">
+                  <div><span className="text-purple-400">pub fn</span> <span className="text-near-green">transfer</span>(&amp;<span className="text-purple-400">mut</span> self, to: AccountId, amount: u128) {'{'}</div>
+                  <div>    <span className="text-purple-400">let</span> sender = env::predecessor_account_id();</div>
+                  <div>    <span className="text-purple-400">let</span> balance = self.balances.get(&amp;sender).unwrap_or(<span className="text-orange-400">0</span>);</div>
+                  <div>    require!(balance &gt;= amount, <span className="text-yellow-300">&quot;Not enough funds&quot;</span>);</div>
+                  <div>    <span className="text-text-muted">{'// Ownership ensures balance is updated atomically'}</span></div>
+                  <div>    self.balances.insert(&amp;sender, &amp;(balance - amount));</div>
+                  <div>    <span className="text-purple-400">let</span> receiver_bal = self.balances.get(&amp;to).unwrap_or(<span className="text-orange-400">0</span>);</div>
+                  <div>    self.balances.insert(&amp;to, &amp;(receiver_bal + amount));</div>
+                  <div>{'}'}</div>
+                </div>
+              </Card>
+
+              {/* Common Mistakes */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <h4 className="font-semibold text-orange-400 mb-2">⚠️ Common Mistakes</h4>
+                <ul className="space-y-1 text-sm text-text-secondary">
+                  <li>• Using a value after it&apos;s been moved — the compiler will catch this, read the error message carefully</li>
+                  <li>• Forgetting &amp;mut on methods that modify state — view methods can&apos;t change contract storage</li>
+                  <li>• Using String when &amp;str suffices — prefer borrowing for function parameters to avoid unnecessary cloning</li>
+                  <li>• Ignoring the Result type — unwrap() in production contracts panics and wastes gas</li>
+                </ul>
+              </Card>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h3>
+                <ul className="space-y-2">
                   {[
-                    'Variables, types, and ownership — Rust\'s core concepts',
-                    'Structs, enums, and pattern matching for contract data models',
-                    'Error handling with Result<T, E> and Option<T>',
-                    'Collections: Vec, HashMap, and iterators',
-                    'Traits and implementations — how NEAR SDK uses them',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'Ownership = one owner per value. When the owner exits scope, memory is freed automatically.',
+                    'Use &self for view methods (free) and &mut self for change methods (costs gas) in NEAR contracts.',
+                    'Pattern matching with match forces you to handle every case — no forgotten edge cases.',
+                    'Rust catches memory bugs at compile time — if it compiles, it won\'t crash from ownership violations.',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <span className="text-near-green mt-0.5 font-bold">→</span>
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-orange-500/20 bg-orange-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-orange-400 font-semibold">Note:</span> You don&apos;t need to master all of Rust. This module focuses on the 20% you&apos;ll use 80% of the time in NEAR contracts.
-                  </p>
-                </Card>
-              </div>
-            )}
+              </Card>
 
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Ownership */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Cpu className="w-5 h-5 text-orange-400" />
-                    Ownership &amp; Borrowing
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Rust&apos;s ownership system is what makes it safe without garbage collection. Every value has exactly one owner, and when the owner goes out of scope, the value is dropped.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">{'// Ownership moves — s1 is no longer valid after this'}</div>
-                    <div><span className="text-purple-400">let</span> s1 = <span className="text-near-green">String::from</span>(<span className="text-yellow-300">&quot;hello&quot;</span>);</div>
-                    <div><span className="text-purple-400">let</span> s2 = s1; <span className="text-text-muted">{'// s1 is moved to s2'}</span></div>
-                    <div className="mt-3 text-text-muted">{'// Borrowing — read access without taking ownership'}</div>
-                    <div><span className="text-purple-400">let</span> s3 = <span className="text-near-green">String::from</span>(<span className="text-yellow-300">&quot;world&quot;</span>);</div>
-                    <div><span className="text-purple-400">let</span> len = calculate_length(<span className="text-purple-400">&amp;</span>s3); <span className="text-text-muted">{'// s3 is borrowed, not moved'}</span></div>
-                    <div className="mt-3"><span className="text-purple-400">fn</span> <span className="text-near-green">calculate_length</span>(s: <span className="text-purple-400">&amp;</span>String) -&gt; <span className="text-cyan-400">usize</span> {'{'}</div>
-                    <div>    s.len()</div>
-                    <div>{'}'}</div>
-                  </div>
-                  <p className="text-text-muted text-sm mt-2">
-                    In NEAR contracts, you&apos;ll use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">&amp;self</code> for view methods and <code className="text-purple-400 bg-purple-500/10 px-1 rounded">&amp;mut self</code> for change methods.
-                  </p>
-                </section>
-
-                {/* Section 2: Types */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-blue-400" />
-                    Types &amp; Structs
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Rust is strongly typed. Structs are your primary way to define data models in NEAR contracts.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">{'// Basic types'}</div>
-                    <div><span className="text-purple-400">let</span> amount: <span className="text-cyan-400">u128</span> = 1_000_000_000_000_000_000_000_000; <span className="text-text-muted">{'// 1 NEAR'}</span></div>
-                    <div><span className="text-purple-400">let</span> name: <span className="text-cyan-400">String</span> = <span className="text-yellow-300">&quot;alice.near&quot;</span>.to_string();</div>
-                    <div><span className="text-purple-400">let</span> is_active: <span className="text-cyan-400">bool</span> = <span className="text-purple-400">true</span>;</div>
-                    <div className="mt-3 text-text-muted">{'// Struct — your contract state'}</div>
-                    <div><span className="text-purple-400">#[near(contract_state)]</span></div>
-                    <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Counter</span> {'{'}</div>
-                    <div>    count: <span className="text-cyan-400">i32</span>,</div>
-                    <div>    owner: <span className="text-cyan-400">AccountId</span>,</div>
-                    <div>{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 3: Enums & Match */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-green-400">🔀</span> Enums &amp; Pattern Matching
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Enums represent values that can be one of several variants. Combined with <code className="text-purple-400 bg-purple-500/10 px-1 rounded">match</code>, they&apos;re incredibly powerful.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">enum</span> <span className="text-cyan-400">Status</span> {'{'}</div>
-                    <div>    Active,</div>
-                    <div>    Paused,</div>
-                    <div>    Completed {'{'} result: <span className="text-cyan-400">String</span> {'}'},</div>
-                    <div>{'}'}</div>
-                    <div className="mt-3"><span className="text-purple-400">fn</span> <span className="text-near-green">handle_status</span>(status: <span className="text-cyan-400">Status</span>) {'{'}</div>
-                    <div>    <span className="text-purple-400">match</span> status {'{'}</div>
-                    <div>        Status::Active =&gt; log!(<span className="text-yellow-300">&quot;Running&quot;</span>),</div>
-                    <div>        Status::Paused =&gt; log!(<span className="text-yellow-300">&quot;Paused&quot;</span>),</div>
-                    <div>        Status::Completed {'{'} result {'}'} =&gt; log!(<span className="text-yellow-300">&quot;Done: {'{'}{'}'}&quot;</span>, result),</div>
-                    <div>    {'}'}</div>
-                    <div>{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 4: Error Handling */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-red-400">⚠️</span> Error Handling
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Rust uses <code className="text-purple-400 bg-purple-500/10 px-1 rounded">Result&lt;T, E&gt;</code> and <code className="text-purple-400 bg-purple-500/10 px-1 rounded">Option&lt;T&gt;</code> instead of exceptions. In NEAR contracts, you&apos;ll use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">require!</code> and <code className="text-purple-400 bg-purple-500/10 px-1 rounded">env::panic_str()</code>.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">{'// Option — value might not exist'}</div>
-                    <div><span className="text-purple-400">let</span> value: <span className="text-cyan-400">Option</span>&lt;<span className="text-cyan-400">u32</span>&gt; = Some(42);</div>
-                    <div><span className="text-purple-400">let</span> missing: <span className="text-cyan-400">Option</span>&lt;<span className="text-cyan-400">u32</span>&gt; = None;</div>
-                    <div className="mt-3 text-text-muted">{'// In NEAR contracts — assert conditions'}</div>
-                    <div><span className="text-purple-400">require!</span>(</div>
-                    <div>    env::predecessor_account_id() == self.owner,</div>
-                    <div>    <span className="text-yellow-300">&quot;Only the owner can call this&quot;</span></div>
-                    <div>);</div>
-                  </div>
-                </section>
-
-                {/* Section 5: Collections */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-purple-400">📚</span> Collections &amp; Iterators
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Standard collections work in Rust, but NEAR has special persistent collections for on-chain storage:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div className="text-text-muted">{'// Standard Rust'}</div>
-                    <div><span className="text-purple-400">let</span> <span className="text-purple-400">mut</span> scores: Vec&lt;<span className="text-cyan-400">u32</span>&gt; = vec![10, 20, 30];</div>
-                    <div>scores.push(40);</div>
-                    <div><span className="text-purple-400">let</span> total: <span className="text-cyan-400">u32</span> = scores.iter().sum();</div>
-                    <div className="mt-3 text-text-muted">{'// NEAR persistent collections (stored on-chain)'}</div>
-                    <div><span className="text-purple-400">use</span> near_sdk::store::{'{'}LookupMap, Vector{'}'};</div>
-                    <div className="mt-1"><span className="text-purple-400">#[near(contract_state)]</span></div>
-                    <div><span className="text-purple-400">pub struct</span> <span className="text-cyan-400">Registry</span> {'{'}</div>
-                    <div>    balances: LookupMap&lt;AccountId, <span className="text-cyan-400">u128</span>&gt;,</div>
-                    <div>    members: Vector&lt;AccountId&gt;,</div>
-                    <div>{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 6: Traits */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <span className="text-cyan-400">🧩</span> Traits &amp; Implementations
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Traits define shared behavior. The NEAR SDK uses traits extensively — your contract implements methods via <code className="text-purple-400 bg-purple-500/10 px-1 rounded">#[near]</code> attribute macros.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">#[near]</span></div>
-                    <div><span className="text-purple-400">impl</span> <span className="text-cyan-400">Counter</span> {'{'}</div>
-                    <div>    <span className="text-text-muted">{'// View method — reads state, costs no gas'}</span></div>
-                    <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">get_count</span>(&amp;self) -&gt; <span className="text-cyan-400">i32</span> {'{'}</div>
-                    <div>        self.count</div>
-                    <div>    {'}'}</div>
-                    <div className="mt-2">    <span className="text-text-muted">{'// Change method — modifies state, costs gas'}</span></div>
-                    <div>    <span className="text-purple-400">pub fn</span> <span className="text-near-green">increment</span>(&amp;<span className="text-purple-400">mut</span> self) {'{'}</div>
-                    <div>        self.count += 1;</div>
-                    <div>        log!(<span className="text-yellow-300">&quot;Count: {'{'}{'}'}&quot;</span>, self.count);</div>
-                    <div>    {'}'}</div>
-                    <div>{'}'}</div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">1</div>
-                    <h5 className="font-semibold text-text-primary">Ownership Playground</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Create a file <code className="text-purple-400 bg-purple-500/10 px-1 rounded">ownership.rs</code> and experiment with ownership rules. Try to make the compiler complain, then fix it:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">fn</span> <span className="text-near-green">main</span>() {'{'}</div>
-                    <div>    <span className="text-purple-400">let</span> s = <span className="text-near-green">String::from</span>(<span className="text-yellow-300">&quot;hello&quot;</span>);</div>
-                    <div>    <span className="text-purple-400">let</span> s2 = s;</div>
-                    <div>    println!(<span className="text-yellow-300">&quot;{'{'}{'}'}&quot;</span>, s); <span className="text-text-muted">{'// ❌ Won&apos;t compile! Fix it.'}</span></div>
-                    <div>{'}'}</div>
-                  </div>
-                  <p className="text-text-muted text-xs mt-2">💡 Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">.clone()</code> or borrowing to fix it.</p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">2</div>
-                    <h5 className="font-semibold text-text-primary">Build a Token Balance Struct</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Define a struct with an account name and balance, then implement methods to deposit and withdraw:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div><span className="text-purple-400">struct</span> <span className="text-cyan-400">Wallet</span> {'{'}</div>
-                    <div>    owner: String,</div>
-                    <div>    balance: <span className="text-cyan-400">u128</span>,</div>
-                    <div>{'}'}</div>
-                    <div className="text-text-muted mt-1">{'// Implement deposit(), withdraw(), and get_balance()'}</div>
-                  </div>
-                  <p className="text-text-muted text-xs mt-2">💡 Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">&amp;mut self</code> for deposit/withdraw, <code className="text-purple-400 bg-purple-500/10 px-1 rounded">&amp;self</code> for get_balance.</p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">3</div>
-                    <h5 className="font-semibold text-text-primary">Enum State Machine</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Create a <code className="text-purple-400 bg-purple-500/10 px-1 rounded">ProposalStatus</code> enum with variants: Pending, Approved, Rejected. Write a match expression that handles each variant.
-                  </p>
-                  <p className="text-text-muted text-xs mt-2">💡 This pattern is used heavily in DAO contracts on NEAR.</p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-purple-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">4</div>
-                    <h5 className="font-semibold text-text-primary">Rustlings Exercises</h5>
-                  </div>
-                  <p className="text-text-secondary text-sm mb-3">
-                    Install and work through the first 20 Rustlings exercises for hands-on Rust practice:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-3 font-mono text-sm text-text-secondary border border-border">
-                    <div>cargo install rustlings</div>
-                    <div>rustlings init</div>
-                    <div>cd rustlings</div>
-                    <div>rustlings</div>
-                  </div>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-3">
-                {[
-                  { title: 'The Rust Book', url: 'https://doc.rust-lang.org/book/', desc: 'The official Rust tutorial — chapters 1-10 are most relevant' },
-                  { title: 'Rust by Example', url: 'https://doc.rust-lang.org/rust-by-example/', desc: 'Learn Rust through annotated examples' },
-                  { title: 'Rustlings', url: 'https://github.com/rust-lang/rustlings', desc: 'Small exercises to practice Rust fundamentals' },
-                  { title: 'NEAR SDK Rust Docs', url: 'https://docs.rs/near-sdk/', desc: 'API reference for the NEAR Rust SDK' },
-                  { title: 'Rust Playground', url: 'https://play.rust-lang.org/', desc: 'Test Rust code in your browser' },
-                  { title: 'NEAR Rust Smart Contract Guide', url: 'https://docs.near.org/build/smart-contracts/anatomy', desc: 'How Rust maps to NEAR contracts' },
-                ].map((link) => (
-                  <a
-                    key={link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-surface/50 border border-border hover:border-purple-500/30 transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-300 flex-shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-text-primary group-hover:text-purple-300">{link.title}</div>
-                      <div className="text-xs text-text-muted">{link.desc}</div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              {/* Mark Complete */}
+              <motion.button
+                onClick={handleComplete}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  'w-full py-3 rounded-xl font-semibold text-sm transition-all',
+                  completed
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-near-green/10 text-near-green border border-near-green/30 hover:bg-near-green/20'
+                )}
+              >
+                {completed ? '✓ Module Complete' : 'Mark as Complete'}
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };
