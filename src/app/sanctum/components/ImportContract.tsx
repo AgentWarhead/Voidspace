@@ -307,7 +307,7 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
   };
 
   return (
-    <div className="bg-void-darker border border-void-purple/30 rounded-2xl p-6 max-w-2xl mx-auto">
+    <div className="bg-void-darker border border-void-purple/30 rounded-2xl p-4 sm:p-6 max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl">📤</span>
@@ -317,10 +317,10 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
       </div>
 
       {/* Mode Selection */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
         <button
           onClick={() => { setMode('address'); setAnalysisResult(null); }}
-          className={`flex-1 py-3 px-4 rounded-xl border transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-2 ${
             mode === 'address'
               ? 'bg-void-purple/20 border-void-purple/50 text-white'
               : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-void-purple/40'
@@ -331,7 +331,7 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
         </button>
         <button
           onClick={() => { setMode('code'); setAnalysisResult(null); }}
-          className={`flex-1 py-3 px-4 rounded-xl border transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-2 ${
             mode === 'code'
               ? 'bg-void-purple/20 border-void-purple/50 text-white'
               : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-void-purple/40'
@@ -341,7 +341,7 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
           Paste Code
         </button>
         <label
-          className={`flex-1 py-3 px-4 rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 py-3 px-4 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
             mode === 'file'
               ? 'bg-void-purple/20 border-void-purple/50 text-white'
               : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-void-purple/40'
@@ -417,7 +417,7 @@ use near_sdk::{env, near_bindgen};
 pub struct Contract {
     // ...
 }"
-            className="w-full h-64 bg-void-black/50 border border-void-purple/20 rounded-xl px-4 py-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-void-purple/50 font-mono text-sm resize-none"
+            className="w-full h-48 sm:h-64 bg-void-black/50 border border-void-purple/20 rounded-xl px-3 sm:px-4 py-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-void-purple/50 font-mono text-sm resize-none"
           />
           <p className="text-xs text-gray-500 mt-2">
             We&apos;ll analyze your code to extract public methods and generate matching UI components
@@ -472,10 +472,10 @@ pub struct Contract {
       )}
 
       {/* Actions */}
-      <div className="flex gap-3 mt-6">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
         <button
           onClick={onCancel}
-          className="px-6 py-3 text-gray-400 hover:text-white transition-colors"
+          className="min-h-[44px] px-6 py-3 text-gray-400 hover:text-white transition-colors"
         >
           Cancel
         </button>
@@ -484,12 +484,12 @@ pub struct Contract {
           <button
             onClick={analyzeContract}
             disabled={isAnalyzing || (mode === 'address' ? !address : !code)}
-            className="flex-1 py-3 bg-void-purple hover:bg-void-purple/90 disabled:bg-void-purple/50 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="flex-1 min-h-[44px] py-3 bg-void-purple hover:bg-void-purple/90 disabled:bg-void-purple/50 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {loadingStatus || 'Analyzing...'}
+                <span className="truncate">{loadingStatus || 'Analyzing...'}</span>
               </>
             ) : (
               <>
@@ -501,9 +501,10 @@ pub struct Contract {
         ) : (
           <button
             onClick={handleContinue}
-            className="flex-1 py-3 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="flex-1 min-h-[44px] py-3 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
           >
-            Continue to Webapp Builder
+            <span className="hidden sm:inline">Continue to Webapp Builder</span>
+            <span className="sm:hidden">Continue</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         )}

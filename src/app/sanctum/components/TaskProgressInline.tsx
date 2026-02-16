@@ -56,7 +56,7 @@ export function TaskProgressInline({ task, isThinking }: TaskProgressInlineProps
   const currentStep = task!.steps.find(s => s.status === 'working');
 
   return (
-    <div className="flex items-center gap-4 flex-1">
+    <div className="flex items-center gap-2 sm:gap-4 flex-1 overflow-hidden">
       {/* Task name + progress */}
       <div className="flex items-center gap-2">
         <span className="text-lg">🔨</span>
@@ -69,7 +69,7 @@ export function TaskProgressInline({ task, isThinking }: TaskProgressInlineProps
       </div>
 
       {/* Progress bar */}
-      <div className="flex-1 max-w-[200px] h-1.5 bg-void-black rounded-full overflow-hidden">
+      <div className="flex-1 max-w-[120px] sm:max-w-[200px] h-1.5 bg-void-black rounded-full overflow-hidden hidden sm:block">
         <motion.div
           className="h-full bg-gradient-to-r from-purple-500 to-near-green"
           initial={{ width: 0 }}
@@ -80,7 +80,7 @@ export function TaskProgressInline({ task, isThinking }: TaskProgressInlineProps
 
       {/* Current step */}
       {currentStep && (
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted">
           <motion.div
             className="w-1.5 h-1.5 rounded-full bg-purple-500"
             animate={{ opacity: [1, 0.4, 1] }}

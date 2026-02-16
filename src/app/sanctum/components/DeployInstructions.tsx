@@ -126,7 +126,7 @@ export function DeployInstructions({ contractName = 'my-contract', code }: Deplo
       {/* Collapsible header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-void-purple/5 transition-colors"
+        className="w-full px-3 sm:px-4 py-3 min-h-[44px] flex items-center justify-between hover:bg-void-purple/5 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-near-green to-emerald-500 flex items-center justify-center">
@@ -227,7 +227,7 @@ function StepItem({
         {/* Checkbox */}
         <button
           onClick={onToggleCheck}
-          className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+          className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors touch-manipulation ${
             isChecked
               ? 'bg-near-green border-near-green text-white'
               : 'border-gray-600 hover:border-near-green/50'
@@ -244,14 +244,14 @@ function StepItem({
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={onToggleHelp}
-                className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-300 transition-colors"
                 title="What's this?"
               >
                 <HelpCircle className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onCopy}
-                className="p-1 text-gray-500 hover:text-near-green transition-colors"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-near-green transition-colors"
                 title="Copy command"
               >
                 {isCopied ? (
@@ -264,7 +264,7 @@ function StepItem({
           </div>
 
           {/* Command */}
-          <code className="text-xs text-gray-400 font-mono block mt-1 truncate">
+          <code className="text-xs text-gray-400 font-mono block mt-1 truncate overflow-x-auto">
             $ {step.command}
           </code>
 

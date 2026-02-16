@@ -56,7 +56,7 @@ export function ScratchWebappSession({ initialPrompt, templateName, onBack }: Sc
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors group"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/[0.05] transition-colors group"
             >
               <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-amber-400 transition-colors" />
             </button>

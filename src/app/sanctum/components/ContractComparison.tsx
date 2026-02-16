@@ -33,22 +33,22 @@ export function ContractComparison({ currentCode, onClose }: ContractComparisonP
   }, [diff]);
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-void-purple/20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+        <div className="px-4 sm:px-6 py-4 border-b border-void-purple/20 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
               <GitCompare className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">Contract Comparison</h3>
-              <p className="text-sm text-gray-400">Compare your current contract with another version</p>
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-white">Contract Comparison</h3>
+              <p className="text-sm text-gray-400 hidden sm:block">Compare your current contract with another version</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white flex-shrink-0"
           >
             ✕
           </button>
@@ -58,7 +58,7 @@ export function ContractComparison({ currentCode, onClose }: ContractComparisonP
         <div className="flex-1 overflow-hidden flex flex-col">
           {showPaste ? (
             /* Paste area */
-            <div className="p-6 flex-1 flex flex-col">
+            <div className="p-4 sm:p-6 flex-1 flex flex-col">
               <label className="text-sm text-gray-400 mb-2">Paste contract code to compare:</label>
               <textarea
                 value={compareCode}
@@ -74,7 +74,7 @@ export function ContractComparison({ currentCode, onClose }: ContractComparisonP
                 <button
                   onClick={() => compareCode && setShowPaste(false)}
                   disabled={!compareCode}
-                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
+                  className="min-h-[44px] px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
                 >
                   Compare
                 </button>
@@ -85,26 +85,26 @@ export function ContractComparison({ currentCode, onClose }: ContractComparisonP
             <div className="flex-1 overflow-hidden flex flex-col">
               {/* Stats bar */}
               {stats && (
-                <div className="px-6 py-3 bg-void-black/30 border-b border-void-purple/20 flex items-center gap-6">
-                  <div className="flex items-center gap-4">
+                <div className="px-4 sm:px-6 py-3 bg-void-black/30 border-b border-void-purple/20 flex flex-wrap items-center gap-3 sm:gap-6">
+                  <div className="hidden sm:flex items-center gap-4">
                     <ContractDNAInline code={compareCode} />
                     <span className="text-gray-500">→</span>
                     <ContractDNAInline code={currentCode} />
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-3 sm:gap-4 text-sm">
                     <span className="flex items-center gap-1 text-green-400">
-                      <Plus className="w-4 h-4" /> {stats.added} added
+                      <Plus className="w-4 h-4" /> {stats.added}
                     </span>
                     <span className="flex items-center gap-1 text-red-400">
-                      <Minus className="w-4 h-4" /> {stats.removed} removed
+                      <Minus className="w-4 h-4" /> {stats.removed}
                     </span>
                     <span className="flex items-center gap-1 text-gray-400">
-                      <Equal className="w-4 h-4" /> {stats.unchanged} unchanged
+                      <Equal className="w-4 h-4" /> {stats.unchanged}
                     </span>
                   </div>
                   <button
                     onClick={() => setShowPaste(true)}
-                    className="ml-auto px-3 py-1 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                    className="ml-auto min-h-[44px] px-3 py-1 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                   >
                     Change source
                   </button>

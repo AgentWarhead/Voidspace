@@ -80,7 +80,7 @@ export function DownloadContract({ code, contractName = 'contract', category }: 
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-amber-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-amber-500/30"
+        className="px-3 py-2 min-h-[44px] min-w-[44px] text-sm bg-white/[0.05] hover:bg-amber-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-amber-500/30"
         title="Download contract"
       >
         <Download className="w-4 h-4" />
@@ -90,11 +90,11 @@ export function DownloadContract({ code, contractName = 'contract', category }: 
       {showMenu && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-          <div className="absolute right-0 top-full mt-2 z-50 bg-void-darker border border-void-purple/30 rounded-xl shadow-2xl shadow-void-purple/20 overflow-hidden w-56">
+          <div className="absolute right-0 top-full mt-2 z-50 bg-void-darker border border-void-purple/30 rounded-xl shadow-2xl shadow-void-purple/20 overflow-hidden w-56 max-w-[calc(100vw-2rem)]">
             <button
               onClick={downloadProjectZip}
               disabled={isGenerating || !code}
-              className="w-full px-4 py-3 flex items-center gap-3 text-sm text-white hover:bg-near-green/10 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-near-green/10 transition-colors disabled:opacity-50"
             >
               <Package className="w-4 h-4 text-near-green" />
               <div className="text-left">
@@ -108,7 +108,7 @@ export function DownloadContract({ code, contractName = 'contract', category }: 
             <button
               onClick={downloadRustFile}
               disabled={!code}
-              className="w-full px-4 py-3 flex items-center gap-3 text-sm text-white hover:bg-amber-500/10 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-amber-500/10 transition-colors disabled:opacity-50"
             >
               <FileCode className="w-4 h-4 text-amber-400" />
               <div className="text-left">

@@ -75,7 +75,7 @@ export function GasEstimator({ code, network = 'testnet' }: GasEstimatorProps) {
       </div>
 
       {/* Gas Breakdown */}
-      <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="p-3 sm:p-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <GasCard
           label="Deploy Cost"
           tgas={estimate.deploy}
@@ -154,15 +154,15 @@ function GasCard({ label, tgas, near, icon }: GasCardProps) {
   const tgasNum = Number(tgas) / 1e12;
   
   return (
-    <div className="bg-void-black/30 rounded-lg p-3">
-      <div className="flex items-center gap-2 mb-2">
-        <span>{icon}</span>
-        <span className="text-xs text-gray-400">{label}</span>
+    <div className="bg-void-black/30 rounded-lg p-2 sm:p-3">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+        <span className="text-sm sm:text-base">{icon}</span>
+        <span className="text-[10px] sm:text-xs text-gray-400">{label}</span>
       </div>
-      <div className="text-lg font-bold text-white">
-        {tgasNum.toFixed(1)} <span className="text-xs text-gray-500">TGas</span>
+      <div className="text-base sm:text-lg font-bold text-white">
+        {tgasNum.toFixed(1)} <span className="text-[10px] sm:text-xs text-gray-500">TGas</span>
       </div>
-      <div className="text-xs text-void-cyan">
+      <div className="text-[10px] sm:text-xs text-void-cyan">
         ~{near.toFixed(4)} NEAR
       </div>
     </div>

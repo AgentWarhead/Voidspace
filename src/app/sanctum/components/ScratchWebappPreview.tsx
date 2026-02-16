@@ -24,14 +24,14 @@ export function ScratchWebappPreview({ code, onDownload }: ScratchWebappPreviewP
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
-        <div className="flex items-center justify-between">
+      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-white/[0.08] bg-void-black/50">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {/* View mode toggle */}
             <div className="flex rounded-lg bg-white/[0.05] border border-white/[0.08] p-0.5">
               <button
                 onClick={() => setViewMode('code')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] rounded-md text-xs font-medium transition-all ${
                   viewMode === 'code'
                     ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                     : 'text-text-muted hover:text-text-primary'
@@ -42,7 +42,7 @@ export function ScratchWebappPreview({ code, onDownload }: ScratchWebappPreviewP
               </button>
               <button
                 onClick={() => setViewMode('preview')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] rounded-md text-xs font-medium transition-all ${
                   viewMode === 'preview'
                     ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                     : 'text-text-muted hover:text-text-primary'
@@ -58,7 +58,7 @@ export function ScratchWebappPreview({ code, onDownload }: ScratchWebappPreviewP
             <button
               onClick={handleCopy}
               disabled={!code}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/[0.05] border border-white/[0.08] text-text-muted hover:text-text-primary hover:border-white/[0.15] transition-all disabled:opacity-30"
+              className="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] text-xs rounded-lg bg-white/[0.05] border border-white/[0.08] text-text-muted hover:text-text-primary hover:border-white/[0.15] transition-all disabled:opacity-30"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'Copied' : 'Copy'}
@@ -66,7 +66,7 @@ export function ScratchWebappPreview({ code, onDownload }: ScratchWebappPreviewP
             <button
               onClick={onDownload}
               disabled={!code}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/30 transition-all disabled:opacity-30"
+              className="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] text-xs rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/30 transition-all disabled:opacity-30"
             >
               <Download className="w-3.5 h-3.5" />
               Export
@@ -86,8 +86,8 @@ export function ScratchWebappPreview({ code, onDownload }: ScratchWebappPreviewP
             <p className="text-text-muted/60 text-xs">Start chatting to build your webapp</p>
           </div>
         ) : viewMode === 'code' ? (
-          <div className="p-4">
-            <pre className="text-sm font-mono leading-relaxed text-text-secondary overflow-x-auto">
+          <div className="p-3 sm:p-4">
+            <pre className="text-xs sm:text-sm font-mono leading-relaxed text-text-secondary overflow-x-auto">
               <code>{code}</code>
             </pre>
           </div>

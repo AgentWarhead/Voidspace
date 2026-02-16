@@ -48,8 +48,8 @@ export function SocialProof({ variant = 'banner' }: SocialProofProps) {
 
   // Banner variant (default) - feature highlights
   return (
-    <div className="bg-gradient-to-r from-void-purple/10 via-void-darker to-void-cyan/10 border border-void-purple/20 rounded-xl p-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="bg-gradient-to-r from-void-purple/10 via-void-darker to-void-cyan/10 border border-void-purple/20 rounded-xl p-3 sm:p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {FEATURES.map((feature, i) => (
           <FeatureCard
             key={i}
@@ -80,13 +80,13 @@ function FeatureCard({ icon, label, desc, color }: FeatureCardProps) {
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-lg ${colorClasses[color]} flex items-center justify-center`}>
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${colorClasses[color]} flex items-center justify-center flex-shrink-0`}>
         {icon}
       </div>
-      <div>
-        <span className="text-base font-bold text-white">{label}</span>
-        <span className="text-xs text-gray-400 block">{desc}</span>
+      <div className="min-w-0">
+        <span className="text-sm sm:text-base font-bold text-white block truncate">{label}</span>
+        <span className="text-[10px] sm:text-xs text-gray-400 block truncate">{desc}</span>
       </div>
     </div>
   );

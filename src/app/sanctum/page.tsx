@@ -363,7 +363,7 @@ function SanctumPageInner() {
 
               <button
                 onClick={openModal}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-near-green text-void-black font-semibold text-lg hover:bg-near-green/90 transition-all shadow-lg shadow-near-green/25 mb-6 w-full justify-center"
+                className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-4 rounded-xl bg-near-green text-void-black font-semibold text-base sm:text-lg hover:bg-near-green/90 transition-all shadow-lg shadow-near-green/25 mb-6 w-full justify-center min-h-[48px]"
               >
                 <Wallet className="w-5 h-5" />
                 Connect NEAR Wallet
@@ -613,7 +613,7 @@ function SanctumPageInner() {
             <div className="flex">
               <button
                 onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: 'chat' })}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-4 min-h-[48px] text-sm font-medium transition-all ${
                   state.activePanel === 'chat'
                     ? 'text-purple-400 border-b-2 border-purple-500 bg-purple-500/10'
                     : 'text-text-muted hover:text-text-primary'
@@ -624,7 +624,7 @@ function SanctumPageInner() {
               </button>
               <button
                 onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: 'code' })}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-4 min-h-[48px] text-sm font-medium transition-all ${
                   state.activePanel === 'code'
                     ? 'text-near-green border-b-2 border-near-green bg-near-green/10'
                     : 'text-text-muted hover:text-text-primary'
@@ -912,10 +912,10 @@ function SanctumPageInner() {
           </div>
 
           {/* Mobile Bottom Toolbar */}
-          <div className="md:hidden relative z-10 flex-shrink-0 border-t border-white/[0.08] bg-void-black/80 backdrop-blur-sm">
-            <div className="flex items-center gap-2 p-3 overflow-x-auto">
+          <div className="md:hidden relative z-10 flex-shrink-0 border-t border-white/[0.08] bg-void-black/80 backdrop-blur-sm safe-area-bottom">
+            <div className="flex items-center gap-2 p-2 sm:p-3 overflow-x-auto">
               <button 
-                className="flex items-center gap-2 px-3 py-2 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
                 onClick={handleShare}
                 disabled={!state.generatedCode}
               >
@@ -923,7 +923,7 @@ function SanctumPageInner() {
                 Share
               </button>
               <button 
-                className="flex items-center gap-2 px-3 py-2 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg border border-blue-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg border border-blue-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
                 onClick={() => dispatch({ type: 'SET_SHOW_COMPARISON', payload: true })}
                 disabled={!state.generatedCode}
               >
@@ -931,7 +931,7 @@ function SanctumPageInner() {
                 Compare
               </button>
               <button 
-                className="flex items-center gap-2 px-3 py-2 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
                 onClick={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: true })}
                 disabled={!state.generatedCode}
               >
@@ -939,7 +939,7 @@ function SanctumPageInner() {
                 Test
               </button>
               <button 
-                className="flex items-center gap-2 px-4 py-2 text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-50 whitespace-nowrap font-medium"
+                className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-50 whitespace-nowrap font-medium"
                 onClick={handleDeploy}
                 disabled={!state.generatedCode || state.sanctumStage === 'thinking'}
               >
@@ -947,7 +947,7 @@ function SanctumPageInner() {
                 Deploy
               </button>
               <button 
-                className="flex items-center gap-2 px-3 py-2 text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
                 onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
                 disabled={!state.generatedCode}
               >

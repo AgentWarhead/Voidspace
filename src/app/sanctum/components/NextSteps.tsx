@@ -49,7 +49,7 @@ export function NextSteps({ steps, onSelect }: NextStepsProps) {
           <button
             key={idx}
             onClick={() => onSelect(step.value)}
-            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border border-white/[0.08] bg-void-black/30 hover:bg-near-green/10 hover:border-near-green/30 transition-all text-sm group"
+            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-lg border border-white/[0.08] bg-void-black/30 hover:bg-near-green/10 hover:border-near-green/30 transition-all text-sm group"
           >
             <span className="text-base">{getIcon(step.label)}</span>
             <span className="text-text-secondary group-hover:text-near-green transition-colors whitespace-nowrap">

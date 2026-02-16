@@ -61,35 +61,35 @@ export function WebappBuilder({ code, contractName = 'my-contract', deployedAddr
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20 overflow-hidden">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20 overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-void-purple/20 flex items-center justify-between bg-gradient-to-r from-void-purple/10 to-near-green/10">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-near-green to-cyan-500 flex items-center justify-center">
-              <Globe className="w-6 h-6 text-white" />
+        <div className="px-4 sm:px-6 py-4 border-b border-void-purple/20 flex items-center justify-between gap-2 bg-gradient-to-r from-void-purple/10 to-near-green/10">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-gradient-to-br from-near-green to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <Globe className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">Webapp Builder</h3>
-              <p className="text-sm text-gray-400">Generate a full Next.js app for your contract</p>
+            <div className="min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Webapp Builder</h3>
+              <p className="text-sm text-gray-400 hidden sm:block">Generate a full Next.js app for your contract</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white flex-shrink-0"
           >
             ✕
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 sm:p-6">
           {step === 'preview' && (
             <div className="space-y-6">
               {/* What you'll get */}
               <div>
                 <h4 className="text-sm font-medium text-gray-400 mb-3">What you&apos;ll get:</h4>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <FeatureCard
                     icon={<Layers className="w-5 h-5" />}
                     title="Next.js 14 App"
@@ -269,30 +269,30 @@ export function WebappBuilder({ code, contractName = 'my-contract', deployedAddr
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-void-purple/20 flex items-center justify-between">
-          <div className="text-xs text-gray-500">
+        <div className="px-4 sm:px-6 py-4 border-t border-void-purple/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs text-gray-500 hidden sm:block">
             {step === 'preview' && 'Preview what will be generated'}
             {step === 'customize' && 'Configure your webapp'}
             {step === 'download' && 'Project downloaded successfully'}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-2">
             {step === 'preview' && (
               <>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  className="min-h-[44px] px-4 py-2 text-gray-400 hover:text-white transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => setStep('customize')}
-                  className="px-6 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-lg transition-colors"
+                  className="min-h-[44px] px-6 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-lg transition-colors"
                 >
                   Customize
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="px-6 py-2 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-lg transition-colors flex items-center gap-2"
+                  className="min-h-[44px] px-6 py-2 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   Download Now
@@ -303,23 +303,23 @@ export function WebappBuilder({ code, contractName = 'my-contract', deployedAddr
               <>
                 <button
                   onClick={() => setStep('preview')}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  className="min-h-[44px] px-4 py-2 text-gray-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="px-6 py-2 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-lg transition-colors flex items-center gap-2"
+                  className="min-h-[44px] px-6 py-2 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Generate & Download
+                  <span className="hidden sm:inline">Generate &</span> Download
                 </button>
               </>
             )}
             {step === 'download' && (
               <button
                 onClick={onClose}
-                className="px-6 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-lg transition-colors"
+                className="min-h-[44px] px-6 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-lg transition-colors"
               >
                 Done
               </button>

@@ -74,7 +74,7 @@ export function KnowledgeTracker({ concepts }: KnowledgeTrackerProps) {
       {/* Header — always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.03] transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] hover:bg-white/[0.03] transition-colors"
       >
         <div className="flex items-center gap-2">
           <span className="text-base">🧠</span>

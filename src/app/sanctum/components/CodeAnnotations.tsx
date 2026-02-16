@@ -38,10 +38,12 @@ export function CodeAnnotations({ annotations, code }: CodeAnnotationsProps) {
 
   return (
     <div className="mt-3 space-y-1.5">
-      <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
-        <span className="font-medium text-text-secondary">📝 Code Annotations</span>
-        <span className="text-text-muted">({annotations.length})</span>
-        <div className="flex items-center gap-3 ml-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-text-muted mb-2">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-text-secondary">📝 Code Annotations</span>
+          <span className="text-text-muted">({annotations.length})</span>
+        </div>
+        <div className="flex items-center gap-3 sm:ml-auto flex-wrap">
           <span className="flex items-center gap-1">🟢 Rust</span>
           <span className="flex items-center gap-1">🔵 NEAR</span>
           <span className="flex items-center gap-1">🔴 Security</span>
@@ -59,7 +61,7 @@ export function CodeAnnotations({ annotations, code }: CodeAnnotationsProps) {
           <button
             key={idx}
             onClick={() => setExpandedLine(isExpanded ? null : idx)}
-            className={`w-full text-left px-3 py-2 rounded-lg border transition-all ${colorClass}`}
+            className={`w-full text-left px-3 py-2 min-h-[44px] rounded-lg border transition-all ${colorClass}`}
           >
             <div className="flex items-center gap-2">
               <span className="text-sm">{marker}</span>
@@ -77,7 +79,7 @@ export function CodeAnnotations({ annotations, code }: CodeAnnotationsProps) {
             {isExpanded && (
               <div className="mt-2 pl-7 space-y-2">
                 {codeLine && (
-                  <div className="text-xs font-mono text-near-green/80 bg-void-black/30 rounded px-2 py-1 overflow-x-auto">
+                  <div className="text-xs font-mono text-near-green/80 bg-void-black/30 rounded px-2 py-1 overflow-x-auto whitespace-pre-wrap break-all sm:whitespace-pre sm:break-normal">
                     {codeLine}
                   </div>
                 )}

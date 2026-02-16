@@ -17,9 +17,9 @@ export function SanctumPreview() {
         </div>
 
         {/* Split pane mockup */}
-        <div className="flex min-h-[220px] sm:min-h-[260px]">
+        <div className="flex min-h-[180px] sm:min-h-[260px]">
           {/* Chat pane */}
-          <div className="flex-1 p-4 border-r border-white/[0.06] flex flex-col gap-3">
+          <div className="flex-1 p-3 sm:p-4 border-r border-white/[0.06] flex flex-col gap-2 sm:gap-3 overflow-hidden">
             {/* User message */}
             <div className="preview-msg preview-msg-1 flex justify-end">
               <div className="max-w-[85%] px-3 py-2 rounded-xl bg-purple-500/20 border border-purple-500/15 text-xs text-purple-200">

@@ -208,7 +208,7 @@ export function CategoryPicker({ onSelect, customPrompt, setCustomPrompt, onCust
     <button
       key={cat.slug}
       onClick={() => onSelect(cat.slug)}
-      className={`group relative p-4 rounded-xl border ${cat.borderColor} bg-gradient-to-br ${cat.color} hover:scale-[1.02] transition-all text-left`}
+      className={`group relative p-3 sm:p-4 min-h-[60px] rounded-xl border ${cat.borderColor} bg-gradient-to-br ${cat.color} hover:scale-[1.02] transition-all text-left`}
     >
       {/* Beginner Friendly badge */}
       {cat.beginner && (
@@ -265,12 +265,12 @@ export function CategoryPicker({ onSelect, customPrompt, setCustomPrompt, onCust
               onChange={(e) => setCustomPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onCustomStart()}
               placeholder="I want to build a token that rewards holders every time someone trades..."
-              className="flex-1 px-4 py-4 rounded-xl bg-void-gray border border-border-subtle focus:border-near-green/50 focus:outline-none focus:ring-1 focus:ring-near-green/30 text-text-primary placeholder:text-text-muted transition-all text-base"
+              className="flex-1 min-w-0 px-3 sm:px-4 py-3 sm:py-4 rounded-xl bg-void-gray border border-border-subtle focus:border-near-green/50 focus:outline-none focus:ring-1 focus:ring-near-green/30 text-text-primary placeholder:text-text-muted transition-all text-sm sm:text-base"
             />
             <button
               onClick={onCustomStart}
               disabled={!customPrompt.trim()}
-              className="px-8 py-4 rounded-xl bg-near-green text-void-black font-bold text-base hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-near-green/20 hover:shadow-near-green/40 whitespace-nowrap"
+              className="px-6 sm:px-8 py-3 sm:py-4 min-h-[48px] rounded-xl bg-near-green text-void-black font-bold text-sm sm:text-base hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-near-green/20 hover:shadow-near-green/40 whitespace-nowrap"
             >
               Start Building →
             </button>

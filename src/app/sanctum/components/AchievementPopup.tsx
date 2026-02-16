@@ -113,13 +113,13 @@ export function AchievementPopup({ achievement, onClose }: AchievementPopupProps
 
       {/* Achievement card */}
       <div
-        className={`fixed top-20 right-4 z-50 transition-all duration-300 ${
+        className={`fixed top-20 right-2 sm:right-4 z-50 transition-all duration-300 max-w-[calc(100vw-1rem)] sm:max-w-none ${
           isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
         }`}
       >
         <div
-          className={`relative p-4 rounded-xl border ${styles.border} bg-gradient-to-br ${styles.bg} backdrop-blur-xl shadow-2xl ${styles.glow}`}
-          style={{ minWidth: '280px' }}
+          className={`relative p-3 sm:p-4 rounded-xl border ${styles.border} bg-gradient-to-br ${styles.bg} backdrop-blur-xl shadow-2xl ${styles.glow}`}
+          style={{ minWidth: '260px', maxWidth: '340px' }}
         >
           {/* Close button */}
           <button
@@ -127,7 +127,7 @@ export function AchievementPopup({ achievement, onClose }: AchievementPopupProps
               setIsVisible(false);
               setTimeout(onClose, 300);
             }}
-            className="absolute top-2 right-2 p-1 rounded-full hover:bg-white/10 transition-colors"
+            className="absolute top-2 right-2 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
           >
             <X className="w-4 h-4 text-white/60" />
           </button>

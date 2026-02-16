@@ -130,7 +130,7 @@ export function BuilderProgress({
       {/* Header - always visible, compact */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+        className="w-full px-3 py-2.5 min-h-[44px] flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-near-green flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-purple-500/20">

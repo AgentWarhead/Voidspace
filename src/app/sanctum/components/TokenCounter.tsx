@@ -16,7 +16,7 @@ export function TokenCounter({ tokensUsed, tokenBalance }: TokenCounterProps) {
   const estimatedCost = (tokensUsed * 0.00002).toFixed(4); // ~$20 per 1M tokens blended
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
       {/* Tokens Used */}
       <div className="text-right">
         <div className="flex items-center gap-1.5 text-sm">
@@ -57,7 +57,7 @@ export function TokenCounter({ tokensUsed, tokenBalance }: TokenCounterProps) {
 
       {/* Low balance warning */}
       {isLow && (
-        <button className="px-3 py-1.5 text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg border border-amber-500/30 transition-colors">
+        <button className="px-3 py-1.5 min-h-[44px] text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg border border-amber-500/30 transition-colors">
           Top Up
         </button>
       )}

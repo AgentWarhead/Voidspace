@@ -185,17 +185,17 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-void-purple/20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+        <div className="px-4 sm:px-6 py-4 border-b border-void-purple/20 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
               <Play className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">Simulation Sandbox</h3>
-              <p className="text-sm text-gray-400">Test your contract before deploying</p>
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-white truncate">Simulation Sandbox</h3>
+              <p className="text-sm text-gray-400 hidden sm:block">Test your contract before deploying</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {passedCount > 0 && (
               <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
                 {passedCount} passed
@@ -208,7 +208,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
             )}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
             >
               ✕
             </button>
@@ -271,7 +271,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                       Add
                     </button>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
                     <input
                       type="text"
                       value={newArgs}
@@ -344,7 +344,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                           ✕
                         </button>
                       </div>
-                      <code className="text-xs text-gray-400 font-mono mt-1 block">
+                      <code className="text-xs text-gray-400 font-mono mt-1 block overflow-x-auto">
                         {tc.caller} → {tc.method}({tc.args}){tc.deposit !== '0' ? ` [${tc.deposit} NEAR]` : ''}
                       </code>
                       {tc.result && (
@@ -378,7 +378,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                     Run a simulation to see contract state
                   </div>
                 ) : (
-                  <pre className="bg-void-black/50 border border-void-purple/20 rounded-lg p-4 text-xs text-gray-300 font-mono overflow-auto">
+                  <pre className="bg-void-black/50 border border-void-purple/20 rounded-lg p-4 text-xs text-gray-300 font-mono overflow-x-auto overflow-y-auto">
                     {JSON.stringify(contractState, null, 2)}
                   </pre>
                 )}
@@ -413,8 +413,8 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                           <div className="flex-1 min-w-0">
                             {/* Arrow diagram */}
                             <div className="bg-void-black/30 border border-void-purple/20 rounded-lg p-3">
-                              <div className="flex items-center gap-2 text-sm">
-                                <span className="text-amber-400 font-mono">{tc.caller}</span>
+                              <div className="flex items-center gap-2 text-sm flex-wrap overflow-x-auto">
+                                <span className="text-amber-400 font-mono truncate max-w-[120px]">{tc.caller}</span>
                                 <ArrowRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
                                 <span className="text-near-green font-mono font-medium">{tc.method}()</span>
                                 <ArrowRight className="w-4 h-4 text-gray-500 flex-shrink-0" />

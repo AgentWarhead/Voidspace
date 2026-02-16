@@ -162,9 +162,32 @@ export function WebappSession({
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Chat Panel */}
+      {/* Mobile Tab Bar */}
+      <div className="md:hidden flex border-b border-white/[0.08] flex-shrink-0">
+        <button
+          onClick={() => setActivePanel('chat')}
+          className={`flex-1 py-3 text-sm min-h-[44px] ${
+            activePanel === 'chat'
+              ? 'text-purple-400 border-b-2 border-purple-500'
+              : 'text-gray-500'
+          }`}
+        >
+          💬 Chat
+        </button>
+        <button
+          onClick={() => setActivePanel('preview')}
+          className={`flex-1 py-3 text-sm min-h-[44px] ${
+            activePanel === 'preview'
+              ? 'text-near-green border-b-2 border-near-green'
+              : 'text-gray-500'
+          }`}
+        >
+          👁 Preview
+        </button>
+      </div>
+
+      {/* Desktop: side by side */}
+      <div className="hidden md:flex flex-1 overflow-hidden">
         <div className="w-1/2 border-r border-void-purple/20">
           <GlassPanel className="h-full" glow glowColor="blue">
             <WebappChat
@@ -176,8 +199,6 @@ export function WebappSession({
             />
           </GlassPanel>
         </div>
-
-        {/* Preview Panel */}
         <div className="w-1/2">
           <GlassPanel className="h-full" glow glowColor="green">
             <WebappPreview
@@ -187,6 +208,30 @@ export function WebappSession({
             />
           </GlassPanel>
         </div>
+      </div>
+
+      {/* Mobile: show active panel */}
+      <div className="md:hidden flex-1 overflow-hidden">
+        {activePanel === 'chat' && (
+          <GlassPanel className="h-full" glow glowColor="blue">
+            <WebappChat
+              contractName={contractName}
+              methods={methods}
+              onPreviewUpdate={handlePreviewUpdate}
+              onComponentAdd={handleComponentAdd}
+              onTokensUsed={handleTokensUsed}
+            />
+          </GlassPanel>
+        )}
+        {activePanel === 'preview' && (
+          <GlassPanel className="h-full" glow glowColor="green">
+            <WebappPreview
+              html={previewHtml}
+              components={components}
+              isGenerating={isGenerating}
+            />
+          </GlassPanel>
+        )}
       </div>
 
       {/* Components Bar */}

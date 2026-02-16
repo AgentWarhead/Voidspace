@@ -85,40 +85,40 @@ export function PairProgramming({ sessionId, onClose }: PairProgrammingProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-2xl shadow-2xl shadow-void-purple/20">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl shadow-void-purple/20">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-void-purple/20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
+        <div className="px-4 sm:px-6 py-4 border-b border-void-purple/20 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
               <Users className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">Pair Programming</h3>
-              <p className="text-sm text-gray-400">Build together in real-time</p>
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-white">Pair Programming</h3>
+              <p className="text-sm text-gray-400 hidden sm:block">Build together in real-time</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white flex-shrink-0"
           >
             ✕
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           {/* Share Link */}
           <div>
             <label className="text-sm text-gray-400 mb-2 block">Share this link to invite collaborators:</label>
             <div className="flex gap-2">
-              <div className="flex-1 bg-void-black/50 border border-void-purple/20 rounded-lg px-4 py-3 flex items-center gap-2">
-                <Link2 className="w-4 h-4 text-gray-500" />
+              <div className="flex-1 min-w-0 bg-void-black/50 border border-void-purple/20 rounded-lg px-3 sm:px-4 py-3 flex items-center gap-2">
+                <Link2 className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 <code className="text-sm text-void-cyan truncate">{shareUrl}</code>
               </div>
               <button
                 onClick={copyShareLink}
-                className="px-4 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-void-purple rounded-lg transition-colors flex items-center gap-2"
+                className="min-w-[44px] min-h-[44px] px-3 sm:px-4 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-void-purple rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
               >
                 {copied ? (
                   <>
@@ -219,7 +219,7 @@ export function PairProgramming({ sessionId, onClose }: PairProgrammingProps) {
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div className="flex items-center gap-2 text-gray-400">
               <div className="w-2 h-2 rounded-full bg-green-400" />
               Live cursor tracking
@@ -240,10 +240,10 @@ export function PairProgramming({ sessionId, onClose }: PairProgrammingProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-void-purple/20 flex justify-end gap-2">
+        <div className="px-4 sm:px-6 py-4 border-t border-void-purple/20 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-lg transition-colors"
+            className="min-h-[44px] px-6 py-2 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-lg transition-colors"
           >
             Close
           </button>

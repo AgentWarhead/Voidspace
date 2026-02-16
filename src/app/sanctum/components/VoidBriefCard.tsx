@@ -144,26 +144,26 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
       <div className="mb-16 max-w-3xl mx-auto">
         <div className="rounded-2xl border border-near-green/20 bg-white/[0.02] backdrop-blur-sm overflow-hidden shadow-[0_0_40px_rgba(0,236,151,0.06)]">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/[0.06]">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
               <span className="text-sm font-semibold text-text-primary">Mission Brief</span>
             </div>
             <button
               onClick={resetState}
-              className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors text-text-muted hover:text-text-primary"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors text-text-muted hover:text-text-primary"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Brief content — reuse the same BriefDisplay from /opportunities */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <BriefDisplay brief={brief} onStartBuild={onStartBuild} />
           </div>
 
           {/* Secondary action */}
-          <div className="px-6 pb-6">
+          <div className="px-4 sm:px-6 pb-6">
             <button
               onClick={resetState}
               className="w-full text-sm text-text-muted hover:text-text-primary transition-colors py-2"
@@ -180,7 +180,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
     <div className="mb-16 max-w-3xl mx-auto">
       <div className="rounded-2xl border border-near-green/15 bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-[0_0_60px_rgba(0,236,151,0.05)] transition-shadow duration-500">
         {/* Header row */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
             <span className="text-sm font-semibold text-text-primary tracking-wide">Void Brief</span>
@@ -207,7 +207,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
         </div>
 
         {/* Body */}
-        <div className="px-6 py-8">
+        <div className="px-4 sm:px-6 py-6 sm:py-8">
           {mode === 'generating' ? (
             /* ── Loading State ── */
             <div className="text-center space-y-5 py-4">
@@ -242,7 +242,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
               )}
 
               {/* ── Two Paths Layout ── */}
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
 
                 {/* ── Path 1: Mystery Mission ── */}
                 <div className="group relative rounded-xl border border-near-green/20 bg-gradient-to-br from-near-green/[0.04] to-transparent p-6 hover:border-near-green/40 hover:shadow-[0_0_40px_rgba(0,236,151,0.08)] transition-all duration-300">
@@ -270,7 +270,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
                       onClick={handleMysteryMission}
                       onMouseEnter={() => setDiceHover(true)}
                       onMouseLeave={() => setDiceHover(false)}
-                      className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl bg-near-green text-void-black font-semibold text-sm hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                      className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 min-h-[44px] rounded-xl bg-near-green text-void-black font-semibold text-sm hover:shadow-[0_0_30px_rgba(0,236,151,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                     >
                       <Dices className="w-[18px] h-[18px]" />
                       Roll a Mystery Mission
@@ -312,7 +312,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
                     <button
                       onClick={handleCustomGenerate}
                       disabled={customIdea.trim().length === 0}
-                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white/[0.06] border border-white/[0.1] text-text-primary font-semibold text-sm hover:bg-white/[0.1] hover:border-white/[0.2] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 min-h-[44px] rounded-xl bg-white/[0.06] border border-white/[0.1] text-text-primary font-semibold text-sm hover:bg-white/[0.1] hover:border-white/[0.2] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                       <Sparkles className="w-4 h-4 text-near-green" />
                       Generate Brief for This Idea

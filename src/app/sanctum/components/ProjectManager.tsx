@@ -124,7 +124,7 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
             setSaveName(category ? category.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'My Contract');
           }}
           disabled={!code}
-          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-amber-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-amber-500/30 disabled:opacity-50"
+          className="px-3 py-2 min-h-[44px] min-w-[44px] text-sm bg-white/[0.05] hover:bg-amber-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-amber-500/30 disabled:opacity-50"
           title="Save project"
         >
           <Save className="w-4 h-4" />
@@ -135,7 +135,7 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
             setShowSaveForm(false);
             setShowModal(true);
           }}
-          className="px-3 py-2 text-sm bg-white/[0.05] hover:bg-purple-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
+          className="px-3 py-2 min-h-[44px] min-w-[44px] text-sm bg-white/[0.05] hover:bg-purple-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-purple-500/30"
           title="My projects"
         >
           <FolderOpen className="w-4 h-4" />
@@ -145,11 +145,11 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl shadow-void-purple/20">
+          <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-void-purple/20 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="px-4 sm:px-6 py-4 border-b border-void-purple/20 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                   {showSaveForm ? <Save className="w-5 h-5 text-white" /> : <FolderOpen className="w-5 h-5 text-white" />}
                 </div>
                 <div>
@@ -163,7 +163,7 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white flex-shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -173,7 +173,7 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
             <div className="flex border-b border-void-purple/20">
               <button
                 onClick={() => setShowSaveForm(true)}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 min-h-[44px] text-sm font-medium transition-colors ${
                   showSaveForm ? 'text-near-green border-b-2 border-near-green' : 'text-gray-500 hover:text-gray-300'
                 }`}
               >
@@ -181,7 +181,7 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
               </button>
               <button
                 onClick={() => setShowSaveForm(false)}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 min-h-[44px] text-sm font-medium transition-colors ${
                   !showSaveForm ? 'text-purple-400 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-300'
                 }`}
               >
@@ -206,7 +206,7 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
                     value={saveName}
                     onChange={e => setSaveName(e.target.value)}
                     placeholder="My Awesome Contract"
-                    className="w-full bg-void-black border border-void-purple/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-near-green/50"
+                    className="w-full bg-void-black border border-void-purple/20 rounded-lg px-3 py-3 min-h-[44px] text-sm text-white placeholder-gray-600 focus:outline-none focus:border-near-green/50"
                   />
                 </div>
                 <div>
@@ -216,13 +216,13 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
                     onChange={e => setSaveDescription(e.target.value)}
                     placeholder="What does this contract do?"
                     rows={2}
-                    className="w-full bg-void-black border border-void-purple/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-near-green/50 resize-none"
+                    className="w-full bg-void-black border border-void-purple/20 rounded-lg px-3 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-near-green/50 resize-none"
                   />
                 </div>
                 <button
                   onClick={handleSave}
                   disabled={isSaving || !saveName.trim() || !code}
-                  className="w-full py-3 bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3 min-h-[44px] bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isSaving ? (
                     <>
@@ -278,19 +278,19 @@ export function ProjectManager({ code, category, mode, onLoadProject }: ProjectM
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => {
                               onLoadProject(project);
                               setShowModal(false);
                             }}
-                            className="px-3 py-1.5 text-xs bg-near-green/20 text-near-green rounded-lg hover:bg-near-green/30 transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 min-h-[44px] text-xs bg-near-green/20 text-near-green rounded-lg hover:bg-near-green/30 transition-colors flex items-center gap-1"
                           >
                             Resume <ChevronRight className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleDelete(project.id)}
-                            className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"
+                            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

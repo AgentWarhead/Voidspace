@@ -114,18 +114,18 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
   return (
     <div className="bg-void-darker border border-void-purple/30 rounded-2xl overflow-hidden max-w-4xl mx-auto">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-void-purple/20 bg-gradient-to-r from-void-purple/10 to-cyan-500/10">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <span className="text-2xl">🔮</span>
+      <div className="px-3 sm:px-6 py-4 border-b border-void-purple/20 bg-gradient-to-r from-void-purple/10 to-cyan-500/10">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <span className="text-xl sm:text-2xl">🔮</span>
               My Projects
             </h2>
-            <p className="text-sm text-gray-400 mt-1">Track your journey from idea to launch</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">Track your journey from idea to launch</p>
           </div>
           <button
             onClick={onNewProject}
-            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-3 sm:px-4 py-2 min-h-[44px] bg-cyan-500 hover:bg-cyan-600 text-black font-medium rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 text-sm sm:text-base"
           >
             <span>+</span>
             New Project
@@ -134,13 +134,13 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
       </div>
 
       {/* Filters */}
-      <div className="px-6 py-3 border-b border-void-purple/20 bg-void-black/30">
-        <div className="flex gap-2">
+      <div className="px-3 sm:px-6 py-3 border-b border-void-purple/20 bg-void-black/30">
+        <div className="flex gap-2 overflow-x-auto">
           {(['all', 'active', 'launched', 'starred'] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+              className={`px-3 py-1.5 min-h-[44px] text-sm rounded-lg transition-colors flex-shrink-0 ${
                 filter === f
                   ? 'bg-void-purple/20 text-white'
                   : 'text-gray-500 hover:text-white hover:bg-white/5'
@@ -171,9 +171,9 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="p-4 hover:bg-void-purple/5 transition-colors"
+                className="p-3 sm:p-4 hover:bg-void-purple/5 transition-colors"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   {/* Project Icon */}
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-void-purple to-cyan-500 flex items-center justify-center text-2xl flex-shrink-0">
                     {PHASES[getPhaseIndex(project.phase)]?.emoji || '📦'}
@@ -193,7 +193,7 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
 
                     {/* Progress Bar */}
                     <div className="mb-3">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="hidden sm:flex items-center gap-2 mb-1">
                         {PHASES.map((phase, i) => (
                           <div key={phase.id} className="flex items-center">
                             <div
@@ -230,7 +230,7 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
                     </div>
 
                     {/* Stats */}
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
                       <span className="flex items-center gap-1">
                         <Zap className="w-3 h-3" />
                         {project.tokensSpent.toLocaleString()} tokens
@@ -244,23 +244,23 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => toggleStar(project.id)}
-                      className="p-2 text-gray-500 hover:text-amber-400 transition-colors rounded-lg hover:bg-white/5"
+                      className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-amber-400 transition-colors rounded-lg hover:bg-white/5"
                     >
                       <Star className={`w-4 h-4 ${project.starred ? 'text-amber-400 fill-amber-400' : ''}`} />
                     </button>
                     <button
                       onClick={() => onSelectProject(project)}
-                      className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-sm flex items-center gap-1"
+                      className="px-3 py-1.5 min-h-[44px] bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-sm flex items-center gap-1"
                     >
                       Continue
                       <ChevronRight className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deleteProject(project.id)}
-                      className="p-2 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
+                      className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
                     >
                       <span>🗑️</span>
                     </button>
@@ -274,8 +274,8 @@ export function ProjectDashboard({ onSelectProject, onNewProject }: ProjectDashb
 
       {/* Footer Stats */}
       {projects.length > 0 && (
-        <div className="px-6 py-3 border-t border-void-purple/20 bg-void-black/30">
-          <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="px-3 sm:px-6 py-3 border-t border-void-purple/20 bg-void-black/30">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
             <span>
               {projects.filter(p => p.phase === 'launched').length} launched •{' '}
               {projects.filter(p => p.phase !== 'launched').length} in progress

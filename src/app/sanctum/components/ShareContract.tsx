@@ -49,14 +49,14 @@ export function ShareContract({ code, contractName = 'My Contract', category, on
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-void-darker border border-void-purple/30 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-void-purple/20">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-void-purple to-void-cyan flex items-center justify-center">
-            <Share2 className="w-6 h-6 text-white" />
+      <div className="bg-void-darker border border-void-purple/30 rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl shadow-void-purple/20 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-void-purple to-void-cyan flex items-center justify-center flex-shrink-0">
+            <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">Share Contract</h3>
-            <p className="text-sm text-gray-400">Let others remix your creation</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Share Contract</h3>
+            <p className="text-xs sm:text-sm text-gray-400">Let others remix your creation</p>
           </div>
         </div>
 
@@ -99,10 +99,10 @@ export function ShareContract({ code, contractName = 'My Contract', category, on
           )}
 
           {/* Share Buttons */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <button
               onClick={copyToClipboard}
-              className="flex flex-col items-center gap-2 p-4 bg-void-black/50 hover:bg-void-purple/20 border border-void-purple/20 rounded-xl transition-all group"
+              className="flex flex-col items-center gap-2 p-3 sm:p-4 min-h-[44px] bg-void-black/50 hover:bg-void-purple/20 border border-void-purple/20 rounded-xl transition-all group"
             >
               <div className="w-10 h-10 rounded-full bg-void-purple/20 flex items-center justify-center group-hover:bg-void-purple/30 transition-colors">
                 {copied ? (
@@ -116,7 +116,7 @@ export function ShareContract({ code, contractName = 'My Contract', category, on
 
             <button
               onClick={shareToTwitter}
-              className="flex flex-col items-center gap-2 p-4 bg-void-black/50 hover:bg-blue-500/20 border border-void-purple/20 rounded-xl transition-all group"
+              className="flex flex-col items-center gap-2 p-3 sm:p-4 min-h-[44px] bg-void-black/50 hover:bg-blue-500/20 border border-void-purple/20 rounded-xl transition-all group"
             >
               <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
                 <span className="text-lg">𝕏</span>
@@ -126,7 +126,7 @@ export function ShareContract({ code, contractName = 'My Contract', category, on
 
             <button
               onClick={shareToTelegram}
-              className="flex flex-col items-center gap-2 p-4 bg-void-black/50 hover:bg-cyan-500/20 border border-void-purple/20 rounded-xl transition-all group"
+              className="flex flex-col items-center gap-2 p-3 sm:p-4 min-h-[44px] bg-void-black/50 hover:bg-cyan-500/20 border border-void-purple/20 rounded-xl transition-all group"
             >
               <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
                 <Send className="w-5 h-5 text-cyan-400" />
@@ -146,7 +146,7 @@ export function ShareContract({ code, contractName = 'My Contract', category, on
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="mt-6 w-full py-3 bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-xl transition-colors font-medium"
+          className="mt-4 sm:mt-6 w-full py-3 min-h-[44px] bg-void-purple/20 hover:bg-void-purple/30 text-white rounded-xl transition-colors font-medium text-sm sm:text-base"
         >
           Done
         </button>

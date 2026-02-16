@@ -91,22 +91,22 @@ export function DeploymentHistory({ onRemix, onShare }: DeploymentHistoryProps) 
   return (
     <div className="bg-void-darker/50 border border-void-purple/20 rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-void-purple/20 flex items-center justify-between">
+      <div className="px-3 sm:px-4 py-3 border-b border-void-purple/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-void-purple" />
-          <h3 className="font-semibold text-white">Deployment History</h3>
+          <Clock className="w-5 h-5 text-void-purple flex-shrink-0" />
+          <h3 className="font-semibold text-white text-sm sm:text-base">Deployment History</h3>
           <span className="px-2 py-0.5 bg-void-purple/20 text-void-purple text-xs rounded-full">
             {deployments.length}
           </span>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto">
           {(['all', 'starred', 'testnet', 'mainnet'] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+              className={`px-3 py-1 min-h-[44px] text-xs rounded-lg transition-colors flex-shrink-0 ${
                 filter === f
                   ? 'bg-void-purple text-white'
                   : 'text-gray-400 hover:text-white hover:bg-void-purple/20'
@@ -123,12 +123,12 @@ export function DeploymentHistory({ onRemix, onShare }: DeploymentHistoryProps) 
         {filteredDeployments.map((contract) => (
           <div
             key={contract.id}
-            className="px-4 py-3 border-b border-void-purple/10 hover:bg-void-purple/5 transition-colors group"
+            className="px-3 sm:px-4 py-3 border-b border-void-purple/10 hover:bg-void-purple/5 transition-colors group"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-white truncate">{contract.name}</span>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="font-medium text-white text-sm sm:text-base truncate">{contract.name}</span>
                   <span className={`px-2 py-0.5 text-xs rounded-full ${
                     contract.network === 'mainnet'
                       ? 'bg-green-500/20 text-green-400'
@@ -142,12 +142,12 @@ export function DeploymentHistory({ onRemix, onShare }: DeploymentHistoryProps) 
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <code className="text-void-cyan text-xs truncate max-w-[200px]">
+                  <code className="text-void-cyan text-xs truncate max-w-[150px] sm:max-w-[200px]">
                     {contract.contractAddress}
                   </code>
                   <button
                     onClick={() => copyAddress(contract.contractAddress, contract.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="p-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   >
                     {copiedId === contract.id ? (
                       <Check className="w-3 h-3 text-green-400" />
@@ -164,24 +164,24 @@ export function DeploymentHistory({ onRemix, onShare }: DeploymentHistoryProps) 
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => toggleStar(contract.id)}
-                  className="p-2 hover:bg-void-purple/20 rounded-lg transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-void-purple/20 rounded-lg transition-colors"
                   title={contract.starred ? 'Unstar' : 'Star'}
                 >
                   <Star className={`w-4 h-4 ${contract.starred ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`} />
                 </button>
                 <button
                   onClick={() => onRemix(contract.code, contract.name)}
-                  className="p-2 hover:bg-void-purple/20 rounded-lg transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-void-purple/20 rounded-lg transition-colors"
                   title="Remix"
                 >
                   <span className="text-sm">🔄</span>
                 </button>
                 <button
                   onClick={() => onShare(contract)}
-                  className="p-2 hover:bg-void-purple/20 rounded-lg transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-void-purple/20 rounded-lg transition-colors"
                   title="Share"
                 >
                   <Share2 className="w-4 h-4 text-gray-400" />
@@ -190,14 +190,14 @@ export function DeploymentHistory({ onRemix, onShare }: DeploymentHistoryProps) 
                   href={getExplorerUrl(contract)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 hover:bg-void-purple/20 rounded-lg transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-void-purple/20 rounded-lg transition-colors"
                   title="View on Explorer"
                 >
                   <ExternalLink className="w-4 h-4 text-gray-400" />
                 </a>
                 <button
                   onClick={() => deleteDeployment(contract.id)}
-                  className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-red-500/20 rounded-lg transition-colors"
                   title="Delete"
                 >
                   <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-400" />

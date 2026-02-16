@@ -136,7 +136,7 @@ export function ContractToolbar({
   };
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
       {/* --- Quick Actions (always visible, icon-only with tooltips) --- */}
       
       {/* Copy Code */}
@@ -230,24 +230,24 @@ export function ContractToolbar({
       
       {/* Deploy */}
       <button
-        className="px-3.5 py-1.5 text-sm font-medium bg-near-green/15 hover:bg-near-green/25 text-near-green rounded-lg border border-near-green/25 hover:border-near-green/40 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-near-green/10"
+        className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium bg-near-green/15 hover:bg-near-green/25 text-near-green rounded-lg border border-near-green/25 hover:border-near-green/40 transition-all flex items-center gap-1.5 sm:gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-near-green/10 min-h-[36px]"
         onClick={handleDeploy}
         disabled={!hasCode || sanctumStage === 'thinking'}
         title="Deploy to NEAR testnet"
       >
         <Rocket className="w-3.5 h-3.5" />
-        Deploy
+        <span className="hidden sm:inline">Deploy</span>
       </button>
 
       {/* Webapp */}
       <button
-        className="px-3.5 py-1.5 text-sm font-medium bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 rounded-lg border border-cyan-500/25 hover:border-cyan-500/40 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyan-500/10"
+        className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 rounded-lg border border-cyan-500/25 hover:border-cyan-500/40 transition-all flex items-center gap-1.5 sm:gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyan-500/10 min-h-[36px]"
         onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
         disabled={!hasCode}
         title="Generate a frontend webapp for this contract"
       >
         <Globe className="w-3.5 h-3.5" />
-        Webapp
+        <span className="hidden sm:inline">Webapp</span>
       </button>
     </div>
   );

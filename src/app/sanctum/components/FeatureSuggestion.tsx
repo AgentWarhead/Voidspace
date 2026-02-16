@@ -39,17 +39,17 @@ export function FeatureSuggestion({ suggestion, onAddFeature }: FeatureSuggestio
       )}
 
       {/* Actions */}
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <button
           onClick={() => onAddFeature(`Add this feature: ${suggestion.title} — ${suggestion.description}`)}
-          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-near-green/20 text-near-green border border-near-green/30 hover:bg-near-green/30 transition-all"
+          className="px-3 py-2 min-h-[44px] text-sm font-medium rounded-lg bg-near-green/20 text-near-green border border-near-green/30 hover:bg-near-green/30 transition-all"
         >
           Add this feature →
         </button>
 
         <button
           onClick={() => setShowWhy(!showWhy)}
-          className="px-3 py-1.5 text-sm rounded-lg text-text-muted hover:text-text-secondary hover:bg-white/[0.05] transition-all"
+          className="px-3 py-2 min-h-[44px] text-sm rounded-lg text-text-muted hover:text-text-secondary hover:bg-white/[0.05] transition-all"
         >
           {showWhy ? 'Hide' : 'Why?'}
         </button>

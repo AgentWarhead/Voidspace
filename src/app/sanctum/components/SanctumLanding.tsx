@@ -72,11 +72,11 @@ export function SanctumLanding({
           <div className="mb-8" style={{ animation: 'sanctumFadeInUp 0.5s ease-out 0.5s backwards' }}>
             <button
               onClick={onEnterSanctum}
-              className="group relative inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-bold text-xl hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-2xl shadow-near-green/30 hover:shadow-near-green/50 hover:scale-[1.02] active:scale-[0.98]"
+              className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-bold text-lg sm:text-xl hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-2xl shadow-near-green/30 hover:shadow-near-green/50 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto max-w-md"
             >
-              <Rocket className="w-6 h-6" />
+              <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
               ENTER THE SANCTUM
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
 
               {/* Glow effect */}
               <div className="absolute inset-0 rounded-2xl bg-near-green/20 blur-2xl -z-10 group-hover:bg-near-green/30 transition-all" />
@@ -149,11 +149,11 @@ export function SanctumLanding({
               </p>
               <p className="text-sm text-text-muted mt-1">Guided by 8 AI Experts</p>
             </div>
-            <div className="flex flex-wrap justify-center gap-2.5">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-2.5">
               {PERSONA_LIST.map((persona, i) => (
                 <div
                   key={persona.id}
-                  className="group relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] hover:border-white/[0.15] transition-all duration-300 hover:bg-white/[0.06] cursor-default"
+                  className="group relative inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] hover:border-white/[0.15] transition-all duration-300 hover:bg-white/[0.06] cursor-default"
                   style={{
                     animationDelay: `${900 + i * 80}ms`,
                     animation: 'sanctumFadeInUp 0.5s ease-out backwards',
@@ -175,7 +175,7 @@ export function SanctumLanding({
       {/* Features footer */}
       <div className="py-8 border-t border-border-subtle bg-void-black/50 backdrop-blur-sm">
         <Container size="xl">
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 lg:gap-12 text-sm text-text-muted">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-3 sm:gap-8 lg:gap-12 text-sm text-text-muted">
             <div className="flex items-center gap-2">
               <Code2 className="w-4 h-4 text-near-green" />
               <span>Rust Smart Contracts</span>

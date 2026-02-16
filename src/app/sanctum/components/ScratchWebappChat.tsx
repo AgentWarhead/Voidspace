@@ -186,7 +186,7 @@ export function ScratchWebappChat({ initialPrompt, onCodeUpdate, onTokensUsed }:
               <button
                 key={action.label}
                 onClick={() => sendMessage(action.value)}
-                className="flex-shrink-0 px-3 py-1.5 text-xs rounded-full bg-white/[0.05] border border-white/[0.08] text-text-muted hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/5 transition-all whitespace-nowrap"
+                className="flex-shrink-0 px-3 py-2 min-h-[44px] text-xs rounded-full bg-white/[0.05] border border-white/[0.08] text-text-muted hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/5 transition-all whitespace-nowrap"
               >
                 {action.label}
               </button>
@@ -211,7 +211,7 @@ export function ScratchWebappChat({ initialPrompt, onCodeUpdate, onTokensUsed }:
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isGenerating}
-            className="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+            className="p-3 min-h-[44px] min-w-[44px] rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 flex items-center justify-center"
           >
             <Send className="w-4 h-4" />
           </button>

@@ -295,11 +295,11 @@ export function WebappChat({
                     <button
                       key={template.id}
                       onClick={() => handleTemplateSelect(template.id)}
-                      className="p-3 rounded-xl bg-void-black/50 border border-void-purple/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
+                      className="p-3 min-h-[80px] rounded-xl bg-void-black/50 border border-void-purple/30 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all text-left group"
                     >
-                      <span className="text-2xl mb-2 block">{template.emoji}</span>
-                      <span className="text-sm font-medium text-white block">{template.name}</span>
-                      <span className="text-xs text-gray-500">{template.description}</span>
+                      <span className="text-xl sm:text-2xl mb-1 sm:mb-2 block">{template.emoji}</span>
+                      <span className="text-xs sm:text-sm font-medium text-white block">{template.name}</span>
+                      <span className="text-[10px] sm:text-xs text-gray-500">{template.description}</span>
                     </button>
                   ))}
                 </div>
@@ -342,7 +342,7 @@ export function WebappChat({
       )}
 
       {/* Input */}
-      <div className="p-4 border-t border-void-purple/20 bg-void-darker/50">
+      <div className="p-3 sm:p-4 border-t border-void-purple/20 bg-void-darker/50">
         <div className="flex gap-2">
           <input
             ref={inputRef}
@@ -352,12 +352,12 @@ export function WebappChat({
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder={showTemplates ? "Pick a template above..." : "Describe what you want to change..."}
             disabled={showTemplates || isGenerating}
-            className="flex-1 bg-void-black border border-void-purple/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 disabled:opacity-50"
+            className="flex-1 min-w-0 bg-void-black border border-void-purple/20 rounded-xl px-3 sm:px-4 py-3 text-sm sm:text-base text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isGenerating || showTemplates}
-            className="px-4 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-700 text-white rounded-xl transition-colors flex items-center gap-2"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-700 text-white rounded-xl transition-colors flex-shrink-0"
           >
             <span>➤</span>
           </button>

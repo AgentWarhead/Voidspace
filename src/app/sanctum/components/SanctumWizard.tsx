@@ -221,8 +221,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
         >
           {/* Step 1: Goal */}
           {step === 'goal' && (
-            <Container size="xl" className="py-8 px-4">
-              <div className="text-center mb-12">
+            <Container size="xl" className="py-4 sm:py-8 px-4">
+              <div className="text-center mb-6 sm:mb-12">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-xs font-mono mb-4" style={{ animation: 'sanctumFadeInUp 0.4s ease-out backwards' }}>
                   <Sparkles className="w-3 h-3" />
                   CHOOSE YOUR PATH
@@ -272,7 +272,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
               )}
 
               {/* Top 2 cards — featured row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-4xl mx-auto mb-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 max-w-4xl mx-auto mb-4 sm:mb-5">
                 <GoalCard
                   emoji="🚀"
                   title="Deploy my first contract"
@@ -486,7 +486,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                       <button
                         onClick={handleScratchContinue}
                         disabled={!state.scratchDescription.trim()}
-                        className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-semibold text-lg hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-lg shadow-near-green/25 disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-semibold text-base sm:text-lg hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-lg shadow-near-green/25 disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto max-w-md"
                       >
                         Continue
                         <ChevronRight className="w-5 h-5" />
@@ -510,7 +510,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl mx-auto mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 max-w-4xl mx-auto mb-8">
                 {PERSONA_LIST.map((persona, i) => (
                   <button
                     key={persona.id}
@@ -548,9 +548,9 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
               <div className="text-center space-y-3">
                 <button
                   onClick={handleLaunch}
-                  className="group inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-bold text-xl hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-2xl shadow-near-green/30 hover:shadow-near-green/50 hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-bold text-lg sm:text-xl hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-2xl shadow-near-green/30 hover:shadow-near-green/50 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto max-w-md"
                 >
-                  <Rocket className="w-6 h-6" />
+                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
                   Launch Session
                 </button>
                 <div>

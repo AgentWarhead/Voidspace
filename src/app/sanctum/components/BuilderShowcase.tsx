@@ -78,7 +78,7 @@ export function BuilderShowcase() {
               </div>
 
               {/* Syntax-highlighted Rust code */}
-              <div className="font-mono text-[13px] leading-relaxed space-y-0.5">
+              <div className="font-mono text-xs sm:text-[13px] leading-relaxed space-y-0.5 overflow-x-auto">
                 <div>
                   <span className="text-yellow-400/80">#[near(contract_state)]</span>
                 </div>

@@ -76,7 +76,7 @@ export function InlineQuiz({ quiz, onAnswer }: InlineQuizProps) {
               key={idx}
               onClick={() => handleSelect(idx)}
               disabled={isAnswered}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-sm text-left transition-all ${buttonStyle} disabled:cursor-default`}
+              className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-lg border text-sm text-left transition-all ${buttonStyle} disabled:cursor-default`}
             >
               <span className="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold flex-shrink-0">
                 {OPTION_LETTERS[idx]}

@@ -874,7 +874,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
-            className="px-3 py-3 rounded-xl bg-void-gray border border-border-subtle hover:border-purple-500/30 hover:bg-purple-500/10 disabled:opacity-50 transition-all"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-void-gray border border-border-subtle hover:border-purple-500/30 hover:bg-purple-500/10 disabled:opacity-50 transition-all flex-shrink-0"
             title="Attach files (code, images)"
           >
             <Link2 className="w-5 h-5 text-text-muted" />
@@ -886,7 +886,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder={isListening ? "Listening..." : "Describe what you want to build..."}
-            className={`flex-1 px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-white placeholder:text-text-muted transition-all ${
+            className={`flex-1 min-w-0 px-3 sm:px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-sm sm:text-base text-white placeholder:text-text-muted transition-all ${
               isListening 
                 ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30 animate-pulse' 
                 : 'border-border focus:border-near-green/50 focus:ring-near-green/30'
@@ -899,7 +899,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
             <button
               onClick={toggleListening}
               disabled={isLoading}
-              className={`px-3 py-3 rounded-xl border transition-all ${
+              className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border transition-all flex-shrink-0 ${
                 isListening
                   ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
                   : 'bg-void-gray border-border-subtle hover:border-near-green/30 hover:bg-near-green/10 text-text-muted hover:text-near-green'
@@ -913,7 +913,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           {isLoading ? (
             <button
               onClick={handleStop}
-              className="px-4 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all flex-shrink-0"
               title="Stop generation"
             >
               <Square className="w-5 h-5 fill-current" />
@@ -922,7 +922,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() && attachedFiles.length === 0}
-              className="px-4 py-3 rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
             >
               <ArrowRight className="w-5 h-5" />
             </button>

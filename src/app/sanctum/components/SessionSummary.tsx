@@ -37,26 +37,26 @@ export function SessionSummary({ stats, onClose, onContinue }: SessionSummaryPro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-void-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-md mx-4 rounded-2xl border border-near-green/20 bg-void-gray/95 backdrop-blur-xl shadow-2xl shadow-near-green/10 overflow-hidden">
+      <div className="w-full max-w-md mx-4 rounded-2xl border border-near-green/20 bg-void-gray/95 backdrop-blur-xl shadow-2xl shadow-near-green/10 overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 text-center">
+        <div className="px-4 sm:px-6 pt-6 pb-4 text-center">
           <div className="text-4xl mb-3">🎓</div>
-          <h2 className="text-xl font-bold text-text-primary">Session Complete!</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-text-primary">Session Complete!</h2>
           <p className="text-sm text-text-muted mt-1">Here&apos;s what you accomplished</p>
         </div>
 
         {/* Stats grid */}
-        <div className="px-6 grid grid-cols-3 gap-3 mb-4">
-          <div className="text-center p-3 rounded-lg bg-void-black/30 border border-white/[0.05]">
-            <div className="text-lg font-bold text-near-green">{formatDuration(stats.duration)}</div>
+        <div className="px-4 sm:px-6 grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+          <div className="text-center p-2 sm:p-3 rounded-lg bg-void-black/30 border border-white/[0.05]">
+            <div className="text-sm sm:text-lg font-bold text-near-green">{formatDuration(stats.duration)}</div>
             <div className="text-[10px] text-text-muted uppercase tracking-wider mt-0.5">Duration</div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-void-black/30 border border-white/[0.05]">
-            <div className="text-lg font-bold text-cyan-400">{stats.messages}</div>
+          <div className="text-center p-2 sm:p-3 rounded-lg bg-void-black/30 border border-white/[0.05]">
+            <div className="text-sm sm:text-lg font-bold text-cyan-400">{stats.messages}</div>
             <div className="text-[10px] text-text-muted uppercase tracking-wider mt-0.5">Messages</div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-void-black/30 border border-white/[0.05]">
-            <div className="text-lg font-bold text-purple-400">{stats.contracts}</div>
+          <div className="text-center p-2 sm:p-3 rounded-lg bg-void-black/30 border border-white/[0.05]">
+            <div className="text-sm sm:text-lg font-bold text-purple-400">{stats.contracts}</div>
             <div className="text-[10px] text-text-muted uppercase tracking-wider mt-0.5">Contracts</div>
           </div>
         </div>
@@ -114,16 +114,16 @@ export function SessionSummary({ stats, onClose, onContinue }: SessionSummaryPro
         </div>
 
         {/* Actions */}
-        <div className="px-6 pb-6 pt-4 flex gap-3">
+        <div className="px-4 sm:px-6 pb-6 pt-4 flex flex-col sm:flex-row gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 rounded-lg border border-white/[0.1] bg-void-black/30 text-text-secondary hover:bg-white/[0.05] transition-all text-sm font-medium"
+            className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg border border-white/[0.1] bg-void-black/30 text-text-secondary hover:bg-white/[0.05] transition-all text-sm font-medium"
           >
             Back to Home
           </button>
           <button
             onClick={onContinue}
-            className="flex-1 px-4 py-2.5 rounded-lg bg-near-green/20 text-near-green border border-near-green/30 hover:bg-near-green/30 transition-all text-sm font-medium"
+            className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-near-green/20 text-near-green border border-near-green/30 hover:bg-near-green/30 transition-all text-sm font-medium"
           >
             Keep Building →
           </button>

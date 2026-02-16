@@ -82,18 +82,18 @@ export function VisualMode() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Type selector */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
         {VISUAL_TYPES.map((t) => (
           <button
             key={t.id}
             onClick={() => setType(t.id)}
-            className={`p-4 rounded-xl border-2 text-center transition-all hover:scale-[1.02] ${
+            className={`p-3 sm:p-4 rounded-xl border-2 text-center transition-all hover:scale-[1.02] min-h-[44px] ${
               type === t.id
                 ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
                 : 'border-border-subtle bg-void-gray/30 hover:border-purple-500/30'
             }`}
           >
-            <div className="text-2xl mb-2">{t.icon}</div>
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">{t.icon}</div>
             <div className={`text-sm font-semibold ${type === t.id ? 'text-purple-400' : 'text-text-primary'}`}>
               {t.label}
             </div>
@@ -110,7 +110,7 @@ export function VisualMode() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="e.g. A NEAR Protocol DeFi architecture showing token swaps, liquidity pools, and staking..."
-            className="w-full h-32 bg-void-gray/50 border border-border-subtle rounded-xl p-4 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 resize-none"
+            className="w-full h-24 sm:h-32 bg-void-gray/50 border border-border-subtle rounded-xl p-3 sm:p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 resize-none"
             maxLength={1000}
           />
           <div className="text-xs text-text-muted text-right mt-1">{prompt.length}/1000</div>
@@ -122,7 +122,7 @@ export function VisualMode() {
             value={projectContext}
             onChange={(e) => setProjectContext(e.target.value)}
             placeholder="e.g. NFT marketplace on NEAR with Rust smart contracts"
-            className="w-full bg-void-gray/50 border border-border-subtle rounded-xl p-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30"
+            className="w-full bg-void-gray/50 border border-border-subtle rounded-xl p-3 min-h-[44px] text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30"
           />
         </div>
       </div>
@@ -131,7 +131,7 @@ export function VisualMode() {
       <button
         onClick={handleGenerate}
         disabled={loading || !prompt.trim()}
-        className="w-full py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+        className="w-full py-4 min-h-[44px] rounded-xl font-semibold text-base sm:text-lg transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
       >
         {loading ? (
           <>

@@ -128,7 +128,7 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="relative bg-void-gray border border-near-green/30 rounded-2xl p-8 max-w-md mx-4 shadow-2xl shadow-near-green/20"
+              className="relative bg-void-gray border border-near-green/30 rounded-2xl p-4 sm:p-6 md:p-8 max-w-md mx-4 shadow-2xl shadow-near-green/20 max-h-[90vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
               {/* Glow effect */}
@@ -173,7 +173,7 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <h2 className="text-2xl font-bold text-text-primary mb-2 flex items-center justify-center gap-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-2 flex items-center justify-center gap-2">
                     <Sparkles className="w-6 h-6 text-amber-400" />
                     Contract Deployed!
                     <Sparkles className="w-6 h-6 text-amber-400" />
@@ -216,14 +216,14 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="flex gap-3"
+                  className="flex flex-col sm:flex-row gap-3"
                 >
                   {explorerUrl && (
                     <a
                       href={explorerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all text-sm sm:text-base"
                     >
                       <ExternalLink className="w-4 h-4" />
                       View on Explorer
@@ -231,7 +231,7 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                   )}
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-text-primary rounded-lg border border-border-subtle transition-all"
+                    className="flex-1 px-4 py-3 min-h-[44px] bg-white/5 hover:bg-white/10 text-text-primary rounded-lg border border-border-subtle transition-all text-sm sm:text-base"
                   >
                     Continue Building
                   </button>

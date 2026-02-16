@@ -89,7 +89,7 @@ export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeP
   return (
     <pre
       ref={containerRef}
-      className="flex-1 overflow-auto p-4 text-sm font-mono leading-relaxed bg-void-black/50"
+      className="flex-1 overflow-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50"
     >
       <code 
         className="text-text-primary"
