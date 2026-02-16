@@ -160,9 +160,9 @@ export function SanctumSection() {
                     {persona.emoji}
                   </div>
                   {/* Tooltip */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-void-black/90 border border-white/[0.1] backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-void-black/90 border border-white/[0.1] backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20 max-w-[calc(100vw-2rem)]">
                     <span className={`text-xs font-medium ${persona.color}`}>{persona.name}</span>
-                    <span className="text-[10px] text-text-muted ml-1">· {persona.role}</span>
+                    <span className="text-[10px] text-text-muted ml-1 hidden sm:inline">· {persona.role}</span>
                   </div>
                 </div>
               ))}

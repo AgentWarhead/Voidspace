@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 // @ts-ignore - lucide-react type export bug
 import { Sparkles, Target, Eye, Terminal, GraduationCap, X } from 'lucide-react';
@@ -44,8 +45,12 @@ const slides: Slide[] = [
 export function OnboardingOverlay() {
   const [isVisible, setIsVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Only show onboarding on the homepage (root "/" route)
+    if (pathname !== '/') return;
+
     // Check if user has already been onboarded (localStorage OR cookie)
     const hasBeenOnboardedLocal = localStorage.getItem('voidspace_onboarded');
     const hasBeenOnboardedCookie = document.cookie.includes('voidspace_onboarded=true');
@@ -53,7 +58,7 @@ export function OnboardingOverlay() {
     if (!hasBeenOnboardedLocal && !hasBeenOnboardedCookie) {
       setIsVisible(true);
     }
-  }, []);
+  }, [pathname]);
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {

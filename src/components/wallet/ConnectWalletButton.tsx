@@ -76,14 +76,14 @@ export function ConnectWalletButton() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full right-0 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 mt-2 w-64 max-w-[calc(100vw-2rem)] z-50"
+              className="absolute top-full right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] z-50"
             >
               <div className="bg-surface/95 backdrop-blur-sm border border-near-green/30 rounded-lg p-3 shadow-lg">
                 <div className="text-sm text-text-secondary leading-relaxed">
                   Connect your NEAR wallet to save opportunities, track builds, and get personalized recommendations
                 </div>
                 {/* Arrow pointing up */}
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-surface/95 border-l border-t border-near-green/30 rotate-45" />
+                <div className="absolute -top-1 right-4 w-2 h-2 bg-surface/95 border-l border-t border-near-green/30 rotate-45" />
               </div>
             </motion.div>
           )}
