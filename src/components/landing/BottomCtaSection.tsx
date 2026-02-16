@@ -21,8 +21,8 @@ export function BottomCtaSection() {
       />
       <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
 
-      <div className="relative z-10 text-center py-14 px-6">
-        <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
+      <div className="relative z-10 text-center py-10 sm:py-14 px-4 sm:px-6">
+        <GradientText as="h2" className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
           The Void Won&apos;t Fill Itself
         </GradientText>
         <p className="text-text-secondary mt-3 max-w-md mx-auto text-sm">
@@ -31,34 +31,34 @@ export function BottomCtaSection() {
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <Link
             href="/opportunities"
-            className="shimmer-btn text-background font-semibold px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 hover:scale-[1.03] transition-transform duration-200"
+            className="shimmer-btn text-background font-semibold px-5 sm:px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 active:scale-[0.98] hover:scale-[1.03] transition-transform duration-200 min-h-[44px]"
           >
             Explore Voids
             <ChevronRight className="w-4 h-4" />
           </Link>
           <Link
             href="/sanctum"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-500/20 border border-purple-500/30 hover:bg-purple-500/30 hover:scale-[1.02] text-purple-300 rounded-lg transition-all duration-200 text-sm"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-purple-500/20 border border-purple-500/30 hover:bg-purple-500/30 active:scale-[0.98] hover:scale-[1.02] text-purple-300 rounded-lg transition-all duration-200 text-sm min-h-[44px]"
           >
             <Sparkles className="w-4 h-4" />
             Sanctum
           </Link>
           <Link
             href="/void-bubbles"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 hover:scale-[1.02] text-cyan-300 rounded-lg transition-all duration-200 text-sm"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 active:scale-[0.98] hover:scale-[1.02] text-cyan-300 rounded-lg transition-all duration-200 text-sm min-h-[44px]"
           >
             🫧 Void Bubbles
           </Link>
           <Link
             href="/observatory"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface border border-border hover:border-accent-cyan/30 hover:scale-[1.02] text-text-secondary hover:text-accent-cyan rounded-lg transition-all duration-200 text-sm"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-surface border border-border hover:border-accent-cyan/30 active:scale-[0.98] hover:scale-[1.02] text-text-secondary hover:text-accent-cyan rounded-lg transition-all duration-200 text-sm min-h-[44px]"
           >
             <Search className="w-4 h-4" />
             Observatory
           </Link>
           <Link
             href="/learn"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface border border-border hover:border-near-green/30 hover:scale-[1.02] text-text-secondary hover:text-near-green rounded-lg transition-all duration-200 text-sm"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-surface border border-border hover:border-near-green/30 active:scale-[0.98] hover:scale-[1.02] text-text-secondary hover:text-near-green rounded-lg transition-all duration-200 text-sm min-h-[44px]"
           >
             <BookOpen className="w-4 h-4" />
             Learn

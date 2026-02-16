@@ -28,14 +28,14 @@ export function SocialProofSection() {
         />
         <div className="absolute inset-0 bg-surface/20" />
 
-        <div className="relative z-10 py-10 px-6 sm:px-10">
+        <div className="relative z-10 py-8 sm:py-10 px-4 sm:px-6 md:px-10">
           {/* Stats bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 max-w-3xl mx-auto">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center group">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <stat.icon className="w-3.5 h-3.5 text-near-green/50" />
-                  <span className="text-xl sm:text-2xl font-bold font-mono text-text-primary">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1">
+                  <stat.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-near-green/50" />
+                  <span className="text-lg sm:text-xl md:text-2xl font-bold font-mono text-text-primary">
                     {stat.value}
                   </span>
                 </div>
@@ -50,13 +50,13 @@ export function SocialProofSection() {
           <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent mb-8" />
 
           {/* Builder signals */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+          <div className="flex flex-col items-center justify-center gap-3 sm:gap-4">
             {signals.map((signal, i) => (
               <div key={i} className="flex items-center gap-3">
                 {i > 0 && (
-                  <span className="hidden sm:block w-1 h-1 rounded-full bg-near-green/30" />
+                  <span className="hidden sm:block w-1 h-1 rounded-full bg-near-green/30 shrink-0" />
                 )}
-                <p className="text-xs text-text-muted font-mono text-center">
+                <p className="text-[10px] sm:text-xs text-text-muted font-mono text-center leading-relaxed">
                   {signal}
                 </p>
               </div>

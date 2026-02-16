@@ -28,16 +28,16 @@ export function BuildPlansSection() {
           }}
         />
 
-        <div className="relative z-10 p-8 sm:p-10">
+        <div className="relative z-10 p-5 sm:p-8 md:p-10">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-xs font-mono mb-4">
               <Target className="w-3 h-3" />
               AI-POWERED MISSION BRIEFS
             </div>
-            <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <GradientText as="h2" className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
               Found Your Void? Plan Your Attack.
             </GradientText>
-            <p className="text-text-secondary text-base mt-3 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-text-secondary text-sm sm:text-base mt-3 max-w-2xl mx-auto leading-relaxed">
               Your next project starts in 60 seconds. Get your AI-powered Build Plan — market analysis, tech specs, NEAR integration strategy, and your first week&apos;s action plan.
             </p>
           </div>
@@ -57,7 +57,7 @@ export function BuildPlansSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             <Link
               href="/opportunities"
-              className="group relative p-5 rounded-xl bg-surface/60 border border-near-green/20 hover:border-near-green/50 transition-all text-center"
+              className="group relative p-4 sm:p-5 rounded-xl bg-surface/60 border border-near-green/20 hover:border-near-green/50 active:border-near-green/60 transition-all text-center min-h-[44px]"
             >
               <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/15 flex items-center justify-center mx-auto mb-3">
                 <Search className="w-5 h-5 text-near-green" />
@@ -73,7 +73,7 @@ export function BuildPlansSection() {
 
             <Link
               href="/opportunities#custom-brief"
-              className="group relative p-5 rounded-xl bg-surface/60 border border-accent-cyan/20 hover:border-accent-cyan/50 transition-all text-center"
+              className="group relative p-4 sm:p-5 rounded-xl bg-surface/60 border border-accent-cyan/20 hover:border-accent-cyan/50 active:border-accent-cyan/60 transition-all text-center min-h-[44px]"
             >
               <div className="w-10 h-10 rounded-lg bg-accent-cyan/10 border border-accent-cyan/15 flex items-center justify-center mx-auto mb-3">
                 <Lightbulb className="w-5 h-5 text-accent-cyan" />

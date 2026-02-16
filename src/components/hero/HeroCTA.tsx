@@ -134,7 +134,7 @@ export function HeroCTA() {
           
           {/* Button */}
           <motion.button
-            className="relative shimmer-btn text-background font-semibold px-8 py-3.5 rounded-lg text-base inline-flex items-center gap-2 overflow-hidden"
+            className="relative shimmer-btn text-background font-semibold px-6 sm:px-8 py-3.5 rounded-lg text-sm sm:text-base inline-flex items-center gap-2 overflow-hidden min-h-[44px]"
             whileHover={{ 
               scale: 1.02,
               boxShadow: '0 0 40px rgba(0,236,151,0.5), 0 0 80px rgba(139,92,246,0.3)' 

@@ -88,10 +88,10 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <GradientText as="h2" className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
           Voids For Every Builder
         </GradientText>
-        <p className="text-text-secondary mt-2 max-w-lg mx-auto text-sm">
+        <p className="text-text-secondary mt-2 max-w-lg mx-auto text-xs sm:text-sm">
           Whether you&apos;re writing your first smart contract or building cross-chain infrastructure — there&apos;s a void for you.
         </p>
       </div>
@@ -113,7 +113,7 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
                 }
                 className="w-full cursor-pointer"
               >
-                <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${meta.bgColor} ${meta.borderColor}`}>
+                <div className={`flex items-center justify-between rounded-lg px-3 py-3 sm:py-2.5 border ${meta.bgColor} ${meta.borderColor} min-h-[44px]`}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{meta.emoji}</span>
                     <span className={`font-semibold text-sm ${meta.color}`}>
@@ -204,7 +204,7 @@ export function VoidsForEveryBuilder({ opportunities }: VoidsForEveryBuilderProp
       <div className="text-center">
         <Link
           href="/opportunities"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-secondary border border-border-primary hover:border-accent/30 text-text-secondary hover:text-accent rounded-lg transition-all duration-200 text-sm font-medium"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-secondary border border-border-primary hover:border-accent/30 active:scale-[0.98] text-text-secondary hover:text-accent rounded-lg transition-all duration-200 text-sm font-medium min-h-[44px]"
         >
           Explore All Voids
         </Link>

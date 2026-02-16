@@ -135,7 +135,7 @@ export function DataSourcesSection() {
         badge="10+ LIVE SOURCES"
       />
 
-      <p className="text-text-secondary max-w-3xl mx-auto text-center mb-10">
+      <p className="text-text-secondary text-sm sm:text-base max-w-3xl mx-auto text-center mb-8 sm:mb-10 px-2 sm:px-0">
         Every insight on Voidspace is backed by verifiable, real-time blockchain data.
         No synthetic data. No hallucinated metrics.{' '}
         <GradientText>Every number you see is verifiable on-chain.</GradientText>
@@ -143,7 +143,7 @@ export function DataSourcesSection() {
 
       {/* Data Sources Grid */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3"
+        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -182,7 +182,7 @@ export function DataSourcesSection() {
         transition={{ duration: 0.5, delay: 0.5 }}
       >
         <div className="relative overflow-hidden rounded-xl border border-amber-400/20 bg-amber-400/[0.03] p-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className={`p-2.5 rounded-lg ${AI_LAYER.bgColor} shrink-0`}>
               <AI_LAYER.icon className={`w-5 h-5 ${AI_LAYER.color}`} />
             </div>

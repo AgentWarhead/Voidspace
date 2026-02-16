@@ -31,7 +31,7 @@ export function MissionControlBar() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="group relative text-center py-5 px-3 transition-all duration-300 hover:bg-near-green/[0.03]"
+              className="group relative text-center py-4 sm:py-5 px-2 sm:px-3 transition-all duration-300 hover:bg-near-green/[0.03]"
             >
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-0 group-hover:w-3/4 bg-gradient-to-r from-transparent via-near-green/50 to-transparent transition-all duration-500" />
               <div className="flex items-center justify-center gap-2 mb-1.5">
@@ -40,7 +40,7 @@ export function MissionControlBar() {
                   style={{ animation: `pulse 3s ease-in-out ${stat.delay} infinite` }}
                 />
                 <span
-                  className="text-xl sm:text-2xl font-bold font-mono text-text-primary group-hover:text-near-green transition-colors duration-300"
+                  className="text-lg sm:text-xl md:text-2xl font-bold font-mono text-text-primary group-hover:text-near-green transition-colors duration-300"
                   style={{ textShadow: '0 0 20px rgba(0,236,151,0.0)', transition: 'text-shadow 0.3s' }}
                 >
                   {stat.value}

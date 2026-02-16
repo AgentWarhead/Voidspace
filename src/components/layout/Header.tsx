@@ -132,7 +132,7 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-text-secondary hover:text-text-primary"
+            className="md:hidden p-2.5 text-text-secondary hover:text-text-primary min-w-[44px] min-h-[44px] flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -159,7 +159,7 @@ export function Header() {
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        'flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors',
+                        'flex items-center gap-3 px-3 py-3 text-sm rounded-lg transition-colors min-h-[44px]',
                         isActive
                           ? 'text-near-green bg-near-green/10'
                           : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'

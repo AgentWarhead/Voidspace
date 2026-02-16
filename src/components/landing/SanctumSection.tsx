@@ -24,17 +24,17 @@ export function SanctumSection() {
           }}
         />
 
-        <div className="relative z-10 p-8 sm:p-12">
+        <div className="relative z-10 p-5 sm:p-8 md:p-12">
           {/* Header */}
           <div className="text-center mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono mb-4">
               <Sparkles className="w-3 h-3" />
               THE ONLY CRYPTO VIBE-CODING PLATFORM
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-300 via-violet-300 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-300 via-violet-300 to-purple-400 bg-clip-text text-transparent">
               The Sanctum
             </h2>
-            <p className="text-text-secondary text-lg mt-3 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-text-secondary text-base sm:text-lg mt-3 max-w-2xl mx-auto leading-relaxed">
               <span className="text-purple-300 font-medium">Describe it. Deploy it.</span><br />
               AI-powered development studio for NEAR Protocol — entirely through conversation.
             </p>
@@ -56,7 +56,7 @@ export function SanctumSection() {
                 <span className="text-[10px] font-mono text-text-muted ml-2">sanctum — vibe-coding session</span>
               </div>
               {/* Terminal content */}
-              <div className="p-4 font-mono text-xs leading-relaxed space-y-2">
+              <div className="p-3 sm:p-4 font-mono text-[10px] sm:text-xs leading-relaxed space-y-2 overflow-x-auto">
                 <p><span className="text-purple-400">you:</span> <span className="text-text-secondary">Build me a token staking contract on NEAR</span></p>
                 <p><span className="text-near-green">sanctum:</span> <span className="text-text-secondary">Let&apos;s build it step by step. First, I&apos;ll create the</span></p>
                 <p className="text-text-secondary pl-[4.5rem]">contract struct with staking pools and reward tracking...</p>
@@ -150,13 +150,13 @@ export function SanctumSection() {
             <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-purple-400/50">
               Meet the Council
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap justify-center">
               {PERSONA_LIST.map((persona) => (
                 <div
                   key={persona.id}
                   className="group relative"
                 >
-                  <div className={`w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-base hover:border-white/[0.2] hover:bg-white/[0.08] transition-all duration-200 cursor-default hover:scale-110`}>
+                  <div className={`w-9 h-9 sm:w-9 sm:h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-base hover:border-white/[0.2] hover:bg-white/[0.08] transition-all duration-200 cursor-default hover:scale-110`}>
                     {persona.emoji}
                   </div>
                   {/* Tooltip */}
@@ -189,7 +189,7 @@ export function SanctumSection() {
           <div className="text-center">
             <Link
               href="/sanctum"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all duration-300"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.98] hover:scale-[1.02] transition-all duration-300 min-h-[44px]"
             >
               <Sparkles className="w-4 h-4" />
               Start Vibe-Coding on NEAR

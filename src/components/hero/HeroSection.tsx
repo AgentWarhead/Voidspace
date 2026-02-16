@@ -17,7 +17,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden py-16 sm:py-24">
+    <section className="relative overflow-hidden py-12 sm:py-16 md:py-24">
       {/* Layer 1: Void depth — radial gradient creating infinite depth */}
       <div
         className="absolute inset-0"
@@ -55,7 +55,7 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
             <GradientText
               as="h1"
               animated
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter"
             >
               VOIDSPACE
             </GradientText>

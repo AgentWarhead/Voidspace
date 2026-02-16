@@ -37,9 +37,9 @@ export function Footer() {
       <GridPattern className="opacity-10" />
 
       <Container>
-        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 items-center py-8 gap-6">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 items-center py-6 sm:py-8 gap-4 sm:gap-6">
           {/* Logo + tagline */}
-          <div className="flex items-center justify-center sm:justify-start gap-3">
+          <div className="flex items-center justify-center md:justify-start gap-3">
             <VoidspaceLogo size="sm" animate={false} />
             <div>
               <span className="text-sm font-semibold text-gradient">Voidspace</span>
@@ -50,29 +50,29 @@ export function Footer() {
           </div>
 
           {/* Quick links */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <Link href="/" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-1">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link href="/" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-2 min-h-[44px] flex items-center">
               Home
             </Link>
-            <Link href="/opportunities" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-1">
+            <Link href="/opportunities" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-2 min-h-[44px] flex items-center">
               Voids
             </Link>
-            <Link href="/sanctum" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-1">
+            <Link href="/sanctum" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-2 min-h-[44px] flex items-center">
               Sanctum
             </Link>
-            <Link href="/observatory" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-1">
+            <Link href="/observatory" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-2 min-h-[44px] flex items-center">
               Observatory
             </Link>
-            <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-1">
+            <Link href="/learn" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-2 min-h-[44px] flex items-center">
               Learn
             </Link>
-            <Link href="/pricing" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-1">
+            <Link href="/pricing" className="text-xs text-text-muted hover:text-text-secondary transition-colors py-2 min-h-[44px] flex items-center">
               Pricing
             </Link>
           </div>
 
           {/* Contact + social */}
-          <div className="flex items-center justify-center sm:justify-end gap-3">
+          <div className="flex items-center justify-center md:justify-end gap-3 flex-wrap">
             <a
               href="mailto:team@voidspace.io"
               className="text-[10px] text-text-muted hover:text-near-green transition-colors"

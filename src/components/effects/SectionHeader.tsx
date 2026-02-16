@@ -16,7 +16,7 @@ export function SectionHeader({ title, badge, count, className }: SectionHeaderP
         <span className="relative inline-flex rounded-full h-2 w-2 bg-near-green" />
       </span>
 
-      <h2 className="text-lg font-semibold text-text-primary whitespace-nowrap">{title}</h2>
+      <h2 className="text-base sm:text-lg font-semibold text-text-primary whitespace-nowrap">{title}</h2>
 
       {count !== undefined && (
         <span className="text-xs font-mono text-text-muted">{count}</span>

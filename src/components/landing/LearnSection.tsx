@@ -30,16 +30,16 @@ export function LearnSection() {
         />
         <div className="absolute inset-0 bg-gradient-to-br from-near-green/5 to-accent-cyan/3" />
 
-        <div className="relative z-10 p-8 sm:p-12">
+        <div className="relative z-10 p-5 sm:p-8 md:p-12">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-near-green text-xs font-mono mb-4">
               <BookOpen className="w-3 h-3" />
               THE MOST COMPREHENSIVE NEAR CURRICULUM — FREE
             </div>
-            <GradientText as="h2" className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <GradientText as="h2" className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
               We&apos;ll Teach You Everything
             </GradientText>
-            <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-text-secondary text-sm sm:text-base md:text-lg mt-3 sm:mt-4 max-w-2xl mx-auto leading-relaxed">
               Then build it with you. 66 interactive modules across 4 structured tracks — from your first Rust line to deploying production dApps. Zero to deployed. No permission needed.
             </p>
           </div>
@@ -71,7 +71,7 @@ export function LearnSection() {
           <div className="text-center">
             <Link
               href="/learn"
-              className="shimmer-btn text-background font-semibold px-8 py-4 rounded-lg text-base inline-flex items-center gap-2 mb-3 hover:scale-[1.02] transition-transform duration-200"
+              className="shimmer-btn text-background font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg text-sm sm:text-base inline-flex items-center gap-2 mb-3 active:scale-[0.98] hover:scale-[1.02] transition-transform duration-200 min-h-[44px]"
             >
               <BookOpen className="w-4 h-4" />
               Start Your Journey →

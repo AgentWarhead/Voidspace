@@ -32,19 +32,19 @@ export function AnimatedStatBar({ stats, totalOpportunities }: AnimatedStatBarPr
       transition={{ duration: 0.5, delay: 1.8 }}
     >
       {items.map((item, i) => (
-        <div key={item.label} className="flex items-center gap-6 sm:gap-10">
+        <div key={item.label} className="flex items-center gap-3 sm:gap-6 md:gap-10">
           {i > 0 && (
-            <div className="h-8 w-px bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
+            <div className="hidden sm:block h-8 w-px bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
           )}
           <div className="text-center">
-            <div className={`text-lg sm:text-xl font-bold font-mono ${item.highlight ? 'text-near-green' : 'text-text-primary'}`}>
+            <div className={`text-base sm:text-lg md:text-xl font-bold font-mono ${item.highlight ? 'text-near-green' : 'text-text-primary'}`}>
               <AnimatedCounter
                 value={item.value}
                 formatter={item.formatter}
                 duration={2500}
               />
             </div>
-            <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-widest font-mono mt-0.5">
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-text-muted uppercase tracking-widest font-mono mt-0.5">
               {item.label}
             </p>
           </div>
