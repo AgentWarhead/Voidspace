@@ -68,7 +68,7 @@ export function BottomCtaSection() {
         {/* Credibility badges */}
         <div className="mt-8 pt-6 border-t border-border/30">
           <p className="text-xs text-text-muted font-mono mb-3">
-            Powered by <span className="text-purple-400">Claude AI</span> · <span className="text-accent-cyan">DexScreener</span> · <span className="text-near-green">NEAR Protocol</span>
+            Built on <span className="text-purple-400">Claude AI</span> · <span className="text-accent-cyan">DexScreener</span> · <span className="text-near-green">NEAR Protocol</span>
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-near-green/5 border border-near-green/15">
             <span className="text-sm">🏆</span>

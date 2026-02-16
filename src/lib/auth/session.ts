@@ -104,7 +104,7 @@ export function verifySessionToken(token: string): VerifyResult | null {
       return null;
     }
 
-    // TODO: Add Supabase revocation check here:
+    // Supabase revocation check (planned):
     // Query users table for revoked_at timestamp and compare with token's issuedAt
     // if (user.revoked_at && issuedAt < user.revoked_at) return null;
 

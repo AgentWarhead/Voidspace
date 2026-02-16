@@ -75,7 +75,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!signed) {
-        console.warn('[Auth] User declined to sign message');
+        // User declined to sign
         return;
       }
 

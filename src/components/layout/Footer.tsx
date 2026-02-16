@@ -100,10 +100,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Built with */}
+        {/* Copyright */}
         <div className="relative z-10 text-center pt-3">
           <p className="text-[10px] text-text-muted/40">
-            Built with Claude AI · NEAR Protocol · Supabase
+            &copy; 2026 Voidspace
           </p>
         </div>
 

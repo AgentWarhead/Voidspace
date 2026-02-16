@@ -5,7 +5,7 @@
  * Vercel serverless functions have no shared memory between instances,
  * so revocation won't persist across different function executions.
  * 
- * TODO: Replace with Supabase-based revocation using a `revoked_at` column
+ * Future: Replace with Supabase-based revocation using a `revoked_at` column
  * in the users table for true distributed session revocation.
  */
 
@@ -105,7 +105,7 @@ export function revokeSession(userId: string): void {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function isRevoked(_userId: string): boolean {
-  // TODO: Move revocation check to Supabase in verifySessionToken()
+  // Revocation check — will use Supabase in verifySessionToken()
   return false; // Disabled - no shared memory in serverless
 }
 

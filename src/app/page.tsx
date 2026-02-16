@@ -53,7 +53,7 @@ export default async function DashboardPage() {
       {/* SECTION 2: Mission Control Stats Bar */}
       <MissionControlBar />
 
-      <Container size="xl" className="py-6 sm:py-8 space-y-10 sm:space-y-16">
+      <Container size="xl" className="py-6 sm:py-8 space-y-8 sm:space-y-12">
         {/* SECTION 3: Priority Voids */}
         <section>
           <SectionHeader title="Here's what NEAR needs" badge="NEARCON TRACKS" />

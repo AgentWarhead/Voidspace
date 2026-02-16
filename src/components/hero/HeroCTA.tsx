@@ -168,7 +168,7 @@ export function HeroCTA() {
         transition={{ delay: 0.3 }}
       >
         <p className="text-xs text-text-muted font-mono">
-          Powered by Claude AI
+          AI-Powered
         </p>
         <span className="hidden sm:inline text-text-muted/30">·</span>
         <Link href="/learn" className="text-xs text-near-green/70 hover:text-near-green font-mono transition-colors min-h-[44px] flex items-center active:scale-[0.97]">
