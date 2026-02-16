@@ -98,7 +98,7 @@ export default function PricingPage() {
                   <Wallet className="w-5 h-5 text-near-green flex-shrink-0" />
                   <p className="text-sm text-text-secondary">
                     <span className="text-near-green font-medium">Connect your NEAR wallet</span>{' '}
-                    to subscribe or purchase credits
+                    to start building — your $2.50 in free credits are waiting
                   </p>
                 </div>
                 <Button
@@ -148,13 +148,13 @@ export default function PricingPage() {
             Sanctum AI Builder
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-4 tracking-tight">
-            Start free.{' '}
+            Build now.{' '}
             <GradientText as="span" animated>
-              Scale when ready.
+              Pay only when you ship.
             </GradientText>
           </h1>
           <p className="text-text-secondary text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            All intelligence tools are free forever. Sanctum AI builder starts with free credits — upgrade as you build more.
+            Every intelligence tool is free — forever. Sanctum gives you $2.50 in credits to start building immediately. No credit card. No trial expiry. Just results.
           </p>
         </motion.div>
 

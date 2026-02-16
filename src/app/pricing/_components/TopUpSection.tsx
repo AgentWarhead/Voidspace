@@ -27,12 +27,12 @@ export function TopUpSection({
     >
       <div className="text-center mb-8 sm:mb-10 px-2">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3">
-          Need more credits?{' '}
-          <GradientText as="span">Top up anytime</GradientText>
+          Running hot?{' '}
+          <GradientText as="span">Top up instantly</GradientText>
         </h2>
         <p className="text-text-secondary text-sm sm:text-base max-w-lg mx-auto">
-          Top-up credits never expire and work with any tier — even Free.
-          Bigger packs = bigger bonuses.
+          Top-up credits <span className="text-near-green font-medium">never expire</span> and work with any tier — even Free.
+          Bigger packs, bigger bonuses. No subscription required.
         </p>
       </div>
 

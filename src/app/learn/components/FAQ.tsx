@@ -51,9 +51,9 @@ export const FAQ_DATA: FAQCategory[] = [
         question: 'What is NEAR Protocol?',
         answer: (
           <>
-            NEAR is a high-performance Layer 1 blockchain with sub-second finality, human-readable accounts (like{' '}
+            NEAR is a Layer 1 blockchain built for usability — sub-second finality, human-readable accounts (like{' '}
             <code className="text-near-green bg-near-green/10 px-1 py-0.5 rounded text-xs">alice.near</code>
-            ), and built-in chain abstraction. It&apos;s designed to feel like using a normal web app.
+            ), and built-in chain abstraction that lets one account work across every blockchain. It&apos;s designed to feel like a normal web app, not a crypto experiment.
           </>
         ),
       },
@@ -71,7 +71,7 @@ export const FAQ_DATA: FAQCategory[] = [
       {
         question: 'Do I need coding experience to get started?',
         answer:
-          'Not at all. The Explorer track covers NEAR basics, wallets, and ecosystem navigation with zero coding required. The Builder and Hacker tracks assume basic programming knowledge, but the Rust Curriculum starts from scratch.',
+          'Not at all. The Explorer track gets you on-chain with zero code — wallets, ecosystem navigation, DeFi basics. The Builder and Hacker tracks assume some programming background, but the Rust Curriculum takes you from your first variable to deployed contracts. Start where you are.',
       },
     ],
   },
@@ -81,12 +81,12 @@ export const FAQ_DATA: FAQCategory[] = [
       {
         question: 'Are the learning tracks really free?',
         answer:
-          'Yes — all 4 tracks (Explorer, Builder, Hacker, Founder) with 66 modules are completely free. No credit card, no paywall, no catch.',
+          'Yes — all 4 tracks, all 66 modules, completely free. No credit card, no paywall, no "free trial" that expires. The learning is free forever. We make money from Sanctum (the AI builder), not from education.',
       },
       {
         question: 'How long does each track take?',
         answer:
-          'Explorer ~6 hours, Builder ~20 hours, Hacker ~8 hours, Founder ~6 hours. All tracks are self-paced — go as fast or slow as you want.',
+          'Explorer ~6 hours, Builder ~20 hours, Hacker ~8 hours, Founder ~6 hours. All self-paced — binge it in a weekend or spread it across weeks. No deadlines, no pressure.',
       },
       {
         question: 'Do I earn certificates?',
@@ -222,7 +222,7 @@ export const FAQ_DATA: FAQCategory[] = [
       {
         question: 'Is Rust hard to learn for smart contracts?',
         answer:
-          'Rust has a steeper learning curve than JavaScript, but the strict compiler catches bugs before they reach production. Our Builder track starts from zero Rust experience and many developers find it rewarding once it clicks.',
+          'Rust has a steeper learning curve than JavaScript — but that strictness is exactly why it\'s the #1 language for smart contracts. The compiler catches bugs before they cost you money. Our Builder track starts from zero Rust and most developers say it "clicks" within the first few modules.',
       },
       {
         question: 'How does NEAR compare to Solana technically?',
@@ -236,17 +236,17 @@ export const FAQ_DATA: FAQCategory[] = [
       {
         question: 'What is Chain Abstraction?',
         answer:
-          'Chain Abstraction is NEAR\'s approach to making blockchain invisible to end users. Technologies like Intents, Chain Signatures, and Shade Agents let users interact across multiple blockchains from a single NEAR account — no network switching or multi-wallet juggling.',
+          'Chain Abstraction is NEAR\'s biggest bet — making blockchain invisible to users. One NEAR account can sign transactions on Bitcoin, Ethereum, Solana, and any other chain. No network switching, no multi-wallet juggling, no bridges. Users just do things; the chain figures out the rest.',
       },
       {
         question: 'What are Shade Agents?',
         answer:
-          'Shade Agents are NEAR\'s autonomous AI agents that can own wallets, sign transactions, and interact across chains. By combining chain abstraction with AI, they enable truly autonomous on-chain applications — agents that can manage funds, execute trades, and operate independently.',
+          'Shade Agents are autonomous AI agents that live on NEAR — they own wallets, sign transactions, and operate across chains without human intervention. Think AI that can manage funds, execute trades, and interact with any blockchain autonomously. It\'s where chain abstraction meets AI, and it\'s only possible on NEAR.',
       },
       {
         question: 'What is Nightshade Sharding?',
         answer:
-          'Nightshade is NEAR\'s sharding approach that splits the network into parallel processing lanes. More users? Add more shards. It scales horizontally — like the internet itself — so throughput grows with demand instead of hitting a ceiling.',
+          'Nightshade splits NEAR into parallel processing lanes that scale with demand — more users means more shards, not slower transactions. While other chains hit throughput ceilings, NEAR scales horizontally, like the internet itself.',
       },
       {
         question: 'What are Chain Signatures?',
@@ -256,7 +256,7 @@ export const FAQ_DATA: FAQCategory[] = [
       {
         question: 'What are Intents on NEAR?',
         answer:
-          'Intents let users express what they want to do, not how to do it. You declare your desired outcome and intent relayers handle the execution — enabling gasless transactions, cross-chain operations, and seamless user experiences without manual bridging or gas management.',
+          'Intents let you say what you want — "swap token A for token B" — without caring how it happens. Solvers compete to fulfill your intent across chains, finding the best route automatically. No manual bridging, no gas management, no thinking about which chain you\'re on.',
       },
       {
         question: 'What is NEAR Data Availability (DA)?',
