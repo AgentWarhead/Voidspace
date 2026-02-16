@@ -885,18 +885,18 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
         <GridPattern className="opacity-10" />
 
         {/* Header */}
-        <div className="relative text-center py-8">
-          <motion.div {...fadeUp(0)} className="flex items-center justify-center gap-3 mb-4">
-            <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.4)] animate-[constellationPulse_3s_ease-in-out_infinite]">
-              <Network className="w-7 h-7 text-white" />
+        <div className="relative text-center py-6 sm:py-8 px-4">
+          <motion.div {...fadeUp(0)} className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.4)] animate-[constellationPulse_3s_ease-in-out_infinite]">
+              <Network className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
-            <GradientText as="h1" animated className="text-3xl font-bold">
+            <GradientText as="h1" animated className="text-2xl sm:text-3xl font-bold">
               Constellation Mapping
             </GradientText>
           </motion.div>
-          <motion.p {...fadeUp(0.2)} className="text-text-secondary text-lg max-w-2xl mx-auto mt-3">
+          <motion.p {...fadeUp(0.2)} className="text-text-secondary text-sm sm:text-lg max-w-2xl mx-auto mt-2 sm:mt-3">
             Trace the invisible threads connecting NEAR&apos;s biggest players.
           </motion.p>
         </div>
@@ -906,7 +906,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
           {...fadeUp(0.3)}
           ref={glassCardRef}
           onMouseMove={handleCardMouseMove}
-          className="relative max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl p-6 overflow-hidden"
+          className="relative max-w-4xl mx-4 sm:mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl p-4 sm:p-6 overflow-hidden"
         >
           {/* Top edge highlight */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
@@ -936,7 +936,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               onClick={() => handleSearch()}
               disabled={loading || !address.trim()}
               variant="primary"
-              className="w-full py-3 text-base font-semibold bg-gradient-to-r from-purple-500 to-cyan-500 shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 border-0"
+              className="w-full py-3 min-h-[48px] text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-500 to-cyan-500 shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] active:scale-[0.98] transition-all duration-300 border-0"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -954,27 +954,27 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             {/* Wallet Suggestions — Unified */}
             <div className="space-y-3 pt-2">
               {/* Featured */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="text-xs text-text-muted shrink-0">🌟 Featured:</span>
                 {EXAMPLE_WALLETS.map(({ id, label }) => (
                   <button
                     key={id}
                     onClick={() => handleSearch(id)}
-                    className="px-2.5 py-1 text-xs font-mono rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 hover:border-purple-500/40 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)] hover:scale-105 transition-all duration-200"
+                    className="px-2.5 py-2 min-h-[44px] flex items-center text-xs font-mono rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 hover:border-purple-500/40 hover:shadow-[0_0_10px_rgba(139,92,246,0.15)] hover:scale-105 active:scale-95 transition-all duration-200"
                   >
-                    {id} <span className="text-purple-400/60 ml-1">— {label}</span>
+                    {id} <span className="text-purple-400/60 ml-1 hidden sm:inline">— {label}</span>
                   </button>
                 ))}
               </div>
 
               {/* Popular */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="text-xs text-text-muted shrink-0">🔥 Popular:</span>
                 {POPULAR_WALLETS.map(w => (
                   <button
                     key={w}
                     onClick={() => handleSearch(w)}
-                    className="px-2 py-0.5 text-xs font-mono rounded bg-amber-500/10 border border-amber-500/20 text-amber-300/80 hover:border-amber-500/40 hover:shadow-[0_0_10px_rgba(245,158,11,0.15)] hover:scale-105 transition-all duration-200"
+                    className="px-2.5 py-2 min-h-[44px] flex items-center text-xs font-mono rounded bg-amber-500/10 border border-amber-500/20 text-amber-300/80 hover:border-amber-500/40 hover:shadow-[0_0_10px_rgba(245,158,11,0.15)] hover:scale-105 active:scale-95 transition-all duration-200"
                   >
                     {w}
                   </button>
@@ -983,13 +983,13 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
 
               {/* Recent */}
               {recentWallets.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <span className="text-xs text-text-muted shrink-0">🕐 Recent:</span>
                   {recentWallets.map(w => (
                     <button
                       key={w}
                       onClick={() => handleSearch(w)}
-                      className="px-2 py-0.5 text-xs font-mono rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300/80 hover:border-cyan-500/40 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] hover:scale-105 transition-all duration-200"
+                      className="px-2.5 py-2 min-h-[44px] flex items-center text-xs font-mono rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300/80 hover:border-cyan-500/40 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] hover:scale-105 active:scale-95 transition-all duration-200"
                     >
                       {w}
                     </button>
@@ -1048,15 +1048,15 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
 
       {/* Time Range + Value Filter */}
       {constellation && (
-        <div className="max-w-4xl mx-auto flex flex-wrap items-center gap-4 px-4">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4 px-4">
           {/* Period selector */}
-          <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1 overflow-x-auto scrollbar-none w-full sm:w-auto">
             {PERIOD_OPTIONS.map(opt => (
               <button
                 key={opt.value}
                 onClick={() => { setPeriod(opt.value); }}
                 className={cn(
-                  'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+                  'px-3 py-2 min-h-[44px] text-xs font-medium rounded-md transition-colors active:scale-95 shrink-0',
                   period === opt.value
                     ? 'bg-near-green/20 text-near-green border border-near-green/30'
                     : 'text-text-muted hover:text-text-secondary'
@@ -1069,7 +1069,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               <Button
                 variant="primary"
                 size="sm"
-                className="ml-2 text-xs px-3"
+                className="ml-2 text-xs px-3 min-h-[44px] shrink-0"
                 onClick={() => handleSearch()}
                 disabled={loading}
               >
@@ -1079,7 +1079,7 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
           </div>
 
           {/* Value filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <label className="text-xs text-text-muted whitespace-nowrap">Min value:</label>
             <input
               type="range"
@@ -1088,9 +1088,9 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               step={0.1}
               value={minValue}
               onChange={e => setMinValue(parseFloat(e.target.value))}
-              className="w-24 accent-purple-500"
+              className="flex-1 sm:w-24 accent-purple-500 min-h-[44px]"
             />
-            <span className="text-xs text-text-secondary font-mono w-24">{formatNear(minValue)}</span>
+            <span className="text-xs text-text-secondary font-mono w-24 shrink-0">{formatNear(minValue)}</span>
           </div>
         </div>
       )}
@@ -1106,14 +1106,14 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
 
       {/* Constellation Visualization */}
       {constellation && (
-        <div className="mx-4 mb-4">
+        <div className="mx-2 sm:mx-4 mb-4">
           <div
             ref={cardRef}
             className={cn(
               'relative overflow-hidden rounded-xl border border-border bg-surface/50',
               isFullscreen && 'fixed inset-0 z-50 rounded-none'
             )}
-            style={isFullscreen ? { width: '100vw', height: '100vh' } : { height: '600px', minHeight: '500px', maxHeight: '70vh' }}
+            style={isFullscreen ? { width: '100vw', height: '100vh' } : { height: 'min(600px, 70vh)', minHeight: '350px' }}
           >
             {/* Controls */}
             <ConstellationControls
@@ -1126,19 +1126,19 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
             />
 
             {/* Stats */}
-            <div className="absolute top-4 left-4 z-10 space-y-2">
-              <Badge variant="glass" className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-white" />
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 space-y-1.5 sm:space-y-2">
+              <Badge variant="glass" className="flex items-center gap-1.5 sm:gap-2 text-xs">
+                <div className="w-2 h-2 rounded-full bg-white shrink-0" />
                 {constellation.nodes.length} Nodes
               </Badge>
-              <Badge variant="glass" className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <Badge variant="glass" className="flex items-center gap-1.5 sm:gap-2 text-xs">
+                <div className="w-2 h-2 rounded-full bg-gray-400 shrink-0" />
                 {constellation.edges.length} Connections
               </Badge>
             </div>
 
             {/* Issue 4: Interactive Legend/Filter Pills */}
-            <div className="absolute bottom-4 left-4 z-10 space-y-2">
+            <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-10 space-y-1.5 sm:space-y-2">
               {([
                 { type: 'wallet' as NodeType, label: 'Wallets', color: 'bg-purple-500', dotColor: '#8B5CF6' },
                 { type: 'contract' as NodeType, label: 'Smart Contracts', color: 'bg-cyan-500', dotColor: '#06B6D4' },
@@ -1151,8 +1151,8 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
                     key={type}
                     onClick={() => toggleTypeFilter(type)}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 cursor-pointer',
-                      'hover:scale-105 hover:brightness-110',
+                      'px-2.5 sm:px-3 py-2 sm:py-1.5 min-h-[40px] rounded-lg border text-xs font-medium transition-all duration-200 cursor-pointer',
+                      'hover:scale-105 hover:brightness-110 active:scale-95',
                       isHidden
                         ? 'border-gray-600 bg-gray-800/40 text-gray-500 opacity-30'
                         : getTypeColor(type)
@@ -1180,8 +1180,8 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
                   Show All
                 </button>
               )}
-              {/* Arrow legend */}
-              <div className="px-3 py-1.5 rounded-lg border border-gray-600 bg-gray-800/40 text-xs text-gray-300 space-y-1">
+              {/* Arrow legend — hidden on very small screens */}
+              <div className="hidden sm:block px-3 py-1.5 rounded-lg border border-gray-600 bg-gray-800/40 text-xs text-gray-300 space-y-1">
                 <div className="flex items-center gap-2"><span className="text-green-400">→</span> Inflow</div>
                 <div className="flex items-center gap-2"><span className="text-orange-400">→</span> Outflow</div>
               </div>
@@ -1202,10 +1202,10 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               containerHeight={containerRef.current?.offsetHeight || 600}
             />
 
-            {/* Tooltip */}
+            {/* Tooltip — hidden on touch devices (use context menu instead) */}
             {tooltip && (
               <div
-                className="fixed z-50 p-3 bg-black/90 border border-gray-600 rounded-lg shadow-xl pointer-events-none backdrop-blur-sm max-w-xs"
+                className="fixed z-50 p-3 bg-black/90 border border-gray-600 rounded-lg shadow-xl pointer-events-none backdrop-blur-sm max-w-[calc(100vw-2rem)] sm:max-w-xs hidden sm:block"
                 style={{
                   left: Math.min(tooltip.x + 10, (typeof window !== 'undefined' ? window.innerWidth : 9999) - 320),
                   top: tooltip.y - 10,

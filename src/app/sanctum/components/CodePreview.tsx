@@ -114,7 +114,7 @@ export function CodePreview({ code }: CodePreviewProps) {
 
       {/* Code */}
       <div className="flex-1 overflow-auto">
-        <pre className="p-4 text-sm font-mono leading-relaxed">
+        <pre className="p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed overflow-x-auto">
           <code 
             className="text-text-primary"
             dangerouslySetInnerHTML={{ __html: highlightRust(code) }}

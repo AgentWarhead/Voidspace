@@ -29,6 +29,7 @@ export function WebappSession({
   const [sessionTime, setSessionTime] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [activePanel, setActivePanel] = useState<'chat' | 'preview'>('chat');
 
   // Track session time
   useState(() => {

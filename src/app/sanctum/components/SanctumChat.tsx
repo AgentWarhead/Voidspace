@@ -696,7 +696,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       )}
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] ${message.role === 'user' ? 'order-2' : ''}`}>

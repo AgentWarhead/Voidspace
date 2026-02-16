@@ -44,42 +44,34 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
     const status = getActivityStatus(p.last_github_commit);
     return status === 'abandoned';
   });
+
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6 sm:space-y-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumb">
-        <div className="flex items-center gap-2 text-sm">
-          <Link
-            href="/"
-            className="text-text-muted hover:text-text-primary transition-colors"
-          >
+      {/* Breadcrumbs — truncated on mobile */}
+      <nav aria-label="Breadcrumb" className="overflow-x-auto scrollbar-none -mx-1 px-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm whitespace-nowrap">
+          <Link href="/" className="text-text-muted hover:text-text-primary transition-colors min-h-[44px] sm:min-h-0 flex items-center active:scale-95 touch-manipulation">
             Home
           </Link>
-          <ChevronRight className="w-3 h-3 text-text-muted" />
-          <Link
-            href="/opportunities"
-            className="text-text-muted hover:text-text-primary transition-colors"
-          >
+          <ChevronRight className="w-3 h-3 text-text-muted shrink-0" />
+          <Link href="/opportunities" className="text-text-muted hover:text-text-primary transition-colors min-h-[44px] sm:min-h-0 flex items-center active:scale-95 touch-manipulation">
             Voids
           </Link>
-          <ChevronRight className="w-3 h-3 text-text-muted" />
+          <ChevronRight className="w-3 h-3 text-text-muted shrink-0" />
           <Link
             href={`/opportunities?category=${category.slug}`}
-            className="text-text-muted hover:text-text-primary transition-colors"
+            className="text-text-muted hover:text-text-primary transition-colors min-h-[44px] sm:min-h-0 flex items-center active:scale-95 touch-manipulation"
           >
             {category.name}
           </Link>
-          <ChevronRight className="w-3 h-3 text-text-muted" />
-          <span className="text-text-primary">
-            {opportunity.title.length > 40 
-              ? `${opportunity.title.substring(0, 40)}...` 
-              : opportunity.title
-            }
+          <ChevronRight className="w-3 h-3 text-text-muted shrink-0" />
+          <span className="text-text-primary truncate max-w-[150px] sm:max-w-[300px]">
+            {opportunity.title}
           </span>
         </div>
       </nav>
@@ -88,21 +80,17 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
       <div className="relative overflow-hidden rounded-xl">
         <div
           className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(0,236,151,0.06) 0%, transparent 70%)',
-          }}
+          style={{ background: 'radial-gradient(ellipse at center, rgba(0,236,151,0.06) 0%, transparent 70%)' }}
         />
         <GridPattern className="opacity-20" />
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, transparent 40%, #0a0a0a 100%)',
-          }}
+          style={{ background: 'radial-gradient(ellipse at center, transparent 40%, #0a0a0a 100%)' }}
         />
-        <div className="relative z-10 p-6 lg:p-8">
-          <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-            <div className="flex-1 space-y-3">
-              <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-6">
+            <div className="flex-1 space-y-2 sm:space-y-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <Badge variant="default">{category.name}</Badge>
                 <span className="flex items-center">
                   <Badge variant="difficulty" difficulty={opportunity.difficulty}>
@@ -122,11 +110,11 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                 </span>
                 <VoidTimer createdAt={opportunity.created_at} size="md" />
               </div>
-              <GradientText as="h1" className="text-2xl font-bold">
+              <GradientText as="h1" className="text-xl sm:text-2xl font-bold">
                 {opportunity.title}
               </GradientText>
               {opportunity.description && (
-                <p className="text-text-secondary">{opportunity.description}</p>
+                <p className="text-sm sm:text-base text-text-secondary">{opportunity.description}</p>
               )}
             </div>
 
@@ -141,11 +129,11 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
       {/* Void Analysis */}
       <ScrollReveal delay={0.05}>
         <SectionHeader title="Void Analysis" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card variant="glass" padding="lg" className="relative overflow-hidden">
             <ScanLine />
-            <div className="relative z-10 space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="relative z-10 space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <p className="text-xs text-text-muted uppercase tracking-wide font-mono flex items-center">
                     Void Score
@@ -163,9 +151,9 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                         <p>{HELP_CONTENT.demandScore.description}</p>
                       </InfoTooltip>
                     </p>
-                    <p className="text-3xl font-bold text-text-primary font-mono flex items-center gap-2 mt-1">
-                      <TrendingUp className="w-5 h-5 text-near-green" />
-                      <AnimatedCounter value={Math.round(opportunity.demand_score)} className="text-3xl font-bold text-text-primary" />
+                    <p className="text-2xl sm:text-3xl font-bold text-text-primary font-mono flex items-center gap-2 mt-1">
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-near-green" />
+                      <AnimatedCounter value={Math.round(opportunity.demand_score)} className="text-2xl sm:text-3xl font-bold text-text-primary" />
                     </p>
                   </div>
                 )}
@@ -189,7 +177,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         <ScrollReveal delay={0.1}>
           <SectionHeader title="Why This Void Exists" badge="AI ANALYZED" />
           <Card variant="glass" padding="lg">
-            <p className="text-text-secondary leading-relaxed">{opportunity.reasoning}</p>
+            <p className="text-sm sm:text-base text-text-secondary leading-relaxed">{opportunity.reasoning}</p>
           </Card>
         </ScrollReveal>
       )}
@@ -199,12 +187,12 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         <ScrollReveal delay={0.15}>
           <SectionHeader title="Suggested Features" count={opportunity.suggested_features.length} />
           <Card variant="glass" padding="lg">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {opportunity.suggested_features.map((feature, index) => (
                 <GlowCard key={index} padding="sm">
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-near-green mt-0.5 shrink-0" />
-                    <span className="text-sm text-text-primary">{feature}</span>
+                    <span className="text-xs sm:text-sm text-text-primary">{feature}</span>
                   </div>
                 </GlowCard>
               ))}
@@ -213,7 +201,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         </ScrollReveal>
       )}
 
-      {/* Void Brief — After analysis so users are primed to act */}
+      {/* Void Brief */}
       <ScrollReveal delay={0.18}>
         <div className="flex items-center gap-1" data-brief-section>
           <SectionHeader title="Void Brief" badge="POWERED BY CLAUDE AI" />
@@ -235,11 +223,11 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
             {allProjects.length > 0 ? (
               <div className="space-y-4">
                 {/* Summary stats */}
-                <div className="flex items-center gap-4 flex-wrap text-sm text-text-muted">
-                  <span>{activeCompetitors.length} active / {inactiveCompetitors.length} inactive out of {allProjects.length} total</span>
-                  <span className="text-text-muted/50">|</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-text-muted">
+                  <span>{activeCompetitors.length} active / {inactiveCompetitors.length} inactive of {allProjects.length}</span>
+                  <span className="hidden sm:inline text-text-muted/50">|</span>
                   <span>{formatCurrency(allProjects.reduce((s, p) => s + (Number(p.tvl_usd) || 0), 0))} TVL</span>
-                  <span className="text-text-muted/50">|</span>
+                  <span className="hidden sm:inline text-text-muted/50">|</span>
                   <span>{formatNumber(allProjects.reduce((s, p) => s + (p.github_stars || 0), 0))} stars</span>
                 </div>
 
@@ -251,12 +239,12 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                   </div>
                 )}
 
-                {/* Inactive/Abandoned — collapsed by default */}
+                {/* Inactive/Abandoned */}
                 {inactiveCompetitors.length > 0 && (
                   <div>
                     <button
                       onClick={() => setShowInactive(!showInactive)}
-                      className="flex items-center gap-1 text-xs uppercase tracking-wide text-text-muted font-mono mb-2 hover:text-text-secondary transition-colors"
+                      className="flex items-center gap-1 text-xs uppercase tracking-wide text-text-muted font-mono mb-2 hover:text-text-secondary transition-colors min-h-[44px] active:scale-95 touch-manipulation"
                     >
                       <ChevronDown className={`w-3 h-3 transition-transform ${showInactive ? 'rotate-0' : '-rotate-90'}`} />
                       Inactive / Abandoned ({inactiveCompetitors.length})
@@ -273,7 +261,6 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </div>
         </Card>
       </ScrollReveal>
-
     </motion.div>
   );
 }

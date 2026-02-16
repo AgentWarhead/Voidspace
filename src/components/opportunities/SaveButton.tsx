@@ -21,8 +21,7 @@ export function SaveButton({ opportunityId, size = 'md' }: SaveButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const saved = isSaved(opportunityId);
-  const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
-  const padding = size === 'sm' ? 'p-1.5' : 'p-2';
+  const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -56,8 +55,8 @@ export function SaveButton({ opportunityId, size = 'md' }: SaveButtonProps) {
       onClick={handleClick}
       disabled={loading}
       className={cn(
-        padding,
-        'rounded-lg transition-all',
+        'min-w-[44px] min-h-[44px] flex items-center justify-center',
+        'rounded-lg transition-all active:scale-90 touch-manipulation',
         saved
           ? 'text-red-400 hover:text-red-300 bg-red-400/10 hover:scale-110'
           : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover hover:scale-110',

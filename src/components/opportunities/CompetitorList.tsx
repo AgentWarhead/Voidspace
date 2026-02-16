@@ -31,25 +31,30 @@ export function CompetitorList({ projects }: { projects: Project[] }) {
         return (
           <div
             key={project.id}
-            className="flex items-center gap-4 px-4 py-3 border-l-2 border-transparent hover:border-near-green/50 hover:bg-surface-hover transition-colors"
+            className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 border-l-2 border-transparent hover:border-near-green/50 hover:bg-surface-hover transition-colors"
           >
             <span className="shrink-0 text-sm" title={status}>{activityIndicator(status)}</span>
-            <Link href={`/projects/${project.slug}`} className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate hover:text-near-green transition-colors">{project.name}</p>
+            <Link
+              href={`/projects/${project.slug}`}
+              className="flex-1 min-w-0 py-1 active:scale-[0.98] touch-manipulation"
+            >
+              <p className="text-sm font-medium text-text-primary truncate hover:text-near-green transition-colors">
+                {project.name}
+              </p>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 {(project.github_stars ?? 0) > 0 && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted font-mono">
-                    <Star className="w-2.5 h-2.5 text-warning" /> {formatNumber(project.github_stars)}
+                  <span className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs text-text-muted font-mono">
+                    <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-warning" /> {formatNumber(project.github_stars)}
                   </span>
                 )}
                 {Number(project.tvl_usd) > 0 && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted font-mono">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs text-text-muted font-mono">
                     {formatCurrency(Number(project.tvl_usd))} TVL
                   </span>
                 )}
                 {project.last_github_commit && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] text-text-muted">
-                    <Clock className="w-2.5 h-2.5" /> {timeAgo(project.last_github_commit)}
+                  <span className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs text-text-muted">
+                    <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {timeAgo(project.last_github_commit)}
                   </span>
                 )}
               </div>
@@ -59,7 +64,7 @@ export function CompetitorList({ projects }: { projects: Project[] }) {
                 href={project.website_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-text-muted hover:text-near-green transition-colors shrink-0"
+                className="text-text-muted hover:text-near-green transition-colors shrink-0 p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95 touch-manipulation"
                 aria-label={`Visit ${project.name} website`}
               >
                 <ExternalLink className="w-4 h-4" />

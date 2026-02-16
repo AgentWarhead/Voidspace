@@ -357,7 +357,7 @@ function ModuleChecklist({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
               className={cn(
-                'flex items-center gap-3 px-4 py-2.5 rounded-lg border transition-colors',
+                'flex items-center gap-3 px-3 sm:px-4 py-3 sm:py-2.5 rounded-lg border transition-colors min-h-[44px]',
                 styles.moduleBg,
                 styles.moduleBorder,
                 styles.moduleHover
@@ -472,7 +472,7 @@ function TrackCard({ track }: { track: Track }) {
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg">{track.emoji}</span>
-              <h3 className="text-2xl font-bold text-text-primary">{track.title} Track</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-text-primary">{track.title} Track</h3>
             </div>
             <p className={cn('text-sm font-medium', styles.accent)}>{track.subtitle}</p>
           </div>
@@ -483,7 +483,7 @@ function TrackCard({ track }: { track: Track }) {
           </p>
 
           {/* Meta row: difficulty, time, modules */}
-          <div className="flex items-center gap-4 flex-wrap mb-5 text-sm">
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap mb-5 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
               <DifficultyDots level={track.difficulty} theme={track.theme} />
               <span className="text-text-muted">
@@ -515,7 +515,7 @@ function TrackCard({ track }: { track: Track }) {
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={cn(
-              'w-full flex items-center justify-center gap-2 py-3 rounded-xl border font-semibold text-sm transition-all mt-4',
+              'w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl border font-semibold text-sm transition-all mt-4 min-h-[44px]',
               'bg-surface-hover',
               styles.border,
               styles.accent,

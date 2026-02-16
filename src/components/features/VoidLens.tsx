@@ -439,8 +439,8 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
     });
 
     return (
-      <div className="flex justify-center">
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <div className="flex justify-center w-full max-w-[280px] mx-auto">
+        <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} className="max-w-[280px]">
           {gridPolygons}
           {axisLines}
           <path d={scorePolygonPath}
@@ -632,12 +632,12 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
               {/* Example Wallets Upgrade */}
               <div className="space-y-2">
                 <p className="text-xs text-text-muted">🐋 Notable Wallets:</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {EXAMPLE_WALLETS.map((example) => (
                     <button
                       key={example}
                       onClick={() => handleAnalyze(example)}
-                      className="text-xs px-2.5 py-1 bg-surface/50 border border-border rounded-full hover:border-near-green/40 hover:shadow-[0_0_10px_rgba(0,236,151,0.1)] hover:scale-105 cursor-pointer transition-all duration-200"
+                      className="text-xs px-2.5 py-2 min-h-[44px] flex items-center bg-surface/50 border border-border rounded-full hover:border-near-green/40 hover:shadow-[0_0_10px_rgba(0,236,151,0.1)] hover:scale-105 active:scale-95 cursor-pointer transition-all duration-200"
                     >
                       {example}
                     </button>
@@ -650,7 +650,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
                 onClick={() => handleAnalyze()}
                 disabled={loading || !address.trim()}
                 className={cn(
-                  "w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2",
+                  "w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.98]",
                   "bg-gradient-to-r from-near-green to-emerald-500 text-black",
                   "shadow-[0_0_20px_rgba(0,236,151,0.3)]",
                   "hover:shadow-[0_0_30px_rgba(0,236,151,0.5)] hover:brightness-110",
@@ -733,8 +733,8 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
           <Card variant="glass" glow hover className={cn("relative overflow-hidden")}>
             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", getScoreGradient(result.analysis?.score || 0))} />
             <div className="relative z-10">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 min-w-0">
                   {/* Score Circle */}
                   <div className="relative">
                     <svg width="120" height="120" className="-rotate-90">
@@ -753,8 +753,8 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
                     </div>
                   </div>
                   
-                  <div className="text-center sm:text-left">
-                    <h2 className="text-xl font-bold text-text-primary mb-1">
+                  <div className="text-center sm:text-left min-w-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-text-primary mb-1 break-all sm:break-normal">
                       {result.walletData?.account || result.address}
                     </h2>
                     <p className="text-text-secondary text-sm mb-3">{result.analysis?.activitySummary || ''}</p>
@@ -845,12 +845,12 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
 
               {/* Holdings Table — Full Width */}
               <Card>
-                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <Coins className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-3 sm:mb-4 flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-yellow-400 shrink-0" />
                   Token Holdings
                 </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                  <table className="w-full text-sm min-w-[480px]">
                     <thead>
                       <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                         <th className="text-left py-3 pr-4">Token</th>
@@ -1240,7 +1240,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
             <div className="flex justify-center">
               <a 
                 href={`/observatory?tool=constellation&address=${result.address}`}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-lg hover:bg-purple-500/30 transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-lg hover:bg-purple-500/30 active:scale-[0.97] transition-all text-sm"
               >
                 <Network className="w-4 h-4" />
                 View in Constellation Map

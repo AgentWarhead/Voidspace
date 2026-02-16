@@ -13,28 +13,24 @@ interface FeasibilitySnapshotProps {
 function getEstimates(opportunity: Opportunity) {
   const { difficulty, gap_score, category } = opportunity;
   
-  // MVP Time based on difficulty
   const mvpTime = {
     beginner: '2-4 weeks',
     intermediate: '4-8 weeks',
     advanced: '3-6 months',
   }[difficulty];
   
-  // Team size based on difficulty
   const teamSize = {
     beginner: 'Solo',
     intermediate: '2-3 people',
     advanced: '3-5+ people',
   }[difficulty];
   
-  // Grant potential based on gap_score
   const grantPotential = gap_score >= 80 
     ? '$25-50K+' 
     : gap_score >= 60 
     ? '$10-25K' 
     : '$5-10K';
   
-  // NEAR Stack based on category
   const categoryName = category?.name?.toLowerCase() || '';
   const nearStack = (() => {
     if (categoryName.includes('defi')) return 'NEAR SDK + Aurora';
@@ -43,12 +39,7 @@ function getEstimates(opportunity: Opportunity) {
     return 'NEAR SDK + BOS';
   })();
   
-  return {
-    mvpTime,
-    teamSize,
-    grantPotential,
-    nearStack,
-  };
+  return { mvpTime, teamSize, grantPotential, nearStack };
 }
 
 export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
@@ -56,26 +47,22 @@ export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
   const estimates = getEstimates(opportunity);
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation to detail page
+    e.stopPropagation();
     setIsOpen(true);
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-  };
+  const handleClose = () => setIsOpen(false);
 
   const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
+    if (e.target === e.currentTarget) handleClose();
   };
 
   return (
     <>
-      {/* Trigger button */}
+      {/* Trigger button — 44px min touch target */}
       <button
         onClick={handleClick}
-        className="p-1 rounded-full hover:bg-surface-hover transition-colors group/snap"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-surface-hover transition-colors group/snap active:scale-90 touch-manipulation"
         title="Quick feasibility check"
       >
         <Zap className="w-4 h-4 text-text-muted group-hover/snap:text-accent-cyan transition-colors" />
@@ -85,7 +72,7 @@ export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
       <AnimatePresence>
         {isOpen && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
             onClick={handleOverlayClick}
           >
             {/* Backdrop */}
@@ -102,7 +89,7 @@ export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ type: 'spring', duration: 0.3 }}
-              className="relative bg-surface border border-border rounded-xl p-6 max-w-sm w-full shadow-2xl"
+              className="relative bg-surface border border-border rounded-xl p-5 sm:p-6 max-w-sm w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -111,11 +98,11 @@ export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
                   <div className="w-8 h-8 rounded-lg bg-accent-cyan/10 flex items-center justify-center">
                     <Zap className="w-4 h-4 text-accent-cyan" />
                   </div>
-                  <h3 className="font-semibold text-text-primary">Quick Check</h3>
+                  <h3 className="font-semibold text-text-primary text-sm sm:text-base">Quick Check</h3>
                 </div>
                 <button
                   onClick={handleClose}
-                  className="p-1 rounded-full hover:bg-surface-hover transition-colors"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-surface-hover transition-colors active:scale-90 touch-manipulation"
                 >
                   <X className="w-4 h-4 text-text-muted" />
                 </button>
@@ -123,53 +110,14 @@ export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
 
               {/* Estimates */}
               <div className="space-y-4">
-                {/* MVP Time */}
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-md bg-surface-hover flex items-center justify-center">
-                    <Clock className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-text-muted">Estimated MVP Time</p>
-                    <p className="font-medium text-text-primary">{estimates.mvpTime}</p>
-                  </div>
-                </div>
-
-                {/* Team Size */}
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-md bg-surface-hover flex items-center justify-center">
-                    <Users className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-text-muted">Team Size</p>
-                    <p className="font-medium text-text-primary">{estimates.teamSize}</p>
-                  </div>
-                </div>
-
-                {/* Grant Potential */}
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-md bg-surface-hover flex items-center justify-center">
-                    <DollarSign className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-text-muted">Grant Potential</p>
-                    <p className="font-medium text-near-green">{estimates.grantPotential}</p>
-                  </div>
-                </div>
-
-                {/* NEAR Stack */}
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-md bg-surface-secondary flex items-center justify-center">
-                    <Code2 className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-text-muted">NEAR Stack</p>
-                    <p className="font-medium text-text-primary">{estimates.nearStack}</p>
-                  </div>
-                </div>
+                <EstimateRow icon={Clock} label="Estimated MVP Time" value={estimates.mvpTime} />
+                <EstimateRow icon={Users} label="Team Size" value={estimates.teamSize} />
+                <EstimateRow icon={DollarSign} label="Grant Potential" value={estimates.grantPotential} valueClass="text-near-green" />
+                <EstimateRow icon={Code2} label="NEAR Stack" value={estimates.nearStack} />
               </div>
 
               {/* Footer */}
-              <div className="mt-6 pt-4 border-t border-border-secondary">
+              <div className="mt-5 sm:mt-6 pt-4 border-t border-border-secondary">
                 <p className="text-xs text-text-muted text-center">
                   Estimates based on difficulty level and market opportunity
                 </p>
@@ -179,5 +127,29 @@ export function FeasibilitySnapshot({ opportunity }: FeasibilitySnapshotProps) {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function EstimateRow({
+  icon: Icon,
+  label,
+  value,
+  valueClass = 'text-text-primary',
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string | undefined;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-7 h-7 sm:w-6 sm:h-6 rounded-md bg-surface-hover flex items-center justify-center shrink-0">
+        <Icon className="w-3.5 h-3.5 text-text-muted" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs sm:text-sm text-text-muted">{label}</p>
+        <p className={`font-medium text-sm sm:text-base ${valueClass}`}>{value}</p>
+      </div>
+    </div>
   );
 }

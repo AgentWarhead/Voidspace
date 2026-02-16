@@ -43,7 +43,7 @@ export function GapScoreIndicator({ score, size = 'md', showLabel = false }: Gap
   if (size === 'lg') {
     return (
       <div className="flex flex-col items-center gap-2">
-        <div className="relative w-24 h-24">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
             <circle
               cx="50"
@@ -68,13 +68,13 @@ export function GapScoreIndicator({ score, size = 'md', showLabel = false }: Gap
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold" style={{ color }}>
+            <span className="text-xl sm:text-2xl font-bold" style={{ color }}>
               {score}
             </span>
           </div>
         </div>
         {showLabel && (
-          <span className="text-sm text-text-secondary">{getScoreLabel(score)}</span>
+          <span className="text-xs sm:text-sm text-text-secondary">{getScoreLabel(score)}</span>
         )}
       </div>
     );

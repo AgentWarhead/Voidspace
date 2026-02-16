@@ -24,21 +24,14 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
   const competitors = getCompetitorsForCategory(categorySlug);
   const summary = getCategoryCompetitionSummary(categorySlug);
 
-  // Don't render if no competitors found
-  if (competitors.length === 0) {
-    return null;
-  }
+  if (competitors.length === 0) return null;
 
-  // Group competitors by chain for better organization
   const competitorsByChain = competitors.reduce((acc, competitor) => {
-    if (!acc[competitor.chain]) {
-      acc[competitor.chain] = [];
-    }
+    if (!acc[competitor.chain]) acc[competitor.chain] = [];
     acc[competitor.chain].push(competitor);
     return acc;
   }, {} as Record<string, CrossChainCompetitor[]>);
 
-  // Format TVL summary
   const formatTVLSummary = (totalTVL: number) => {
     if (totalTVL >= 1e9) return `$${(totalTVL / 1e9).toFixed(1)}B`;
     if (totalTVL >= 1e6) return `$${(totalTVL / 1e6).toFixed(0)}M`;
@@ -50,59 +43,59 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
     <ScrollReveal delay={0.25}>
       <Card variant="glass" padding="lg" className={`relative overflow-hidden ${className}`}>
         <ScanLine />
-        <div className="relative z-10 space-y-4">
+        <div className="relative z-10 space-y-3 sm:space-y-4">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <GradientText 
               as="h3" 
-              className="text-xl font-bold flex items-center gap-2"
+              className="text-lg sm:text-xl font-bold flex items-center gap-2"
             >
               🏁 Cross-Chain Competition
             </GradientText>
-            <Badge variant="default" className="text-xs">
+            <Badge variant="default" className="text-xs shrink-0">
               {competitors.length} protocols
             </Badge>
           </div>
 
           {/* Summary Banner */}
           <motion.div 
-            className="p-4 rounded-lg border border-border/50 bg-surface/30"
+            className="p-3 sm:p-4 rounded-lg border border-border/50 bg-surface/30"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-text-secondary">
               {summary.topChains.map((item, index) => (
                 <span key={item.chain} className="flex items-center gap-1">
                   <span style={{ color: CHAIN_COLORS[item.chain as keyof typeof CHAIN_COLORS] }}>
                     {CHAIN_EMOJIS[item.chain as keyof typeof CHAIN_EMOJIS]} {item.chain}
                   </span>
                   <span className="text-text-primary font-medium">
-                    {item.count} protocol{item.count !== 1 ? 's' : ''}
+                    {item.count}
                   </span>
                   {index < summary.topChains.length - 1 && (
-                    <span className="text-text-muted/50 mx-1">•</span>
+                    <span className="text-text-muted/50 mx-0.5 sm:mx-1">•</span>
                   )}
                 </span>
               ))}
               <span className="text-text-muted/50">•</span>
               <span className="flex items-center gap-1">
                 <TrendingUp className="w-3 h-3 text-near-green" />
-                {formatTVLSummary(summary.totalTVL)} combined TVL
+                {formatTVLSummary(summary.totalTVL)} TVL
               </span>
             </div>
             
             {/* NEAR comparison */}
-            <div className="mt-3 pt-3 border-t border-border/30">
+            <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-border/30">
               {nearProjectCount === 0 ? (
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-near-green" />
-                  <span className="text-near-green font-bold">
+                  <Target className="w-4 h-4 text-near-green shrink-0" />
+                  <span className="text-near-green font-bold text-xs sm:text-sm">
                     NEAR has ZERO — this void is wide open 🎯
                   </span>
                 </div>
               ) : (
-                <div className="text-sm text-text-secondary">
+                <div className="text-xs sm:text-sm text-text-secondary">
                   <span className="text-near-green font-medium">NEAR</span> has{' '}
                   <span className="text-text-primary font-bold">{nearProjectCount}</span>{' '}
                   {nearProjectCount === 1 ? 'protocol' : 'protocols'} in this space
@@ -111,7 +104,7 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
             </div>
           </motion.div>
 
-          {/* Competitors by Chain — Solana first, then alphabetical */}
+          {/* Competitors by Chain */}
           <div className="space-y-3">
             {Object.entries(competitorsByChain)
               .sort(([a], [b]) => {
@@ -130,11 +123,11 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
                 {/* Chain header */}
                 <div className="flex items-center gap-2">
                   <div 
-                    className="w-2 h-2 rounded-full"
+                    className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: CHAIN_COLORS[chain as keyof typeof CHAIN_COLORS] }}
                   />
                   <span 
-                    className="text-sm font-medium"
+                    className="text-xs sm:text-sm font-medium"
                     style={{ color: CHAIN_COLORS[chain as keyof typeof CHAIN_COLORS] }}
                   >
                     {CHAIN_EMOJIS[chain as keyof typeof CHAIN_EMOJIS]} {chain}
@@ -145,29 +138,29 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
                 </div>
 
                 {/* Competitors list */}
-                <div className="pl-4 space-y-2">
+                <div className="pl-3 sm:pl-4 space-y-2">
                   {chainCompetitors.map((competitor) => (
                     <motion.div
                       key={`${competitor.chain}-${competitor.name}`}
-                      className="flex items-center justify-between p-3 rounded-lg bg-surface/20 border border-border/30 hover:border-border/60 transition-colors group"
+                      className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-surface/20 border border-border/30 hover:border-border/60 transition-colors group active:scale-[0.99] touch-manipulation"
                       whileHover={{ scale: 1.01 }}
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-text-primary group-hover:text-near-green transition-colors">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs sm:text-sm font-medium text-text-primary group-hover:text-near-green transition-colors">
                             {competitor.name}
                           </span>
                           {competitor.tvl && (
-                            <Badge variant="default" className="text-xs font-mono">
+                            <Badge variant="default" className="text-[10px] sm:text-xs font-mono">
                               {competitor.tvl}
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-text-muted mt-1 line-clamp-2">
+                        <p className="text-[10px] sm:text-xs text-text-muted mt-1 line-clamp-2">
                           {competitor.description}
                         </p>
                       </div>
-                      <ExternalLink className="w-3 h-3 text-text-muted group-hover:text-near-green transition-colors shrink-0" />
+                      <ExternalLink className="w-3 h-3 text-text-muted group-hover:text-near-green transition-colors shrink-0 ml-2" />
                     </motion.div>
                   ))}
                 </div>
@@ -177,7 +170,7 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
 
           {/* Footer insight */}
           <motion.div
-            className="text-xs text-text-muted italic pt-2 border-t border-border/30"
+            className="text-[10px] sm:text-xs text-text-muted italic pt-2 border-t border-border/30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}

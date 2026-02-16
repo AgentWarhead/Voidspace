@@ -50,7 +50,7 @@ export default async function OpportunityDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen">
-      <Container size="lg" className="py-8">
+      <Container size="lg" className="py-4 sm:py-6 md:py-8 px-4 sm:px-6">
         <OpportunityDetail
           opportunity={opportunity}
           relatedProjects={relatedProjects}

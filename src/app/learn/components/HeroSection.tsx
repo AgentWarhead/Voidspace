@@ -234,12 +234,12 @@ function StatItem({ value, prefix, suffix, label, delay }: StatItemProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
     >
-      <div className="text-3xl md:text-4xl font-bold text-near-green mb-1">
+      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-near-green mb-1">
         {prefix}
         <AnimatedCounter value={value} duration={2500} />
         {suffix}
       </div>
-      <div className="text-sm text-text-muted">{label}</div>
+      <div className="text-xs sm:text-sm text-text-muted">{label}</div>
     </motion.div>
   );
 }
@@ -333,7 +333,7 @@ export function HeroSection() {
               <GradientText
                 as="h1"
                 animated
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 leading-[1.1]"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight mb-6 leading-[1.1]"
               >
                 From Zero to
                 <br />
@@ -392,8 +392,8 @@ export function HeroSection() {
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 {/* Glass card */}
-                <div className="relative bg-surface/70 backdrop-blur-xl border border-white/[0.06] rounded-2xl px-6 py-8 shadow-2xl">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:divide-x sm:divide-border">
+                <div className="relative bg-surface/70 backdrop-blur-xl border border-white/[0.06] rounded-2xl px-4 sm:px-6 py-6 sm:py-8 shadow-2xl">
+                  <div className="grid grid-cols-3 gap-4 sm:gap-8 sm:divide-x sm:divide-border">
                     <StatItem
                       value={78}
                       suffix="+"

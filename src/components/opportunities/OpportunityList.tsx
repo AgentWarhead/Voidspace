@@ -49,7 +49,7 @@ export function OpportunityList({
   return (
     <div className="space-y-6">
       {/* Stagger-animated grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {opportunities.map((opp, i) => (
           <div
             key={opp.id}
@@ -66,36 +66,38 @@ export function OpportunityList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 pt-2">
+        <div className="flex items-center justify-center gap-2 sm:gap-4 pt-2">
           {page > 1 ? (
             <Link
               href={buildPageUrl(page - 1, searchParams)}
-              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
+              className="flex items-center gap-1 px-4 py-3 sm:py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors active:scale-95 touch-manipulation min-h-[44px]"
             >
               <ChevronLeft className="w-4 h-4" />
-              Previous
+              <span className="hidden sm:inline">Previous</span>
+              <span className="sm:hidden">Prev</span>
             </Link>
           ) : (
-            <span className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/30 border border-border/50 text-text-muted cursor-not-allowed">
+            <span className="flex items-center gap-1 px-4 py-3 sm:py-2 text-sm rounded-lg bg-surface/30 border border-border/50 text-text-muted cursor-not-allowed min-h-[44px]">
               <ChevronLeft className="w-4 h-4" />
-              Previous
+              <span className="hidden sm:inline">Previous</span>
+              <span className="sm:hidden">Prev</span>
             </span>
           )}
 
           <span className="text-xs text-text-secondary font-mono">
-            Page {page} of {totalPages}
+            {page}/{totalPages}
           </span>
 
           {page < totalPages ? (
             <Link
               href={buildPageUrl(page + 1, searchParams)}
-              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors"
+              className="flex items-center gap-1 px-4 py-3 sm:py-2 text-sm rounded-lg bg-surface border border-border hover:border-near-green/30 text-text-secondary hover:text-text-primary transition-colors active:scale-95 touch-manipulation min-h-[44px]"
             >
               Next
               <ChevronRight className="w-4 h-4" />
             </Link>
           ) : (
-            <span className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-surface/30 border border-border/50 text-text-muted cursor-not-allowed">
+            <span className="flex items-center gap-1 px-4 py-3 sm:py-2 text-sm rounded-lg bg-surface/30 border border-border/50 text-text-muted cursor-not-allowed min-h-[44px]">
               Next
               <ChevronRight className="w-4 h-4" />
             </span>

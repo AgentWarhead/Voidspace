@@ -47,7 +47,7 @@ export function PersonaSelector({ currentPersona, onSelect, disabled }: PersonaS
           />
           
           {/* Menu */}
-          <div className="absolute top-full left-0 mt-2 w-72 bg-surface border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+          <div className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-surface border border-border rounded-xl shadow-xl z-50 overflow-hidden">
             <div className="p-2 border-b border-border">
               <div className="text-xs text-text-muted uppercase tracking-wider px-2">
                 Choose Your Expert
@@ -62,7 +62,7 @@ export function PersonaSelector({ currentPersona, onSelect, disabled }: PersonaS
                     onSelect(persona);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all hover:bg-surface-hover ${
+                  className={`w-full flex items-start gap-3 p-3 min-h-[44px] rounded-lg transition-all hover:bg-surface-hover ${
                     currentPersona.id === persona.id ? persona.bgColor : ''
                   }`}
                 >

@@ -56,7 +56,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-10 sm:py-14">
+      <section className="relative overflow-hidden py-8 sm:py-10 md:py-14">
         <div
           className="absolute inset-0"
           style={{
@@ -70,17 +70,17 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
             background: 'radial-gradient(ellipse at center, transparent 40%, #0a0a0a 100%)',
           }}
         />
-        <Container size="xl" className="relative z-10 text-center">
-          <GradientText as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight">
+        <Container size="xl" className="relative z-10 text-center px-4 sm:px-6">
+          <GradientText as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             Explore the Voids
           </GradientText>
           <p className="text-text-secondary mt-2 max-w-lg mx-auto text-sm sm:text-base">
             Ecosystem gaps waiting to be filled. Higher scores = deeper opportunities.
           </p>
 
-          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">
-            <Sparkles className="w-4 h-4 text-near-green animate-pulse" />
-            <span className="text-sm text-text-secondary">
+          <div className="mt-3 inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">
+            <Sparkles className="w-4 h-4 text-near-green animate-pulse shrink-0" />
+            <span className="text-xs sm:text-sm text-text-secondary">
               Every void includes an AI-powered{' '}
               <span className="text-near-green font-medium">Build Plan</span>
             </span>
@@ -89,20 +89,20 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
           {/* Summary Stats */}
           <div className="flex items-center justify-center gap-6 sm:gap-10 mt-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-near-green font-mono">{totalCount}</p>
-              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Voids Detected</p>
+              <p className="text-xl sm:text-2xl font-bold text-near-green font-mono">{totalCount}</p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Voids Detected</p>
             </div>
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
             <div className="text-center">
-              <p className="text-2xl font-bold text-text-primary font-mono">{categories.length}</p>
-              <p className="text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Categories</p>
+              <p className="text-xl sm:text-2xl font-bold text-text-primary font-mono">{categories.length}</p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Categories</p>
             </div>
           </div>
         </Container>
       </section>
 
       {/* Filters + Voids Grid */}
-      <Container size="xl" className="py-6 space-y-6">
+      <Container size="xl" className="py-4 sm:py-6 space-y-4 sm:space-y-6 px-4 sm:px-6">
         <Card variant="glass" padding="md">
           <Suspense fallback={<Skeleton variant="rectangular" height="40px" />}>
             <OpportunityFilters categories={categories} total={totalCount} filteredTotal={filteredTotal} />
@@ -123,16 +123,19 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
       </Container>
 
       {/* Custom Brief Section */}
-      <Container size="xl" className="py-8">
+      <Container size="xl" className="py-6 sm:py-8 px-4 sm:px-6">
         <BuildPlansSection />
       </Container>
 
       {/* Void Bubbles CTA */}
-      <Container size="xl" className="py-4 pb-12">
+      <Container size="xl" className="py-4 pb-8 sm:pb-12 px-4 sm:px-6">
         <ScrollReveal>
-          <Link href="/void-bubbles" className="group flex items-center gap-3 px-6 py-4 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all">
+          <Link
+            href="/void-bubbles"
+            className="group flex items-center gap-3 px-4 sm:px-6 py-4 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all active:scale-[0.98] touch-manipulation min-h-[56px]"
+          >
             <span className="text-2xl">🫧</span>
-            <span className="text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
+            <span className="text-xs sm:text-sm text-text-secondary group-hover:text-accent-cyan transition-colors">
               Want to see these tokens LIVE? → Launch Void Bubbles
             </span>
           </Link>

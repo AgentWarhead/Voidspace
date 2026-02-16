@@ -113,7 +113,7 @@ export function ConstellationMinimap({ nodes, edges, centerNodeId, viewTransform
   }, [nodes, edges, centerNodeId, viewTransform, containerWidth, containerHeight]);
 
   return (
-    <div className="absolute bottom-4 right-4 z-10 border border-gray-600 rounded-lg overflow-hidden shadow-lg">
+    <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 z-10 border border-gray-600 rounded-lg overflow-hidden shadow-lg hidden sm:block">
       <canvas
         ref={canvasRef}
         style={{ width: MINIMAP_W, height: MINIMAP_H }}

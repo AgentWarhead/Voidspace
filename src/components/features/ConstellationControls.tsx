@@ -22,24 +22,26 @@ export function ConstellationControls({
   isFullscreen,
 }: ConstellationControlsProps) {
   return (
-    <div className="absolute top-4 right-4 z-10 flex gap-2">
-      <InfoTooltip term="Controls">
-        Use mouse wheel to zoom, drag to pan, click nodes to explore connections.
-        Right-click for more actions.
-      </InfoTooltip>
-      <Button variant="secondary" size="sm" onClick={onResetView} title="Reset view">
+    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex flex-wrap gap-1.5 sm:gap-2">
+      <div className="hidden sm:block">
+        <InfoTooltip term="Controls">
+          Use mouse wheel to zoom, drag to pan, click nodes to explore connections.
+          Right-click for more actions. On mobile: pinch to zoom, tap to select.
+        </InfoTooltip>
+      </div>
+      <Button variant="secondary" size="sm" onClick={onResetView} title="Reset view" className="min-h-[44px] min-w-[44px] active:scale-95 transition-transform">
         <RotateCcw className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" size="sm" onClick={onZoomIn} title="Zoom in">
+      <Button variant="secondary" size="sm" onClick={onZoomIn} title="Zoom in" className="min-h-[44px] min-w-[44px] active:scale-95 transition-transform">
         <ZoomIn className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" size="sm" onClick={onZoomOut} title="Zoom out">
+      <Button variant="secondary" size="sm" onClick={onZoomOut} title="Zoom out" className="min-h-[44px] min-w-[44px] active:scale-95 transition-transform">
         <ZoomOut className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" size="sm" onClick={onScreenshot} title="Export as PNG">
+      <Button variant="secondary" size="sm" onClick={onScreenshot} title="Export as PNG" className="hidden sm:flex min-h-[44px] min-w-[44px] active:scale-95 transition-transform">
         <Camera className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" size="sm" onClick={onToggleFullscreen} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
+      <Button variant="secondary" size="sm" onClick={onToggleFullscreen} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'} className="min-h-[44px] min-w-[44px] active:scale-95 transition-transform">
         {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
       </Button>
     </div>

@@ -228,52 +228,68 @@ export default function ObservatoryContent() {
         </div>
 
         {/* Minimal top bar */}
-        <div className="relative z-10 flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-[#030508]/80 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-3">
-            <GradientText as="h1" className="text-lg font-bold tracking-tight">
+        <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2 border-b border-white/[0.06] bg-[#030508]/80 backdrop-blur-xl shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 overflow-hidden">
+            <GradientText as="h1" className="text-base sm:text-lg font-bold tracking-tight whitespace-nowrap">
               🫧 Void Bubbles
             </GradientText>
             {stats && (
-              <div className="hidden md:flex items-center gap-4 ml-4 text-xs font-mono">
-                {stats.nearPrice != null && (
-                  <span className="flex items-center gap-1">
-                    <span className="text-text-muted">NEAR</span>
-                    <span className="text-white font-bold">${stats.nearPrice.toFixed(2)}</span>
-                    {stats.nearPriceChange24h != null && (
-                      <span className={`text-[10px] font-semibold ${stats.nearPriceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {stats.nearPriceChange24h >= 0 ? '▲' : '▼'}{Math.abs(stats.nearPriceChange24h).toFixed(1)}%
-                      </span>
-                    )}
+              <>
+                {/* Mobile: show just NEAR price */}
+                <div className="flex sm:hidden items-center gap-1 text-xs font-mono shrink-0">
+                  {stats.nearPrice != null && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-white font-bold">${stats.nearPrice.toFixed(2)}</span>
+                      {stats.nearPriceChange24h != null && (
+                        <span className={`text-[10px] font-semibold ${stats.nearPriceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {stats.nearPriceChange24h >= 0 ? '▲' : '▼'}{Math.abs(stats.nearPriceChange24h).toFixed(1)}%
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
+                {/* Desktop: full stats */}
+                <div className="hidden sm:flex items-center gap-4 ml-4 text-xs font-mono">
+                  {stats.nearPrice != null && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-text-muted">NEAR</span>
+                      <span className="text-white font-bold">${stats.nearPrice.toFixed(2)}</span>
+                      {stats.nearPriceChange24h != null && (
+                        <span className={`text-[10px] font-semibold ${stats.nearPriceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {stats.nearPriceChange24h >= 0 ? '▲' : '▼'}{Math.abs(stats.nearPriceChange24h).toFixed(1)}%
+                        </span>
+                      )}
+                    </span>
+                  )}
+                  <span className="text-text-muted hidden md:inline">MCap <span className="text-white font-bold">{formatStatValue(stats.totalMarketCap)}</span></span>
+                  <span className="text-text-muted hidden md:inline">Vol <span className="text-white font-bold">{formatStatValue(stats.totalVolume24h)}</span></span>
+                  <span className="text-text-muted hidden lg:inline">Tokens <span className="text-white font-bold">{stats.totalTokens}</span></span>
+                  <span className="hidden lg:inline">
+                    <span className="text-emerald-400 font-bold">{stats.gainersCount}</span>
+                    <span className="text-text-muted mx-1">/</span>
+                    <span className="text-rose-400 font-bold">{stats.losersCount}</span>
                   </span>
-                )}
-                <span className="text-text-muted">MCap <span className="text-white font-bold">{formatStatValue(stats.totalMarketCap)}</span></span>
-                <span className="text-text-muted">Vol <span className="text-white font-bold">{formatStatValue(stats.totalVolume24h)}</span></span>
-                <span className="text-text-muted">Tokens <span className="text-white font-bold">{stats.totalTokens}</span></span>
-                <span>
-                  <span className="text-emerald-400 font-bold">{stats.gainersCount}</span>
-                  <span className="text-text-muted mx-1">/</span>
-                  <span className="text-rose-400 font-bold">{stats.losersCount}</span>
-                </span>
-                {stats.buyPressure != null && (
-                  <span className="flex items-center gap-1">
-                    <span className="text-text-muted">Buy</span>
-                    <span className={`font-bold ${stats.buyPressure >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{stats.buyPressure}%</span>
-                  </span>
-                )}
-              </div>
+                  {stats.buyPressure != null && (
+                    <span className="hidden lg:flex items-center gap-1">
+                      <span className="text-text-muted">Buy</span>
+                      <span className={`font-bold ${stats.buyPressure >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{stats.buyPressure}%</span>
+                    </span>
+                  )}
+                </div>
+              </>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-near-green/10 border border-near-green/20">
               <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
               <span className="text-[10px] font-mono text-near-green uppercase tracking-widest font-semibold">Live</span>
             </div>
             <button
               onClick={() => setIsExpanded(false)}
-              className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-text-secondary hover:text-white"
+              className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] active:scale-95 transition-all text-text-secondary hover:text-white"
               title="Exit fullscreen (Esc)"
             >
-              <span className="text-xs">✕</span>
+              <span className="text-sm">✕</span>
             </button>
           </div>
         </div>
@@ -319,19 +335,19 @@ export default function ObservatoryContent() {
             </div>
 
             {/* Live indicator with counter */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-near-green/10 border border-near-green/20 w-fit">
                 <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
                 <span className="text-xs font-mono text-near-green uppercase tracking-wider">Live Data</span>
               </div>
-              <span className="text-xs text-text-muted font-mono">
+              <span className="hidden sm:inline text-xs text-text-muted font-mono">
                 {analysisCount.toLocaleString()} analyses today
               </span>
             </div>
           </div>
 
           {/* Tool Tabs */}
-          <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-2">
+          <div className="mt-4 sm:mt-6 flex flex-row flex-wrap gap-2">
             {TOOLS.map((tool) => {
               const Icon = tool.icon;
               const isActive = activeTool === tool.id;
@@ -340,7 +356,7 @@ export default function ObservatoryContent() {
                   key={tool.id}
                   onClick={() => handleToolSwitch(tool.id)}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200',
+                    'flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border transition-all duration-200 min-h-[44px] active:scale-[0.97]',
                     isActive && tool.hero
                       ? 'bg-near-green/15 border-near-green/40 text-near-green shadow-[0_0_12px_rgba(0,236,151,0.15)]'
                       : isActive
@@ -352,13 +368,13 @@ export default function ObservatoryContent() {
                     <span className={`text-sm ${isActive ? '' : 'opacity-50'}`}>🫧</span>
                   ) : (
                     <Icon className={cn(
-                      "w-4 h-4",
+                      "w-4 h-4 shrink-0",
                       isActive ? "text-near-green" : tool.iconTint
                     )} />
                   )}
-                  <span className="text-sm font-medium">{tool.label.replace('🫧 ', '')}</span>
+                  <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{tool.label.replace('🫧 ', '')}</span>
                   {tool.hero && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-near-green/10 text-near-green/70 uppercase tracking-wider">
+                    <span className="hidden sm:inline text-[9px] font-mono px-1.5 py-0.5 rounded bg-near-green/10 text-near-green/70 uppercase tracking-wider">
                       Featured
                     </span>
                   )}
@@ -402,7 +418,7 @@ export default function ObservatoryContent() {
                 </div>
                 <button
                   onClick={handleDismissOnboarding}
-                  className="flex-shrink-0 p-2 rounded-lg text-text-muted hover:text-white hover:bg-surface-hover transition-colors duration-200"
+                  className="flex-shrink-0 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-text-muted hover:text-white hover:bg-surface-hover active:scale-95 transition-all duration-200"
                   aria-label="Dismiss welcome message"
                 >
                   <X className="w-5 h-5" />
@@ -432,8 +448,8 @@ export default function ObservatoryContent() {
                 <Container size="xl" className="relative z-10 py-2.5">
                   <div className="flex flex-col gap-2">
                     {/* Row 1: Primary Stats */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-none">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 overflow-x-auto scrollbar-none min-w-0">
                         {stats ? (
                           <>
                             {/* NEAR Price */}
@@ -494,9 +510,10 @@ export default function ObservatoryContent() {
                       </div>
                       <button
                         onClick={() => setIsExpanded(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-near-green/10 border border-near-green/20 text-near-green hover:bg-near-green/20 transition-all text-sm font-mono font-semibold shrink-0 ml-3"
+                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-near-green/10 border border-near-green/20 text-near-green hover:bg-near-green/20 active:scale-95 transition-all text-xs sm:text-sm font-mono font-semibold shrink-0 ml-2 sm:ml-3 min-h-[44px]"
                       >
-                        ⛶ Fullscreen
+                        <span className="hidden sm:inline">⛶ Fullscreen</span>
+                        <span className="sm:hidden">⛶</span>
                       </button>
                     </div>
 
@@ -612,7 +629,7 @@ export default function ObservatoryContent() {
               </div>
 
               {/* Bubble Engine — tall embedded view */}
-              <div className="relative" style={{ height: 'calc(100vh - 160px)', minHeight: '600px' }}>
+              <div className="relative" style={{ height: 'calc(100vh - 160px)', minHeight: '400px' }}>
                 {/* Space background */}
                 <div className="absolute inset-0 bg-[#030508]">
                   <div

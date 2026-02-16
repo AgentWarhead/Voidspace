@@ -31,8 +31,8 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
   return (
     <Card variant="glass" padding="lg" className="relative overflow-hidden">
       <ScanLine />
-      <div className="relative z-10 space-y-4">
-        <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
+      <div className="relative z-10 space-y-3 sm:space-y-4">
+        <h3 className="text-xs sm:text-sm font-semibold text-text-primary uppercase tracking-wide">
           Void Analysis
         </h3>
 
@@ -40,12 +40,12 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
           {narrative}
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {breakdown.signals.map((signal, i) => (
             <div key={i} className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-text-muted">{signal.label}</span>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-text-muted truncate mr-2">{signal.label}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <span className="text-[10px] text-text-muted font-mono">
                     {Math.round(signal.weight * 100)}%
                   </span>
@@ -53,14 +53,14 @@ export function GapScoreBreakdown({ breakdown }: GapScoreBreakdownProps) {
                 </div>
               </div>
               <Progress value={signal.value} size="sm" />
-              <p className="text-[10px] text-text-muted">{signal.description}</p>
+              <p className="text-[10px] text-text-muted leading-snug">{signal.description}</p>
             </div>
           ))}
 
           <div className="pt-3 border-t border-border flex items-center justify-between">
-            <span className="text-sm font-semibold text-text-primary">Void Score</span>
+            <span className="text-xs sm:text-sm font-semibold text-text-primary">Void Score</span>
             <span
-              className="text-2xl font-bold font-mono"
+              className="text-xl sm:text-2xl font-bold font-mono"
               style={{
                 color: breakdown.finalScore >= 67 ? '#00EC97' : breakdown.finalScore >= 34 ? '#FFA502' : '#FF4757',
               }}

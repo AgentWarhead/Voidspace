@@ -107,8 +107,8 @@ function EcosystemStats() {
           animate={{ opacity: [0.4, 0.7, 0.4] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl border border-white/[0.04] p-8 md:p-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl border border-white/[0.04] p-4 sm:p-8 md:p-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {ECOSYSTEM_STATS.map((stat, i) => {
               const Icon = stat.icon;
               return (
@@ -129,7 +129,7 @@ function EcosystemStats() {
                   >
                     <Icon className={cn('w-6 h-6', stat.color)} />
                   </div>
-                  <div className={cn('text-3xl md:text-4xl font-bold mb-1', stat.color)}>
+                  <div className={cn('text-xl sm:text-3xl md:text-4xl font-bold mb-1', stat.color)}>
                     {stat.value}
                   </div>
                   <p className="text-sm text-text-secondary font-medium">{stat.label}</p>

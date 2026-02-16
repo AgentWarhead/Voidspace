@@ -87,10 +87,10 @@ export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, o
   return (
     <div
       ref={menuRef}
-      className="fixed z-[60] min-w-[200px] bg-black/95 border border-gray-600 rounded-lg shadow-2xl backdrop-blur-md py-1 animate-in fade-in zoom-in-95 duration-150"
+      className="fixed z-[60] min-w-[200px] max-w-[calc(100vw-24px)] bg-black/95 border border-gray-600 rounded-lg shadow-2xl backdrop-blur-md py-1 animate-in fade-in zoom-in-95 duration-150"
       style={{ left: position.left, top: position.top }}
     >
-      <div className="px-3 py-2 border-b border-gray-700">
+      <div className="px-3 py-2.5 border-b border-gray-700">
         <p className="text-xs text-cyan-400 font-mono truncate" title={nodeId}>{nodeId}</p>
       </div>
 
@@ -98,26 +98,26 @@ export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, o
         <button
           onClick={() => { onExpand(); onClose(); }}
           disabled={isExpanded}
-          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-200 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] text-sm text-gray-200 hover:bg-white/10 active:bg-white/15 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
-          <Network className="w-4 h-4 text-purple-400" />
+          <Network className="w-4 h-4 text-purple-400 shrink-0" />
           {isExpanded ? 'Already Expanded' : 'Expand Network'}
         </button>
       )}
 
       <button
         onClick={handleAnalyze}
-        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] text-sm text-gray-200 hover:bg-white/10 active:bg-white/15 active:scale-[0.98] transition-all"
       >
-        <Search className="w-4 h-4 text-cyan-400" />
+        <Search className="w-4 h-4 text-cyan-400 shrink-0" />
         Analyze in Void Lens
       </button>
 
       <button
         onClick={handleNearBlocks}
-        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] text-sm text-gray-200 hover:bg-white/10 active:bg-white/15 active:scale-[0.98] transition-all"
       >
-        <ExternalLink className="w-4 h-4 text-green-400" />
+        <ExternalLink className="w-4 h-4 text-green-400 shrink-0" />
         View on NearBlocks
       </button>
 
@@ -125,9 +125,9 @@ export function ConstellationContextMenu({ x, y, nodeId, isCenter, isExpanded, o
 
       <button
         onClick={handleCopy}
-        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] text-sm text-gray-200 hover:bg-white/10 active:bg-white/15 active:scale-[0.98] transition-all"
       >
-        <Copy className="w-4 h-4 text-gray-400" />
+        <Copy className="w-4 h-4 text-gray-400 shrink-0" />
         Copy Address
       </button>
     </div>
