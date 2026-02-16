@@ -217,7 +217,7 @@ export function QuickStart() {
           <GradientText>Your First Transaction in 3 Minutes</GradientText>
         </h1>
         <p className="text-text-secondary text-sm">
-          A hands-on walkthrough to get you on-chain. No code required.
+          Hands-on, no code, no excuses. You'll be on-chain before your coffee gets cold.
         </p>
       </div>
 

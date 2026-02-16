@@ -160,7 +160,7 @@ function EarlyAccessSection() {
           Built for NEAR Builders
         </h3>
         <p className="text-text-secondary max-w-2xl mx-auto leading-relaxed">
-          Voidspace is the first AI-powered NEAR education platform. Learn, build, and ship on NEAR Protocol — completely free.
+          The only platform that combines AI-powered education, ecosystem intelligence, and a smart contract builder — all for NEAR, all free. Nothing else comes close.
         </p>
       </div>
 

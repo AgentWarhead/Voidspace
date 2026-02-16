@@ -885,10 +885,10 @@ export function WalletSetup() {
             From Zero to On-Chain in 10 Minutes
           </GradientText>
           <p className="text-text-secondary text-base leading-relaxed">
-            Before you can build or explore NEAR, you need a wallet. It&apos;s{' '}
+            Your NEAR wallet is your identity, your keys, and your gateway to building. It&apos;s{' '}
             <span className="text-near-green font-semibold">free, takes 10 minutes</span>, and gives
             you a human-readable <code className="text-emerald-400 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-1 py-0.5 rounded text-sm">yourname.near</code> address
-            instead of a hex string. Pick a wallet below, follow the guide, and you&apos;re on-chain.
+            instead of a hex nightmare. Pick a wallet below and you&apos;re on-chain.
           </p>
         </div>
       </ScrollReveal>

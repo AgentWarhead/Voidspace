@@ -359,7 +359,7 @@ export function Certificate() {
           <GradientText>NEAR Certificates</GradientText>
         </h1>
         <p className="text-text-secondary text-sm">
-          Complete a learning track to earn a shareable certificate. {earnedCount > 0 ? `You've earned ${earnedCount}!` : 'Start learning to unlock yours.'}
+          Complete a track, prove your skills, flex on LinkedIn. {earnedCount > 0 ? `You've earned ${earnedCount}!` : 'Shareable, verifiable, earned.'}
         </p>
       </div>
 

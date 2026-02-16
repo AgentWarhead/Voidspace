@@ -175,8 +175,8 @@ export function CertificateShowcase() {
 
         <div className="text-center mb-8">
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Not just a badge — a <GradientText className="font-bold">genuine achievement</GradientText>.
-            Prove your NEAR expertise with shareable certificates for every track.
+            Not just a badge — <GradientText className="font-bold">proof you can ship</GradientText>.
+            Earn shareable certificates that tell recruiters and DAOs exactly what you can build.
           </p>
         </div>
 
