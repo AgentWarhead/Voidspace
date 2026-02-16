@@ -71,6 +71,7 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
               lines={[
                 'Find the gaps. Ship what\'s missing.',
                 'NEAR\'s first AI-native intelligence and builder platform.',
+                'See everything. Build anything.',
               ]}
               speed={35}
               className="max-w-lg mx-auto"
