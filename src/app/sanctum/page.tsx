@@ -396,7 +396,10 @@ function SanctumPageInner() {
       {/* Landing — Hero */}
       {!state.sessionStarted && !showWalletGate && !showWizard && (
         <SanctumLanding
-          onEnterSanctum={() => setShowWizard(true)}
+          onEnterSanctum={() => {
+            if (!isConnected) { openModal(); return; }
+            setShowWizard(true);
+          }}
           hasSavedSession={hasSavedSession}
           savedSessionInfo={savedSessionInfo}
           onResumeSession={handleResumeSession}

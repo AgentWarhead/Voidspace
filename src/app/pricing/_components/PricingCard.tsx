@@ -161,8 +161,17 @@ export function PricingCard({
               className="w-full min-h-[44px] active:scale-[0.97]"
               onClick={onGetStarted}
             >
-              Get Started
-              <ChevronRight className="w-4 h-4" />
+              {!isConnected ? (
+                <>
+                  Connect Wallet to Start
+                  <Wallet className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  Get Started
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           ) : (
             <Button
