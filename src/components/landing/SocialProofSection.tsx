@@ -10,7 +10,7 @@ const stats = [
 ];
 
 const signals = [
-  'Built for Nearcon 2026 Innovation Sandbox',
+  'The first AI-native intelligence platform for NEAR Protocol',
   'Powered by Claude AI · DexScreener · NEAR Protocol data',
   'The most comprehensive free NEAR developer education platform',
 ];

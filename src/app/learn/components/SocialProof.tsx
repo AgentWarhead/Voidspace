@@ -153,15 +153,14 @@ function EarlyAccessSection() {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5 backdrop-blur-sm mb-6">
           <Sparkles className="w-4 h-4 text-near-green" />
           <span className="text-xs font-semibold text-near-green uppercase tracking-wider">
-            Nearcon Innovation Sandbox
+            NEAR Protocol
           </span>
         </div>
         <h3 className="text-2xl md:text-3xl font-bold text-text-primary mb-3">
-          Built for Nearcon Innovation Sandbox
+          Built for NEAR Builders
         </h3>
         <p className="text-text-secondary max-w-2xl mx-auto leading-relaxed">
-          Voidspace is the first AI-powered NEAR education platform. Be among the first
-          builders to learn, build, and ship on NEAR Protocol.
+          Voidspace is the first AI-powered NEAR education platform. Learn, build, and ship on NEAR Protocol — completely free.
         </p>
       </div>
 

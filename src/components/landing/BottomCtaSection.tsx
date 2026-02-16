@@ -73,7 +73,7 @@ export function BottomCtaSection() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-near-green/5 border border-near-green/15">
             <span className="text-sm">🏆</span>
             <span className="text-xs font-semibold text-near-green/80 tracking-wide">
-              Built for NEARCON 2026 Innovation Sandbox
+              AI-Native NEAR Ecosystem Intelligence
             </span>
           </div>
         </div>

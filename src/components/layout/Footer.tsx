@@ -95,7 +95,7 @@ export function Footer() {
               &copy; {new Date().getFullYear()}
             </span>
             <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-near-green/60 bg-near-green/10 px-2 py-0.5 rounded-full border border-near-green/20">
-              NEARCON 2026
+              NEAR PROTOCOL
             </span>
           </div>
         </div>
