@@ -3,8 +3,8 @@ import { ProfileContent } from '@/components/profile/ProfileContent';
 import { GridPattern } from '@/components/effects/GridPattern';
 
 export const metadata = {
-  title: 'Profile — Voidspace',
-  description: 'Your Voidspace profile, saved opportunities, and usage stats.',
+  title: 'Your Profile — Voidspace',
+  description: 'Track your Voidspace progress, saved opportunities, learning achievements, and usage stats.',
 };
 
 export default function ProfilePage() {

@@ -15,8 +15,23 @@ export async function generateMetadata({ params }: Props) {
   if (!opportunity) return { title: 'Opportunity Not Found — Voidspace' };
 
   return {
-    title: `${opportunity.title} — Voidspace`,
-    description: opportunity.description || `Gap opportunity in the NEAR ecosystem.`,
+    title: `${opportunity.title} — NEAR Ecosystem Gap | Voidspace`,
+    description: opportunity.description || `An identified gap in the NEAR Protocol ecosystem — analyze the opportunity, review existing projects, and build what's missing.`,
+    alternates: { canonical: `https://voidspace.io/opportunities/${params.id}` },
+    openGraph: {
+      title: `${opportunity.title} — NEAR Ecosystem Gap | Voidspace`,
+      description: opportunity.description || `Ecosystem gap identified on NEAR Protocol. Analyze the opportunity and build what's missing.`,
+      url: `https://voidspace.io/opportunities/${params.id}`,
+      siteName: 'Voidspace',
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${opportunity.title} — NEAR Gap | Voidspace`,
+      description: opportunity.description || `NEAR ecosystem gap — analyze and build what's missing.`,
+      creator: '@VoidSpaceNear',
+    },
   };
 }
 

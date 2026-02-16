@@ -13,8 +13,23 @@ interface Props {
 }
 
 export const metadata = {
-  title: 'Search — Voidspace',
-  description: 'Search across projects, voids, and categories in the NEAR ecosystem.',
+  title: 'Search NEAR Ecosystem — Projects, Gaps & Categories | Voidspace',
+  description: 'Search the NEAR Protocol ecosystem. Find projects, identify gaps, and explore categories across DeFi, NFTs, DAOs, gaming, and infrastructure.',
+  alternates: { canonical: 'https://voidspace.io/search' },
+  openGraph: {
+    title: 'Search NEAR Ecosystem — Projects, Gaps & Categories | Voidspace',
+    description: 'Search the NEAR Protocol ecosystem. Find projects, identify gaps, and explore categories.',
+    url: 'https://voidspace.io/search',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Search NEAR Ecosystem | Voidspace',
+    description: 'Find projects, gaps, and categories across the NEAR Protocol ecosystem.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default async function SearchPage({ searchParams }: Props) {

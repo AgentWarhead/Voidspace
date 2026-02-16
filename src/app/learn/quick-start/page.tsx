@@ -10,6 +10,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://voidspace.io/learn/quick-start',
   },
+  openGraph: {
+    title: 'Quick Start — Your First NEAR Transaction in 3 Minutes | Voidspace',
+    description: 'Create a NEAR testnet wallet, get tokens, make your first transfer, and verify it on-chain. No code required.',
+    url: 'https://voidspace.io/learn/quick-start',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'article',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Quick Start — First NEAR Transaction in 3 Minutes | Voidspace',
+    description: 'Hands-on walkthrough: create a wallet, get tokens, send your first transaction. No code required.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function QuickStartPage() {

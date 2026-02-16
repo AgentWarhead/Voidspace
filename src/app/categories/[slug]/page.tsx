@@ -26,8 +26,23 @@ export async function generateMetadata({ params }: Props) {
   if (!category) return { title: 'Category Not Found — Voidspace' };
 
   return {
-    title: `${category.name} — Voidspace`,
-    description: category.description || `Explore ${category.name} projects in the NEAR ecosystem.`,
+    title: `${category.name} on NEAR Protocol — Projects, Gaps & Opportunities | Voidspace`,
+    description: category.description || `Explore ${category.name} in the NEAR ecosystem. Track active projects, identify gaps, and find what's missing.`,
+    alternates: { canonical: `https://voidspace.io/categories/${params.slug}` },
+    openGraph: {
+      title: `${category.name} on NEAR Protocol — Projects & Gaps | Voidspace`,
+      description: category.description || `Explore ${category.name} projects and gaps in the NEAR ecosystem.`,
+      url: `https://voidspace.io/categories/${params.slug}`,
+      siteName: 'Voidspace',
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${category.name} — NEAR Ecosystem | Voidspace`,
+      description: category.description || `${category.name} projects and opportunities on NEAR Protocol.`,
+      creator: '@VoidSpaceNear',
+    },
   };
 }
 

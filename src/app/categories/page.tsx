@@ -9,8 +9,24 @@ import { GridPattern } from '@/components/effects/GridPattern';
 import { getCategoriesWithStats } from '@/lib/queries';
 
 export const metadata = {
-  title: 'Categories — Voidspace',
-  description: 'Browse NEAR ecosystem categories and identify gaps.',
+  title: 'NEAR Ecosystem Categories — Gap Analysis & Opportunities | Voidspace',
+  description: 'Browse 20+ NEAR Protocol categories with real-time gap scoring. Find where the ecosystem needs builders — DeFi, NFTs, DAOs, AI, gaming, and more.',
+  keywords: ['NEAR Protocol', 'ecosystem categories', 'gap analysis', 'DeFi', 'NFTs', 'DAOs', 'blockchain opportunities'],
+  alternates: { canonical: 'https://voidspace.io/categories' },
+  openGraph: {
+    title: 'NEAR Ecosystem Categories — Gap Analysis & Opportunities | Voidspace',
+    description: 'Browse 20+ NEAR Protocol categories with real-time gap scoring. Find where the ecosystem needs builders.',
+    url: 'https://voidspace.io/categories',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NEAR Ecosystem Categories — Gap Analysis | Voidspace',
+    description: 'Browse 20+ categories with real-time gap scoring. Find where NEAR needs builders.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default async function CategoriesPage() {

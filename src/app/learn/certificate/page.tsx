@@ -10,6 +10,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://voidspace.io/learn/certificate',
   },
+  openGraph: {
+    title: 'Certificates — Earn Your NEAR Certification | Voidspace',
+    description: 'Complete NEAR learning tracks and earn shareable certificates. Prove your Explorer, Builder, Hacker, or Founder skills.',
+    url: 'https://voidspace.io/learn/certificate',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Earn Your NEAR Certification | Voidspace',
+    description: 'Complete learning tracks and earn shareable certificates for Explorer, Builder, Hacker, or Founder.',
+    creator: '@VoidSpaceNear',
+  },
 };
 
 export default function CertificatePage() {
