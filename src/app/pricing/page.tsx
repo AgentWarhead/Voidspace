@@ -148,13 +148,13 @@ export default function PricingPage() {
             Sanctum AI Builder
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-4 tracking-tight">
-            Build now.{' '}
+            Start building now.{' '}
             <GradientText as="span" animated>
-              Pay only when you ship.
+              Scale when you&apos;re ready.
             </GradientText>
           </h1>
           <p className="text-text-secondary text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Every intelligence tool is free — forever. Sanctum gives you $2.50 in credits to start building immediately. No credit card. No trial expiry. Just results.
+            Every intelligence tool is free — forever. Sanctum AI uses credits as you build, starting with $2.50 on us. No credit card. No trial expiry. Just results.
           </p>
         </motion.div>
 
