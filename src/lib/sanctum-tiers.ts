@@ -59,7 +59,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     maxProjects: 1,
     aiModel: 'claude-sonnet-4-20250514',
     canExport: false,
-    canAudit: false,
+    canAudit: true,   // Temporarily enabled for Nearcon judging — revert after contest
     priorityQueue: false,
     maxBriefsPerMonth: 3,
     maxSavedOpportunities: 5,
