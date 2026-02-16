@@ -69,9 +69,10 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
           >
             <TypewriterText
               lines={[
-                'The NEAR ecosystem has gaps. Your next project fills one.',
+                'See everything. Build anything.',
+                'Find the void. Fill the void.',
+                'We\'ll teach you everything. Then help you build it.',
                 'Real data. AI analysis. Your mission brief in 60 seconds.',
-                'Find where NEAR needs you most.',
               ]}
               speed={35}
               className="max-w-lg mx-auto"

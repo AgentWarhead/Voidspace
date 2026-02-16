@@ -178,8 +178,7 @@ export default function PricingPage() {
             </GradientText>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            All Voidspace tools are free. Sanctum is the AI builder — credit-gated,
-            infinitely powerful. Choose your tier.
+            Build like you have a team. You do. All Voidspace tools are free — Sanctum is the AI builder. Choose your tier.
           </p>
         </motion.div>
 

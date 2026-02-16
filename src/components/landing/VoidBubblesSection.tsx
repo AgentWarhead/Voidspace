@@ -20,8 +20,7 @@ export function VoidBubblesSection() {
               Void Bubbles — Live Ecosystem Visualization
             </GradientText>
             <p className="text-text-secondary text-base mt-3 max-w-2xl mx-auto">
-              Watch every NEAR token breathe in real-time. AI health scores, whale alerts, rug detection,
-              and sonic feedback — all in one mesmerizing bubble map.
+              See everything. Watch every NEAR token breathe in real-time — AI health scores, whale alerts, rug detection, and sonic feedback in one mesmerizing bubble map.
             </p>
           </div>
 

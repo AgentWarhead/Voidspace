@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://voidspace.io'),
   title: 'Voidspace — NEAR Ecosystem Intelligence',
-  description: 'AI-powered NEAR ecosystem intelligence tool. Find voids. Build the future.',
+  description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
   keywords: ['NEAR', 'blockchain', 'ecosystem', 'gap analysis', 'AI', 'web3', 'intelligence', 'Voidspace'],
   icons: {
     icon: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Voidspace — NEAR Ecosystem Intelligence',
-    description: 'AI-powered NEAR ecosystem intelligence tool. Find voids. Build the future.',
+    description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
     url: 'https://voidspace.io',
     siteName: 'Voidspace',
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Voidspace — NEAR Ecosystem Intelligence',
-    description: 'AI-powered NEAR ecosystem intelligence tool. Find voids. Build the future.',
+    description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
     images: ['/twitter-image.jpg'],
     creator: '@VoidSpaceNear',
   },
@@ -70,7 +70,7 @@ export default function RootLayout({
     '@type': 'WebApplication',
     name: 'Voidspace',
     url: 'https://voidspace.io',
-    description: 'AI-powered NEAR ecosystem intelligence tool. Find voids. Build the future.',
+    description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Web',
     image: 'https://voidspace.io/og-image.jpg',

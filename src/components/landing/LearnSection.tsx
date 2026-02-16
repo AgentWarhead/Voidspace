@@ -37,10 +37,10 @@ export function LearnSection() {
               THE MOST COMPREHENSIVE NEAR CURRICULUM — FREE
             </div>
             <GradientText as="h2" className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Master NEAR Development
+              We&apos;ll Teach You Everything
             </GradientText>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
-              66 interactive modules across 4 structured tracks. From your first Rust line to deploying production dApps — with AI guidance at every step.
+              Then help you build it. 66 interactive modules across 4 structured tracks — from your first Rust line to deploying production dApps. Zero to deployed. No permission needed.
             </p>
           </div>
 

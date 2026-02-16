@@ -23,10 +23,10 @@ export function BottomCtaSection() {
 
       <div className="relative z-10 text-center py-14 px-6">
         <GradientText as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Ready to build the future of NEAR?
+          The Void Won&apos;t Fill Itself
         </GradientText>
         <p className="text-text-secondary mt-3 max-w-md mx-auto text-sm">
-          Every void you fill makes NEAR stronger. Find your opportunity, generate your mission brief, and start building.
+          Stop researching. Start building. Find your opportunity, generate your mission brief, and ship it — your next project starts in 60 seconds.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <Link

@@ -38,7 +38,7 @@ export function BuildPlansSection() {
               Found Your Void? Plan Your Attack.
             </GradientText>
             <p className="text-text-secondary text-base mt-3 max-w-2xl mx-auto leading-relaxed">
-              Get your AI-powered Build Plan — market analysis, tech specs, NEAR integration strategy, and your first week&apos;s action plan. In 60 seconds.
+              Your next project starts in 60 seconds. Get your AI-powered Build Plan — market analysis, tech specs, NEAR integration strategy, and your first week&apos;s action plan.
             </p>
           </div>
 

@@ -35,11 +35,11 @@ export function SanctumSection() {
               The Sanctum
             </h2>
             <p className="text-text-secondary text-lg mt-3 max-w-2xl mx-auto leading-relaxed">
-              AI-powered development studio for NEAR Protocol.<br />
-              <span className="text-purple-300 font-medium">From zero to deployed dApp</span> — entirely through conversation.
+              <span className="text-purple-300 font-medium">Describe it. Deploy it.</span><br />
+              AI-powered development studio for NEAR Protocol — entirely through conversation.
             </p>
             <p className="text-text-muted text-sm mt-2 max-w-xl mx-auto">
-              No Rust experience needed. No complex toolchain setup. Just describe what you want to build — the AI handles the rest.
+              Build like you have a team. You do. 8 expert AI personas handle Rust, security, DeFi, testing, and deployment — so you don&apos;t have to.
             </p>
           </div>
 

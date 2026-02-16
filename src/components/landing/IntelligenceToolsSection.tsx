@@ -21,7 +21,7 @@ const tools = [
   {
     href: '/observatory?tool=constellation',
     title: 'Constellation Map',
-    desc: 'Map wallet relationships and transaction patterns across the NEAR ecosystem.',
+    desc: 'See the patterns others miss. Map wallet relationships and transaction flows across NEAR.',
     icon: Network,
     tags: ['Wallet Graph', 'Relationships', 'Patterns', 'Network'],
     badge: null,
@@ -35,7 +35,7 @@ const tools = [
   {
     href: '/observatory?tool=void-lens',
     title: 'Void Lens',
-    desc: 'AI-powered project analysis in 60 seconds. Instant insights, zero cost.',
+    desc: 'Every wallet tells a story. AI-powered analysis in 60 seconds — reputation, holdings, security.',
     icon: Zap,
     tags: ['60s Analysis', 'AI Summary', 'Opportunity Score', 'Free Forever'],
     badge: 'FREE',
@@ -51,7 +51,7 @@ const tools = [
 export function IntelligenceToolsSection() {
   return (
     <section>
-      <SectionHeader title="Intelligence Tools" badge="DEEP ANALYSIS" />
+      <SectionHeader title="Intelligence Tools" badge="YOUR EDGE IN THE ECOSYSTEM" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {tools.map((tool) => (
           <Link key={tool.href} href={tool.href} className="group">
