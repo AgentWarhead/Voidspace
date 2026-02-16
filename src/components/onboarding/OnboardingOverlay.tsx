@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Target, Settings, Globe, X } from 'lucide-react';
+// @ts-ignore - lucide-react type export bug
+import { Sparkles, Target, Eye, Terminal, GraduationCap, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
@@ -16,22 +17,27 @@ const slides: Slide[] = [
   {
     icon: Sparkles,
     title: 'Welcome to Voidspace',
-    description: 'We scan the NEAR blockchain ecosystem to find gaps — places where builders like you can make the biggest impact.',
+    description: "NEAR's first AI-native intelligence and builder platform. See everything. Build anything.",
+  },
+  {
+    icon: Eye,
+    title: 'The Observatory',
+    description: 'Void Bubbles visualize 150+ tokens in real time. Void Lens scores any wallet\'s reputation. Constellation maps relationship networks. Every project. Every wallet. Every connection.',
   },
   {
     icon: Target,
-    title: 'Discover Opportunities',
-    description: "Each 'Void' is an opportunity scored 0-100. Higher scores = bigger gaps = more potential. Filter by your skill level and interests.",
+    title: 'Find the Voids',
+    description: '383+ projects scanned. Every gap scored 0–100. Filter by skill level, category, and feasibility. The ecosystem\'s blind spots are your opportunities.',
   },
   {
-    icon: Settings,
-    title: 'Build with AI',
-    description: "The Sanctum is your AI-powered development studio. Describe what you want to build, and we'll generate smart contracts, webapps, and deployment — all through conversation.",
+    icon: Terminal,
+    title: 'The Sanctum',
+    description: '8 AI expert personas. 3 modes — Learn, Build, Expert. Describe what you want to build and vibe-code smart contracts through conversation. Your AI dev team awaits.',
   },
   {
-    icon: Globe,
-    title: 'Analyze the Ecosystem',
-    description: 'The Observatory gives you real-time intelligence: wallet reputation scoring, relationship mapping, and live transaction feeds.',
+    icon: GraduationCap,
+    title: 'Zero to Dangerous',
+    description: '66 interactive modules across 4 tracks — Explorer, Builder, Hacker, Founder. From your first Rust line to production dApps. No permission needed.',
   },
 ];
 
