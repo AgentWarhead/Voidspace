@@ -57,10 +57,10 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     creditsPerMonth: 25,
     features: [
       '$25/mo in Sanctum credits',
-      'Claude Opus 4 (latest model)',
+      'Claude Opus 4.6 (latest model)',
       'All templates + project export',
       'Guided Rust curriculum',
-      'Up to 3 active projects',
+      'Unlimited projects',
     ],
     color: '#00EC97',
     glowColor: 'rgba(0, 236, 151, 0.3)',
@@ -77,7 +77,6 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     features: [
       '$70/mo in Sanctum credits ($10 bonus)',
       'Everything in Specter',
-      'Unlimited active projects',
       'AI-powered contract auditing',
       'Advanced NEAR developer tooling',
       'Priority build queue',

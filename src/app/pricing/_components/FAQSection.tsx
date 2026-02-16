@@ -6,7 +6,7 @@ import { GradientText } from '@/components/effects/GradientText';
 const faqs = [
   {
     q: 'What is 1 credit?',
-    a: '$1 of AI compute in Sanctum — the same Claude Opus 4 that powers the world\'s best AI applications. A typical build session (generating a full smart contract) uses ~$3–5 in credits.',
+    a: '$1 of AI compute in Sanctum — powered by Claude Opus 4.6, Anthropic\'s most capable model. A typical build session (generating a full smart contract) uses ~$3–5 in credits.',
   },
   {
     q: 'Do subscription credits roll over?',

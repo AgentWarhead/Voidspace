@@ -353,7 +353,7 @@ export default function BottomCTA() {
           viewport={{ once: true }}
           transition={{ delay: 0.7 }}
         >
-          Free to start · $2.50 starter credits · Upgrade from $25/mo · AI-powered by Claude Opus
+          Free to start · $2.50 starter credits · Upgrade from $25/mo · Powered by Claude Opus 4.6
         </motion.p>
       </motion.div>
     </section>

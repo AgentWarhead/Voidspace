@@ -49,7 +49,7 @@ Ready to deploy to testnet? Click "Deploy" and I'll walk you through it.`,
 const FEATURES = [
   {
     icon: Cpu,
-    title: 'Powered by Claude Opus 4',
+    title: 'Powered by Claude Opus 4.6',
     description: 'The most intelligent AI model available — understands NEAR architecture deeply',
     gradient: 'from-emerald-500/20 to-cyan-500/20',
     border: 'border-emerald-500/20',
@@ -248,7 +248,7 @@ export function SanctumPreview() {
             </div>
             <div className="ml-auto">
               <span className="text-[10px] font-mono text-emerald-400/70 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                Claude Opus 4
+                Claude Opus 4.6
               </span>
             </div>
           </div>
