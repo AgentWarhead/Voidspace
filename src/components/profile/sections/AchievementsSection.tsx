@@ -1,17 +1,13 @@
 /* ─── AchievementsSection — Organized & Navigable ────────────
- * Replaces the flat 107-achievement grid with:
- * - Category tabs with progress rings
- * - Collapsible category groups
- * - Featured pins at top
- * - Filter pills (All / Unlocked / Locked)
- * - Timeline toggle
+ * Category tabs with progress rings, collapsible groups,
+ * featured pins, filter pills, and timeline toggle.
+ * Sub-components extracted for maintainability.
  * ────────────────────────────────────────────────────────────── */
 
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, ChevronDown, ChevronRight } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 import {
@@ -23,6 +19,9 @@ import {
 import { AchievementCard } from '@/components/achievements/AchievementCard';
 import { AchievementProgress } from '@/components/achievements/AchievementProgress';
 import { AchievementTimeline } from '@/components/achievements/AchievementTimeline';
+import { AchievementCategoryTabs } from './AchievementCategoryTabs';
+import { AchievementFeaturedShowcase } from './AchievementFeaturedShowcase';
+import { AchievementGroupedGrid } from './AchievementGroupedGrid';
 
 type FilterMode = 'all' | 'unlocked' | 'locked';
 
@@ -43,7 +42,6 @@ export function AchievementsSection() {
 
   const displayable = useMemo(() => getDisplayable(unlocked), [unlocked]);
 
-  // Category progress data
   const categoryProgress = useMemo(() => {
     const cats = Object.keys(CATEGORY_CONFIG) as AchievementCategory[];
     return cats.map((cat) => {
@@ -53,7 +51,6 @@ export function AchievementsSection() {
     });
   }, [unlocked]);
 
-  // Filtered achievements
   const filtered = useMemo(() => {
     let list = displayable;
     if (activeCategory !== 'all') {
@@ -67,7 +64,6 @@ export function AchievementsSection() {
     return list;
   }, [displayable, activeCategory, filter, unlocked]);
 
-  // Group by category when viewing "all"
   const groupedByCategory = useMemo(() => {
     if (activeCategory !== 'all') return null;
     const groups = new Map<AchievementCategory, typeof filtered>();
@@ -137,7 +133,7 @@ export function AchievementsSection() {
 
       {/* Featured */}
       {featured.length > 0 && (
-        <FeaturedShowcase
+        <AchievementFeaturedShowcase
           featured={featured}
           timelineMap={timelineMap}
           onToggleFeatured={handleToggleFeatured}
@@ -148,8 +144,8 @@ export function AchievementsSection() {
         <AchievementTimeline timeline={timeline} limit={15} />
       ) : (
         <>
-          {/* Category Tabs with Progress Rings */}
-          <CategoryTabs
+          {/* Category Tabs */}
+          <AchievementCategoryTabs
             activeCategory={activeCategory}
             onSelect={setActiveCategory}
             categoryProgress={categoryProgress}
@@ -177,7 +173,7 @@ export function AchievementsSection() {
 
           {/* Achievement Grid — grouped or flat */}
           {groupedByCategory ? (
-            <GroupedAchievementGrid
+            <AchievementGroupedGrid
               groups={groupedByCategory}
               collapsedCats={collapsedCats}
               toggleCollapsed={toggleCollapsed}
@@ -204,192 +200,12 @@ export function AchievementsSection() {
           )}
 
           {filtered.length === 0 && (
-            <div className="text-center py-8 text-text-muted text-sm">
+            <div className="text-center py-6 sm:py-8 text-text-muted text-xs sm:text-sm">
               No achievements match this filter. Keep exploring! 🚀
             </div>
           )}
         </>
       )}
-    </div>
-  );
-}
-
-/* ─── Sub-components ─────────────────────────────────────────── */
-
-function FeaturedShowcase({
-  featured,
-  timelineMap,
-  onToggleFeatured,
-}: {
-  featured: string[];
-  timelineMap: Map<string, number>;
-  onToggleFeatured: (id: string) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <h3 className="text-xs uppercase tracking-wider text-text-muted font-medium">
-        ⭐ Featured ({featured.length}/3)
-      </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {featured.map((id) => {
-          const achievement = ACHIEVEMENTS.find((a) => a.id === id);
-          if (!achievement) return null;
-          return (
-            <AchievementCard
-              key={id}
-              achievement={achievement}
-              isUnlocked={true}
-              isFeatured={true}
-              unlockedAt={timelineMap.get(id)}
-              onToggleFeatured={onToggleFeatured}
-              featuredCount={featured.length}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function CategoryTabs({
-  activeCategory,
-  onSelect,
-  categoryProgress,
-}: {
-  activeCategory: AchievementCategory | 'all';
-  onSelect: (cat: AchievementCategory | 'all') => void;
-  categoryProgress: Array<{ cat: AchievementCategory; total: number; done: number; pct: number }>;
-}) {
-  return (
-    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
-      <button
-        onClick={() => onSelect('all')}
-        className={cn(
-          'flex-shrink-0 text-xs px-3 py-2.5 sm:py-1.5 rounded-lg border transition-all whitespace-nowrap min-h-[44px] sm:min-h-0 active:scale-[0.97]',
-          activeCategory === 'all'
-            ? 'border-near-green/50 bg-near-green/10 text-near-green'
-            : 'border-border/50 text-text-muted hover:text-text-secondary hover:border-border',
-        )}
-      >
-        All
-      </button>
-      {categoryProgress.map(({ cat, done, total, pct }) => {
-        const config = CATEGORY_CONFIG[cat];
-        const isActive = activeCategory === cat;
-        return (
-          <button
-            key={cat}
-            onClick={() => onSelect(cat)}
-            className={cn(
-              'flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-2.5 sm:py-1.5 rounded-lg border transition-all whitespace-nowrap min-h-[44px] sm:min-h-0 active:scale-[0.97]',
-              isActive
-                ? 'border-near-green/50 bg-near-green/10 text-near-green'
-                : 'border-border/50 text-text-muted hover:text-text-secondary hover:border-border',
-            )}
-          >
-            {/* Mini progress ring */}
-            <svg className="w-4 h-4 -rotate-90 flex-shrink-0" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="4" className="text-border/30" />
-              <circle
-                cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="4"
-                strokeLinecap="round"
-                strokeDasharray={`${pct * 0.942} 94.2`}
-                className={cn(isActive ? 'text-near-green' : config.color)}
-              />
-            </svg>
-            <span>{config.emoji}</span>
-            <span className="hidden sm:inline">{config.label}</span>
-            <span className="text-[10px] font-mono opacity-70">{done}/{total}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function GroupedAchievementGrid({
-  groups,
-  collapsedCats,
-  toggleCollapsed,
-  unlocked,
-  featured,
-  timelineMap,
-  onToggleFeatured,
-  isUnlocked,
-}: {
-  groups: Map<AchievementCategory, ReturnType<typeof getDisplayable>>;
-  collapsedCats: Set<AchievementCategory>;
-  toggleCollapsed: (cat: AchievementCategory) => void;
-  unlocked: Set<string>;
-  featured: string[];
-  timelineMap: Map<string, number>;
-  onToggleFeatured: (id: string) => void;
-  isUnlocked: (id: string) => boolean;
-}) {
-  const categories = Object.keys(CATEGORY_CONFIG) as AchievementCategory[];
-
-  return (
-    <div className="space-y-4">
-      {categories.map((cat) => {
-        const items = groups.get(cat);
-        if (!items || items.length === 0) return null;
-        const config = CATEGORY_CONFIG[cat];
-        const isCollapsed = collapsedCats.has(cat);
-        const total = ACHIEVEMENTS.filter((a) => a.category === cat).length;
-        const done = ACHIEVEMENTS.filter((a) => a.category === cat && unlocked.has(a.id)).length;
-
-        return (
-          <div key={cat} className="border border-border/30 rounded-xl overflow-hidden">
-            {/* Category Header */}
-            <button
-              onClick={() => toggleCollapsed(cat)}
-              className="w-full flex items-center justify-between px-3 sm:px-4 py-3 bg-surface/50 hover:bg-surface-hover transition-colors min-h-[44px] active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-base">{config.emoji}</span>
-                <span className={cn('text-sm font-semibold', config.color)}>
-                  {config.label}
-                </span>
-                <span className="text-xs font-mono text-text-muted">
-                  {done}/{total}
-                </span>
-              </div>
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4 text-text-muted" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-text-muted" />
-              )}
-            </button>
-
-            {/* Achievements */}
-            <AnimatePresence initial={false}>
-              {!isCollapsed && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 sm:p-3">
-                    {items.map((a) => (
-                      <AchievementCard
-                        key={a.id}
-                        achievement={a}
-                        isUnlocked={isUnlocked(a.id)}
-                        isFeatured={featured.includes(a.id)}
-                        unlockedAt={timelineMap.get(a.id)}
-                        onToggleFeatured={onToggleFeatured}
-                        featuredCount={featured.length}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
     </div>
   );
 }
