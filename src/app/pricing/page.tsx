@@ -83,7 +83,7 @@ export default function PricingPage() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] sm:w-[800px] h-[400px] sm:h-[600px] bg-near-green/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[400px] sm:w-[600px] h-[300px] sm:h-[400px] bg-accent-cyan/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <Container className="relative z-10 py-10 sm:py-16 md:py-24 px-4 sm:px-6">
+      <Container className="relative z-10 pt-4 sm:pt-6 md:pt-8 pb-10 sm:pb-16 md:pb-24 px-4 sm:px-6">
         {/* Connect Wallet Banner */}
         <AnimatePresence>
           {!walletLoading && !isConnected && (
@@ -91,7 +91,7 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 sm:mb-8"
+              className="mb-4 sm:mb-6"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl border border-near-green/20 bg-near-green/5 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
