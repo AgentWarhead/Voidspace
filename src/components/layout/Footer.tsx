@@ -100,6 +100,13 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Built with */}
+        <div className="relative z-10 text-center pt-3">
+          <p className="text-[10px] text-text-muted/40">
+            Built with Claude AI · NEAR Protocol · Supabase
+          </p>
+        </div>
+
         {/* Legal links */}
         <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pb-6 pt-2 border-t border-white/[0.04]">
           <Link href="/legal/terms" className="text-[10px] text-text-muted/60 hover:text-near-green/80 transition-colors">

@@ -12,7 +12,6 @@ import './globals.css';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: 'cover',
 };
 
@@ -21,6 +20,7 @@ export const metadata: Metadata = {
   title: 'Voidspace — NEAR Ecosystem Intelligence',
   description: 'See everything. Build anything. AI-powered NEAR ecosystem intelligence — find voids, learn Rust, and ship smart contracts.',
   keywords: ['NEAR', 'blockchain', 'ecosystem', 'gap analysis', 'AI', 'web3', 'intelligence', 'Voidspace'],
+  manifest: '/site.webmanifest',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '48x48' },
