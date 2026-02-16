@@ -40,7 +40,7 @@ export function LearnSection() {
               We&apos;ll Teach You Everything
             </GradientText>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
-              Then help you build it. 66 interactive modules across 4 structured tracks — from your first Rust line to deploying production dApps. Zero to deployed. No permission needed.
+              Then build it with you. 66 interactive modules across 4 structured tracks — from your first Rust line to deploying production dApps. Zero to deployed. No permission needed.
             </p>
           </div>
 
