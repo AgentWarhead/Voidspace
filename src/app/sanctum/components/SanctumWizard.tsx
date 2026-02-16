@@ -10,7 +10,10 @@ import { PERSONA_LIST } from '../lib/personas';
 import { storeBriefForSanctum, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
 // @ts-ignore
-import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles, Search, MessageSquare, Play } from 'lucide-react';
+import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles, Search, MessageSquare, Play, Lock } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import Link from 'next/link';
 
 export interface WizardConfig {
   mode: 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
@@ -53,6 +56,9 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
   const [step, setStep] = useState<WizardStep>('goal');
   const [goal, setGoal] = useState<GoalChoice | null>(null);
   const [existingCodeSub, setExistingCodeSub] = useState<ExistingCodeSub>(null);
+  const { user } = useWallet();
+  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
+  const canAudit = SANCTUM_TIERS[userTier].canAudit;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPersona, setSelectedPersona] = useState<string>('shade');
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
@@ -361,13 +367,24 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 {/* Existing code sub-options (inline) */}
                 {goal === 'existing-code' && (
                   <div className="mt-4 flex flex-wrap justify-center gap-3" style={{ animation: 'sanctumSlideUp 0.3s ease-out' }}>
-                    <button
-                      onClick={() => handleExistingCodeSub('roast')}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all text-sm font-medium"
-                    >
-                      <Flame className="w-4 h-4" />
-                      Roast Zone (Audit)
-                    </button>
+                    {canAudit ? (
+                      <button
+                        onClick={() => handleExistingCodeSub('roast')}
+                        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all text-sm font-medium"
+                      >
+                        <Flame className="w-4 h-4" />
+                        Roast Zone (Audit)
+                      </button>
+                    ) : (
+                      <Link
+                        href="/pricing"
+                        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 transition-all text-sm font-medium hover:bg-red-500/10"
+                      >
+                        <Lock className="w-4 h-4" />
+                        Roast Zone
+                        <span className="text-xs text-near-green ml-1">Legion+</span>
+                      </Link>
+                    )}
                     <button
                       onClick={() => handleExistingCodeSub('webapp')}
                       className="flex items-center gap-2 px-5 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 transition-all text-sm font-medium"

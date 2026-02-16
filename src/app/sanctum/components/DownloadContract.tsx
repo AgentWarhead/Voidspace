@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 // @ts-ignore
-import { Download, Package, FileCode, ChevronDown } from 'lucide-react';
+import { Download, Package, FileCode, ChevronDown, Lock } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import Link from 'next/link';
 
 interface DownloadContractProps {
   code: string;
@@ -13,6 +16,9 @@ interface DownloadContractProps {
 export function DownloadContract({ code, contractName = 'contract', category }: DownloadContractProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = useWallet();
+  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
+  const canExport = SANCTUM_TIERS[userTier].canExport;
 
   const safeName = contractName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
   const crateNameSnake = safeName.replace(/-/g, '_');
@@ -80,10 +86,14 @@ export function DownloadContract({ code, contractName = 'contract', category }: 
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="px-3 py-2 min-h-[44px] min-w-[44px] text-sm bg-white/[0.05] hover:bg-amber-500/20 rounded-lg border border-white/[0.1] transition-all flex items-center gap-2 hover:border-amber-500/30"
-        title="Download contract"
+        className={`px-3 py-2 min-h-[44px] min-w-[44px] text-sm rounded-lg border transition-all flex items-center gap-2 ${
+          canExport
+            ? 'bg-white/[0.05] hover:bg-amber-500/20 border-white/[0.1] hover:border-amber-500/30'
+            : 'bg-white/[0.03] border-white/[0.06] text-text-muted'
+        }`}
+        title={canExport ? 'Download contract' : 'Upgrade to export code'}
       >
-        <Download className="w-4 h-4" />
+        {canExport ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
         <ChevronDown className="w-3 h-3" />
       </button>
 
@@ -91,31 +101,50 @@ export function DownloadContract({ code, contractName = 'contract', category }: 
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
           <div className="absolute right-0 top-full mt-2 z-50 bg-void-darker border border-void-purple/30 rounded-xl shadow-2xl shadow-void-purple/20 overflow-hidden w-56 max-w-[calc(100vw-2rem)]">
-            <button
-              onClick={downloadProjectZip}
-              disabled={isGenerating || !code}
-              className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-near-green/10 transition-colors disabled:opacity-50"
+          {!canExport ? (
+            <Link
+              href="/pricing"
+              className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-near-green/10 transition-colors"
+              onClick={() => setShowMenu(false)}
             >
-              <Package className="w-4 h-4 text-near-green" />
+              <Lock className="w-4 h-4 text-amber-400" />
               <div className="text-left">
-                <div className="font-medium">
-                  {isGenerating ? 'Generating...' : '📦 Download Project'}
-                </div>
-                <div className="text-xs text-gray-500">Full cargo-near scaffold</div>
+                <div className="font-medium">Export requires a subscription</div>
+                <div className="text-xs text-near-green">Upgrade from $25/mo →</div>
               </div>
-            </button>
-            <div className="border-t border-white/[0.05]" />
-            <button
-              onClick={downloadRustFile}
-              disabled={!code}
-              className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-amber-500/10 transition-colors disabled:opacity-50"
-            >
-              <FileCode className="w-4 h-4 text-amber-400" />
-              <div className="text-left">
-                <div className="font-medium">Download .rs only</div>
-                <div className="text-xs text-gray-500">Just the contract file</div>
-              </div>
-            </button>
+            </Link>
+          ) : (
+            <></>
+          )}
+            {canExport && (
+              <>
+                <button
+                  onClick={downloadProjectZip}
+                  disabled={isGenerating || !code}
+                  className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-near-green/10 transition-colors disabled:opacity-50"
+                >
+                  <Package className="w-4 h-4 text-near-green" />
+                  <div className="text-left">
+                    <div className="font-medium">
+                      {isGenerating ? 'Generating...' : '📦 Download Project'}
+                    </div>
+                    <div className="text-xs text-gray-500">Full cargo-near scaffold</div>
+                  </div>
+                </button>
+                <div className="border-t border-white/[0.05]" />
+                <button
+                  onClick={downloadRustFile}
+                  disabled={!code}
+                  className="w-full px-4 py-3 min-h-[44px] flex items-center gap-3 text-sm text-white hover:bg-amber-500/10 transition-colors disabled:opacity-50"
+                >
+                  <FileCode className="w-4 h-4 text-amber-400" />
+                  <div className="text-left">
+                    <div className="font-medium">Download .rs only</div>
+                    <div className="text-xs text-gray-500">Just the contract file</div>
+                  </div>
+                </button>
+              </>
+            )}
           </div>
         </>
       )}

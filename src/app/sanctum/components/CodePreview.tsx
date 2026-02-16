@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy, Download, Code } from 'lucide-react';
+import { Check, Copy, Download, Code, Lock } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
 
 interface CodePreviewProps {
   code: string;
@@ -9,6 +11,9 @@ interface CodePreviewProps {
 
 export function CodePreview({ code }: CodePreviewProps) {
   const [copied, setCopied] = useState(false);
+  const { user } = useWallet();
+  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
+  const canExport = SANCTUM_TIERS[userTier].canExport;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -17,6 +22,7 @@ export function CodePreview({ code }: CodePreviewProps) {
   };
 
   const handleDownload = () => {
+    if (!canExport) return;
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -104,11 +110,16 @@ export function CodePreview({ code }: CodePreviewProps) {
           {copied ? 'Copied!' : 'Copy'}
         </button>
         <button
-          onClick={handleDownload}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary bg-void-gray/50 hover:bg-void-gray rounded-lg transition-colors"
+          onClick={canExport ? handleDownload : undefined}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            canExport
+              ? 'text-text-secondary hover:text-text-primary bg-void-gray/50 hover:bg-void-gray'
+              : 'text-text-muted bg-void-gray/30 cursor-not-allowed'
+          }`}
+          title={canExport ? 'Download' : 'Upgrade to export code'}
         >
-          <Download className="w-4 h-4" />
-          Download
+          {canExport ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          {canExport ? 'Download' : 'Upgrade to Export'}
         </button>
       </div>
 
