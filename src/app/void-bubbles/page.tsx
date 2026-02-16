@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Void Bubbles — Voidspace Observatory',
-  description: 'Live NEAR Protocol ecosystem visualization. 150+ tokens as living, breathing bubbles with AI health scores, whale alerts, and real-time market data.',
-  keywords: ['NEAR', 'bubble map', 'cryptocurrency', 'market cap', 'DeFi', 'token visualization'],
+  title: 'Void Bubbles — Live NEAR Token Intelligence | Voidspace',
+  description: '150+ NEAR tokens visualized as living bubbles — AI health scores, whale alerts, and market signals the rest of the ecosystem hasn\'t noticed yet. Free to use.',
+  keywords: ['NEAR analytics', 'token bubble map', 'NEAR DeFi', 'whale alerts', 'AI health score', 'NEAR token tracker', 'live market data'],
 };
 
 export default function VoidBubblesPage() {

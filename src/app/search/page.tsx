@@ -57,10 +57,10 @@ export default async function SearchPage({ searchParams }: Props) {
         />
         <Container size="xl" className="relative z-10 text-center">
           <GradientText as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Search
+            Search the Void
           </GradientText>
           <p className="text-sm sm:text-base text-text-secondary mt-3 max-w-lg mx-auto px-4 sm:px-0">
-            Search across projects, voids, and categories in the NEAR ecosystem.
+            Projects, opportunities, and ecosystem gaps — all searchable, all scored. Find what others haven&apos;t built yet.
           </p>
 
           {/* Search Input with Client-Side Debounce */}

@@ -893,11 +893,11 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
             <GradientText as="h1" animated className="text-2xl sm:text-3xl font-bold">
-              Constellation Mapping
+              Constellation Map
             </GradientText>
           </motion.div>
           <motion.p {...fadeUp(0.2)} className="text-text-secondary text-sm sm:text-lg max-w-2xl mx-auto mt-2 sm:mt-3">
-            Trace the invisible threads connecting NEAR&apos;s biggest players.
+            Every wallet tells a story. Trace connections, uncover clusters, and see the relationships behind the transactions.
           </motion.p>
         </div>
 
@@ -1291,8 +1291,8 @@ export function ConstellationMap({ initialAddress }: ConstellationMapProps = {})
               <Network className="w-8 h-8 text-purple-400" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-text-primary mb-2">Ready to Explore the Void</h3>
-              <p className="text-text-secondary">Enter a NEAR wallet address to visualize its transaction network</p>
+              <h3 className="text-xl font-semibold text-text-primary mb-2">The Void Awaits</h3>
+              <p className="text-text-secondary">Drop a NEAR wallet address above and watch its network unfold — who it transacts with, how often, and what the pattern reveals.</p>
             </div>
           </div>
         </div>

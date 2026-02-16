@@ -56,10 +56,10 @@ export default async function CategoriesPage() {
         />
         <Container size="xl" className="relative z-10 text-center">
           <GradientText as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Ecosystem Categories
+            Ecosystem Map
           </GradientText>
           <p className="text-sm sm:text-base text-text-secondary mt-3 max-w-lg mx-auto px-4 sm:px-0">
-            Browse the NEAR ecosystem by category. Green bars indicate deep voids with opportunity.
+            The entire NEAR ecosystem, scored and ranked. Green means wide open. The best builders aren&apos;t competing — they&apos;re finding gaps.
           </p>
 
           {/* Summary Stats */}

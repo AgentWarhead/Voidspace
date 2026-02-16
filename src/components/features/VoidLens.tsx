@@ -583,7 +583,7 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Scan any NEAR wallet. Trust score in 60 seconds.
+            Know exactly who you're dealing with. AI reputation scoring that reads the blockchain so you don't have to.
           </motion.p>
         </div>
 
