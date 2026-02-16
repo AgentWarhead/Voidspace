@@ -11,6 +11,9 @@ import { NextSteps, NextStep } from './NextSteps';
 import { CategoryLearnBanner } from './CategoryLearnBanner';
 import { getPersona } from '../lib/personas';
 import { UpgradeModal } from '@/components/credits/UpgradeModal';
+import { useWallet } from '@/hooks/useWallet';
+import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import Link from 'next/link';
 
 interface AttachedFile {
   name: string;
@@ -119,6 +122,11 @@ const CATEGORY_STARTERS: Record<string, string> = {
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
+  const { user } = useWallet();
+  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
+  const tierConfig = SANCTUM_TIERS[userTier];
+  const isFreeTier = userTier === 'shade';
+  const modelLabel = tierConfig.aiModel.includes('opus') ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5';
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesRestoredRef = useRef(false);
   const saveMsgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -214,6 +222,34 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   // Save messages to localStorage (debounced, but flush on unmount)
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+  const cloudConvIdRef = useRef<string | null>(null);
+  const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cloud save for paid users (debounced 3s to avoid spamming)
+  const saveToCloud = (msgs: Message[]) => {
+    if (isFreeTier || msgs.length < 2) return; // need at least 1 exchange
+    if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
+    cloudSaveTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/sanctum/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId: cloudConvIdRef.current,
+            title: msgs.find(m => m.role === 'user')?.content?.slice(0, 80) || 'Untitled',
+            category,
+            persona: personaId,
+            mode: chatMode,
+            messages: msgs.map(m => ({ role: m.role, content: m.content })),
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.conversationId) cloudConvIdRef.current = data.conversationId;
+        }
+      } catch { /* silent fail — localStorage is backup */ }
+    }, 3000);
+  };
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -225,8 +261,11 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         } catch { /* ignore */ }
       }
     }, 500);
+    // Also save to cloud for paid users
+    saveToCloud(messages);
     return () => {
       if (saveMsgTimerRef.current) clearTimeout(saveMsgTimerRef.current);
+      if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
       // Flush save immediately on unmount — never lose messages
       if (typeof window !== 'undefined' && messagesRef.current.length > 0) {
         try {
@@ -234,7 +273,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         } catch { /* ignore */ }
       }
     };
-  }, [messages]);
+  }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Also save on page unload (back button, tab close, navigation)
   useEffect(() => {
@@ -861,6 +900,23 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           </div>
         )}
         
+        {/* Model watermark */}
+        <div className="flex items-center justify-between mb-2 px-1">
+          <span className={`text-xs ${isFreeTier ? 'text-text-muted' : 'text-near-green/70'}`}>
+            {isFreeTier ? (
+              <>
+                Running on {modelLabel}
+                {' · '}
+                <Link href="/pricing" className="text-near-green/80 hover:text-near-green underline underline-offset-2 transition-colors">
+                  Upgrade for Opus 4.6
+                </Link>
+              </>
+            ) : (
+              <>Powered by {modelLabel}</>
+            )}
+          </span>
+        </div>
+
         <div className="flex gap-2">
           {/* File attachment button */}
           <input
