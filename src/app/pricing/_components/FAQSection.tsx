@@ -6,7 +6,7 @@ import { GradientText } from '@/components/effects/GradientText';
 const faqs = [
   {
     q: 'What is 1 credit?',
-    a: '$1 of AI compute in Sanctum. Free tier runs on Claude Sonnet 4.5 — fast and capable. Paid tiers unlock Claude Opus 4.6, Anthropic\'s most powerful model, for deeper reasoning and better code. A typical build session uses ~$3–5 in credits.',
+    a: '$1 of AI compute in Sanctum. Free tier runs on Claude Sonnet 4.5 — fast and capable. Paid tiers unlock Claude Opus 4.6, Anthropic\'s most powerful model, for deeper reasoning and better code. A typical build session uses ~$1.50–2 on Sonnet or ~$5–8 on Opus.',
   },
   {
     q: 'Why is Opus 4.6 worth upgrading for?',

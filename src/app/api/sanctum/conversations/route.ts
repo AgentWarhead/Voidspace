@@ -65,10 +65,10 @@ export async function POST(request: NextRequest) {
   if (userTier === 'shade') {
     const { data: credits } = await supabase
       .from('credit_balances')
-      .select('topup_balance')
+      .select('topup_credits')
       .eq('user_id', auth.userId)
       .single();
-    hasTopUpCredits = (credits?.topup_balance ?? 0) > 0;
+    hasTopUpCredits = (credits?.topup_credits ?? 0) > 0;
   }
 
   if (userTier === 'shade' && !hasTopUpCredits) {
