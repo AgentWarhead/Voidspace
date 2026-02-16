@@ -76,7 +76,7 @@ export function OverviewSection({
   const lastBuildingMission = missions.find((m) => m.status === 'building');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 min-w-0 overflow-x-hidden">
       <AnimatedBorderCard className="relative overflow-hidden" padding="none">
         {/* Background Glow */}
         <div
@@ -86,12 +86,12 @@ export function OverviewSection({
           }}
         />
 
-        <div className="relative p-6">
+        <div className="relative p-4 sm:p-6">
           {/* Header */}
-          <div className="flex items-start gap-4 mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-near-green/20 to-cyan-500/20 border border-near-green/30 flex items-center justify-center">
-                <span className="text-4xl">{currentRank.icon}</span>
+          <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="relative flex-shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-near-green/20 to-cyan-500/20 border border-near-green/30 flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl">{currentRank.icon}</span>
               </div>
               <div className="absolute -bottom-2 -right-2">
                 <Badge variant="tier" tier={tier} className="text-xs shadow-lg">
@@ -101,15 +101,15 @@ export function OverviewSection({
             </div>
 
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold text-text-primary truncate font-mono">
+              <h2 className="text-lg sm:text-xl font-bold text-text-primary truncate font-mono break-words">
                 {accountId}
               </h2>
-              <div className={cn('text-sm font-medium mt-0.5', currentRank.color)}>
+              <div className={cn('text-xs sm:text-sm font-medium mt-0.5', currentRank.color)}>
                 {currentRank.icon} {currentRank.name}
               </div>
-              <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
+              <div className="flex items-center gap-2 sm:gap-3 mt-2 text-xs text-text-muted flex-wrap">
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
                   Since {joinMonth} {joinYear}
                 </span>
                 {reputation && (
@@ -123,7 +123,7 @@ export function OverviewSection({
                           : 'text-red-400',
                     )}
                   >
-                    <Shield className="w-3 h-3" />
+                    <Shield className="w-3 h-3 flex-shrink-0" />
                     Rep: {reputation.score}/100
                   </span>
                 )}
@@ -133,7 +133,7 @@ export function OverviewSection({
             <Button
               variant="ghost"
               size="sm"
-              className="text-text-muted hover:text-near-green"
+              className="text-text-muted hover:text-near-green min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-[0.97] transition-transform flex-shrink-0"
               onClick={() => trackStat('profileShares')}
             >
               <Share2 className="w-4 h-4" />
@@ -141,14 +141,14 @@ export function OverviewSection({
           </div>
 
           {/* XP Progress */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between text-sm mb-2">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
               <span className="text-text-secondary">Experience</span>
               <span className="font-mono text-near-green">{xp.toLocaleString()} XP</span>
             </div>
             <Progress value={progressToNext} size="md" color="green" />
             {nextRank && (
-              <div className="flex items-center justify-between text-xs text-text-muted mt-1">
+              <div className="flex items-center justify-between text-xs text-text-muted mt-1 flex-wrap gap-1">
                 <span>{currentRank.name}</span>
                 <span className="flex items-center gap-1">
                   {nextRank.icon} {nextRank.name}
@@ -159,7 +159,7 @@ export function OverviewSection({
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             {[
               { value: stats.voidsExplored, label: 'Explored', icon: Search, color: 'text-text-primary' },
               { value: stats.briefsGenerated, label: 'Briefs', icon: FileText, color: 'text-text-primary' },
@@ -168,11 +168,11 @@ export function OverviewSection({
             ].map(({ value, label, icon: Icon, color }) => (
               <div
                 key={label}
-                className="bg-surface rounded-xl p-3 text-center border border-border hover:border-near-green/30 transition-colors"
+                className="bg-surface rounded-xl p-3 text-center border border-border hover:border-near-green/30 transition-colors min-w-0"
               >
-                <div className={cn('text-2xl font-bold', color)}>{value}</div>
+                <div className={cn('text-xl sm:text-2xl font-bold', color)}>{value}</div>
                 <div className="text-xs text-text-muted flex items-center justify-center gap-1 mt-1">
-                  <Icon className="w-3 h-3" /> {label}
+                  <Icon className="w-3 h-3 flex-shrink-0" /> {label}
                 </div>
               </div>
             ))}

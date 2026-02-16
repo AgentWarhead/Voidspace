@@ -15,8 +15,8 @@ interface ArsenalSectionProps {
 
 export function ArsenalSection({ userId, tier }: ArsenalSectionProps) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+    <div className="space-y-3 sm:space-y-4">
+      <h2 className="text-base sm:text-lg font-semibold text-text-primary flex items-center gap-2">
         ⚡ <GradientText>Sanctum Arsenal</GradientText>
       </h2>
       <CreditDashboard userId={userId} tier={tier} />

@@ -119,7 +119,7 @@ export function ProfileContent() {
 
   if (!isConnected) {
     return (
-      <Card variant="glass" padding="lg">
+      <Card variant="glass" padding="lg" className="mx-auto">
         <VoidEmptyState
           icon={User}
           title="Enter the Void"
@@ -129,7 +129,7 @@ export function ProfileContent() {
               variant="primary"
               size="lg"
               onClick={openModal}
-              className="hover:shadow-[0_0_24px_rgba(0,236,151,0.4)]"
+              className="hover:shadow-[0_0_24px_rgba(0,236,151,0.4)] min-h-[44px] min-w-[44px] active:scale-[0.97]"
             >
               Connect Wallet
             </Button>
@@ -141,12 +141,12 @@ export function ProfileContent() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-64 bg-surface rounded-2xl animate-pulse" />
-        <div className="h-16 bg-surface rounded-xl animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="h-48 sm:h-64 bg-surface rounded-2xl animate-pulse" />
+        <div className="h-12 sm:h-16 bg-surface rounded-xl animate-pulse" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-80 bg-surface rounded-xl animate-pulse" />
+            <div key={i} className="h-64 sm:h-80 bg-surface rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -156,13 +156,13 @@ export function ProfileContent() {
   const tier = (user?.tier as TierName) || 'shade';
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-4 sm:space-y-6 overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <GradientText as="h1" className="text-3xl font-bold">
+      <div className="flex items-center justify-between gap-2">
+        <GradientText as="h1" className="text-2xl sm:text-3xl font-bold">
           Void Command
         </GradientText>
-        <div className="text-sm text-text-muted font-mono">🐧 Your Builder HQ</div>
+        <div className="text-xs sm:text-sm text-text-muted font-mono flex-shrink-0">🐧 Your Builder HQ</div>
       </div>
 
       {/* Command Center */}

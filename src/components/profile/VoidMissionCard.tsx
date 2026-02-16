@@ -104,18 +104,18 @@ export function VoidMissionCard({ mission, onUpdate, onSetFocus, isFocused }: Vo
         </div>
       )}
 
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* Header: Health + Category + Status */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             {/* Health Indicator */}
-            <div className="flex gap-1">
+            <div className="flex gap-1.5 flex-shrink-0">
               {(['green', 'yellow', 'red'] as const).map((h) => (
                 <button
                   key={h}
                   onClick={() => handleHealthChange(h)}
                   className={cn(
-                    'w-2.5 h-2.5 rounded-full transition-all',
+                    'w-4 h-4 sm:w-2.5 sm:h-2.5 rounded-full transition-all min-w-[16px] min-h-[16px]',
                     HEALTH_COLORS[h],
                     health === h ? 'ring-2 ring-white ring-offset-1 ring-offset-background scale-110' : 'opacity-30 hover:opacity-60'
                   )}
@@ -140,8 +140,8 @@ export function VoidMissionCard({ mission, onUpdate, onSetFocus, isFocused }: Vo
         </div>
 
         {/* Title & Description */}
-        <Link href={`/opportunities/${mission.opportunity_id}`} className="group">
-          <h3 className="font-semibold text-text-primary group-hover:text-near-green transition-colors line-clamp-1">
+        <Link href={`/opportunities/${mission.opportunity_id}`} className="group min-h-[44px] flex flex-col justify-center">
+          <h3 className="font-semibold text-sm sm:text-base text-text-primary group-hover:text-near-green transition-colors line-clamp-1 break-words">
             {mission.opportunity?.title || 'Untitled Void'}
           </h3>
           {mission.opportunity?.description && (
@@ -166,7 +166,7 @@ export function VoidMissionCard({ mission, onUpdate, onSetFocus, isFocused }: Vo
                 key={pct}
                 onClick={() => handleProgressChange(pct)}
                 className={cn(
-                  'flex-1 text-xs py-1 rounded transition-colors',
+                  'flex-1 text-xs py-2 sm:py-1 rounded transition-colors min-h-[36px] sm:min-h-0 active:scale-[0.97]',
                   progress === pct
                     ? 'bg-near-green/20 text-near-green border border-near-green/30'
                     : 'bg-surface-hover text-text-muted hover:text-text-secondary'
@@ -203,13 +203,13 @@ export function VoidMissionCard({ mission, onUpdate, onSetFocus, isFocused }: Vo
         </div>
 
         {/* Notes */}
-        <div className="mt-4 pt-3 border-t border-border">
+        <div className="mt-3 sm:mt-4 pt-3 border-t border-border">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-text-muted">Notes</span>
             {!isEditingNotes && (
               <button 
                 onClick={() => setIsEditingNotes(true)}
-                className="text-xs text-near-green/70 hover:text-near-green"
+                className="text-xs text-near-green/70 hover:text-near-green min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-[0.97]"
               >
                 Edit
               </button>
@@ -242,12 +242,12 @@ export function VoidMissionCard({ mission, onUpdate, onSetFocus, isFocused }: Vo
       </div>
 
       {/* Footer Actions */}
-      <div className="border-t border-border bg-surface/50 p-3 flex items-center gap-2">
+      <div className="border-t border-border bg-surface/50 p-2 sm:p-3 flex items-center gap-1 sm:gap-2">
         {/* Status Selector */}
         <select
           value={status}
           onChange={(e) => handleStatusChange(e.target.value as MissionStatus)}
-          className="flex-1 bg-surface border border-border rounded-lg px-2 py-1.5 text-xs text-text-secondary focus:outline-none focus:border-near-green/50"
+          className="flex-1 min-w-0 bg-surface border border-border rounded-lg px-2 py-2 sm:py-1.5 text-xs text-text-secondary focus:outline-none focus:border-near-green/50 min-h-[44px] sm:min-h-0"
         >
           <option value="saved">📑 Saved</option>
           <option value="researching">🔍 Researching</option>
@@ -258,23 +258,23 @@ export function VoidMissionCard({ mission, onUpdate, onSetFocus, isFocused }: Vo
 
         {/* Quick Actions */}
         <Link href={`/opportunities/${mission.opportunity_id}`}>
-          <Button variant="ghost" size="sm" className="text-xs">
-            <FileText className="w-3.5 h-3.5" />
+          <Button variant="ghost" size="sm" className="text-xs min-h-[44px] min-w-[44px] active:scale-[0.97]">
+            <FileText className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </Button>
         </Link>
         <Link href={`/sanctum?void=${mission.opportunity_id}`}>
-          <Button variant="ghost" size="sm" className="text-xs">
-            <Code2 className="w-3.5 h-3.5" />
+          <Button variant="ghost" size="sm" className="text-xs min-h-[44px] min-w-[44px] active:scale-[0.97]">
+            <Code2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </Button>
         </Link>
         {onSetFocus && !isFocused && (
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-xs"
+            className="text-xs min-h-[44px] min-w-[44px] active:scale-[0.97]"
             onClick={() => onSetFocus(mission.opportunity_id)}
           >
-            <Target className="w-3.5 h-3.5" />
+            <Target className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </Button>
         )}
       </div>

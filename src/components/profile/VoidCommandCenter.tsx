@@ -103,7 +103,7 @@ export function VoidCommandCenter({
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-0 md:gap-0 min-h-[600px] bg-surface/30 rounded-2xl border border-border/30 overflow-hidden">
+    <div className="flex flex-col md:flex-row gap-0 md:gap-0 min-h-[400px] sm:min-h-[600px] bg-surface/30 rounded-xl sm:rounded-2xl border border-border/30 overflow-hidden overflow-x-hidden">
       {/* Sidebar / Tab Bar */}
       <CommandNav
         active={activeSection}
@@ -115,7 +115,7 @@ export function VoidCommandCenter({
       />
 
       {/* Main Content Panel */}
-      <main className="flex-1 min-w-0 p-4 md:p-6">
+      <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-6 overflow-x-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSection}

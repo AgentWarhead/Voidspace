@@ -52,8 +52,8 @@ export function MissionsSection({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 sm:space-y-4 min-w-0 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
         <SectionHeader
           title="Void Missions"
           count={missions.length}
@@ -61,11 +61,11 @@ export function MissionsSection({
         />
 
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-text-muted" />
+          <Filter className="w-4 h-4 text-text-muted flex-shrink-0" />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-            className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-secondary focus:outline-none focus:border-near-green/50"
+            className="bg-surface border border-border rounded-lg px-3 py-2 sm:py-1.5 text-sm text-text-secondary focus:outline-none focus:border-near-green/50 min-h-[44px] sm:min-h-0 flex-1 sm:flex-none active:scale-[0.97] transition-transform"
           >
             <option value="all">All Missions</option>
             <option value="saved">📑 Saved</option>
@@ -78,13 +78,13 @@ export function MissionsSection({
       </div>
 
       {missionsLoading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-80 bg-surface rounded-xl animate-pulse" />
           ))}
         </div>
       ) : sortedMissions.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           {sortedMissions.map((mission) => (
             <VoidMissionCard
               key={mission.id}
@@ -113,8 +113,8 @@ export function MissionsSection({
 
       {/* Footer Stats */}
       {missions.length > 0 && (
-        <Card variant="glass" padding="md" className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-6">
+        <Card variant="glass" padding="md" className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm">
+          <div className="flex items-center gap-3 sm:gap-6 flex-wrap min-w-0">
             <span className="text-text-muted">
               Total: <span className="text-text-primary font-mono">{missions.length}</span>
             </span>
@@ -133,7 +133,7 @@ export function MissionsSection({
           </div>
           <Link
             href="/opportunities"
-            className="text-near-green/70 hover:text-near-green transition-colors"
+            className="text-near-green/70 hover:text-near-green transition-all min-h-[44px] flex items-center active:scale-[0.97]"
           >
             + Add Mission
           </Link>

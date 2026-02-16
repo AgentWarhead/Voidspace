@@ -11,7 +11,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen relative">
       <GridPattern className="opacity-10" />
-      <Container size="lg" className="relative z-10 py-8">
+      <Container size="lg" className="relative z-10 py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
         <ProfileContent />
       </Container>
     </div>

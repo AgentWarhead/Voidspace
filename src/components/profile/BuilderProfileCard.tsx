@@ -86,13 +86,13 @@ export function BuilderProfileCard({
           }}
         />
 
-        <div className="relative p-6">
+        <div className="relative p-4 sm:p-6">
           {/* Header */}
-          <div className="flex items-start gap-4 mb-6">
+          <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
             {/* Avatar Area */}
-            <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-near-green/20 to-cyan-500/20 border border-near-green/30 flex items-center justify-center">
-                <span className="text-4xl">{currentRank.icon}</span>
+            <div className="relative flex-shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-near-green/20 to-cyan-500/20 border border-near-green/30 flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl">{currentRank.icon}</span>
               </div>
               {/* Tier Badge */}
               <div className="absolute -bottom-2 -right-2">
@@ -104,13 +104,13 @@ export function BuilderProfileCard({
 
             {/* Identity */}
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold text-text-primary truncate font-mono">
+              <h2 className="text-base sm:text-xl font-bold text-text-primary truncate font-mono break-words">
                 {accountId}
               </h2>
-              <div className={cn('text-sm font-medium mt-0.5', currentRank.color)}>
+              <div className={cn('text-xs sm:text-sm font-medium mt-0.5', currentRank.color)}>
                 {currentRank.icon} {currentRank.name}
               </div>
-              <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   Since {joinMonth} {joinYear}
@@ -129,14 +129,14 @@ export function BuilderProfileCard({
             </div>
 
             {/* Share Button */}
-            <Button variant="ghost" size="sm" className="text-text-muted hover:text-near-green" onClick={() => trackStat('profileShares')}>
+            <Button variant="ghost" size="sm" className="min-h-[44px] min-w-[44px] text-text-muted hover:text-near-green active:scale-[0.97]" onClick={() => trackStat('profileShares')}>
               <Share2 className="w-4 h-4" />
             </Button>
           </div>
 
           {/* XP Progress */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between text-sm mb-2">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
               <span className="text-text-secondary">Experience</span>
               <span className="font-mono text-near-green">{xp.toLocaleString()} XP</span>
             </div>
@@ -146,34 +146,34 @@ export function BuilderProfileCard({
                 <span>{currentRank.name}</span>
                 <span className="flex items-center gap-1">
                   {nextRank.icon} {nextRank.name} 
-                  <span className="text-text-secondary">({nextRank.minXp - xp} XP to go)</span>
+                  <span className="text-text-secondary hidden sm:inline">({nextRank.minXp - xp} XP to go)</span>
                 </span>
               </div>
             )}
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-4 gap-2">
-            <div className="bg-surface rounded-xl p-3 text-center border border-border hover:border-near-green/30 transition-colors">
-              <div className="text-2xl font-bold text-text-primary">{stats.voidsExplored}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="bg-surface rounded-xl p-2 sm:p-3 text-center border border-border hover:border-near-green/30 transition-colors">
+              <div className="text-xl sm:text-2xl font-bold text-text-primary">{stats.voidsExplored}</div>
               <div className="text-xs text-text-muted flex items-center justify-center gap-1 mt-1">
                 <Search className="w-3 h-3" /> Explored
               </div>
             </div>
-            <div className="bg-surface rounded-xl p-3 text-center border border-border hover:border-near-green/30 transition-colors">
-              <div className="text-2xl font-bold text-text-primary">{stats.briefsGenerated}</div>
+            <div className="bg-surface rounded-xl p-2 sm:p-3 text-center border border-border hover:border-near-green/30 transition-colors">
+              <div className="text-xl sm:text-2xl font-bold text-text-primary">{stats.briefsGenerated}</div>
               <div className="text-xs text-text-muted flex items-center justify-center gap-1 mt-1">
                 <FileText className="w-3 h-3" /> Briefs
               </div>
             </div>
-            <div className="bg-surface rounded-xl p-3 text-center border border-border hover:border-near-green/30 transition-colors">
-              <div className="text-2xl font-bold text-amber-400">{stats.building}</div>
+            <div className="bg-surface rounded-xl p-2 sm:p-3 text-center border border-border hover:border-near-green/30 transition-colors">
+              <div className="text-xl sm:text-2xl font-bold text-amber-400">{stats.building}</div>
               <div className="text-xs text-text-muted flex items-center justify-center gap-1 mt-1">
                 <Zap className="w-3 h-3" /> Building
               </div>
             </div>
-            <div className="bg-surface rounded-xl p-3 text-center border border-border hover:border-near-green/30 transition-colors">
-              <div className="text-2xl font-bold text-near-green">{stats.shipped}</div>
+            <div className="bg-surface rounded-xl p-2 sm:p-3 text-center border border-border hover:border-near-green/30 transition-colors">
+              <div className="text-xl sm:text-2xl font-bold text-near-green">{stats.shipped}</div>
               <div className="text-xs text-text-muted flex items-center justify-center gap-1 mt-1">
                 <Rocket className="w-3 h-3" /> Shipped
               </div>

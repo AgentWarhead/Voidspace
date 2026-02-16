@@ -104,12 +104,12 @@ export function AchievementsSection() {
 
   if (!isConnected) {
     return (
-      <div className="rounded-xl border border-border bg-surface/50 p-8 text-center">
-        <Trophy className="w-10 h-10 text-text-muted mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-text-primary mb-1">
+      <div className="rounded-xl border border-border bg-surface/50 p-4 sm:p-8 text-center">
+        <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-text-muted mx-auto mb-3" />
+        <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-1">
           Connect Wallet to Track Achievements
         </h3>
-        <p className="text-sm text-text-muted">
+        <p className="text-xs sm:text-sm text-text-muted">
           Sign in with your NEAR wallet to start earning achievements and XP.
         </p>
       </div>
@@ -117,17 +117,17 @@ export function AchievementsSection() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header + Progress */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-400" />
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-2">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
             Achievements
           </h2>
           <button
             onClick={() => setShowTimeline(!showTimeline)}
-            className="text-xs text-near-green/70 hover:text-near-green transition-colors"
+            className="text-xs text-near-green/70 hover:text-near-green transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-[0.97]"
           >
             {showTimeline ? 'Show Grid' : 'Recent Activity'}
           </button>
@@ -156,13 +156,13 @@ export function AchievementsSection() {
           />
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {(['all', 'unlocked', 'locked'] as FilterMode[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  'text-xs px-3 py-1 rounded-full border transition-colors capitalize',
+                  'text-xs px-3 py-2 sm:py-1 rounded-full border transition-colors capitalize min-h-[36px] active:scale-[0.97]',
                   filter === f
                     ? 'border-near-green/50 bg-near-green/10 text-near-green'
                     : 'border-border text-text-muted hover:text-text-secondary',
@@ -230,7 +230,7 @@ function FeaturedShowcase({
       <h3 className="text-xs uppercase tracking-wider text-text-muted font-medium">
         ⭐ Featured ({featured.length}/3)
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {featured.map((id) => {
           const achievement = ACHIEVEMENTS.find((a) => a.id === id);
           if (!achievement) return null;
@@ -261,11 +261,11 @@ function CategoryTabs({
   categoryProgress: Array<{ cat: AchievementCategory; total: number; done: number; pct: number }>;
 }) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
       <button
         onClick={() => onSelect('all')}
         className={cn(
-          'flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-all whitespace-nowrap',
+          'flex-shrink-0 text-xs px-3 py-2.5 sm:py-1.5 rounded-lg border transition-all whitespace-nowrap min-h-[44px] sm:min-h-0 active:scale-[0.97]',
           activeCategory === 'all'
             ? 'border-near-green/50 bg-near-green/10 text-near-green'
             : 'border-border/50 text-text-muted hover:text-text-secondary hover:border-border',
@@ -281,7 +281,7 @@ function CategoryTabs({
             key={cat}
             onClick={() => onSelect(cat)}
             className={cn(
-              'flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all whitespace-nowrap',
+              'flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-2.5 sm:py-1.5 rounded-lg border transition-all whitespace-nowrap min-h-[44px] sm:min-h-0 active:scale-[0.97]',
               isActive
                 ? 'border-near-green/50 bg-near-green/10 text-near-green'
                 : 'border-border/50 text-text-muted hover:text-text-secondary hover:border-border',
@@ -343,7 +343,7 @@ function GroupedAchievementGrid({
             {/* Category Header */}
             <button
               onClick={() => toggleCollapsed(cat)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-surface/50 hover:bg-surface-hover transition-colors"
+              className="w-full flex items-center justify-between px-3 sm:px-4 py-3 bg-surface/50 hover:bg-surface-hover transition-colors min-h-[44px] active:scale-[0.98]"
             >
               <div className="flex items-center gap-2">
                 <span className="text-base">{config.emoji}</span>
@@ -371,7 +371,7 @@ function GroupedAchievementGrid({
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 sm:p-3">
                     {items.map((a) => (
                       <AchievementCard
                         key={a.id}

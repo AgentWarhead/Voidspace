@@ -118,7 +118,7 @@ export function CommandNav({
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={cn(
-                  'relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 group',
+                  'relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 group min-h-[44px] active:scale-[0.98]',
                   isActive
                     ? 'bg-near-green/10 text-near-green'
                     : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover',
@@ -187,7 +187,7 @@ export function CommandNav({
       </nav>
 
       {/* Mobile Tab Bar */}
-      <nav className="md:hidden flex items-center gap-1 overflow-x-auto pb-2 scrollbar-hide px-1">
+      <nav className="md:hidden flex items-center gap-1 overflow-x-auto pb-2 scrollbar-hide px-2 -mx-2">
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.id;
           const badge = getBadgeCount(item.id);
@@ -197,7 +197,7 @@ export function CommandNav({
               key={item.id}
               onClick={() => onNavigate(item.id)}
               className={cn(
-                'relative flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap',
+                'relative flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] min-w-[44px] rounded-lg text-xs font-medium transition-all whitespace-nowrap active:scale-[0.97]',
                 isActive
                   ? 'bg-near-green/10 text-near-green border border-near-green/30'
                   : 'text-text-muted border border-transparent hover:text-text-secondary',
