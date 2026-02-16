@@ -1,9 +1,240 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Globe, ExternalLink, CheckCircle, Network, ArrowRight, Layers, Code, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
+  AlertTriangle, ArrowRight, Shield, Globe, Network,
+  Key, Layers, Lock, LinkIcon, Fingerprint,
+} from 'lucide-react';
+
+// ─── Interactive Visual: Multi-Chain Hub ────────────────────────────────────
+
+function MultiChainHub() {
+  const [activeChain, setActiveChain] = useState<number | null>(null);
+
+  const chains = [
+    {
+      name: 'Ethereum',
+      position: 'top',
+      color: 'from-blue-500/30 to-indigo-500/30',
+      border: 'border-blue-500/40',
+      textColor: 'text-blue-400',
+      bridge: 'Rainbow Bridge (Light Client)',
+      format: 'EVM transactions, ABI-encoded',
+      finality: '~12 minutes (64 blocks)',
+      trust: 'Trustless — full header chain verification via light client on NEAR',
+    },
+    {
+      name: 'Bitcoin',
+      position: 'right',
+      color: 'from-orange-500/30 to-yellow-500/30',
+      border: 'border-orange-500/40',
+      textColor: 'text-orange-400',
+      bridge: 'Chain Signatures (MPC)',
+      format: 'UTXO transactions, Script',
+      finality: '~60 minutes (6 blocks)',
+      trust: 'MPC-based — NEAR validators collectively sign BTC transactions',
+    },
+    {
+      name: 'Aurora',
+      position: 'bottom',
+      color: 'from-green-500/30 to-emerald-500/30',
+      border: 'border-green-500/40',
+      textColor: 'text-green-400',
+      bridge: 'Native (runs on NEAR)',
+      format: 'EVM-compatible, deployed as NEAR contract',
+      finality: '~1-2 seconds (inherits NEAR)',
+      trust: 'Native — Aurora is a smart contract on NEAR, no bridge needed',
+    },
+    {
+      name: 'Solana',
+      position: 'left',
+      color: 'from-purple-500/30 to-violet-500/30',
+      border: 'border-purple-500/40',
+      textColor: 'text-purple-400',
+      bridge: 'Chain Signatures + Wormhole',
+      format: 'Solana transactions, Borsh-encoded',
+      finality: '~13 seconds (32 slots)',
+      trust: 'MPC + Guardian network — multiple verification layers',
+    },
+  ];
+
+  return (
+    <div className="relative py-6">
+      {/* Hub-and-spoke layout */}
+      <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+        {/* NEAR Hub - center spanning both columns */}
+        <div className="col-span-2 flex justify-center mb-2">
+          <motion.div
+            className="w-28 h-28 rounded-full bg-gradient-to-br from-near-green/20 to-cyan-500/20 border-2 border-near-green/40 flex items-center justify-center"
+            animate={{ boxShadow: ['0 0 20px rgba(0,236,151,0.1)', '0 0 40px rgba(0,236,151,0.2)', '0 0 20px rgba(0,236,151,0.1)'] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            <div className="text-center">
+              <span className="text-2xl">⬡</span>
+              <p className="text-xs font-bold text-near-green mt-1">NEAR</p>
+              <p className="text-[9px] text-text-muted">Hub</p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Chain nodes */}
+        {chains.map((chain, i) => (
+          <motion.div
+            key={chain.name}
+            className={cn(
+              'rounded-xl border p-3 cursor-pointer transition-all text-center',
+              activeChain === i
+                ? `bg-gradient-to-br ${chain.color} ${chain.border} shadow-lg`
+                : 'bg-surface border-border hover:border-border-hover'
+            )}
+            whileHover={{ scale: 1.03 }}
+            onClick={() => setActiveChain(activeChain === i ? null : i)}
+          >
+            <p className={cn('text-sm font-bold', activeChain === i ? chain.textColor : 'text-text-primary')}>{chain.name}</p>
+            <p className="text-[10px] text-text-muted mt-0.5">Click to explore →</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Detail panel */}
+      <AnimatePresence>
+        {activeChain !== null && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden mt-4"
+          >
+            <Card variant="default" padding="md" className="border-purple-500/20 bg-purple-500/5">
+              <p className={cn('text-sm font-bold mb-3', chains[activeChain].textColor)}>
+                NEAR ↔ {chains[activeChain].name} Connection
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="text-text-muted mb-1">Bridge Type</p>
+                  <p className="text-text-secondary font-medium">{chains[activeChain].bridge}</p>
+                </div>
+                <div>
+                  <p className="text-text-muted mb-1">Finality Time</p>
+                  <p className="text-text-secondary font-medium">{chains[activeChain].finality}</p>
+                </div>
+                <div>
+                  <p className="text-text-muted mb-1">Message Format</p>
+                  <p className="text-text-secondary font-medium">{chains[activeChain].format}</p>
+                </div>
+                <div>
+                  <p className="text-text-muted mb-1">Trust Assumptions</p>
+                  <p className="text-text-secondary font-medium">{chains[activeChain].trust}</p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-center text-xs text-text-muted mt-4">
+        Click each chain to see bridge details and trust assumptions →
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ───────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="default" padding="md" className="cursor-pointer hover:border-border-hover transition-all" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-purple-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ──────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 0;
+
+  const question = 'What is the biggest security risk in multi-chain architecture?';
+  const options = [
+    'Bridge vulnerabilities — they\'re the most attacked component with billions in losses',
+    'Smart contract bugs on individual chains',
+    'Consensus mechanism failures',
+    'Private key management across chains',
+  ];
+  const explanation = 'Correct! Cross-chain bridges are the #1 target for hackers, with over $2B stolen in 2022 alone. Bridge code is complex, handles massive value, and often relies on trusted intermediaries — making it the weakest link in multi-chain systems.';
+  const wrongExplanation = 'Not quite. While all are risks, bridge vulnerabilities are the biggest threat in multi-chain architecture — over $2B was stolen from bridges in 2022 alone. They\'re complex, high-value targets that often rely on trusted intermediaries.';
+
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">{question}</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('mt-4 p-3 rounded-lg text-sm', selected === correctAnswer ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20')}>
+            {selected === correctAnswer ? `✓ ${explanation}` : `✕ ${wrongExplanation}`}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ────────────────────────────────────────────────────────────
 
 interface MultiChainWithNearProps {
   isActive: boolean;
@@ -11,21 +242,17 @@ interface MultiChainWithNearProps {
 }
 
 const MultiChainWithNear: React.FC<MultiChainWithNearProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
-
   return (
     <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+      {/* Accordion Header */}
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
             <Globe className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Multi-Chain with NEAR</h3>
-            <p className="text-text-muted text-sm">Building cross-chain dApps, bridges, and multi-chain orchestration</p>
+            <p className="text-text-muted text-sm">Cross-chain messaging, bridge protocols, multi-chain dApp architecture, and state verification</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -35,269 +262,153 @@ const MultiChainWithNear: React.FC<MultiChainWithNearProps> = ({ isActive, onTog
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Globe className="w-5 h-5 text-indigo-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-purple-500/20 p-6 space-y-8">
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary">The Big Idea</h4>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Building a multi-chain app is like opening restaurant franchises in different countries. Each location (chain) has
+                  different regulations (consensus), currencies (tokens), and customs (transaction formats).
+                  <span className="text-purple-400 font-medium"> NEAR acts as your headquarters</span> — coordinating operations
+                  across all locations through <span className="text-near-green font-medium">chain signatures</span> and message
+                  passing. Instead of building separate apps on each chain, you build one coordinating app on NEAR that can talk to all of them.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-2">🌐 Multi-Chain Hub</h4>
+                <p className="text-sm text-text-muted mb-4">NEAR at the center, connected to major chains. Each connection has different bridge types, finality times, and trust models.</p>
+                <MultiChainHub />
+              </div>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1">⚠️ Security Gotcha</h4>
+                    <p className="text-sm text-text-secondary">
+                      Cross-chain bridges are the <span className="text-orange-400 font-medium">#1 target for hackers</span> — over
+                      $2B stolen from bridges in 2022 alone. Never assume a bridge message is valid without independent verification.
+                      Use multiple verification sources. The Ronin Bridge hack ($625M) and Wormhole exploit ($320M) both exploited
+                      single points of trust failure.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Core Concepts */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h4>
+                <div className="space-y-3">
+                  <ConceptCard
+                    icon={Network}
+                    title="Hub-and-Spoke Architecture"
+                    preview="NEAR as the coordination layer connecting multiple chains."
+                    details="Instead of building N×(N-1) bridges between every pair of chains, use NEAR as a central hub. Each chain only needs one connection to NEAR. Chain signatures allow a NEAR account to sign transactions on any supported chain, making NEAR a universal coordinator. This reduces bridge complexity from O(n²) to O(n)."
+                  />
+                  <ConceptCard
+                    icon={LinkIcon}
+                    title="Cross-Chain Messaging"
+                    preview="How messages are verified and delivered between chains."
+                    details="Cross-chain messages follow a pattern: Event on Chain A → Proof generated → Relayer submits proof to Chain B → Chain B verifies proof → Action executed. The critical question is always: who verifies the proof? Light client bridges verify cryptographically. Optimistic bridges assume validity unless challenged. MPC bridges rely on a threshold of honest signers."
+                  />
+                  <ConceptCard
+                    icon={Fingerprint}
+                    title="State Proofs"
+                    preview="Cryptographic proofs that something happened on another chain."
+                    details="A state proof is a Merkle proof showing that a specific piece of data exists in a blockchain's state tree. For Ethereum→NEAR, you can prove an event was emitted by providing the receipt trie proof, block header, and enough headers to verify finality. This is trustless — no intermediary can fake it without breaking the chain's cryptography."
+                  />
+                  <ConceptCard
+                    icon={Layers}
+                    title="Bridge Protocols"
+                    preview="Different bridge designs: light client, optimistic, MPC-based."
+                    details="Light client bridges (like Rainbow Bridge) verify full header chains — most secure but expensive. Optimistic bridges assume messages are valid with a challenge period — cheaper but slower. MPC bridges (like chain signatures) use distributed key generation among validators — fast but rely on honest majority. Each makes different tradeoffs between security, cost, and speed."
+                  />
+                  <ConceptCard
+                    icon={Lock}
+                    title="Multi-Chain State Management"
+                    preview="Keeping state consistent across chains."
+                    details="The hardest problem in multi-chain: if you lock tokens on NEAR and mint on Ethereum, what happens if the Ethereum transaction fails? You need careful state machines with timeout-based recovery, two-phase commits, or optimistic execution with dispute resolution. Never leave assets in a half-bridged limbo state."
+                  />
+                  <ConceptCard
+                    icon={Key}
+                    title="Atomic Cross-Chain Operations"
+                    preview="Ensuring operations either complete on all chains or none."
+                    details="True atomicity across chains is impossible due to different finality times. Instead, protocols use 'eventual atomicity' — hash time-locked contracts (HTLCs) or intent-based systems where solvers guarantee execution. The key insight: you can't have simultaneous finality, but you can have guaranteed eventual settlement or guaranteed refund."
+                  />
+                </div>
+              </div>
+
+              {/* Attack / Defense Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card variant="default" padding="md" className="border-red-500/20">
+                  <h4 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Attack Vectors
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Bridge oracle manipulation:</strong> Compromising bridge validators or relayers</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">State proof forgery:</strong> Crafting invalid state proofs to fake cross-chain events</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Cross-chain replay:</strong> Replaying a valid message on a different chain</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Finality exploits:</strong> Acting on not-yet-final cross-chain state</li>
+                  </ul>
+                </Card>
+                <Card variant="default" padding="md" className="border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Defenses
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Multi-proof verification requiring multiple independent sources</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Light client verification with full header chain validation</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Chain-specific nonces and domain separators to prevent replay</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Waiting for sufficient confirmations per chain before acting</li>
+                  </ul>
+                </Card>
+              </div>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h4 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h4>
+                <ul className="space-y-2">
                   {[
-                    'NEAR as a multi-chain orchestration layer — coordinating actions across chains',
-                    'Rainbow Bridge architecture — trustless Ethereum ↔ NEAR bridge',
-                    'Building with chain signatures for Bitcoin, Ethereum, Solana integration',
-                    'Cross-chain state verification and light client patterns',
-                    'Designing dApps that abstract away the underlying chains',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'NEAR can serve as a multi-chain coordination hub via chain signatures.',
+                    'Every cross-chain message needs independent verification — never trust bridges blindly.',
+                    'State proofs provide cryptographic verification that events happened on other chains.',
+                    'Different chains have different finality times — always account for this in your design.',
+                    'Atomic cross-chain operations require careful design to prevent partial execution.',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <ArrowRight className="w-4 h-4 text-near-green flex-shrink-0 mt-0.5" />
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-indigo-500/20 bg-indigo-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-indigo-400 font-semibold">Why this matters:</span> The future is multi-chain. Users don&apos;t care which chain their assets are on — they want seamless experiences. NEAR&apos;s chain abstraction stack makes it the ideal orchestration layer.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Multi-Chain Architecture */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Network className="w-5 h-5 text-blue-400" />
-                    Multi-Chain Architecture Patterns
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    There are several patterns for building multi-chain applications with NEAR as the coordination layer:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Card variant="default" padding="md" className="border-blue-500/20">
-                      <h5 className="font-semibold text-blue-400 text-sm mb-2">Hub-and-Spoke</h5>
-                      <p className="text-xs text-text-muted">NEAR as the central hub. All cross-chain messages route through NEAR. Simplest to implement, NEAR pays for coordination gas.</p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-purple-500/20">
-                      <h5 className="font-semibold text-purple-400 text-sm mb-2">Direct Signing</h5>
-                      <p className="text-xs text-text-muted">NEAR contract directly signs transactions for other chains via chain signatures. No bridge needed for outgoing operations.</p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">Verification</h5>
-                      <p className="text-xs text-text-muted">Light clients on NEAR verify other chain state. Trustless proof verification for incoming cross-chain messages.</p>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 2: Rainbow Bridge */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <ArrowRight className="w-5 h-5 text-green-400" />
-                    Rainbow Bridge Deep Dive
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    The Rainbow Bridge is a trustless bridge between Ethereum and NEAR. It uses light client verification — no trusted third party:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-green-400 mb-2">{'// Rainbow Bridge architecture'}</div>
-                    <div className="text-near-green">{'// ETH → NEAR direction:'}</div>
-                    <div className="text-near-green">{'// 1. User locks tokens in Ethereum locker contract'}</div>
-                    <div className="text-near-green">{'// 2. Relayer submits ETH block headers to NEAR light client'}</div>
-                    <div className="text-near-green">{'// 3. NEAR light client verifies the ETH proof'}</div>
-                    <div className="text-near-green">{'// 4. NEAR mints wrapped tokens to user'}</div>
-                    <div className="mt-2 text-near-green">{'// NEAR → ETH direction:'}</div>
-                    <div className="text-near-green">{'// 1. User burns wrapped tokens on NEAR'}</div>
-                    <div className="text-near-green">{'// 2. Relayer submits NEAR block to ETH light client'}</div>
-                    <div className="text-near-green">{'// 3. ETH light client verifies NEAR proof (expensive!)'}</div>
-                    <div className="text-near-green">{'// 4. ETH locker releases original tokens'}</div>
-                    <div className="mt-2 text-near-green">{'// Challenge period: NEAR→ETH takes ~16 hours'}</div>
-                    <div className="text-near-green">{'// (optimistic verification with fraud proofs)'}</div>
-                  </div>
-                </section>
-
-                {/* Section 3: Cross-Chain with Chain Signatures */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-yellow-400" />
-                    Cross-Chain via Chain Signatures
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Chain signatures enable a more flexible multi-chain pattern — your NEAR contract can directly control assets on any chain:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-yellow-400 mb-2">{'// Multi-chain vault contract'}</div>
-                    <div className="text-near-green">{'#[near]'}</div>
-                    <div className="text-near-green">{'impl MultiChainVault {'}</div>
-                    <div className="text-near-green">{'    // Deposit tracking (off-chain monitoring)'}</div>
-                    <div className="text-near-green">{'    pub fn register_deposit('}</div>
-                    <div className="text-near-green">{'        &mut self, chain: String, tx_proof: Vec<u8>'}</div>
-                    <div className="text-near-green">{'    ) {'}</div>
-                    <div className="text-near-green">{'        // Verify proof of deposit on source chain'}</div>
-                    <div className="text-near-green">{'        // Credit user balance'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="mt-1 text-near-green">{'    // Withdraw to any chain'}</div>
-                    <div className="text-near-green">{'    pub fn withdraw('}</div>
-                    <div className="text-near-green">{'        &mut self, chain: String, to: String, amount: U128'}</div>
-                    <div className="text-near-green">{'    ) -> Promise {'}</div>
-                    <div className="text-near-green">{'        // Debit user balance'}</div>
-                    <div className="text-near-green">{'        // Construct transaction for target chain'}</div>
-                    <div className="text-near-green">{'        // Request chain signature to sign it'}</div>
-                    <div className="text-near-green">{'        let path = format!("{}-withdrawal", chain);'}</div>
-                    <div className="text-near-green">{'        self.request_signature(tx_bytes, path)'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 4: Light Client Verification */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-red-400" />
-                    Light Client Verification
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    For incoming cross-chain messages, you need trustless verification. NEAR supports light clients for multiple chains:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">Ethereum Light Client</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Deployed on NEAR as a smart contract</li>
-                        <li>• Verifies Ethereum block headers and receipts</li>
-                        <li>• Uses Ethereum consensus (beacon chain) proofs</li>
-                        <li>• ~10 minute verification delay</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-blue-500/20">
-                      <h5 className="font-semibold text-blue-400 text-sm mb-2">NEAR Light Client on ETH</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Deployed on Ethereum as a Solidity contract</li>
-                        <li>• Verifies NEAR block headers</li>
-                        <li>• Uses Ed25519 signature verification (expensive on ETH)</li>
-                        <li>• Optimistic with challenge period (~16 hours)</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 5: Multi-Chain dApp Design */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Code className="w-5 h-5 text-cyan-400" />
-                    Multi-Chain dApp Design
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Design patterns for building user-friendly multi-chain applications:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-cyan-400 mb-2">{'// Frontend multi-chain abstraction'}</div>
-                    <div className="text-near-green">{'class MultiChainApp {'}</div>
-                    <div className="text-near-green">{'  // Unified balance view across all chains'}</div>
-                    <div className="text-near-green">{'  async getPortfolio(nearAccountId: string) {'}</div>
-                    <div className="text-near-green">{'    const [nearBalance, ethBalance, btcBalance] = await Promise.all(['}</div>
-                    <div className="text-near-green">{'      this.getNearBalance(nearAccountId),'}</div>
-                    <div className="text-near-green">{'      this.getEthBalance(derivedEthAddress),'}</div>
-                    <div className="text-near-green">{'      this.getBtcBalance(derivedBtcAddress),'}</div>
-                    <div className="text-near-green">{'    ]);'}</div>
-                    <div className="text-near-green">{'    return { near: nearBalance, eth: ethBalance, btc: btcBalance };'}</div>
-                    <div className="text-near-green">{'  }'}</div>
-                    <div className="mt-1 text-near-green">{'  // Single function for any cross-chain transfer'}</div>
-                    <div className="text-near-green">{'  async transfer(from: ChainAsset, to: ChainAsset, amount: string) {'}</div>
-                    <div className="text-near-green">{'    if (from.chain === to.chain) return this.sameChainTransfer(from, to, amount);'}</div>
-                    <div className="text-near-green">{'    // Route through NEAR for cross-chain'}</div>
-                    <div className="text-near-green">{'    return this.crossChainTransfer(from, to, amount);'}</div>
-                    <div className="text-near-green">{'  }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 1: Multi-Chain Balance Viewer</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a frontend that takes a NEAR account ID, derives Ethereum and Bitcoin addresses via chain signatures, and shows a unified balance view across all three chains.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 2: Cross-Chain NFT</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Create an NFT that can be moved between NEAR and Ethereum. Mint on NEAR, lock on NEAR + mint wrapped on ETH (via chain signatures), and reverse the process.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 3: Multi-Chain DeFi Aggregator</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a swap aggregator that finds the best price across NEAR DEXs, Ethereum DEXs (Uniswap), and executes the optimal path. Use intents for the cross-chain routing.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 4: Cross-Chain Message Verifier</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a contract on NEAR that verifies Ethereum event logs. Submit an Ethereum receipt proof and verify that a specific event was emitted on Ethereum using the light client.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Rainbow Bridge', url: 'https://rainbowbridge.app/', desc: 'The official ETH↔NEAR trustless bridge' },
-                  { title: 'Rainbow Bridge Architecture', url: 'https://near.org/blog/eth-near-rainbow-bridge/', desc: 'Technical deep dive into bridge architecture' },
-                  { title: 'Chain Signatures for Multi-Chain', url: 'https://docs.near.org/concepts/abstraction/chain-signatures', desc: 'Using chain signatures for cross-chain operations' },
-                  { title: 'NEAR Light Client', url: 'https://github.com/near/rainbow-bridge', desc: 'Source code for NEAR/ETH light clients' },
-                  { title: 'Cross-Chain Communication Research', url: 'https://arxiv.org/abs/2210.16422', desc: 'Academic survey of cross-chain communication protocols' },
-                  { title: 'Aurora (NEAR EVM)', url: 'https://aurora.dev', desc: 'EVM compatibility layer on NEAR for Ethereum dApp migration' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

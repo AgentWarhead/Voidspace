@@ -1,9 +1,255 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Network, ExternalLink, CheckCircle, Zap, AlertTriangle, Code, ArrowRight, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
+  Shield, AlertTriangle, ArrowRight, GitBranch, Code,
+  Workflow, Terminal, Activity,
+} from 'lucide-react';
+
+// ─── Interactive Promise Chain Visual ───────────────────────────────────────
+
+function PromiseChainVisual() {
+  const [activeNode, setActiveNode] = useState<number | null>(null);
+
+  const nodes = [
+    {
+      id: 0,
+      label: 'Caller',
+      type: 'user',
+      gasStart: 100,
+      gasUsed: 10,
+      detail: 'User initiates a transaction with 100 TGas attached. The transaction calls Contract A with the remaining gas budget.',
+      color: 'from-indigo-500/30 to-indigo-600/20',
+      borderColor: 'border-indigo-500/40',
+      textColor: 'text-indigo-400',
+    },
+    {
+      id: 1,
+      label: 'Contract A',
+      type: 'promise',
+      gasStart: 90,
+      gasUsed: 25,
+      detail: 'Contract A executes its logic (10 TGas), creates a promise to Contract B attaching 50 TGas, and reserves 5 TGas for its callback.',
+      color: 'from-blue-500/30 to-blue-600/20',
+      borderColor: 'border-blue-500/40',
+      textColor: 'text-blue-400',
+    },
+    {
+      id: 2,
+      label: 'Contract B',
+      type: 'execution',
+      gasStart: 50,
+      gasUsed: 30,
+      detail: 'Contract B receives the promise, executes the requested function using 30 TGas. Returns a result (success or failure) that triggers the callback.',
+      color: 'from-cyan-500/30 to-cyan-600/20',
+      borderColor: 'border-cyan-500/40',
+      textColor: 'text-cyan-400',
+    },
+    {
+      id: 3,
+      label: 'Callback → A',
+      type: 'callback',
+      gasStart: 5,
+      gasUsed: 3,
+      detail: 'Contract A\'s callback fires with the reserved 5 TGas. It checks if Contract B succeeded or failed, and handles rollback logic if needed. Critical: Contract A\'s earlier state changes already persisted!',
+      color: 'from-emerald-500/30 to-emerald-600/20',
+      borderColor: 'border-emerald-500/40',
+      textColor: 'text-emerald-400',
+    },
+  ];
+
+  return (
+    <div className="relative py-6">
+      {/* Gas Budget Bar */}
+      <div className="mb-6 px-2">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-text-muted font-mono">Gas Budget</span>
+          <span className="text-xs text-text-muted font-mono">100 TGas total</span>
+        </div>
+        <div className="h-3 bg-surface border border-border rounded-full overflow-hidden flex">
+          {nodes.map((node) => (
+            <motion.div
+              key={node.id}
+              className={cn(
+                'h-full transition-all cursor-pointer',
+                node.id === 0 ? 'bg-indigo-500/60' :
+                node.id === 1 ? 'bg-blue-500/60' :
+                node.id === 2 ? 'bg-cyan-500/60' : 'bg-emerald-500/60',
+                activeNode === node.id && 'brightness-150'
+              )}
+              style={{ width: `${node.gasUsed}%` }}
+              onClick={() => setActiveNode(activeNode === node.id ? null : node.id)}
+              whileHover={{ scaleY: 1.3 }}
+            />
+          ))}
+          <div className="h-full bg-gray-700/30 flex-1" title="Unused gas (refunded)" />
+        </div>
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] text-text-muted">Used: 68 TGas</span>
+          <span className="text-[10px] text-emerald-400">Refunded: 32 TGas</span>
+        </div>
+      </div>
+
+      {/* Flow Nodes */}
+      <div className="flex flex-col md:flex-row items-center gap-2 md:gap-0">
+        {nodes.map((node, i) => (
+          <div key={node.id} className="flex items-center flex-shrink-0 w-full md:w-auto">
+            <motion.div
+              className={cn(
+                'relative rounded-xl p-3 border cursor-pointer transition-all w-full md:w-44',
+                `bg-gradient-to-br ${node.color} ${node.borderColor}`,
+                activeNode === node.id && 'ring-1 ring-white/20 shadow-lg'
+              )}
+              whileHover={{ scale: 1.03, y: -2 }}
+              onClick={() => setActiveNode(activeNode === node.id ? null : node.id)}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className={cn('text-xs font-bold font-mono', node.textColor)}>{node.label}</span>
+              </div>
+              <div className="text-[10px] text-text-muted">
+                <span>Gas: {node.gasStart} → {node.gasStart - node.gasUsed} TGas</span>
+              </div>
+              <AnimatePresence>
+                {activeNode === node.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="mt-2 pt-2 border-t border-white/10 text-[10px] text-text-secondary leading-relaxed">
+                      {node.detail}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+            {i < nodes.length - 1 && (
+              <motion.div
+                className="hidden md:flex items-center mx-1"
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.4 }}
+              >
+                <div className="w-6 h-0.5 bg-gradient-to-r from-blue-500/50 to-cyan-500/30" />
+                <ArrowRight className="w-3 h-3 text-blue-400/50" />
+              </motion.div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Gas Cost Summary */}
+      <div className="mt-4 p-3 rounded-lg bg-surface border border-border">
+        <p className="text-[10px] text-text-muted font-mono leading-relaxed">
+          💡 Promise creation: ~5 TGas base • Cross-contract call: 5-10 TGas overhead •
+          Deep chains (A→B→C→D) easily consume 100+ TGas — keep chains shallow
+        </p>
+      </div>
+
+      <p className="text-center text-xs text-text-muted mt-4">
+        Click nodes to see gas flow details →
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ───────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="default" padding="md" className="cursor-pointer hover:border-border-hover transition-all" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-indigo-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ──────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 1;
+
+  const question = 'What happens if a cross-contract callback fails on NEAR?';
+  const options = [
+    'The entire transaction reverts including all state changes',
+    'The calling contract\'s state changes persist — only the callback\'s changes revert',
+    'The transaction is automatically retried up to 3 times',
+    'Both contracts\' state changes are rolled back',
+  ];
+  const explanation = 'Correct! This is one of the most dangerous gotchas on NEAR. When Contract A calls Contract B and B\'s callback fails, Contract A\'s state changes from the original call are already committed. Only the callback function\'s own state changes revert. You must handle rollback logic explicitly.';
+  const wrongExplanation = 'Not quite. On NEAR, cross-contract calls are async. Contract A\'s state changes persist regardless of the callback outcome. Only the callback\'s own changes revert on failure — you must handle rollback explicitly!';
+
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">{question}</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('mt-4 p-3 rounded-lg text-sm', selected === correctAnswer ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20')}>
+            {selected === correctAnswer ? `✓ ${explanation}` : `✕ ${wrongExplanation}`}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ────────────────────────────────────────────────────────────
 
 interface CrossContractCallsProps {
   isActive: boolean;
@@ -11,336 +257,166 @@ interface CrossContractCallsProps {
 }
 
 const CrossContractCalls: React.FC<CrossContractCallsProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
-
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <Card variant="glass" padding="none" className="border-indigo-500/20">
+      {/* Accordion Header */}
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-            <Network className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <GitBranch className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Cross-Contract Calls</h3>
-            <p className="text-text-muted text-sm">Promises, callbacks, gas splitting, and async composition patterns</p>
+            <p className="text-text-muted text-sm">Promise-based async execution, callbacks, gas attachment, and error handling patterns</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge className="bg-red-500/10 text-red-300 border-red-500/20">Advanced</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">55 min</Badge>
+          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Network className="w-5 h-5 text-blue-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-indigo-500/20 p-6 space-y-8">
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-blue-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-indigo-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary">The Big Idea</h4>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Think of cross-contract calls like <span className="text-indigo-400 font-medium">sending a letter with a stamped return envelope</span>.
+                  You send your request (with gas money for postage), and include instructions for what to do when the reply
+                  comes back. But unlike real mail — if the reply fails, you need a <span className="text-blue-400 font-medium">plan B</span>.
+                  On NEAR, cross-contract calls are <span className="text-cyan-400 font-medium">fundamentally asynchronous</span> —
+                  each call executes in a separate block, and failure in one step doesn&apos;t automatically undo the others.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-2">🔍 Promise Chain &amp; Gas Flow</h4>
+                <p className="text-sm text-text-muted mb-4">Follow a cross-contract call from caller through promises to callback. Watch gas being consumed at each step.</p>
+                <PromiseChainVisual />
+              </div>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1">⚠️ Security Gotcha</h4>
+                    <p className="text-sm text-text-secondary">
+                      Cross-contract callbacks don&apos;t automatically revert the parent call! If Contract B fails,
+                      Contract A&apos;s state changes <span className="text-orange-300 font-medium">PERSIST</span>. You
+                      must handle rollback logic explicitly in your callback. This is the #1 source of bugs in NEAR
+                      smart contracts — developers assume Ethereum-style atomic transactions, but NEAR&apos;s async model
+                      means each step commits independently.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Core Concepts */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h4>
+                <div className="space-y-3">
+                  <ConceptCard
+                    icon={Code}
+                    title="Promise API"
+                    preview="Creating cross-contract calls in Rust using near_sdk's Promise type."
+                    details="The Promise API lets you create cross-contract calls: Promise::new(account_id).function_call(method, args, deposit, gas). Each promise is a deferred execution — it doesn't run immediately but is scheduled for the next block. You can chain promises with .then() to create callbacks. The key insight: promises are not Rust futures — they're blockchain-level execution units."
+                  />
+                  <ConceptCard
+                    icon={Activity}
+                    title="Gas Attachment"
+                    preview="Allocating gas for each cross-contract call — 5 TGas minimum per promise."
+                    details="Every promise needs gas to execute. You must explicitly allocate gas from your total budget: too little and the call fails, too much and you waste resources. Rule of thumb: 5 TGas minimum per promise, 5 TGas reserved for your callback. For complex operations, budget 10-30 TGas per call. The remaining unused gas is refunded to the original caller."
+                  />
+                  <ConceptCard
+                    icon={Workflow}
+                    title="Callbacks"
+                    preview="Handling success and failure of cross-contract promises."
+                    details="Callbacks fire after a promise resolves — regardless of whether it succeeded or failed. Use env::promise_results_count() and env::promise_result(0) to check the outcome. Critical pattern: in your callback, check the result FIRST, then update state. If the promise failed, implement rollback logic (refund tokens, revert state changes). Never assume success!"
+                  />
+                  <ConceptCard
+                    icon={GitBranch}
+                    title="Promise Batching"
+                    preview="Combining multiple actions into a single atomic promise."
+                    details="Promise batching lets you combine actions that execute atomically on a single account: create_account + transfer + deploy_contract + function_call. Batched actions either all succeed or all fail — unlike chained promises. Use batching for account setup, contract deployment, or any sequence that must be atomic. Syntax: Promise::new(id).create_account().transfer(amount).deploy_contract(code)."
+                  />
+                  <ConceptCard
+                    icon={Terminal}
+                    title="Error Propagation"
+                    preview="Understanding what happens when a promise fails — state rollback is NOT automatic."
+                    details="When a promise fails, ONLY the failing function's state changes revert. The caller's state changes persist! This means: if Contract A updates its balance, then calls Contract B which fails — Contract A's balance change is permanent. You MUST check promise results in callbacks and handle failures. Pattern: 1) Save rollback data before the call, 2) In callback, check result, 3) If failed, use saved data to undo changes."
+                  />
+                </div>
+              </div>
+
+              {/* Attack Vector / Defense */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card variant="default" padding="md" className="border-red-500/20">
+                  <h4 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Attack Vectors
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Reentrancy via callbacks — attacker contract calls back into the original contract before state is updated, exploiting stale state</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Gas exhaustion — attacker provides just enough gas for the main call but not the callback, causing silent failure in rollback logic</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Callback manipulation — malicious contract returns crafted data to mislead the callback&apos;s decision logic</li>
+                  </ul>
+                </Card>
+                <Card variant="default" padding="md" className="border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Defenses
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Checks-effects-interactions pattern — update state BEFORE making external calls, then verify in callback</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Explicit gas budgeting — always reserve at least 5 TGas for callbacks; use assert! to verify sufficient gas before external calls</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Validate callback caller — use env::current_account_id() to ensure only your own contract can invoke the callback</li>
+                  </ul>
+                </Card>
+              </div>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h4 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h4>
+                <ul className="space-y-2">
                   {[
-                    'The Promise API — low-level cross-contract calls with fine-grained gas control',
-                    'High-level #[ext_contract] macro patterns and their tradeoffs',
-                    'Gas splitting strategies — how to budget across multi-hop call chains',
-                    'Callback patterns — handling success, failure, and partial failures',
-                    'Atomic-like guarantees in an async world — saga and compensating patterns',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'Cross-contract calls are async via the Promise API — each executes in a separate block',
+                    'Callbacks must explicitly handle failure — there is no automatic rollback of the parent call',
+                    'Always budget gas carefully — 5 TGas minimum per promise, 5 TGas reserved for callbacks',
+                    'Use checks-effects-interactions pattern to prevent reentrancy attacks via callbacks',
+                    'Promise batching combines multiple actions atomically on a single account — use it for setup flows',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <ArrowRight className="w-4 h-4 text-near-green flex-shrink-0 mt-0.5" />
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-blue-500/20 bg-blue-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-blue-400 font-semibold">Why this matters:</span> Cross-contract calls are NEAR&apos;s composability primitive. Every DeFi protocol, DAO, and complex dApp relies on them. Getting the patterns wrong leads to locked funds, reentrancy bugs, and gas-limit failures.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Promise Fundamentals */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-400" />
-                    Promise Fundamentals
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Every cross-contract call on NEAR is a Promise. Unlike JavaScript promises, NEAR promises are on-chain objects that schedule receipt execution across blocks and potentially across shards.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-yellow-400 mb-2">{'// Low-level Promise API in Rust'}</div>
-                    <div className="text-near-green">{`use near_sdk::{env, Promise, Gas, NearToken};`}</div>
-                    <div className="mt-2 text-near-green">{`// Simple cross-contract call`}</div>
-                    <div className="text-near-green">{`let promise = Promise::new("target.near".parse().unwrap())`}</div>
-                    <div className="text-near-green">{`    .function_call(`}</div>
-                    <div className="text-near-green">{`        "method_name".to_string(),`}</div>
-                    <div className="text-near-green">{`        json!({ "arg1": "value" })`}</div>
-                    <div className="text-near-green">{`            .to_string().into_bytes(),`}</div>
-                    <div className="text-near-green">{`        NearToken::from_yoctonear(0),  // attached deposit`}</div>
-                    <div className="text-near-green">{`        Gas::from_tgas(10),             // gas for this call`}</div>
-                    <div className="text-near-green">{`    );`}</div>
-                    <div className="mt-2 text-near-green">{`// Chain a callback on the CURRENT contract`}</div>
-                    <div className="text-near-green">{`promise.then(`}</div>
-                    <div className="text-near-green">{`    Promise::new(env::current_account_id())`}</div>
-                    <div className="text-near-green">{`        .function_call(`}</div>
-                    <div className="text-near-green">{`            "on_method_complete".to_string(),`}</div>
-                    <div className="text-near-green">{`            vec![],`}</div>
-                    <div className="text-near-green">{`            NearToken::from_yoctonear(0),`}</div>
-                    <div className="text-near-green">{`            Gas::from_tgas(5),`}</div>
-                    <div className="text-near-green">{`        )`}</div>
-                    <div className="text-near-green">{`);`}</div>
-                  </div>
-                </section>
-
-                {/* Section 2: High-Level Patterns */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Code className="w-5 h-5 text-green-400" />
-                    High-Level Cross-Contract Patterns
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    The <code className="text-purple-400 bg-purple-500/10 px-1 rounded">#[ext_contract]</code> macro generates type-safe cross-contract interfaces. Here&apos;s production-grade usage:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-green-400 mb-2">{'// Define external contract interface'}</div>
-                    <div className="text-near-green">{`#[ext_contract(ext_ft)]`}</div>
-                    <div className="text-near-green">{`trait FungibleToken {`}</div>
-                    <div className="text-near-green">{`    fn ft_transfer(`}</div>
-                    <div className="text-near-green">{`        &mut self,`}</div>
-                    <div className="text-near-green">{`        receiver_id: AccountId,`}</div>
-                    <div className="text-near-green">{`        amount: U128,`}</div>
-                    <div className="text-near-green">{`        memo: Option<String>,`}</div>
-                    <div className="text-near-green">{`    );`}</div>
-                    <div className="text-near-green">{`    fn ft_balance_of(&self, account_id: AccountId) -> U128;`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                    <div className="mt-2 text-green-400">{'// Usage in your contract'}</div>
-                    <div className="text-near-green">{`ext_ft::ext(token_contract_id)`}</div>
-                    <div className="text-near-green">{`    .with_attached_deposit(NearToken::from_yoctonear(1))`}</div>
-                    <div className="text-near-green">{`    .with_static_gas(Gas::from_tgas(10))`}</div>
-                    <div className="text-near-green">{`    .ft_transfer(receiver, amount, None)`}</div>
-                    <div className="text-near-green">{`    .then(`}</div>
-                    <div className="text-near-green">{`        Self::ext(env::current_account_id())`}</div>
-                    <div className="text-near-green">{`            .with_static_gas(Gas::from_tgas(5))`}</div>
-                    <div className="text-near-green">{`            .on_ft_transfer_complete()`}</div>
-                    <div className="text-near-green">{`    )`}</div>
-                  </div>
-                </section>
-
-                {/* Section 3: Gas Splitting */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <ArrowRight className="w-5 h-5 text-orange-400" />
-                    Gas Splitting Strategies
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    With 300 TGas max per transaction, you must carefully budget gas across call chains. Here&apos;s how the pros do it:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="font-semibold text-orange-400 text-sm mb-2">Static Gas Allocation</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Pre-calculate gas for each step</li>
-                        <li>• Reserve gas for callbacks before making calls</li>
-                        <li>• Typical: 5 TGas callback, 10-20 TGas per external call</li>
-                        <li>• Leave buffer for refund receipts (~2 TGas)</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-yellow-500/20">
-                      <h5 className="font-semibold text-yellow-400 text-sm mb-2">Dynamic Gas Allocation</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Use <code className="text-purple-400">env::prepaid_gas()</code> to check budget</li>
-                        <li>• Split remaining gas proportionally</li>
-                        <li>• Pattern: keep 1/3 for callback, give 2/3 to callee</li>
-                        <li>• Use <code className="text-purple-400">Gas::from_tgas(0)</code> to donate all remaining</li>
-                      </ul>
-                    </Card>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border mt-3">
-                    <div className="text-orange-400 mb-2">{'// Dynamic gas splitting pattern'}</div>
-                    <div className="text-near-green">{`const CALLBACK_GAS: Gas = Gas::from_tgas(10);`}</div>
-                    <div className="text-near-green">{`const BUFFER_GAS: Gas = Gas::from_tgas(5);`}</div>
-                    <div className="text-near-green">{``}</div>
-                    <div className="text-near-green">{`let remaining = env::prepaid_gas() - env::used_gas();`}</div>
-                    <div className="text-near-green">{`let call_gas = remaining - CALLBACK_GAS - BUFFER_GAS;`}</div>
-                  </div>
-                </section>
-
-                {/* Section 4: Callback Patterns */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-red-400" />
-                    Callback Error Handling
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Callbacks ALWAYS execute even if the promise failed. You must check the result and handle rollback manually:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-red-400 mb-2">{'// Production callback pattern'}</div>
-                    <div className="text-near-green">{`#[private]`}</div>
-                    <div className="text-near-green">{`pub fn on_transfer_complete(`}</div>
-                    <div className="text-near-green">{`    &mut self,`}</div>
-                    <div className="text-near-green">{`    #[callback_result] result: Result<U128, PromiseError>,`}</div>
-                    <div className="text-near-green">{`) -> bool {`}</div>
-                    <div className="text-near-green">{`    match result {`}</div>
-                    <div className="text-near-green">{`        Ok(balance) => {`}</div>
-                    <div className="text-near-green">{`            log!("Transfer succeeded, balance: {}", balance.0);`}</div>
-                    <div className="text-near-green">{`            true`}</div>
-                    <div className="text-near-green">{`        }`}</div>
-                    <div className="text-near-green">{`        Err(_) => {`}</div>
-                    <div className="text-near-green">{`            // CRITICAL: Rollback state changes`}</div>
-                    <div className="text-near-green">{`            self.pending_transfers.remove(&env::predecessor_account_id());`}</div>
-                    <div className="text-near-green">{`            log!("Transfer failed — state rolled back");`}</div>
-                    <div className="text-near-green">{`            false`}</div>
-                    <div className="text-near-green">{`        }`}</div>
-                    <div className="text-near-green">{`    }`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                  </div>
-                  <Card variant="default" padding="md" className="mt-3 border-red-500/20 bg-red-500/5">
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-text-secondary">
-                        <strong className="text-red-400">Critical:</strong> Never modify state before a cross-contract call without a rollback plan in the callback. This is the #1 source of fund-loss bugs on NEAR.
-                      </p>
-                    </div>
-                  </Card>
-                </section>
-
-                {/* Section 5: Promise Combinators */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-cyan-400" />
-                    Promise Combinators: and &amp; then
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    NEAR supports two promise combinators for parallel and sequential execution:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">.then() — Sequential</h5>
-                      <p className="text-xs text-text-muted mb-2">Execute B after A completes. B receives A&apos;s result.</p>
-                      <div className="bg-black/30 rounded p-2 font-mono text-xs text-near-green">
-                        {`promise_a.then(promise_b)`}
-                      </div>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-purple-500/20">
-                      <h5 className="font-semibold text-purple-400 text-sm mb-2">.and() — Parallel</h5>
-                      <p className="text-xs text-text-muted mb-2">Execute A and B in parallel. Callback receives both results.</p>
-                      <div className="bg-black/30 rounded p-2 font-mono text-xs text-near-green">
-                        {`promise_a.and(promise_b).then(callback)`}
-                      </div>
-                    </Card>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border mt-3">
-                    <div className="text-cyan-400 mb-2">{'// Parallel cross-contract calls (fan-out pattern)'}</div>
-                    <div className="text-near-green">{`let p1 = ext_oracle::ext(oracle_a.clone())`}</div>
-                    <div className="text-near-green">{`    .with_static_gas(Gas::from_tgas(10))`}</div>
-                    <div className="text-near-green">{`    .get_price("NEAR/USD".to_string());`}</div>
-                    <div className="text-near-green">{``}</div>
-                    <div className="text-near-green">{`let p2 = ext_oracle::ext(oracle_b.clone())`}</div>
-                    <div className="text-near-green">{`    .with_static_gas(Gas::from_tgas(10))`}</div>
-                    <div className="text-near-green">{`    .get_price("NEAR/USD".to_string());`}</div>
-                    <div className="text-near-green">{``}</div>
-                    <div className="text-near-green">{`// Both calls execute in the same block`}</div>
-                    <div className="text-near-green">{`p1.and(p2).then(`}</div>
-                    <div className="text-near-green">{`    Self::ext(env::current_account_id())`}</div>
-                    <div className="text-near-green">{`        .on_prices_received()`}</div>
-                    <div className="text-near-green">{`)`}</div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 1: Multi-Contract Swap</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a contract that performs an atomic-style swap: transfer token A from user → pool, transfer token B from pool → user. Handle failure at every step with proper rollback.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 2: Oracle Aggregator</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a price oracle aggregator that queries 3 oracle contracts in parallel using <code className="text-purple-400 bg-purple-500/10 px-1 rounded">.and()</code>, then computes the median price in the callback. Handle cases where 1 or 2 oracles fail.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 3: Gas Budget Calculator</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Write a contract that makes a 4-hop cross-contract call chain (A → B → C → D → callback). Log the gas used at each step and verify your gas budgeting is correct. Push the limits of 300 TGas.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 4: Saga Pattern</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Implement a saga pattern: a multi-step workflow where each step has a compensating action. If step 3 of 5 fails, the contract must execute compensating actions for steps 2 and 1 in reverse order.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Cross-Contract Calls Guide', url: 'https://docs.near.org/build/smart-contracts/anatomy/crosscontract', desc: 'Official guide to cross-contract calls with examples' },
-                  { title: 'Promise API Reference', url: 'https://docs.near.org/sdk/rust/promises/intro', desc: 'Low-level promise API docs for Rust SDK' },
-                  { title: 'Callback Patterns', url: 'https://docs.near.org/sdk/rust/promises/callbacks', desc: 'Handling results and errors in callbacks' },
-                  { title: 'Gas Deep Dive', url: 'https://docs.near.org/concepts/protocol/gas', desc: 'Understanding gas costs and allocation strategies' },
-                  { title: 'Ref Finance Contracts', url: 'https://github.com/ref-finance/ref-contracts', desc: 'Production cross-contract patterns from the biggest NEAR DEX' },
-                  { title: 'near-sdk-rs Cross-Contract Examples', url: 'https://github.com/near/near-sdk-rs/tree/master/examples', desc: 'Official SDK examples with cross-contract patterns' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

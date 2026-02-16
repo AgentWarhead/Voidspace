@@ -1,9 +1,245 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, ExternalLink, CheckCircle, ShieldCheck, FlaskConical, Bug, ScanSearch, FileCheck, Binary } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
+  Shield, AlertTriangle, ArrowRight, FileCode, Search,
+  Brain, Crosshair, GitBranch, Eye, Lock,
+} from 'lucide-react';
+
+// ─── Interactive Visual: Verification Spectrum ──────────────────────────────
+
+function VerificationSpectrumVisual() {
+  const [activeLevel, setActiveLevel] = useState<number | null>(null);
+
+  const levels = [
+    {
+      label: 'Manual Review',
+      rigor: 1,
+      color: 'bg-red-500',
+      timeCost: 'Low',
+      bugsCaught: 'Surface-level',
+      confidence: '~40%',
+      tools: 'Human eyeballs, code review checklists',
+      description: 'A developer or auditor reads the code and looks for issues. Catches obvious bugs but misses edge cases. Highly dependent on reviewer expertise. Essential as a first pass but insufficient alone.',
+    },
+    {
+      label: 'Unit Tests',
+      rigor: 2,
+      color: 'bg-orange-500',
+      timeCost: 'Low-Medium',
+      bugsCaught: 'Known scenarios',
+      confidence: '~55%',
+      tools: 'cargo test, NEAR workspaces',
+      description: 'Testing specific inputs and expected outputs. Great for regression testing and documenting behavior. But only tests the cases you think of — can\'t catch unknown unknowns.',
+    },
+    {
+      label: 'Fuzzing',
+      rigor: 3,
+      color: 'bg-amber-500',
+      timeCost: 'Medium',
+      bugsCaught: 'Crashes, panics',
+      confidence: '~65%',
+      tools: 'cargo-fuzz, AFL, honggfuzz',
+      description: 'Automatically generates random inputs and feeds them to your code, looking for crashes, panics, and assertion failures. Finds bugs humans would never think to test. Run for hours or days for best results.',
+    },
+    {
+      label: 'Property Testing',
+      rigor: 4,
+      color: 'bg-yellow-500',
+      timeCost: 'Medium-High',
+      bugsCaught: 'Invariant violations',
+      confidence: '~75%',
+      tools: 'proptest, QuickCheck-style',
+      description: 'Define properties that must ALWAYS hold (e.g., "total supply never changes"), then generate thousands of random test cases. If any input violates the property, you\'ve found a bug. Much more powerful than example-based testing.',
+    },
+    {
+      label: 'Symbolic Execution',
+      rigor: 5,
+      color: 'bg-emerald-500',
+      timeCost: 'High',
+      bugsCaught: 'All reachable paths',
+      confidence: '~88%',
+      tools: 'KANI, CBMC, Mythril',
+      description: 'Treats all inputs as symbolic variables and explores every possible execution path. Mathematically determines which paths can reach which states. Finds edge cases that no amount of random testing would discover.',
+    },
+    {
+      label: 'Full Formal Verification',
+      rigor: 6,
+      color: 'bg-green-500',
+      timeCost: 'Very High',
+      bugsCaught: 'Mathematical proof',
+      confidence: '~99%',
+      tools: 'Coq, Isabelle, KANI proofs',
+      description: 'Mathematically PROVES that your code satisfies its specification for ALL possible inputs. The gold standard — but requires a formal specification and significant expertise. The confidence gap from 99% to 100% is the spec itself: if the spec is wrong, the proof is meaningless.',
+    },
+  ];
+
+  return (
+    <div className="relative py-6">
+      {/* Spectrum bar */}
+      <div className="flex items-center gap-1 mb-4">
+        <span className="text-[10px] text-text-muted mr-2 flex-shrink-0">Less rigorous</span>
+        {levels.map((level, i) => (
+          <motion.div
+            key={i}
+            className={cn(
+              'flex-1 h-10 rounded-md cursor-pointer flex items-center justify-center relative transition-all',
+              activeLevel === i
+                ? `${level.color} shadow-lg`
+                : `${level.color}/30 hover:${level.color}/50`
+            )}
+            whileHover={{ y: -2 }}
+            onClick={() => setActiveLevel(activeLevel === i ? null : i)}
+          >
+            <span className={cn(
+              'text-[10px] font-medium text-center leading-tight px-1',
+              activeLevel === i ? 'text-white' : 'text-text-muted'
+            )}>
+              {level.label}
+            </span>
+          </motion.div>
+        ))}
+        <span className="text-[10px] text-text-muted ml-2 flex-shrink-0">Most rigorous</span>
+      </div>
+
+      {/* Detail panel */}
+      <AnimatePresence>
+        {activeLevel !== null && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 rounded-lg bg-surface border border-border">
+              <h5 className="font-semibold text-text-primary text-sm mb-3">{levels[activeLevel].label}</h5>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                <div className="text-xs">
+                  <span className="text-text-muted block">Time Cost</span>
+                  <span className="text-text-secondary font-medium">{levels[activeLevel].timeCost}</span>
+                </div>
+                <div className="text-xs">
+                  <span className="text-text-muted block">Bugs Found</span>
+                  <span className="text-text-secondary font-medium">{levels[activeLevel].bugsCaught}</span>
+                </div>
+                <div className="text-xs">
+                  <span className="text-text-muted block">Confidence</span>
+                  <span className="text-emerald-400 font-medium">{levels[activeLevel].confidence}</span>
+                </div>
+                <div className="text-xs">
+                  <span className="text-text-muted block">Tools</span>
+                  <span className="text-text-secondary font-medium">{levels[activeLevel].tools}</span>
+                </div>
+              </div>
+              <p className="text-xs text-text-muted leading-relaxed">{levels[activeLevel].description}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-center text-xs text-text-muted mt-4">
+        Click levels to explore the verification spectrum →
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ───────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="default" padding="md" className="cursor-pointer hover:border-border-hover transition-all" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ──────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 1;
+
+  const question = 'What does formal verification guarantee that testing cannot?';
+  const options = [
+    'That the code has no bugs whatsoever',
+    'That properties hold for ALL possible inputs, not just tested ones',
+    'That the contract is gas-efficient and optimized',
+    'That the user experience is intuitive and well-designed',
+  ];
+  const explanation = 'Correct! Testing checks specific examples. Formal verification proves properties hold for every possible input — mathematically. This is why it\'s the gold standard for security-critical code. But remember: it proves your code matches your spec, not that your spec is correct.';
+  const wrongExplanation = 'Not quite. Formal verification guarantees that specified properties hold for ALL possible inputs — not just the ones you test. It\'s mathematical proof vs. empirical evidence.';
+
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">{question}</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('mt-4 p-3 rounded-lg text-sm', selected === correctAnswer ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20')}>
+            {selected === correctAnswer ? `✓ ${explanation}` : `✕ ${wrongExplanation}`}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ────────────────────────────────────────────────────────────
 
 interface FormalVerificationProps {
   isActive: boolean;
@@ -11,295 +247,164 @@ interface FormalVerificationProps {
 }
 
 const FormalVerification: React.FC<FormalVerificationProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
-
   return (
     <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+      {/* Accordion Header */}
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
-            <ShieldCheck className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+            <FileCode className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Formal Verification</h3>
-            <p className="text-text-muted text-sm">Property testing, invariants, model checking, and symbolic execution for smart contracts</p>
+            <p className="text-text-muted text-sm">Mathematical proofs for smart contracts, model checking, property testing, and verification tools</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className="bg-yellow-500/10 text-yellow-300 border-yellow-500/20">Expert</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">75 min</Badge>
+          <Badge className="bg-red-500/10 text-red-300 border-red-500/20">Advanced</Badge>
+          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <ShieldCheck className="w-5 h-5 text-red-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-purple-500/20 p-6 space-y-8">
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary">The Big Idea</h4>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Testing tells you &quot;it worked for these inputs.&quot; Formal verification tells you{' '}
+                  <span className="text-emerald-400 font-medium">&quot;it works for ALL possible inputs — mathematically guaranteed.&quot;</span>{' '}
+                  It&apos;s the difference between test-driving a car on a few roads vs. mathematically proving the brakes
+                  will work under every possible condition. For smart contracts holding millions,{' '}
+                  <span className="text-near-green font-medium">&quot;probably works&quot; isn&apos;t good enough</span>.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-2">🔍 Verification Spectrum</h4>
+                <p className="text-sm text-text-muted mb-4">From manual review to full formal proofs — each level offers more rigor at higher cost.</p>
+                <VerificationSpectrumVisual />
+              </div>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1">⚠️ Security Gotcha</h4>
+                    <p className="text-sm text-text-secondary">Formal verification proves your CODE matches your SPEC — but if your spec is wrong, your verified code is perfectly implementing the wrong behavior! Always have the spec reviewed independently from the code.</p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Core Concepts */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h4>
+                <div className="space-y-3">
+                  <ConceptCard icon={Brain} title="Formal Methods Overview" preview="Using mathematical logic to PROVE properties about programs." details="Formal methods apply mathematical logic and proof techniques to software. Instead of testing examples, you write a formal specification of what the code should do, then use automated tools to prove the code satisfies that specification for every possible input. This is the highest level of assurance possible in software engineering." />
+                  <ConceptCard icon={Search} title="Property-Based Testing" preview="Define invariants, then generate random inputs to find violations." details="Property-based testing (QuickCheck-style) lets you define properties like 'total_supply never changes after a transfer' and automatically generates thousands of random inputs to try to violate them. If the tool finds a counterexample, you've found a bug. Libraries like proptest for Rust make this accessible without formal methods expertise." />
+                  <ConceptCard icon={GitBranch} title="Symbolic Execution" preview="Exploring ALL execution paths by treating inputs as symbols." details="Instead of running code with concrete values, symbolic execution treats inputs as mathematical symbols and explores every possible path through the code. It builds a logical formula for each path and uses SAT/SMT solvers to find inputs that reach specific states. This catches edge cases that random testing would take years to find." />
+                  <ConceptCard icon={Eye} title="Model Checking" preview="Exhaustively checking all reachable states against a specification." details="Model checking systematically explores every reachable state of your contract and verifies that a property holds in all of them. For example: 'In no reachable state can a non-owner call the admin function.' The challenge is state space explosion — complex contracts have billions of reachable states, requiring abstraction techniques." />
+                  <ConceptCard icon={Lock} title="Invariant Verification" preview="Proving conditions that must ALWAYS hold: balance ≥ 0, access control." details="Invariants are the most valuable properties to verify: total supply is conserved, balances never go negative, only the owner can call admin functions, reentrancy is impossible. These are the properties that, if violated, lead to catastrophic exploits. Start with these before attempting full behavioral verification." />
+                  <ConceptCard icon={Crosshair} title="Tools for NEAR" preview="KANI, cargo-fuzz, proptest, and NEAR workspaces for Rust contracts." details="KANI is a model checker for Rust that can prove properties about NEAR contracts. cargo-fuzz provides fuzzing infrastructure. proptest enables property-based testing in Rust. NEAR workspaces provides integration testing with a real NEAR sandbox. The recommended progression: unit tests → proptest → cargo-fuzz → KANI for maximum coverage." />
+                </div>
+              </div>
+
+              {/* Practical Example */}
+              <Card variant="default" padding="md" className="border-emerald-500/20">
+                <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                  <FileCode className="w-4 h-4" /> Practical Verification Progression
+                </h4>
+                <p className="text-xs text-text-muted mb-3">Recommended approach for a NEAR token contract:</p>
+                <div className="space-y-2">
                   {[
-                    'What formal verification means for smart contracts and why testing isn\'t enough',
-                    'Property-based testing with proptest: generating thousands of random test cases',
-                    'Invariant testing patterns for stateful smart contract validation',
-                    'Model checking approaches: exhaustively verifying all possible states',
-                    'Symbolic execution tools: KLEE, Manticore, and their application to Rust/WASM',
+                    { step: '1', label: 'Unit Tests', desc: 'Test transfer, mint, burn with known inputs', effort: 'Hours' },
+                    { step: '2', label: 'Property Tests', desc: 'Prove: total_supply == sum(all_balances) for random inputs', effort: 'Days' },
+                    { step: '3', label: 'Fuzzing', desc: 'Random call sequences to find panics and edge cases', effort: 'Days' },
+                    { step: '4', label: 'Symbolic Execution', desc: 'Prove no path allows balance underflow', effort: 'Weeks' },
+                    { step: '5', label: 'KANI Proofs', desc: 'Mathematical proof that access control is never bypassed', effort: 'Weeks' },
                   ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    <div key={i} className="flex items-center gap-3 text-xs">
+                      <span className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold flex-shrink-0">{item.step}</span>
+                      <div className="flex-1">
+                        <span className="text-text-primary font-medium">{item.label}</span>
+                        <span className="text-text-muted"> — {item.desc}</span>
+                      </div>
+                      <span className="text-text-muted flex-shrink-0">~{item.effort}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Attack / Defense Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card variant="default" padding="md" className="border-red-500/20">
+                  <h4 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Attack Vectors
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Spec errors — formal spec doesn&apos;t capture the actual security requirement</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> State space explosion — model checker runs out of memory on complex contracts</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Verification gaps — only part of the contract is verified, unverified parts have bugs</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Tool bugs — the verification tool itself has bugs giving false confidence</li>
+                  </ul>
+                </Card>
+                <Card variant="default" padding="md" className="border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Defenses
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Independent spec review and dual-specification by different teams</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Abstraction and compositional verification to manage complexity</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Full-contract verification with clear boundary documentation</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Cross-verification with multiple tools and manual review</li>
+                  </ul>
+                </Card>
+              </div>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h4 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h4>
+                <ul className="space-y-2">
+                  {[
+                    'Formal verification provides mathematical guarantees that testing cannot match.',
+                    'Start with property-based testing (lowest effort, high value), then add fuzzing and symbolic execution.',
+                    'Invariants are the most valuable properties to verify: balance conservation, access control, no reentrancy.',
+                    'The verification spectrum: testing → fuzzing → property testing → symbolic execution → full formal verification.',
+                    'A verified spec that\'s wrong gives false confidence — always review specs independently.',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <ArrowRight className="w-4 h-4 text-near-green flex-shrink-0 mt-0.5" />
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-red-500/20 bg-red-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-red-400 font-semibold">Why this matters:</span> Smart contracts are immutable and handle real money. A single bug can drain millions. Formal verification provides mathematical guarantees that your contract behaves correctly under all possible inputs — not just the test cases you thought of.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <FlaskConical className="w-5 h-5 text-red-400" />
-                    Beyond Unit Tests
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Traditional testing checks specific inputs against expected outputs. Formal verification proves properties hold for all possible inputs. Here&apos;s the verification spectrum:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">Testing Limitations</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Unit tests: specific input → expected output</li>
-                        <li>• Integration tests: happy paths + known edge cases</li>
-                        <li>• Only catches bugs you anticipate</li>
-                        <li>• Can&apos;t cover infinite input space</li>
-                        <li>• &quot;Testing shows bugs exist, not their absence&quot;</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-pink-500/20">
-                      <h5 className="font-semibold text-pink-400 text-sm mb-2">Formal Verification</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Property testing: random inputs, verify invariants</li>
-                        <li>• Model checking: explore all reachable states</li>
-                        <li>• Symbolic execution: analyze all execution paths</li>
-                        <li>• Theorem proving: mathematical correctness proofs</li>
-                        <li>• Catches bugs you never imagined</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Bug className="w-5 h-5 text-orange-400" />
-                    Property-Based Testing with proptest
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    proptest generates thousands of random inputs and checks that properties always hold. When it finds a failure, it automatically shrinks to the minimal failing case.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-orange-400 mb-2">{'// Rust: Property-based testing for a token contract'}</div>
-                    <div className="text-near-green">{'use proptest::prelude::*;'}</div>
-                    <div className="mt-1 text-near-green">{'proptest! {'}</div>
-                    <div className="text-near-green">{'    #[test]'}</div>
-                    <div className="text-near-green">{'    fn transfer_preserves_total_supply('}</div>
-                    <div className="text-near-green">{'        sender_balance in 1u128..1_000_000,'}</div>
-                    <div className="text-near-green">{'        transfer_amount in 1u128..1_000_000,'}</div>
-                    <div className="text-near-green">{'    ) {'}</div>
-                    <div className="text-near-green">{'        let mut contract = setup_contract();'}</div>
-                    <div className="text-near-green">{'        contract.set_balance("alice", sender_balance);'}</div>
-                    <div className="text-near-green">{'        contract.set_balance("bob", 0);'}</div>
-                    <div className="text-near-green">{'        let total_before = contract.total_supply();'}</div>
-                    <div className="mt-1 text-near-green">{'        // Transfer may fail — that\'s fine'}</div>
-                    <div className="text-near-green">{'        let _ = contract.ft_transfer("alice", "bob", transfer_amount);'}</div>
-                    <div className="mt-1 text-near-green">{'        // But total supply must NEVER change'}</div>
-                    <div className="text-near-green">{'        assert_eq!(contract.total_supply(), total_before);'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <FileCheck className="w-5 h-5 text-green-400" />
-                    Invariant Testing Patterns
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Invariants are properties that must always hold, regardless of the sequence of operations. Define them for your contract and test across random action sequences:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-green-400 mb-2">{'// Invariant testing: random sequences of actions'}</div>
-                    <div className="text-near-green">{'#[derive(Debug, Clone)]'}</div>
-                    <div className="text-near-green">{'enum Action {'}</div>
-                    <div className="text-near-green">{'    Deposit { user: String, amount: u128 },'}</div>
-                    <div className="text-near-green">{'    Withdraw { user: String, amount: u128 },'}</div>
-                    <div className="text-near-green">{'    Transfer { from: String, to: String, amount: u128 },'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                    <div className="mt-1 text-near-green">{'fn check_invariants(contract: &Contract) {'}</div>
-                    <div className="text-near-green">{'    // Invariant 1: sum of all balances == total supply'}</div>
-                    <div className="text-near-green">{'    let sum: u128 = contract.all_balances().values().sum();'}</div>
-                    <div className="text-near-green">{'    assert_eq!(sum, contract.total_supply());'}</div>
-                    <div className="mt-1 text-near-green">{'    // Invariant 2: no balance is negative (enforced by u128)'}</div>
-                    <div className="text-near-green">{'    // Invariant 3: total supply never exceeds max'}</div>
-                    <div className="text-near-green">{'    assert!(contract.total_supply() <= MAX_SUPPLY);'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                    <div className="mt-1 text-near-green">{'// Run 10,000 random action sequences, check after each'}</div>
-                    <div className="text-near-green">{'// proptest generates random Action sequences automatically'}</div>
-                  </div>
-                </section>
-
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <ScanSearch className="w-5 h-5 text-purple-400" />
-                    Model Checking
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Model checking exhaustively explores all reachable states of your contract to find violations. It&apos;s like testing every possible execution, but automated:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-purple-400 mb-2">{'// Model checking approach for smart contracts'}</div>
-                    <div className="text-near-green">{'// 1. Define state space'}</div>
-                    <div className="text-near-green">{'//    - Contract state (balances, mappings, flags)'}</div>
-                    <div className="text-near-green">{'//    - Environmental state (caller, block, gas)'}</div>
-                    <div className="mt-2 text-near-green">{'// 2. Define transitions (contract methods)'}</div>
-                    <div className="text-near-green">{'//    - Each method = state transition function'}</div>
-                    <div className="text-near-green">{'//    - Include all possible callers and inputs'}</div>
-                    <div className="mt-2 text-near-green">{'// 3. Define properties to verify'}</div>
-                    <div className="text-near-green">{'//    - Safety: "bad thing never happens"'}</div>
-                    <div className="text-near-green">{'//    - Liveness: "good thing eventually happens"'}</div>
-                    <div className="text-near-green">{'//    - Deadlock freedom: no stuck states'}</div>
-                    <div className="mt-2 text-near-green">{'// 4. Explore all reachable states via BFS/DFS'}</div>
-                    <div className="text-near-green">{'//    Tools: TLA+, Alloy, or custom Rust harness'}</div>
-                    <div className="text-near-green">{'//    Output: counterexample trace if property violated'}</div>
-                  </div>
-                </section>
-
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Binary className="w-5 h-5 text-cyan-400" />
-                    Symbolic Execution
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Symbolic execution treats inputs as symbolic variables and explores all execution paths algebraically, finding exact inputs that trigger bugs:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">Tools for Rust/WASM</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• KLEE: symbolic execution engine for LLVM IR</li>
-                        <li>• Haybale: symbolic execution for LLVM bitcode in Rust</li>
-                        <li>• cargo-fuzz: coverage-guided fuzzing with libFuzzer</li>
-                        <li>• Bolero: unified property testing + fuzzing framework</li>
-                        <li>• WASM symbolic: emerging tools for WASM analysis</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">What It Finds</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Integer overflow/underflow</li>
-                        <li>• Unreachable code paths</li>
-                        <li>• Assertion violations</li>
-                        <li>• Panics and unwrap failures</li>
-                        <li>• Logic errors in branch conditions</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 1: Property Test a Token</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Add proptest to a NEP-141 fungible token contract. Define and test at least 5 properties: total supply conservation, no negative balances, transfer correctness, allowance limits, and self-transfer idempotency.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 2: Invariant Test Suite</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a stateful invariant test harness for a DEX contract. Generate random sequences of swaps, liquidity additions, and removals. Verify the constant product formula holds after each action.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 3: Fuzz Your Contract</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Set up cargo-fuzz for a NEAR smart contract. Write fuzz targets for each public method. Run for 1 hour and analyze any crashes found. Fix bugs and re-verify.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 4: TLA+ State Machine Model</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Model a multi-sig wallet contract in TLA+. Define states, transitions, and safety properties (e.g., no unauthorized withdrawal). Run the TLC model checker to verify all properties hold.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'proptest Crate', url: 'https://github.com/proptest-rs/proptest', desc: 'Property-based testing framework for Rust — hypothesis-inspired' },
-                  { title: 'cargo-fuzz', url: 'https://github.com/rust-fuzz/cargo-fuzz', desc: 'Coverage-guided fuzzing for Rust with libFuzzer backend' },
-                  { title: 'Bolero', url: 'https://github.com/camshaft/bolero', desc: 'Unified fuzzing and property testing framework for Rust' },
-                  { title: 'KLEE Symbolic Execution', url: 'https://klee.github.io/', desc: 'Symbolic execution engine for LLVM-based languages' },
-                  { title: 'TLA+ for Engineers', url: 'https://lamport.azurewebsites.net/tla/tla.html', desc: 'Leslie Lamport\'s TLA+ specification language for model checking' },
-                  { title: 'Trail of Bits Smart Contract Testing', url: 'https://blog.trailofbits.com/2023/07/21/fuzzing-on-chain-contracts-with-echidna/', desc: 'Advanced smart contract testing techniques from security researchers' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

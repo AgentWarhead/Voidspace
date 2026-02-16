@@ -1,9 +1,226 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Flame, ExternalLink, CheckCircle, AlertTriangle, BarChart3, Shield, Zap, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap, Shield,
+  AlertTriangle, ArrowRight, Activity, Eye, Lock, Layers,
+  BarChart3, Network, Clock,
+} from 'lucide-react';
+
+// ─── Interactive Visual: Sandwich Attack Timeline ────────────────────────────
+
+function SandwichAttackVisual() {
+  const [activeStep, setActiveStep] = useState<number | null>(null);
+
+  const steps = [
+    {
+      id: 0,
+      label: 'Victim\'s TX Spotted',
+      icon: '👀',
+      time: 't=0',
+      color: 'border-blue-500/40 bg-blue-500/10',
+      detail: 'Victim submits: "Swap 1,000 USDC → NEAR on Ref Finance." This transaction enters the mempool where it\'s visible to everyone — including MEV searchers monitoring for profitable opportunities.',
+      profit: null,
+    },
+    {
+      id: 1,
+      label: 'Attacker Front-runs',
+      icon: '🏃',
+      time: 't=1',
+      color: 'border-red-500/40 bg-red-500/10',
+      detail: 'Attacker buys NEAR before the victim\'s trade executes. This large buy pushes the NEAR price up. Attacker gets NEAR at $4.80 (the pre-victim price). The pool\'s price shifts upward.',
+      profit: 'Attacker buys at $4.80',
+    },
+    {
+      id: 2,
+      label: 'Victim\'s TX Executes',
+      icon: '😰',
+      time: 't=2',
+      color: 'border-yellow-500/40 bg-yellow-500/10',
+      detail: 'Victim\'s swap executes at the now-higher price of $4.95 instead of the expected $4.80. The victim receives fewer NEAR tokens than anticipated. If their slippage tolerance allows it, the trade completes at a loss.',
+      profit: 'Victim pays $4.95 (expected $4.80)',
+    },
+    {
+      id: 3,
+      label: 'Attacker Back-runs',
+      icon: '💰',
+      time: 't=3',
+      color: 'border-red-500/40 bg-red-500/10',
+      detail: 'Attacker immediately sells the NEAR they bought at $4.80 for the now-inflated price of ~$4.93. After fees, the attacker pockets the spread. The victim unknowingly funded the attacker\'s profit.',
+      profit: 'Attacker sells at $4.93 → ~$0.13/NEAR profit',
+    },
+  ];
+
+  return (
+    <div className="relative py-6">
+      {/* Timeline */}
+      <div className="space-y-3">
+        {steps.map((step, i) => (
+          <motion.div
+            key={step.id}
+            className={cn(
+              'relative p-4 rounded-xl border cursor-pointer transition-all',
+              activeStep === step.id ? step.color : 'bg-surface border-border hover:border-border-hover'
+            )}
+            whileHover={{ x: 4 }}
+            onClick={() => setActiveStep(activeStep === step.id ? null : step.id)}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center flex-shrink-0">
+                <span className="text-lg">{step.icon}</span>
+                <span className="text-[10px] font-mono text-text-muted mt-1">{step.time}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-text-primary">{step.label}</p>
+                  {step.profit && (
+                    <span className={cn(
+                      'text-[10px] font-mono px-2 py-0.5 rounded',
+                      i === 2 ? 'bg-yellow-500/10 text-yellow-400' : 'bg-red-500/10 text-red-400'
+                    )}>
+                      {step.profit}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <motion.div animate={{ rotate: activeStep === step.id ? 180 : 0 }}>
+                <ChevronDown className="w-4 h-4 text-text-muted" />
+              </motion.div>
+            </div>
+            <AnimatePresence>
+              {activeStep === step.id && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <p className="text-sm text-text-secondary mt-3 pt-3 border-t border-border leading-relaxed">
+                    {step.detail}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {i < steps.length - 1 && (
+              <div className="absolute left-7 -bottom-3 w-0.5 h-3 bg-border z-10" />
+            )}
+          </motion.div>
+        ))}
+      </div>
+      {/* Profit/Loss summary */}
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 text-center">
+          <p className="text-[10px] text-text-muted mb-1">Attacker Profit</p>
+          <p className="text-lg font-bold text-red-400">+$130</p>
+          <p className="text-[10px] text-text-muted">on 1,000 USDC sandwich</p>
+        </div>
+        <div className="p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/20 text-center">
+          <p className="text-[10px] text-text-muted mb-1">Victim Loss</p>
+          <p className="text-lg font-bold text-yellow-400">-$150</p>
+          <p className="text-[10px] text-text-muted">worse execution price</p>
+        </div>
+      </div>
+      <p className="text-center text-xs text-text-muted mt-4">Click each step to see the anatomy of a sandwich attack →</p>
+    </div>
+  );
+}
+
+// ─── Concept Card ───────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="default" padding="md" className="cursor-pointer hover:border-border-hover transition-all" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-red-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ──────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 2;
+
+  const question = 'How does a sandwich attack extract value?';
+  const options = [
+    'By stealing tokens directly from the victim\'s wallet',
+    'By exploiting a smart contract vulnerability',
+    'By buying before and selling after a victim\'s swap, profiting from the price impact',
+    'By double-spending tokens through a race condition',
+  ];
+  const explanation = 'Correct! A sandwich attack brackets the victim\'s trade: the attacker front-runs (buys before) to inflate the price, the victim trades at the worse price, then the attacker back-runs (sells after) to pocket the spread. No exploit needed — just transaction ordering control.';
+  const wrongExplanation = 'Not quite. Sandwich attacks don\'t exploit bugs or steal directly — they profit by manipulating transaction ordering around a victim\'s swap, buying before and selling after to capture the price impact.';
+
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">{question}</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('mt-4 p-3 rounded-lg text-sm', selected === correctAnswer ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20')}>
+            {selected === correctAnswer ? `✓ ${explanation}` : `✕ ${wrongExplanation}`}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ────────────────────────────────────────────────────────────
 
 interface MevTransactionOrderingProps {
   isActive: boolean;
@@ -11,306 +228,175 @@ interface MevTransactionOrderingProps {
 }
 
 const MevTransactionOrdering: React.FC<MevTransactionOrderingProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
-
   return (
     <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+      {/* Accordion Header */}
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-            <Flame className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center">
+            <Activity className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">MEV &amp; Transaction Ordering</h3>
-            <p className="text-text-muted text-sm">Maximal extractable value, frontrunning, and MEV protection on NEAR</p>
+            <p className="text-text-muted text-sm">Maximal Extractable Value, front-running, sandwich attacks, and NEAR&apos;s ordering guarantees</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge className="bg-red-500/10 text-red-300 border-red-500/20">Advanced</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
+          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">55 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame className="w-5 h-5 text-orange-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-purple-500/20 p-6 space-y-8">
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-red-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary">The Big Idea</h4>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Imagine a stock exchange where the person running the order book can{' '}
+                  <span className="text-red-400 font-medium">see your buy order before it executes</span> — and place
+                  their own order first. That&apos;s MEV:{' '}
+                  <span className="text-near-green font-medium">value extracted by those who control transaction ordering</span>.
+                  On Ethereum, miners and validators have enormous MEV power due to the global mempool. On NEAR,
+                  the game is different — shard-level ordering and fast finality change the dynamics — but the
+                  economic incentives for extraction still exist.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-2">🔍 Anatomy of a Sandwich Attack</h4>
+                <p className="text-sm text-text-muted mb-4">Step through a real sandwich attack to see how value is extracted from DEX traders.</p>
+                <SandwichAttackVisual />
+              </div>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1">⚠️ Security Gotcha</h4>
+                    <p className="text-sm text-text-secondary">
+                      Even on NEAR, chunk producers can reorder transactions within a chunk! While NEAR has less
+                      MEV surface than Ethereum (no global mempool), chunk producer MEV is still theoretically possible.{' '}
+                      <span className="text-orange-400 font-medium">Use slippage limits on all swaps</span> — they&apos;re
+                      your first and most important line of defense. A 0.5% slippage limit makes most sandwich attacks unprofitable.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Core Concepts */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h4>
+                <div className="space-y-3">
+                  <ConceptCard
+                    icon={Activity}
+                    title="MEV Definition"
+                    preview="Value extractable by reordering, inserting, or censoring transactions."
+                    details="Maximal Extractable Value (formerly Miner Extractable Value) is the total profit available to whoever controls transaction ordering. This includes front-running profitable trades, back-running liquidations, sandwiching DEX swaps, and censoring competing transactions. On Ethereum, MEV extraction totals billions of dollars annually. It's an invisible tax on regular users."
+                  />
+                  <ConceptCard
+                    icon={Eye}
+                    title="Front-running"
+                    preview="Placing a transaction before a known pending transaction to profit."
+                    details="A front-runner monitors the mempool for profitable pending transactions — like large DEX swaps that will move prices. They submit an identical or related transaction with higher gas (on Ethereum) to ensure it executes first. On NEAR, front-running is harder because there's no global mempool — transactions go directly to shard chunk producers — but it's not impossible if the chunk producer is malicious."
+                  />
+                  <ConceptCard
+                    icon={BarChart3}
+                    title="Sandwich Attacks"
+                    preview="Surrounding a victim transaction with buy-before and sell-after."
+                    details="The most common DEX MEV strategy. The attacker: (1) Front-runs by buying the token the victim wants, raising its price. (2) The victim's swap executes at the inflated price. (3) The attacker back-runs by selling at the higher price. The victim gets fewer tokens; the attacker pockets the difference. Tight slippage limits are the primary defense — they cause the sandwich to fail if the price moves too much."
+                  />
+                  <ConceptCard
+                    icon={Layers}
+                    title="NEAR's Ordering Model"
+                    preview="Chunk producers order transactions within shards — less MEV surface."
+                    details="NEAR's sharded architecture means transactions are ordered per-shard by chunk producers, not globally by a single block proposer. There's no public mempool — transactions are sent directly to the relevant shard's chunk producer. This dramatically reduces MEV compared to Ethereum's global ordering, but doesn't eliminate it — a malicious chunk producer could still reorder transactions within their chunk."
+                  />
+                  <ConceptCard
+                    icon={Network}
+                    title="Transaction Priority"
+                    preview="NEAR uses first-come-first-served, not gas auctions."
+                    details="Unlike Ethereum where users bid gas prices for priority (enabling MEV through priority gas auctions), NEAR processes transactions in roughly FIFO order within chunks. There's no equivalent of Ethereum's 'priority fee' that lets you pay for better positioning. This design choice significantly reduces the MEV extraction surface, though it doesn't prevent chunk producer manipulation entirely."
+                  />
+                  <ConceptCard
+                    icon={Clock}
+                    title="Back-running"
+                    preview="Executing immediately after a known transaction to capture arbitrage."
+                    details="Back-running means placing your transaction right after a target transaction. Common use: after a large swap moves a DEX price away from centralized exchange prices, back-runners submit arbitrage transactions to capture the difference. Unlike front-running, back-running can be positive for the ecosystem — it helps keep DEX prices aligned with global markets. Some protocols intentionally enable back-running for liquidation bots."
+                  />
+                </div>
+              </div>
+
+              {/* Attack / Defense Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card variant="default" padding="md" className="border-red-500/20">
+                  <h4 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Attack Vectors
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Sandwich attacks:</strong> Front-run + back-run around DEX swaps to extract price impact</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Chunk producer MEV:</strong> Malicious chunk producer reorders transactions for profit</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Liquidation front-running:</strong> Racing to liquidate undercollateralized positions first</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Time-bandit attacks:</strong> Reorging the chain to capture past MEV opportunities</li>
+                  </ul>
+                </Card>
+                <Card variant="default" padding="md" className="border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Defenses
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> <strong className="text-text-secondary">Slippage limits:</strong> Tight tolerances make sandwich attacks unprofitable</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> <strong className="text-text-secondary">Encrypted mempools:</strong> Threshold encryption hides transaction details until ordering</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> <strong className="text-text-secondary">Dutch auctions:</strong> Gradual price discovery for liquidations prevents front-running</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> <strong className="text-text-secondary">Fast finality:</strong> NEAR&apos;s ~1-2s finality makes chain reorgs impractical</li>
+                  </ul>
+                </Card>
+              </div>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h4 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h4>
+                <ul className="space-y-2">
                   {[
-                    'What MEV is and how it manifests differently on NEAR vs Ethereum',
-                    'Transaction ordering in NEAR — chunk producers and their role in ordering',
-                    'Frontrunning, sandwich attacks, and back-running on sharded chains',
-                    'MEV protection techniques: commit-reveal, private transactions, and time-locks',
-                    'NEAR-specific MEV vectors: cross-shard arbitrage and receipt ordering',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'MEV is value extracted through transaction ordering control — an invisible tax on users',
+                    'NEAR has less MEV surface than Ethereum — no global mempool, shard-level ordering, no gas auctions',
+                    'Sandwich attacks are the most common DEX MEV strategy — front-run, victim trades, back-run',
+                    'Always use slippage limits on swaps — they\'re your primary defense against sandwich attacks',
+                    'Fast finality (~1-2s) makes time-bandit reorg attacks impractical on NEAR',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <ArrowRight className="w-4 h-4 text-near-green flex-shrink-0 mt-0.5" />
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-orange-500/20 bg-orange-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-orange-400 font-semibold">Why this matters:</span> MEV is a $600M+ annual market on Ethereum. As NEAR DeFi grows, understanding MEV vectors helps you protect your users and potentially build profitable MEV strategies.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: MEV on NEAR */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-blue-400" />
-                    MEV on NEAR vs Ethereum
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    NEAR&apos;s sharded architecture changes the MEV landscape significantly. The async receipt model adds complexity but also new opportunities:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-blue-500/20">
-                      <h5 className="font-semibold text-blue-400 text-sm mb-2">Ethereum MEV</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Block builders have full transaction ordering power</li>
-                        <li>• Mempool is publicly visible → frontrunning</li>
-                        <li>• Flashbots/MEV-Boost create an MEV marketplace</li>
-                        <li>• Atomic transactions enable sandwich attacks</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">NEAR MEV</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Chunk producers order transactions per shard</li>
-                        <li>• Cross-shard calls are async (multi-block)</li>
-                        <li>• No public mempool (transactions go to RPC nodes)</li>
-                        <li>• Receipt ordering across shards adds uncertainty</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 2: Transaction Ordering */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-purple-400" />
-                    Transaction Ordering Mechanics
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Understanding how NEAR orders transactions within a chunk is key to analyzing MEV:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-purple-400 mb-2">{'// Transaction ordering within a chunk'}</div>
-                    <div className="text-near-green">{'// 1. Chunk producer receives transactions from pool'}</div>
-                    <div className="text-near-green">{'// 2. Transactions sorted by:'}</div>
-                    <div className="text-near-green">{'//    a) Account nonce (sequential per account)'}</div>
-                    <div className="text-near-green">{'//    b) Among different accounts: chunk producer decides'}</div>
-                    <div className="text-near-green">{'// 3. Receipts from previous blocks are processed FIRST'}</div>
-                    <div className="text-near-green">{'// 4. New transactions converted to receipts AFTER'}</div>
-                    <div className="mt-2 text-purple-400">{'// This means:'}</div>
-                    <div className="text-near-green">{'// - Cross-shard receipts have priority over new txns'}</div>
-                    <div className="text-near-green">{'// - Chunk producer can reorder between accounts'}</div>
-                    <div className="text-near-green">{'// - Same-account txns are always ordered by nonce'}</div>
-                  </div>
-                </section>
-
-                {/* Section 3: MEV Vectors */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                    NEAR-Specific MEV Vectors
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    These are the primary MEV opportunities and risks on NEAR:
-                  </p>
-                  <div className="space-y-3">
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">DEX Arbitrage</h5>
-                      <p className="text-xs text-text-muted">Price discrepancies between NEAR DEXs (Ref Finance, etc.) can be exploited. The async nature means arbitrage is less atomic than on Ethereum — you may need to handle partial fills.</p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="font-semibold text-orange-400 text-sm mb-2">Liquidation Bots</h5>
-                      <p className="text-xs text-text-muted">Monitoring lending protocols for undercollateralized positions. First to submit liquidation tx wins. NEAR&apos;s ~1s blocks make this extremely competitive.</p>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-yellow-500/20">
-                      <h5 className="font-semibold text-yellow-400 text-sm mb-2">Cross-Shard Receipt Racing</h5>
-                      <p className="text-xs text-text-muted">When a cross-shard receipt is pending, observing it and front-running on the destination shard. This is unique to NEAR&apos;s architecture.</p>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 4: Protection Patterns */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-green-400" />
-                    MEV Protection Techniques
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Protect your users and contracts from MEV extraction:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-green-400 mb-2">{'// Commit-Reveal pattern for MEV protection'}</div>
-                    <div className="text-near-green">{'#[near]'}</div>
-                    <div className="text-near-green">{'impl MevProtectedSwap {'}</div>
-                    <div className="text-near-green">{'    // Phase 1: User commits hash of their order'}</div>
-                    <div className="text-near-green">{'    pub fn commit_order(&mut self, order_hash: String) {'}</div>
-                    <div className="text-near-green">{'        self.commitments.insert('}</div>
-                    <div className="text-near-green">{'            &env::predecessor_account_id(),'}</div>
-                    <div className="text-near-green">{'            &Commitment {'}</div>
-                    <div className="text-near-green">{'                hash: order_hash,'}</div>
-                    <div className="text-near-green">{'                block: env::block_height(),'}</div>
-                    <div className="text-near-green">{'            }'}</div>
-                    <div className="text-near-green">{'        );'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="mt-1 text-near-green">{'    // Phase 2: After N blocks, reveal and execute'}</div>
-                    <div className="text-near-green">{'    pub fn reveal_order(&mut self, token_in: AccountId,'}</div>
-                    <div className="text-near-green">{'        amount: U128, min_out: U128, salt: String) {'}</div>
-                    <div className="text-near-green">{'        let commitment = self.commitments'}</div>
-                    <div className="text-near-green">{'            .get(&env::predecessor_account_id()).unwrap();'}</div>
-                    <div className="text-near-green">{'        // Verify reveal matches commitment'}</div>
-                    <div className="text-near-green">{'        let hash = env::sha256('}</div>
-                    <div className="text-near-green">{'            format!("{}{}{}{}", token_in, amount.0, min_out.0, salt)'}</div>
-                    <div className="text-near-green">{'                .as_bytes());'}</div>
-                    <div className="text-near-green">{'        require!(hex::encode(hash) == commitment.hash);'}</div>
-                    <div className="text-near-green">{'        // Must wait at least 3 blocks'}</div>
-                    <div className="text-near-green">{'        require!(env::block_height() >= commitment.block + 3);'}</div>
-                    <div className="text-near-green">{'        // Execute swap...'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 5: Building MEV Bots */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-400" />
-                    Building MEV Bots on NEAR
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    If you want to build MEV bots (for arbitrage, liquidations), here&apos;s the architecture:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-yellow-400 mb-2">{'// MEV bot architecture'}</div>
-                    <div className="text-near-green">{'class NearMevBot {'}</div>
-                    <div className="text-near-green">{'  // 1. Stream blocks from NEAR Lake framework'}</div>
-                    <div className="text-near-green">{'  async monitor() {'}</div>
-                    <div className="text-near-green">{'    const lake = new LakeFramework({ network: "mainnet" });'}</div>
-                    <div className="text-near-green">{'    for await (const block of lake.stream()) {'}</div>
-                    <div className="text-near-green">{'      for (const shard of block.shards) {'}</div>
-                    <div className="text-near-green">{'        for (const receipt of shard.receipt_execution_outcomes) {'}</div>
-                    <div className="text-near-green">{'          if (this.isArbitrageable(receipt)) {'}</div>
-                    <div className="text-near-green">{'            await this.executeArbitrage(receipt);'}</div>
-                    <div className="text-near-green">{'          }'}</div>
-                    <div className="text-near-green">{'        }'}</div>
-                    <div className="text-near-green">{'      }'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="text-near-green">{'  }'}</div>
-                    <div className="mt-1 text-near-green">{'  // 2. Send transactions to multiple RPC nodes'}</div>
-                    <div className="text-near-green">{'  async executeArbitrage(opp: Opportunity) {'}</div>
-                    <div className="text-near-green">{'    const tx = buildArbitrageTx(opp);'}</div>
-                    <div className="text-near-green">{'    // Broadcast to multiple RPCs for speed'}</div>
-                    <div className="text-near-green">{'    await Promise.race(['}</div>
-                    <div className="text-near-green">{'      rpc1.sendTransaction(tx),'}</div>
-                    <div className="text-near-green">{'      rpc2.sendTransaction(tx),'}</div>
-                    <div className="text-near-green">{'      rpc3.sendTransaction(tx),'}</div>
-                    <div className="text-near-green">{'    ]);'}</div>
-                    <div className="text-near-green">{'  }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 1: MEV Detection</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a tool that analyzes NEAR blocks for potential MEV activity. Look for: back-to-back DEX trades by the same account, large swaps followed by opposing swaps, and liquidation transactions.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 2: Commit-Reveal Swap</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Implement a commit-reveal swap contract on testnet. Users commit a hash of their swap parameters, wait 3 blocks, then reveal and execute. Verify that the swap cannot be frontrun.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 3: Arbitrage Bot</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a simple arbitrage bot that monitors price differences between two testnet DEX contracts. When the spread exceeds gas costs, execute the arbitrage. Measure profitability.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 4: Receipt Ordering Analysis</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Using NEAR Lake, analyze 1000 blocks and map how receipts are ordered within chunks. Determine if there are predictable patterns that could be exploited.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'Flash Boys 2.0 Paper', url: 'https://arxiv.org/abs/1904.05234', desc: 'Seminal MEV research paper applicable across chains' },
-                  { title: 'Flashbots Research', url: 'https://writings.flashbots.net/', desc: 'MEV research and mitigation strategies' },
-                  { title: 'NEAR Transaction Ordering', url: 'https://nomicon.io/ChainSpec/Transactions', desc: 'Protocol spec for how transactions are ordered in chunks' },
-                  { title: 'NEAR Lake Framework', url: 'https://docs.near.org/concepts/advanced/near-lake-framework', desc: 'Stream blocks for MEV detection and bot building' },
-                  { title: 'Ref Finance Contracts', url: 'https://github.com/ref-finance/ref-contracts', desc: 'Study DEX contracts for understanding swap mechanics' },
-                  { title: 'MEV on L2s Research', url: 'https://timroughgarden.org/papers/mev.pdf', desc: 'Tim Roughgarden\'s research on MEV in different architectures' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

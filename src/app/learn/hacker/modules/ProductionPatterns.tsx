@@ -1,9 +1,275 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Rocket, ExternalLink, CheckCircle, Shield, Zap, Server, AlertTriangle, BarChart3, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
+  AlertTriangle, ArrowRight, Shield, Settings, Activity,
+  GitBranch, Server, Lock, RefreshCw, Eye, Layers,
+} from 'lucide-react';
+
+// ─── Interactive Visual: Deployment Lifecycle ───────────────────────────────
+
+function DeploymentLifecycle() {
+  const [activeStage, setActiveStage] = useState<number | null>(null);
+
+  const stages = [
+    {
+      label: 'Development',
+      icon: '💻',
+      color: 'from-blue-500/20 to-cyan-500/20',
+      border: 'border-blue-500/30',
+      checklist: [
+        'Unit tests with near-workspaces-rs or sandbox',
+        'Property-based testing for edge cases',
+        'Gas profiling on all public methods',
+        'Storage layout documentation',
+        'Threat model document',
+      ],
+    },
+    {
+      label: 'Audit',
+      icon: '🔍',
+      color: 'from-yellow-500/20 to-orange-500/20',
+      border: 'border-yellow-500/30',
+      checklist: [
+        'Internal security review (checklist-based)',
+        'External audit by reputable firm',
+        'Fix all critical/high findings',
+        'Re-audit after significant changes',
+        'Publish audit report publicly',
+      ],
+    },
+    {
+      label: 'Testnet',
+      icon: '🧪',
+      color: 'from-purple-500/20 to-pink-500/20',
+      border: 'border-purple-500/30',
+      checklist: [
+        'Deploy to testnet with production config',
+        'Integration testing with real RPC calls',
+        'Load testing for gas and throughput limits',
+        'Verify upgrade path from scratch',
+        'Soak test for 48+ hours',
+      ],
+    },
+    {
+      label: 'Canary',
+      icon: '🐤',
+      color: 'from-amber-500/20 to-yellow-500/20',
+      border: 'border-amber-500/30',
+      checklist: [
+        'Deploy to mainnet sub-account first',
+        'Limit initial TVL with deposit caps',
+        'Monitor for 7+ days before full launch',
+        'Compare on-chain behavior with testnet',
+        'Verify all monitoring alerts are firing',
+      ],
+    },
+    {
+      label: 'Mainnet',
+      icon: '🚀',
+      color: 'from-green-500/20 to-emerald-500/20',
+      border: 'border-green-500/30',
+      checklist: [
+        'Deploy via multisig with timelock',
+        'Verify deployed code matches audited code',
+        'Announce deployment publicly',
+        'Gradually raise deposit/withdrawal limits',
+        'Bug bounty program live',
+      ],
+    },
+    {
+      label: 'Monitor',
+      icon: '📊',
+      color: 'from-cyan-500/20 to-blue-500/20',
+      border: 'border-cyan-500/30',
+      checklist: [
+        'Real-time transaction monitoring',
+        'Balance change alerts for contract accounts',
+        'Failed transaction rate tracking',
+        'Gas usage anomaly detection',
+        'Uptime monitoring for all dependencies',
+      ],
+    },
+    {
+      label: 'Incident',
+      icon: '🚨',
+      color: 'from-red-500/20 to-orange-500/20',
+      border: 'border-red-500/30',
+      checklist: [
+        'PAUSE the contract immediately',
+        'Assess scope and impact',
+        'Communicate with users (status page)',
+        'Develop and test the fix',
+        'Post-mortem within 48 hours',
+      ],
+    },
+    {
+      label: 'Hotfix',
+      icon: '🔧',
+      color: 'from-orange-500/20 to-red-500/20',
+      border: 'border-orange-500/30',
+      checklist: [
+        'Emergency audit of the fix',
+        'Test on testnet fork of mainnet state',
+        'Deploy via multisig (expedited timelock)',
+        'Unpause with rate limits active',
+        'Monitor intensely for 72 hours',
+      ],
+    },
+  ];
+
+  return (
+    <div className="relative py-6">
+      {/* Circular flow represented as grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {stages.map((stage, i) => (
+          <motion.div
+            key={stage.label}
+            className={cn(
+              'rounded-xl border p-3 cursor-pointer transition-all text-center',
+              activeStage === i
+                ? `bg-gradient-to-br ${stage.color} ${stage.border} shadow-lg`
+                : 'bg-surface border-border hover:border-border-hover'
+            )}
+            whileHover={{ scale: 1.03 }}
+            onClick={() => setActiveStage(activeStage === i ? null : i)}
+          >
+            <span className="text-xl">{stage.icon}</span>
+            <p className="text-xs font-semibold text-text-primary mt-1">{stage.label}</p>
+            <p className="text-[10px] text-text-muted">Step {i + 1}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Detail panel */}
+      <AnimatePresence>
+        {activeStage !== null && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden mt-4"
+          >
+            <Card variant="default" padding="md" className="border-green-500/20 bg-green-500/5">
+              <p className="text-sm font-bold text-green-400 mb-3">
+                {stages[activeStage].icon} {stages[activeStage].label} — Checklist
+              </p>
+              <ul className="space-y-1.5">
+                {stages[activeStage].checklist.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-text-muted">
+                    <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-center text-xs text-text-muted mt-4">
+        Click each stage to see the checklist — the cycle never ends →
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ───────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="default" padding="md" className="cursor-pointer hover:border-border-hover transition-all" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-green-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ──────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 0;
+
+  const question = 'What is the FIRST action you should take when a mainnet vulnerability is discovered?';
+  const options = [
+    'Pause the contract to prevent further exploitation',
+    'Deploy a fix immediately to patch the vulnerability',
+    'Announce the vulnerability publicly so users can withdraw',
+    'Contact the attacker to negotiate a white-hat bounty',
+  ];
+  const explanation = 'Correct! Pause first, then assess. Deploying a fix before understanding the full scope can introduce new bugs. Public announcement before pausing gives attackers a window. Always pause → assess → fix → deploy → post-mortem.';
+  const wrongExplanation = 'Not quite. The first action is always to PAUSE the contract. Deploying untested fixes, public announcements, or attacker negotiations all take time during which funds remain at risk. Pause stops the bleeding immediately.';
+
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">{question}</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('mt-4 p-3 rounded-lg text-sm', selected === correctAnswer ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20')}>
+            {selected === correctAnswer ? `✓ ${explanation}` : `✕ ${wrongExplanation}`}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ────────────────────────────────────────────────────────────
 
 interface ProductionPatternsProps {
   isActive: boolean;
@@ -11,429 +277,172 @@ interface ProductionPatternsProps {
 }
 
 const ProductionPatterns: React.FC<ProductionPatternsProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
-
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <Card variant="glass" padding="none" className="border-green-500/20">
+      {/* Accordion Header */}
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-            <Rocket className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+            <Settings className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Production Patterns</h3>
-            <p className="text-text-muted text-sm">Security hardening, upgrade strategies, monitoring, and battle-tested patterns</p>
+            <p className="text-text-muted text-sm">Upgrade strategies, monitoring, incident response, and battle-tested deployment patterns</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge className="bg-red-500/10 text-red-300 border-red-500/20">Advanced</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">60 min</Badge>
+          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">45 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Rocket className="w-5 h-5 text-amber-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-green-500/20 p-6 space-y-8">
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-green-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary">The Big Idea</h4>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Shipping a smart contract to mainnet is like launching a satellite — once it&apos;s up there, you can&apos;t easily
+                  bring it back for repairs. You need redundancy, remote update capabilities, monitoring systems, and a
+                  <span className="text-green-400 font-medium"> mission control team</span> ready for anomalies. Production
+                  patterns are your <span className="text-near-green font-medium">mission control playbook</span> — the
+                  difference between a controlled response and a panicked scramble when things go wrong.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-2">🔄 Deployment Lifecycle</h4>
+                <p className="text-sm text-text-muted mb-4">From code to mainnet and back again. Each stage has a checklist — skip one at your peril.</p>
+                <DeploymentLifecycle />
+              </div>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1">⚠️ Security Gotcha</h4>
+                    <p className="text-sm text-text-secondary">
+                      A contract without a <span className="text-orange-400 font-medium">pause mechanism</span> is a ticking time
+                      bomb! When (not if) a vulnerability is discovered, you need to be able to halt the contract immediately while
+                      you prepare a fix. Without it, you&apos;re watching funds drain while frantically deploying an untested patch.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Core Concepts */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h4>
+                <div className="space-y-3">
+                  <ConceptCard
+                    icon={Layers}
+                    title="Upgrade Patterns"
+                    preview="Proxy contracts, migration functions, versioned storage for safe upgrades."
+                    details="NEAR supports code deployment to existing accounts, but storage layout changes can corrupt state. Versioned storage (enum-based state with migration functions) is the safest approach. Each version knows how to migrate from the previous one. Proxy patterns delegate calls to a logic contract that can be swapped. Always test the full upgrade path: deploy v1 → populate state → upgrade to v2 → verify all state migrated correctly."
+                  />
+                  <ConceptCard
+                    icon={Shield}
+                    title="Contract Guards"
+                    preview="Pausability, rate limiting, withdrawal limits — circuit breakers for smart contracts."
+                    details="Guards are defensive mechanisms built into your contract. Pausability lets an admin halt all operations. Rate limiting caps how much value can flow through in a time window (e.g., max 10,000 NEAR/hour in withdrawals). Withdrawal limits create a delay for large operations, giving you time to detect and respond. Think of these as circuit breakers — they trip before the system catches fire."
+                  />
+                  <ConceptCard
+                    icon={Activity}
+                    title="Monitoring & Alerting"
+                    preview="Watching for anomalous transactions, balance changes, and failed calls."
+                    details="Monitor everything: contract balance changes, function call patterns, gas usage anomalies, failed transaction rates, and unusual account interactions. Set up alerts for: balance drops > X%, spike in failed calls, calls from unknown accounts to admin functions, and any call to upgrade/migrate functions. Use indexers to build dashboards showing contract health in real-time."
+                  />
+                  <ConceptCard
+                    icon={AlertTriangle}
+                    title="Incident Response"
+                    preview="Steps when something goes wrong: pause, assess, fix, deploy, post-mortem."
+                    details="The incident response playbook: 1) PAUSE — stop all contract interactions immediately. 2) ASSESS — understand the vulnerability scope and funds at risk. 3) COMMUNICATE — notify users via status page without revealing exploit details. 4) FIX — develop and thoroughly test the fix on testnet. 5) DEPLOY — upgrade via multisig with expedited review. 6) UNPAUSE — gradually with rate limits. 7) POST-MORTEM — within 48 hours, publish what happened and how you're preventing it."
+                  />
+                  <ConceptCard
+                    icon={RefreshCw}
+                    title="Storage Migration"
+                    preview="Safely transforming on-chain state when upgrading contract logic."
+                    details="When your new contract version changes the storage layout, you need a migration function that transforms old state to new state. Critical rules: migrations must be idempotent (running twice is safe), reversible (you can roll back), and bounded (lazy migration for large collections, eager for small ones). Always snapshot state before migrating. Test with a mainnet state dump on testnet."
+                  />
+                  <ConceptCard
+                    icon={GitBranch}
+                    title="Deployment Strategy"
+                    preview="Testnet → canary → staged mainnet rollout with verification at each step."
+                    details="Never deploy directly to mainnet. The pipeline: testnet with full integration tests → mainnet canary (sub-account with limited TVL) → mainnet with deposit caps → full mainnet. At each stage, verify: code hash matches audited code, all functions behave as expected, monitoring alerts fire correctly. Use multisig with timelock for all mainnet deployments — no single person should be able to deploy alone."
+                  />
+                </div>
+              </div>
+
+              {/* Attack / Defense Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card variant="default" padding="md" className="border-red-500/20">
+                  <h4 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Attack Vectors
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Upgrade hijacking:</strong> Attacker gains deploy access and pushes malicious code</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Storage corruption:</strong> Buggy migration function destroys on-chain state</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Monitoring blind spots:</strong> Attacker exploits an unmonitored function path</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> <strong className="text-text-secondary">Social engineering:</strong> Phishing deployer keys from team members</li>
+                  </ul>
+                </Card>
+                <Card variant="default" padding="md" className="border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Defenses
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Multisig upgrade governance with mandatory timelock delays</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Reversible migrations with pre-migration state backup snapshots</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Comprehensive event logging and anomaly detection on all paths</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Hardware wallets and ceremony-based deployments for key security</li>
+                  </ul>
+                </Card>
+              </div>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h4 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h4>
+                <ul className="space-y-2">
                   {[
-                    'Security hardening — common attack vectors and how to prevent them',
-                    'Upgradeable contract patterns — proxy, DAO-governed, and time-locked upgrades',
-                    'Monitoring and alerting — building observability for on-chain contracts',
-                    'Gas optimization at scale — techniques used by top NEAR protocols',
-                    'Incident response — what to do when things go wrong in production',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'Every production contract needs a pause mechanism — it\'s your emergency brake.',
+                    'Use proxy patterns or versioned storage for safe, reversible upgrades.',
+                    'Monitor all contract interactions — anomaly detection catches exploits early.',
+                    'Incident response: Pause → Assess → Fix → Deploy → Post-mortem.',
+                    'Storage migrations must be reversible — test extensively on testnet first.',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <ArrowRight className="w-4 h-4 text-near-green flex-shrink-0 mt-0.5" />
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-amber-500/20 bg-amber-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-amber-400 font-semibold">Why this matters:</span> The difference between a hobby project and a production protocol is in these details. This module covers everything you need to ship contracts that handle real money safely.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Security Hardening */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-red-400" />
-                    Security Hardening
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Common NEAR contract vulnerabilities and their mitigations:
-                  </p>
-                  <div className="space-y-3">
-                    <Card variant="default" padding="md" className="border-red-500/20">
-                      <h5 className="font-semibold text-red-400 text-sm mb-2">1. Reentrancy via Callbacks</h5>
-                      <p className="text-xs text-text-muted mb-2">NEAR&apos;s async model doesn&apos;t have Ethereum-style reentrancy, but callback ordering can cause similar issues:</p>
-                      <div className="bg-black/40 rounded p-3 font-mono text-xs text-near-green">
-                        {'// BAD: State modified before callback'}<br/>
-                        {'pub fn withdraw(&mut self, amount: U128) {'}<br/>
-                        {'    self.balances.insert(&sender, &(balance - amount)); // state change'}<br/>
-                        {'    Promise::new(sender).transfer(amount); // may fail!'}<br/>
-                        {'}'}<br/>
-                        <br/>
-                        {'// GOOD: Optimistic state + rollback in callback'}<br/>
-                        {'pub fn withdraw(&mut self, amount: U128) -> Promise {'}<br/>
-                        {'    self.pending_withdrawals.insert(&sender, &amount);'}<br/>
-                        {'    Promise::new(sender).transfer(amount)'}<br/>
-                        {'        .then(Self::ext(current).on_withdraw(sender, amount))'}<br/>
-                        {'}'}
-                      </div>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="font-semibold text-orange-400 text-sm mb-2">2. Integer Overflow/Underflow</h5>
-                      <p className="text-xs text-text-muted mb-2">Rust panics on overflow in debug mode but wraps in release. Always use checked arithmetic:</p>
-                      <div className="bg-black/40 rounded p-3 font-mono text-xs text-near-green">
-                        {'// BAD: Can underflow in release'}<br/>
-                        {'let new_balance = balance - amount;'}<br/>
-                        <br/>
-                        {'// GOOD: Checked arithmetic'}<br/>
-                        {'let new_balance = balance.checked_sub(amount)'}<br/>
-                        {'    .expect("Insufficient balance");'}
-                      </div>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-yellow-500/20">
-                      <h5 className="font-semibold text-yellow-400 text-sm mb-2">3. Access Control Gaps</h5>
-                      <p className="text-xs text-text-muted mb-2">Always verify who is calling your function:</p>
-                      <div className="bg-black/40 rounded p-3 font-mono text-xs text-near-green">
-                        {'// Use #[private] for callbacks'}<br/>
-                        {'#[private]'}<br/>
-                        {'pub fn on_callback(&mut self) { /* only self can call */ }'}<br/>
-                        <br/>
-                        {'// Explicit owner checks for admin functions'}<br/>
-                        {'pub fn set_config(&mut self, config: Config) {'}<br/>
-                        {'    require!(env::predecessor_account_id() == self.owner,'}<br/>
-                        {'        "Only owner can call this");'}<br/>
-                        {'}'}
-                      </div>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 2: Upgrade Strategies */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-400" />
-                    Upgrade Strategies
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Production contracts need upgrade paths. Here are the battle-tested patterns:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Card variant="default" padding="md" className="border-blue-500/20">
-                      <h5 className="font-semibold text-blue-400 text-sm mb-2">Owner-Controlled</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Owner account deploys new code</li>
-                        <li>• Simplest pattern</li>
-                        <li>• Risk: single point of failure</li>
-                        <li>• Good for: early stage, internal tools</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-purple-500/20">
-                      <h5 className="font-semibold text-purple-400 text-sm mb-2">DAO-Governed</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• DAO proposal + vote to upgrade</li>
-                        <li>• Multi-sig or token-weighted voting</li>
-                        <li>• Time-lock between approval and execution</li>
-                        <li>• Good for: mature protocols</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">Immutable + Factory</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Core contract is immutable</li>
-                        <li>• New versions deployed as new contracts</li>
-                        <li>• Factory pattern for migration</li>
-                        <li>• Good for: maximum trust, DeFi</li>
-                      </ul>
-                    </Card>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border mt-3">
-                    <div className="text-yellow-400 mb-2">{'// DAO-governed upgrade with time-lock'}</div>
-                    <div className="text-near-green">{'#[near]'}</div>
-                    <div className="text-near-green">{'impl UpgradeableContract {'}</div>
-                    <div className="text-near-green">{'    pub fn propose_upgrade(&mut self, code_hash: String) {'}</div>
-                    <div className="text-near-green">{'        require!(self.dao_members.contains(&env::predecessor_account_id()));'}</div>
-                    <div className="text-near-green">{'        self.pending_upgrade = Some(PendingUpgrade {'}</div>
-                    <div className="text-near-green">{'            code_hash,'}</div>
-                    <div className="text-near-green">{'            proposed_at: env::block_timestamp(),'}</div>
-                    <div className="text-near-green">{'            approvals: vec![env::predecessor_account_id()],'}</div>
-                    <div className="text-near-green">{'        });'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="mt-1 text-near-green">{'    pub fn execute_upgrade(&mut self) {'}</div>
-                    <div className="text-near-green">{'        let upgrade = self.pending_upgrade.as_ref().unwrap();'}</div>
-                    <div className="text-near-green">{'        require!(upgrade.approvals.len() >= 3, "Need 3 approvals");'}</div>
-                    <div className="text-near-green">{'        require!('}</div>
-                    <div className="text-near-green">{'            env::block_timestamp() > upgrade.proposed_at + DAY_NS * 2,'}</div>
-                    <div className="text-near-green">{'            "48h time-lock not elapsed"'}</div>
-                    <div className="text-near-green">{'        );'}</div>
-                    <div className="text-near-green">{'        // Deploy new code via promise'}</div>
-                    <div className="text-near-green">{'        Promise::new(env::current_account_id())'}</div>
-                    <div className="text-near-green">{'            .deploy_contract(self.staged_code.take().unwrap());'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 3: Monitoring */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-cyan-400" />
-                    Monitoring &amp; Observability
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    You can&apos;t fix what you can&apos;t see. Build monitoring into your protocol from day one:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card variant="default" padding="md" className="border-cyan-500/20">
-                      <h5 className="font-semibold text-cyan-400 text-sm mb-2">On-Chain Monitoring</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• Index contract events (NEP-297) for dashboards</li>
-                        <li>• Track TVL, user counts, transaction volume</li>
-                        <li>• Monitor gas usage per method</li>
-                        <li>• Alert on unusual patterns (large withdrawals, etc.)</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-orange-500/20">
-                      <h5 className="font-semibold text-orange-400 text-sm mb-2">Off-Chain Infrastructure</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• RPC endpoint health checks</li>
-                        <li>• Indexer lag monitoring</li>
-                        <li>• Relayer balance and activity</li>
-                        <li>• Grafana + Prometheus for metrics</li>
-                      </ul>
-                    </Card>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border mt-3">
-                    <div className="text-cyan-400 mb-2">{'// Alert bot example (Node.js)'}</div>
-                    <div className="text-near-green">{'async function monitorContract() {'}</div>
-                    <div className="text-near-green">{'  const tvl = await nearView("protocol.near", "get_tvl");'}</div>
-                    <div className="text-near-green">{'  const prevTvl = await redis.get("protocol:tvl");'}</div>
-                    <div className="text-near-green">{'  '}</div>
-                    <div className="text-near-green">{'  const change = Math.abs(tvl - prevTvl) / prevTvl;'}</div>
-                    <div className="text-near-green">{'  if (change > 0.1) { // >10% change'}</div>
-                    <div className="text-near-green">{'    await slack.alert(`TVL changed ${(change*100).toFixed(1)}%!`);'}</div>
-                    <div className="text-near-green">{'  }'}</div>
-                    <div className="text-near-green">{'  await redis.set("protocol:tvl", tvl);'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                </section>
-
-                {/* Section 4: Gas Optimization */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-green-400" />
-                    Advanced Gas Optimization
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Techniques used by top NEAR protocols to minimize gas costs:
-                  </p>
-                  <div className="space-y-3">
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Batch Operations</h5>
-                      <p className="text-xs text-text-muted">Combine multiple operations into a single transaction. Process lists in batches. Use pagination to avoid gas limits.</p>
-                    </Card>
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Minimize Storage Reads</h5>
-                      <p className="text-xs text-text-muted">Cache frequently accessed data. Use <code className="text-purple-400 bg-purple-500/10 px-1 rounded">env::storage_read</code> directly for hot paths instead of SDK collections.</p>
-                    </Card>
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Borsh Optimization</h5>
-                      <p className="text-xs text-text-muted">Use compact types: <code className="text-purple-400 bg-purple-500/10 px-1 rounded">u32</code> instead of <code className="text-purple-400 bg-purple-500/10 px-1 rounded">u64</code> when possible. Pack related fields into structs for single storage reads.</p>
-                    </Card>
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Avoid JSON Serialization</h5>
-                      <p className="text-xs text-text-muted">Internal state uses Borsh (binary). Only use JSON for external interfaces. JSON encoding/decoding costs 2-5x more gas than Borsh.</p>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 5: Incident Response */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                    Incident Response
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    When things go wrong in production, you need a plan:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-red-400 mb-2">{'// Emergency pause pattern'}</div>
-                    <div className="text-near-green">{'#[near]'}</div>
-                    <div className="text-near-green">{'impl Contract {'}</div>
-                    <div className="text-near-green">{'    pub fn emergency_pause(&mut self) {'}</div>
-                    <div className="text-near-green">{'        require!('}</div>
-                    <div className="text-near-green">{'            self.guardians.contains(&env::predecessor_account_id()),'}</div>
-                    <div className="text-near-green">{'            "Only guardians can pause"'}</div>
-                    <div className="text-near-green">{'        );'}</div>
-                    <div className="text-near-green">{'        self.paused = true;'}</div>
-                    <div className="text-near-green">{'        log!("CONTRACT PAUSED by {}", env::predecessor_account_id());'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="mt-1 text-near-green">{'    // All user-facing methods check this'}</div>
-                    <div className="text-near-green">{'    fn assert_not_paused(&self) {'}</div>
-                    <div className="text-near-green">{'        require!(!self.paused, "Contract is paused");'}</div>
-                    <div className="text-near-green">{'    }'}</div>
-                    <div className="text-near-green">{'}'}</div>
-                  </div>
-                  <Card variant="default" padding="md" className="mt-3 border-red-500/20 bg-red-500/5">
-                    <div className="flex items-start gap-2">
-                      <Lock className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                      <div className="text-xs text-text-secondary">
-                        <strong className="text-red-400">Incident playbook:</strong>
-                        <ol className="mt-1 space-y-1 list-decimal list-inside">
-                          <li>Detect: monitoring alerts fire</li>
-                          <li>Triage: assess severity and impact</li>
-                          <li>Pause: activate emergency pause if funds at risk</li>
-                          <li>Investigate: analyze transactions and state</li>
-                          <li>Fix: deploy patched contract</li>
-                          <li>Verify: confirm fix on testnet, then mainnet</li>
-                          <li>Resume: unpause and monitor closely</li>
-                          <li>Post-mortem: document learnings</li>
-                        </ol>
-                      </div>
-                    </div>
-                  </Card>
-                </section>
-
-                {/* Section 6: Audit Checklist */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Server className="w-5 h-5 text-purple-400" />
-                    Production Audit Checklist
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Security</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>☐ All callbacks use #[private]</li>
-                        <li>☐ Owner/admin checks on privileged functions</li>
-                        <li>☐ No unchecked arithmetic</li>
-                        <li>☐ State rollback in failed callbacks</li>
-                        <li>☐ Emergency pause mechanism</li>
-                        <li>☐ Formal audit by reputable firm</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Operations</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>☐ Migration function for upgrades</li>
-                        <li>☐ Monitoring and alerting setup</li>
-                        <li>☐ Runbook for common incidents</li>
-                        <li>☐ Multi-sig on owner account</li>
-                        <li>☐ Rate limiting on sensitive methods</li>
-                        <li>☐ Integration tests on testnet</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 1: Security Audit</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Take a smart contract you built earlier in this track and perform a security audit. Check for: callback safety, access control, arithmetic overflow, storage costs, and gas limits. Document all findings.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 2: Emergency Pause System</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Add an emergency pause system with a guardian multi-sig to a contract. Test: pause, verify all functions blocked, unpause with 2-of-3 guardian approval. Deploy on testnet.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 3: DAO-Governed Upgrade</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Implement a full DAO-governed upgrade flow: propose upgrade → vote → time-lock → execute. Stage new code, verify the hash matches the proposal, and migrate state. Test the entire flow.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 4: Monitoring Dashboard</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Build a monitoring dashboard for a deployed contract. Track: method call frequency, gas usage per method, unique users per day, and total value locked. Set up alerts for anomalies.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 5: Gas Optimization Challenge</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Take a working contract and reduce its gas usage by 50%+. Techniques: batch operations, efficient storage patterns, minimize cross-contract calls, and use Borsh over JSON. Benchmark before and after.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'NEAR Security Best Practices', url: 'https://docs.near.org/sdk/rust/best-practices', desc: 'Official security guidelines for NEAR smart contracts' },
-                  { title: 'NEAR Contract Upgrades', url: 'https://docs.near.org/sdk/rust/building/prototyping', desc: 'Guide to upgrading contracts with state migration' },
-                  { title: 'Auditing NEAR Contracts', url: 'https://docs.near.org/sdk/rust/testing/audit', desc: 'Audit preparation and common vulnerability patterns' },
-                  { title: 'BlockSec NEAR Audits', url: 'https://blocksec.com/', desc: 'Professional smart contract auditing firm' },
-                  { title: 'NEAR Gas Optimization', url: 'https://docs.near.org/concepts/protocol/gas', desc: 'Deep dive into gas costs and optimization techniques' },
-                  { title: 'Sputnik DAO', url: 'https://github.com/near-daos/sputnik-dao-contract', desc: 'Production DAO contract — study governance patterns' },
-                  { title: 'NEAR Post-Mortems', url: 'https://near.org/blog', desc: 'Learn from past incidents on NEAR protocols' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };

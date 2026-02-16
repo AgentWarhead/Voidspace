@@ -1,9 +1,266 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Database, ExternalLink, CheckCircle, HardDrive, Layers, Zap, BarChart3, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import {
+  ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
+  Shield, AlertTriangle, ArrowRight, Database, Box,
+  Search, Settings, Layers,
+} from 'lucide-react';
+
+// ─── Interactive Storage Calculator ─────────────────────────────────────────
+
+function StorageCalculator() {
+  const [activeCollection, setActiveCollection] = useState<number>(0);
+
+  const collections = [
+    {
+      name: 'LookupMap',
+      lookup: 'O(1)',
+      iteration: '✕ No',
+      ordering: '✕ No',
+      storagePerEntry: '~130 bytes',
+      gasRead: '~5 TGas',
+      gasWrite: '~5 TGas',
+      bestFor: 'Simple key-value lookups (balances, configs)',
+      overhead: 'Lowest',
+      color: 'from-emerald-500/30 to-emerald-600/20',
+      borderColor: 'border-emerald-500/40',
+      textColor: 'text-emerald-400',
+    },
+    {
+      name: 'UnorderedMap',
+      lookup: 'O(1)',
+      iteration: '✓ Yes',
+      ordering: '✕ No',
+      storagePerEntry: '~180 bytes',
+      gasRead: '~5 TGas',
+      gasWrite: '~8 TGas',
+      bestFor: 'Collections you need to iterate (all users, all NFTs)',
+      overhead: 'Medium',
+      color: 'from-blue-500/30 to-blue-600/20',
+      borderColor: 'border-blue-500/40',
+      textColor: 'text-blue-400',
+    },
+    {
+      name: 'TreeMap',
+      lookup: 'O(log n)',
+      iteration: '✓ Yes',
+      ordering: '✓ Yes',
+      storagePerEntry: '~250 bytes',
+      gasRead: '~7 TGas',
+      gasWrite: '~10 TGas',
+      bestFor: 'Sorted data (leaderboards, price feeds)',
+      overhead: 'Highest',
+      color: 'from-amber-500/30 to-amber-600/20',
+      borderColor: 'border-amber-500/40',
+      textColor: 'text-amber-400',
+    },
+    {
+      name: 'Vector',
+      lookup: 'O(1) by index',
+      iteration: '✓ Yes',
+      ordering: '✓ Insert order',
+      storagePerEntry: '~100 bytes',
+      gasRead: '~5 TGas',
+      gasWrite: '~5 TGas',
+      bestFor: 'Append-only lists (logs, history, queues)',
+      overhead: 'Low',
+      color: 'from-purple-500/30 to-purple-600/20',
+      borderColor: 'border-purple-500/40',
+      textColor: 'text-purple-400',
+    },
+  ];
+
+  const active = collections[activeCollection];
+  const entriesExample = 1000;
+  const bytesPerEntry = parseInt(active.storagePerEntry) || 150;
+  const totalBytes = entriesExample * bytesPerEntry;
+  const nearCost = (totalBytes / 100_000).toFixed(3);
+
+  return (
+    <div className="relative py-6">
+      {/* Collection Selector */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+        {collections.map((col, i) => (
+          <motion.button
+            key={col.name}
+            onClick={() => setActiveCollection(i)}
+            className={cn(
+              'rounded-xl p-3 border text-left transition-all',
+              `bg-gradient-to-br ${col.color} ${col.borderColor}`,
+              activeCollection === i && 'ring-1 ring-white/20 shadow-lg'
+            )}
+            whileHover={{ scale: 1.02 }}
+          >
+            <span className={cn('text-xs font-bold font-mono block', col.textColor)}>{col.name}</span>
+            <span className="text-[10px] text-text-muted block mt-1">{col.overhead} overhead</span>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Detail Card */}
+      <motion.div
+        key={activeCollection}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={cn('rounded-xl p-4 border', `bg-gradient-to-br ${active.color} ${active.borderColor}`)}
+      >
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+          <div>
+            <span className="text-text-muted block">Lookup</span>
+            <span className="text-text-primary font-mono">{active.lookup}</span>
+          </div>
+          <div>
+            <span className="text-text-muted block">Iteration</span>
+            <span className="text-text-primary font-mono">{active.iteration}</span>
+          </div>
+          <div>
+            <span className="text-text-muted block">Ordering</span>
+            <span className="text-text-primary font-mono">{active.ordering}</span>
+          </div>
+          <div>
+            <span className="text-text-muted block">Storage/Entry</span>
+            <span className="text-text-primary font-mono">{active.storagePerEntry}</span>
+          </div>
+          <div>
+            <span className="text-text-muted block">Gas Read</span>
+            <span className="text-text-primary font-mono">{active.gasRead}</span>
+          </div>
+          <div>
+            <span className="text-text-muted block">Gas Write</span>
+            <span className="text-text-primary font-mono">{active.gasWrite}</span>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-white/10">
+          <span className="text-[10px] text-text-muted">Best for: </span>
+          <span className="text-[10px] text-text-secondary">{active.bestFor}</span>
+        </div>
+      </motion.div>
+
+      {/* Cost Estimate */}
+      <div className="mt-4 p-3 rounded-lg bg-surface border border-border">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-text-muted font-mono">
+            Cost for {entriesExample.toLocaleString()} entries:
+          </span>
+          <span className="text-sm font-bold text-near-green font-mono">{nearCost} NEAR locked</span>
+        </div>
+        <div className="mt-2 h-2 bg-surface-hover rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(parseFloat(nearCost) * 50, 100)}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+        <p className="text-[10px] text-text-muted mt-1">
+          Rate: 1 NEAR per 100KB • Storage stake is locked, not burned — recoverable on deletion
+        </p>
+      </div>
+
+      <p className="text-center text-xs text-text-muted mt-4">
+        Click collection types to compare storage characteristics →
+      </p>
+    </div>
+  );
+}
+
+// ─── Concept Card ───────────────────────────────────────────────────────────
+
+function ConceptCard({ icon: Icon, title, preview, details }: {
+  icon: React.ElementType;
+  title: string;
+  preview: string;
+  details: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Card variant="default" padding="md" className="cursor-pointer hover:border-border-hover transition-all" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-amber-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-semibold text-text-primary text-sm">{title}</h4>
+            <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4 text-text-muted" />
+            </motion.div>
+          </div>
+          <p className="text-sm text-text-secondary">{preview}</p>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <p className="text-sm text-text-muted mt-3 pt-3 border-t border-border leading-relaxed">{details}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Mini Quiz ──────────────────────────────────────────────────────────────
+
+function MiniQuiz() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correctAnswer = 2;
+
+  const question = 'How much NEAR is locked per 100KB of contract storage?';
+  const options = [
+    '0.1 NEAR',
+    '10 NEAR',
+    '1 NEAR',
+    'Storage is free on NEAR',
+  ];
+  const explanation = 'Correct! NEAR locks 1 NEAR per 100KB of storage. This stake is not burned — you get it back when storage is freed. This mechanism prevents state bloat while keeping storage economically sustainable.';
+  const wrongExplanation = 'Not quite. NEAR\'s storage staking rate is exactly 1 NEAR per 100KB. This is locked (not burned) and is returned when data is deleted. This economic model prevents spam while being fair to developers.';
+
+  return (
+    <Card variant="glass" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb className="w-5 h-5 text-near-green" />
+        <h4 className="font-bold text-text-primary">Quick Check</h4>
+      </div>
+      <p className="text-text-secondary mb-4">{question}</p>
+      <div className="space-y-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelected(i); setRevealed(true); }}
+            className={cn(
+              'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
+              revealed && i === correctAnswer
+                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                : revealed && i === selected && i !== correctAnswer
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                  : selected === i
+                    ? 'bg-surface-hover border-border-hover text-text-primary'
+                    : 'bg-surface border-border text-text-secondary hover:border-border-hover'
+            )}
+          >
+            <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      <AnimatePresence>
+        {revealed && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('mt-4 p-3 rounded-lg text-sm', selected === correctAnswer ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20')}>
+            {selected === correctAnswer ? `✓ ${explanation}` : `✕ ${wrongExplanation}`}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
+// ─── Main Module ────────────────────────────────────────────────────────────
 
 interface AdvancedStorageProps {
   isActive: boolean;
@@ -11,309 +268,172 @@ interface AdvancedStorageProps {
 }
 
 const AdvancedStorage: React.FC<AdvancedStorageProps> = ({ isActive, onToggle }) => {
-  const [selectedTab, setSelectedTab] = useState<string>('overview');
-
   return (
-    <Card variant="glass" padding="none" className="border-purple-500/20">
-      <div
-        onClick={onToggle}
-        className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-      >
+    <Card variant="glass" padding="none" className="border-amber-500/20">
+      {/* Accordion Header */}
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
             <Database className="w-6 h-6 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-text-primary">Advanced Storage Patterns</h3>
-            <p className="text-text-muted text-sm">Trie optimization, lazy loading, storage staking, and data architecture</p>
+            <p className="text-text-muted text-sm">Trie storage mechanics, storage staking, efficient collections, and data architecture</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge className="bg-red-500/10 text-red-300 border-red-500/20">Advanced</Badge>
-          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">50 min</Badge>
+          <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">45 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
       </div>
 
-      {isActive && (
-        <div className="border-t border-purple-500/20 p-6">
-          <div className="flex gap-2 mb-6 border-b border-border">
-            {['overview', 'learn', 'practice', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={cn(
-                  'px-4 py-2 font-medium transition-colors text-sm',
-                  selectedTab === tab
-                    ? 'text-purple-400 border-b-2 border-purple-500'
-                    : 'text-text-muted hover:text-text-secondary'
-                )}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {selectedTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Database className="w-5 h-5 text-green-400" />
-                  <h4 className="text-lg font-semibold text-text-primary">What You&apos;ll Learn</h4>
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-amber-500/20 p-6 space-y-8">
+              {/* The Big Idea */}
+              <Card variant="glass" padding="lg">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary">The Big Idea</h4>
                 </div>
-                <ul className="space-y-3">
+                <p className="text-text-secondary leading-relaxed">
+                  Blockchain storage is like <span className="text-amber-400 font-medium">renting a safety deposit box at a bank</span> —
+                  except you pay rent per byte, and the rent is locked NEAR tokens. The bigger your box, the more tokens
+                  are locked. Smart developers use <span className="text-orange-400 font-medium">clever packing</span> to
+                  fit more data in smaller boxes. Choose the wrong data structure and you&apos;ll waste storage (and money).
+                  Choose wisely and your contract stays lean, fast, and affordable.
+                </p>
+              </Card>
+
+              {/* Interactive Visual */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-2">🔍 Storage Collection Comparison</h4>
+                <p className="text-sm text-text-muted mb-4">Compare NEAR&apos;s collection types — each trades off between features and storage cost.</p>
+                <StorageCalculator />
+              </div>
+
+              {/* Security Gotcha */}
+              <Card variant="default" padding="md" className="border-orange-500/20 bg-orange-500/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1">⚠️ Security Gotcha</h4>
+                    <p className="text-sm text-text-secondary">
+                      If you don&apos;t require storage deposits from users, an attacker can <span className="text-orange-300 font-medium">drain
+                      your contract&apos;s NEAR balance</span> by creating thousands of entries. Each entry locks ~0.01 NEAR
+                      in storage staking. 10,000 spam entries = 100 NEAR locked. Always use{' '}
+                      <span className="font-mono text-orange-300">#[payable]</span> and validate the attached deposit
+                      covers the storage cost before writing data.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Core Concepts */}
+              <div>
+                <h4 className="text-lg font-bold text-text-primary mb-4">🧩 Core Concepts</h4>
+                <div className="space-y-3">
+                  <ConceptCard
+                    icon={Database}
+                    title="Storage Staking"
+                    preview="1 NEAR per 100KB — locked, not burned. Recoverable when data is deleted."
+                    details="NEAR uses a storage staking model: for every 100KB of state your contract uses, 1 NEAR must be locked in the contract's account. This isn't a fee — the NEAR is returned when storage is freed. This creates economic pressure to keep state small and incentivizes cleanup. Contracts should track storage usage before/after operations and charge users proportionally."
+                  />
+                  <ConceptCard
+                    icon={Layers}
+                    title="Trie Storage"
+                    preview="NEAR stores all state in a Merkle Patricia Trie for efficient proofs."
+                    details="Under the hood, all contract state is stored in a Merkle Patricia Trie — a tree where each path from root to leaf represents a storage key. This structure enables efficient state proofs (prove a value exists without downloading everything) and incremental state syncing. Each key-value write updates the trie path, so key length affects gas cost. Shorter, well-structured keys = cheaper operations."
+                  />
+                  <ConceptCard
+                    icon={Box}
+                    title="Collection Types"
+                    preview="LookupMap vs UnorderedMap vs TreeMap — each has different tradeoffs."
+                    details="LookupMap: O(1) reads/writes, no iteration — use for simple key-value (token balances). UnorderedMap: O(1) reads/writes with iteration support — use when you need to enumerate all entries. TreeMap: O(log n) with sorted iteration — use for ordered data like price feeds or leaderboards. Vector: O(1) index access — use for append-only lists. Wrong choice = wasted gas and storage."
+                  />
+                  <ConceptCard
+                    icon={Settings}
+                    title="Lazy Loading"
+                    preview="near_sdk lazy options prevent loading entire collections on every call."
+                    details="By default, near_sdk deserializes your entire contract state on every function call — even if you only need one field. For large collections, this wastes enormous gas. Use LazyOption<T> for fields loaded on-demand, and prefer LookupMap over UnorderedMap when you don't need iteration. The pattern: #[near(contract_state)] with Lazy<T> wrapping expensive fields ensures they're only loaded when accessed."
+                  />
+                  <ConceptCard
+                    icon={Search}
+                    title="Storage Keys & Prefixes"
+                    preview="Prefix-based namespacing prevents key collisions between data structures."
+                    details="Each near_sdk collection uses a byte prefix to namespace its keys in the trie. If two collections accidentally share a prefix, they'll overwrite each other's data — a critical bug. Always use unique, short prefixes: b'a' for accounts, b'b' for balances, etc. The StorageKey enum pattern is recommended: #[derive(BorshSerialize)] enum StorageKey { Accounts, Balances, Metadata }. This ensures compile-time uniqueness."
+                  />
+                  <ConceptCard
+                    icon={Shield}
+                    title="Storage Deposits"
+                    preview="Requiring users to pay for their own storage prevents drain attacks."
+                    details="The standard pattern: mark functions that write data as #[payable], measure storage before and after the operation using env::storage_usage(), calculate the cost (bytes_used * STORAGE_PRICE_PER_BYTE), and assert the attached deposit covers it. Refund any excess. NEP-145 (Storage Management) standardizes this: users register with a storage deposit, and the contract tracks per-user storage accounting."
+                  />
+                </div>
+              </div>
+
+              {/* Attack Vector / Defense */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card variant="default" padding="md" className="border-red-500/20">
+                  <h4 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Attack Vectors
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Storage exhaustion — spam entries to drain the contract&apos;s NEAR balance through forced storage staking</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> Key collision — malicious prefix overlap between collections causes silent data corruption</li>
+                    <li className="flex items-start gap-2"><span className="text-red-400">•</span> State bloat — unbounded collections grow indefinitely, making the contract progressively more expensive to operate</li>
+                  </ul>
+                </Card>
+                <Card variant="default" padding="md" className="border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Defenses
+                  </h4>
+                  <ul className="text-xs text-text-muted space-y-1.5">
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Require storage deposit per entry — measure before/after and assert deposit covers the difference</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Use StorageKey enum for unique prefix namespacing — compile-time guarantee of no collisions</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Implement pagination and cleanup methods — set maximum collection sizes and allow users to remove their own data</li>
+                  </ul>
+                </Card>
+              </div>
+
+              {/* Mini Quiz */}
+              <MiniQuiz />
+
+              {/* Key Takeaways */}
+              <Card variant="glass" padding="lg" className="border-near-green/20">
+                <h4 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-near-green" />
+                  Key Takeaways
+                </h4>
+                <ul className="space-y-2">
                   {[
-                    'NEAR storage internals — trie keys, node structure, and proof generation',
-                    'Collection types deep dive — when to use LookupMap vs UnorderedMap vs TreeMap',
-                    'Lazy loading with LazyOption and custom patterns for large data structures',
-                    'Storage staking economics and how to design storage-efficient contracts',
-                    'Advanced patterns: upgradeable storage schemas, data migration, and versioning',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary">
-                      <CheckCircle className="w-4 h-4 text-near-green mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
+                    'Storage staking locks 1 NEAR per 100KB — it\'s not burned and is recoverable on deletion',
+                    'Use LookupMap for key-value without iteration, UnorderedMap when you need to enumerate entries',
+                    'Always require storage deposits from users to prevent balance drain attacks',
+                    'Lazy loading prevents expensive deserialization of large collections on every call',
+                    'Prefix namespacing with StorageKey enum prevents key collisions between data structures',
+                  ].map((point, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
+                      <ArrowRight className="w-4 h-4 text-near-green flex-shrink-0 mt-0.5" />
+                      {point}
                     </li>
                   ))}
                 </ul>
-                <Card variant="default" padding="md" className="mt-4 border-green-500/20 bg-green-500/5">
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-green-400 font-semibold">Why this matters:</span> Storage is the most expensive resource on NEAR. A poorly designed data structure can make your contract 10x more expensive. Senior NEAR developers optimize storage first, compute second.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'learn' && (
-              <div className="space-y-8">
-                {/* Section 1: Storage Internals */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <HardDrive className="w-5 h-5 text-blue-400" />
-                    Storage Internals
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    NEAR stores contract state as key-value pairs in a Merkle-Patricia Trie. Each key-value pair is a trie node with overhead for the Merkle proof path.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-blue-400 mb-2">{'// How NEAR SDK collections map to trie keys'}</div>
-                    <div className="text-near-green">{`// LookupMap with prefix "m":`}</div>
-                    <div className="text-near-green">{`// Key "alice" → trie key: "m" + borsh(b"alice")`}</div>
-                    <div className="text-near-green">{`// Key "bob"   → trie key: "m" + borsh(b"bob")`}</div>
-                    <div className="mt-2 text-near-green">{`// UnorderedMap with prefix "u" adds an index:`}</div>
-                    <div className="text-near-green">{`// "u" + borsh(key)   → value       (lookup)`}</div>
-                    <div className="text-near-green">{`// "u" + INDEX_PREFIX + borsh(idx)  → key (enumeration)`}</div>
-                    <div className="text-near-green">{`// "u" + LENGTH_PREFIX → u64          (length tracking)`}</div>
-                    <div className="mt-2 text-text-muted">{`// Storage cost per entry:`}</div>
-                    <div className="text-text-muted">{`// ~= key_bytes + value_bytes + 40 bytes trie overhead`}</div>
-                    <div className="text-text-muted">{`// × 10^19 yoctoNEAR per byte`}</div>
-                  </div>
-                </section>
-
-                {/* Section 2: Collection Selection Guide */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-purple-400" />
-                    Collection Selection Guide
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Choosing the right collection type can reduce storage costs by 30-60%. Here&apos;s the decision matrix:
-                  </p>
-                  <div className="grid grid-cols-1 gap-3">
-                    <Card variant="default" padding="md" className="border-green-500/20">
-                      <h5 className="font-semibold text-green-400 text-sm mb-2">LookupMap — Lowest Overhead</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Use when:</strong> You only need get/set/remove by key</li>
-                        <li>• <strong className="text-text-secondary">Overhead:</strong> Just key + value (no index)</li>
-                        <li>• <strong className="text-text-secondary">Cannot:</strong> Iterate, count entries, or list keys</li>
-                        <li>• <strong className="text-text-secondary">Best for:</strong> Balances, user settings, one-to-one mappings</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-blue-500/20">
-                      <h5 className="font-semibold text-blue-400 text-sm mb-2">UnorderedMap — Enumerable</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Use when:</strong> You need iteration or pagination</li>
-                        <li>• <strong className="text-text-secondary">Overhead:</strong> 2× storage per entry (value + index)</li>
-                        <li>• <strong className="text-text-secondary">Trade-off:</strong> O(1) remove via swap-and-pop (order not preserved)</li>
-                        <li>• <strong className="text-text-secondary">Best for:</strong> Token registries, enumerable NFT ownership</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md" className="border-yellow-500/20">
-                      <h5 className="font-semibold text-yellow-400 text-sm mb-2">TreeMap — Ordered</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• <strong className="text-text-secondary">Use when:</strong> You need sorted keys, range queries, min/max</li>
-                        <li>• <strong className="text-text-secondary">Overhead:</strong> ~3× storage (AVL tree nodes)</li>
-                        <li>• <strong className="text-text-secondary">Trade-off:</strong> O(log n) operations, highest overhead</li>
-                        <li>• <strong className="text-text-secondary">Best for:</strong> Order books, leaderboards, priority queues</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 3: Lazy Loading */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-400" />
-                    Lazy Loading Patterns
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    By default, NEAR deserializes your entire contract state on every function call. For large contracts, this burns massive gas. Lazy loading defers deserialization until access.
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-yellow-400 mb-2">{'// LazyOption: load only when needed'}</div>
-                    <div className="text-near-green">{`use near_sdk::store::LazyOption;`}</div>
-                    <div className="mt-1 text-near-green">{`#[near(contract_state)]`}</div>
-                    <div className="text-near-green">{`pub struct Contract {`}</div>
-                    <div className="text-near-green">{`    pub owner: AccountId,`}</div>
-                    <div className="text-near-green">{`    // Always loaded (small)`}</div>
-                    <div className="text-near-green">{`    pub config: Config,`}</div>
-                    <div className="text-near-green">{`    // Only loaded when accessed (large)`}</div>
-                    <div className="text-near-green">{`    pub metadata: LazyOption<ContractMetadata>,`}</div>
-                    <div className="text-near-green">{`    // Collections are already lazy by default`}</div>
-                    <div className="text-near-green">{`    pub tokens: LookupMap<TokenId, Token>,`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                    <div className="mt-2 text-yellow-400">{'// Custom lazy pattern for versioned data'}</div>
-                    <div className="text-near-green">{`impl Contract {`}</div>
-                    <div className="text-near-green">{`    fn get_metadata(&self) -> ContractMetadata {`}</div>
-                    <div className="text-near-green">{`        self.metadata.get().expect("Metadata not set")`}</div>
-                    <div className="text-near-green">{`    }`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                  </div>
-                </section>
-
-                {/* Section 4: Storage Staking Economics */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-cyan-400" />
-                    Storage Staking Economics
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    Every byte of storage costs 0.00001 NEAR in staked balance. This has profound implications for contract design:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Cost Examples</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• 1 KB data = 0.01 NEAR staked</li>
-                        <li>• 100 KB = 1 NEAR staked</li>
-                        <li>• 1 MB = 10 NEAR staked</li>
-                        <li>• NFT metadata (~500 bytes) = 0.005 NEAR</li>
-                        <li>• FT balance entry (~100 bytes) = 0.001 NEAR</li>
-                      </ul>
-                    </Card>
-                    <Card variant="default" padding="md">
-                      <h5 className="font-semibold text-text-primary text-sm mb-2">Who Pays?</h5>
-                      <ul className="text-xs text-text-muted space-y-1">
-                        <li>• The account whose storage usage increases pays</li>
-                        <li>• For contracts: the contract account pays</li>
-                        <li>• Pattern: charge users <code className="text-purple-400">storage_deposit()</code></li>
-                        <li>• NEP-145 Storage Management standard</li>
-                        <li>• Freeing data → refund staked NEAR</li>
-                      </ul>
-                    </Card>
-                  </div>
-                </section>
-
-                {/* Section 5: Data Migration */}
-                <section>
-                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-orange-400" />
-                    Storage Schema Migration
-                  </h4>
-                  <p className="text-text-secondary mb-3">
-                    When you upgrade a contract, the old state must be compatible with the new schema. Here&apos;s the production pattern:
-                  </p>
-                  <div className="bg-black/40 rounded-lg p-4 font-mono text-xs text-text-secondary border border-border">
-                    <div className="text-orange-400 mb-2">{'// Versioned state migration pattern'}</div>
-                    <div className="text-near-green">{`#[derive(BorshDeserialize)]`}</div>
-                    <div className="text-near-green">{`pub struct ContractV1 {`}</div>
-                    <div className="text-near-green">{`    pub owner: AccountId,`}</div>
-                    <div className="text-near-green">{`    pub tokens: UnorderedMap<TokenId, TokenV1>,`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                    <div className="mt-2 text-near-green">{`#[near(contract_state)]`}</div>
-                    <div className="text-near-green">{`pub struct Contract {  // V2`}</div>
-                    <div className="text-near-green">{`    pub owner: AccountId,`}</div>
-                    <div className="text-near-green">{`    pub tokens: UnorderedMap<TokenId, TokenV2>,`}</div>
-                    <div className="text-near-green">{`    pub admin_list: LookupSet<AccountId>, // new field`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                    <div className="mt-2 text-near-green">{`#[private]`}</div>
-                    <div className="text-near-green">{`#[init(ignore_state)]`}</div>
-                    <div className="text-near-green">{`pub fn migrate() -> Self {`}</div>
-                    <div className="text-near-green">{`    let old: ContractV1 = env::state_read().expect("failed");`}</div>
-                    <div className="text-near-green">{`    Self {`}</div>
-                    <div className="text-near-green">{`        owner: old.owner,`}</div>
-                    <div className="text-near-green">{`        tokens: old.tokens,  // same prefix = no migration`}</div>
-                    <div className="text-near-green">{`        admin_list: LookupSet::new(b"a"),`}</div>
-                    <div className="text-near-green">{`    }`}</div>
-                    <div className="text-near-green">{`}`}</div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {selectedTab === 'practice' && (
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-text-primary">Exercises</h4>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 1: Storage Benchmark</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Deploy a contract that writes 1000 entries using LookupMap, UnorderedMap, and TreeMap. Compare: total storage bytes, gas per insert, gas per lookup, and gas per iteration.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 2: Storage-Optimized NFT</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Design an NFT contract that stores metadata off-chain (IPFS) and only stores a hash on-chain. Calculate the storage savings vs storing full metadata. Implement NEP-145 storage deposits.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 3: Live Migration</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Deploy a V1 contract, populate it with data, then deploy V2 with a new field and a migration function. Verify all old data is preserved and new fields are initialized correctly. Do this on testnet.
-                  </p>
-                </Card>
-
-                <Card variant="default" padding="md" className="border-red-500/20">
-                  <h5 className="font-semibold text-red-400 text-sm mb-2">🔴 Exercise 4: Paginated State Cleanup</h5>
-                  <p className="text-xs text-text-muted mb-3">
-                    Write a contract function that cleans up expired entries from an UnorderedMap in batches (to avoid gas limits). Implement pagination and verify NEAR is refunded as storage is freed.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {selectedTab === 'resources' && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-text-primary">Resources</h4>
-                {[
-                  { title: 'NEAR Storage Staking', url: 'https://docs.near.org/concepts/storage/storage-staking', desc: 'Official docs on storage economics and staking model' },
-                  { title: 'near-sdk Collections Guide', url: 'https://docs.near.org/sdk/rust/contract-structure/collections', desc: 'Complete guide to SDK storage collections' },
-                  { title: 'NEP-145 Storage Management', url: 'https://nomicon.io/Standards/StorageManagement', desc: 'Standard for managing storage deposits in contracts' },
-                  { title: 'Contract Upgrade & Migration', url: 'https://docs.near.org/sdk/rust/building/prototyping', desc: 'Patterns for upgrading contracts with state migration' },
-                  { title: 'NEAR State Viewer', url: 'https://github.com/near/nearcore/tree/master/tools/state-viewer', desc: 'Tool for inspecting raw trie state' },
-                  { title: 'Storage Optimization Techniques', url: 'https://docs.near.org/sdk/rust/contract-structure/nesting', desc: 'Nested collections and prefix optimization' },
-                ].map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <ExternalLink className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-text-primary group-hover:text-purple-400 transition-colors">{link.title}</p>
-                      <p className="text-xs text-text-muted">{link.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };
