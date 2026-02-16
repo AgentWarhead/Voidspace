@@ -22,7 +22,7 @@ export default function PricingPage() {
   const [loadingPack, setLoadingPack] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  const { user, isConnected, isLoading: walletLoading, userLoading, openModal, accountId } = useWallet();
+  const { user, isConnected, userLoading, openModal, accountId } = useWallet();
 
   async function handleSubscribe(tier: SanctumTier) {
     if (tier === 'shade') return;
@@ -85,36 +85,6 @@ export default function PricingPage() {
       <div className="absolute bottom-0 right-0 w-[400px] sm:w-[600px] h-[300px] sm:h-[400px] bg-accent-cyan/5 rounded-full blur-[100px] pointer-events-none" />
 
       <Container className="relative z-10 pt-4 sm:pt-6 md:pt-8 pb-10 sm:pb-16 md:pb-24 px-4 sm:px-6">
-        {/* Connect Wallet Banner */}
-        <AnimatePresence>
-          {!walletLoading && !isConnected && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mb-4 sm:mb-6"
-            >
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl border border-near-green/20 bg-near-green/5 backdrop-blur-sm">
-                <div className="flex items-center gap-3">
-                  <Wallet className="w-5 h-5 text-near-green flex-shrink-0" />
-                  <p className="text-sm text-text-secondary">
-                    <span className="text-near-green font-medium">Connect your NEAR wallet</span>{' '}
-                    to start building — your $2.50 in free credits are waiting
-                  </p>
-                </div>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={openModal}
-                  className="min-h-[44px] sm:min-h-0 w-full sm:w-auto"
-                >
-                  Connect Wallet
-                </Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Checkout error banner */}
         <AnimatePresence>
           {checkoutError && (
