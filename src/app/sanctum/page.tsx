@@ -142,10 +142,10 @@ function SanctumPageInner() {
       explain: `Explain this code in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
       optimize: `How can I optimize this code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
       security: `Audit this code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      ask: `I have a question about this code:\n\n\`\`\`rust\n${codeSnippet}\n\`\`\`\n\nWhat does this do and how does it work?`,
+      modify: `I want to modify this code. Suggest improvements or alternative implementations, then rewrite it:\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
     };
 
-    sendToChat(prompts[action.action] || prompts.ask);
+    sendToChat(prompts[action.action] || prompts.explain);
   }, [sendToChat]);
 
   const handleNewSession = useCallback(() => {

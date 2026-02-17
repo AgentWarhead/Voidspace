@@ -325,10 +325,10 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
             🔒 Audit
           </button>
           <button
-            onClick={() => handleSelectionAction('ask')}
+            onClick={() => handleSelectionAction('modify')}
             className="px-2.5 py-1.5 text-xs rounded-md hover:bg-near-green/20 text-near-green hover:text-near-green/80 transition-all whitespace-nowrap"
           >
-            💬 Ask
+            ✏️ Modify
           </button>
         </div>
       )}
