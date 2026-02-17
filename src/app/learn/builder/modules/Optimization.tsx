@@ -328,7 +328,7 @@ const Optimization: React.FC<OptimizationProps> = ({ isActive, onToggle }) => {
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-yellow-500/20 bg-yellow-500/5 text-xs text-yellow-400">
                 <BookOpen className="w-3 h-3" />
-                Module 20 of 22
+                Module 20 of 27
                 <span className="text-text-muted">|</span>
                 <Clock className="w-3 h-3" />
                 45 min read

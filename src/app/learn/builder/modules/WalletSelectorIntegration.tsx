@@ -254,7 +254,7 @@ export default function WalletSelectorIntegration({ isActive, onToggle }: Wallet
         <div className="border-t border-orange-500/20 p-6 space-y-8">
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 flex-wrap">
-            <Badge className="bg-orange-500/10 text-orange-300 border-orange-500/20">Module 8 of 22</Badge>
+            <Badge className="bg-orange-500/10 text-orange-300 border-orange-500/20">Module 26 of 27</Badge>
             <Badge className="bg-black/30 text-text-muted border-border"><Clock className="w-3 h-3 inline mr-1" />50 min read</Badge>
           </motion.div>
 

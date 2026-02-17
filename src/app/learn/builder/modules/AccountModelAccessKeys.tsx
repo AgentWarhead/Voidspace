@@ -403,7 +403,7 @@ const AccountModelAccessKeys: React.FC<AccountModelAccessKeysProps> = ({
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
                 <BookOpen className="w-3 h-3" />
-                Module 7 of 22
+                Module 9 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 30 min read

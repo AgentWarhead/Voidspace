@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
@@ -14,6 +14,7 @@ import {
   Target,
   Lightbulb,
   CheckCircle,
+  CheckCircle2,
   AlertTriangle,
   Layers,
 } from 'lucide-react';
@@ -204,6 +205,25 @@ function MiniQuiz() {
 }
 
 export default function TokenomicsDesign({ isActive, onToggle }: TokenomicsDesignProps) {
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-founder-progress') || '{}');
+      if (progress['tokenomics-design']) setCompleted(true);
+    } catch {}
+  }, []);
+
+  const handleComplete = () => {
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-founder-progress') || '{}');
+      progress['tokenomics-design'] = true;
+      localStorage.setItem('voidspace-founder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
+  };
+
   return (
     <Card variant="glass" padding="none" className="border-near-green/20">
       <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">

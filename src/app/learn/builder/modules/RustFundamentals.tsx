@@ -227,7 +227,7 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
                 <BookOpen className="w-3 h-3" />
-                Module 1 of 22
+                Module 2 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 45 min read

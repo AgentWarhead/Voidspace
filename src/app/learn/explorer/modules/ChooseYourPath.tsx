@@ -31,6 +31,8 @@ function ProgressSummary() {
     'what-is-blockchain', 'what-is-near', 'create-a-wallet', 'your-first-transaction',
     'understanding-dapps', 'reading-smart-contracts', 'near-ecosystem-tour',
     'near-vs-other-chains', 'reading-the-explorer', 'defi-basics', 'choose-your-path',
+    'nft-basics-on-near', 'staking-and-validators', 'daos-on-near',
+    'staying-safe-in-web3', 'near-data-tools',
   ];
 
   const moduleLabels: Record<string, string> = {
@@ -45,6 +47,11 @@ function ProgressSummary() {
     'reading-the-explorer': 'Reading the Explorer',
     'defi-basics': 'DeFi Basics',
     'choose-your-path': 'Choose Your Path',
+    'nft-basics-on-near': 'NFT Basics on NEAR',
+    'staking-and-validators': 'Staking & Validators',
+    'daos-on-near': 'DAOs on NEAR',
+    'staying-safe-in-web3': 'Staying Safe in Web3',
+    'near-data-tools': 'NEAR Data Tools',
   };
 
   const completedCount = completedModules.length;

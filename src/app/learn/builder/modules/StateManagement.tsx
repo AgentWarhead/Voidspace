@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -188,8 +188,21 @@ function MiniQuiz() {
 const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle }) => {
   const [completed, setCompleted] = useState(false);
 
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      if (progress['state-management']) setCompleted(true);
+    } catch {}
+  }, []);
+
   const handleComplete = () => {
-    setCompleted(true);
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      progress['state-management'] = true;
+      localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
   };
 
   return (
@@ -232,7 +245,7 @@ const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle })
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
                 <BookOpen className="w-3 h-3" />
-                Module 5 of 22
+                Module 10 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 35 min read

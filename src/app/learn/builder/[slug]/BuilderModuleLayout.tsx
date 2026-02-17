@@ -11,8 +11,13 @@ import { ModuleCompletionTracker } from '@/components/tracking/ModuleCompletionT
 import { WalletPromptBanner } from '@/components/tracking/WalletPromptBanner';
 
 import {
+  CollectionsIterators,
   DevEnvironmentSetup,
+  ErrorHandling,
+  OwnershipBorrowing,
   RustFundamentals,
+  StructsEnums,
+  TraitsGenerics,
   YourFirstContract,
   AccountModelAccessKeys,
   StateManagement,
@@ -38,8 +43,13 @@ import {
 // ─── Module Component Map ──────────────────────────────────────────────────────
 
 const MODULE_COMPONENTS: Record<string, React.ComponentType<any>> = {
+  'collections-iterators': CollectionsIterators,
   'dev-environment-setup': DevEnvironmentSetup,
+  'error-handling': ErrorHandling,
+  'ownership-borrowing': OwnershipBorrowing,
   'rust-fundamentals': RustFundamentals,
+  'structs-enums': StructsEnums,
+  'traits-generics': TraitsGenerics,
   'your-first-contract': YourFirstContract,
   'account-model-access-keys': AccountModelAccessKeys,
   'state-management': StateManagement,

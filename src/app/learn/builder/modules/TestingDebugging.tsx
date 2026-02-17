@@ -229,7 +229,7 @@ const TestingDebugging: React.FC<TestingDebuggingProps> = ({ isActive, onToggle 
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-pink-500/20 bg-pink-500/5 text-xs text-pink-400">
                 <BookOpen className="w-3 h-3" />
-                Builder Track
+                Module 12 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 50 min read

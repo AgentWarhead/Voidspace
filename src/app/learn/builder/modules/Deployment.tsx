@@ -324,7 +324,7 @@ const Deployment: React.FC<DeploymentProps> = ({ isActive, onToggle }) => {
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 text-xs text-green-400">
                 <BookOpen className="w-3 h-3" />
-                Module 21 of 22
+                Module 19 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 40 min read

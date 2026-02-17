@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -228,6 +228,24 @@ interface GasOptimizationDeepDiveProps {
 }
 
 const GasOptimizationDeepDive: React.FC<GasOptimizationDeepDiveProps> = ({ isActive, onToggle }) => {
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-hacker-progress') || '{}');
+      if (progress['gas-optimization-deep-dive']) setCompleted(true);
+    } catch {}
+  }, []);
+
+  const handleComplete = () => {
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-hacker-progress') || '{}');
+      progress['gas-optimization-deep-dive'] = true;
+      localStorage.setItem('voidspace-hacker-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
+  };
   return (
     <Card variant="glass" padding="none" className="border-purple-500/20">
       {/* Accordion Header */}
@@ -242,6 +260,8 @@ const GasOptimizationDeepDive: React.FC<GasOptimizationDeepDiveProps> = ({ isAct
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Module 14 of 16</Badge>
+          {completed && <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/20">✓ Done</Badge>}
           <Badge className="bg-red-500/10 text-red-300 border-red-500/20">Advanced</Badge>
           <Badge className="bg-purple-500/10 text-purple-300 border-purple-500/20">45 min</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
@@ -404,6 +424,25 @@ const GasOptimizationDeepDive: React.FC<GasOptimizationDeepDiveProps> = ({ isAct
                   ))}
                 </ul>
               </Card>
+
+              {/* Mark Complete */}
+              <div className="flex justify-center pt-4 mt-4 border-t border-white/5">
+                <motion.button
+                  onClick={handleComplete}
+                  disabled={completed}
+                  className={cn(
+                    'px-8 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2',
+                    completed
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
+                      : 'bg-gradient-to-r from-near-green to-emerald-500 text-white hover:shadow-lg hover:shadow-near-green/20'
+                  )}
+                  whileHover={completed ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={completed ? {} : { scale: 0.97 }}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {completed ? 'Module Completed ✓' : 'Mark as Complete'}
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}

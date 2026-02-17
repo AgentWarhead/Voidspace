@@ -266,7 +266,7 @@ export default function UpgradingContracts({ isActive, onToggle }: UpgradingCont
       {isActive && (
         <div className="border-t border-cyan-500/20 p-6 space-y-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 flex-wrap">
-            <Badge className="bg-cyan-500/10 text-cyan-300 border-cyan-500/20">Module 21 of 22</Badge>
+            <Badge className="bg-cyan-500/10 text-cyan-300 border-cyan-500/20">Module 18 of 27</Badge>
             <Badge className="bg-black/30 text-text-muted border-border"><Clock className="w-3 h-3 inline mr-1" />30 min read</Badge>
           </motion.div>
 

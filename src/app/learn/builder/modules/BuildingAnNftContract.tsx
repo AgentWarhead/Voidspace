@@ -246,7 +246,7 @@ export default function BuildingAnNftContract({ isActive, onToggle }: BuildingAn
         <div className="border-t border-pink-500/20 p-6 space-y-8">
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 flex-wrap">
-            <Badge className="bg-pink-500/10 text-pink-300 border-pink-500/20">Module 11 of 22</Badge>
+            <Badge className="bg-pink-500/10 text-pink-300 border-pink-500/20">Module 22 of 27</Badge>
             <Badge className="bg-black/30 text-text-muted border-border"><Clock className="w-3 h-3 inline mr-1" />40 min read</Badge>
           </motion.div>
 

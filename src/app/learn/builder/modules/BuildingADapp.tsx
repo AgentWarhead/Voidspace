@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -188,8 +188,21 @@ function MiniQuiz() {
 const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => {
   const [completed, setCompleted] = useState(false);
 
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      if (progress['building-a-dapp']) setCompleted(true);
+    } catch {}
+  }, []);
+
   const handleComplete = () => {
-    setCompleted(true);
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      progress['building-a-dapp'] = true;
+      localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
   };
 
   return (
@@ -219,7 +232,7 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
             <div className="border-t border-near-green/20 p-6 space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-near-green/20 bg-near-green/5 text-xs text-near-green">
-                <BookOpen className="w-3 h-3" /> Module 17 of 22 <span className="text-text-muted">•</span> <Clock className="w-3 h-3" /> 45 min read
+                <BookOpen className="w-3 h-3" /> Module 16 of 27 <span className="text-text-muted">•</span> <Clock className="w-3 h-3" /> 45 min read
               </div>
 
               {/* The Big Idea */}

@@ -323,7 +323,7 @@ const TokenStandards: React.FC<TokenStandardsProps> = ({ isActive, onToggle }) =
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">
                 <BookOpen className="w-3 h-3" />
-                Module 16 of 22
+                Module 14 of 27
                 <span className="text-text-muted">|</span>
                 <Clock className="w-3 h-3" />
                 60 min read

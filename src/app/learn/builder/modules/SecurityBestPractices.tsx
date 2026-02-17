@@ -381,7 +381,7 @@ const SecurityBestPractices: React.FC<SecurityBestPracticesProps> = ({ isActive,
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/5 text-xs text-red-400">
                 <BookOpen className="w-3 h-3" />
-                Module 19 of 22
+                Module 17 of 27
                 <span className="text-text-muted">|</span>
                 <Clock className="w-3 h-3" />
                 60 min read
