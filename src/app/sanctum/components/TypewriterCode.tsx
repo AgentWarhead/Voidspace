@@ -2,31 +2,28 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 
-interface CodeAction {
-  action: string;
-  selectedCode: string;
-}
-
 interface TypewriterCodeProps {
   code: string;
   speed?: number; // ms per character
   instant?: boolean; // skip animation — show code immediately (restored sessions)
   onComplete?: () => void;
-  onCodeAction?: (action: CodeAction) => void;
+  onSelectionChange?: (selectedCode: string | null) => void;
 }
 
 const HINT_DISMISSED_KEY = 'sanctum-highlight-hint-dismissed';
 
-export function TypewriterCode({ code, speed = 10, instant = false, onComplete, onCodeAction }: TypewriterCodeProps) {
+export function TypewriterCode({ code, speed = 10, instant = false, onComplete, onSelectionChange }: TypewriterCodeProps) {
   const [displayedCode, setDisplayedCode] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+  const [hasSelection, setHasSelection] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const containerRef = useRef<HTMLPreElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const userHasScrolledRef = useRef(false);
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
 
   // Store onComplete in a ref to avoid re-triggering the effect
   const onCompleteRef = useRef(onComplete);
@@ -37,9 +34,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     if (!code || typeof window === 'undefined') return;
     const dismissed = localStorage.getItem(HINT_DISMISSED_KEY);
     if (!dismissed) {
-      // Show hint after code appears (slight delay so it doesn't fight the typewriter)
       const timer = setTimeout(() => setShowHint(true), instant ? 500 : 3000);
-      // Auto-dismiss after 8 seconds
       const autoHide = setTimeout(() => {
         setShowHint(false);
         localStorage.setItem(HINT_DISMISSED_KEY, '1');
@@ -86,14 +81,15 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Selection detection
+  // Selection detection — notify parent of selected text
   const handleMouseUp = useCallback(() => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.toString().trim()) {
       setTimeout(() => {
         const s = window.getSelection();
         if (!s || s.isCollapsed || !s.toString().trim()) {
-          setSelection(null);
+          setHasSelection(false);
+          onSelectionChangeRef.current?.(null);
         }
       }, 200);
       return;
@@ -102,38 +98,24 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     const text = sel.toString().trim();
     if (text.length < 3) return;
 
-    const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    const wrapperRect = wrapperRef.current?.getBoundingClientRect();
-    if (!wrapperRect) return;
-
     // Dismiss the hint when user first highlights
     if (showHint) dismissHint();
 
-    setSelection({
-      text,
-      x: Math.min(rect.left - wrapperRect.left + rect.width / 2, wrapperRect.width - 120),
-      y: rect.top - wrapperRect.top - 8,
-    });
+    setHasSelection(true);
+    onSelectionChangeRef.current?.(text);
   }, [showHint]);
 
-  // Close selection toolbar on click outside
+  // Clear selection state on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setSelection(null);
+        setHasSelection(false);
+        onSelectionChangeRef.current?.(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleSelectionAction = (action: string) => {
-    if (!selection) return;
-    onCodeAction?.({ action, selectedCode: selection.text });
-    setSelection(null);
-    window.getSelection()?.removeAllRanges();
-  };
 
   // Typewriter effect — or instant display for restored sessions
   useEffect(() => {
@@ -143,7 +125,6 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
       return;
     }
 
-    // Instant mode: show all code immediately (restored from localStorage)
     if (instant) {
       setDisplayedCode(code);
       setIsComplete(true);
@@ -256,7 +237,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
 
   return (
     <div ref={wrapperRef} className="relative flex-1 min-h-0 flex flex-col">
-      {/* Custom selection color via style tag */}
+      {/* Custom selection color */}
       <style jsx>{`
         pre ::selection {
           background: rgba(0, 236, 151, 0.25);
@@ -286,49 +267,13 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
       {showHint && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-xl bg-purple-500/15 backdrop-blur-sm border border-purple-500/30 shadow-lg shadow-purple-500/10 animate-in fade-in slide-in-from-top-2 duration-300 flex items-center gap-3">
           <span className="text-xs text-purple-300">
-            ✨ <span className="font-medium">Pro tip:</span> Highlight any code to explain, optimize, or audit it
+            ✨ <span className="font-medium">Pro tip:</span> Highlight any code — the toolbar below will act on your selection
           </span>
           <button
             onClick={dismissHint}
             className="text-purple-400/60 hover:text-purple-300 text-xs transition-colors"
           >
             ✕
-          </button>
-        </div>
-      )}
-
-      {/* Selection floating toolbar */}
-      {selection && (
-        <div
-          className="absolute z-20 flex items-center gap-1 px-1.5 py-1 rounded-lg bg-[#1a1a2e]/95 backdrop-blur-xl border border-white/[0.15] shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-bottom-2 duration-150"
-          style={{
-            left: Math.max(8, selection.x - 100),
-            top: Math.max(8, selection.y - 36),
-          }}
-        >
-          <button
-            onClick={() => handleSelectionAction('explain')}
-            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 transition-all whitespace-nowrap"
-          >
-            💡 Explain
-          </button>
-          <button
-            onClick={() => handleSelectionAction('optimize')}
-            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 transition-all whitespace-nowrap"
-          >
-            ⚡ Optimize
-          </button>
-          <button
-            onClick={() => handleSelectionAction('security')}
-            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all whitespace-nowrap"
-          >
-            🔒 Audit
-          </button>
-          <button
-            onClick={() => handleSelectionAction('modify')}
-            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-near-green/20 text-near-green hover:text-near-green/80 transition-all whitespace-nowrap"
-          >
-            ✏️ Modify
           </button>
         </div>
       )}

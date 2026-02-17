@@ -124,6 +124,9 @@ function SanctumPageInner() {
   const [externalMessage, setExternalMessage] = useState('');
   const [externalMessageSeq, setExternalMessageSeq] = useState(0);
 
+  // Track code selection from TypewriterCode
+  const [codeSelection, setCodeSelection] = useState<string | null>(null);
+
   const sendToChat = useCallback((message: string) => {
     setExternalMessage(message);
     setExternalMessageSeq(prev => prev + 1);
@@ -133,20 +136,23 @@ function SanctumPageInner() {
     }
   }, [state.activePanel, dispatch]);
 
-  const handleCodeAction = useCallback((action: { action: string; selectedCode: string }) => {
-    const codeSnippet = action.selectedCode.length > 500
-      ? action.selectedCode.slice(0, 500) + '\n// ... (truncated)'
-      : action.selectedCode;
+  // Build a prompt for the bottom action bar — uses selection if available, otherwise full code
+  const buildActionPrompt = useCallback((action: string) => {
+    const hasSelection = codeSelection && codeSelection.length >= 3;
+    const codeSnippet = hasSelection
+      ? (codeSelection.length > 500 ? codeSelection.slice(0, 500) + '\n// ... (truncated)' : codeSelection)
+      : (state.generatedCode.length > 2000 ? state.generatedCode.slice(0, 2000) + '\n// ... (truncated)' : state.generatedCode);
+    const scope = hasSelection ? 'this code' : 'this entire contract';
 
     const prompts: Record<string, string> = {
-      explain: `Explain this code in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      optimize: `How can I optimize this code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      security: `Audit this code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      modify: `I want to modify this code. Suggest improvements or alternative implementations, then rewrite it:\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      explain: `Explain ${scope} in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      tests: `Generate comprehensive unit tests for ${scope} — cover all public methods, edge cases, and error conditions.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      optimize: `How can I optimize ${scope} for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      security: `Audit ${scope} for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
     };
 
-    sendToChat(prompts[action.action] || prompts.explain);
-  }, [sendToChat]);
+    sendToChat(prompts[action] || prompts.explain);
+  }, [codeSelection, state.generatedCode, sendToChat]);
 
   const handleNewSession = useCallback(() => {
     clearPersistedSession();
@@ -784,7 +790,7 @@ function SanctumPageInner() {
                         speed={8}
                         instant={state.sanctumStage === 'complete'}
                         onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
-                        onCodeAction={handleCodeAction}
+                        onSelectionChange={setCodeSelection}
                       />
                     </div>
                   )}
@@ -793,30 +799,35 @@ function SanctumPageInner() {
                   {state.generatedCode && (
                     <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
                       <div className="px-3 py-2.5 flex items-center justify-between gap-2">
-                        {/* Quick actions */}
+                        {/* Quick actions — selection-aware */}
                         <div className="flex items-center gap-1.5 overflow-x-auto">
-                          <span className="text-xs text-text-muted mr-1 whitespace-nowrap hidden lg:inline">Ask AI <span className="text-text-muted/50">(or highlight code)</span>:</span>
-                          <span className="text-xs text-text-muted mr-1 whitespace-nowrap lg:hidden">Ask AI:</span>
+                          <span className="text-xs mr-1 whitespace-nowrap">
+                            {codeSelection ? (
+                              <span className="text-near-green">✦ Selection</span>
+                            ) : (
+                              <span className="text-text-muted">Ask AI:</span>
+                            )}
+                          </span>
                           <button
-                            onClick={() => sendToChat('Explain this entire contract — walk me through the architecture, each function, and the NEAR-specific patterns used.')}
+                            onClick={() => buildActionPrompt('explain')}
                             className="px-2.5 py-1.5 text-xs rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/30 transition-all whitespace-nowrap"
                           >
                             💡 Explain
                           </button>
                           <button
-                            onClick={() => sendToChat('Generate comprehensive unit tests for this contract — cover all public methods, edge cases, and error conditions.')}
+                            onClick={() => buildActionPrompt('tests')}
                             className="px-2.5 py-1.5 text-xs rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/30 transition-all whitespace-nowrap"
                           >
                             🧪 Tests
                           </button>
                           <button
-                            onClick={() => sendToChat('Optimize this contract for gas efficiency on NEAR — review storage patterns, function calls, and suggest specific improvements.')}
+                            onClick={() => buildActionPrompt('optimize')}
                             className="px-2.5 py-1.5 text-xs rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/20 hover:border-amber-500/30 transition-all whitespace-nowrap"
                           >
                             ⚡ Optimize
                           </button>
                           <button
-                            onClick={() => sendToChat('Audit this contract for security vulnerabilities — check for reentrancy, access control gaps, overflow risks, and NEAR-specific attack vectors.')}
+                            onClick={() => buildActionPrompt('security')}
                             className="px-2.5 py-1.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/30 transition-all whitespace-nowrap"
                           >
                             🔒 Audit
@@ -929,7 +940,7 @@ function SanctumPageInner() {
                             speed={8}
                             instant={state.sanctumStage === 'complete'}
                             onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
-                            onCodeAction={handleCodeAction}
+                            onSelectionChange={setCodeSelection}
                           />
                         </div>
                       )}
@@ -938,26 +949,33 @@ function SanctumPageInner() {
                       {state.generatedCode && (
                         <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
                           <div className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto">
+                            <span className="text-xs whitespace-nowrap flex-shrink-0">
+                              {codeSelection ? (
+                                <span className="text-near-green">✦</span>
+                              ) : (
+                                <span className="text-text-muted">AI:</span>
+                              )}
+                            </span>
                             <button
-                              onClick={() => sendToChat('Explain this entire contract — walk me through each function and the NEAR patterns used.')}
+                              onClick={() => buildActionPrompt('explain')}
                               className="px-2 py-1.5 text-xs rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all whitespace-nowrap flex-shrink-0"
                             >
                               💡 Explain
                             </button>
                             <button
-                              onClick={() => sendToChat('Generate unit tests for this contract.')}
+                              onClick={() => buildActionPrompt('tests')}
                               className="px-2 py-1.5 text-xs rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 transition-all whitespace-nowrap flex-shrink-0"
                             >
                               🧪 Tests
                             </button>
                             <button
-                              onClick={() => sendToChat('Optimize this contract for gas efficiency.')}
+                              onClick={() => buildActionPrompt('optimize')}
                               className="px-2 py-1.5 text-xs rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 transition-all whitespace-nowrap flex-shrink-0"
                             >
                               ⚡ Gas
                             </button>
                             <button
-                              onClick={() => sendToChat('Audit this contract for security vulnerabilities.')}
+                              onClick={() => buildActionPrompt('security')}
                               className="px-2 py-1.5 text-xs rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 transition-all whitespace-nowrap flex-shrink-0"
                             >
                               🔒 Audit
