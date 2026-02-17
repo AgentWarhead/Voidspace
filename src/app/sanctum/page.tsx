@@ -798,7 +798,7 @@ function SanctumPageInner() {
                   {/* Smart action bar + gas badge */}
                   {state.generatedCode && (
                     <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
-                      <div className="px-3 py-2.5 flex items-center justify-between gap-2">
+                      <div className="px-3 py-2.5 flex items-center justify-between gap-2" data-preserve-selection>
                         {/* Quick actions — selection-aware */}
                         <div className="flex items-center gap-1.5 overflow-x-auto">
                           <span className="text-xs mr-1 whitespace-nowrap">
@@ -948,7 +948,7 @@ function SanctumPageInner() {
                       {/* Smart action bar — mobile */}
                       {state.generatedCode && (
                         <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
-                          <div className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto">
+                          <div className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto" data-preserve-selection>
                             <span className="text-xs whitespace-nowrap flex-shrink-0">
                               {codeSelection ? (
                                 <span className="text-near-green">✦</span>

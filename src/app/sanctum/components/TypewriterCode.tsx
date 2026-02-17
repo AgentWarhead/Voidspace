@@ -17,13 +17,15 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
   const [isComplete, setIsComplete] = useState(false);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [hasSelection, setHasSelection] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [selectedText, setSelectedText] = useState<string | null>(null);
   const containerRef = useRef<HTMLPreElement>(null);
+  const codeRef = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const userHasScrolledRef = useRef(false);
   const onSelectionChangeRef = useRef(onSelectionChange);
   onSelectionChangeRef.current = onSelectionChange;
+  const highlightMarksRef = useRef<HTMLElement[]>([]);
 
   // Store onComplete in a ref to avoid re-triggering the effect
   const onCompleteRef = useRef(onComplete);
@@ -81,17 +83,95 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Selection detection — notify parent of selected text
+  // Remove any existing highlight marks from the DOM
+  const clearHighlightMarks = useCallback(() => {
+    highlightMarksRef.current.forEach(mark => {
+      const parent = mark.parentNode;
+      if (parent) {
+        // Replace mark with its text content
+        const text = document.createTextNode(mark.textContent || '');
+        parent.replaceChild(text, mark);
+        parent.normalize(); // merge adjacent text nodes
+      }
+    });
+    highlightMarksRef.current = [];
+  }, []);
+
+  // Apply visual highlight marks to the selected range in the DOM
+  const applyHighlightMarks = useCallback((range: Range) => {
+    clearHighlightMarks();
+
+    try {
+      // Use a TreeWalker to find all text nodes in the range
+      const container = codeRef.current;
+      if (!container) return;
+
+      // Clone the range to avoid modifying the original
+      const startContainer = range.startContainer;
+      const endContainer = range.endContainer;
+      const startOffset = range.startOffset;
+      const endOffset = range.endOffset;
+
+      // Simple case: selection is within a single text node
+      if (startContainer === endContainer && startContainer.nodeType === Node.TEXT_NODE) {
+        const textNode = startContainer as Text;
+        const selectedPart = textNode.splitText(startOffset);
+        selectedPart.splitText(endOffset - startOffset);
+        const mark = document.createElement('mark');
+        mark.className = 'sanctum-highlight';
+        selectedPart.parentNode?.replaceChild(mark, selectedPart);
+        mark.appendChild(selectedPart);
+        highlightMarksRef.current.push(mark);
+        return;
+      }
+
+      // Multi-node selection: collect all text nodes in range
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+      const textNodes: Text[] = [];
+      let inRange = false;
+
+      while (walker.nextNode()) {
+        const node = walker.currentNode as Text;
+        if (node === startContainer) inRange = true;
+        if (inRange) textNodes.push(node);
+        if (node === endContainer) break;
+      }
+
+      // Wrap each text node (or partial) in a mark
+      for (let i = 0; i < textNodes.length; i++) {
+        const node = textNodes[i];
+        let targetNode: Text = node;
+
+        if (i === 0 && node === startContainer) {
+          // Split at start offset
+          targetNode = node.splitText(startOffset);
+        }
+        if (node === endContainer || (i === textNodes.length - 1 && targetNode === endContainer)) {
+          // For the last node, we need to handle endOffset
+          if (targetNode === endContainer) {
+            const after = targetNode.splitText(endOffset - (i === 0 && node === startContainer ? startOffset : 0));
+            // targetNode is now just the selected part
+            void after; // the rest stays unwrapped
+          }
+        }
+
+        const mark = document.createElement('mark');
+        mark.className = 'sanctum-highlight';
+        targetNode.parentNode?.replaceChild(mark, targetNode);
+        mark.appendChild(targetNode);
+        highlightMarksRef.current.push(mark);
+      }
+    } catch {
+      // If DOM manipulation fails (edge cases), just clear and rely on state
+      clearHighlightMarks();
+    }
+  }, [clearHighlightMarks]);
+
+  // Selection detection — notify parent of selected text and apply visual highlight
   const handleMouseUp = useCallback(() => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.toString().trim()) {
-      setTimeout(() => {
-        const s = window.getSelection();
-        if (!s || s.isCollapsed || !s.toString().trim()) {
-          setHasSelection(false);
-          onSelectionChangeRef.current?.(null);
-        }
-      }, 200);
+      // Don't clear immediately — let the click handler decide
       return;
     }
 
@@ -101,21 +181,53 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     // Dismiss the hint when user first highlights
     if (showHint) dismissHint();
 
-    setHasSelection(true);
-    onSelectionChangeRef.current?.(text);
-  }, [showHint]);
+    // Save the range before the browser clears the selection
+    const range = sel.getRangeAt(0).cloneRange();
 
-  // Clear selection state on click outside
+    // Apply persistent visual highlights
+    applyHighlightMarks(range);
+
+    // Clear the browser selection (our marks handle the visual now)
+    sel.removeAllRanges();
+
+    setSelectedText(text);
+    onSelectionChangeRef.current?.(text);
+  }, [showHint, applyHighlightMarks]);
+
+  // Clear selection on click inside the code area (but not on the marks themselves)
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // If clicking on a highlight mark, don't clear (user might be re-selecting)
+    const target = e.target as HTMLElement;
+    if (target.classList?.contains('sanctum-highlight') || target.closest?.('.sanctum-highlight')) return;
+
+    // If there's an active browser selection (user is making a new selection), don't clear
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    // Clear existing highlight marks and selection state
+    if (selectedText) {
+      clearHighlightMarks();
+      setSelectedText(null);
+      onSelectionChangeRef.current?.(null);
+    }
+  }, [selectedText, clearHighlightMarks]);
+
+  // Clear selection state on click outside the wrapper
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setHasSelection(false);
+        // Don't clear if clicking action bar buttons (they have data-preserve-selection)
+        const target = e.target as HTMLElement;
+        if (target.closest?.('[data-preserve-selection]')) return;
+
+        clearHighlightMarks();
+        setSelectedText(null);
         onSelectionChangeRef.current?.(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [clearHighlightMarks]);
 
   // Typewriter effect — or instant display for restored sessions
   useEffect(() => {
@@ -237,8 +349,8 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
 
   return (
     <div ref={wrapperRef} className="relative flex-1 min-h-0 flex flex-col">
-      {/* Custom selection color */}
-      <style jsx>{`
+      {/* Highlight mark styles */}
+      <style jsx global>{`
         pre ::selection {
           background: rgba(0, 236, 151, 0.25);
           color: inherit;
@@ -246,6 +358,12 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
         pre ::-moz-selection {
           background: rgba(0, 236, 151, 0.25);
           color: inherit;
+        }
+        mark.sanctum-highlight {
+          background: rgba(0, 236, 151, 0.2);
+          color: inherit;
+          border-radius: 2px;
+          padding: 1px 0;
         }
       `}</style>
 
@@ -282,6 +400,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
         ref={containerRef}
         onScroll={handleScroll}
         onMouseUp={handleMouseUp}
+        onClick={handleClick}
         className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50"
       >
         <div className="flex">
@@ -293,6 +412,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
           </div>
           {/* Code content */}
           <code
+            ref={codeRef}
             className="flex-1 overflow-x-auto text-text-primary"
             dangerouslySetInnerHTML={{ __html: highlightRust(displayedCode) }}
           />
