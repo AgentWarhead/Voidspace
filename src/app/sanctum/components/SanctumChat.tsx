@@ -367,17 +367,19 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       }
     }
 
+    // If messages were already restored, don't overwrite them on category change
+    // (This prevents the category dependency from wiping restored chat history)
+    if (messagesRef.current.length > 0) return;
+
     // For template walkthroughs, skip the greeting — go straight to user message
     if (autoMessage && !autoMessageSentRef.current) {
       autoMessageSentRef.current = true;
-      // Show the user's message immediately as a chat bubble
       const userMessage: Message = {
         id: Date.now().toString(),
         role: 'user',
         content: autoMessage,
       };
       setMessages([userMessage]);
-      // Fire the AI response immediately (bypass handleSend to avoid re-adding the user message)
       sendToApi(autoMessage, [userMessage]);
       return;
     }
