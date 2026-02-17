@@ -391,6 +391,24 @@ export default function GoToMarket({ isActive, onToggle }: GoToMarketProps) {
               like events, not announcements. Pre-arrange at least 10 ecosystem partners to co-announce within 24 hours of your launch.
             </p>
           </div>
+
+          {/* GTM Metrics Framework */}
+          <div className="bg-black/30 rounded-xl p-4 mt-4">
+            <h4 className="font-semibold text-text-primary text-sm mb-3">📊 GTM Metrics That Actually Matter</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { metric: 'Activation Rate', desc: 'What % of signups complete the core action within 24 hours? Target: 40%+.' },
+                { metric: 'Organic Mentions', desc: 'Track unpaid tweets, Discord mentions, and forum posts. Real signal of product-market fit.' },
+                { metric: 'Retention (D7/D30)', desc: 'How many users return after a week? After a month? This is the only metric VCs truly care about.' },
+                { metric: 'Referral Coefficient', desc: 'Does each user bring in >1 new user? If k > 1, you have viral growth. Web3 referrals should be on-chain and verifiable.' },
+              ].map((item, i) => (
+                <div key={i} className="bg-white/5 rounded-lg p-3">
+                  <p className="text-xs font-bold text-near-green mb-1">{item.metric}</p>
+                  <p className="text-xs text-text-muted leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </Card>

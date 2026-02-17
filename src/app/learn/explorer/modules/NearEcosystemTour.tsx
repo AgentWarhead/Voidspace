@@ -8,7 +8,7 @@ import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GradientText } from '@/components/effects/GradientText';
 import { cn } from '@/lib/utils';
 import {
-  BookOpen, Clock, CheckCircle2,
+  BookOpen, Clock, CheckCircle2, Lightbulb,
   Coins, Image, Users, Gamepad2, Brain, Wrench,
   TrendingUp, MapPin,
 } from 'lucide-react';
@@ -369,7 +369,45 @@ export function NearEcosystemTour() {
         </Card>
       </ScrollReveal>
 
+      {/* Pro Tips */}
       <ScrollReveal delay={0.3}>
+        <Card variant="glass" padding="lg" className="mb-12 border-purple-500/20">
+          <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+            <Lightbulb className="w-5 h-5 text-yellow-400" />
+            Pro Tips for Exploring the Ecosystem
+          </h3>
+          <div className="space-y-4">
+            <div className="bg-black/20 rounded-lg p-4">
+              <h4 className="font-semibold text-text-primary text-sm mb-2">🔍 How to Evaluate a Project</h4>
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Before aping into any protocol, check these fundamentals: Is the contract code open-source and audited?
+                How much TVL (Total Value Locked) does it hold? Is the team doxxed or anonymous? What does the token
+                distribution look like? Check NEAR Explorer for on-chain activity — real usage beats marketing hype every time.
+              </p>
+            </div>
+            <div className="bg-black/20 rounded-lg p-4">
+              <h4 className="font-semibold text-text-primary text-sm mb-2">🌐 Stay Connected</h4>
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Join the NEAR Discord and Telegram groups for real-time ecosystem updates. Follow @NEARProtocol on X
+                for announcements. The NEAR Forum (gov.near.org) is where governance proposals and grant applications
+                are discussed. AwesomeNEAR.com maintains a curated directory of every project in the ecosystem —
+                bookmark it as your go-to reference for discovering new protocols and tools.
+              </p>
+            </div>
+            <div className="bg-black/20 rounded-lg p-4">
+              <h4 className="font-semibold text-text-primary text-sm mb-2">💡 Start Small, Build Up</h4>
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Don&apos;t try to learn the entire ecosystem at once. Pick one category that excites you — DeFi, NFTs,
+                or DAOs — and go deep. Use testnet faucets to experiment without risking real funds. Most NEAR dApps
+                have testnet versions specifically for learning. Once you&apos;re comfortable with one vertical,
+                branch out. The cross-protocol composability on NEAR means skills transfer naturally between categories.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.35}>
         <MarkComplete moduleSlug="near-ecosystem-tour" />
       </ScrollReveal>
     </Container>

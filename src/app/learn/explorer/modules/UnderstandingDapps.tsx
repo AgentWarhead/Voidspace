@@ -8,7 +8,7 @@ import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { GradientText } from '@/components/effects/GradientText';
 import { cn } from '@/lib/utils';
 import {
-  BookOpen, Clock, CheckCircle2,
+  BookOpen, Clock, CheckCircle2, Lightbulb,
   Globe, Code, Users, Layers, Shield,
   AppWindow, ArrowRight,
 } from 'lucide-react';
@@ -372,7 +372,42 @@ export function UnderstandingDapps() {
         </Card>
       </ScrollReveal>
 
+      {/* Common Misconceptions */}
       <ScrollReveal delay={0.35}>
+        <Card variant="glass" padding="lg" className="mb-12 border-yellow-500/20">
+          <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+            <Lightbulb className="w-5 h-5 text-yellow-400" />
+            Common Misconceptions About dApps
+          </h3>
+          <div className="space-y-3">
+            {[
+              {
+                myth: '"dApps are slow and expensive"',
+                reality: 'On NEAR, transactions finalize in ~1 second and cost fractions of a cent. Sharding means the network scales with demand — no gas wars like early Ethereum.',
+              },
+              {
+                myth: '"You need crypto to use a dApp"',
+                reality: 'NEAR supports meta-transactions where a relayer pays gas on your behalf. Users can onboard with just an email — the crypto stays invisible under the hood.',
+              },
+              {
+                myth: '"All dApps are fully decentralized"',
+                reality: 'Decentralization is a spectrum. Many dApps have centralized frontends, admin keys, or upgradable contracts. Always check: who controls the keys? Is the code verified on-chain?',
+              },
+              {
+                myth: '"dApps replace all traditional apps"',
+                reality: 'dApps excel where trust, transparency, and censorship resistance matter — finance, governance, digital ownership. For a todo list? A regular app is fine.',
+              },
+            ].map((item, i) => (
+              <div key={i} className="bg-black/20 rounded-lg p-4">
+                <p className="text-sm font-semibold text-red-400 mb-1">❌ Myth: {item.myth}</p>
+                <p className="text-sm text-text-secondary">✅ Reality: {item.reality}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.4}>
         <MarkComplete moduleSlug="understanding-dapps" />
       </ScrollReveal>
     </Container>
