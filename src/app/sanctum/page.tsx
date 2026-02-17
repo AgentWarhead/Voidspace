@@ -685,7 +685,7 @@ function SanctumPageInner() {
 
               {/* Right Panel - Code Preview */}
               <div className="w-1/2 flex flex-col h-full">
-                <GlassPanel className="flex-1 flex flex-col" glow glowColor="green">
+                <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
                   {/* Header with inline task progress */}
                   <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50 relative z-10">
                     {/* Top row: Title + Buttons */}
@@ -761,7 +761,7 @@ function SanctumPageInner() {
 
                   {/* Code with typing animation */}
                   {state.generatedCode && (
-                    <div className="flex-1 min-h-0 overflow-auto">
+                    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                       <TypewriterCode 
                         code={state.generatedCode}
                         speed={8}
@@ -882,7 +882,7 @@ function SanctumPageInner() {
 
                       {/* Code with typing animation */}
                       {state.generatedCode && (
-                        <div className="flex-1 min-h-0 overflow-auto">
+                        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                           <TypewriterCode 
                             code={state.generatedCode}
                             speed={8}
