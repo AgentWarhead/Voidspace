@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import {
   ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
   Shield, AlertTriangle, ArrowRight, Code, TrendingUp,
   Droplets, Sprout, Layers, Ban, BarChart3,
-  CircleDollarSign, Activity,
+  CircleDollarSign, Activity, BookOpen, Clock,
 } from 'lucide-react';
 
 // ─── Interactive AMM Curve Visual ───────────────────────────────────────────
@@ -267,18 +267,23 @@ interface DefiContractPatternsProps {
 }
 
 export default function DefiContractPatterns({ isActive, onToggle }: DefiContractPatternsProps) {
-  const [completed, setCompleted] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('voidspace-module-defi-patterns') === 'true';
-    }
-    return false;
-  });
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      if (progress['defi-contract-patterns']) setCompleted(true);
+    } catch {}
+  }, []);
 
   const handleComplete = () => {
-    setCompleted(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('voidspace-module-defi-patterns', 'true');
-    }
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      progress['defi-contract-patterns'] = true;
+      localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
   };
 
   return (
@@ -312,6 +317,15 @@ export default function DefiContractPatterns({ isActive, onToggle }: DefiContrac
             className="overflow-hidden"
           >
             <div className="border-t border-amber-500/20 p-6 space-y-8">
+              {/* Module Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">
+                <BookOpen className="w-3 h-3" />
+                Module 24 of 27
+                <span className="text-text-muted">•</span>
+                <Clock className="w-3 h-3" />
+                50 min read
+              </div>
+
               {/* The Big Idea */}
               <Card variant="glass" padding="lg">
                 <div className="flex items-center gap-3 mb-3">

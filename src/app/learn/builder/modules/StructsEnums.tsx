@@ -264,7 +264,7 @@ const StructsEnums: React.FC<StructsEnumsProps> = ({ isActive, onToggle }) => {
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/5 text-xs text-violet-400">
                 <BookOpen className="w-3 h-3" />
-                Rust Curriculum — Phase 1
+                Module 4 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 35 min read

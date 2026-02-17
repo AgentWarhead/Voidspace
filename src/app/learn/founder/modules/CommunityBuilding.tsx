@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
@@ -17,6 +17,7 @@ import {
   Maximize2,
   Lightbulb,
   CheckCircle,
+  CheckCircle2,
   AlertTriangle,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -233,6 +234,25 @@ function MiniQuiz() {
 }
 
 export default function CommunityBuilding({ isActive, onToggle }: CommunityBuildingProps) {
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-founder-progress') || '{}');
+      if (progress['community-building']) setCompleted(true);
+    } catch {}
+  }, []);
+
+  const handleComplete = () => {
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-founder-progress') || '{}');
+      progress['community-building'] = true;
+      localStorage.setItem('voidspace-founder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
+  };
+
   return (
     <Card variant="glass" padding="none" className="border-near-green/20">
       <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
@@ -246,6 +266,8 @@ export default function CommunityBuilding({ isActive, onToggle }: CommunityBuild
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Module 6 of 12</Badge>
+          {completed && <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/20">✓ Done</Badge>}
           <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
@@ -409,6 +431,25 @@ export default function CommunityBuilding({ isActive, onToggle }: CommunityBuild
               (3) Empower — give them a title, a channel, a small budget, and clear expectations. The best contributors are already 
               contributing informally — your job is to formalize their role and remove obstacles. Aim to onboard 3 new contributors per month.
             </p>
+          </div>
+
+          {/* Mark Complete */}
+          <div className="flex justify-center pt-4 mt-4 border-t border-white/5">
+            <motion.button
+              onClick={handleComplete}
+              disabled={completed}
+              className={cn(
+                'px-8 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2',
+                completed
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
+                  : 'bg-gradient-to-r from-near-green to-emerald-500 text-white hover:shadow-lg hover:shadow-near-green/20'
+              )}
+              whileHover={completed ? {} : { scale: 1.03, y: -1 }}
+              whileTap={completed ? {} : { scale: 0.97 }}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              {completed ? 'Module Completed ✓' : 'Mark as Complete'}
+            </motion.button>
           </div>
         </div>
       )}

@@ -314,7 +314,7 @@ const CollectionsIterators: React.FC<CollectionsIteratorsProps> = ({ isActive, o
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-xs text-teal-400">
                 <BookOpen className="w-3 h-3" />
-                Rust Curriculum — Phase 1
+                Module 7 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 45 min read

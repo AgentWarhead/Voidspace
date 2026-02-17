@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
   Shield, AlertTriangle, ArrowRight, Layers, Code,
-  DollarSign, Terminal, Globe, Lock, Cpu,
+  DollarSign, Terminal, Globe, Lock, Cpu, BookOpen, Clock,
 } from 'lucide-react';
 
 // ─── Bridge Architecture Visual ─────────────────────────────────────────────
@@ -265,13 +265,20 @@ export default function AuroraEvmCompatibility({ isActive, onToggle }: AuroraEvm
   const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('voidspace-module-aurora-evm');
-    if (saved === 'complete') setCompleted(true);
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      if (progress['aurora-evm-compatibility']) setCompleted(true);
+    } catch {}
   }, []);
 
   const handleComplete = () => {
-    localStorage.setItem('voidspace-module-aurora-evm', 'complete');
-    setCompleted(true);
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      progress['aurora-evm-compatibility'] = true;
+      localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
   };
 
   return (
@@ -305,6 +312,15 @@ export default function AuroraEvmCompatibility({ isActive, onToggle }: AuroraEvm
             className="overflow-hidden"
           >
             <div className="border-t border-emerald-500/20 p-6 space-y-8">
+              {/* Module Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400">
+                <BookOpen className="w-3 h-3" />
+                Module 25 of 27
+                <span className="text-text-muted">•</span>
+                <Clock className="w-3 h-3" />
+                40 min read
+              </div>
+
               {/* The Big Idea */}
               <Card variant="glass" padding="lg">
                 <div className="flex items-center gap-3 mb-3">

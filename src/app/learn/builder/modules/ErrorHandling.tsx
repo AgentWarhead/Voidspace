@@ -295,7 +295,7 @@ const ErrorHandling: React.FC<ErrorHandlingProps> = ({ isActive, onToggle }) => 
               {/* Module Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-rose-500/20 bg-rose-500/5 text-xs text-rose-400">
                 <BookOpen className="w-3 h-3" />
-                Rust Curriculum — Phase 1
+                Module 5 of 27
                 <span className="text-text-muted">•</span>
                 <Clock className="w-3 h-3" />
                 35 min read

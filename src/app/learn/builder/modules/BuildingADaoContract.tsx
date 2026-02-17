@@ -8,7 +8,7 @@ import {
   ChevronDown, ChevronUp, CheckCircle2, Lightbulb, Zap,
   Shield, AlertTriangle, ArrowRight, Code, Users,
   Vote, Gavel, Settings, UserPlus, UserMinus,
-  FileText, Rocket, Lock, Scale,
+  FileText, Rocket, Lock, Scale, BookOpen, Clock,
 } from 'lucide-react';
 
 // ─── Interactive Governance Flow ────────────────────────────────────────────
@@ -273,18 +273,23 @@ interface BuildingADaoContractProps {
 }
 
 export default function BuildingADaoContract({ isActive, onToggle }: BuildingADaoContractProps) {
-  const [completed, setCompleted] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('voidspace-module-dao-contract') === 'true';
-    }
-    return false;
-  });
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      if (progress['building-a-dao-contract']) setCompleted(true);
+    } catch {}
+  }, []);
 
   const handleComplete = () => {
-    setCompleted(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('voidspace-module-dao-contract', 'true');
-    }
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-builder-progress') || '{}');
+      progress['building-a-dao-contract'] = true;
+      localStorage.setItem('voidspace-builder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
   };
 
   return (
@@ -318,6 +323,15 @@ export default function BuildingADaoContract({ isActive, onToggle }: BuildingADa
             className="overflow-hidden"
           >
             <div className="border-t border-cyan-500/20 p-6 space-y-8">
+              {/* Module Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-xs text-cyan-400">
+                <BookOpen className="w-3 h-3" />
+                Module 23 of 27
+                <span className="text-text-muted">•</span>
+                <Clock className="w-3 h-3" />
+                45 min read
+              </div>
+
               {/* The Big Idea */}
               <Card variant="glass" padding="lg">
                 <div className="flex items-center gap-3 mb-3">

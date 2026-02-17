@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
@@ -14,6 +14,7 @@ import {
   Shield,
   Lightbulb,
   CheckCircle,
+  CheckCircle2,
   AlertTriangle,
   TrendingUp,
   Zap,
@@ -196,6 +197,25 @@ function MiniQuiz() {
 }
 
 export default function MarketingForWeb3({ isActive, onToggle }: MarketingForWeb3Props) {
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-founder-progress') || '{}');
+      if (progress['marketing-for-web3']) setCompleted(true);
+    } catch {}
+  }, []);
+
+  const handleComplete = () => {
+    if (completed) return;
+    try {
+      const progress = JSON.parse(localStorage.getItem('voidspace-founder-progress') || '{}');
+      progress['marketing-for-web3'] = true;
+      localStorage.setItem('voidspace-founder-progress', JSON.stringify(progress));
+      setCompleted(true);
+    } catch {}
+  };
+
   return (
     <Card variant="glass" padding="none" className="border-near-green/20">
       <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
@@ -209,6 +229,8 @@ export default function MarketingForWeb3({ isActive, onToggle }: MarketingForWeb
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Badge className="bg-near-green/10 text-near-green border-near-green/20">Module 11 of 12</Badge>
+          {completed && <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/20">✓ Done</Badge>}
           <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/20">Founder</Badge>
           {isActive ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
         </div>
@@ -392,6 +414,25 @@ export default function MarketingForWeb3({ isActive, onToggle }: MarketingForWeb
               (4) Behind-the-scenes — show your team working, failing, and learning. Batch-produce a week&apos;s content every Monday. Consistency 
               beats virality — your 50th post will perform better than your 1st because you&apos;ve earned algorithmic trust.
             </p>
+          </div>
+
+          {/* Mark Complete */}
+          <div className="flex justify-center pt-4 mt-4 border-t border-white/5">
+            <motion.button
+              onClick={handleComplete}
+              disabled={completed}
+              className={cn(
+                'px-8 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2',
+                completed
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
+                  : 'bg-gradient-to-r from-near-green to-emerald-500 text-white hover:shadow-lg hover:shadow-near-green/20'
+              )}
+              whileHover={completed ? {} : { scale: 1.03, y: -1 }}
+              whileTap={completed ? {} : { scale: 0.97 }}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              {completed ? 'Module Completed ✓' : 'Mark as Complete'}
+            </motion.button>
           </div>
         </div>
       )}
