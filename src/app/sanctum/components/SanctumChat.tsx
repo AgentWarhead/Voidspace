@@ -83,6 +83,8 @@ interface SanctumChatProps {
   onConceptLearned?: (concept: { title: string; category: string; difficulty: string }) => void;
   onUserMessage?: (text: string) => void; // for achievement checks on user messages
   sessionReset?: number; // increment to signal reset from parent
+  externalMessage?: string; // message injected from outside (code panel actions)
+  externalMessageSeq?: number; // increment to trigger send
 }
 
 // --- localStorage persistence for chat ---
@@ -120,7 +122,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user } = useWallet();
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
@@ -704,6 +706,13 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       setVoiceAutoSend(false);
     }
   }, [voiceAutoSend, input, isLoading]);
+
+  // External message injection (from code panel actions)
+  useEffect(() => {
+    if (externalMessage && externalMessageSeq && externalMessageSeq > 0 && !isLoading) {
+      handleSend(externalMessage);
+    }
+  }, [externalMessageSeq]);
   
   // Determine a task name based on the user's request
   function getTaskName(text: string): string {

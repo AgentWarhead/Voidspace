@@ -19,7 +19,6 @@ import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline } from './components/TaskProgressInline';
 import { ShareContract } from './components/ShareContract';
 // SocialProof moved to SanctumLanding
-import { ContractDNA } from './components/ContractDNA';
 import { GasEstimatorCompact } from './components/GasEstimator';
 import { ContractComparison } from './components/ContractComparison';
 import { SimulationSandbox } from './components/SimulationSandbox';
@@ -120,6 +119,34 @@ function SanctumPageInner() {
   // Counter to signal chat component to reset
   const [sessionResetCounter, setSessionResetCounter] = useState(0);
   const [showWizard, setShowWizard] = useState(false);
+
+  // External message injection from code panel → chat
+  const [externalMessage, setExternalMessage] = useState('');
+  const [externalMessageSeq, setExternalMessageSeq] = useState(0);
+
+  const sendToChat = useCallback((message: string) => {
+    setExternalMessage(message);
+    setExternalMessageSeq(prev => prev + 1);
+    // On mobile, switch to chat panel to show the response
+    if (state.activePanel === 'code') {
+      dispatch({ type: 'SET_ACTIVE_PANEL', payload: 'chat' });
+    }
+  }, [state.activePanel, dispatch]);
+
+  const handleCodeAction = useCallback((action: { action: string; selectedCode: string }) => {
+    const codeSnippet = action.selectedCode.length > 500
+      ? action.selectedCode.slice(0, 500) + '\n// ... (truncated)'
+      : action.selectedCode;
+
+    const prompts: Record<string, string> = {
+      explain: `Explain this code in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      optimize: `How can I optimize this code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      security: `Audit this code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+      ask: `I have a question about this code:\n\n\`\`\`rust\n${codeSnippet}\n\`\`\`\n\nWhat does this do and how does it work?`,
+    };
+
+    sendToChat(prompts[action.action] || prompts.ask);
+  }, [sendToChat]);
 
   const handleNewSession = useCallback(() => {
     clearPersistedSession();
@@ -663,6 +690,8 @@ function SanctumPageInner() {
                       onConceptLearned={(c) => { dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c }); handleConceptLearned(); }}
                       onUserMessage={checkMessageForAchievements}
                       sessionReset={sessionResetCounter}
+                      externalMessage={externalMessage}
+                      externalMessageSeq={externalMessageSeq}
                     />
                   </div>
                 </GlassPanel>
@@ -754,25 +783,45 @@ function SanctumPageInner() {
                         code={state.generatedCode}
                         speed={8}
                         onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
+                        onCodeAction={handleCodeAction}
                       />
                     </div>
                   )}
 
-                  {/* Contract DNA + Gas + File info */}
+                  {/* Smart action bar + gas badge */}
                   {state.generatedCode && (
                     <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
-                      {/* DNA and Gas row */}
-                      <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
-                        <ContractDNA code={state.generatedCode} size="sm" showLabel={true} />
+                      <div className="px-3 py-2.5 flex items-center justify-between gap-2">
+                        {/* Quick actions */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto">
+                          <span className="text-xs text-text-muted mr-1 whitespace-nowrap">Ask AI:</span>
+                          <button
+                            onClick={() => sendToChat('Explain this entire contract — walk me through the architecture, each function, and the NEAR-specific patterns used.')}
+                            className="px-2.5 py-1.5 text-xs rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/30 transition-all whitespace-nowrap"
+                          >
+                            💡 Explain
+                          </button>
+                          <button
+                            onClick={() => sendToChat('Generate comprehensive unit tests for this contract — cover all public methods, edge cases, and error conditions.')}
+                            className="px-2.5 py-1.5 text-xs rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/30 transition-all whitespace-nowrap"
+                          >
+                            🧪 Tests
+                          </button>
+                          <button
+                            onClick={() => sendToChat('Optimize this contract for gas efficiency on NEAR — review storage patterns, function calls, and suggest specific improvements.')}
+                            className="px-2.5 py-1.5 text-xs rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/20 hover:border-amber-500/30 transition-all whitespace-nowrap"
+                          >
+                            ⚡ Optimize
+                          </button>
+                          <button
+                            onClick={() => sendToChat('Audit this contract for security vulnerabilities — check for reentrancy, access control gaps, overflow risks, and NEAR-specific attack vectors.')}
+                            className="px-2.5 py-1.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/30 transition-all whitespace-nowrap"
+                          >
+                            🔒 Audit
+                          </button>
+                        </div>
+                        {/* Gas badge */}
                         <GasEstimatorCompact code={state.generatedCode} />
-                      </div>
-                      {/* File info row */}
-                      <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
-                          contract.rs
-                        </span>
-                        <span>{state.generatedCode.split('\n').length} lines • {state.generatedCode.length} chars</span>
                       </div>
                     </div>
                   )}
@@ -803,6 +852,8 @@ function SanctumPageInner() {
                         onConceptLearned={(c) => { dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c }); handleConceptLearned(); }}
                         onUserMessage={checkMessageForAchievements}
                         sessionReset={sessionResetCounter}
+                        externalMessage={externalMessage}
+                        externalMessageSeq={externalMessageSeq}
                       />
                     </div>
                   </GlassPanel>
@@ -875,23 +926,42 @@ function SanctumPageInner() {
                             code={state.generatedCode}
                             speed={8}
                             onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
+                            onCodeAction={handleCodeAction}
                           />
                         </div>
                       )}
 
-                      {/* Contract info footer */}
+                      {/* Smart action bar — mobile */}
                       {state.generatedCode && (
                         <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
-                          <div className="p-3 flex items-center justify-between border-b border-white/[0.05]">
-                            <ContractDNA code={state.generatedCode} size="sm" showLabel={false} />
-                            <GasEstimatorCompact code={state.generatedCode} />
-                          </div>
-                          <div className="px-3 py-2 flex items-center justify-between text-xs text-text-muted">
-                            <span className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-near-green animate-pulse" />
-                              contract.rs
-                            </span>
-                            <span>{state.generatedCode.split('\n').length} lines</span>
+                          <div className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto">
+                            <button
+                              onClick={() => sendToChat('Explain this entire contract — walk me through each function and the NEAR patterns used.')}
+                              className="px-2 py-1.5 text-xs rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all whitespace-nowrap flex-shrink-0"
+                            >
+                              💡 Explain
+                            </button>
+                            <button
+                              onClick={() => sendToChat('Generate unit tests for this contract.')}
+                              className="px-2 py-1.5 text-xs rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 transition-all whitespace-nowrap flex-shrink-0"
+                            >
+                              🧪 Tests
+                            </button>
+                            <button
+                              onClick={() => sendToChat('Optimize this contract for gas efficiency.')}
+                              className="px-2 py-1.5 text-xs rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 transition-all whitespace-nowrap flex-shrink-0"
+                            >
+                              ⚡ Gas
+                            </button>
+                            <button
+                              onClick={() => sendToChat('Audit this contract for security vulnerabilities.')}
+                              className="px-2 py-1.5 text-xs rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 transition-all whitespace-nowrap flex-shrink-0"
+                            >
+                              🔒 Audit
+                            </button>
+                            <div className="ml-auto flex-shrink-0">
+                              <GasEstimatorCompact code={state.generatedCode} />
+                            </div>
                           </div>
                         </div>
                       )}

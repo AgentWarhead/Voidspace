@@ -1,19 +1,27 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+
+interface CodeAction {
+  action: string;
+  selectedCode: string;
+}
 
 interface TypewriterCodeProps {
   code: string;
   speed?: number; // ms per character
   onComplete?: () => void;
+  onCodeAction?: (action: CodeAction) => void;
 }
 
-export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeProps) {
+export function TypewriterCode({ code, speed = 10, onComplete, onCodeAction }: TypewriterCodeProps) {
   const [displayedCode, setDisplayedCode] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLPreElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const userHasScrolledRef = useRef(false);
 
   // Store onComplete in a ref to avoid re-triggering the effect
@@ -51,6 +59,54 @@ export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeP
     await navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Selection detection
+  const handleMouseUp = useCallback(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+      // Small delay to allow click-to-deselect
+      setTimeout(() => {
+        const s = window.getSelection();
+        if (!s || s.isCollapsed || !s.toString().trim()) {
+          setSelection(null);
+        }
+      }, 200);
+      return;
+    }
+
+    const text = sel.toString().trim();
+    if (text.length < 3) return; // Ignore tiny selections
+
+    // Get position relative to wrapper
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const wrapperRect = wrapperRef.current?.getBoundingClientRect();
+    if (!wrapperRect) return;
+
+    setSelection({
+      text,
+      x: Math.min(rect.left - wrapperRect.left + rect.width / 2, wrapperRect.width - 120),
+      y: rect.top - wrapperRect.top - 8,
+    });
+  }, []);
+
+  // Close selection toolbar on click outside code area
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setSelection(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectionAction = (action: string) => {
+    if (!selection) return;
+    onCodeAction?.({ action, selectedCode: selection.text });
+    setSelection(null);
+    window.getSelection()?.removeAllRanges();
   };
 
   useEffect(() => {
@@ -177,7 +233,7 @@ export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeP
   };
 
   return (
-    <div className="relative flex-1 min-h-0 flex flex-col">
+    <div ref={wrapperRef} className="relative flex-1 min-h-0 flex flex-col">
       {/* Copy button */}
       {code && (
         <button
@@ -192,9 +248,46 @@ export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeP
         </button>
       )}
 
+      {/* Selection floating toolbar */}
+      {selection && (
+        <div
+          className="absolute z-20 flex items-center gap-1 px-1.5 py-1 rounded-lg bg-[#1a1a2e]/95 backdrop-blur-xl border border-white/[0.15] shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-bottom-2 duration-150"
+          style={{
+            left: Math.max(8, selection.x - 100),
+            top: Math.max(8, selection.y - 36),
+          }}
+        >
+          <button
+            onClick={() => handleSelectionAction('explain')}
+            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 transition-all whitespace-nowrap"
+          >
+            💡 Explain
+          </button>
+          <button
+            onClick={() => handleSelectionAction('optimize')}
+            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 transition-all whitespace-nowrap"
+          >
+            ⚡ Optimize
+          </button>
+          <button
+            onClick={() => handleSelectionAction('security')}
+            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all whitespace-nowrap"
+          >
+            🔒 Audit
+          </button>
+          <button
+            onClick={() => handleSelectionAction('ask')}
+            className="px-2.5 py-1.5 text-xs rounded-md hover:bg-near-green/20 text-near-green hover:text-near-green/80 transition-all whitespace-nowrap"
+          >
+            💬 Ask
+          </button>
+        </div>
+      )}
+
       <pre
         ref={containerRef}
         onScroll={handleScroll}
+        onMouseUp={handleMouseUp}
         className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50"
       >
         <div className="flex">
