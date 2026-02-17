@@ -78,6 +78,12 @@ export async function POST(request: NextRequest) {
             cancel_at_period_end: subscription.cancel_at_period_end,
           }, { onConflict: 'user_id' });
 
+        // Sync tier to users table (frontend reads users.tier for UI display)
+        await supabase
+          .from('users')
+          .update({ tier })
+          .eq('id', userId);
+
         console.log(`[Stripe Webhook] Subscription ${event.type} — user=${userId} tier=${tier} status=${status}`);
         break;
       }
@@ -191,6 +197,12 @@ export async function POST(request: NextRequest) {
             cancel_at_period_end: false,
           })
           .eq('user_id', userId);
+
+        // Sync tier to users table (frontend reads users.tier for UI display)
+        await supabase
+          .from('users')
+          .update({ tier: 'shade' })
+          .eq('id', userId);
 
         // Zero out subscription credits (top-ups preserved)
         await supabase

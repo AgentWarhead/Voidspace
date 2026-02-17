@@ -1,19 +1,28 @@
 // ============================================================
 // Stripe Customer Portal
 // Allows users to manage their subscription (upgrade/downgrade/cancel)
+// Server-side session authentication — never trusts client userId
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
-
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    // --- Authenticate via session cookie (never trust body) ---
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
+
+    const session = verifySessionToken(sessionCookie);
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid or expired session' }, { status: 401 });
+    }
+
+    const userId = session.userId;
 
     const supabase = createAdminClient();
     const stripe = getStripe();
