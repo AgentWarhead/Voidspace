@@ -25,7 +25,6 @@ import { ContractComparison } from './components/ContractComparison';
 import { SimulationSandbox } from './components/SimulationSandbox';
 import { PairProgramming } from './components/PairProgramming';
 import { FileStructure } from './components/FileStructure';
-import { DeployInstructions } from './components/DeployInstructions';
 import { ContractToolbar } from './components/ContractToolbar';
 import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
@@ -729,17 +728,6 @@ function SanctumPageInner() {
                       <FileStructure 
                         code={state.generatedCode} 
                         contractName={state.selectedCategory || 'my-contract'}
-                      />
-                    </div>
-                  )}
-
-                  {/* Deploy Instructions Panel */}
-                  {state.generatedCode && state.sanctumStage === 'complete' && (
-                    <div className="px-4 pt-3 border-b border-white/[0.08]">
-                      <DeployInstructions
-                        contractName={state.selectedCategory || 'my-contract'}
-                        category={state.selectedCategory || undefined}
-                        code={state.generatedCode}
                       />
                     </div>
                   )}
