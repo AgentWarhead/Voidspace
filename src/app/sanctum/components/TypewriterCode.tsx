@@ -11,11 +11,47 @@ interface TypewriterCodeProps {
 export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeProps) {
   const [displayedCode, setDisplayedCode] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
+  const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLPreElement>(null);
+  const userHasScrolledRef = useRef(false);
 
   // Store onComplete in a ref to avoid re-triggering the effect
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
+
+  // Reset scroll state when code prop changes (new generation)
+  useEffect(() => {
+    userHasScrolledRef.current = false;
+    setUserHasScrolled(false);
+  }, [code]);
+
+  const handleScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 40;
+    if (nearBottom) {
+      userHasScrolledRef.current = false;
+      setUserHasScrolled(false);
+    } else {
+      userHasScrolledRef.current = true;
+      setUserHasScrolled(true);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+    userHasScrolledRef.current = false;
+    setUserHasScrolled(false);
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (!code) {
@@ -39,8 +75,8 @@ export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeP
         setDisplayedCode(code.slice(0, index + 1));
         index++;
 
-        // Auto-scroll to bottom
-        if (containerRef.current) {
+        // Auto-scroll to bottom only if user hasn't scrolled away
+        if (containerRef.current && !userHasScrolledRef.current) {
           containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
 
@@ -141,17 +177,53 @@ export function TypewriterCode({ code, speed = 10, onComplete }: TypewriterCodeP
   };
 
   return (
-    <pre
-      ref={containerRef}
-      className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50"
-    >
-      <code 
-        className="text-text-primary"
-        dangerouslySetInnerHTML={{ __html: highlightRust(displayedCode) }}
-      />
-      {!isComplete && code && (
-        <span className="inline-block w-2 h-4 bg-near-green animate-pulse ml-0.5" />
+    <div className="relative flex-1 min-h-0 flex flex-col">
+      {/* Copy button */}
+      {code && (
+        <button
+          onClick={handleCopy}
+          className={`absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs font-mono transition-all ${
+            copied
+              ? 'bg-near-green/20 text-near-green border border-near-green/40'
+              : 'bg-void-black/60 text-text-muted border border-white/10 hover:border-white/30 hover:text-white'
+          }`}
+        >
+          {copied ? '✓ Copied!' : 'Copy'}
+        </button>
       )}
-    </pre>
+
+      <pre
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50"
+      >
+        <div className="flex">
+          {/* Line number gutter */}
+          <div className="flex-shrink-0 text-right pr-3 mr-3 border-r border-white/[0.06] select-none">
+            {displayedCode.split('\n').map((_, i) => (
+              <div key={i} className="text-text-muted/30 text-xs leading-relaxed">{i + 1}</div>
+            ))}
+          </div>
+          {/* Code content */}
+          <code
+            className="flex-1 overflow-x-auto text-text-primary"
+            dangerouslySetInnerHTML={{ __html: highlightRust(displayedCode) }}
+          />
+        </div>
+        {!isComplete && code && (
+          <span className="inline-block w-2 h-4 bg-near-green animate-pulse ml-0.5" />
+        )}
+      </pre>
+
+      {/* Scroll to bottom button */}
+      {userHasScrolled && (
+        <button
+          onClick={scrollToBottom}
+          className="absolute bottom-4 right-4 z-10 px-3 py-1.5 rounded-lg bg-void-black/80 text-near-green border border-near-green/30 text-xs font-mono hover:bg-near-green/10 transition-all shadow-lg"
+        >
+          ↓ Scroll to bottom
+        </button>
+      )}
+    </div>
   );
 }

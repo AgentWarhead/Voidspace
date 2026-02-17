@@ -734,7 +734,7 @@ function SanctumPageInner() {
                   )}
 
                   {/* Deploy Instructions Panel */}
-                  {state.generatedCode && (
+                  {state.generatedCode && state.sanctumStage === 'complete' && (
                     <div className="px-4 pt-3 border-b border-white/[0.08]">
                       <DeployInstructions
                         contractName={state.selectedCategory || 'my-contract'}

@@ -141,6 +141,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const autoMessageSentRef = useRef(false);
@@ -676,6 +677,9 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     const allMessages = [...messages, userMessage];
     setMessages(allMessages);
     setInput('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
     setAttachedFiles([]);
 
     // Notify parent for achievement checks
@@ -905,14 +909,12 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           <span className={`text-xs ${isFreeTier ? 'text-text-muted' : 'text-near-green/70'}`}>
             {isFreeTier ? (
               <>
-                Running on {modelLabel}
+                Powered by {modelLabel}
                 {' · '}
-                <Link href="/pricing" className="text-near-green/80 hover:text-near-green underline underline-offset-2 transition-colors">
-                  Upgrade for Opus 4.6
-                </Link>
+                <span className="text-near-green/60">NEAR-specialized</span>
               </>
             ) : (
-              <>Powered by {modelLabel}</>
+              <>Powered by {modelLabel} · <span className="text-near-green">NEAR-specialized</span></>
             )}
           </span>
         </div>
@@ -936,13 +938,26 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
             <Link2 className="w-5 h-5 text-text-muted" />
           </button>
           
-          <input
-            type="text"
+          <textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // Auto-resize
+              if (textareaRef.current) {
+                textareaRef.current.style.height = 'auto';
+                textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            rows={1}
             placeholder={isListening ? "Listening..." : "Describe what you want to build..."}
-            className={`flex-1 min-w-0 px-3 sm:px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-sm sm:text-base text-white placeholder:text-text-muted transition-all ${
+            className={`flex-1 min-w-0 px-3 sm:px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-sm sm:text-base text-white placeholder:text-text-muted transition-all resize-none ${
               isListening 
                 ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30 animate-pulse' 
                 : 'border-border focus:border-near-green/50 focus:ring-near-green/30'
