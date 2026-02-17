@@ -782,6 +782,7 @@ function SanctumPageInner() {
                       <TypewriterCode 
                         code={state.generatedCode}
                         speed={8}
+                        instant={state.sanctumStage === 'complete'}
                         onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
                         onCodeAction={handleCodeAction}
                       />
@@ -794,7 +795,8 @@ function SanctumPageInner() {
                       <div className="px-3 py-2.5 flex items-center justify-between gap-2">
                         {/* Quick actions */}
                         <div className="flex items-center gap-1.5 overflow-x-auto">
-                          <span className="text-xs text-text-muted mr-1 whitespace-nowrap">Ask AI:</span>
+                          <span className="text-xs text-text-muted mr-1 whitespace-nowrap hidden lg:inline">Ask AI <span className="text-text-muted/50">(or highlight code)</span>:</span>
+                          <span className="text-xs text-text-muted mr-1 whitespace-nowrap lg:hidden">Ask AI:</span>
                           <button
                             onClick={() => sendToChat('Explain this entire contract — walk me through the architecture, each function, and the NEAR-specific patterns used.')}
                             className="px-2.5 py-1.5 text-xs rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/30 transition-all whitespace-nowrap"
@@ -925,6 +927,7 @@ function SanctumPageInner() {
                           <TypewriterCode 
                             code={state.generatedCode}
                             speed={8}
+                            instant={state.sanctumStage === 'complete'}
                             onComplete={() => dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' })}
                             onCodeAction={handleCodeAction}
                           />
