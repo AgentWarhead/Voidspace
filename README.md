@@ -271,17 +271,6 @@ npm run dev
 
 ---
 
-## 🗺️ Roadmap
-
-- [ ] Cloud WASM compilation — compile and test contracts in-browser
-- [ ] One-click testnet deployment from Sanctum
-- [ ] Community layer — share contracts, collaborate on Voids
-- [ ] DAO tooling — governance analysis, treasury intelligence
-- [ ] Sanctum marketplace — community contract templates
-- [ ] Mobile app
-- [ ] Multi-chain expansion beyond NEAR
-
----
 
 ## 📊 By the Numbers
 
