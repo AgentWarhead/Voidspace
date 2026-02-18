@@ -1,159 +1,306 @@
 <div align="center">
 
+<img src="public/voidspace-logo.png" alt="Voidspace" width="200"/>
+
 # Voidspace
 
-**The intelligence layer for NEAR Protocol.**
+### The Intelligence Layer for NEAR Protocol
 
-### 🎬 Watch the Demo
+**Ecosystem intelligence · AI smart contract builder · Blockchain education**
+**All in one platform. Built for builders.**
+
+[![Live](https://img.shields.io/badge/🌐_Live-voidspace.io-00EC97?style=for-the-badge)](https://voidspace.io)
+[![NEAR](https://img.shields.io/badge/Built_on-NEAR_Protocol-00EC97?style=for-the-badge&logo=near)](https://near.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-108%2C879_lines-3178C6?style=for-the-badge&logo=typescript)](.)
+[![Built in](https://img.shields.io/badge/Built_in-3_weeks-FF6B35?style=for-the-badge)](.)
+
+---
+
+### 🎬 Demo
 
 https://github.com/user-attachments/assets/ef14e58b-3c15-484b-9f14-62f2a3111c26
 
 </div>
 
-Voidspace is a unified platform for ecosystem intelligence, AI-powered smart contract development, and structured blockchain education — built exclusively for NEAR.
+---
 
-**Live:** [voidspace.io](https://voidspace.io)
+## What is Voidspace?
+
+Voidspace is a **full-stack intelligence platform** for the NEAR ecosystem. It combines real-time market data, on-chain analytics, AI-powered development tools, and structured education into a single application — giving builders everything they need to discover opportunities, write smart contracts, and ship products on NEAR.
+
+There is nothing else like it in the NEAR ecosystem. Or any ecosystem.
+
+**462 source files. 108,879 lines of TypeScript. 456 commits. 3 weeks. Zero templates. One developer.**
 
 ---
 
-## Features
+## 🔭 Observatory — Ecosystem Intelligence Dashboard
 
-### 🔭 Intelligence Suite
+The Observatory is a real-time command center for the entire NEAR ecosystem.
 
-| Tool | What it does |
-|------|-------------|
-| **Observatory** | Live ecosystem dashboard — browse 20+ categories of NEAR projects with real-time market data, opportunity scoring, and AI-generated ecosystem gap analysis |
-| **Void Bubbles** | 3D interactive market visualization — token price, volume, and liquidity rendered as an animated bubble field with whale alerts, gainers/losers tracking, and fullscreen mode |
-| **Void Lens** | Deep wallet analysis — 6-axis reputation scoring, DeFi position tracking, portfolio valuation with live USD pricing, security profiling, transaction history, and behavioral radar |
-| **Constellation Map** | Transaction flow graph — map relationships between wallets, reveal clusters, trace fund flows with direction arrows, time/value filters, minimap, search, and screenshot export |
+- **20+ browsable categories** — DeFi, NFTs, Gaming, Infrastructure, Social, DAOs, and more
+- **140+ indexed NEAR projects** with live market data powered by DexScreener
+- **Category-level aggregate stats** — total TVL, volume, token counts per vertical
+- **Top Movers & New Pairs** — surface trending tokens and freshly listed pairs
+- **DeFi Overview Banner** — ecosystem-wide liquidity, volume, and market cap at a glance
 
-### 🔍 Discovery & Research
-
-| Feature | What it does |
-|---------|-------------|
-| **Opportunities (Voids)** | AI-detected ecosystem gaps — real project data + market signals analyzed to surface building opportunities, scored by demand, competition, and difficulty |
-| **Void Brief** | AI-generated build plans for any opportunity — architecture, tech stack, go-to-market, and competitive analysis |
-| **Project Pages** | Deep-dive profiles for 140+ NEAR projects — live token market data, GitHub stats, category context, related opportunities |
-| **Search** | Full-text search across projects, opportunities, categories, and learning modules |
-| **Categories** | Browse the NEAR ecosystem by category with aggregate DeFi stats and token data |
-
-### ⚡ Sanctum (AI Development Environment)
-
-The first AI-powered IDE built specifically for NEAR and Rust smart contracts.
-
-- **Natural language → Rust code.** Describe what you want, watch it generate production-ready smart contracts in real time.
-- **8 specialist AI personas:** Shade (Lead Architect), Oxide (Rust Grandmaster), Warden (Security Overlord), Phantom (Gas & Performance), Nexus (Cross-Chain), Prism (Frontend & Integration), Crucible (Testing & QA), Ledger (DeFi & Tokenomics).
-- **3 builder modes:** Learn (guided education) · Build (project scaffold) · Expert (full control).
-- **Scratch mode:** Start from pre-built contract templates (token, NFT, DAO, marketplace, etc.) and customize with AI.
-- **Webapp Builder:** Auto-generates a frontend dApp from your smart contract with method calls, wallet integration, and deploy instructions.
-- **Post-contract pipeline:** Downloadable ZIP project scaffold, deploy instructions, simulation sandbox, persistent project management.
-- **Roast Zone:** Security audit your contract ideas with brutal honesty.
-- **Import & iterate:** Import existing contracts for AI-assisted refactoring and enhancement.
-- **Powered by Claude Opus 4** with credit-based usage.
-
-### 📚 Learning Platform
-
-- **66 learning modules** across 4 tracks: Explorer (16) · Builder (22) · Hacker (16) · Founder (12).
-- **Quick Start guide** for new developers entering the NEAR ecosystem.
-- **7 deep dives:** Rust for Blockchain, Rust Curriculum, NEAR vs Solana, For Solana Developers, Key Technologies, Wallet Setup, Why Rust.
-- **Cross-chain content** targeting Solana and Ethereum developers exploring NEAR.
-- **Capstone projects** and completion certificates per track.
-- **Module completion tracking** with progress visualization and streak tracking.
-
-### 👤 Profile & Progression
-
-- **Void Command Center** — mission-control-style profile dashboard.
-- **108 achievements** across exploration, learning, building, and community categories.
-- **XP system** with level progression tied to real platform usage.
-- **Skill Constellation** — interactive star-map visualization of your learning progress across all 4 tracks.
-- **Arsenal** — saved opportunities, build plans, and Sanctum projects.
-
-### 💰 Subscription Tiers
-
-| Tier | Price | What you get |
-|------|-------|-------------|
-| **Shade** | Free ($2.50 one-time) | All intelligence tools, learning modules, limited Sanctum |
-| **Specter** | $25/mo | Full Sanctum access, all personas, export |
-| **Legion** | $60/mo | Higher limits, priority, advanced features |
-| **Leviathan** | $200/mo | Unlimited everything, enterprise support |
-
-Credit top-ups ($5–$100) available to all tiers. Never expire.
-All intelligence tools are free — only Sanctum (AI builder) is credit-gated.
+Every project page includes live token price, 24h volume, liquidity depth, GitHub activity, and links to all relevant resources.
 
 ---
 
-## Tech Stack
+## 🫧 Void Bubbles — 3D Market Visualization
+
+An interactive **Three.js-powered bubble field** rendering the NEAR token ecosystem in real time.
+
+- Bubble size = market cap · Color = 24h price change · Animation = volume
+- **Whale alert system** — detects and highlights large transactions as they happen
+- **9-stat ribbon** — price, volume, market cap, liquidity, gainers, losers, pairs, and more
+- **Fullscreen mode** with glassmorphism UI overlay
+- Click any bubble to deep-dive into that token's full profile
+
+Not a chart. Not a table. A living, breathing visualization of the NEAR economy.
+
+---
+
+## 🔍 Void Lens — Deep Wallet Intelligence
+
+Paste any NEAR wallet address. Get a **complete behavioral profile**.
+
+- **6-axis reputation score** — Activity, DeFi engagement, Governance, Development, Security, Age
+- **Portfolio valuation** — every token balance × live USD pricing via DexScreener
+- **DeFi position tracking** — staking, LP positions, lending, yield farming
+- **Security profiling** — suspicious patterns, contract interactions, risk signals
+- **Transaction history** with categorization and behavioral radar chart
+- **Address suggestions** — validates and autocompletes known NEAR addresses
+
+Think of it as a credit score for blockchain wallets — but transparent and verifiable.
+
+---
+
+## 🌌 Constellation Map — Transaction Flow Graph
+
+A **D3.js force-directed graph** that maps relationships between wallets visually.
+
+- Enter any wallet → see every wallet it has transacted with, rendered as a network graph
+- **Directional arrows** showing fund flow (who sent to whom)
+- **Cluster detection** — highlights wallet groups that transact frequently
+- **Time & value filters** — narrow transactions to specific date ranges and amounts
+- **Interactive controls** — zoom, pan, search, minimap, context menus on every node
+- **Edge hover tooltips** — see transaction count, total value, and date range per connection
+- **Type filter pills** — toggle visibility by transaction type (transfer, stake, contract call)
+- **Screenshot export** — one click to save your graph as an image
+- **Fullscreen mode** for presentations and deep analysis
+
+Reveals patterns invisible in raw blockchain data. Who funds whom. Where the money flows.
+
+---
+
+## 🔮 Voids — AI Opportunity Detection
+
+Voidspace doesn't just show you what exists — it shows you **what's missing**.
+
+- Analyzes real ecosystem data to detect **gaps** in the NEAR landscape
+- Each "Void" is a scored opportunity (0–100) based on demand signals, competitive density, and technical difficulty
+- **Void Brief** — click any opportunity to generate a full AI build plan: architecture, tech stack, go-to-market strategy, competitive analysis, and estimated timeline
+- Powered by cross-referencing project data, market signals, GitHub activity, and category coverage
+
+This is how you find what to build next.
+
+---
+
+## ⚡ Sanctum — AI Smart Contract Development
+
+**The world's first AI-powered IDE built specifically for NEAR and Rust smart contracts.**
+
+This isn't a chatbot that writes code. It's a full development environment.
+
+### 8 Specialist AI Personas
+
+| Persona | Role | Specialty |
+|---------|------|-----------|
+| 🐧 **Shade** | Lead Architect | System design, architecture, orchestration |
+| 🦀 **Oxide** | Rust Grandmaster | Language mastery, idioms, performance |
+| 🛡️ **Warden** | Security Overlord | Audit, exploits, hardening |
+| ⚡ **Phantom** | Gas & Performance | Optimization, gas profiling, efficiency |
+| 🌉 **Nexus** | Cross-Chain | Bridges, interop, multi-chain patterns |
+| 🎭 **Prism** | Frontend & Integration | dApp UI, wallet connection, SDK usage |
+| 🧪 **Crucible** | Testing & QA | Test suites, fuzzing, simulation |
+| 💰 **Ledger** | DeFi & Tokenomics | Financial contracts, token design, MEV |
+
+### 3 Builder Modes
+
+- **Learn** — Guided education. The AI teaches concepts step by step.
+- **Build** — Project scaffolding. Describe what you want, get a working contract.
+- **Expert** — Full control. Direct conversation with any specialist.
+
+### Full Development Pipeline
+
+- **Natural language → production Rust code** in real time
+- **Scratch Mode** — start from pre-built contract templates (token, NFT, DAO, marketplace, staking, etc.)
+- **Import & Iterate** — bring existing contracts for AI-assisted refactoring
+- **Webapp Builder** — auto-generates a frontend dApp with wallet integration and method calls
+- **Post-contract pipeline** — downloadable ZIP project scaffold, deploy instructions, simulation
+- **Roast Zone** — security audit your contract ideas with brutal, honest feedback
+- **Persistent projects** — save, revisit, and iterate on your work across sessions
+
+Powered by **Claude Opus 4**. Credit-based usage across 4 subscription tiers.
+
+---
+
+## 📚 Learn — Structured Blockchain Education
+
+**66 learning modules across 4 progressive tracks.**
+
+| Track | Modules | Focus |
+|-------|---------|-------|
+| 🧭 **Explorer** | 16 | NEAR fundamentals, wallets, ecosystem orientation |
+| 🔨 **Builder** | 22 | Rust, smart contracts, testing, deployment |
+| 🗡️ **Hacker** | 16 | Security, exploits, auditing, hardening |
+| 👑 **Founder** | 12 | Tokenomics, governance, go-to-market, fundraising |
+
+### Plus:
+
+- **Quick Start Guide** — zero to NEAR in minutes
+- **7 Deep Dive articles** — Rust for Blockchain, NEAR vs Solana, Wallet Setup, Why Rust, Key Technologies, Rust Curriculum, For Solana Developers
+- **Cross-chain content** targeting Solana and Ethereum developers exploring NEAR
+- **Capstone projects** at the end of each track
+- **Completion certificates** per track
+- **Progress tracking** with streak system and module completion visualization
+
+### 🌟 Skill Constellation
+
+An **interactive star-map** that visualizes your learning progress across all 4 tracks. Each completed module lights up a star. Watch your constellation grow as you master NEAR development.
+
+---
+
+## 👤 Profile — Void Command Center
+
+A mission-control-style dashboard for every user.
+
+- **118 achievements** across exploration, learning, building, and community categories
+- **XP system** with level progression tied to real platform activity
+- **Arsenal** — saved opportunities, build plans, Sanctum projects, and bookmarks
+- **Skill Constellation** embedded in your profile
+- **Activity history** and engagement metrics
+
+---
+
+## 💰 Pricing
+
+All intelligence tools are **free**. Only Sanctum (AI builder) is credit-gated.
+
+| Tier | Price | Sanctum Credits | Highlights |
+|------|-------|----------------|------------|
+| **Shade** | Free ($2.50 one-time) | Limited | Full access to all intel tools + learning |
+| **Specter** | $25/mo | Standard | All Sanctum personas, export, projects |
+| **Legion** | $60/mo | High | Priority processing, advanced features |
+| **Leviathan** | $200/mo | Unlimited | Enterprise support, maximum limits |
+
+**Credit top-ups** ($5 / $20 / $50 / $100) available to all tiers. Credits never expire.
+
+---
+
+## 🏗️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 15 (App Router, TypeScript) |
-| Styling | Tailwind CSS, Framer Motion |
-| Visualization | D3.js, Three.js, Recharts |
-| Database | Supabase (PostgreSQL) |
-| Auth | NEAR Connector (@hot-labs/near-connect) |
-| AI | Anthropic Claude Opus 4 |
-| Market Data | DexScreener API |
-| Chain Data | NearBlocks API |
-| Ecosystem Data | NEAR Catalog, DeFiLlama, GitHub API |
-| Payments | Stripe |
-| Hosting | Vercel |
+| **Framework** | Next.js 15 (App Router, TypeScript, React 19) |
+| **Styling** | Tailwind CSS 4, Framer Motion |
+| **3D / Viz** | Three.js, D3.js, Recharts |
+| **Database** | Supabase (PostgreSQL, Realtime, RLS) |
+| **Auth** | NEAR WalletConnect (@hot-labs/near-connect) |
+| **AI** | Anthropic Claude Opus 4 |
+| **Market Data** | DexScreener API (real-time, 60s cache) |
+| **Chain Data** | NearBlocks API (queued, rate-limit-safe) |
+| **Ecosystem** | NEAR Catalog, DeFiLlama, GitHub API |
+| **Payments** | Stripe (subscriptions + one-time top-ups) |
+| **Hosting** | Vercel (Edge, ISR) |
+| **SEO** | JSON-LD (Course, FAQ), dynamic OG images, sitemap |
 
-## Architecture
+---
+
+## 📐 Architecture
 
 ```
 src/
 ├── app/
-│   ├── api/                  # API routes (auth, AI, payments, data sync)
-│   ├── observatory/          # Ecosystem dashboard
-│   ├── void-bubbles/         # 3D market visualization
-│   ├── void-lens/            # Wallet analysis tool
-│   ├── constellation/        # Transaction flow mapping
-│   ├── sanctum/              # AI development environment (50+ components)
-│   ├── learn/                # 66 learning modules across 4 tracks + 7 deep dives
-│   ├── pricing/              # Subscription tiers
+│   ├── api/                  # 28 API routes (auth, AI, payments, sync, data)
+│   ├── observatory/          # Ecosystem intelligence dashboard
+│   ├── void-bubbles/         # Three.js 3D market visualization
+│   ├── void-lens/            # Wallet reputation & portfolio analysis
+│   ├── constellation/        # D3.js transaction flow mapping
+│   ├── opportunities/        # AI opportunity detection + Void Briefs
+│   ├── sanctum/              # AI development environment (60 files)
+│   ├── learn/                # 66 modules, 4 tracks, 7 deep dives (121 files)
+│   ├── pricing/              # Subscription tiers + Stripe checkout
 │   ├── profile/              # Void Command Center + Skill Constellation
-│   ├── opportunities/        # AI-detected ecosystem gaps
-│   ├── projects/             # Individual project profiles
-│   ├── categories/           # Category browsing
-│   ├── search/               # Full-text search
+│   ├── projects/             # Individual project deep-dive pages
+│   ├── categories/           # Category browsing with DeFi stats
+│   ├── search/               # Full-text ecosystem search
 │   └── legal/                # Terms, privacy, cookies, disclaimer
-├── components/               # Shared UI components, effects, brand assets
-├── contexts/                 # App-wide state (wallet, achievements, etc.)
+├── components/               # 136 shared UI components
+├── contexts/                 # Wallet, achievements, theme, app state
 ├── hooks/                    # Custom React hooks
-├── lib/                      # Business logic, data services, utilities
+├── lib/                      # Business logic, data services, APIs
 └── types/                    # TypeScript definitions
 ```
 
-**448 source files · ~94,000 lines of TypeScript · Zero templates · Built in 2 weeks**
-
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- Supabase project
-- NEAR wallet
-
-### Development
+## 🚀 Getting Started
 
 ```bash
 git clone https://github.com/AgentWarhead/Voidspace.git
 cd Voidspace
 npm install
-cp .env.example .env.local  # Configure environment variables
+cp .env.example .env.local
 npm run dev
 ```
 
-## Roadmap
+### Required Environment Variables
 
-- [ ] Cloud WASM compilation (compile and test contracts in-browser)
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase admin key |
+| `ANTHROPIC_API_KEY` | Claude Opus 4 (Sanctum AI) |
+| `STRIPE_SECRET_KEY` | Stripe payments |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification |
+| `SYNC_API_KEY` | Data sync authentication |
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Cloud WASM compilation — compile and test contracts in-browser
 - [ ] One-click testnet deployment from Sanctum
-- [ ] Community layer (share contracts, collaborate on opportunities)
-- [ ] DAO integration (governance tooling, treasury analysis)
-- [ ] Sanctum marketplace (community contract templates)
+- [ ] Community layer — share contracts, collaborate on Voids
+- [ ] DAO tooling — governance analysis, treasury intelligence
+- [ ] Sanctum marketplace — community contract templates
 - [ ] Mobile app
+- [ ] Multi-chain expansion beyond NEAR
+
+---
+
+## 📊 By the Numbers
+
+| Metric | Value |
+|--------|-------|
+| Source files | 462 |
+| Lines of TypeScript | 108,879 |
+| UI Components | 136 |
+| API Routes | 28 |
+| Learning Modules | 66 |
+| Achievements | 118 |
+| AI Personas | 8 |
+| Ecosystem Categories | 20+ |
+| Git Commits | 456 |
+| Build Time | 3 weeks |
+| Developers | 1 |
+| Templates Used | 0 |
+
+---
 
 ## License
 
@@ -161,4 +308,12 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-**Built for the [Nearcon Innovation Sandbox](https://nearcon.org/innovation-sandbox/) by Warhead & Urban Blazer.**
+<div align="center">
+
+**Built for the [NEARCON Innovation Sandbox](https://nearcon.org) by [Warhead](https://github.com/AgentWarhead) & [Urban Blazer](https://github.com/mfauch)**
+
+*462 files. 108,879 lines. 3 weeks. One vision.*
+
+**[voidspace.io](https://voidspace.io)**
+
+</div>
