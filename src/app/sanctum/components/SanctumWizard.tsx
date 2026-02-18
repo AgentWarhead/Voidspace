@@ -277,19 +277,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 </div>
               )}
 
-              {/* Top 2 cards — featured row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 max-w-4xl mx-auto mb-4 sm:mb-5">
-                <GoalCard
-                  emoji="🚀"
-                  title="Deploy my first contract"
-                  description="Zero to deployed in minutes. The AI walks you through every step — no experience needed."
-                  color="amber"
-                  tag="Beginner Friendly"
-                  tagIcon="⚡"
-                  delay={0}
-                  onClick={() => handleGoalSelect('deploy-first')}
-                  selected={goal === 'deploy-first'}
-                />
+              {/* 3 goal cards — clean decision architecture */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 max-w-5xl mx-auto mb-10">
                 <GoalCard
                   emoji="💡"
                   title="I have an idea — build it"
@@ -298,37 +287,29 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   tag="Most Popular"
                   tagIcon="🔥"
                   featured
-                  delay={80}
+                  delay={0}
                   onClick={() => handleGoalSelect('idea')}
                   selected={goal === 'idea'}
                 />
-              </div>
-
-              {/* Learn card — full width */}
-              <div className="max-w-4xl mx-auto mb-5">
                 <GoalCard
-                  emoji="📚"
-                  title="Learn NEAR & Rust"
-                  description="Structured learning with 66 interactive modules. Pick a contract category and build real projects with AI guidance."
+                  emoji="🚀"
+                  title="Learn & deploy"
+                  description="Go from zero to deployed. Pick a contract type, learn as you build, and ship your first project."
                   color="cyan"
-                  wide
-                  delay={160}
+                  tag="Guided"
+                  tagIcon="⚡"
+                  delay={80}
                   onClick={() => handleGoalSelect('learn')}
                   selected={goal === 'learn'}
                 />
-              </div>
-
-              {/* Bottom discovery card — full width, centered */}
-              <div className="max-w-4xl mx-auto mb-10">
                 <GoalCard
-                  emoji="🔍"
-                  title="Help me find something to build"
-                  description="Not sure where to start? Browse ecosystem opportunities, explore trending ideas, or let AI generate a custom project brief tailored to your interests."
+                  emoji="🧭"
+                  title="Help me decide"
+                  description="Not sure yet? Explore ecosystem gaps, trending ideas, or let AI craft a project brief for you."
                   color="teal"
                   tag="Explorer"
-                  tagIcon="🧭"
-                  wide
-                  delay={320}
+                  tagIcon="🔍"
+                  delay={160}
                   onClick={() => handleGoalSelect('discover')}
                   selected={goal === 'discover'}
                 />
