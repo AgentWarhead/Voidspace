@@ -500,238 +500,208 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
           {/* Step 3: Meet the Council — Epic Neon Card Grid */}
           {step === 'persona' && (
-            <div
-              className="flex flex-col w-full px-3 sm:px-4 pb-3"
-              style={{ minHeight: 'calc(100vh - 80px)', paddingTop: '12px' }}
-            >
+            <div className="w-full px-3 sm:px-4 py-4 sm:py-6">
+              <div className="max-w-5xl mx-auto flex flex-col gap-3 sm:gap-4">
               {/* Header */}
-              <div className="text-center mb-3 flex-shrink-0">
+              <div className="text-center">
                 <div className="inline-flex items-center gap-2 mb-2 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
                   <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400/80">Classified Briefing</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary leading-tight">
-                  The <GradientText>Council</GradientText> <span className="text-white/40 text-xl font-light">NEAR</span>
+                <h2 className="text-3xl sm:text-4xl font-black text-text-primary leading-tight tracking-tight">
+                  THE <GradientText>COUNCIL</GradientText> <span className="text-white/35 text-2xl sm:text-3xl font-light">NEAR</span>
                 </h2>
-                <p className="text-xs text-text-muted/60 mt-0.5 uppercase tracking-[0.15em] font-mono">
+                <p className="text-[10px] sm:text-xs text-purple-400/70 mt-1 uppercase tracking-[0.25em] font-mono font-bold">
                   Voidspace Sanctum Protocol
                 </p>
               </div>
 
-              {/* Epic Neon Card Grid — 8 members + Launch button */}
-              {/* No overflow-hidden/y-auto here — prevents hover glow clipping */}
-              <div className="flex-1 flex flex-col gap-2 min-h-0">
-                {/* 4×2 grid — fills all available height on desktop */}
-                <div
-                  className="council-grid flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 min-h-0"
-                >
-                  {([
-                    { id: 'shade',    color: '#8B5CF6', tags: ['Auto-Routes', 'Sees All', 'Full Stack'] },
-                    { id: 'oxide',    color: '#F97316', tags: ['Rust', 'NEAR SDK', 'Smart Contracts'] },
-                    { id: 'warden',   color: '#3B82F6', tags: ['Security', 'Access Control', 'Audits'] },
-                    { id: 'phantom',  color: '#FBBF24', tags: ['Gas Optimization', 'Performance', 'Storage'] },
-                    { id: 'nexus',    color: '#14B8A6', tags: ['Cross-Chain', 'NEAR Intents', 'Bridges'] },
-                    { id: 'prism',    color: '#EC4899', tags: ['Frontend', 'Wallet UX', 'TypeScript'] },
-                    { id: 'crucible', color: '#22C55E', tags: ['Testing', 'Unit Tests', 'Simulation'] },
-                    { id: 'ledger',   color: '#EAB308', tags: ['Tokenomics', 'DeFi', 'Economic Design'] },
-                  ] as const).map(({ id, color, tags }, i) => {
-                    const persona = PERSONA_LIST.find(p => p.id === id)!;
-                    const isHovered = hoveredCard === id;
-                    return (
+              {/* 4×2 neon card grid — natural content height, no stretching */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                {([
+                  { id: 'shade',    color: '#8B5CF6', tags: ['Auto-Routes', 'Sees All', 'Full Stack'] },
+                  { id: 'oxide',    color: '#F97316', tags: ['Rust', 'NEAR SDK', 'Smart Contracts'] },
+                  { id: 'warden',   color: '#3B82F6', tags: ['Security', 'Access Control', 'Audits'] },
+                  { id: 'phantom',  color: '#FBBF24', tags: ['Gas Optimization', 'Performance', 'Storage'] },
+                  { id: 'nexus',    color: '#14B8A6', tags: ['Cross-Chain', 'NEAR Intents', 'Bridges'] },
+                  { id: 'prism',    color: '#EC4899', tags: ['Frontend', 'Wallet UX', 'TypeScript'] },
+                  { id: 'crucible', color: '#22C55E', tags: ['Testing', 'Unit Tests', 'Simulation'] },
+                  { id: 'ledger',   color: '#EAB308', tags: ['Tokenomics', 'DeFi', 'Economic Design'] },
+                ] as const).map(({ id, color, tags }, i) => {
+                  const persona = PERSONA_LIST.find(p => p.id === id)!;
+                  const isHovered = hoveredCard === id;
+                  return (
+                    <div
+                      key={id}
+                      className="relative rounded-xl overflow-hidden flex flex-col cursor-default select-none"
+                      style={{
+                        background: `linear-gradient(155deg, ${color}16 0%, rgba(2,3,8,0.94) 50%, rgba(0,0,0,0.97) 100%)`,
+                        border: `2px solid ${isHovered ? color : `${color}50`}`,
+                        boxShadow: isHovered
+                          ? `0 0 30px ${color}60, 0 0 70px ${color}20, inset 0 0 28px ${color}10`
+                          : `0 0 10px ${color}20, inset 0 0 12px ${color}06`,
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                        animation: `sanctumFadeInUp 0.4s ease-out ${i * 55}ms backwards`,
+                      }}
+                      onMouseEnter={() => setHoveredCard(id)}
+                      onMouseLeave={() => setHoveredCard(null)}
+                    >
+                      {/* Watermark — large emoji, top-right */}
                       <div
-                        key={id}
-                        className="relative rounded-xl overflow-hidden flex flex-col cursor-default select-none"
+                        className="absolute top-0 right-0 leading-none pointer-events-none select-none"
                         style={{
-                          minHeight: '150px',
-                          background: `linear-gradient(160deg, ${color}14 0%, rgba(3,4,8,0.92) 55%, rgba(0,0,0,0.97) 100%)`,
-                          border: `2px solid ${isHovered ? color : `${color}55`}`,
-                          boxShadow: isHovered
-                            ? `0 0 32px ${color}70, 0 0 80px ${color}25, inset 0 0 30px ${color}12`
-                            : `0 0 12px ${color}25, inset 0 0 14px ${color}08`,
-                          // No transform — prevents overflow outside grid cells
-                          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                          animation: `sanctumFadeInUp 0.4s ease-out ${i * 55}ms backwards`,
+                          fontSize: '80px',
+                          opacity: isHovered ? 0.12 : 0.05,
+                          filter: `drop-shadow(0 0 10px ${color})`,
+                          transform: 'translate(12px, -10px)',
+                          transition: 'opacity 0.2s',
                         }}
-                        onMouseEnter={() => setHoveredCard(id)}
-                        onMouseLeave={() => setHoveredCard(null)}
                       >
-                        {/* Background watermark icon — large, top-right */}
+                        {persona.emoji}
+                      </div>
+
+                      {/* Corner dots */}
+                      <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
+                      <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
+                      <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
+                      <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
+
+                      {/* Scan sweep on hover */}
+                      {isHovered && (
                         <div
-                          className="absolute top-0 right-0 leading-none pointer-events-none select-none"
+                          className="absolute inset-y-0 w-[45%] pointer-events-none z-10"
                           style={{
-                            fontSize: '72px',
-                            opacity: isHovered ? 0.1 : 0.05,
-                            filter: `drop-shadow(0 0 12px ${color})`,
-                            transform: 'translate(10px, -8px)',
-                            transition: 'opacity 0.2s',
-                          }}
-                        >
-                          {persona.emoji}
-                        </div>
-
-                        {/* Corner accent dots */}
-                        <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
-                        <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
-                        <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
-                        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
-
-                        {/* Scan sweep on hover */}
-                        {isHovered && (
-                          <div
-                            className="absolute inset-y-0 w-[45%] pointer-events-none z-10"
-                            style={{
-                              background: `linear-gradient(90deg, transparent, ${color}1a, transparent)`,
-                              animation: 'scanSweep 0.55s ease-out forwards',
-                            }}
-                          />
-                        )}
-
-                        {/* Card content — flex-1 + justify-between fills full height */}
-                        <div className="relative z-10 flex flex-col items-center justify-between flex-1 px-2 py-3 sm:py-4">
-                          {/* Top: icon + name + role */}
-                          <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                            {/* Large emoji with glow halo */}
-                            <div
-                              className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0"
-                              style={{
-                                background: `radial-gradient(circle, ${color}28 0%, transparent 70%)`,
-                                filter: isHovered
-                                  ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 28px ${color}88)`
-                                  : `drop-shadow(0 0 8px ${color}88)`,
-                                transition: 'filter 0.2s',
-                              }}
-                            >
-                              <span className="text-3xl sm:text-4xl leading-none">{persona.emoji}</span>
-                            </div>
-
-                            {/* Name in bold accent color */}
-                            <h3
-                              className="text-sm sm:text-base font-black uppercase tracking-wide leading-none text-center"
-                              style={{
-                                color,
-                                textShadow: isHovered
-                                  ? `0 0 18px ${color}, 0 0 36px ${color}66`
-                                  : `0 0 10px ${color}55`,
-                                transition: 'text-shadow 0.2s',
-                              }}
-                            >
-                              {persona.name.toUpperCase()}
-                            </h3>
-
-                            {/* Role subtitle */}
-                            <p
-                              className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.15em] leading-none text-center hidden sm:block"
-                              style={{ color: `${color}88` }}
-                            >
-                              {persona.role}
-                            </p>
-                          </div>
-
-                          {/* Middle: Quote */}
-                          <p
-                            className="text-[8px] sm:text-[9px] italic text-center leading-snug px-1 line-clamp-2 flex-shrink-0 my-1 sm:my-1.5"
-                            style={{ color: `${color}cc` }}
-                          >
-                            &quot;{persona.description}&quot;
-                          </p>
-
-                          {/* Bottom: Tags */}
-                          <div className="flex flex-wrap justify-center gap-1 flex-shrink-0">
-                            {tags.slice(0, 3).map(tag => (
-                              <span
-                                key={tag}
-                                className="text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                                style={{
-                                  color,
-                                  border: `1px solid ${color}55`,
-                                  background: `${color}18`,
-                                }}
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Bottom chromatic bar */}
-                        <div
-                          className="absolute bottom-0 left-0 right-0 h-[2px]"
-                          style={{
-                            background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)`,
-                            opacity: isHovered ? 1 : 0.6,
-                            transition: 'opacity 0.2s',
+                            background: `linear-gradient(90deg, transparent, ${color}18, transparent)`,
+                            animation: 'scanSweep 0.55s ease-out forwards',
                           }}
                         />
+                      )}
+
+                      {/* Card body — compact, content-driven height */}
+                      <div className="relative z-10 flex flex-col items-center px-2 pt-4 sm:pt-5 pb-3 sm:pb-4 gap-1.5 sm:gap-2">
+                        {/* Large emoji + glow halo */}
+                        <div
+                          style={{
+                            filter: isHovered
+                              ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 28px ${color}80)`
+                              : `drop-shadow(0 0 8px ${color}80)`,
+                            transition: 'filter 0.2s',
+                          }}
+                        >
+                          <span className="text-4xl sm:text-5xl leading-none">{persona.emoji}</span>
+                        </div>
+
+                        {/* NAME — large, bold, neon */}
+                        <h3
+                          className="text-base sm:text-lg font-black uppercase tracking-wide leading-none text-center"
+                          style={{
+                            color,
+                            textShadow: isHovered
+                              ? `0 0 16px ${color}, 0 0 32px ${color}60`
+                              : `0 0 8px ${color}50`,
+                            transition: 'text-shadow 0.2s',
+                          }}
+                        >
+                          {persona.name.toUpperCase()}
+                        </h3>
+
+                        {/* Role */}
+                        <p
+                          className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.18em] leading-none text-center"
+                          style={{ color: `${color}80` }}
+                        >
+                          {persona.role}
+                        </p>
+
+                        {/* Quote */}
+                        <p
+                          className="text-[9px] sm:text-[10px] italic text-center leading-snug px-1 line-clamp-2"
+                          style={{ color: `${color}cc` }}
+                        >
+                          &quot;{persona.description}&quot;
+                        </p>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap justify-center gap-1">
+                          {tags.slice(0, 3).map(tag => (
+                            <span
+                              key={tag}
+                              className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                              style={{
+                                color,
+                                border: `1px solid ${color}50`,
+                                background: `${color}16`,
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
 
-                {/* Full-width LAUNCH SESSION button */}
-                <button
-                  onClick={handleLaunch}
-                  className="group relative flex-shrink-0 w-full rounded-xl overflow-hidden focus:outline-none active:scale-[0.99]"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(0,236,151,0.12) 0%, rgba(0,236,151,0.06) 100%)',
-                    border: '2px solid #00ec97',
-                    boxShadow: '0 0 28px rgba(0,236,151,0.45), 0 0 70px rgba(0,236,151,0.15)',
-                    animation: 'sanctumFadeInUp 0.4s ease-out 0.5s backwards',
-                    minHeight: '60px',
-                    transition: 'box-shadow 0.2s, background 0.2s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 0 40px rgba(0,236,151,0.65), 0 0 90px rgba(0,236,151,0.25)';
-                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, rgba(0,236,151,0.2) 0%, rgba(0,236,151,0.1) 100%)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 0 28px rgba(0,236,151,0.45), 0 0 70px rgba(0,236,151,0.15)';
-                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, rgba(0,236,151,0.12) 0%, rgba(0,236,151,0.06) 100%)';
-                  }}
-                >
-                  {/* Scan sweep on hover */}
-                  <div
-                    className="absolute inset-y-0 w-[30%] pointer-events-none opacity-0 group-hover:opacity-100"
-                    style={{ background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.12), transparent)', animation: 'scanSweep 1s ease-out forwards' }}
-                  />
-
-                  {/* Corner dots */}
-                  {(['top-2 left-3', 'top-2 right-3', 'bottom-2 left-3', 'bottom-2 right-3'] as const).map((pos, i) => (
-                    <div key={i} className={`absolute ${pos} w-1.5 h-1.5 rounded-full`} style={{ background: '#00ec97', opacity: 0.7 }} />
-                  ))}
-
-                  <div className="relative z-10 flex items-center justify-center gap-3 sm:gap-5 py-3 sm:py-4 px-4">
-                    <div
-                      className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0"
-                      style={{ background: 'rgba(0,236,151,0.18)', border: '1px solid rgba(0,236,151,0.45)' }}
-                    >
-                      <Rocket className="w-4 h-4 text-near-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,236,151,0.9))' }} />
-                    </div>
-                    <div className="text-center">
+                      {/* Bottom chromatic bar */}
                       <div
-                        className="text-lg sm:text-xl font-black uppercase tracking-widest leading-none"
-                        style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,0.9), 0 0 45px rgba(0,236,151,0.45)' }}
-                      >
-                        🚀 LAUNCH SESSION
-                      </div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-near-green/50 mt-0.5 hidden sm:block">
-                        with your council — specialists auto-deployed as needed
-                      </div>
+                        className="absolute bottom-0 left-0 right-0 h-[2px]"
+                        style={{
+                          background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)`,
+                          opacity: isHovered ? 1 : 0.55,
+                          transition: 'opacity 0.2s',
+                        }}
+                      />
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* Full-width LAUNCH SESSION button */}
+              <button
+                onClick={handleLaunch}
+                className="group relative w-full rounded-xl overflow-hidden focus:outline-none active:scale-[0.99]"
+                style={{
+                  background: 'rgba(0,236,151,0.08)',
+                  border: '2px solid #00ec97',
+                  boxShadow: '0 0 30px rgba(0,236,151,0.50), 0 0 80px rgba(0,236,151,0.15)',
+                  animation: 'sanctumFadeInUp 0.4s ease-out 0.5s backwards',
+                  minHeight: '58px',
+                  transition: 'box-shadow 0.2s, background 0.2s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 45px rgba(0,236,151,0.70), 0 0 100px rgba(0,236,151,0.25)';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,236,151,0.16)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 30px rgba(0,236,151,0.50), 0 0 80px rgba(0,236,151,0.15)';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,236,151,0.08)';
+                }}
+              >
+                {/* Scan sweep */}
+                <div
+                  className="absolute inset-y-0 w-[30%] pointer-events-none opacity-0 group-hover:opacity-100"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.10), transparent)', animation: 'scanSweep 1s ease-out forwards' }}
+                />
+                {/* Corner dots */}
+                {(['top-2 left-3', 'top-2 right-3', 'bottom-2 left-3', 'bottom-2 right-3'] as const).map((pos, idx) => (
+                  <div key={idx} className={`absolute ${pos} w-1.5 h-1.5 rounded-full`} style={{ background: '#00ec97', opacity: 0.65 }} />
+                ))}
+
+                <div className="relative z-10 flex items-center justify-center gap-3 sm:gap-4 py-3 px-4">
+                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-near-green flex-shrink-0" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,1))' }} />
+                  <div className="text-center">
                     <div
-                      className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0"
-                      style={{ background: 'rgba(0,236,151,0.18)', border: '1px solid rgba(0,236,151,0.45)' }}
+                      className="text-lg sm:text-xl font-black uppercase tracking-widest leading-none"
+                      style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,1), 0 0 50px rgba(0,236,151,0.5)' }}
                     >
-                      <Rocket className="w-4 h-4 text-near-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,236,151,0.9))' }} />
+                      LAUNCH SESSION
+                    </div>
+                    <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-near-green/50 mt-0.5 hidden sm:block">
+                      specialists auto-deployed as your build evolves
                     </div>
                   </div>
-
-                  {/* Bottom chromatic bar */}
-                  <div
-                    className="absolute bottom-0 left-0 right-0 h-[2px]"
-                    style={{ background: 'linear-gradient(90deg, transparent 5%, #00ec97 50%, transparent 95%)' }}
-                  />
-                </button>
+                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-near-green flex-shrink-0" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,1))' }} />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, #00ec97 50%, transparent 95%)' }} />
+              </button>
               </div>
             </div>
           )}
@@ -740,12 +710,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
       {/* Animations */}
       <style jsx>{`
-        /* Council grid: fill available height on desktop, auto-height on mobile */
-        @media (min-width: 768px) {
-          .council-grid {
-            grid-template-rows: repeat(2, 1fr);
-          }
-        }
         @keyframes sanctumFadeInUp {
           from {
             opacity: 0;
