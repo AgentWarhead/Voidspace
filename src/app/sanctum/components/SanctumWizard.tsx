@@ -6,7 +6,18 @@ import { GradientText } from '@/components/effects/GradientText';
 import { CategoryPicker } from './CategoryPicker';
 import { ScratchTemplates, SCRATCH_TEMPLATES } from './ScratchTemplates';
 import { VoidBriefCard } from './VoidBriefCard';
-import { PERSONA_LIST } from '../lib/personas';
+import { PERSONA_LIST, type Persona } from '../lib/personas';
+
+// ── Specialist metadata — colors, tags, trigger examples ──
+const SPECIALIST_META: Record<string, { color: string; tags: string[]; triggers: string[] }> = {
+  oxide:   { color: '#F97316', tags: ['Rust', 'NEAR SDK', 'Smart Contracts'], triggers: ['"write this in Rust"', '"ownership error"'] },
+  warden:  { color: '#3B82F6', tags: ['Security', 'Access Control', 'Audits'],  triggers: ['"audit my contract"', '"access control"'] },
+  phantom: { color: '#FBBF24', tags: ['Gas Optimization', 'Performance', 'Storage'], triggers: ['"reduce gas costs"', '"optimize performance"'] },
+  nexus:   { color: '#14B8A6', tags: ['Cross-Chain', 'NEAR Intents', 'Bridges'],   triggers: ['"cross-chain transfer"', '"NEAR Intents"'] },
+  prism:   { color: '#EC4899', tags: ['Frontend', 'Wallet UX', 'TypeScript'],       triggers: ['"build the frontend"', '"wallet integration"'] },
+  crucible: { color: '#22C55E', tags: ['Testing', 'Unit Tests', 'Simulation'],      triggers: ['"write tests"', '"QA this contract"'] },
+  ledger:  { color: '#EAB308', tags: ['Tokenomics', 'DeFi', 'Economic Design'],     triggers: ['"design the tokenomics"', '"DeFi mechanics"'] },
+};
 import { storeBriefForSanctum, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
 // @ts-ignore
@@ -63,6 +74,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
   const [selectedPersona, setSelectedPersona] = useState<string>('shade');
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const [briefPrompt, setBriefPrompt] = useState<string | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const goForward = useCallback((nextStep: WizardStep) => {
     setDirection('forward');
@@ -524,30 +536,32 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 );
               })()}
 
-              {/* Specialist grid — read-only showcase */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 max-w-4xl mx-auto mb-4">
+              {/* Section divider — The Specialists */}
+              <div
+                className="flex items-center gap-4 max-w-4xl mx-auto mb-5"
+                style={{ animation: 'sanctumFadeInUp 0.4s ease-out 0.2s backwards' }}
+              >
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/[0.12]" />
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.03]">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted/70">
+                    ⚔️ &nbsp;The Specialists&nbsp; ⚔️
+                  </span>
+                </div>
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/[0.12]" />
+              </div>
+
+              {/* Specialist grid — LEGENDARY showcase */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-4xl mx-auto mb-4">
                 {PERSONA_LIST.filter(p => p.id !== 'shade').map((persona, i) => (
-                  <div
+                  <SpecialistCard
                     key={persona.id}
-                    title="Available in session — Shade calls them in automatically"
-                    className="relative p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] opacity-60 hover:opacity-80 transition-opacity duration-200 text-left select-none"
-                    style={{
-                      animationDelay: `${(i + 1) * 50}ms`,
-                      animation: 'sanctumFadeInUp 0.4s ease-out backwards',
-                    }}
-                  >
-                    <div className="text-2xl mb-2">{persona.emoji}</div>
-                    <h3 className="text-sm font-bold mb-0.5 text-text-primary">
-                      {persona.name}
-                    </h3>
-                    <p className="text-[11px] text-text-muted mb-2">{persona.role}</p>
-                    <p className="text-[10px] text-text-muted/70 leading-relaxed line-clamp-2">
-                      {persona.description}
-                    </p>
-                    <span className="absolute bottom-2 right-2 text-[9px] text-text-muted/40 font-mono">
-                      Available in session
-                    </span>
-                  </div>
+                    persona={persona}
+                    meta={SPECIALIST_META[persona.id] ?? { color: '#ffffff', tags: [], triggers: [] }}
+                    index={i}
+                    isHovered={hoveredCard === persona.id}
+                    onHover={() => setHoveredCard(persona.id)}
+                    onLeave={() => setHoveredCard(null)}
+                  />
                 ))}
               </div>
 
@@ -791,5 +805,119 @@ function GoalCard({
         <div className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full" style={{ background: `linear-gradient(90deg, transparent, ${c.glow.replace('0.15', '0.6')}, transparent)` }} />
       )}
     </button>
+  );
+}
+
+// ── SpecialistCard — Legendary Council member card ──
+function SpecialistCard({
+  persona,
+  meta,
+  index,
+  isHovered,
+  onHover,
+  onLeave,
+}: {
+  persona: Persona;
+  meta: { color: string; tags: string[]; triggers: string[] };
+  index: number;
+  isHovered: boolean;
+  onHover: () => void;
+  onLeave: () => void;
+}) {
+  const { color, tags, triggers } = meta;
+  const glowSubtle = `${color}26`; // ~15% opacity
+  const glowStrong = `${color}55`; // ~33% opacity
+  const glowBorder = `${color}66`; // ~40% opacity
+
+  return (
+    <div
+      className="relative rounded-xl border transition-all duration-300 cursor-default overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${color}0d 0%, rgba(255,255,255,0.02) 100%)`,
+        borderColor: isHovered ? glowBorder : `${color}33`,
+        boxShadow: isHovered
+          ? `0 0 24px ${glowStrong}, 0 0 6px ${glowSubtle}, inset 0 0 12px ${glowSubtle}`
+          : `0 0 8px ${glowSubtle}`,
+        transform: isHovered ? 'translateY(-4px) scale(1.03)' : 'translateY(0) scale(1)',
+        animation: `sanctumFadeInUp 0.45s ease-out ${(index + 1) * 80}ms backwards`,
+      }}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+    >
+      {/* AUTO-DEPLOYED badge */}
+      <div
+        className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+        style={{
+          color,
+          borderColor: `${color}55`,
+          background: `${color}18`,
+        }}
+      >
+        AUTO
+      </div>
+
+      <div className="p-4 pt-5">
+        {/* Glowing emoji avatar */}
+        <div className="mb-3">
+          <div
+            className="inline-flex items-center justify-center w-11 h-11 rounded-full text-2xl border transition-all duration-300"
+            style={{
+              background: `radial-gradient(circle, ${color}33 0%, ${color}0d 100%)`,
+              borderColor: `${color}44`,
+              boxShadow: isHovered ? `0 0 16px ${glowStrong}` : `0 0 6px ${glowSubtle}`,
+            }}
+          >
+            {persona.emoji}
+          </div>
+        </div>
+
+        {/* Name + role */}
+        <h3 className="text-sm font-bold text-text-primary mb-0.5 pr-8">{persona.name}</h3>
+        <p className="text-[11px] font-mono mb-2" style={{ color: `${color}cc` }}>{persona.role}</p>
+
+        {/* Tagline */}
+        <p className="text-[11px] text-text-muted/80 leading-relaxed line-clamp-2 mb-3">
+          {persona.description}
+        </p>
+
+        {/* Specialty tags */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {tags.map(tag => (
+            <span
+              key={tag}
+              className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+              style={{ color, borderColor: `${color}44`, background: `${color}18` }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* Hover reveal — triggers */}
+        <div
+          className="overflow-hidden transition-all duration-300"
+          style={{
+            maxHeight: isHovered ? '60px' : '0px',
+            opacity: isHovered ? 1 : 0,
+          }}
+        >
+          <div className="pt-2 border-t" style={{ borderColor: `${color}33` }}>
+            <p className="text-[9px] text-text-muted/60 uppercase tracking-wider font-semibold mb-1">Called in when you say:</p>
+            <p className="text-[10px]" style={{ color: `${color}cc` }}>
+              {triggers.join(' · ')}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom accent line */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[2px] transition-opacity duration-300"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${color}88, transparent)`,
+          opacity: isHovered ? 1 : 0.3,
+        }}
+      />
+    </div>
   );
 }

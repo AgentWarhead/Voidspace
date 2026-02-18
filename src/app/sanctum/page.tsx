@@ -7,9 +7,8 @@ import { Container } from '@/components/ui';
 import { ParticleBackground } from './components/ParticleBackground';
 // CategoryPicker moved to SanctumWizard
 import { SanctumChat } from './components/SanctumChat';
-import { PersonaSelector } from './components/PersonaSelector';
+import Image from 'next/image';
 import { ModeSelector } from './components/ModeSelector';
-import { getPersona } from './lib/personas';
 import { TypewriterCode } from './components/TypewriterCode';
 // TokenCounter removed
 import { SanctumVisualization } from './components/SanctumVisualization';
@@ -577,7 +576,7 @@ function SanctumPageInner() {
             
             {/* Desktop header */}
             <div className="hidden md:flex items-center justify-between px-4 py-3 gap-4">
-              {/* Left: Back + Persona */}
+              {/* Left: Back + Sanctum Logo */}
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={handleBack}
@@ -585,11 +584,10 @@ function SanctumPageInner() {
                 >
                   <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
                 </button>
-                <PersonaSelector
-                  currentPersona={getPersona(state.personaId)}
-                  onSelect={(p) => dispatch({ type: 'SET_PERSONA_ID', payload: p.id })}
-                  disabled={false}
-                />
+                <a href="/sanctum" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+                  <Image src="/voidspace-logo-sm.png" alt="Voidspace" width={28} height={28} className="rounded-md" />
+                  <span className="text-sm font-semibold text-text-primary tracking-wide">Sanctum</span>
+                </a>
               </div>
 
               {/* Center: Mode Selector */}
@@ -634,11 +632,10 @@ function SanctumPageInner() {
                   >
                     <ChevronLeft className="w-5 h-5 text-text-muted group-hover:text-near-green transition-colors" />
                   </button>
-                  <PersonaSelector
-                    currentPersona={getPersona(state.personaId)}
-                    onSelect={(p) => dispatch({ type: 'SET_PERSONA_ID', payload: p.id })}
-                    disabled={false}
-                  />
+                  <a href="/sanctum" className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <Image src="/voidspace-logo-sm.png" alt="Voidspace" width={24} height={24} className="rounded-md" />
+                    <span className="text-sm font-semibold text-text-primary tracking-wide">Sanctum</span>
+                  </a>
                 </div>
                 <button
                   onClick={handleNewSession}
