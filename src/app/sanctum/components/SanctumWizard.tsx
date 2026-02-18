@@ -498,201 +498,215 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
             </Container>
           )}
 
-          {/* Step 3: Meet the Council — Bento Command Grid */}
+          {/* Step 3: Meet the Council — Epic Neon Card Grid */}
           {step === 'persona' && (
-            <div className="flex flex-col h-full px-4 py-3 max-w-4xl mx-auto w-full" style={{ minHeight: 0 }}>
-              {/* Compact edgy header */}
-              <div className="text-center mb-3 flex-shrink-0">
+            <div className="flex flex-col h-full px-4 py-3 max-w-5xl mx-auto w-full" style={{ minHeight: 0 }}>
+              {/* Header */}
+              <div className="text-center mb-4 flex-shrink-0">
                 <div className="inline-flex items-center gap-2 mb-2 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
                   <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400/80">Classified Briefing</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-text-primary leading-tight">
-                  Meet the <GradientText>Council</GradientText>
+                  The <GradientText>Council</GradientText> <span className="text-white/40 text-xl font-light">NEAR</span>
                 </h2>
-                <p className="text-xs text-text-muted/60 mt-1">
-                  Eight specialists. Zero mercy. Auto-deployed as your build evolves.
+                <p className="text-xs text-text-muted/60 mt-1 uppercase tracking-[0.15em] font-mono">
+                  Voidspace Sanctum Protocol
                 </p>
               </div>
 
-              {/* Bento command grid — everything in one viewport */}
-              <div
-                className="flex-1 grid grid-cols-4 gap-2 min-h-0"
-                style={{ gridTemplateRows: '1fr 1fr minmax(88px, 110px)' }}
-              >
-                {/* ── SHADE — 2×2 command cell ── */}
-                {(() => {
-                  const shade = PERSONA_LIST.find(p => p.id === 'shade')!;
-                  return (
-                    <div
-                      className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden flex flex-col"
-                      style={{
-                        background: 'linear-gradient(145deg, rgba(139,92,246,0.18) 0%, rgba(88,28,235,0.10) 40%, rgba(0,0,0,0.5) 100%)',
-                        border: '1.5px solid rgba(139,92,246,0.45)',
-                        boxShadow: '0 0 60px rgba(139,92,246,0.22), 0 0 20px rgba(139,92,246,0.10), inset 0 0 60px rgba(139,92,246,0.06)',
-                        animation: 'sanctumFadeInUp 0.4s ease-out backwards',
-                      }}
-                    >
-                      {/* Scanlines overlay */}
+              {/* Epic Neon Card Grid — 8 members + Launch button */}
+              <div className="flex-1 flex flex-col gap-2 min-h-0 overflow-y-auto">
+                {/* 4×2 grid of council members */}
+                <div className="grid grid-cols-4 gap-2 flex-shrink-0">
+                  {([
+                    { id: 'shade',    color: '#8B5CF6', tags: ['Auto-Routes', 'Sees All', 'Full Stack'] },
+                    { id: 'oxide',    color: '#F97316', tags: ['Rust', 'NEAR SDK', 'Smart Contracts'] },
+                    { id: 'warden',   color: '#3B82F6', tags: ['Security', 'Access Control', 'Audits'] },
+                    { id: 'phantom',  color: '#FBBF24', tags: ['Gas Optimization', 'Performance', 'Storage'] },
+                    { id: 'nexus',    color: '#14B8A6', tags: ['Cross-Chain', 'NEAR Intents', 'Bridges'] },
+                    { id: 'prism',    color: '#EC4899', tags: ['Frontend', 'Wallet UX', 'TypeScript'] },
+                    { id: 'crucible', color: '#22C55E', tags: ['Testing', 'Unit Tests', 'Simulation'] },
+                    { id: 'ledger',   color: '#EAB308', tags: ['Tokenomics', 'DeFi', 'Economic Design'] },
+                  ] as const).map(({ id, color, tags }, i) => {
+                    const persona = PERSONA_LIST.find(p => p.id === id)!;
+                    const isHovered = hoveredCard === id;
+                    return (
                       <div
-                        className="absolute inset-0 pointer-events-none opacity-[0.022]"
-                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,1) 3px, rgba(255,255,255,1) 4px)' }}
-                      />
+                        key={id}
+                        className="relative rounded-xl overflow-hidden flex flex-col cursor-default select-none"
+                        style={{
+                          background: `linear-gradient(160deg, ${color}12 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.9) 100%)`,
+                          border: `2px solid ${isHovered ? color : `${color}55`}`,
+                          boxShadow: isHovered
+                            ? `0 0 28px ${color}66, 0 0 60px ${color}22, inset 0 0 24px ${color}10`
+                            : `0 0 10px ${color}22, inset 0 0 12px ${color}08`,
+                          transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+                          transform: isHovered ? 'translateY(-4px) scale(1.03)' : 'none',
+                          animation: `sanctumFadeInUp 0.4s ease-out ${i * 60}ms backwards`,
+                        }}
+                        onMouseEnter={() => setHoveredCard(id)}
+                        onMouseLeave={() => setHoveredCard(null)}
+                      >
+                        {/* Background watermark icon */}
+                        <div
+                          className="absolute top-1 right-1 text-5xl pointer-events-none select-none leading-none"
+                          style={{ opacity: 0.06, filter: `drop-shadow(0 0 8px ${color})` }}
+                        >
+                          {persona.emoji}
+                        </div>
 
-                      {/* Corner accent dots */}
-                      {[
-                        'top-2 left-2', 'top-2 right-2',
-                        'bottom-2 left-2', 'bottom-2 right-2',
-                      ].map((pos, i) => (
-                        <div key={i} className={`absolute ${pos} w-1 h-1 rounded-full bg-purple-500/50`} />
-                      ))}
+                        {/* Corner accent dots */}
+                        <div className="absolute top-1.5 left-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
+                        <div className="absolute top-1.5 right-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
+                        <div className="absolute bottom-1.5 left-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
+                        <div className="absolute bottom-1.5 right-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
 
-                      {/* COMMAND badge top-left */}
-                      <div className="absolute top-3 left-4 flex items-center gap-1.5">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full bg-purple-400"
-                          style={{ animation: 'pulse 2.5s ease-in-out infinite', boxShadow: '0 0 6px rgba(139,92,246,0.8)' }}
-                        />
-                        <span className="text-[8px] font-black uppercase tracking-[0.22em] text-purple-400/70">Council Commander</span>
-                      </div>
-
-                      {/* LEAD ARCHITECT badge top-right */}
-                      <div className="absolute top-3 right-4 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/35">
-                        <span className="text-[8px] font-black uppercase tracking-[0.15em] text-purple-300">Lead Architect</span>
-                      </div>
-
-                      {/* Large emoji centrepiece with ambient halo */}
-                      <div className="flex-1 flex items-center justify-center pt-8 pb-2 relative">
-                        {/* Ambient glow rings */}
-                        <div className="absolute w-28 h-28 rounded-full" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)', filter: 'blur(12px)' }} />
-                        <div className="absolute w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 60%)' }} />
-
-                        {/* Floating particles */}
-                        {[
-                          { top: '20%', left: '20%', delay: '0s', size: 'w-1 h-1' },
-                          { top: '15%', right: '25%', delay: '0.7s', size: 'w-1.5 h-1.5' },
-                          { bottom: '30%', left: '15%', delay: '1.4s', size: 'w-0.5 h-0.5' },
-                          { bottom: '25%', right: '20%', delay: '0.4s', size: 'w-1 h-1' },
-                        ].map((p, i) => (
+                        {/* Scan sweep on hover */}
+                        {isHovered && (
                           <div
-                            key={i}
-                            className={`absolute ${p.size} rounded-full bg-purple-400/40`}
+                            className="absolute inset-y-0 w-[45%] pointer-events-none z-10"
                             style={{
-                              top: p.top, left: p.left, right: p.right, bottom: p.bottom,
-                              animation: `floatParticle 3s ease-in-out infinite`,
-                              animationDelay: p.delay,
+                              background: `linear-gradient(90deg, transparent, ${color}20, transparent)`,
+                              animation: 'scanSweep 0.55s ease-out forwards',
                             }}
                           />
-                        ))}
+                        )}
 
-                        {/* The penguin — large and commanding */}
+                        {/* Card content */}
+                        <div className="relative z-10 flex flex-col items-center px-2 pt-4 pb-3 gap-1.5">
+                          {/* Large emoji with glow halo */}
+                          <div
+                            className="relative flex items-center justify-center w-12 h-12 rounded-full"
+                            style={{
+                              background: `radial-gradient(circle, ${color}25 0%, transparent 70%)`,
+                              filter: isHovered
+                                ? `drop-shadow(0 0 12px ${color}) drop-shadow(0 0 24px ${color}88)`
+                                : `drop-shadow(0 0 6px ${color}88)`,
+                              transition: 'filter 0.25s',
+                            }}
+                          >
+                            <span className="text-3xl leading-none">{persona.emoji}</span>
+                          </div>
+
+                          {/* Name in bold accent color */}
+                          <h3
+                            className="text-sm font-black uppercase tracking-wide leading-none text-center"
+                            style={{
+                              color,
+                              textShadow: isHovered ? `0 0 16px ${color}, 0 0 32px ${color}66` : `0 0 8px ${color}66`,
+                              transition: 'text-shadow 0.25s',
+                            }}
+                          >
+                            {persona.name.toUpperCase()}
+                          </h3>
+
+                          {/* Role subtitle */}
+                          <p
+                            className="text-[8px] font-mono uppercase tracking-[0.15em] leading-none text-center"
+                            style={{ color: `${color}88` }}
+                          >
+                            {persona.role}
+                          </p>
+
+                          {/* Quote */}
+                          <p
+                            className="text-[8px] italic text-center leading-snug px-1 line-clamp-2"
+                            style={{ color: `${color}cc` }}
+                          >
+                            &quot;{persona.description}&quot;
+                          </p>
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap justify-center gap-1 mt-0.5">
+                            {tags.slice(0, 3).map(tag => (
+                              <span
+                                key={tag}
+                                className="text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                                style={{
+                                  color,
+                                  border: `1px solid ${color}50`,
+                                  background: `${color}15`,
+                                }}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bottom chromatic bar */}
                         <div
-                          className="relative text-5xl z-10 select-none"
-                          style={{
-                            filter: 'drop-shadow(0 0 16px rgba(139,92,246,0.9)) drop-shadow(0 0 32px rgba(139,92,246,0.5))',
-                            animation: 'subtleFloat 4s ease-in-out infinite',
-                          }}
-                        >
-                          {shade.emoji}
-                        </div>
+                          className="absolute bottom-0 left-0 right-0 h-[2px]"
+                          style={{ background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)` }}
+                        />
                       </div>
+                    );
+                  })}
+                </div>
 
-                      {/* Character info — bottom section */}
-                      <div className="px-5 pb-5 flex-shrink-0">
-                        {/* Name + role */}
-                        <div className="mb-1">
-                          <h3 className="text-2xl font-black text-purple-200 leading-none tracking-tight">{shade.name}</h3>
-                          <p className="text-[10px] font-mono text-purple-400/60 uppercase tracking-[0.18em] mt-0.5">{shade.role}</p>
-                        </div>
-
-                        {/* Tagline */}
-                        <p className="text-[10px] font-mono italic text-purple-300/70 mb-2 leading-relaxed">
-                          &quot;{shade.description}&quot;
-                        </p>
-
-                        {/* Bio */}
-                        <p className="text-[11px] text-white/55 leading-relaxed mb-3 line-clamp-3">
-                          {shade.bio ?? shade.description}
-                        </p>
-
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-1.5">
-                          {['Auto-Routes', 'Sees All', 'Full Stack'].map(tag => (
-                            <span
-                              key={tag}
-                              className="text-[8px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border border-purple-400/30 text-purple-300/80 bg-purple-500/12"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Bottom chromatic bar */}
-                      <div
-                        className="absolute bottom-0 left-0 right-0 h-[2px]"
-                        style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(139,92,246,0.9) 50%, transparent 95%)' }}
-                      />
-                    </div>
-                  );
-                })()}
-
-                {/* ── SIDE SPECIALISTS — Oxide, Warden, Phantom, Nexus ── */}
-                {(['oxide', 'warden', 'phantom', 'nexus'] as const).map((id, i) => {
-                  const persona = PERSONA_LIST.find(p => p.id === id)!;
-                  const meta = SPECIALIST_META[id] ?? { color: '#ffffff', tags: [], triggers: [] };
-                  return (
-                    <SpecialistCard
-                      key={id}
-                      persona={persona}
-                      meta={meta}
-                      index={i + 1}
-                      isHovered={hoveredCard === id}
-                      isDimmed={hoveredCard !== null && hoveredCard !== id}
-                      onHover={() => setHoveredCard(id)}
-                      onLeave={() => setHoveredCard(null)}
-                    />
-                  );
-                })}
-
-                {/* ── BOTTOM ROW: Prism, Crucible, Ledger (mini) ── */}
-                {(['prism', 'crucible', 'ledger'] as const).map((id, i) => {
-                  const persona = PERSONA_LIST.find(p => p.id === id)!;
-                  const meta = SPECIALIST_META[id] ?? { color: '#ffffff', tags: [], triggers: [] };
-                  return (
-                    <SpecialistCard
-                      key={id}
-                      persona={persona}
-                      meta={meta}
-                      index={i + 5}
-                      isHovered={hoveredCard === id}
-                      isDimmed={hoveredCard !== null && hoveredCard !== id}
-                      onHover={() => setHoveredCard(id)}
-                      onLeave={() => setHoveredCard(null)}
-                      mini
-                    />
-                  );
-                })}
-
-                {/* ── LAUNCH BUTTON — 4th cell, bottom row ── */}
+                {/* Full-width LAUNCH SESSION button */}
                 <button
                   onClick={handleLaunch}
-                  className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] focus:outline-none"
+                  className="group relative flex-shrink-0 w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.015] active:scale-[0.99] focus:outline-none"
                   style={{
-                    background: 'linear-gradient(135deg, #00ec97 0%, #10b981 100%)',
-                    boxShadow: '0 0 20px rgba(0,236,151,0.35)',
-                    animation: 'sanctumFadeInUp 0.4s ease-out 0.65s backwards',
+                    background: 'linear-gradient(135deg, rgba(0,236,151,0.15) 0%, rgba(16,185,129,0.10) 100%)',
+                    border: '2px solid #00ec97',
+                    boxShadow: '0 0 24px rgba(0,236,151,0.4), 0 0 60px rgba(0,236,151,0.15)',
+                    animation: 'sanctumFadeInUp 0.4s ease-out 0.5s backwards',
+                    minHeight: '64px',
                   }}
                 >
-                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
-                  <div className="relative flex flex-col items-center justify-center h-full gap-1 p-3">
-                    <Rocket className="w-6 h-6 text-void-black drop-shadow" />
-                    <span className="text-xs font-black text-void-black uppercase tracking-wider leading-none">Launch</span>
-                    <span className="text-[9px] font-semibold text-void-black/60 uppercase tracking-widest leading-none">Session</span>
+                  {/* Hover glow overlay */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ background: 'linear-gradient(135deg, rgba(0,236,151,0.12) 0%, rgba(16,185,129,0.08) 100%)' }} />
+
+                  {/* Scan sweep on hover */}
+                  <div
+                    className="absolute inset-y-0 w-[30%] pointer-events-none opacity-0 group-hover:opacity-100"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.15), transparent)',
+                      animation: 'scanSweep 0.8s ease-out forwards',
+                    }}
+                  />
+
+                  {/* Corner dots */}
+                  {['top-2 left-3', 'top-2 right-3', 'bottom-2 left-3', 'bottom-2 right-3'].map((pos, i) => (
+                    <div key={i} className={`absolute ${pos} w-1.5 h-1.5 rounded-full bg-near-green/60`} />
+                  ))}
+
+                  <div className="relative z-10 flex items-center justify-center gap-4 py-4 px-6">
+                    <div
+                      className="flex items-center justify-center w-10 h-10 rounded-full"
+                      style={{ background: 'rgba(0,236,151,0.2)', border: '1px solid rgba(0,236,151,0.5)' }}
+                    >
+                      <Rocket className="w-5 h-5 text-near-green" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,0.8))' }} />
+                    </div>
+                    <div className="text-center">
+                      <div
+                        className="text-xl font-black uppercase tracking-widest leading-none"
+                        style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,0.8), 0 0 40px rgba(0,236,151,0.4)' }}
+                      >
+                        LAUNCH SESSION
+                      </div>
+                      <div className="text-[9px] font-mono uppercase tracking-[0.25em] text-near-green/50 mt-0.5">
+                        with your council — auto-deployed as needed
+                      </div>
+                    </div>
+                    <div
+                      className="flex items-center justify-center w-10 h-10 rounded-full"
+                      style={{ background: 'rgba(0,236,151,0.2)', border: '1px solid rgba(0,236,151,0.5)' }}
+                    >
+                      <Rocket className="w-5 h-5 text-near-green" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,0.8))' }} />
+                    </div>
                   </div>
-                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ boxShadow: 'inset 0 0 20px rgba(255,255,255,0.1)' }} />
+
+                  {/* Bottom chromatic bar */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[2px]"
+                    style={{ background: 'linear-gradient(90deg, transparent 5%, #00ec97 50%, transparent 95%)' }}
+                  />
                 </button>
               </div>
             </div>
