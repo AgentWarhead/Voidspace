@@ -186,7 +186,7 @@ export const RARITY_CONFIG: Record<AchievementRarity, {
     color: 'text-amber-400',
     bg: 'from-amber-500/90 to-orange-600/90',
     border: 'border-amber-400',
-    glow: 'shadow-500/50',
+    glow: 'shadow-amber-500/50',
     textColor: 'text-amber-100',
   },
 };

@@ -9,12 +9,28 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { WalletContext } from '@/contexts/WalletContext';
 import {
   type AchievementDef,
+  type AchievementRarity,
   type UserAchievementStats,
   ACHIEVEMENT_MAP,
   ACHIEVEMENTS,
   defaultStats,
   evaluateAchievements,
 } from '@/lib/achievements';
+
+// ─── Rarity priority (higher = shown first) ───────────────────
+const RARITY_PRIORITY: Record<AchievementRarity, number> = {
+  legendary: 5,
+  epic:      4,
+  rare:      3,
+  uncommon:  2,
+  common:    1,
+};
+
+function sortByRarityPriority(achievements: AchievementDef[]): AchievementDef[] {
+  return [...achievements].sort(
+    (a, b) => RARITY_PRIORITY[b.rarity] - RARITY_PRIORITY[a.rarity],
+  );
+}
 
 function storageKey(accountId: string, suffix: string) {
   return `voidspace-achievements-${accountId}-${suffix}`;
@@ -250,7 +266,12 @@ export function useAchievements(): UseAchievementsReturn {
 
     setUnlocked(updated);
     setTimeline(updatedTimeline);
-    setPendingPopups(prev => [...prev, ...newAchievements.filter(a => newIds.includes(a.id))]);
+    // Sort new achievements by rarity priority (legendary first), then append to queue
+    const newPending = sortByRarityPriority(newAchievements.filter(a => newIds.includes(a.id)));
+    setPendingPopups(prev => {
+      // Re-sort entire queue so any existing lower-rarity items yield to incoming legendaries
+      return sortByRarityPriority([...prev, ...newPending]);
+    });
 
     // Persist locally
     if (accountId) {

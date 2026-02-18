@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 import { RARITY_CONFIG, type AchievementDef, type AchievementRarity } from '@/lib/achievements';
+import { useAchievementSound } from '@/hooks/useAchievementSound';
 import { cn } from '@/lib/utils';
 
 // ─── Void Particle ─────────────────────────────────────────────
@@ -248,6 +249,7 @@ function ToastCard({ achievement, onDismiss }: ToastCardProps) {
 
 export function AchievementToastLayer() {
   const { pendingPopups, dismissPopup } = useAchievementContext();
+  const { playAchievementSound } = useAchievementSound();
   const current = pendingPopups[0] ?? null;
   const [key, setKey] = useState(0); // force re-render to restart particle animations
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -258,6 +260,9 @@ export function AchievementToastLayer() {
 
     // Force particle re-render on each new achievement
     setKey(k => k + 1);
+
+    // Play rarity-appropriate sound
+    playAchievementSound(current);
 
     // Auto-dismiss timing by rarity
     const DISMISS_MS: Record<AchievementRarity, number> = {
@@ -272,7 +277,7 @@ export function AchievementToastLayer() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [current?.id, dismissPopup]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [current?.id, dismissPopup, playAchievementSound]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const rarity = current?.rarity ?? 'common';
   const isCenter = rarity === 'epic' || rarity === 'legendary';
