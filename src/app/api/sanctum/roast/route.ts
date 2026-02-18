@@ -178,6 +178,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Enable 1M context window beta for all supported models
     const response = await anthropic.messages.create({
       model: modelId,
       max_tokens: 4096,
@@ -188,6 +189,8 @@ export async function POST(request: NextRequest) {
           content: `Roast this NEAR smart contract. Be brutal but educational:\n\n\`\`\`rust\n${code}\n\`\`\``,
         },
       ],
+    }, {
+      headers: { 'anthropic-beta': 'context-1m-2025-08-07' },
     });
 
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';

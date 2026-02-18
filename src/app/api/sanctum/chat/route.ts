@@ -1249,11 +1249,14 @@ export async function POST(request: NextRequest) {
     }));
 
     // Call Claude — model determined by user's subscription tier
+    // Enable 1M context window beta for all supported models
     const response = await anthropic.messages.create({
       model: modelId,
       max_tokens: 4096,
       system: systemPrompt,
       messages: sanitizedMessages,
+    }, {
+      headers: { 'anthropic-beta': 'context-1m-2025-08-07' },
     });
 
     // Extract the response text
