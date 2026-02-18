@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Target, Sparkles, Globe, BookOpen, User, Zap } from 'lucide-react';
+import { Menu, X, Search, Target, Sparkles, Globe, BookOpen, Zap } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
@@ -12,14 +12,12 @@ import { LiveScanIndicator } from '@/components/effects/LiveScanIndicator';
 import { NearPriceTicker } from '@/components/layout/NearPriceTicker';
 import { NAV_ITEMS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { useWallet } from '@/hooks/useWallet';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isImmersive, setIsImmersive] = useState(false);
-  const { isConnected } = useWallet();
   const { setStat } = useAchievementContext();
 
   // Logo click easter egg — 3 rapid clicks within 1 second
@@ -63,16 +61,12 @@ export function Header() {
       case 'Sanctum': return <Sparkles className={iconClass} />;
       case 'Learn': return <BookOpen className={iconClass} />;
       case 'Pricing': return <Zap className={iconClass} />;
-      case 'Profile': return <User className={iconClass} />;
       default: return null;
     }
   };
 
-  // Create nav items with conditional Profile + Vault
+  // Create nav items
   const navItems = [...NAV_ITEMS] as Array<{ label: string; href: string }>;
-  if (isConnected) {
-    navItems.push({ label: 'Profile', href: '/profile' });
-  }
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">

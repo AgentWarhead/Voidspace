@@ -143,7 +143,7 @@ export function OverviewSection({
           {/* XP Progress */}
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
-              <span className="text-text-secondary">Experience</span>
+              <span className="text-text-secondary">📚 Builder Rank</span>
               <span className="font-mono text-near-green">{xp.toLocaleString()} XP</span>
             </div>
             <Progress value={progressToNext} size="md" color="green" />

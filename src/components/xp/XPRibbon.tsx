@@ -68,6 +68,11 @@ export function XPRibbon({ totalXP, showNext = true, className = '' }: XPRibbonP
         }}
       />
 
+      {/* Label */}
+      <div className="relative mb-1.5">
+        <span className="text-[9px] text-white/25 uppercase tracking-[0.15em] font-medium">🏆 Achievement Level</span>
+      </div>
+
       <div className="relative flex items-center gap-3">
         {/* Level badge */}
         <div

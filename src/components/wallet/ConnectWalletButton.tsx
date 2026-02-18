@@ -102,28 +102,66 @@ export function ConnectWalletButton() {
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {dropdownOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-lg shadow-xl overflow-hidden z-50">
-          <Link
-            href="/profile"
-            onClick={() => setDropdownOpen(false)}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors min-h-[44px] active:scale-[0.97]"
+      <AnimatePresence>
+        {dropdownOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute right-0 mt-2 w-64 z-50"
           >
-            <User className="w-4 h-4" />
-            Profile
-          </Link>
-          <button
-            onClick={async () => {
-              setDropdownOpen(false);
-              await signOut();
-            }}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors w-full text-left border-t border-border min-h-[44px] active:scale-[0.97]"
-          >
-            <LogOut className="w-4 h-4" />
-            Disconnect
-          </button>
-        </div>
-      )}
+            <div
+              className="relative rounded-xl overflow-hidden backdrop-blur-xl border border-near-green/20"
+              style={{
+                background: 'rgba(8, 12, 18, 0.92)',
+                boxShadow: '0 0 0 1px rgba(0,236,151,0.08), 0 4px 30px rgba(0,0,0,0.5), 0 0 40px rgba(0,236,151,0.05)',
+              }}
+            >
+              {/* Subtle inner gradient */}
+              <div
+                className="absolute inset-0 pointer-events-none rounded-xl"
+                style={{
+                  background:
+                    'radial-gradient(ellipse at top left, rgba(0,236,151,0.06) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(123,97,255,0.04) 0%, transparent 60%)',
+                }}
+              />
+
+              {/* Wallet address header */}
+              <div className="relative px-4 py-3 border-b border-white/[0.06]">
+                <div className="text-[9px] text-white/25 uppercase tracking-[0.15em] mb-1.5 font-medium">Connected Wallet</div>
+                <div className="text-xs font-mono text-near-green/70 break-all leading-relaxed">{accountId}</div>
+              </div>
+
+              {/* Menu items */}
+              <div className="relative p-1.5">
+                <Link
+                  href="/profile"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-white/55 hover:text-near-green hover:bg-near-green/10 rounded-lg transition-all duration-150 min-h-[44px] group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.05] group-hover:bg-near-green/15 border border-white/[0.06] group-hover:border-near-green/20 flex items-center justify-center transition-all flex-shrink-0">
+                    <User className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-medium">Profile</span>
+                </Link>
+                <button
+                  onClick={async () => {
+                    setDropdownOpen(false);
+                    await signOut();
+                  }}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-white/55 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-150 w-full text-left min-h-[44px] group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.05] group-hover:bg-red-500/10 border border-white/[0.06] group-hover:border-red-500/20 flex items-center justify-center transition-all flex-shrink-0">
+                    <LogOut className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-medium">Disconnect</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
