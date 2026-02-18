@@ -1,6 +1,6 @@
 'use client';
 
-import { Rocket, BarChart3, Image, Vote, Coins, LineChart, MessageCircle } from 'lucide-react';
+import { BarChart3, Image, Vote, Coins, LineChart, MessageCircle, BookOpen, Link2 } from 'lucide-react';
 
 export interface ScratchTemplate {
   id: string;
@@ -67,6 +67,24 @@ export const SCRATCH_TEMPLATES: ScratchTemplate[] = [
     color: 'text-pink-400',
     icon: MessageCircle,
     starterPrompt: 'Build me a social dApp on NEAR. I want user profiles tied to NEAR accounts, a feed of posts/messages, the ability to tip other users in NEAR, a follow system, and profile customization. Include wallet connection, real-time updates feel, and a modern social media-style UI.',
+  },
+  {
+    id: 'guestbook',
+    name: 'Guestbook',
+    emoji: '📝',
+    description: 'The NEAR hello-world. Perfect for learning.',
+    color: 'text-teal-400',
+    icon: BookOpen,
+    starterPrompt: 'Build me a simple guestbook contract on NEAR. Users can post messages tied to their NEAR account, view all messages, and optionally tip the poster. Include proper Borsh serialization, unit tests, and clear comments explaining each part. This is a learning project — explain everything.',
+  },
+  {
+    id: 'cross-contract-call',
+    name: 'Cross-Contract Call',
+    emoji: '🔗',
+    description: 'Contract that talks to other contracts',
+    color: 'text-indigo-400',
+    icon: Link2,
+    starterPrompt: 'Build me a NEAR smart contract that demonstrates cross-contract calls using Promises. Create a main contract that calls an external token contract to check balances and transfer tokens. Show proper callback handling, gas attachment, and error recovery patterns. Include both the caller and callee contracts.',
   },
 ];
 
