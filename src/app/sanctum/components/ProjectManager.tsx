@@ -428,7 +428,7 @@ export function ProjectManager({
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-void-darker border border-void-purple/30 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl shadow-void-purple/20">
             {/* Header */}
             <div className="px-4 sm:px-6 py-4 border-b border-void-purple/20 flex items-center justify-between gap-3">
