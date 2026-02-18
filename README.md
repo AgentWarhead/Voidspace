@@ -1,6 +1,14 @@
+<div align="center">
+
 # Voidspace
 
 **The intelligence layer for NEAR Protocol.**
+
+### 🎬 Watch the Demo
+
+https://github.com/AgentWarhead/Voidspace/releases/download/v1.0-demo/Voidspace.Launch.Video.mp4
+
+</div>
 
 Voidspace is a unified platform for ecosystem intelligence, AI-powered smart contract development, and structured blockchain education — built exclusively for NEAR.
 
