@@ -282,6 +282,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 <GoalCard
                   emoji="💡"
                   title="I have an idea — build it"
+                  subtitle="Live preview studio with AI pair programmer"
                   description="Describe your vision in plain English. We architect, code, and deploy it for you."
                   color="purple"
                   tag="Most Popular"
@@ -294,6 +295,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 <GoalCard
                   emoji="🚀"
                   title="Learn & deploy"
+                  subtitle="Interactive course with quizzes &amp; milestones"
                   description="Go from zero to deployed. Pick a contract type, learn as you build, and ship your first project."
                   color="cyan"
                   tag="Guided"
@@ -626,6 +628,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 function GoalCard({
   emoji,
   title,
+  subtitle,
   description,
   color,
   tag,
@@ -638,6 +641,7 @@ function GoalCard({
 }: {
   emoji: string;
   title: string;
+  subtitle?: string;
   description: string;
   color: 'amber' | 'cyan' | 'green' | 'purple' | 'teal';
   tag?: string;
@@ -749,7 +753,7 @@ function GoalCard({
 
         <div className="flex-1 min-w-0">
           {/* Title */}
-          <h3 className={`${wide ? 'text-lg' : 'text-base'} font-bold mb-2 transition-colors duration-200 ${
+          <h3 className={`${wide ? 'text-lg' : 'text-base'} font-bold mb-1 transition-colors duration-200 ${
             selected ? c.text : 'text-text-primary'
           } group-hover:${c.text}`}>
             {title}
@@ -759,6 +763,13 @@ function GoalCard({
               </span>
             )}
           </h3>
+
+          {/* Subtitle — mode tagline */}
+          {subtitle && (
+            <p className={`text-[11px] font-mono mb-2 ${c.text} opacity-70`}>
+              {subtitle}
+            </p>
+          )}
 
           {/* Description */}
           <p className={`${wide ? 'text-sm sm:text-base' : 'text-sm'} text-text-muted leading-relaxed ${wide ? 'max-w-xl' : ''}`}>
