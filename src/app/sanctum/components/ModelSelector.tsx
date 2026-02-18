@@ -20,6 +20,11 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
   // Always start with the tier's default model — no localStorage override
   const [selectedModel, setSelectedModel] = useState<string>(tierConfig.aiModel);
 
+  // Re-sync when tier changes (e.g. user loads after initial render)
+  useEffect(() => {
+    setSelectedModel(tierConfig.aiModel);
+  }, [tierConfig.aiModel]);
+
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);

@@ -126,7 +126,9 @@ const CATEGORY_STARTERS: Record<string, string> = {
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user } = useWallet();
-  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
+  // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
+  // API enforces actual tier regardless. Once user loads, syncs to real tier.
+  const userTier: SanctumTier = (user?.tier as SanctumTier) || 'specter';
   const tierConfig = SANCTUM_TIERS[userTier];
   const isFreeTier = userTier === 'shade';
   const modelLabel = tierConfig.aiModel.includes('opus') ? 'Claude Opus 4.6' : (tierConfig.aiModel.includes('sonnet-4-6') ? 'Claude Sonnet 4.6' : 'Claude Sonnet 4');
