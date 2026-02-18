@@ -14,7 +14,8 @@ const STORAGE_KEY = 'sanctum-session-state';
 const PERSISTED_FIELDS = [
   'mode', 'selectedCategory', 'customPrompt', 'sessionStarted',
   'generatedCode', 'tokensUsed', 'tokenBalance', 'sanctumStage',
-  'messageCount', 'chatMode', 'conceptsLearned', 'quizScore',
+  'messageCount', 'conceptsLearned', 'quizScore',
+  // chatMode intentionally excluded — always starts fresh as 'learn'
   'contractsBuilt', 'scratchDescription', 'scratchGeneratedCode',
   'scratchTemplate', 'showScratchSession',
   'personaId',
