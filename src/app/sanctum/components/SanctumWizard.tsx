@@ -16,7 +16,7 @@ const SPECIALIST_META: Record<string, { color: string; tags: string[]; triggers:
   nexus:   { color: '#14B8A6', tags: ['Cross-Chain', 'NEAR Intents', 'Bridges'],   triggers: ['"cross-chain transfer"', '"NEAR Intents"'] },
   prism:   { color: '#EC4899', tags: ['Frontend', 'Wallet UX', 'TypeScript'],       triggers: ['"build the frontend"', '"wallet integration"'] },
   crucible: { color: '#22C55E', tags: ['Testing', 'Unit Tests', 'Simulation'],      triggers: ['"write tests"', '"QA this contract"'] },
-  ledger:  { color: '#EAB308', tags: ['Tokenomics', 'DeFi', 'Economic Design'],     triggers: ['"design the tokenomics"', '"DeFi mechanics"'] },
+  ledger:  { color: '#EF4444', tags: ['Tokenomics', 'DeFi', 'Economic Design'],     triggers: ['"design the tokenomics"', '"DeFi mechanics"'] },
 };
 import { storeBriefForSanctum, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
@@ -554,7 +554,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   { id: 'nexus',    color: '#14B8A6', tags: ['Cross-Chain', 'NEAR Intents', 'Bridges'] },
                   { id: 'prism',    color: '#EC4899', tags: ['Frontend', 'Wallet UX', 'TypeScript'] },
                   { id: 'crucible', color: '#22C55E', tags: ['Testing', 'Unit Tests', 'Simulation'] },
-                  { id: 'ledger',   color: '#EAB308', tags: ['Tokenomics', 'DeFi', 'Economic Design'] },
+                  { id: 'ledger',   color: '#EF4444', tags: ['Tokenomics', 'DeFi', 'Economic Design'] },
                 ] as const).map(({ id, color, tags }, i) => {
                   const persona = PERSONA_LIST.find(p => p.id === id)!;
                   const isHovered = hoveredCard === id;
