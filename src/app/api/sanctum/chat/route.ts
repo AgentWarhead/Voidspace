@@ -1257,15 +1257,45 @@ export async function POST(request: NextRequest) {
     // Extract the response text
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
 
-    // Try to parse as JSON
+    // Try to parse as JSON — multiple strategies for robustness
     let parsed;
     try {
-      // Find JSON in the response (it might have markdown around it)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
-      } else {
-        // Fallback: treat as plain text response
+      // Strategy 1: Direct parse (ideal case — clean JSON response)
+      parsed = JSON.parse(responseText);
+    } catch {
+      try {
+        // Strategy 2: Strip markdown fences (```json ... ```)
+        const fenceMatch = responseText.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+        if (fenceMatch) {
+          parsed = JSON.parse(fenceMatch[1]);
+        } else {
+          // Strategy 3: Find outermost JSON object by matching braces properly
+          const firstBrace = responseText.indexOf('{');
+          if (firstBrace !== -1) {
+            let depth = 0;
+            let inString = false;
+            let escape = false;
+            let lastBrace = -1;
+            for (let i = firstBrace; i < responseText.length; i++) {
+              const ch = responseText[i];
+              if (escape) { escape = false; continue; }
+              if (ch === '\\' && inString) { escape = true; continue; }
+              if (ch === '"' && !escape) { inString = !inString; continue; }
+              if (inString) continue;
+              if (ch === '{') depth++;
+              if (ch === '}') { depth--; if (depth === 0) { lastBrace = i; break; } }
+            }
+            if (lastBrace !== -1) {
+              parsed = JSON.parse(responseText.slice(firstBrace, lastBrace + 1));
+            }
+          }
+        }
+      } catch {
+        // All strategies failed
+      }
+
+      // Final fallback: treat as plain text response
+      if (!parsed) {
         parsed = {
           content: responseText,
           code: null,
@@ -1273,14 +1303,6 @@ export async function POST(request: NextRequest) {
           options: null,
         };
       }
-    } catch {
-      // If JSON parse fails, return as plain content
-      parsed = {
-        content: responseText,
-        code: null,
-        learnTips: null,
-        options: null,
-      };
     }
 
     // Backward compatibility: convert singular learnTip to learnTips array
