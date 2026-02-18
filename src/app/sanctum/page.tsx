@@ -29,7 +29,7 @@ import { WebappBuilder } from './components/WebappBuilder';
 import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 import { ScratchWebappSession } from './components/ScratchWebappSession';
-import { LearnSession } from './components/LearnSession';
+// LearnSession removed — original build chat handles all modes via Learn/Build/Expert toggle
 import { ScratchTemplates, SCRATCH_TEMPLATES } from './components/ScratchTemplates';
 import { useSanctumState, clearPersistedSession } from './hooks/useSanctumState';
 import { useWallet } from '@/hooks/useWallet';
@@ -551,41 +551,8 @@ function SanctumPageInner() {
         </div>
       )}
 
-      {/* Learn Session — full-screen interactive course (blue/indigo identity) */}
-      {state.sessionStarted && state.mode === 'build' && state.chatMode === 'learn' && (
-        <LearnSession
-          category={state.selectedCategory}
-          personaId={state.personaId}
-          customPrompt={state.customPrompt}
-          generatedCode={state.generatedCode}
-          messagesCount={state.messageCount}
-          contractsBuilt={state.contractsBuilt}
-          deployCount={state.deployCount}
-          isThinking={state.isThinking}
-          onBack={handleBack}
-          onNewSession={handleNewSession}
-          onDeploy={handleDeploy}
-          onCodeGenerated={handleCodeGenerated}
-          onTokensUsed={handleTokensUsed}
-          onTaskUpdate={handleTaskUpdate}
-          onThinkingChange={handleThinkingChange}
-          onPersonaChange={(id) => dispatch({ type: 'SET_PERSONA_ID', payload: id })}
-          onQuizAnswer={(correct) => handleQuizAnswer(correct)}
-          onConceptLearned={(c) => {
-            dispatch({ type: 'ADD_CONCEPT_LEARNED', payload: c });
-            handleConceptLearned();
-          }}
-          onUserMessage={checkMessageForAchievements}
-          sessionReset={sessionResetCounter}
-          externalMessage={externalMessage}
-          externalMessageSeq={externalMessageSeq}
-          loadedProjectMessages={loadedProjectMessages}
-          loadedProjectSeq={loadedProjectSeq}
-        />
-      )}
-
       {/* Build Session - full screen immersive mode (green identity) */}
-      {state.sessionStarted && state.mode === 'build' && state.chatMode !== 'learn' && (
+      {state.sessionStarted && state.mode === 'build' && (
         <div className="relative z-40 flex flex-col bg-void-black h-dvh overflow-hidden overscroll-none touch-manipulation">
           {/* Session background - contained, no bleeding */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
