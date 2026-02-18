@@ -1244,8 +1244,9 @@ export async function POST(request: NextRequest) {
     }));
 
     // Call Claude — model determined by user's subscription tier
-    // Expert mode needs more tokens for full contracts; learn/build can use less
-    const maxTokens = mode === 'expert' ? 16384 : 8192;
+    // All modes need generous tokens — learn/build responses include JSON + code + educational content
+    // Truncation destroys the JSON `code` field, causing code to leak into chat
+    const maxTokens = mode === 'expert' ? 16384 : 12288;
     // Enable 1M context window beta for all supported models
     const response = await anthropic.messages.create({
       model: modelId,
@@ -1321,6 +1322,67 @@ export async function POST(request: NextRequest) {
     if (parsed.learnTip && !parsed.learnTips) {
       parsed.learnTips = [parsed.learnTip];
       delete parsed.learnTip;
+    }
+
+    // ── SERVER-SIDE CODE EXTRACTION (belt + suspenders) ──
+    // Ensure code ends up in the `code` field, NOT embedded in `content`
+    if (!parsed.code && parsed.content) {
+      // Try fenced Rust code blocks first (```rust\n...```)
+      const fencedRust = parsed.content.match(/```rust\s*\n([\s\S]*?)```/);
+      if (fencedRust && fencedRust[1] && fencedRust[1].trim().length > 50) {
+        parsed.code = fencedRust[1].trim();
+      } else {
+        // Try ANY fenced code block (```\n...```)
+        const fencedAny = parsed.content.match(/```\w*\s*\n([\s\S]*?)```/);
+        if (fencedAny && fencedAny[1] && fencedAny[1].trim().length > 100) {
+          // Verify it looks like Rust/NEAR code
+          const block = fencedAny[1].trim();
+          if (/(?:use\s+near_sdk|#\[near|pub\s+(?:fn|struct)|impl\s+\w)/.test(block)) {
+            parsed.code = block;
+          }
+        }
+      }
+      // Detect unfenced Rust code: if content has 5+ Rust/NEAR markers, extract the code block
+      if (!parsed.code) {
+        const lines = parsed.content.split('\n');
+        const rustMarkers = /^(?:use\s+\w|#\[|pub\s+(?:fn|struct|enum|mod)|impl\s|fn\s|\/\/|let\s|const\s|mod\s|struct\s|\}|\{)/;
+        let codeStart = -1;
+        let codeEnd = -1;
+        let markerCount = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const trimmed = lines[i].trim();
+          if (rustMarkers.test(trimmed)) {
+            if (codeStart === -1) codeStart = i;
+            codeEnd = i;
+            markerCount++;
+          }
+        }
+        if (markerCount >= 5 && codeStart !== -1) {
+          // Include surrounding lines that look like code (braces, indented)
+          while (codeStart > 0 && /^[\s{}\/)#]/.test(lines[codeStart - 1].trim().charAt(0) || ' ')) codeStart--;
+          while (codeEnd < lines.length - 1 && /^[\s{}\/)#]/.test(lines[codeEnd + 1]?.trim().charAt(0) || ' ')) codeEnd++;
+          const extracted = lines.slice(codeStart, codeEnd + 1).join('\n').trim();
+          if (extracted.length > 100) {
+            parsed.code = extracted;
+          }
+        }
+      }
+    }
+
+    // Strip code blocks from content server-side — code belongs in the `code` field only
+    if (parsed.content && parsed.code) {
+      let cleaned = parsed.content
+        // Strip fenced code blocks
+        .replace(/```(?:\w*)\s*\n[\s\S]*?```/g, '')
+        // Strip unfenced Rust code (consecutive lines matching Rust patterns)
+        .replace(/(?:^|\n)(?:(?:use\s+\w|#\[|pub\s+(?:fn|struct)|impl\s|fn\s|let\s|const\s|\s+\w+:\s|^\s*\}|^\s*\{).*\n?){5,}/gm, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      // If stripping left almost nothing, add a helpful note
+      if (cleaned.length < 30) {
+        cleaned = '✅ Contract code generated — check the preview panel →';
+      }
+      parsed.content = cleaned;
     }
 
     // Log AI usage for budget tracking (secondary safety net)

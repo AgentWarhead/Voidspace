@@ -635,25 +635,54 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         }
       }
 
-      // Extract code — prefer explicit code field, fallback to markdown code blocks in content
+      // ── CODE EXTRACTION — prefer explicit `code` field, fallback to content parsing ──
       let extractedCode = data.code;
       if (!extractedCode && data.content) {
-        // Try to extract Rust code from markdown blocks in content
-        const rustMatch = data.content.match(/```rust\n([\s\S]*?)```/);
-        if (rustMatch && rustMatch[1] && rustMatch[1].length > 100) {
+        // Strategy 1: Fenced Rust code blocks (```rust ... ```)
+        const rustMatch = data.content.match(/```rust\s*\n([\s\S]*?)```/);
+        if (rustMatch && rustMatch[1] && rustMatch[1].trim().length > 50) {
           extractedCode = rustMatch[1].trim();
+        }
+        // Strategy 2: Any fenced code block that looks like Rust/NEAR
+        if (!extractedCode) {
+          const anyFence = data.content.match(/```\w*\s*\n([\s\S]*?)```/);
+          if (anyFence && anyFence[1] && /(?:use\s+near_sdk|#\[near|pub\s+(?:fn|struct)|impl\s+\w)/.test(anyFence[1])) {
+            extractedCode = anyFence[1].trim();
+          }
+        }
+        // Strategy 3: Detect unfenced Rust code (5+ lines with Rust markers)
+        if (!extractedCode) {
+          const lines = data.content.split('\n');
+          const rustMarker = /^(?:use\s+\w|#\[|pub\s+(?:fn|struct|enum)|impl\s|fn\s|\/\/\s|let\s|const\s|mod\s|struct\s|\}$|\{$)/;
+          let start = -1, end = -1, count = 0;
+          for (let i = 0; i < lines.length; i++) {
+            if (rustMarker.test(lines[i].trim())) {
+              if (start === -1) start = i;
+              end = i;
+              count++;
+            }
+          }
+          if (count >= 5 && start !== -1) {
+            // Extend to include surrounding code lines
+            while (start > 0 && /^[\s{}\/)#]/.test(lines[start - 1].trim().charAt(0) || ' ')) start--;
+            while (end < lines.length - 1 && /^[\s{}\/)#]/.test(lines[end + 1]?.trim().charAt(0) || ' ')) end++;
+            const block = lines.slice(start, end + 1).join('\n').trim();
+            if (block.length > 100) extractedCode = block;
+          }
         }
       }
 
-      // Strip ALL code blocks from chat content — code belongs in the preview panel only
-      // Also strip raw JSON blocks that leak when parsing partially fails
+      // ── STRIP CODE from chat content — code belongs in preview panel ONLY ──
       if (assistantMessage.content) {
         let cleaned = assistantMessage.content
-          .replace(/```(?:rust|toml|sh|bash|typescript|javascript|json)?\n[\s\S]*?```/g, '')
+          // Strip all fenced code blocks (any language, with or without newline variants)
+          .replace(/```\w*\s*\n[\s\S]*?```/g, '')
+          // Strip unfenced Rust code blocks (5+ consecutive Rust-pattern lines)
+          .replace(/(?:^|\n)(?:(?:use\s+\w|#\[|pub\s+(?:fn|struct)|impl\s|fn\s|let\s|const\s|\s+\w+:\s+|^\s*\}|^\s*\{).*(?:\n|$)){5,}/gm, '')
           .replace(/\n{3,}/g, '\n\n')
           .trim();
         // If stripping left almost nothing and we have code, add a note
-        if (cleaned.length < 20 && extractedCode) {
+        if (cleaned.length < 30 && extractedCode) {
           cleaned = '✅ Contract generated — see the preview panel →';
         }
         assistantMessage.content = cleaned;
