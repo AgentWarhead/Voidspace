@@ -277,21 +277,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 </div>
               )}
 
-              {/* 3 goal cards — clean decision architecture */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 max-w-5xl mx-auto mb-10">
-                <GoalCard
-                  emoji="💡"
-                  title="I have an idea — build it"
-                  subtitle="Live preview studio with AI pair programmer"
-                  description="Describe your vision in plain English. We architect, code, and deploy it for you."
-                  color="purple"
-                  tag="Most Popular"
-                  tagIcon="🔥"
-                  featured
-                  delay={0}
-                  onClick={() => handleGoalSelect('idea')}
-                  selected={goal === 'idea'}
-                />
+              {/* 2 goal cards — clean decision architecture */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 max-w-3xl mx-auto mb-10">
                 <GoalCard
                   emoji="🚀"
                   title="Learn & deploy"
@@ -300,7 +287,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   color="cyan"
                   tag="Guided"
                   tagIcon="⚡"
-                  delay={80}
+                  featured
+                  delay={0}
                   onClick={() => handleGoalSelect('learn')}
                   selected={goal === 'learn'}
                 />
@@ -311,7 +299,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   color="teal"
                   tag="Explorer"
                   tagIcon="🔍"
-                  delay={160}
+                  delay={80}
                   onClick={() => handleGoalSelect('discover')}
                   selected={goal === 'discover'}
                 />
