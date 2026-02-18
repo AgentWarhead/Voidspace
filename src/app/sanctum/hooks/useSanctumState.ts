@@ -1,6 +1,6 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
-import { Achievement, ACHIEVEMENTS } from '../components/AchievementPopup';
 import { CurrentTask } from '../components/TaskProgressInline';
+import { useAchievementContext } from '@/contexts/AchievementContext';
 import { DeployedContract, saveDeployment } from '../components/DeploymentHistory';
 import { ImportedContract } from '../components/ImportContract';
 import { generateSessionId } from '../components/PairProgramming';
@@ -16,7 +16,7 @@ const PERSISTED_FIELDS = [
   'generatedCode', 'tokensUsed', 'tokenBalance', 'sanctumStage',
   'messageCount', 'chatMode', 'conceptsLearned', 'quizScore',
   'contractsBuilt', 'scratchDescription', 'scratchGeneratedCode',
-  'scratchTemplate', 'showScratchSession', 'unlockedAchievements',
+  'scratchTemplate', 'showScratchSession',
   'personaId',
 ] as const;
 
@@ -31,10 +31,6 @@ function loadPersistedState(): Partial<SanctumState> | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed: PersistedState = JSON.parse(raw);
-    // Convert unlockedAchievements back to Set
-    if (Array.isArray(parsed.unlockedAchievements)) {
-      (parsed as Record<string, unknown>).unlockedAchievements = new Set<string>(parsed.unlockedAchievements);
-    }
     return parsed as Partial<SanctumState>;
   } catch {
     return null;
@@ -46,11 +42,7 @@ function savePersistedState(state: SanctumState): void {
   try {
     const subset: Record<string, unknown> = {};
     for (const key of PERSISTED_FIELDS) {
-      if (key === 'unlockedAchievements') {
-        subset[key] = Array.from(state.unlockedAchievements);
-      } else {
-        subset[key] = state[key];
-      }
+      subset[key] = state[key];
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(subset));
   } catch {
@@ -82,8 +74,6 @@ export interface SanctumState {
   tokenBalance: number;
   sanctumStage: SanctumStage;
   isGenerating: boolean;
-  currentAchievement: Achievement | null;
-  unlockedAchievements: Set<string>;
   messageCount: number;
   deployCount: number;
   showDeployCelebration: boolean;
@@ -128,8 +118,6 @@ type SanctumAction =
   | { type: 'SUBTRACT_TOKEN_BALANCE'; payload: number }
   | { type: 'SET_SANCTUM_STAGE'; payload: SanctumStage }
   | { type: 'SET_IS_GENERATING'; payload: boolean }
-  | { type: 'SET_CURRENT_ACHIEVEMENT'; payload: Achievement | null }
-  | { type: 'ADD_UNLOCKED_ACHIEVEMENT'; payload: string }
   | { type: 'SET_MESSAGE_COUNT'; payload: number }
   | { type: 'INCREMENT_MESSAGE_COUNT' }
   | { type: 'SET_DEPLOY_COUNT'; payload: number }
@@ -175,8 +163,6 @@ const defaultState: SanctumState = {
   tokenBalance: 50000,
   sanctumStage: 'idle',
   isGenerating: false,
-  currentAchievement: null,
-  unlockedAchievements: new Set<string>(),
   messageCount: 0,
   deployCount: 0,
   showDeployCelebration: false,
@@ -249,15 +235,6 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
     
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
-    
-    case 'SET_CURRENT_ACHIEVEMENT':
-      return { ...state, currentAchievement: action.payload };
-    
-    case 'ADD_UNLOCKED_ACHIEVEMENT':
-      return { 
-        ...state, 
-        unlockedAchievements: new Set(Array.from(state.unlockedAchievements).concat([action.payload]))
-      };
     
     case 'SET_MESSAGE_COUNT':
       return { ...state, messageCount: action.payload };
@@ -366,7 +343,6 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
       return {
         ...defaultState,
         // Keep persistent progress stats
-        unlockedAchievements: state.unlockedAchievements,
         deployCount: state.deployCount,
       };
     
@@ -445,29 +421,40 @@ export function useSanctumState() {
     };
   }, [state.sessionStarted, state.sessionStartTime]);
 
-  // Achievement unlock function
-  const unlockAchievement = useCallback((achievementId: string) => {
-    if (state.unlockedAchievements.has(achievementId)) return;
-    
-    const achievement = ACHIEVEMENTS[achievementId];
-    if (achievement) {
-      dispatch({ type: 'ADD_UNLOCKED_ACHIEVEMENT', payload: achievementId });
-      dispatch({ type: 'SET_CURRENT_ACHIEVEMENT', payload: achievement });
-    }
-  }, [state.unlockedAchievements]);
+  // ─── Global achievement context ─────────────────────────────
+  const { trackStat, triggerCustom, setStat, stats } = useAchievementContext();
+  // Keep stats in a ref to avoid stale closures in callbacks
+  const statsRef = useRef(stats);
+  statsRef.current = stats;
 
-  // Handler functions
+  // Track which personas have been used this session (for uniquePersonasUsed stat)
+  const usedPersonasRef = useRef<Set<string>>(new Set(['shade']));
+  // Track quiz streak independently for accurate maxQuizStreak
+  const quizStreakRef = useRef(0);
+
+  // ─── Handler functions ───────────────────────────────────────
+
   const handleCategorySelect = useCallback((categorySlug: string) => {
     dispatch({ type: 'SET_SELECTED_CATEGORY', payload: categorySlug });
     dispatch({ type: 'SET_SESSION_STARTED', payload: true });
-    
-    // Check for category-specific achievements
-    if (categorySlug === 'chain-signatures') {
-      setTimeout(() => unlockAchievement('chain_signatures'), 2000);
-    } else if (categorySlug === 'ai-agents') {
-      setTimeout(() => unlockAchievement('shade_agent'), 2000);
+
+    // Category-specific achievements (fired at code-gen, not just selection)
+    const CATEGORY_TRIGGERS: Record<string, string> = {
+      'chain-signatures': 'built_chain_signatures',
+      'ai-agents':        'built_ai_agent',
+      'defi':             'built_defi',
+      'nfts':             'built_nft',
+      'meme':             'built_meme',
+      'gaming':           'built_gaming',
+      'intents':          'built_intents',
+      'privacy':          'built_privacy',
+    };
+    const trigger = CATEGORY_TRIGGERS[categorySlug];
+    if (trigger) {
+      // Delay so code must actually be generated in this category
+      setTimeout(() => triggerCustom(trigger), 3000);
     }
-  }, [unlockAchievement]);
+  }, [triggerCustom]);
 
   const handleCustomStart = useCallback(() => {
     if (state.customPrompt.trim()) {
@@ -481,65 +468,70 @@ export function useSanctumState() {
     dispatch({ type: 'ADD_TOKENS_USED', payload: total });
     dispatch({ type: 'SUBTRACT_TOKEN_BALANCE', payload: total });
     dispatch({ type: 'INCREMENT_MESSAGE_COUNT' });
-    
-    // First message achievement
-    if (state.messageCount === 0) {
-      unlockAchievement('first_message');
-    }
-  }, [state.messageCount, unlockAchievement]);
 
-  // Check message content for "asked_why" achievement
+    // Track in global context — auto-unlocks hello_sanctum at threshold 1,
+    // conversationalist at threshold 100, token_burner/million_token_club for tokens
+    trackStat('sanctumMessages');
+    trackStat('tokensUsed', total);
+  }, [trackStat]);
+
+  // Check message content for triggered achievements
   const checkMessageForAchievements = useCallback((messageText: string) => {
-    if (!state.unlockedAchievements.has('asked_why')) {
-      const lower = messageText.toLowerCase();
-      if (lower.includes('why') || lower.includes('how does this work') || lower.includes('how does that work') || lower.includes('explain')) {
-        setTimeout(() => unlockAchievement('asked_why'), 1000);
-      }
+    const lower = messageText.toLowerCase();
+    if (lower.includes('why') || lower.includes('how does this work') || lower.includes('how does that work') || lower.includes('explain')) {
+      setTimeout(() => triggerCustom('asked_why'), 1000);
     }
-  }, [state.unlockedAchievements, unlockAchievement]);
+    if (lower.includes('the plan') || lower.includes('what is the plan') || lower.includes("what's the plan")) {
+      setTimeout(() => triggerCustom('asked_the_plan'), 1000);
+    }
+  }, [triggerCustom]);
 
-  // Concept-based achievement checks
+  // Concept-based achievement — global context handles threshold evaluation
   const handleConceptLearned = useCallback(() => {
-    const newCount = state.conceptsLearned.length + 1;
-    if (newCount >= 5 && !state.unlockedAchievements.has('concept_collector_5')) {
-      setTimeout(() => unlockAchievement('concept_collector_5'), 1500);
-    }
-    if (newCount >= 20 && !state.unlockedAchievements.has('concept_collector_20')) {
-      setTimeout(() => unlockAchievement('concept_collector_20'), 1500);
-    }
-  }, [state.conceptsLearned.length, state.unlockedAchievements, unlockAchievement]);
+    trackStat('conceptsLearned');
+  }, [trackStat]);
 
-  // Quiz streak achievement check
+  // Quiz answer — track streak accurately for maxQuizStreak stat
   const handleQuizAnswer = useCallback((correct: boolean) => {
     dispatch({ type: 'UPDATE_QUIZ_SCORE', payload: { correct } });
     if (correct) {
-      // Check for streak of 5 — simplified: just check if they have 5+ correct
-      const newCorrect = state.quizScore.correct + 1;
-      if (newCorrect >= 5 && !state.unlockedAchievements.has('quiz_ace')) {
-        setTimeout(() => unlockAchievement('quiz_ace'), 1500);
+      quizStreakRef.current++;
+      const currentMax = statsRef.current.maxQuizStreak;
+      if (quizStreakRef.current > currentMax) {
+        setStat('maxQuizStreak', quizStreakRef.current);
       }
+    } else {
+      quizStreakRef.current = 0;
     }
-  }, [state.quizScore.correct, state.unlockedAchievements, unlockAchievement]);
+  }, [setStat]);
 
   const handleCodeGenerated = useCallback((code: string) => {
     dispatch({ type: 'START_CODE_GENERATION', payload: code });
     dispatch({ type: 'INCREMENT_CONTRACTS_BUILT' });
-    
-    // First code achievement
-    if (!state.unlockedAchievements.has('first_code')) {
-      setTimeout(() => unlockAchievement('first_code'), 1500);
+
+    // Track in global context — auto-unlocks code_conjurer, contract_factory, etc.
+    trackStat('codeGenerations');
+    trackStat('contractsBuilt');
+
+    // Night build achievement (midnight–5 AM)
+    const hour = new Date().getHours();
+    if (hour < 5) {
+      trackStat('nightBuilds');
     }
 
-    // Three contracts achievement
-    if (state.contractsBuilt + 1 >= 3 && !state.unlockedAchievements.has('three_contracts')) {
-      setTimeout(() => unlockAchievement('three_contracts'), 2000);
+    // Update longest session stat for marathon_session achievement
+    if (state.sessionStartTime) {
+      const minutes = Math.floor((Date.now() - state.sessionStartTime) / 60000);
+      if (minutes > statsRef.current.longestSessionMinutes) {
+        setStat('longestSessionMinutes', minutes);
+      }
     }
-    
+
     // Complete after typing animation
     setTimeout(() => {
       dispatch({ type: 'COMPLETE_CODE_GENERATION' });
     }, code.length * 10 + 500);
-  }, [state.unlockedAchievements, state.contractsBuilt, unlockAchievement]);
+  }, [trackStat, setStat, state.sessionStartTime]);
 
   const handleTaskUpdate = useCallback((task: CurrentTask | null) => {
     dispatch({ type: 'SET_CURRENT_TASK', payload: task });
@@ -552,7 +544,7 @@ export function useSanctumState() {
   const handleDeploy = useCallback(async () => {
     dispatch({ type: 'SET_DEPLOY_ERROR', payload: null });
     dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'thinking' });
-    
+
     try {
       // Call deploy API
       const response = await fetch('/api/sanctum/deploy', {
@@ -563,31 +555,34 @@ export function useSanctumState() {
           category: state.selectedCategory,
         }),
       });
-      
+
       const data = await response.json();
-      
+
       dispatch({ type: 'INCREMENT_DEPLOY_COUNT' });
-      
-      // First deploy achievement
-      if (state.deployCount === 0) {
-        unlockAchievement('first_deploy');
-      }
+
+      // Track in global context — auto-unlocks genesis_deploy at threshold 1
+      trackStat('contractsDeployed');
 
       // Speed demon — deployed within 3 minutes of session start
-      if (state.sessionStartTime && !state.unlockedAchievements.has('speed_demon')) {
+      if (state.sessionStartTime) {
         const elapsed = (Date.now() - state.sessionStartTime) / 1000 / 60;
         if (elapsed <= 3) {
-          setTimeout(() => unlockAchievement('speed_demon'), 2000);
+          setTimeout(() => triggerCustom('speed_deploy'), 2000);
         }
       }
-      
+
+      // Mainnet pioneer
+      if (data.network === 'mainnet') {
+        setTimeout(() => triggerCustom('mainnet_deployed'), 2000);
+      }
+
       dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
-      
+
       // Show celebration with contract ID
       const contractId = data.contractId || `sanctum-${Date.now()}.testnet`;
       dispatch({ type: 'SET_DEPLOYED_CONTRACT_ID', payload: contractId });
       dispatch({ type: 'SET_SHOW_DEPLOY_CELEBRATION', payload: true });
-      
+
       // Save to deployment history
       saveDeployment({
         name: state.selectedCategory === 'custom' ? 'Custom Contract' : (state.selectedCategory || 'My Contract'),
@@ -597,22 +592,29 @@ export function useSanctumState() {
         txHash: data.txHash || `tx-${Date.now()}`,
         code: state.generatedCode,
       });
-      
+
     } catch (error) {
       console.error('Deploy error:', error);
       dispatch({ type: 'SET_DEPLOY_ERROR', payload: 'Deploy failed. Please try again.' });
       dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
     }
-  }, [state.generatedCode, state.selectedCategory, state.deployCount, unlockAchievement]);
+  }, [state.generatedCode, state.selectedCategory, state.sessionStartTime, trackStat, triggerCustom]);
 
   const handleBack = useCallback(() => {
+    // Update longest session stat before resetting
+    if (state.sessionStartTime) {
+      const minutes = Math.floor((Date.now() - state.sessionStartTime) / 60000);
+      if (minutes > statsRef.current.longestSessionMinutes) {
+        setStat('longestSessionMinutes', minutes);
+      }
+    }
     dispatch({ type: 'RESET_SESSION' });
-  }, []);
+  }, [state.sessionStartTime, setStat]);
 
   const handleShare = useCallback(() => {
     if (state.generatedCode) {
-      dispatch({ 
-        type: 'SET_CONTRACT_TO_SHARE', 
+      dispatch({
+        type: 'SET_CONTRACT_TO_SHARE',
         payload: {
           code: state.generatedCode,
           name: state.selectedCategory === 'custom' ? 'Custom Contract' : (state.selectedCategory || 'My Contract'),
@@ -620,8 +622,10 @@ export function useSanctumState() {
         }
       });
       dispatch({ type: 'SET_SHOW_SHARE_MODAL', payload: true });
+      // Track share achievement
+      trackStat('contractsShared');
     }
-  }, [state.generatedCode, state.selectedCategory]);
+  }, [state.generatedCode, state.selectedCategory, trackStat]);
 
   const handleShareFromHistory = useCallback((contract: DeployedContract) => {
     dispatch({ 
@@ -643,18 +647,25 @@ export function useSanctumState() {
     dispatch({ type: 'SET_SHOW_HISTORY', payload: false });
   }, []);
 
-  // Trigger security_aware when roast mode is entered (Warden audit)
+  // Trigger warden_audit achievement when roast mode is entered
   useEffect(() => {
-    if (state.mode === 'roast' && !state.unlockedAchievements.has('security_aware')) {
-      setTimeout(() => unlockAchievement('security_aware'), 2000);
+    if (state.mode === 'roast') {
+      setTimeout(() => triggerCustom('warden_audit'), 2000);
     }
-  }, [state.mode, state.unlockedAchievements, unlockAchievement]);
+  }, [state.mode, triggerCustom]);
+
+  // Track unique personas used for council achievements
+  useEffect(() => {
+    if (state.personaId && !usedPersonasRef.current.has(state.personaId)) {
+      usedPersonasRef.current.add(state.personaId);
+      trackStat('uniquePersonasUsed');
+    }
+  }, [state.personaId, trackStat]);
 
   return {
     state,
     dispatch,
     // Handlers
-    unlockAchievement,
     handleCategorySelect,
     handleCustomStart,
     handleTokensUsed,

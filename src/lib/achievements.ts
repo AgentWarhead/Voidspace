@@ -5,7 +5,7 @@
 
 // ─── Types ────────────────────────────────────────────────────
 
-export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
+export type AchievementRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
 export type AchievementCategory =
   | 'exploration'
@@ -157,6 +157,14 @@ export const RARITY_CONFIG: Record<AchievementRarity, {
     glow: 'shadow-slate-500/30',
     textColor: 'text-slate-200',
   },
+  uncommon: {
+    label: 'Uncommon',
+    color: 'text-green-400',
+    bg: 'from-green-700/90 to-green-800/90',
+    border: 'border-green-500',
+    glow: 'shadow-green-500/40',
+    textColor: 'text-green-200',
+  },
   rare: {
     label: 'Rare',
     color: 'text-blue-400',
@@ -212,11 +220,11 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   // ═══════════════════════════════════════════════════════════
   { id: 'first_steps',        name: 'First Steps',          description: 'Connected your wallet to the Void',                      emoji: '👣', icon: 'footprints',     category: 'exploration', rarity: 'common',    xp: 10,   trigger: { custom: 'wallet_connected' } },
   { id: 'void_walker',        name: 'Void Walker',          description: 'Explored your first project',                            emoji: '🔍', icon: 'search',         category: 'exploration', rarity: 'common',    xp: 15,   trigger: { stat: 'voidsExplored', threshold: 1 } },
-  { id: 'void_hunter',        name: 'Void Hunter',          description: 'Explored 10 projects in the NEAR ecosystem',             emoji: '🌀', icon: 'radar',          category: 'exploration', rarity: 'common',    xp: 50,   trigger: { stat: 'voidsExplored', threshold: 10 } },
+  { id: 'void_hunter',        name: 'Void Hunter',          description: 'Explored 10 projects in the NEAR ecosystem',             emoji: '🌀', icon: 'radar',          category: 'exploration', rarity: 'uncommon',  xp: 50,   trigger: { stat: 'voidsExplored', threshold: 10 } },
   { id: 'void_cartographer',  name: 'Void Cartographer',    description: 'Explored 50 projects — you know this ecosystem',         emoji: '🗺️', icon: 'map',            category: 'exploration', rarity: 'rare',      xp: 150,  trigger: { stat: 'voidsExplored', threshold: 50 } },
   { id: 'void_archaeologist',  name: 'Void Archaeologist',   description: 'Explored 100 projects — nothing escapes your gaze',      emoji: '⛏️', icon: 'pickaxe',        category: 'exploration', rarity: 'epic',      xp: 300,  trigger: { stat: 'voidsExplored', threshold: 100 } },
   { id: 'seen_everything',    name: "I've Seen Everything",  description: 'Explored every single listed project',                   emoji: '👁️', icon: 'eye',            category: 'exploration', rarity: 'legendary', xp: 1000, trigger: { custom: 'all_projects_explored' } },
-  { id: 'category_sampler',   name: 'Category Sampler',     description: 'Explored projects in 5 different categories',             emoji: '🎯', icon: 'target',         category: 'exploration', rarity: 'common',    xp: 50,   trigger: { stat: 'uniqueCategoriesExplored', threshold: 5 } },
+  { id: 'category_sampler',   name: 'Category Sampler',     description: 'Explored projects in 5 different categories',             emoji: '🎯', icon: 'target',         category: 'exploration', rarity: 'uncommon',  xp: 50,   trigger: { stat: 'uniqueCategoriesExplored', threshold: 5 } },
   { id: 'category_completionist', name: 'Category Completionist', description: 'Explored every project in a single category',      emoji: '🏁', icon: 'flag',           category: 'exploration', rarity: 'rare',      xp: 200,  trigger: { stat: 'categoriesFullyExplored', threshold: 1 } },
   { id: 'master_taxonomist',  name: 'Master Taxonomist',    description: 'Explored at least 1 project in every category',           emoji: '📚', icon: 'library',        category: 'exploration', rarity: 'epic',      xp: 500,  trigger: { custom: 'all_categories_sampled' } },
   { id: 'observatory_regular', name: 'Observatory Regular',  description: 'Visited the Observatory 10 times',                       emoji: '🔭', icon: 'telescope',      category: 'exploration', rarity: 'common',    xp: 30,   trigger: { stat: 'observatoryVisits', threshold: 10 } },
@@ -227,7 +235,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   // INTELLIGENCE (12)
   // ═══════════════════════════════════════════════════════════
   { id: 'intel_gatherer',     name: 'Intel Gatherer',       description: 'Generated your first opportunity brief',                  emoji: '📋', icon: 'clipboard',      category: 'intelligence', rarity: 'common',  xp: 25,   trigger: { stat: 'briefsGenerated', threshold: 1 } },
-  { id: 'brief_collector',    name: 'Brief Collector',      description: 'Generated 5 briefs — building your playbook',             emoji: '📑', icon: 'files',          category: 'intelligence', rarity: 'common',  xp: 50,   trigger: { stat: 'briefsGenerated', threshold: 5 } },
+  { id: 'brief_collector',    name: 'Brief Collector',      description: 'Generated 5 briefs — building your playbook',             emoji: '📑', icon: 'files',          category: 'intelligence', rarity: 'uncommon',xp: 50,   trigger: { stat: 'briefsGenerated', threshold: 5 } },
   { id: 'intelligence_officer', name: 'Intelligence Officer', description: 'Generated 25 briefs — serious researcher',              emoji: '🕵️', icon: 'user-search',    category: 'intelligence', rarity: 'rare',    xp: 150,  trigger: { stat: 'briefsGenerated', threshold: 25 } },
   { id: 'spymaster',          name: 'Spymaster',            description: 'Generated 100 briefs — you ARE the intelligence',         emoji: '🎩', icon: 'graduation-cap', category: 'intelligence', rarity: 'epic',    xp: 400,  trigger: { stat: 'briefsGenerated', threshold: 100 } },
   { id: 'opportunity_spotter', name: 'Opportunity Spotter',  description: 'Saved your first opportunity to the mission board',       emoji: '💡', icon: 'lightbulb',      category: 'intelligence', rarity: 'common',  xp: 15,   trigger: { stat: 'opportunitiesSaved', threshold: 1 } },
@@ -243,7 +251,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   // VOID BUBBLES (5)
   // ═══════════════════════════════════════════════════════════
   { id: 'bubble_popper',      name: 'Bubble Popper',        description: 'First visit to Void Bubbles',                             emoji: '🫧', icon: 'circle',         category: 'bubbles', rarity: 'common',    xp: 10,   trigger: { stat: 'bubblesVisits', threshold: 1 } },
-  { id: 'market_gazer',       name: 'Market Gazer',         description: 'Spent 5+ minutes watching the bubbles dance',             emoji: '📊', icon: 'bar-chart',      category: 'bubbles', rarity: 'common',    xp: 25,   trigger: { stat: 'bubblesMinutesSpent', threshold: 5 } },
+  { id: 'market_gazer',       name: 'Market Gazer',         description: 'Spent 5+ minutes watching the bubbles dance',             emoji: '📊', icon: 'bar-chart',      category: 'bubbles', rarity: 'uncommon',  xp: 25,   trigger: { stat: 'bubblesMinutesSpent', threshold: 5 } },
   { id: 'bubble_surfer',      name: 'Bubble Surfer',        description: 'Interacted with 20 different bubbles',                    emoji: '🏄', icon: 'waves',          category: 'bubbles', rarity: 'rare',      xp: 75,   trigger: { stat: 'bubblesClicked', threshold: 20 } },
   { id: 'the_bigger_they_are', name: 'The Bigger They Are', description: 'Clicked on the largest bubble by market cap',             emoji: '💥', icon: 'maximize',       category: 'bubbles', rarity: 'common',    xp: 15,   trigger: { custom: 'largest_bubble_clicked' } },
   { id: 'micro_hunter',       name: 'Micro Hunter',         description: 'Found and clicked the smallest bubble',                   emoji: '🔬', icon: 'minimize',       category: 'bubbles', rarity: 'rare',      xp: 50,   trigger: { custom: 'smallest_bubble_clicked' } },
@@ -252,7 +260,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   // CONSTELLATION MAP (8)
   // ═══════════════════════════════════════════════════════════
   { id: 'constellation_gazer', name: 'Constellation Gazer',  description: 'Opened the Constellation Map for the first time',        emoji: '✨', icon: 'sparkles',       category: 'constellation', rarity: 'common',    xp: 15,  trigger: { stat: 'constellationVisits', threshold: 1 } },
-  { id: 'web_weaver',         name: 'Web Weaver',           description: 'Expanded 5 nodes in one session',                         emoji: '🕸️', icon: 'git-branch',     category: 'constellation', rarity: 'common',    xp: 30,  trigger: { stat: 'nodesExpanded', threshold: 5 } },
+  { id: 'web_weaver',         name: 'Web Weaver',           description: 'Expanded 5 nodes in one session',                         emoji: '🕸️', icon: 'git-branch',     category: 'constellation', rarity: 'uncommon',  xp: 30,  trigger: { stat: 'nodesExpanded', threshold: 5 } },
   { id: 'deep_diver',         name: 'Deep Diver',           description: 'Reached 4+ levels deep in a constellation',               emoji: '🤿', icon: 'arrow-down',     category: 'constellation', rarity: 'rare',      xp: 75,  trigger: { stat: 'maxDepthReached', threshold: 4 } },
   { id: 'cluster_finder',     name: 'Cluster Finder',       description: 'Discovered a cluster of 10+ connected addresses',         emoji: '🔮', icon: 'network',        category: 'constellation', rarity: 'rare',      xp: 100, trigger: { custom: 'large_cluster_found' } },
   { id: 'cartographer_screenshot', name: 'Cartographer',    description: 'Captured a screenshot of your constellation',             emoji: '📸', icon: 'camera',         category: 'constellation', rarity: 'common',    xp: 20,  trigger: { stat: 'screenshotsTaken', threshold: 1 } },
@@ -293,6 +301,10 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'quiz_ace',           name: 'Quiz Ace',             description: 'Got 5 quizzes right in a row',                            emoji: '🎯', icon: 'target',         category: 'sanctum', rarity: 'rare',      xp: 100,  trigger: { stat: 'maxQuizStreak', threshold: 5 } },
   { id: 'perfect_score',      name: 'Perfect Score',        description: 'Got 10 quizzes right in a row — flawless',                emoji: '💯', icon: 'check-circle',   category: 'sanctum', rarity: 'epic',      xp: 250,  trigger: { stat: 'maxQuizStreak', threshold: 10 } },
   { id: 'category_conqueror', name: 'Category Conqueror',   description: 'Built a contract in every Sanctum category',              emoji: '🏆', icon: 'trophy',         category: 'sanctum', rarity: 'legendary', xp: 1000, trigger: { custom: 'all_sanctum_categories' } },
+  { id: 'test_runner',        name: 'Test Runner',          description: 'Generated tests for a smart contract',                    emoji: '🧪', icon: 'flask-conical',  category: 'sanctum', rarity: 'uncommon',  xp: 50,   trigger: { custom: 'tests_generated' } },
+  { id: 'mainnet_pioneer',    name: 'Mainnet Pioneer',      description: 'Deployed a contract to NEAR mainnet',                     emoji: '🌍', icon: 'globe',          category: 'sanctum', rarity: 'epic',      xp: 400,  trigger: { custom: 'mainnet_deployed' } },
+  { id: 'optimizer',          name: 'Optimizer',            description: 'Optimized a contract for gas efficiency',                  emoji: '⚡', icon: 'gauge',          category: 'sanctum', rarity: 'uncommon',  xp: 50,   trigger: { custom: 'contract_optimized' } },
+  { id: 'conversationalist',  name: 'Conversationalist',    description: 'Sent 100 messages to Sanctum — the void listens',          emoji: '💬', icon: 'messages-square',category: 'sanctum', rarity: 'uncommon',  xp: 75,   trigger: { stat: 'sanctumMessages', threshold: 100 } },
 
   // ═══════════════════════════════════════════════════════════
   // LEARNING (15)
@@ -381,6 +393,7 @@ export function getDisplayable(unlocked: Set<string>): AchievementDef[] {
 export function countByRarity(unlocked: Set<string>): Record<AchievementRarity, { total: number; unlocked: number }> {
   const result: Record<AchievementRarity, { total: number; unlocked: number }> = {
     common:    { total: 0, unlocked: 0 },
+    uncommon:  { total: 0, unlocked: 0 },
     rare:      { total: 0, unlocked: 0 },
     epic:      { total: 0, unlocked: 0 },
     legendary: { total: 0, unlocked: 0 },

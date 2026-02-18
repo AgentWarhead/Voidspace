@@ -321,6 +321,93 @@ body::before {
 }
 
 /* Confetti falling animation */
+/* ─── Void particle radiate outward ────────────────────────── */
+@keyframes void-particle-fade {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px, 0px), var(--py, 0px)) scale(0); }
+}
+.animate-void-particle {
+  animation: void-particle-fade var(--pd, 1.2s) ease-out forwards;
+}
+
+/* ─── Legendary: particles drift upward ────────────────────── */
+@keyframes void-particle-rise {
+  0%   { opacity: 0.9; transform: translateY(0) translateX(var(--drift, 0px)) scale(1); }
+  100% { opacity: 0;   transform: translateY(-120px) translateX(var(--drift, 0px)) scale(0.3); }
+}
+.animate-void-particle-rise {
+  animation: void-particle-rise var(--pd, 2s) ease-out forwards;
+}
+
+/* ─── Epic: screen-edge shimmer lines ──────────────────────── */
+@keyframes edge-shimmer {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  30%  { opacity: 0.8; }
+  70%  { opacity: 0.8; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+.animate-edge-shimmer {
+  animation: edge-shimmer 1.8s ease-in-out forwards;
+}
+
+/* ─── Legendary: background void flood ─────────────────────── */
+@keyframes void-flood {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.animate-void-flood {
+  animation: void-flood var(--duration, 6s) ease-in-out forwards;
+}
+
+/* ─── Card: materialize from void (legendary) ──────────────── */
+@keyframes materialize-void {
+  0%   { opacity: 0; transform: scale(0.7) translateY(16px); filter: blur(12px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+.animate-materialize-void {
+  animation: materialize-void 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ─── Teal glow pulse (common/uncommon border) ──────────────── */
+@keyframes teal-glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(0,236,151,0.25), 0 0 24px rgba(0,236,151,0.10); }
+  50%       { box-shadow: 0 0 24px rgba(0,236,151,0.50), 0 0 48px rgba(0,236,151,0.20); }
+}
+.animate-teal-glow-pulse {
+  animation: teal-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ─── Rare: teal-purple glow pulse ─────────────────────────── */
+@keyframes rare-glow-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(59,130,246,0.40), 0 0 32px rgba(59,130,246,0.15); }
+  50%       { box-shadow: 0 0 28px rgba(59,130,246,0.65), 0 0 56px rgba(59,130,246,0.25), 0 0 80px rgba(0,236,151,0.10); }
+}
+.animate-rare-glow-pulse {
+  animation: rare-glow-pulse 1.8s ease-in-out infinite;
+}
+
+/* ─── Epic: purple-cosmic glow ──────────────────────────────── */
+@keyframes epic-glow-pulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(168,85,247,0.45), 0 0 48px rgba(168,85,247,0.20); }
+  50%       { box-shadow: 0 0 40px rgba(168,85,247,0.70), 0 0 80px rgba(168,85,247,0.30), 0 0 120px rgba(0,236,151,0.10); }
+}
+.animate-epic-glow-pulse {
+  animation: epic-glow-pulse 1.6s ease-in-out infinite;
+}
+
+/* ─── Legendary: golden-teal glow pulse ─────────────────────── */
+@keyframes legendary-glow-pulse {
+  0%, 100% { box-shadow: 0 0 32px rgba(245,158,11,0.50), 0 0 64px rgba(245,158,11,0.25), 0 0 96px rgba(0,236,151,0.15); }
+  50%       { box-shadow: 0 0 56px rgba(245,158,11,0.80), 0 0 96px rgba(245,158,11,0.40), 0 0 140px rgba(0,236,151,0.25); }
+}
+.animate-legendary-glow-pulse {
+  animation: legendary-glow-pulse 1.4s ease-in-out infinite;
+}
+
+/* ─── Legacy: keep confetti class (used elsewhere) ─────────── */
 @keyframes confetti {
   0% {
     transform: translateY(0) rotate(0deg);
@@ -331,7 +418,6 @@ body::before {
     opacity: 0;
   }
 }
-
 .animate-confetti {
   animation: confetti 3s ease-out forwards;
 }

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Zap, Rocket, Code2 } from 'lucide-react';
-import { ACHIEVEMENTS } from './AchievementPopup';
+import { useAchievementContext } from '@/contexts/AchievementContext';
+import { ACHIEVEMENTS as GLOBAL_ACHIEVEMENTS, getByCategory } from '@/lib/achievements';
 
 // Inline SVG icons
 const ChevronDown = ({ className }: { className?: string }) => (
@@ -38,20 +39,37 @@ const Flame = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Achievement icon map
+// Map global achievement IDs to display emojis (sanctum category subset)
 const ACHIEVEMENT_ICONS: Record<string, string> = {
-  first_message: '💬',
-  first_code: '📝',
-  first_deploy: '🚀',
-  chain_signatures: '🔗',
-  shade_agent: '🤖',
-  speed_demon: '⚡',
-  concept_collector_5: '📚',
-  concept_collector_20: '🧠',
-  quiz_ace: '🎯',
-  security_aware: '🛡️',
-  three_contracts: '🏭',
-  asked_why: '❓',
+  hello_sanctum:      '💬',
+  code_conjurer:      '📝',
+  genesis_deploy:     '🚀',
+  chain_master:       '🔗',
+  agent_smith:        '🤖',
+  speed_demon:        '⚡',
+  concept_collector:  '📚',
+  knowledge_hoarder:  '🧠',
+  quiz_ace:           '🎯',
+  security_minded:    '🛡️',
+  contract_factory:   '🏭',
+  curious_mind:       '❓',
+  conversationalist:  '💬',
+  test_runner:        '🧪',
+  mainnet_pioneer:    '🌍',
+  optimizer:          '⚙️',
+  mass_production:    '🔨',
+  assembly_line:      '⚙️',
+  night_builder:      '🌙',
+  marathon_session:   '⏰',
+  council_awaits:     '👥',
+  council_completionist: '🎭',
+  defi_architect:     '💰',
+  nft_creator:        '🎨',
+  meme_lord:          '🪙',
+  game_designer:      '🎮',
+  intent_weaver:      '🔗',
+  privacy_phantom:    '🔒',
+  category_conqueror: '🏆',
 };
 
 export interface BuilderProgressProps {
@@ -59,7 +77,6 @@ export interface BuilderProgressProps {
   codeGenerations: number;
   deploysCount: number;
   tokensUsed: number;
-  unlockedAchievements: Set<string>;
   conceptsLearned: number;
   quizScore: { correct: number; total: number };
   sessionMinutes?: number;
@@ -80,27 +97,27 @@ function getLevel(xp: number): { level: number; currentXP: number; nextLevelXP: 
   return { level, currentXP: xp - currentLevelXP, nextLevelXP: nextLevelXP - currentLevelXP, progress, title: titles[level - 1] || 'Mythic' };
 }
 
-// Calculate XP from all sources — uses actual achievement XP values
+// Calculate Sanctum session XP from activity (achievement XP handled by global context)
 export function calculateTotalXP(
   messages: number,
   codeGens: number,
   deploys: number,
-  unlockedAchievements: Set<string>,
+  unlockedSanctumAchievements: Set<string>,
   conceptsLearned: number,
   quizCorrect: number,
 ): number {
   // Activity XP
-  const messageXP = messages * 5;      // 5 XP per message
-  const codeXP = codeGens * 25;        // 25 XP per code generation
-  const deployXP = deploys * 100;      // 100 XP per deploy
-  const conceptXP = conceptsLearned * 15; // 15 XP per concept learned
-  const quizXP = quizCorrect * 20;     // 20 XP per correct quiz answer
+  const messageXP = messages * 5;          // 5 XP per message
+  const codeXP = codeGens * 25;            // 25 XP per code generation
+  const deployXP = deploys * 100;          // 100 XP per deploy
+  const conceptXP = conceptsLearned * 15;  // 15 XP per concept learned
+  const quizXP = quizCorrect * 20;         // 20 XP per correct quiz answer
 
-  // Achievement XP — use actual defined values
+  // Achievement XP from global registry (sanctum category only)
+  const sanctumAchievements = getByCategory('sanctum');
   let achievementXP = 0;
-  for (const id of unlockedAchievements) {
-    const ach = ACHIEVEMENTS[id];
-    if (ach) achievementXP += ach.xp;
+  for (const ach of sanctumAchievements) {
+    if (unlockedSanctumAchievements.has(ach.id)) achievementXP += ach.xp;
   }
 
   return messageXP + codeXP + deployXP + conceptXP + quizXP + achievementXP;
@@ -111,19 +128,22 @@ export function BuilderProgress({
   codeGenerations,
   deploysCount,
   tokensUsed,
-  unlockedAchievements,
   conceptsLearned,
   quizScore,
   sessionMinutes = 0,
 }: BuilderProgressProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Use global achievement context instead of local prop
+  const { unlocked: unlockedAchievements } = useAchievementContext();
+
   const xp = calculateTotalXP(messagesCount, codeGenerations, deploysCount, unlockedAchievements, conceptsLearned, quizScore.correct);
   const { level, currentXP, nextLevelXP, progress, title } = getLevel(xp);
 
-  const achievementsList = Object.entries(ACHIEVEMENTS);
-  const unlockedCount = unlockedAchievements.size;
-  const totalAchievements = achievementsList.length;
+  // Show only sanctum-category achievements in this widget
+  const sanctumAchievements = getByCategory('sanctum');
+  const unlockedCount = sanctumAchievements.filter(a => unlockedAchievements.has(a.id)).length;
+  const totalAchievements = sanctumAchievements.length;
 
   return (
     <div className="bg-void-gray/50 border border-border-subtle rounded-xl overflow-hidden">
@@ -215,20 +235,20 @@ export function BuilderProgress({
               Achievements ({unlockedCount}/{totalAchievements})
             </div>
             <div className="flex flex-wrap gap-1">
-              {achievementsList.map(([id, ach]) => {
-                const unlocked = unlockedAchievements.has(id);
-                const icon = ACHIEVEMENT_ICONS[id] || '⭐';
+              {sanctumAchievements.map((ach) => {
+                const isUnlocked = unlockedAchievements.has(ach.id);
+                const icon = ACHIEVEMENT_ICONS[ach.id] || ach.emoji || '⭐';
                 return (
                   <div
-                    key={id}
+                    key={ach.id}
                     className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all ${
-                      unlocked
+                      isUnlocked
                         ? 'bg-gradient-to-br from-purple-500/20 to-near-green/20 border border-near-green/30'
                         : 'bg-void-black/50 border border-border-subtle opacity-30 grayscale'
                     }`}
-                    title={unlocked ? `${ach.title}: ${ach.description} (+${ach.xp} XP)` : '???'}
+                    title={isUnlocked ? `${ach.name}: ${ach.description} (+${ach.xp} XP)` : '???'}
                   >
-                    {unlocked ? icon : '?'}
+                    {isUnlocked ? icon : '?'}
                   </div>
                 );
               })}

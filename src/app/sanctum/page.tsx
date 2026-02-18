@@ -14,7 +14,7 @@ import { TypewriterCode } from './components/TypewriterCode';
 // TokenCounter removed
 import { SanctumVisualization } from './components/SanctumVisualization';
 import { GlassPanel } from './components/GlassPanel';
-import { AchievementPopup } from './components/AchievementPopup';
+// AchievementPopup removed — global AchievementToastLayer (in Providers) handles all popups
 import { DeployCelebration } from './components/DeployCelebration';
 import { TaskProgressInline } from './components/TaskProgressInline';
 import { ShareContract } from './components/ShareContract';
@@ -270,12 +270,6 @@ function SanctumPageInner() {
     <div className="min-h-screen bg-void-black relative overflow-hidden">
       {/* Animated particle background */}
       <ParticleBackground />
-
-      {/* Achievement popup */}
-      <AchievementPopup
-        achievement={state.currentAchievement}
-        onClose={() => dispatch({ type: 'SET_CURRENT_ACHIEVEMENT', payload: null })}
-      />
 
       {/* Deploy celebration with confetti */}
       <DeployCelebration
@@ -713,7 +707,6 @@ function SanctumPageInner() {
                     codeGenerations={state.contractsBuilt}
                     deploysCount={state.deployCount}
                     tokensUsed={state.tokensUsed}
-                    unlockedAchievements={state.unlockedAchievements}
                     conceptsLearned={state.conceptsLearned.length}
                     quizScore={state.quizScore}
                     sessionMinutes={state.sessionStartTime ? Math.floor((Date.now() - state.sessionStartTime) / 60000) : 0}
