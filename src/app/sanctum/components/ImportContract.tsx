@@ -1,20 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { Link2, Code2, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Link2, Code2, ArrowRight, Loader2, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface ImportContractProps {
   onImport: (data: ImportedContract) => void;
   onCancel: () => void;
+  /** Optional: called when user wants to start a chat with a prompt (e.g. Solidity conversion) */
+  onStartChat?: (prompt: string) => void;
 }
 
 export interface ImportedContract {
-  source: 'address' | 'code' | 'file';
+  source: 'address' | 'code' | 'file' | 'solidity-convert';
   address?: string;
   code?: string;
   name: string;
   methods: ExtractedMethod[];
   network?: 'testnet' | 'mainnet';
+  solidityCode?: string;
+  conversionPrompt?: string;
 }
 
 export interface ExtractedMethod {
@@ -23,7 +27,7 @@ export interface ExtractedMethod {
   args: string[];
 }
 
-type ImportMode = 'address' | 'code' | 'file';
+type ImportMode = 'address' | 'code' | 'file' | 'solidity';
 
 // NEAR RPC helpers
 const NEAR_RPC_URLS: Record<string, string> = {
@@ -58,6 +62,18 @@ const INTERNAL_METHODS: Record<string, true> = {
 
 // View method heuristics — names that typically indicate read-only methods
 const VIEW_METHOD_PREFIXES = ['get_', 'view_', 'is_', 'has_', 'check_', 'ft_balance_of', 'ft_total_supply', 'ft_metadata', 'nft_token', 'nft_tokens', 'nft_supply', 'nft_metadata', 'storage_balance_of'];
+
+// Solidity → NEAR key differences guide
+const SOLIDITY_NEAR_DIFFS = [
+  { solidity: 'mapping(K => V)', near: 'LookupMap<K, V>', color: 'text-amber-400' },
+  { solidity: 'msg.sender', near: 'env::predecessor_account_id()', color: 'text-cyan-400' },
+  { solidity: 'payable', near: '#[payable]', color: 'text-green-400' },
+  { solidity: 'require(cond)', near: 'assert!(cond)', color: 'text-purple-400' },
+  { solidity: 'emit Event()', near: 'env::log_str()', color: 'text-pink-400' },
+  { solidity: 'address', near: 'AccountId', color: 'text-blue-400' },
+  { solidity: 'uint256', near: 'u128 / U128', color: 'text-orange-400' },
+  { solidity: 'constructor()', near: '#[init] fn new()', color: 'text-near-green' },
+];
 
 async function nearRpcCall(network: string, method: string, params: Record<string, unknown>): Promise<unknown> {
   const rpcUrl = NEAR_RPC_URLS[network];
@@ -136,13 +152,11 @@ function extractMethodNamesFromWasm(base64Code: string): string[] {
     const binaryStr = atob(base64Code);
     
     // Search for readable ASCII strings that look like method names
-    // WASM exports contain method names as readable strings
     const methodNames: string[] = [];
     let currentStr = '';
     
     for (let i = 0; i < binaryStr.length; i++) {
       const charCode = binaryStr.charCodeAt(i);
-      // Printable ASCII range for method names: letters, digits, underscore
       if ((charCode >= 97 && charCode <= 122) || // a-z
           (charCode >= 65 && charCode <= 90) ||  // A-Z
           (charCode >= 48 && charCode <= 57) ||  // 0-9
@@ -150,7 +164,6 @@ function extractMethodNamesFromWasm(base64Code: string): string[] {
         currentStr += binaryStr[i];
       } else {
         if (currentStr.length >= 3 && currentStr.length <= 64) {
-          // Filter: must contain at least one lowercase letter (not just constants)
           if (/[a-z]/.test(currentStr) && !INTERNAL_METHODS[currentStr]) {
             methodNames.push(currentStr);
           }
@@ -159,16 +172,11 @@ function extractMethodNamesFromWasm(base64Code: string): string[] {
       }
     }
     
-    // Deduplicate and filter for likely method names
     const unique = Array.from(new Set(methodNames));
     
-    // Heuristic: keep names that look like Rust/NEAR method names
     return unique.filter(name => {
-      // Must start with a letter or underscore
       if (!/^[a-z_]/.test(name)) return false;
-      // Must be snake_case or simple name
       if (!/^[a-z][a-z0-9_]*$/.test(name)) return false;
-      // Filter out likely internal strings
       if (name.startsWith('rust_') || name.startsWith('wasm_') || name.startsWith('alloc_')) return false;
       if (name === 'main' || name === 'abort' || name === 'handle_result') return false;
       return true;
@@ -195,17 +203,18 @@ async function fetchContractMethodsFromWasm(network: string, accountId: string):
     return methodNames.map(name => ({
       name,
       isView: VIEW_METHOD_PREFIXES.some(prefix => name.startsWith(prefix)),
-      args: [], // Can't determine args from WASM alone
+      args: [],
     }));
   } catch {
     return null;
   }
 }
 
-export function ImportContract({ onImport, onCancel }: ImportContractProps) {
+export function ImportContract({ onImport, onCancel, onStartChat }: ImportContractProps) {
   const [mode, setMode] = useState<ImportMode>('address');
   const [address, setAddress] = useState('');
   const [code, setCode] = useState('');
+  const [solidityCode, setSolidityCode] = useState('');
   const [network, setNetwork] = useState<'testnet' | 'mainnet'>('testnet');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState<string>('');
@@ -225,6 +234,29 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
     reader.readAsText(file);
   };
 
+  const handleSolidityConvert = () => {
+    if (!solidityCode.trim()) {
+      setError('Please paste your Solidity contract code');
+      return;
+    }
+
+    const prompt = `I have this Solidity smart contract and I want to convert it to NEAR/Rust. Here's the Solidity code:\n\n\`\`\`solidity\n${solidityCode}\n\`\`\`\n\nPlease convert this to a NEAR smart contract using near-sdk-rs. Show me a side-by-side comparison explaining every key difference between the Solidity and Rust/NEAR versions.`;
+
+    if (onStartChat) {
+      onStartChat(prompt);
+    } else {
+      // Fallback: pass as a special import
+      const result: ImportedContract = {
+        source: 'solidity-convert',
+        solidityCode,
+        conversionPrompt: prompt,
+        name: 'solidity-conversion',
+        methods: [],
+      };
+      onImport(result);
+    }
+  };
+
   const analyzeContract = async () => {
     setIsAnalyzing(true);
     setError(null);
@@ -232,29 +264,24 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
 
     try {
       if (mode === 'address') {
-        // Validate address format
         if (!address.includes('.near') && !address.includes('.testnet')) {
           throw new Error('Please enter a valid NEAR contract address (e.g., contract.testnet)');
         }
 
-        // Step 1: Validate the account exists on-chain
         setLoadingStatus('Checking account on-chain...');
         const accountExists = await validateAccount(network, address);
         if (!accountExists) {
           throw new Error(`Account "${address}" not found on ${network}. Check the address and network.`);
         }
 
-        // Step 2: Try to fetch ABI
         setLoadingStatus('Looking for contract ABI...');
         let methods = await fetchContractAbi(network, address);
         
-        // Step 3: Fallback — extract from WASM binary
         if (!methods) {
           setLoadingStatus('No ABI found. Analyzing WASM binary for methods...');
           methods = await fetchContractMethodsFromWasm(network, address);
         }
 
-        // Step 4: If all failed, show helpful message
         if (!methods || methods.length === 0) {
           throw new Error(
             "Couldn't auto-detect methods from on-chain data. This contract may not export ABI metadata. " +
@@ -273,7 +300,6 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
         setAnalysisResult(result);
         
       } else {
-        // Analyze pasted/uploaded code
         if (!code.trim()) {
           throw new Error('Please paste or upload your contract code');
         }
@@ -288,7 +314,6 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
           methods,
         };
 
-        // Simulate analysis
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         setAnalysisResult(result);
@@ -317,38 +342,39 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
       </div>
 
       {/* Mode Selection */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
         <button
-          onClick={() => { setMode('address'); setAnalysisResult(null); }}
-          className={`flex-1 py-3 px-4 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-2 ${
+          onClick={() => { setMode('address'); setAnalysisResult(null); setError(null); }}
+          className={`py-3 px-3 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-1.5 text-sm ${
             mode === 'address'
               ? 'bg-void-purple/20 border-void-purple/50 text-white'
               : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-void-purple/40'
           }`}
         >
-          <Link2 className="w-4 h-4" />
-          Contract Address
+          <Link2 className="w-4 h-4 flex-shrink-0" />
+          <span className="hidden sm:inline">Contract</span> Address
         </button>
         <button
-          onClick={() => { setMode('code'); setAnalysisResult(null); }}
-          className={`flex-1 py-3 px-4 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-2 ${
+          onClick={() => { setMode('code'); setAnalysisResult(null); setError(null); }}
+          className={`py-3 px-3 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-1.5 text-sm ${
             mode === 'code'
               ? 'bg-void-purple/20 border-void-purple/50 text-white'
               : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-void-purple/40'
           }`}
         >
-          <Code2 className="w-4 h-4" />
-          Paste Code
+          <Code2 className="w-4 h-4 flex-shrink-0" />
+          Paste <span className="hidden sm:inline">NEAR</span> Code
         </button>
         <label
-          className={`flex-1 py-3 px-4 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`py-3 px-3 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-1.5 text-sm cursor-pointer ${
             mode === 'file'
               ? 'bg-void-purple/20 border-void-purple/50 text-white'
               : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-void-purple/40'
           }`}
+          onClick={() => setMode('file')}
         >
           <span>📁</span>
-          Upload File
+          Upload <span className="hidden sm:inline">File</span>
           <input
             type="file"
             accept=".rs,.txt"
@@ -356,9 +382,20 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
             className="hidden"
           />
         </label>
+        <button
+          onClick={() => { setMode('solidity'); setAnalysisResult(null); setError(null); }}
+          className={`py-3 px-3 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-1.5 text-sm ${
+            mode === 'solidity'
+              ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+              : 'bg-void-black/30 border-void-purple/20 text-gray-400 hover:border-amber-500/30'
+          }`}
+        >
+          <span>🔄</span>
+          <span className="hidden sm:inline">Convert from</span> Solidity
+        </button>
       </div>
 
-      {/* Input Area */}
+      {/* ── Address Input ── */}
       {mode === 'address' && (
         <div className="space-y-4">
           <div>
@@ -399,10 +436,11 @@ export function ImportContract({ onImport, onCancel }: ImportContractProps) {
         </div>
       )}
 
+      {/* ── Paste NEAR/Rust Code ── */}
       {(mode === 'code' || mode === 'file') && (
         <div>
           <label className="text-sm text-gray-400 mb-2 block">
-            {mode === 'file' ? 'Uploaded Code' : 'Contract Code (Rust)'}
+            {mode === 'file' ? 'Uploaded Code' : 'Contract Code (Rust / NEAR)'}
           </label>
           <textarea
             value={code}
@@ -421,6 +459,73 @@ pub struct Contract {
           />
           <p className="text-xs text-gray-500 mt-2">
             We&apos;ll analyze your code to extract public methods and generate matching UI components
+          </p>
+        </div>
+      )}
+
+      {/* ── Convert from Solidity ── */}
+      {mode === 'solidity' && (
+        <div className="space-y-4">
+          {/* Header banner */}
+          <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+            <span className="text-2xl">🔄</span>
+            <div>
+              <p className="text-sm font-medium text-amber-300">Solidity → NEAR Conversion</p>
+              <p className="text-xs text-gray-400">Paste your Solidity contract and Sanctum will guide the conversion</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-400 mb-2 block">Solidity Contract Code</label>
+            <textarea
+              value={solidityCode}
+              onChange={(e) => setSolidityCode(e.target.value)}
+              placeholder="// Paste your Solidity contract here...
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MyToken {
+    mapping(address => uint256) public balances;
+    
+    function transfer(address to, uint256 amount) public {
+        require(balances[msg.sender] >= amount, 'Insufficient balance');
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+    }
+}"
+              className="w-full h-48 sm:h-56 bg-void-black/50 border border-amber-500/20 rounded-xl px-3 sm:px-4 py-3 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-amber-500/40 font-mono text-sm resize-none"
+            />
+          </div>
+
+          {/* Key differences guide */}
+          <div className="bg-void-black/40 border border-void-purple/20 rounded-xl p-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>💡</span> Key Translation Guide
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {SOLIDITY_NEAR_DIFFS.map((diff, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <code className="text-gray-500 font-mono shrink-0">{diff.solidity}</code>
+                  <span className="text-gray-600">→</span>
+                  <code className={`font-mono ${diff.color} shrink-0`}>{diff.near}</code>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Convert button */}
+          <button
+            onClick={handleSolidityConvert}
+            disabled={!solidityCode.trim()}
+            className="w-full py-3 min-h-[44px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 hover:border-amber-500/50 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 font-medium"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Convert to NEAR — Start Conversation
+          </button>
+
+          <p className="text-xs text-gray-600 text-center">
+            Sanctum will explain each conversion step and help you understand the differences
           </p>
         </div>
       )}
@@ -471,44 +576,58 @@ pub struct Contract {
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
-        <button
-          onClick={onCancel}
-          className="min-h-[44px] px-6 py-3 text-gray-400 hover:text-white transition-colors"
-        >
-          Cancel
-        </button>
-        
-        {!analysisResult ? (
+      {/* Actions — only show for non-solidity modes */}
+      {mode !== 'solidity' && (
+        <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
           <button
-            onClick={analyzeContract}
-            disabled={isAnalyzing || (mode === 'address' ? !address : !code)}
-            className="flex-1 min-h-[44px] py-3 bg-void-purple hover:bg-void-purple/90 disabled:bg-void-purple/50 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
+            onClick={onCancel}
+            className="min-h-[44px] px-6 py-3 text-gray-400 hover:text-white transition-colors"
           >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="truncate">{loadingStatus || 'Analyzing...'}</span>
-              </>
-            ) : (
-              <>
-                Analyze Contract
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
+            Cancel
           </button>
-        ) : (
+          
+          {!analysisResult ? (
+            <button
+              onClick={analyzeContract}
+              disabled={isAnalyzing || (mode === 'address' ? !address : !code)}
+              className="flex-1 min-h-[44px] py-3 bg-void-purple hover:bg-void-purple/90 disabled:bg-void-purple/50 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="truncate">{loadingStatus || 'Analyzing...'}</span>
+                </>
+              ) : (
+                <>
+                  Analyze Contract
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleContinue}
+              className="flex-1 min-h-[44px] py-3 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <span className="hidden sm:inline">Continue to Webapp Builder</span>
+              <span className="sm:hidden">Continue</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Cancel for solidity mode */}
+      {mode === 'solidity' && (
+        <div className="mt-3 text-center">
           <button
-            onClick={handleContinue}
-            className="flex-1 min-h-[44px] py-3 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+            onClick={onCancel}
+            className="min-h-[44px] px-6 py-3 text-gray-500 hover:text-gray-300 transition-colors text-sm"
           >
-            <span className="hidden sm:inline">Continue to Webapp Builder</span>
-            <span className="sm:hidden">Continue</span>
-            <ArrowRight className="w-4 h-4" />
+            Cancel
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -517,7 +636,6 @@ pub struct Contract {
 function extractMethods(code: string): ExtractedMethod[] {
   const methods: ExtractedMethod[] = [];
   
-  // Match pub fn declarations
   const fnRegex = /pub fn (\w+)\s*\(\s*(?:&(?:mut\s+)?self)?(?:,?\s*)?([^)]*)\)/g;
   let match;
   
@@ -525,10 +643,8 @@ function extractMethods(code: string): ExtractedMethod[] {
     const name = match[1];
     const argsStr = match[2].trim();
     
-    // Skip init/new methods
     if (name === 'new' || name === 'init' || name === 'default') continue;
     
-    // Parse arguments
     const args: string[] = [];
     if (argsStr) {
       const argParts = argsStr.split(',').map(a => a.trim()).filter(Boolean);
@@ -540,7 +656,6 @@ function extractMethods(code: string): ExtractedMethod[] {
       }
     }
     
-    // Determine if view method (no &mut self)
     const contextStart = Math.max(0, match.index - 100);
     const contextEnd = match.index + match[0].length + 50;
     const context = code.slice(contextStart, contextEnd);
@@ -554,7 +669,6 @@ function extractMethods(code: string): ExtractedMethod[] {
 
 // Try to extract contract name from code
 function extractContractName(code: string): string | null {
-  // Look for struct with #[near_bindgen]
   const structMatch = code.match(/#\[near_bindgen\]\s*(?:#\[.*?\]\s*)*(?:pub\s+)?struct\s+(\w+)/);
   if (structMatch) {
     return structMatch[1].toLowerCase().replace(/([A-Z])/g, '-$1').replace(/^-/, '');

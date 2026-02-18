@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import { X, Sparkles, Zap, Code, Rocket, Star } from 'lucide-react';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Achievement Types
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface Achievement {
   id: string;
   title: string;
@@ -12,13 +16,163 @@ export interface Achievement {
   xp: number;
 }
 
+/** New-style Sanctum achievement with emoji (for SANCTUM_ACHIEVEMENTS) */
+export interface SanctumAchievement {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  xp: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SANCTUM_ACHIEVEMENTS — 15 achievements exportable by other components
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const SANCTUM_ACHIEVEMENTS: SanctumAchievement[] = [
+  {
+    id: 'first-contract',
+    name: 'First Contract',
+    emoji: '🏗️',
+    description: 'Generate your first smart contract',
+    xp: 50,
+  },
+  {
+    id: 'test-runner',
+    name: 'Test Runner',
+    emoji: '🧪',
+    description: 'Generate tests for a contract',
+    xp: 30,
+  },
+  {
+    id: 'deployer',
+    name: 'Deployer',
+    emoji: '🚀',
+    description: 'Deploy a contract to testnet',
+    xp: 100,
+  },
+  {
+    id: 'mainnet-pioneer',
+    name: 'Mainnet Pioneer',
+    emoji: '🌍',
+    description: 'Deploy to mainnet',
+    xp: 200,
+  },
+  {
+    id: 'security-conscious',
+    name: 'Security Conscious',
+    emoji: '🛡️',
+    description: 'Run your first audit',
+    xp: 50,
+  },
+  {
+    id: 'optimizer',
+    name: 'Optimizer',
+    emoji: '⚡',
+    description: 'Optimize a contract for gas efficiency',
+    xp: 50,
+  },
+  {
+    id: 'scholar',
+    name: 'Scholar',
+    emoji: '🎓',
+    description: 'Complete 10 Learn mode sessions',
+    xp: 150,
+  },
+  {
+    id: 'rustacean',
+    name: 'Rustacean',
+    emoji: '🦀',
+    description: 'Build 5 different contract types',
+    xp: 200,
+  },
+  {
+    id: 'cross-chain',
+    name: 'Cross-Chain',
+    emoji: '🔗',
+    description: 'Convert a Solidity contract to NEAR',
+    xp: 75,
+  },
+  {
+    id: 'social',
+    name: 'Social Builder',
+    emoji: '👥',
+    description: 'Share a contract',
+    xp: 25,
+  },
+  {
+    id: 'master-builder',
+    name: 'Master Builder',
+    emoji: '🏆',
+    description: 'Deploy 10 contracts',
+    xp: 500,
+  },
+  {
+    id: 'night-owl',
+    name: 'Night Owl',
+    emoji: '🦉',
+    description: 'Build between midnight and 5 AM',
+    xp: 25,
+  },
+  {
+    id: 'speed-demon',
+    name: 'Speed Demon',
+    emoji: '💨',
+    description: 'Generate a contract in under 30 seconds',
+    xp: 50,
+  },
+  {
+    id: 'conversationalist',
+    name: 'Conversationalist',
+    emoji: '💬',
+    description: 'Send 100 messages in the Sanctum',
+    xp: 75,
+  },
+  {
+    id: 'all-personas',
+    name: 'Council Complete',
+    emoji: '👑',
+    description: 'Use all 8 Sanctum personas',
+    xp: 150,
+  },
+];
+
+/** Look up a SanctumAchievement by id */
+export function getSanctumAchievement(id: string): SanctumAchievement | undefined {
+  return SANCTUM_ACHIEVEMENTS.find(a => a.id === id);
+}
+
+/** Convert a SanctumAchievement to the legacy Achievement format for the popup */
+function sanctumToLegacy(sa: SanctumAchievement): Achievement {
+  // Map XP to rarity
+  let rarity: Achievement['rarity'] = 'common';
+  if (sa.xp >= 500) rarity = 'legendary';
+  else if (sa.xp >= 150) rarity = 'epic';
+  else if (sa.xp >= 75) rarity = 'rare';
+
+  return {
+    id: sa.id,
+    title: sa.name,
+    description: sa.description,
+    icon: 'sparkles',
+    rarity,
+    xp: sa.xp,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Popup Component
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface AchievementPopupProps {
   achievement: Achievement | null;
+  /** Optional: display a SanctumAchievement by id instead of a legacy Achievement */
+  sanctumAchievementId?: string;
   onClose: () => void;
 }
 
 const ICONS = {
-  trophy: Star, // Using star as fallback
+  trophy: Star,
   sparkles: Sparkles,
   zap: Zap,
   code: Code,
@@ -32,43 +186,54 @@ const RARITY_STYLES = {
     border: 'border-slate-500',
     glow: 'shadow-slate-500/30',
     text: 'text-slate-200',
+    label: 'Common',
   },
   rare: {
     bg: 'from-blue-600/90 to-blue-700/90',
     border: 'border-blue-400',
     glow: 'shadow-blue-500/50',
     text: 'text-blue-200',
+    label: 'Rare',
   },
   epic: {
     bg: 'from-purple-600/90 to-purple-700/90',
     border: 'border-purple-400',
     glow: 'shadow-purple-500/50',
     text: 'text-purple-200',
+    label: 'Epic',
   },
   legendary: {
     bg: 'from-amber-500/90 to-orange-600/90',
     border: 'border-amber-400',
     glow: 'shadow-amber-500/50',
     text: 'text-amber-100',
+    label: 'Legendary',
   },
 };
 
-export function AchievementPopup({ achievement, onClose }: AchievementPopupProps) {
+export function AchievementPopup({ achievement: achievementProp, sanctumAchievementId, onClose }: AchievementPopupProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Resolve which achievement to show
+  const achievement = achievementProp
+    ?? (sanctumAchievementId ? sanctumToLegacy(getSanctumAchievement(sanctumAchievementId) ?? { id: '', name: 'Unknown', emoji: '🏆', description: '', xp: 0 }) : null);
+
+  // Find matching Sanctum achievement for emoji display
+  const sanctumAch = achievement
+    ? SANCTUM_ACHIEVEMENTS.find(a => a.id === achievement.id)
+    : undefined;
 
   useEffect(() => {
     if (achievement) {
       setIsVisible(true);
       setShowConfetti(true);
 
-      // Auto-close after 5 seconds
       const timer = setTimeout(() => {
         setIsVisible(false);
         setTimeout(onClose, 300);
       }, 5000);
 
-      // Hide confetti after 2 seconds
       const confettiTimer = setTimeout(() => setShowConfetti(false), 2000);
 
       return () => {
@@ -134,30 +299,37 @@ export function AchievementPopup({ achievement, onClose }: AchievementPopupProps
 
           {/* Header */}
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center ${
-              achievement.rarity === 'legendary' ? 'animate-pulse' : ''
-            }`}>
-              <IconComponent className={`w-6 h-6 ${styles.text}`} />
+            <div
+              className={`w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 ${
+                achievement.rarity === 'legendary' ? 'animate-pulse' : ''
+              }`}
+            >
+              {/* Show emoji if available, otherwise icon */}
+              {sanctumAch ? (
+                <span className="text-2xl">{sanctumAch.emoji}</span>
+              ) : (
+                <IconComponent className={`w-6 h-6 ${styles.text}`} />
+              )}
             </div>
-            <div>
+            <div className="min-w-0 pr-8">
               <p className="text-xs uppercase tracking-wider text-white/60 font-medium">
                 🏆 Achievement Unlocked!
               </p>
-              <h3 className={`text-lg font-bold ${styles.text}`}>
+              <h3 className={`text-base sm:text-lg font-bold ${styles.text} truncate`}>
                 {achievement.title}
               </h3>
             </div>
           </div>
 
           {/* Description */}
-          <p className="mt-2 text-sm text-white/80">
+          <p className="mt-2 text-sm text-white/80 leading-relaxed">
             {achievement.description}
           </p>
 
-          {/* XP reward */}
+          {/* XP reward + rarity */}
           <div className="mt-3 flex items-center justify-between">
-            <span className={`text-xs uppercase tracking-wider ${styles.text}`}>
-              {achievement.rarity}
+            <span className={`text-xs uppercase tracking-wider font-medium ${styles.text}`}>
+              {styles.label}
             </span>
             <span className="flex items-center gap-1 text-sm font-bold text-near-green">
               <Sparkles className="w-4 h-4" />
@@ -165,7 +337,7 @@ export function AchievementPopup({ achievement, onClose }: AchievementPopupProps
             </span>
           </div>
 
-          {/* Animated border */}
+          {/* Animated shimmer for legendary */}
           {achievement.rarity === 'legendary' && (
             <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
               <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -177,7 +349,10 @@ export function AchievementPopup({ achievement, onClose }: AchievementPopupProps
   );
 }
 
-// Predefined achievements
+// ─────────────────────────────────────────────────────────────────────────────
+// Predefined legacy achievements (kept for backward compatibility)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const ACHIEVEMENTS: Record<string, Achievement> = {
   first_message: {
     id: 'first_message',
