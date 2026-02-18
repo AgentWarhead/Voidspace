@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props) {
       card: 'summary_large_image',
       title: `${category.name} — NEAR Ecosystem | Voidspace`,
       description: category.description || `${category.name} projects and opportunities on NEAR Protocol.`,
-      creator: '@VoidSpaceNear',
+      creator: '@VoidSpaceIO',
     },
   };
 }

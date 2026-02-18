@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Privacy Policy — Voidspace',
     description: 'Minimal data collection, NEAR wallet auth, transparent practices. How we protect your data.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 
@@ -121,8 +121,8 @@ export default function PrivacyPage() {
             team@voidspace.io
           </a>{' '}
           or contact us on X at{' '}
-          <a href="https://x.com/voidspacenear" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
-            @VoidSpaceNear
+          <a href="https://x.com/VoidSpaceIO" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
+            @VoidSpaceIO
           </a>.
         </p>
       </Section>

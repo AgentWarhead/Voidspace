@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: 'Solana vs NEAR — Honest Developer Comparison | Voidspace',
     description:
       'Fair comparison of Solana and NEAR Protocol for blockchain developers.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

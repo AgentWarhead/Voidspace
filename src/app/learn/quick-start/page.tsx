@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Quick Start — First NEAR Transaction in 3 Minutes | Voidspace',
     description: 'Hands-on walkthrough: create a wallet, get tokens, send your first transaction. No code required.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

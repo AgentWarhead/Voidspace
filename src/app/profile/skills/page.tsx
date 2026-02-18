@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Skill Constellation — NEAR Learning Progress | Voidspace',
     description: 'Track your progress across Explorer, Builder, Hacker, and Founder tracks.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

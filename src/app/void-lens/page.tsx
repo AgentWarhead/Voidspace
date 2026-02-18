@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Void Lens — AI Wallet Intelligence for NEAR Protocol | Voidspace',
     description: 'Scan any NEAR wallet in 60 seconds. Reputation scoring, DeFi tracking, security profiling — free.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

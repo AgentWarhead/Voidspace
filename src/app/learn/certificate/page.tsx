@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Earn Your NEAR Certification | Voidspace',
     description: 'Complete learning tracks and earn shareable certificates for Explorer, Builder, Hacker, or Founder.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

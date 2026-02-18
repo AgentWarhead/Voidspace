@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: 'Learn Rust for Blockchain — Smart Contract Development | Voidspace',
     description:
       'Chain-agnostic Rust curriculum covering NEAR, Solana, Cosmos, and Polkadot. Free with code examples.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

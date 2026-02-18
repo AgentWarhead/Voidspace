@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Constellation Map — NEAR Wallet Relationships | Voidspace',
     description: 'Trace wallet connections and transaction flows on NEAR Protocol. Interactive graph with filters and export.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

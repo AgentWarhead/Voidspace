@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Acceptable Use Policy — Voidspace',
     description: 'Rules for responsible use of Voidspace — no malicious contracts, no platform abuse.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 
@@ -108,8 +108,8 @@ export default function AcceptableUsePage() {
             team@voidspace.io
           </a>{' '}
           or report it to us on X at{' '}
-          <a href="https://x.com/voidspacenear" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
-            @VoidSpaceNear
+          <a href="https://x.com/VoidSpaceIO" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
+            @VoidSpaceIO
           </a>.
           We take reports seriously and will investigate promptly.
         </p>

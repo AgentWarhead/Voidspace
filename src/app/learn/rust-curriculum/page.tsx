@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Rust Smart Contract Curriculum — Free Course | Voidspace',
     description:
       'Free structured course from zero to Rust smart contract deployment on NEAR.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

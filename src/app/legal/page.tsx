@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Legal — Voidspace',
     description: 'Terms, Privacy, Disclaimer, Cookies, and Acceptable Use policies for Voidspace.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

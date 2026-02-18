@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: 'Voidspace — AI-Native Intelligence & Builder Platform for NEAR',
     description: 'Find gaps, build smart contracts, and ship dApps on NEAR. AI-powered ecosystem scanner, builder studio, and free developer education.',
     images: ['/twitter-image.jpg'],
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
   robots: {
     index: true,

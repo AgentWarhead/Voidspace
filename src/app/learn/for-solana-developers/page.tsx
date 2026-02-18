@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: 'NEAR for Solana Developers — Your Rust Skills Already Work Here | Voidspace',
     description:
       'Solana → NEAR fast-track: concept translator, side-by-side code, first contract in 10 minutes.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

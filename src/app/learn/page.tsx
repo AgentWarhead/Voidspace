@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     title: 'Learn NEAR Protocol — Free Rust & Smart Contract Course | Voidspace',
     description:
       'Master Rust and ship smart contracts on NEAR. 66 free modules — AI-powered, self-paced.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

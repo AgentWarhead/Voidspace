@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Disclaimer — Voidspace',
     description: 'Important limitations and risk disclosures for Voidspace. Not financial advice.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

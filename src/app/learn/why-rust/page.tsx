@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Why Rust for Blockchain? — Smart Contract Development | Voidspace',
     description:
       'Why Rust is the language of secure smart contracts on NEAR Protocol.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

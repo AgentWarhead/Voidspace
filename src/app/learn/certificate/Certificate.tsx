@@ -191,7 +191,7 @@ function CertificateCard({
   const certId = useMemo(() => isEarned ? generateCertId(cert.track, userName) : '', [isEarned, cert.track, userName]);
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  const shareText = `I earned the ${cert.title} certificate on @VoidSpaceNear! 🎉\n\nCompleted ${cert.moduleCount} modules and earned ${cert.xpTotal} XP.\n\nhttps://voidspace.io/learn/certificate`;
+  const shareText = `I earned the ${cert.title} certificate on @VoidSpaceIO! 🎉\n\nCompleted ${cert.moduleCount} modules and earned ${cert.xpTotal} XP.\n\nhttps://voidspace.io/learn/certificate`;
 
   const handleShare = () => {
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;

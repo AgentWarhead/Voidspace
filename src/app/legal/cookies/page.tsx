@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Cookie Policy — Voidspace',
     description: 'Minimal cookies for analytics and essential functionality. Manage your preferences.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

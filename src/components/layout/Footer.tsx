@@ -81,7 +81,7 @@ export function Footer() {
               team@voidspace.io
             </a>
             <a
-              href="https://x.com/voidspacenear"
+              href="https://x.com/VoidSpaceIO"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-muted hover:text-text-secondary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-[0.97]"

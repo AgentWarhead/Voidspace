@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Terms of Service — Voidspace',
     description: 'Terms and conditions for using Voidspace — NEAR Protocol ecosystem intelligence platform.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 
@@ -162,8 +162,8 @@ export default function TermsPage() {
             team@voidspace.io
           </a>{' '}
           or reach us on X at{' '}
-          <a href="https://x.com/voidspacenear" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
-            @VoidSpaceNear
+          <a href="https://x.com/VoidSpaceIO" target="_blank" rel="noopener noreferrer" className="text-near-green hover:underline">
+            @VoidSpaceIO
           </a>.
         </p>
       </Section>

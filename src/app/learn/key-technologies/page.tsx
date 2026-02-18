@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'NEAR Key Technologies — Chain Abstraction, Intents & More | Voidspace',
     description:
       'Chain Abstraction, Intents, Chain Signatures — the tech powering NEAR Protocol.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

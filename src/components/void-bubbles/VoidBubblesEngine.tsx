@@ -1814,7 +1814,7 @@ export function VoidBubblesEngine() {
   }, []);
 
   const handleShareX = useCallback(() => {
-    const text = "Exploring the NEAR Protocol ecosystem with @VoidSpaceNear's Void Bubbles! 🫧\n\nReal-time token analytics, AI insights, and whale tracking in one beautiful interface. 🐋\n\n#NEAR #DeFi #Web3";
+    const text = "Exploring the NEAR Protocol ecosystem with @VoidSpaceIO's Void Bubbles! 🫧\n\nReal-time token analytics, AI insights, and whale tracking in one beautiful interface. 🐋\n\n#NEAR #DeFi #Web3";
     const url = "https://voidspace.io";
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
   }, []);

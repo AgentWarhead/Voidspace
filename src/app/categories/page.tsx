@@ -25,7 +25,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'NEAR Ecosystem Categories — Gap Analysis | Voidspace',
     description: 'Browse 20+ categories with real-time gap scoring. Find where NEAR needs builders.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

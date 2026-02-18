@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Set Up Your NEAR Wallet — Getting Started | Voidspace',
     description:
       'Step-by-step guide to setting up your first NEAR wallet on NEAR Protocol.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

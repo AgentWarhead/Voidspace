@@ -28,7 +28,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Search NEAR Ecosystem | Voidspace',
     description: 'Find projects, gaps, and categories across the NEAR Protocol ecosystem.',
-    creator: '@VoidSpaceNear',
+    creator: '@VoidSpaceIO',
   },
 };
 

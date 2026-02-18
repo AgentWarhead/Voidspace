@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props) {
       card: 'summary_large_image',
       title: `${opportunity.title} — NEAR Gap | Voidspace`,
       description: opportunity.description || `NEAR ecosystem gap — analyze and build what's missing.`,
-      creator: '@VoidSpaceNear',
+      creator: '@VoidSpaceIO',
     },
   };
 }
