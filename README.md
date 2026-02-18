@@ -6,7 +6,11 @@
 
 ### 🎬 Watch the Demo
 
-https://github.com/AgentWarhead/Voidspace/releases/download/v1.0-demo/Voidspace.Launch.Video.mp4
+<a href="https://github.com/AgentWarhead/Voidspace/releases/download/v1.0-demo/Voidspace.Launch.Video.mp4">
+  <img src="public/demo-thumbnail.png" alt="Watch Voidspace Demo" width="720"/>
+</a>
+
+<sub>Click to watch the 90-second demo video</sub>
 
 </div>
 
