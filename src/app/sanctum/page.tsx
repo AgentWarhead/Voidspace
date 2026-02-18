@@ -40,7 +40,8 @@ import { VisualMode } from './components/VisualMode';
 import { DownloadButton } from './components/DownloadContract';
 import { SanctumLanding } from './components/SanctumLanding';
 import { SanctumWizard, WizardConfig } from './components/SanctumWizard';
-import { BuilderProgress } from './components/BuilderProgress';
+// BuilderProgress kept for /profile and /learn pages; XPHeaderBar used in Sanctum header
+import { XPHeaderBar } from './components/XPHeaderBar';
 
 // Template slug → starter message mapping
 const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
@@ -590,8 +591,17 @@ function SanctumPageInner() {
                 />
               </div>
 
-              {/* Right: New Session */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Right: XP Bar + New Session */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <XPHeaderBar
+                  messagesCount={state.messageCount}
+                  codeGenerations={state.contractsBuilt}
+                  deploysCount={state.deployCount}
+                  tokensUsed={state.tokensUsed}
+                  conceptsLearned={state.conceptsLearned.length}
+                  quizScore={state.quizScore}
+                  sessionStartTime={state.sessionStartTime}
+                />
                 <button
                   onClick={handleNewSession}
                   className="flex items-center gap-1.5 px-3 py-2 text-sm text-text-muted hover:text-near-green rounded-lg hover:bg-white/[0.06] border border-white/[0.06] hover:border-near-green/20 transition-all"
@@ -628,12 +638,21 @@ function SanctumPageInner() {
                   <RefreshCw className="w-3.5 h-3.5" />
                 </button>
               </div>
-              {/* Bottom row: Mode Selector centered */}
-              <div className="flex justify-center">
+              {/* Bottom row: Mode Selector + compact XP bar */}
+              <div className="flex items-center justify-between gap-3">
                 <ModeSelector
                   mode={state.chatMode}
                   onModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
                   disabled={false}
+                />
+                <XPHeaderBar
+                  messagesCount={state.messageCount}
+                  codeGenerations={state.contractsBuilt}
+                  deploysCount={state.deployCount}
+                  tokensUsed={state.tokensUsed}
+                  conceptsLearned={state.conceptsLearned.length}
+                  quizScore={state.quizScore}
+                  sessionStartTime={state.sessionStartTime}
                 />
               </div>
             </div>
@@ -700,18 +719,7 @@ function SanctumPageInner() {
                   </div>
                 </GlassPanel>
 
-                {/* Builder Progress / XP HUD */}
-                <div className="flex-shrink-0 mt-2">
-                  <BuilderProgress
-                    messagesCount={state.messageCount}
-                    codeGenerations={state.contractsBuilt}
-                    deploysCount={state.deployCount}
-                    tokensUsed={state.tokensUsed}
-                    conceptsLearned={state.conceptsLearned.length}
-                    quizScore={state.quizScore}
-                    sessionStartTime={state.sessionStartTime}
-                  />
-                </div>
+                {/* XP HUD moved to header bar */}
               </div>
 
               {/* Right Panel - Code Preview */}
@@ -883,18 +891,7 @@ function SanctumPageInner() {
                     </div>
                   </GlassPanel>
 
-                  {/* Mobile XP HUD */}
-                  <div className="flex-shrink-0 mt-2">
-                    <BuilderProgress
-                      messagesCount={state.messageCount}
-                      codeGenerations={state.contractsBuilt}
-                      deploysCount={state.deployCount}
-                      tokensUsed={state.tokensUsed}
-                      conceptsLearned={state.conceptsLearned.length}
-                      quizScore={state.quizScore}
-                      sessionStartTime={state.sessionStartTime}
-                    />
-                  </div>
+                  {/* Mobile XP HUD moved to header bar */}
                 </div>
               )}
 
