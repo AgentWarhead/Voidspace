@@ -524,6 +524,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           personaId: currentPersona.id,
           mode: chatMode,
           attachments: userAttachments?.filter(f => f.type.startsWith('image/')),
+          preferredModel: typeof window !== 'undefined' ? localStorage.getItem('sanctum-model-preference') : null,
         }),
         signal: abortControllerRef.current.signal,
       });

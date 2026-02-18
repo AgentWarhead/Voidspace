@@ -1153,19 +1153,13 @@ export async function POST(request: NextRequest) {
     const userTier: SanctumTier = (userSub?.tier as SanctumTier) || 'shade';
     const tierConfig = SANCTUM_TIERS[userTier];
 
-    // Resolve model: check user preference, fall back to tier default
-    let preferredModel: string | null = null;
-    try {
-      const { data: prefData } = await createAdminClient()
-        .from('credit_balances')
-        .select('preferred_model')
-        .eq('user_id', user.userId)
-        .single();
-      preferredModel = prefData?.preferred_model ?? null;
-    } catch {
-      // Column may not exist yet — graceful fallback
-    }
-    const modelId = resolveModel(userTier, preferredModel);
+    // Parse request body early — need preferredModel for model routing
+    const body = await request.json();
+    const { messages, category, personaId, mode: rawMode, preferredModel: clientPreferredModel } = body;
+
+    // Resolve model: client sends preference (from localStorage), validate against tier
+    // No DB lookup needed — preference is client-side
+    const modelId = resolveModel(userTier, clientPreferredModel);
     const costModel = modelId.includes('opus') ? 'opus' : 'sonnet';
 
     // Primary gate: credit balance check
@@ -1199,7 +1193,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Request body too large' }, { status: 413 });
     }
 
-    const { messages, category, personaId, mode: rawMode } = await request.json();
+    // Body already parsed above for model routing
 
     // Validate and default mode
     const mode: BuilderMode = VALID_MODES.includes(rawMode) ? rawMode : 'learn';

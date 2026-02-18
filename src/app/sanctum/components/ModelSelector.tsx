@@ -5,6 +5,8 @@ import { ChevronDown, Cpu, Zap, Brain, Lock, Sparkles } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { SANCTUM_TIERS, type SanctumTier, type AvailableModel } from '@/lib/sanctum-tiers';
 
+const MODEL_PREF_KEY = 'sanctum-model-preference';
+
 interface ModelSelectorProps {
   tier: SanctumTier;
   onModelChange?: (modelId: string) => void;
@@ -14,31 +16,22 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
   const tierConfig = SANCTUM_TIERS[tier];
   const availableModels = tierConfig.availableModels;
   const isFreeTier = tier === 'shade';
-  const [selectedModel, setSelectedModel] = useState<string>(tierConfig.aiModel);
+
+  // Initialize from localStorage (sync, no flash)
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    if (typeof window === 'undefined' || isFreeTier) return tierConfig.aiModel;
+    try {
+      const saved = localStorage.getItem(MODEL_PREF_KEY);
+      if (saved && availableModels.some((m: AvailableModel) => m.id === saved && !m.comingSoon)) {
+        return saved;
+      }
+    } catch { /* ignore */ }
+    return tierConfig.aiModel;
+  });
+
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Load saved preference on mount
-  useEffect(() => {
-    async function loadPreference() {
-      try {
-        const res = await fetch('/api/sanctum/model-preference');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.preferredModel && availableModels.some((m: AvailableModel) => m.id === data.preferredModel && !m.comingSoon)) {
-            setSelectedModel(data.preferredModel);
-          }
-        }
-      } catch {
-        // Silently fail — use default
-      }
-    }
-    if (!isFreeTier) {
-      loadPreference();
-    }
-  }, [tier, isFreeTier, availableModels]);
 
   // Position the dropdown after it renders (measures actual size)
   const positionDropdown = useCallback(() => {
@@ -46,13 +39,13 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     const btnRect = buttonRef.current.getBoundingClientRect();
     const dd = dropdownRef.current;
     const ddHeight = dd.offsetHeight;
-    const ddWidth = Math.min(288, window.innerWidth - 16); // w-72 capped to viewport
+    const ddWidth = Math.min(288, window.innerWidth - 16);
 
     // Default: position above the button, aligned left
     let top = btnRect.top - ddHeight - 4;
     let left = btnRect.left;
 
-    // Clamp horizontal: don't overflow left or right
+    // Clamp horizontal
     if (left < 8) left = 8;
     if (left + ddWidth > window.innerWidth - 8) {
       left = window.innerWidth - ddWidth - 8;
@@ -71,7 +64,6 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
   // Reposition on open, scroll, resize
   useLayoutEffect(() => {
     if (!isOpen) return;
-    // Position once DOM has painted
     requestAnimationFrame(positionDropdown);
 
     const handleUpdate = () => requestAnimationFrame(positionDropdown);
@@ -107,37 +99,20 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen]);
 
-  const handleSelect = async (modelId: string) => {
+  const handleSelect = (modelId: string) => {
     if (modelId === selectedModel) {
       setIsOpen(false);
       return;
     }
 
-    // Optimistic update — switch immediately for responsive UX
-    const previousModel = selectedModel;
+    // Update state + persist to localStorage (instant, no API call)
     setSelectedModel(modelId);
     onModelChange?.(modelId);
     setIsOpen(false);
 
-    // Persist to server in background (non-blocking)
     try {
-      const res = await fetch('/api/sanctum/model-preference', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modelId }),
-      });
-
-      if (!res.ok) {
-        // Server rejected — revert to previous model
-        console.warn('Model preference save failed:', res.status);
-        setSelectedModel(previousModel);
-        onModelChange?.(previousModel);
-      }
-    } catch {
-      // Network error — revert
-      setSelectedModel(previousModel);
-      onModelChange?.(previousModel);
-    }
+      localStorage.setItem(MODEL_PREF_KEY, modelId);
+    } catch { /* ignore */ }
   };
 
   const currentModel = availableModels.find((m: AvailableModel) => m.id === selectedModel) || availableModels[0];
@@ -154,12 +129,12 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     );
   }
 
-  // Portal dropdown — renders on document.body, positioned after measuring
+  // Portal dropdown
   const dropdown = isOpen && typeof document !== 'undefined' ? createPortal(
     <div
       ref={dropdownRef}
       className="fixed z-[9999] rounded-lg border border-white/10 bg-gray-900/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
-      style={{ top: -9999, left: -9999 }} // offscreen until positioned
+      style={{ top: -9999, left: -9999 }}
     >
       <div className="px-3 py-2 border-b border-white/5">
         <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Select AI Model</span>
@@ -221,13 +196,11 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     document.body
   ) : null;
 
-  // Paid tier: interactive toggle
   return (
     <div className="relative">
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        disabled={isLoading}
         className={`
           flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium
           transition-all duration-200 cursor-pointer
@@ -236,7 +209,6 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
             ? 'bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/50'
             : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/50'
           }
-          ${isLoading ? 'opacity-50' : ''}
         `}
       >
         {isOpus ? <Brain className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
