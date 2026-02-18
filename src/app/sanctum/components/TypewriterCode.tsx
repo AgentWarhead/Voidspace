@@ -18,7 +18,9 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [selectedText, setSelectedText] = useState<string | null>(null);
+  // Use a ref (not state) so setting the selection doesn't trigger a re-render,
+  // which would cause dangerouslySetInnerHTML to wipe out the highlight marks.
+  const selectedTextRef = useRef<string | null>(null);
   const containerRef = useRef<HTMLPreElement>(null);
   const codeRef = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -190,7 +192,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     // Clear the browser selection (our marks handle the visual now)
     sel.removeAllRanges();
 
-    setSelectedText(text);
+    selectedTextRef.current = text;
     onSelectionChangeRef.current?.(text);
   }, [showHint, applyHighlightMarks]);
 
@@ -205,12 +207,12 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     if (sel && !sel.isCollapsed) return;
 
     // Clear existing highlight marks and selection state
-    if (selectedText) {
+    if (selectedTextRef.current) {
       clearHighlightMarks();
-      setSelectedText(null);
+      selectedTextRef.current = null;
       onSelectionChangeRef.current?.(null);
     }
-  }, [selectedText, clearHighlightMarks]);
+  }, [clearHighlightMarks]);
 
   // Clear selection state on click outside the wrapper
   useEffect(() => {
@@ -221,7 +223,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
         if (target.closest?.('[data-preserve-selection]')) return;
 
         clearHighlightMarks();
-        setSelectedText(null);
+        selectedTextRef.current = null;
         onSelectionChangeRef.current?.(null);
       }
     };
