@@ -500,8 +500,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
           {/* Step 3: Meet the Council — Epic Neon Card Grid */}
           {step === 'persona' && (
-            <div className="w-full px-3 sm:px-4 py-4 sm:py-6">
-              <div className="max-w-5xl mx-auto flex flex-col gap-3 sm:gap-4">
+            <div className="w-full px-3 sm:px-4 py-2 sm:py-4">
+              <div className="max-w-5xl mx-auto flex flex-col gap-2 sm:gap-3">
               {/* Header */}
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 mb-2 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
@@ -545,7 +545,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
               )}
 
               {/* 4×2 neon card grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {([
                   { id: 'shade',    color: '#8B5CF6', tags: ['Auto-Routes', 'Sees All', 'Full Stack'] },
                   { id: 'oxide',    color: '#F97316', tags: ['Rust', 'NEAR SDK', 'Smart Contracts'] },
@@ -559,7 +559,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   const persona = PERSONA_LIST.find(p => p.id === id)!;
                   const isHovered = hoveredCard === id;
                   const isShade = id === 'shade';
-                  const triggers = SPECIALIST_META[id]?.triggers ?? [];
                   return (
                     <div
                       key={id}
@@ -624,7 +623,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                       )}
 
                       {/* Card body */}
-                      <div className="relative z-10 flex flex-col items-center px-2 pt-5 pb-3 gap-1.5">
+                      <div className="relative z-10 flex flex-col items-center px-2 pt-4 pb-3 gap-1.5">
                         <div style={{ filter: isHovered ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 28px ${color}80)` : `drop-shadow(0 0 8px ${color}80)`, transition: 'filter 0.2s' }}>
                           <span className="text-4xl sm:text-5xl leading-none">{persona.emoji}</span>
                         </div>
@@ -648,20 +647,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                           ))}
                         </div>
                       </div>
-
-                      {/* [5] Trigger reveal on hover — non-Shade only */}
-                      {!isShade && isHovered && triggers.length > 0 && (
-                        <div className="px-3 pb-3" style={{ animation: 'sanctumFadeInUp 0.2s ease-out backwards' }}>
-                          <div style={{ borderTop: `1px solid ${color}28`, paddingTop: '7px' }}>
-                            <p style={{ fontSize: '8px', color: `${color}70`, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', textAlign: 'center', marginBottom: '3px' }}>
-                              Activates when:
-                            </p>
-                            <p style={{ fontSize: '9px', color: `${color}cc`, fontStyle: 'italic', textAlign: 'center', lineHeight: 1.4 }}>
-                              {triggers.slice(0, 2).join(' · ')}
-                            </p>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Bottom chromatic bar */}
                       <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)`, opacity: isHovered ? 1 : isShade ? 0.75 : 0.55, transition: 'opacity 0.2s' }} />
