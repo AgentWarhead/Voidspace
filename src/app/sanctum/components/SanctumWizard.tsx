@@ -517,7 +517,34 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 </p>
               </div>
 
-              {/* 4×2 neon card grid — natural content height, no stretching */}
+              {/* [4] Mission confirmation banner */}
+              {goal && (
+                <div
+                  className="flex items-center justify-center gap-2 px-4 py-1.5 rounded-lg self-center"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    animation: 'sanctumFadeInUp 0.4s ease-out 0.1s backwards',
+                  }}
+                >
+                  <span style={{ fontSize: '10px', color: 'rgba(0,236,151,0.7)', fontFamily: 'monospace', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 900 }}>
+                    ⚡ MISSION
+                  </span>
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>
+                    {goal === 'deploy-first'
+                      ? `Deploy: ${(selectedCategory || 'smart-contract').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`
+                      : goal === 'learn'
+                      ? `Learn: ${(selectedCategory || 'NEAR').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`
+                      : goal === 'idea'
+                      ? 'Build from Scratch'
+                      : goal === 'discover'
+                      ? 'Explore Opportunities'
+                      : 'Sanctum Build Session'}
+                  </span>
+                </div>
+              )}
+
+              {/* 4×2 neon card grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                 {([
                   { id: 'shade',    color: '#8B5CF6', tags: ['Auto-Routes', 'Sees All', 'Full Stack'] },
@@ -531,178 +558,147 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 ] as const).map(({ id, color, tags }, i) => {
                   const persona = PERSONA_LIST.find(p => p.id === id)!;
                   const isHovered = hoveredCard === id;
+                  const isShade = id === 'shade';
+                  const triggers = SPECIALIST_META[id]?.triggers ?? [];
                   return (
                     <div
                       key={id}
                       className="relative rounded-xl overflow-hidden flex flex-col cursor-default select-none"
                       style={{
                         background: `linear-gradient(155deg, ${color}16 0%, rgba(2,3,8,0.94) 50%, rgba(0,0,0,0.97) 100%)`,
-                        border: `2px solid ${isHovered ? color : `${color}50`}`,
+                        border: `2px solid ${isHovered ? color : isShade ? `${color}88` : `${color}50`}`,
                         boxShadow: isHovered
                           ? `0 0 30px ${color}60, 0 0 70px ${color}20, inset 0 0 28px ${color}10`
+                          : isShade
+                          ? `0 0 20px ${color}40, 0 0 50px ${color}14, inset 0 0 20px ${color}10`
                           : `0 0 10px ${color}20, inset 0 0 12px ${color}06`,
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                        animation: `sanctumFadeInUp 0.4s ease-out ${i * 55}ms backwards`,
+                        animation: isShade
+                          ? `sanctumFadeInUp 0.4s ease-out backwards, shadeBorderPulse 3s ease-in-out 0.5s infinite`
+                          : `sanctumFadeInUp 0.4s ease-out ${i * 55}ms backwards`,
                       }}
                       onMouseEnter={() => setHoveredCard(id)}
                       onMouseLeave={() => setHoveredCard(null)}
                     >
-                      {/* Watermark — large emoji, top-right */}
+                      {/* Watermark */}
                       <div
                         className="absolute top-0 right-0 leading-none pointer-events-none select-none"
-                        style={{
-                          fontSize: '80px',
-                          opacity: isHovered ? 0.12 : 0.05,
-                          filter: `drop-shadow(0 0 10px ${color})`,
-                          transform: 'translate(12px, -10px)',
-                          transition: 'opacity 0.2s',
-                        }}
+                        style={{ fontSize: '80px', opacity: isHovered ? 0.12 : 0.05, filter: `drop-shadow(0 0 10px ${color})`, transform: 'translate(12px, -10px)', transition: 'opacity 0.2s' }}
                       >
                         {persona.emoji}
                       </div>
 
-                      {/* Corner dots */}
+                      {/* Corner dots — bottom only for non-Shade (top-right replaced by badge) */}
                       <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
-                      <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
+                      {isShade && <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.7 }} />}
                       <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
                       <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.45 }} />
 
-                      {/* Scan sweep on hover */}
+                      {/* [1] SHADE: ● ACTIVE badge (top-center) */}
+                      {isShade && (
+                        <div
+                          className="absolute top-2 left-1/2 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                          style={{ transform: 'translateX(-50%)', background: '#8B5CF620', border: '1px solid #8B5CF665' }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#A78BFA', animation: 'pulse 1.5s ease-in-out infinite', boxShadow: '0 0 5px #8B5CF6' }} />
+                          <span style={{ fontSize: '8px', color: '#C4B5FD', fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase' }}>ACTIVE</span>
+                        </div>
+                      )}
+
+                      {/* [2] NON-SHADE: ⚡ AUTO badge (top-right) */}
+                      {!isShade && (
+                        <div
+                          className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 rounded-full"
+                          style={{ padding: '2px 6px', background: `${color}14`, border: `1px solid ${color}45` }}
+                        >
+                          <span style={{ fontSize: '7px', color, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase' }}>⚡ AUTO</span>
+                        </div>
+                      )}
+
+                      {/* Scan sweep */}
                       {isHovered && (
                         <div
                           className="absolute inset-y-0 w-[45%] pointer-events-none z-10"
-                          style={{
-                            background: `linear-gradient(90deg, transparent, ${color}18, transparent)`,
-                            animation: 'scanSweep 0.55s ease-out forwards',
-                          }}
+                          style={{ background: `linear-gradient(90deg, transparent, ${color}18, transparent)`, animation: 'scanSweep 0.55s ease-out forwards' }}
                         />
                       )}
 
-                      {/* Card body — compact, content-driven height */}
-                      <div className="relative z-10 flex flex-col items-center px-2 pt-4 sm:pt-5 pb-3 sm:pb-4 gap-1.5 sm:gap-2">
-                        {/* Large emoji + glow halo */}
-                        <div
-                          style={{
-                            filter: isHovered
-                              ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 28px ${color}80)`
-                              : `drop-shadow(0 0 8px ${color}80)`,
-                            transition: 'filter 0.2s',
-                          }}
-                        >
+                      {/* Card body */}
+                      <div className="relative z-10 flex flex-col items-center px-2 pt-5 pb-3 gap-1.5">
+                        <div style={{ filter: isHovered ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 28px ${color}80)` : `drop-shadow(0 0 8px ${color}80)`, transition: 'filter 0.2s' }}>
                           <span className="text-4xl sm:text-5xl leading-none">{persona.emoji}</span>
                         </div>
-
-                        {/* NAME — large, bold, neon */}
                         <h3
                           className="font-black uppercase tracking-wide leading-none text-center"
-                          style={{
-                            fontSize: '20px',
-                            color,
-                            textShadow: isHovered
-                              ? `0 0 16px ${color}, 0 0 32px ${color}60`
-                              : `0 0 8px ${color}50`,
-                            transition: 'text-shadow 0.2s',
-                          }}
+                          style={{ fontSize: '20px', color, textShadow: isHovered ? `0 0 16px ${color}, 0 0 32px ${color}60` : isShade ? `0 0 12px ${color}88` : `0 0 8px ${color}50`, transition: 'text-shadow 0.2s' }}
                         >
                           {persona.name.toUpperCase()}
                         </h3>
-
-                        {/* Role */}
-                        <p
-                          className="font-mono uppercase text-center"
-                          style={{
-                            fontSize: '11px',
-                            letterSpacing: '0.12em',
-                            color: `${color}99`,
-                          }}
-                        >
+                        <p className="font-mono uppercase text-center" style={{ fontSize: '11px', letterSpacing: '0.12em', color: `${color}99` }}>
                           {persona.role}
                         </p>
-
-                        {/* Quote */}
-                        <p
-                          className="italic text-center leading-snug px-1 line-clamp-2"
-                          style={{
-                            fontSize: '11px',
-                            color: `${color}ee`,
-                          }}
-                        >
+                        <p className="italic text-center leading-snug px-1 line-clamp-2" style={{ fontSize: '11px', color: `${color}ee` }}>
                           &quot;{persona.description}&quot;
                         </p>
-
-                        {/* Tags */}
                         <div className="flex flex-wrap justify-center gap-1">
                           {tags.slice(0, 3).map(tag => (
-                            <span
-                              key={tag}
-                              className="font-black uppercase rounded-full"
-                              style={{
-                                fontSize: '10px',
-                                letterSpacing: '0.08em',
-                                padding: '3px 8px',
-                                color,
-                                border: `1px solid ${color}55`,
-                                background: `${color}18`,
-                              }}
-                            >
+                            <span key={tag} className="font-black uppercase rounded-full" style={{ fontSize: '10px', letterSpacing: '0.08em', padding: '3px 8px', color, border: `1px solid ${color}55`, background: `${color}18` }}>
                               {tag}
                             </span>
                           ))}
                         </div>
                       </div>
 
+                      {/* [5] Trigger reveal on hover — non-Shade only */}
+                      {!isShade && isHovered && triggers.length > 0 && (
+                        <div className="px-3 pb-3" style={{ animation: 'sanctumFadeInUp 0.2s ease-out backwards' }}>
+                          <div style={{ borderTop: `1px solid ${color}28`, paddingTop: '7px' }}>
+                            <p style={{ fontSize: '8px', color: `${color}70`, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', textAlign: 'center', marginBottom: '3px' }}>
+                              Activates when:
+                            </p>
+                            <p style={{ fontSize: '9px', color: `${color}cc`, fontStyle: 'italic', textAlign: 'center', lineHeight: 1.4 }}>
+                              {triggers.slice(0, 2).join(' · ')}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Bottom chromatic bar */}
-                      <div
-                        className="absolute bottom-0 left-0 right-0 h-[2px]"
-                        style={{
-                          background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)`,
-                          opacity: isHovered ? 1 : 0.55,
-                          transition: 'opacity 0.2s',
-                        }}
-                      />
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)`, opacity: isHovered ? 1 : isShade ? 0.75 : 0.55, transition: 'opacity 0.2s' }} />
                     </div>
                   );
                 })}
               </div>
 
-              {/* Full-width LAUNCH SESSION button */}
+              {/* [3] How it works — kills "do I pick one?" confusion */}
+              <p className="text-center" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>
+                <span style={{ color: '#C4B5FD', fontWeight: 700 }}>Shade</span>
+                {' '}leads every build.{' '}
+                <span style={{ color: 'rgba(255,255,255,0.45)' }}>Specialists deploy automatically as your project evolves.</span>
+              </p>
+
+              {/* [6] Full-width LAUNCH SESSION button — breathing glow */}
               <button
                 onClick={handleLaunch}
                 className="group relative w-full rounded-xl overflow-hidden focus:outline-none active:scale-[0.99]"
                 style={{
                   background: 'rgba(0,236,151,0.08)',
                   border: '2px solid #00ec97',
-                  boxShadow: '0 0 30px rgba(0,236,151,0.50), 0 0 80px rgba(0,236,151,0.15)',
-                  animation: 'sanctumFadeInUp 0.4s ease-out 0.5s backwards',
                   minHeight: '58px',
-                  transition: 'box-shadow 0.2s, background 0.2s',
+                  transition: 'background 0.2s',
+                  animation: 'sanctumFadeInUp 0.4s ease-out 0.5s backwards, launchGlow 2.5s ease-in-out 1s infinite',
                 }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 45px rgba(0,236,151,0.70), 0 0 100px rgba(0,236,151,0.25)';
-                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,236,151,0.16)';
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 30px rgba(0,236,151,0.50), 0 0 80px rgba(0,236,151,0.15)';
-                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,236,151,0.08)';
-                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,236,151,0.16)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,236,151,0.08)'; }}
               >
-                {/* Scan sweep */}
-                <div
-                  className="absolute inset-y-0 w-[30%] pointer-events-none opacity-0 group-hover:opacity-100"
-                  style={{ background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.10), transparent)', animation: 'scanSweep 1s ease-out forwards' }}
-                />
-                {/* Corner dots */}
+                <div className="absolute inset-y-0 w-[30%] pointer-events-none opacity-0 group-hover:opacity-100" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.10), transparent)', animation: 'scanSweep 1s ease-out forwards' }} />
                 {(['top-2 left-3', 'top-2 right-3', 'bottom-2 left-3', 'bottom-2 right-3'] as const).map((pos, idx) => (
                   <div key={idx} className={`absolute ${pos} w-1.5 h-1.5 rounded-full`} style={{ background: '#00ec97', opacity: 0.65 }} />
                 ))}
-
                 <div className="relative z-10 flex items-center justify-center gap-3 sm:gap-4 py-3 px-4">
                   <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-near-green flex-shrink-0" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,1))' }} />
                   <div className="text-center">
-                    <div
-                      className="text-lg sm:text-xl font-black uppercase tracking-widest leading-none"
-                      style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,1), 0 0 50px rgba(0,236,151,0.5)' }}
-                    >
+                    <div className="text-lg sm:text-xl font-black uppercase tracking-widest leading-none" style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,1), 0 0 50px rgba(0,236,151,0.5)' }}>
                       LAUNCH SESSION
                     </div>
                     <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-near-green/50 mt-0.5 hidden sm:block">
@@ -721,6 +717,16 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
       {/* Animations */}
       <style jsx>{`
+        /* [1] Shade card — breathing border pulse */
+        @keyframes shadeBorderPulse {
+          0%, 100% { box-shadow: 0 0 20px #8B5CF640, 0 0 50px #8B5CF614, inset 0 0 20px #8B5CF610; }
+          50%       { box-shadow: 0 0 38px #8B5CF672, 0 0 90px #8B5CF622, inset 0 0 30px #8B5CF618; }
+        }
+        /* [6] Launch button — breathing glow */
+        @keyframes launchGlow {
+          0%, 100% { box-shadow: 0 0 24px rgba(0,236,151,0.48), 0 0 65px rgba(0,236,151,0.14); }
+          50%       { box-shadow: 0 0 48px rgba(0,236,151,0.78), 0 0 110px rgba(0,236,151,0.28); }
+        }
         @keyframes sanctumFadeInUp {
           from {
             opacity: 0;
