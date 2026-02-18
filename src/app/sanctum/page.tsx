@@ -672,12 +672,12 @@ function SanctumPageInner() {
           </div>
           
           {/* Main content - responsive layout */}
-          <div className="relative z-10 flex-1 flex overflow-hidden">
+          <div className="relative z-10 flex-1 flex min-h-0 overflow-hidden">
             {/* Desktop Layout: Side-by-side */}
-            <div className="hidden md:flex flex-1 gap-3 p-3 overflow-hidden">
+            <div className="hidden md:flex flex-1 min-h-0 gap-3 p-3 overflow-hidden">
               {/* Left Panel - Chat */}
-              <div className="w-1/2 flex flex-col h-full">
-                <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
+              <div className="w-1/2 min-h-0 flex flex-col h-full">
+                <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="purple">
                   {/* Chat - fills remaining space */}
                   <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     <SanctumChat 
@@ -718,8 +718,8 @@ function SanctumPageInner() {
               </div>
 
               {/* Right Panel - Code Preview */}
-              <div className="w-1/2 flex flex-col h-full">
-                <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
+              <div className="w-1/2 min-h-0 flex flex-col h-full">
+                <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="green">
                   {/* Header with inline task progress */}
                   <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50 relative z-10">
                     {/* Top row: Title + Buttons */}
@@ -843,11 +843,11 @@ function SanctumPageInner() {
             </div>
 
             {/* Mobile Layout: Stacked with tabs */}
-            <div className="md:hidden flex-1 flex flex-col overflow-hidden">
+            <div className="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
               {/* Chat Panel */}
               {state.activePanel === 'chat' && (
-                <div className="flex-1 p-3 overflow-hidden">
-                  <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="purple">
+                <div className="flex-1 min-h-0 p-3 overflow-hidden">
+                  <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="purple">
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                       <SanctumChat 
                         category={state.selectedCategory}
@@ -875,9 +875,9 @@ function SanctumPageInner() {
 
               {/* Code Panel */}
               {state.activePanel === 'code' && (
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className="flex-1 p-3 overflow-hidden">
-                    <GlassPanel className="flex-1 flex flex-col overflow-hidden" glow glowColor="green">
+                <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                  <div className="flex-1 min-h-0 p-3 overflow-hidden">
+                    <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="green">
                       {/* Mobile Code Header */}
                       <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
                         <div className="flex items-center justify-between mb-3">

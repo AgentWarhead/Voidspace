@@ -739,7 +739,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Upgrade Modal */}
       <UpgradeModal
         isOpen={showUpgradeModal}
