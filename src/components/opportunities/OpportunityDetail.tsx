@@ -10,6 +10,7 @@ import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { GapScoreBreakdown } from '@/components/opportunities/GapScoreBreakdown';
 import { CrossChainRivalry } from '@/components/opportunities/CrossChainRivalry';
 import { SaveButton } from '@/components/opportunities/SaveButton';
+import { ShareButton } from '@/components/opportunities/ShareButton';
 import { VoidTimer } from '@/components/opportunities/VoidTimer';
 import { BriefGenerator } from '@/components/brief/BriefGenerator';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -120,7 +121,14 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
 
             <div className="flex items-start gap-3 shrink-0">
               <GapScoreIndicator score={opportunity.gap_score} size="lg" showLabel />
-              <SaveButton opportunityId={opportunity.id} />
+              <div className="flex items-center gap-1">
+                <SaveButton opportunityId={opportunity.id} />
+                <ShareButton
+                  opportunityId={opportunity.id}
+                  title={opportunity.title}
+                  gapScore={opportunity.gap_score}
+                />
+              </div>
             </div>
           </div>
         </div>
