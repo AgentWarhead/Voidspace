@@ -498,89 +498,142 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
             </Container>
           )}
 
-          {/* Step 3: Meet the Council */}
+          {/* Step 3: Meet the Council — Bento Command Grid */}
           {step === 'persona' && (
-            <Container size="xl" className="py-8 px-4">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+            <div className="flex flex-col h-full px-4 py-3 max-w-4xl mx-auto w-full" style={{ minHeight: 0 }}>
+              {/* Compact edgy header */}
+              <div className="text-center mb-3 flex-shrink-0">
+                <div className="inline-flex items-center gap-2 mb-2 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400/80">Classified Briefing</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary leading-tight">
                   Meet the <GradientText>Council</GradientText>
                 </h2>
-                <p className="text-text-muted text-sm max-w-md mx-auto">
-                  Every session starts with Shade. As your Lead Architect, he directs the build and calls in specialists when needed.
+                <p className="text-xs text-text-muted/60 mt-1">
+                  Eight specialists. Zero mercy. Auto-deployed as your build evolves.
                 </p>
               </div>
 
-              {/* Shade — Featured Lead Architect */}
-              {(() => {
-                const shadePersona = PERSONA_LIST.find(p => p.id === 'shade')!;
-                return (
-                  <div
-                    className="max-w-4xl mx-auto mb-6"
-                    style={{ animation: 'sanctumFadeInUp 0.4s ease-out backwards' }}
-                  >
-                    <div className={`relative p-5 sm:p-6 rounded-2xl border-2 ${shadePersona.borderColor} ${shadePersona.bgColor} shadow-xl shadow-purple-500/20`}>
+              {/* Bento command grid — everything in one viewport */}
+              <div
+                className="flex-1 grid grid-cols-4 gap-2 min-h-0"
+                style={{ gridTemplateRows: '1fr 1fr minmax(88px, 110px)' }}
+              >
+                {/* ── SHADE — 2×2 command cell ── */}
+                {(() => {
+                  const shade = PERSONA_LIST.find(p => p.id === 'shade')!;
+                  return (
+                    <div
+                      className="col-span-2 row-span-2 relative rounded-2xl border-2 border-purple-500/40 overflow-hidden flex flex-col justify-between p-5"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.08) 50%, rgba(0,0,0,0.3) 100%)',
+                        boxShadow: '0 0 40px rgba(139,92,246,0.2), inset 0 0 40px rgba(139,92,246,0.05)',
+                        animation: 'sanctumFadeInUp 0.4s ease-out backwards',
+                      }}
+                    >
+                      {/* Subtle scanlines */}
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,1) 3px, rgba(255,255,255,1) 4px)' }} />
+
                       {/* LEAD ARCHITECT badge */}
-                      <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-purple-500/30 border border-purple-400/40 text-purple-300 text-[10px] font-bold uppercase tracking-wider">
-                        LEAD ARCHITECT
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/25 border border-purple-400/40">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-purple-300">Lead Architect</span>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-4xl sm:text-5xl flex-shrink-0">{shadePersona.emoji}</div>
-                        <div>
-                          <h3 className={`text-lg sm:text-xl font-bold ${shadePersona.color} mb-0.5`}>{shadePersona.name}</h3>
-                          <p className="text-xs text-text-muted mb-2">{shadePersona.role}</p>
-                          <p className="text-sm text-text-secondary leading-relaxed">{shadePersona.description}</p>
+
+                      {/* Top: emoji + class label */}
+                      <div>
+                        <div
+                          className="inline-flex items-center justify-center w-14 h-14 rounded-xl text-3xl border border-purple-500/30"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0.05) 100%)',
+                            boxShadow: '0 0 24px rgba(139,92,246,0.5)',
+                          }}
+                        >
+                          {shade.emoji}
+                        </div>
+                        <div className="mt-2 text-[8px] font-bold uppercase tracking-[0.2em] text-purple-400/50">Class: Mastermind</div>
+                      </div>
+
+                      {/* Bottom: name + description + tags */}
+                      <div>
+                        <h3 className="text-xl font-black text-purple-300 mb-0.5">{shade.name}</h3>
+                        <p className="text-[10px] font-mono text-purple-400/70 mb-2">{shade.role}</p>
+                        <p className="text-xs text-text-secondary/80 leading-relaxed mb-3 line-clamp-3">{shade.description}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {['Auto-Routes', 'Sees All', 'Full Stack'].map(tag => (
+                            <span key={tag} className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-purple-400/30 text-purple-300/80 bg-purple-500/10">
+                              {tag}
+                            </span>
+                          ))}
                         </div>
                       </div>
+
+                      {/* Bottom glow line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px]"
+                        style={{ background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.8), transparent)' }} />
                     </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
 
-              {/* Section divider — The Specialists */}
-              <div
-                className="flex items-center gap-4 max-w-4xl mx-auto mb-5"
-                style={{ animation: 'sanctumFadeInUp 0.4s ease-out 0.2s backwards' }}
-              >
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/[0.12]" />
-                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.03]">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted/70">
-                    ⚔️ &nbsp;The Specialists&nbsp; ⚔️
-                  </span>
-                </div>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/[0.12]" />
-              </div>
+                {/* ── SIDE SPECIALISTS — Oxide, Warden, Phantom, Nexus ── */}
+                {(['oxide', 'warden', 'phantom', 'nexus'] as const).map((id, i) => {
+                  const persona = PERSONA_LIST.find(p => p.id === id)!;
+                  const meta = SPECIALIST_META[id] ?? { color: '#ffffff', tags: [], triggers: [] };
+                  return (
+                    <SpecialistCard
+                      key={id}
+                      persona={persona}
+                      meta={meta}
+                      index={i + 1}
+                      isHovered={hoveredCard === id}
+                      onHover={() => setHoveredCard(id)}
+                      onLeave={() => setHoveredCard(null)}
+                    />
+                  );
+                })}
 
-              {/* Specialist grid — LEGENDARY showcase */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-4xl mx-auto mb-4">
-                {PERSONA_LIST.filter(p => p.id !== 'shade').map((persona, i) => (
-                  <SpecialistCard
-                    key={persona.id}
-                    persona={persona}
-                    meta={SPECIALIST_META[persona.id] ?? { color: '#ffffff', tags: [], triggers: [] }}
-                    index={i}
-                    isHovered={hoveredCard === persona.id}
-                    onHover={() => setHoveredCard(persona.id)}
-                    onLeave={() => setHoveredCard(null)}
-                  />
-                ))}
-              </div>
+                {/* ── BOTTOM ROW: Prism, Crucible, Ledger (mini) ── */}
+                {(['prism', 'crucible', 'ledger'] as const).map((id, i) => {
+                  const persona = PERSONA_LIST.find(p => p.id === id)!;
+                  const meta = SPECIALIST_META[id] ?? { color: '#ffffff', tags: [], triggers: [] };
+                  return (
+                    <SpecialistCard
+                      key={id}
+                      persona={persona}
+                      meta={meta}
+                      index={i + 5}
+                      isHovered={hoveredCard === id}
+                      onHover={() => setHoveredCard(id)}
+                      onLeave={() => setHoveredCard(null)}
+                      mini
+                    />
+                  );
+                })}
 
-              {/* Subtle hint */}
-              <p className="text-center text-xs text-text-muted/50 italic mb-8 max-w-sm mx-auto">
-                Shade will bring in specialists automatically as your build evolves
-              </p>
-
-              {/* Launch button */}
-              <div className="text-center">
+                {/* ── LAUNCH BUTTON — 4th cell, bottom row ── */}
                 <button
                   onClick={handleLaunch}
-                  className="group inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-bold text-lg sm:text-xl hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-2xl shadow-near-green/30 hover:shadow-near-green/50 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto max-w-md"
+                  className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] focus:outline-none"
+                  style={{
+                    background: 'linear-gradient(135deg, #00ec97 0%, #10b981 100%)',
+                    boxShadow: '0 0 20px rgba(0,236,151,0.35)',
+                    animation: 'sanctumFadeInUp 0.4s ease-out 0.65s backwards',
+                  }}
                 >
-                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
-                  Launch Session
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
+                  <div className="relative flex flex-col items-center justify-center h-full gap-1 p-3">
+                    <Rocket className="w-6 h-6 text-void-black drop-shadow" />
+                    <span className="text-xs font-black text-void-black uppercase tracking-wider leading-none">Launch</span>
+                    <span className="text-[9px] font-semibold text-void-black/60 uppercase tracking-widest leading-none">Session</span>
+                  </div>
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ boxShadow: 'inset 0 0 20px rgba(255,255,255,0.1)' }} />
                 </button>
               </div>
-            </Container>
+            </div>
           )}
         </div>
       </div>
@@ -816,6 +869,7 @@ function SpecialistCard({
   isHovered,
   onHover,
   onLeave,
+  mini = false,
 }: {
   persona: Persona;
   meta: { color: string; tags: string[]; triggers: string[] };
@@ -823,6 +877,7 @@ function SpecialistCard({
   isHovered: boolean;
   onHover: () => void;
   onLeave: () => void;
+  mini?: boolean;
 }) {
   const { color, tags, triggers } = meta;
   const glowSubtle = `${color}26`; // ~15% opacity
@@ -844,23 +899,25 @@ function SpecialistCard({
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
     >
-      {/* AUTO-DEPLOYED badge */}
-      <div
-        className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
-        style={{
-          color,
-          borderColor: `${color}55`,
-          background: `${color}18`,
-        }}
-      >
-        AUTO
-      </div>
+      {/* AUTO-DEPLOYED badge — hidden in mini mode */}
+      {!mini && (
+        <div
+          className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+          style={{
+            color,
+            borderColor: `${color}55`,
+            background: `${color}18`,
+          }}
+        >
+          AUTO
+        </div>
+      )}
 
-      <div className="p-4 pt-5">
+      <div className={mini ? 'p-2.5' : 'p-4 pt-5'}>
         {/* Glowing emoji avatar */}
-        <div className="mb-3">
+        <div className={mini ? 'mb-1.5' : 'mb-3'}>
           <div
-            className="inline-flex items-center justify-center w-11 h-11 rounded-full text-2xl border transition-all duration-300"
+            className={`inline-flex items-center justify-center rounded-full border transition-all duration-300 ${mini ? 'w-8 h-8 text-lg' : 'w-11 h-11 text-2xl'}`}
             style={{
               background: `radial-gradient(circle, ${color}33 0%, ${color}0d 100%)`,
               borderColor: `${color}44`,
@@ -871,21 +928,27 @@ function SpecialistCard({
           </div>
         </div>
 
-        {/* Name + role */}
-        <h3 className="text-sm font-bold text-text-primary mb-0.5 pr-8">{persona.name}</h3>
-        <p className="text-[11px] font-mono mb-2" style={{ color: `${color}cc` }}>{persona.role}</p>
+        {/* Name */}
+        <h3 className={`font-bold text-text-primary mb-0.5 ${mini ? 'text-xs pr-0' : 'text-sm pr-8'}`}>{persona.name}</h3>
 
-        {/* Tagline */}
-        <p className="text-[11px] text-text-muted/80 leading-relaxed line-clamp-2 mb-3">
-          {persona.description}
-        </p>
+        {/* Role — hidden in mini mode */}
+        {!mini && (
+          <p className="text-[11px] font-mono mb-2" style={{ color: `${color}cc` }}>{persona.role}</p>
+        )}
+
+        {/* Tagline — hidden in mini mode */}
+        {!mini && (
+          <p className="text-[11px] text-text-muted/80 leading-relaxed line-clamp-2 mb-3">
+            {persona.description}
+          </p>
+        )}
 
         {/* Specialty tags */}
         <div className="flex flex-wrap gap-1 mb-3">
-          {tags.map(tag => (
+          {tags.slice(0, mini ? 2 : 3).map(tag => (
             <span
               key={tag}
-              className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+              className={`${mini ? 'text-[8px]' : 'text-[9px]'} font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border`}
               style={{ color, borderColor: `${color}44`, background: `${color}18` }}
             >
               {tag}
@@ -893,21 +956,23 @@ function SpecialistCard({
           ))}
         </div>
 
-        {/* Hover reveal — triggers */}
-        <div
-          className="overflow-hidden transition-all duration-300"
-          style={{
-            maxHeight: isHovered ? '60px' : '0px',
-            opacity: isHovered ? 1 : 0,
-          }}
-        >
-          <div className="pt-2 border-t" style={{ borderColor: `${color}33` }}>
-            <p className="text-[9px] text-text-muted/60 uppercase tracking-wider font-semibold mb-1">Called in when you say:</p>
-            <p className="text-[10px]" style={{ color: `${color}cc` }}>
-              {triggers.join(' · ')}
-            </p>
+        {/* Hover reveal — triggers — hidden in mini mode */}
+        {!mini && (
+          <div
+            className="overflow-hidden transition-all duration-300"
+            style={{
+              maxHeight: isHovered ? '60px' : '0px',
+              opacity: isHovered ? 1 : 0,
+            }}
+          >
+            <div className="pt-2 border-t" style={{ borderColor: `${color}33` }}>
+              <p className="text-[9px] text-text-muted/60 uppercase tracking-wider font-semibold mb-1">Called in when you say:</p>
+              <p className="text-[10px]" style={{ color: `${color}cc` }}>
+                {triggers.join(' · ')}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Bottom accent line */}
