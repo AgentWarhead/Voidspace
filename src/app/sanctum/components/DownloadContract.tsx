@@ -100,7 +100,7 @@ export function DownloadContract({ code, contractName = 'contract', category }: 
       {showMenu && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-          <div className="absolute right-0 top-full mt-2 z-50 bg-void-darker border border-void-purple/30 rounded-xl shadow-2xl shadow-void-purple/20 overflow-hidden w-56 max-w-[calc(100vw-2rem)]">
+          <div className="absolute right-0 top-full mt-2 z-50 bg-[#0d0d1a] border border-void-purple/30 rounded-xl shadow-2xl shadow-void-purple/20 overflow-hidden w-56 max-w-[calc(100vw-2rem)]">
           {!canExport ? (
             <Link
               href="/pricing"

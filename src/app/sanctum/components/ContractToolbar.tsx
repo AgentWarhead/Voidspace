@@ -120,7 +120,7 @@ function ToolbarDropdown({
         {trigger}
       </div>
       {isOpen && (
-        <div className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} z-50 min-w-[200px] py-1.5 bg-[#1a1a2e]/95 backdrop-blur-xl border border-white/[0.1] rounded-xl shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-top-2 duration-200`}>
+        <div className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} z-50 min-w-[200px] py-1.5 bg-[#1a1a2e] backdrop-blur-xl border border-white/[0.1] rounded-xl shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-top-2 duration-200`}>
           {children}
         </div>
       )}
@@ -176,9 +176,9 @@ function Tooltip({ children, label }: { children: React.ReactNode; label: string
   return (
     <div className="relative group">
       {children}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 text-[11px] font-medium text-white bg-[#1a1a2e]/95 border border-white/[0.1] rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 shadow-lg z-50">
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 text-[11px] font-medium text-white bg-[#1a1a2e] border border-white/[0.1] rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 shadow-lg z-50">
         {label}
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[-1px] border-4 border-transparent border-b-[#1a1a2e]/95" />
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[-1px] border-4 border-transparent border-b-[#1a1a2e]" />
       </div>
     </div>
   );
