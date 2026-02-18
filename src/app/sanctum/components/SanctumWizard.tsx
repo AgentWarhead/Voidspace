@@ -156,11 +156,11 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
     if (goal === 'deploy-first') {
       config.mode = 'build';
-      config.chatMode = 'learn';
+      config.chatMode = 'build';
       config.category = selectedCategory || 'meme-tokens';
     } else if (goal === 'learn') {
       config.mode = 'build';
-      config.chatMode = 'learn';
+      config.chatMode = 'build';
       config.category = selectedCategory;
       config.customPrompt = state.customPrompt || undefined;
     } else if (goal === 'idea') {
