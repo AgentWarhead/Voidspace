@@ -857,7 +857,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] min-w-0 ${message.role === 'user' ? 'order-2' : ''}`}>
+            <div className={`max-w-[88%] sm:max-w-[85%] min-w-0 overflow-hidden ${message.role === 'user' ? 'order-2' : ''}`}>
               {/* Avatar */}
               <div className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {(() => {
@@ -944,12 +944,12 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                   
                   {/* Quick options */}
                   {message.options && message.options.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2 max-w-full">
                       {message.options.map((opt, i) => (
                         <button
                           key={i}
                           onClick={() => handleOptionClick(opt.value)}
-                          className="px-3 py-2 min-h-[44px] text-sm bg-void-black/50 hover:bg-near-green/20 border border-border-subtle hover:border-near-green/30 rounded-lg transition-all text-text-secondary hover:text-near-green text-left"
+                          className="px-3 py-2 min-h-[44px] text-sm bg-void-black/50 hover:bg-near-green/20 border border-border-subtle hover:border-near-green/30 rounded-lg transition-all text-text-secondary hover:text-near-green text-left break-words"
                         >
                           {opt.label}
                         </button>
@@ -1027,7 +1027,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           {/* File attachment button */}
           <input
             ref={fileInputRef}

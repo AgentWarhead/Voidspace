@@ -52,7 +52,7 @@ export function ModeSelector({ mode, onModeChange, disabled }: ModeSelectorProps
             onMouseEnter={() => setHoveredMode(m.key)}
             onMouseLeave={() => setHoveredMode(null)}
             disabled={disabled}
-            className={`flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all duration-200 ${
               mode === m.key
                 ? 'bg-near-green/20 text-near-green border border-near-green/30 shadow-sm shadow-near-green/10'
                 : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.05] border border-transparent'

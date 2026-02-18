@@ -84,7 +84,7 @@ function SmartStatusBadge({
   }, [generatedCode, sanctumStage, isThinking, lastAction]);
 
   return (
-    <span className={`text-[11px] font-medium whitespace-nowrap ${className}`}>
+    <span className={`text-[11px] font-medium truncate max-w-[160px] sm:max-w-[240px] lg:max-w-none ${className}`} title={text}>
       {text}
     </span>
   );
@@ -246,7 +246,7 @@ export function ContractToolbar({
       )}
 
       {/* Buttons row */}
-      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end min-w-0">
       {/* --- Quick Actions (always visible, icon-only with tooltips) --- */}
       
       {/* Copy Code */}

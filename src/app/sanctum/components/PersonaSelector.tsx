@@ -111,7 +111,7 @@ export function PersonaSelector({ currentPersona, onSelect, disabled }: PersonaS
           <div className={`text-sm font-medium ${currentPersona.color}`}>
             {currentPersona.name}
           </div>
-          <div className="text-xs text-text-muted">
+          <div className="text-xs text-text-muted hidden sm:block">
             {currentPersona.role}
           </div>
         </div>

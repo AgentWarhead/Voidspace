@@ -400,9 +400,9 @@ export function CodePreview({ code, mode, contractName, annotations: propAnnotat
 
       {/* Body: optional file tree sidebar + code */}
       <div className="flex-1 flex overflow-hidden">
-        {/* File tree sidebar */}
+        {/* File tree sidebar — hidden on mobile (too cramped), visible sm+ */}
         {fileTreeVisible && (
-          <div className="w-48 sm:w-56 flex-shrink-0 border-r border-border-subtle overflow-y-auto bg-void-black/30">
+          <div className="hidden sm:block sm:w-48 md:w-56 flex-shrink-0 border-r border-border-subtle overflow-y-auto bg-void-black/30">
             <FileStructure
               code={code}
               contractName={contractName || 'my-contract'}
@@ -412,7 +412,7 @@ export function CodePreview({ code, mode, contractName, annotations: propAnnotat
         )}
 
         {/* Code panel */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto">
             <pre className="p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed overflow-x-auto">
               <code

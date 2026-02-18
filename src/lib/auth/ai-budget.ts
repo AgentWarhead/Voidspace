@@ -1,19 +1,20 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { SanctumTier } from '@/lib/sanctum-tiers';
 
-// Daily request limits per tier — generous enough to not punish real usage
-const TIER_LIMITS: Record<SanctumTier, number> = {
-  shade: 25,        // Free tier: 25 requests/day (enough to explore)
-  specter: 200,     // $25/mo: 200/day — solid daily usage
-  legion: 500,      // $60/mo: 500/day — power user
-  leviathan: 2000,  // $200/mo: 2000/day — practically unlimited
-};
+// Daily request limit ONLY for free tier (Shade) — a gentle nudge to upgrade.
+// Paid tiers have NO daily limit. Their credits ARE the limit.
+const FREE_TIER_DAILY_LIMIT = 25;
 
 export async function checkAiBudget(
   userId: string,
   tier: SanctumTier = 'shade'
 ): Promise<{ allowed: boolean; remaining: number }> {
-  const limit = TIER_LIMITS[tier] || TIER_LIMITS.shade;
+  // Paid tiers: no daily cap — credits are the only gate
+  if (tier !== 'shade') {
+    return { allowed: true, remaining: Infinity };
+  }
+
+  // Free tier: soft daily limit to prevent abuse without credit commitment
   const supabase = createAdminClient();
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
@@ -27,8 +28,8 @@ export async function checkAiBudget(
   
   const used = count || 0;
   return {
-    allowed: used < limit,
-    remaining: Math.max(0, limit - used)
+    allowed: used < FREE_TIER_DAILY_LIMIT,
+    remaining: Math.max(0, FREE_TIER_DAILY_LIMIT - used)
   };
 }
 

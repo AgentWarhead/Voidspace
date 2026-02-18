@@ -385,13 +385,13 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
 
       {/* One-time highlight hint */}
       {showHint && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-xl bg-purple-500/15 backdrop-blur-sm border border-purple-500/30 shadow-lg shadow-purple-500/10 animate-in fade-in slide-in-from-top-2 duration-300 flex items-center gap-3">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-3 sm:px-4 py-2 rounded-xl bg-purple-500/15 backdrop-blur-sm border border-purple-500/30 shadow-lg shadow-purple-500/10 animate-in fade-in slide-in-from-top-2 duration-300 flex items-start sm:items-center gap-2 sm:gap-3 max-w-[calc(100%-1rem)] w-max">
           <span className="text-xs text-purple-300">
-            ✨ <span className="font-medium">Pro tip:</span> Highlight any code — the toolbar below will act on your selection
+            ✨ <span className="font-medium">Pro tip:</span> <span className="hidden sm:inline">Highlight any code — the toolbar below will act on your selection</span><span className="sm:hidden">Highlight code to query AI on selection</span>
           </span>
           <button
             onClick={dismissHint}
-            className="text-purple-400/60 hover:text-purple-300 text-xs transition-colors"
+            className="text-purple-400/60 hover:text-purple-300 text-xs transition-colors flex-shrink-0"
           >
             ✕
           </button>
