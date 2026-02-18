@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Rocket, ExternalLink, Copy, Sparkles } from 'lucide-react';
+import { CheckCircle2, Rocket, ExternalLink, Copy, Sparkles, Share2, Code2, BookOpen, FlaskConical } from 'lucide-react';
 
 interface Particle {
   id: number;
@@ -17,6 +17,7 @@ interface Particle {
 interface DeployCelebrationProps {
   isVisible: boolean;
   contractId?: string;
+  network?: string;
   explorerUrl?: string;
   onClose: () => void;
 }
@@ -30,14 +31,32 @@ const CONFETTI_COLORS = [
   '#4ECDC4', // Teal
 ];
 
-export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose }: DeployCelebrationProps) {
+const WHAT_NEXT: { icon: React.ReactNode; title: string; desc: string }[] = [
+  {
+    icon: <FlaskConical className="w-4 h-4 text-near-green" />,
+    title: 'Test in Sandbox',
+    desc: 'Simulate method calls against your live contract',
+  },
+  {
+    icon: <Code2 className="w-4 h-4 text-void-purple" />,
+    title: 'Build a Frontend',
+    desc: 'Connect a React app with near-api-js or wallet-selector',
+  },
+  {
+    icon: <BookOpen className="w-4 h-4 text-amber-400" />,
+    title: 'Read the Docs',
+    desc: 'Explore NEAR docs to add cross-contract calls, FTs, and NFTs',
+  },
+];
+
+export function DeployCelebration({ isVisible, contractId, network = 'testnet', explorerUrl, onClose }: DeployCelebrationProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [copied, setCopied] = useState(false);
 
   // Generate confetti particles
   const createParticles = useCallback(() => {
     const newParticles: Particle[] = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 120; i++) {
       newParticles.push({
         id: i,
         x: Math.random() * window.innerWidth,
@@ -62,9 +81,9 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
     }
 
     createParticles();
-    
+
     const interval = setInterval(() => {
-      setParticles(prev => 
+      setParticles(prev =>
         prev
           .map(p => ({
             ...p,
@@ -73,7 +92,7 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
             rotation: p.rotation + 5,
             velocity: {
               x: p.velocity.x * 0.99,
-              y: p.velocity.y + 0.1, // gravity
+              y: p.velocity.y + 0.1,
             },
           }))
           .filter(p => p.y < window.innerHeight + 50)
@@ -85,11 +104,23 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
 
   const handleCopy = () => {
     if (contractId) {
-      navigator.clipboard.writeText(contractId);
+      navigator.clipboard.writeText(contractId).catch(() => {});
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const handleShareX = () => {
+    const networkLabel = network === 'mainnet' ? 'NEAR Mainnet' : 'NEAR Testnet';
+    const text = contractId
+      ? `🚀 Just deployed a smart contract to ${networkLabel}!\n\nContract: ${contractId}\n\nBuilt with @voidspaceio — the AI-powered NEAR dev studio ⚡\n\n#NEAR #Web3 #SmartContracts`
+      : `🚀 Just deployed a smart contract to ${networkLabel} with @voidspaceio!\n\n#NEAR #Web3 #SmartContracts`;
+    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const networkLabel = network === 'mainnet' ? 'Mainnet' : 'Testnet';
+  const networkColor = network === 'mainnet' ? 'text-amber-400' : 'text-near-green';
 
   return (
     <AnimatePresence>
@@ -132,8 +163,8 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
               onClick={e => e.stopPropagation()}
             >
               {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-b from-near-green/10 to-transparent rounded-2xl" />
-              
+              <div className="absolute inset-0 bg-gradient-to-b from-near-green/10 to-transparent rounded-2xl pointer-events-none" />
+
               {/* Success icon with pulse */}
               <motion.div
                 initial={{ scale: 0 }}
@@ -142,7 +173,6 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                 className="relative flex justify-center mb-6"
               >
                 <div className="relative">
-                  {/* Pulse rings */}
                   <motion.div
                     animate={{ scale: [1, 2], opacity: [0.5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -153,8 +183,6 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                     transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
                     className="absolute inset-0 rounded-full bg-near-green/20"
                   />
-                  
-                  {/* Icon */}
                   <div className="relative w-20 h-20 rounded-full bg-near-green/20 flex items-center justify-center border-2 border-near-green">
                     <motion.div
                       animate={{ rotate: [0, 10, -10, 0] }}
@@ -173,13 +201,21 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-2 flex items-center justify-center gap-2">
-                    <Sparkles className="w-6 h-6 text-amber-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-1 flex items-center justify-center gap-2">
+                    <Sparkles className="w-5 h-5 text-amber-400" />
                     Contract Deployed!
-                    <Sparkles className="w-6 h-6 text-amber-400" />
+                    <Sparkles className="w-5 h-5 text-amber-400" />
                   </h2>
-                  <p className="text-text-secondary mb-6">
-                    Your smart contract is now live on NEAR Protocol!
+                  {contractId ? (
+                    <p className="text-text-secondary mb-1 text-sm">
+                      Deployed to{' '}
+                      <span className="font-mono text-near-green text-xs">{contractId}</span>
+                    </p>
+                  ) : null}
+                  <p className="text-text-secondary mb-5 text-sm">
+                    Live on{' '}
+                    <span className={`font-semibold ${networkColor}`}>NEAR {networkLabel}</span>
+                    {' '}🎉
                   </p>
                 </motion.div>
 
@@ -189,16 +225,16 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="mb-6"
+                    className="mb-4"
                   >
                     <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Contract ID</p>
                     <div className="flex items-center gap-2 bg-void-black/50 rounded-lg p-3 border border-border-subtle">
-                      <code className="flex-1 text-near-green font-mono text-sm truncate">
+                      <code className="flex-1 text-near-green font-mono text-sm truncate text-left">
                         {contractId}
                       </code>
                       <button
                         onClick={handleCopy}
-                        className="p-1.5 hover:bg-white/10 rounded transition-colors"
+                        className="p-1.5 hover:bg-white/10 rounded transition-colors flex-shrink-0"
                         title="Copy contract ID"
                       >
                         {copied ? (
@@ -216,25 +252,58 @@ export function DeployCelebration({ isVisible, contractId, explorerUrl, onClose 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="flex flex-col sm:flex-row gap-3"
+                  className="flex flex-col gap-2 mb-5"
                 >
                   {explorerUrl && (
                     <a
                       href={explorerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all text-sm sm:text-base"
+                      className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all text-sm"
                     >
                       <ExternalLink className="w-4 h-4" />
-                      View on Explorer
+                      View on NearBlocks Explorer
                     </a>
                   )}
+
+                  {/* Share on X */}
+                  <button
+                    onClick={handleShareX}
+                    className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-void-black/50 hover:bg-void-black/70 text-white rounded-lg border border-gray-700 transition-all text-sm"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share on X
+                  </button>
+
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 min-h-[44px] bg-white/5 hover:bg-white/10 text-text-primary rounded-lg border border-border-subtle transition-all text-sm sm:text-base"
+                    className="px-4 py-3 min-h-[44px] bg-white/5 hover:bg-white/10 text-text-primary rounded-lg border border-border-subtle transition-all text-sm"
                   >
                     Continue Building
                   </button>
+                </motion.div>
+
+                {/* What's next */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                >
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 text-left">What's next?</p>
+                  <div className="space-y-2">
+                    {WHAT_NEXT.map(item => (
+                      <div
+                        key={item.title}
+                        className="flex items-start gap-3 p-2.5 bg-void-black/40 border border-void-purple/15 rounded-lg text-left"
+                      >
+                        <div className="mt-0.5">{item.icon}</div>
+                        <div>
+                          <p className="text-xs font-semibold text-white">{item.title}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               </div>
 

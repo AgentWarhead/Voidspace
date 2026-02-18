@@ -1,281 +1,565 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 // @ts-ignore
-import { Rocket, ChevronDown, ChevronUp, Copy, Check, HelpCircle } from 'lucide-react';
+import {
+  Rocket, CheckCircle2, AlertCircle, ChevronRight, ChevronLeft,
+  Globe, FlaskConical, Wallet, ExternalLink, Loader2,
+  Copy, Check, XCircle, Info, Zap, Shield,
+} from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { parsePublicMethods } from './DownloadContract';
+import { DeployCelebration } from './DeployCelebration';
 
 interface DeployInstructionsProps {
   contractName?: string;
   category?: string;
   code: string;
+  onDeploySuccess?: (result: { contractId: string; txHash: string; network: string }) => void;
 }
 
-interface Step {
-  id: string;
-  label: string;
-  command: string;
-  description: string;
-  explanation: string;
-  section: 'prerequisites' | 'deploy';
-}
+type Network = 'testnet' | 'mainnet';
+type DeployStage = 'idle' | 'deploying' | 'success' | 'error';
 
-export function DeployInstructions({ contractName = 'my-contract', code }: DeployInstructionsProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [checkedSteps, setCheckedSteps] = useState<Set<string>>(new Set());
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [expandedHelp, setExpandedHelp] = useState<Set<string>>(new Set());
+const DEPLOY_STEPS = [
+  { id: 1, label: 'Checklist' },
+  { id: 2, label: 'Network' },
+  { id: 3, label: 'Wallet' },
+  { id: 4, label: 'Deploy' },
+];
 
+const STATUS_MESSAGES = [
+  'Validating contract code…',
+  'Compiling to WebAssembly…',
+  'Uploading to NEAR network…',
+  'Verifying deployment…',
+];
+
+export function DeployInstructions({
+  contractName = 'my-contract',
+  category,
+  code,
+  onDeploySuccess,
+}: DeployInstructionsProps) {
+  const { isConnected, accountId, openModal } = useWallet();
+
+  const [step, setStep] = useState(1);
+  const [network, setNetwork] = useState<Network>('testnet');
+  const [hasTestedOnTestnet, setHasTestedOnTestnet] = useState(false);
+  const [stage, setStage] = useState<DeployStage>('idle');
+  const [statusIdx, setStatusIdx] = useState(0);
+  const [deployResult, setDeployResult] = useState<{
+    contractId: string;
+    txHash: string;
+    network: string;
+    explorerUrl: string;
+  } | null>(null);
+  const [deployError, setDeployError] = useState<string | null>(null);
+  const [copiedHash, setCopiedHash] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // Parse contract metadata
+  const methods = useMemo(() => parsePublicMethods(code), [code]);
+  const lineCount = useMemo(() => code.split('\n').filter(l => l.trim()).length, [code]);
+  const methodCount = methods.length;
   const safeName = contractName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-  const crateName = safeName.replace(/-/g, '_');
 
-  const steps: Step[] = [
-    {
-      id: 'rust',
-      label: 'Rust installed',
-      command: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh",
-      description: 'Install the Rust toolchain',
-      explanation: 'Rust is the programming language used for NEAR smart contracts. This installs rustc (compiler), cargo (package manager), and rustup (toolchain manager).',
-      section: 'prerequisites',
-    },
-    {
-      id: 'wasm',
-      label: 'WASM target added',
-      command: 'rustup target add wasm32-unknown-unknown',
-      description: 'Add WebAssembly compilation target',
-      explanation: 'NEAR contracts compile to WebAssembly (WASM). This adds the WASM target so Rust can cross-compile your contract to run on the NEAR Virtual Machine.',
-      section: 'prerequisites',
-    },
-    {
-      id: 'cli',
-      label: 'NEAR CLI installed',
-      command: 'npm install -g near-cli-rs',
-      description: 'Install the NEAR command-line interface',
-      explanation: 'NEAR CLI lets you interact with the NEAR blockchain from your terminal — deploy contracts, call methods, manage accounts, and more.',
-      section: 'prerequisites',
-    },
-    {
-      id: 'account',
-      label: 'Testnet account created',
-      command: 'near account create-account fund-later use-auto-generation save-to-folder ~/.near-credentials/implicit',
-      description: 'Create a testnet account',
-      explanation: 'You need a NEAR testnet account to deploy your contract. This creates an implicit account (based on a keypair) that you can fund from the testnet faucet.',
-      section: 'prerequisites',
-    },
-    {
-      id: 'build',
-      label: 'Build contract',
-      command: `RUSTFLAGS='-C link-arg=-s' cargo build --target wasm32-unknown-unknown --release`,
-      description: 'Compile your contract to WASM',
-      explanation: 'This compiles your Rust code to an optimized WebAssembly binary. The -C link-arg=-s flag strips debug symbols to reduce file size. Release mode enables all optimizations.',
-      section: 'deploy',
-    },
-    {
-      id: 'deploy',
-      label: 'Deploy to testnet',
-      command: `near contract deploy ${safeName}.testnet use-file ./target/wasm32-unknown-unknown/release/${crateName}.wasm without-init-call network-config testnet sign-with-keychain send`,
-      description: 'Upload your contract to NEAR testnet',
-      explanation: 'This deploys your compiled WASM to the NEAR testnet. The contract will be accessible at the account ID you specify. You can view it on NEAR Explorer after deployment.',
-      section: 'deploy',
-    },
-    {
-      id: 'init',
-      label: 'Initialize contract',
-      command: `near contract call-function as-transaction ${safeName}.testnet new json-args '{}' prepaid-gas '30 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-keychain send`,
-      description: 'Call the init function',
-      explanation: "Most NEAR contracts have a `new()` initialization function that sets up the contract's state. This must be called once after deployment before the contract can be used.",
-      section: 'deploy',
-    },
-  ];
+  const canProceedStep1 = !!code;
+  const canProceedStep2 = true; // network always selected
+  const canProceedStep3 = isConnected;
+  const canDeploy = isConnected && stage === 'idle';
 
-  const toggleCheck = (id: string) => {
-    setCheckedSteps(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const handleDeploy = async () => {
+    setStage('deploying');
+    setDeployError(null);
+    setStatusIdx(0);
 
-  const toggleHelp = (id: string) => {
-    setExpandedHelp(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+    // Cycle through status messages
+    const interval = setInterval(() => {
+      setStatusIdx(prev => Math.min(prev + 1, STATUS_MESSAGES.length - 1));
+    }, 700);
 
-  const copyCommand = async (id: string, command: string) => {
     try {
-      await navigator.clipboard.writeText(command);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch {
-      // fallback
+      const response = await fetch('/api/sanctum/deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          projectName: safeName,
+          category,
+          network,
+        }),
+      });
+
+      clearInterval(interval);
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Deployment failed');
+      }
+
+      const explorerBase =
+        network === 'testnet'
+          ? 'https://testnet.nearblocks.io'
+          : 'https://nearblocks.io';
+      const explorerUrl = `${explorerBase}/txns/${data.transactionHash}`;
+
+      const result = {
+        contractId: data.contractId,
+        txHash: data.transactionHash,
+        network,
+        explorerUrl,
+      };
+
+      setDeployResult(result);
+      setStage('success');
+
+      // Mark testnet deployed
+      if (network === 'testnet') setHasTestedOnTestnet(true);
+
+      // Trigger celebration
+      setTimeout(() => setShowCelebration(true), 300);
+
+      onDeploySuccess?.({ contractId: result.contractId, txHash: result.txHash, network });
+    } catch (err) {
+      clearInterval(interval);
+      setDeployError(err instanceof Error ? err.message : 'Deployment failed');
+      setStage('error');
     }
   };
 
-  const progress = checkedSteps.size / steps.length;
-  const prereqs = steps.filter(s => s.section === 'prerequisites');
-  const deploySteps = steps.filter(s => s.section === 'deploy');
+  const reset = () => {
+    setStage('idle');
+    setDeployError(null);
+    setDeployResult(null);
+  };
 
-  if (!code) return null;
+  const copyHash = () => {
+    if (!deployResult) return;
+    navigator.clipboard.writeText(deployResult.txHash).catch(() => {});
+    setCopiedHash(true);
+    setTimeout(() => setCopiedHash(false), 2000);
+  };
 
   return (
-    <div className="bg-void-darker/50 border border-void-purple/20 rounded-xl overflow-hidden">
-      {/* Collapsible header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-3 sm:px-4 py-3 min-h-[44px] flex items-center justify-between hover:bg-void-purple/5 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-near-green to-emerald-500 flex items-center justify-center">
-            <Rocket className="w-4 h-4 text-white" />
+    <>
+      {/* Celebration overlay */}
+      <DeployCelebration
+        isVisible={showCelebration}
+        contractId={deployResult?.contractId}
+        network={deployResult?.network}
+        explorerUrl={deployResult?.explorerUrl}
+        onClose={() => setShowCelebration(false)}
+      />
+
+      <div className="bg-void-darker/50 border border-void-purple/20 rounded-xl overflow-hidden">
+        {/* Progress header */}
+        <div className="px-4 py-3 border-b border-void-purple/20 bg-void-black/30">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-near-green to-emerald-500 flex items-center justify-center flex-shrink-0">
+              <Rocket className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white">Deploy Your Contract</h3>
+              <p className="text-xs text-gray-500">Step {step} of {DEPLOY_STEPS.length}</p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="text-sm font-semibold text-white">Deploy Your Contract</h3>
-            <p className="text-xs text-gray-500">
-              {checkedSteps.size}/{steps.length} steps completed
-            </p>
+
+          {/* Step dots */}
+          <div className="flex items-center gap-2">
+            {DEPLOY_STEPS.map((s, i) => (
+              <div key={s.id} className="flex items-center gap-2">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                      step > s.id
+                        ? 'bg-near-green text-void-black'
+                        : step === s.id
+                        ? 'bg-void-purple text-white ring-2 ring-void-purple/30'
+                        : 'bg-void-black/50 text-gray-600 border border-gray-700'
+                    }`}
+                  >
+                    {step > s.id ? <Check className="w-3 h-3" /> : s.id}
+                  </div>
+                  <span className={`text-[9px] mt-0.5 font-medium ${step === s.id ? 'text-void-purple' : 'text-gray-600'}`}>
+                    {s.label}
+                  </span>
+                </div>
+                {i < DEPLOY_STEPS.length - 1 && (
+                  <div className={`flex-1 h-px mb-4 transition-colors ${step > s.id ? 'bg-near-green/50' : 'bg-gray-800'}`} />
+                )}
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Progress bar */}
-          <div className="w-24 h-1.5 bg-void-black/50 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-near-green rounded-full transition-all duration-500"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-          {isExpanded ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+
+        {/* Step content */}
+        <div className="p-4">
+          {/* ── STEP 1: Pre-deploy checklist ── */}
+          {step === 1 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-white">Pre-Deploy Checklist</h4>
+
+              {/* Contract summary */}
+              <div className="bg-void-black/40 border border-void-purple/15 rounded-lg p-3 mb-2">
+                <p className="text-xs text-gray-400 font-mono">
+                  <span className="text-near-green font-semibold">{contractName}</span>
+                  {' — '}
+                  <span className="text-white">{lineCount}</span> lines,{' '}
+                  <span className="text-white">{methodCount}</span> method{methodCount !== 1 ? 's' : ''}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {/* Code generated */}
+                <ChecklistItem
+                  status="ok"
+                  label="Contract code generated"
+                  detail="Your Rust smart contract is ready"
+                />
+
+                {/* Code review */}
+                <ChecklistItem
+                  status="warning"
+                  label="Review your code"
+                  detail="Check for logic errors before deploying"
+                />
+
+                {/* Tests */}
+                <ChecklistItem
+                  status="info"
+                  label="Consider running tests first"
+                  detail="Simulate contract calls in the Sandbox to catch bugs early"
+                />
+
+                {/* Audit */}
+                <ChecklistItem
+                  status="info"
+                  label="Consider an audit for mainnet"
+                  detail="For production contracts, a security audit is recommended"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 2: Choose target ── */}
+          {step === 2 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-white">Choose Deployment Target</h4>
+
+              <div className="grid grid-cols-1 gap-3">
+                <NetworkCard
+                  id="testnet"
+                  icon="🧪"
+                  title="Testnet"
+                  badge="Recommended"
+                  description="Free to deploy. Perfect for testing. Can redeploy anytime."
+                  selected={network === 'testnet'}
+                  onSelect={() => setNetwork('testnet')}
+                  badgeColor="bg-near-green/20 text-near-green border-near-green/30"
+                />
+                <NetworkCard
+                  id="mainnet"
+                  icon="🌐"
+                  title="Mainnet"
+                  description="Costs NEAR. This is permanent. Make sure you've tested first."
+                  selected={network === 'mainnet'}
+                  onSelect={() => setNetwork('mainnet')}
+                  danger
+                />
+              </div>
+
+              {/* Mainnet warning */}
+              {network === 'mainnet' && !hasTestedOnTestnet && (
+                <div className="flex gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-300">
+                    We recommend testing on testnet first before deploying to mainnet.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── STEP 3: Connect wallet ── */}
+          {step === 3 && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-white">Connect Your Wallet</h4>
+              <p className="text-xs text-gray-400">
+                Your wallet is used to sign the deployment transaction.
+              </p>
+
+              {isConnected && accountId ? (
+                <div className="flex items-center gap-3 p-4 bg-near-green/10 border border-near-green/30 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5 text-near-green flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-near-green font-semibold">Wallet Connected</p>
+                    <p className="text-sm text-white font-mono mt-0.5 break-all">{accountId}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-4 bg-void-black/40 border border-gray-700 rounded-lg">
+                    <Wallet className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <p className="text-sm text-gray-400">No wallet connected</p>
+                  </div>
+                  <button
+                    onClick={openModal}
+                    className="w-full py-3 bg-void-purple/20 hover:bg-void-purple/30 border border-void-purple/40 text-void-purple rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Wallet className="w-4 h-4" />
+                    Connect NEAR Wallet
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── STEP 4: Deploy ── */}
+          {step === 4 && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-white">
+                Deploy to {network === 'testnet' ? '🧪 Testnet' : '🌐 Mainnet'}
+              </h4>
+
+              {/* Summary */}
+              <div className="bg-void-black/40 border border-void-purple/15 rounded-lg p-3 space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Contract</span>
+                  <span className="text-white font-mono">{contractName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Network</span>
+                  <span className={network === 'testnet' ? 'text-near-green' : 'text-amber-400'}>
+                    {network}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Wallet</span>
+                  <span className="text-white font-mono truncate max-w-[150px]">{accountId}</span>
+                </div>
+              </div>
+
+              {/* Deploy button / loading / success / error */}
+              {stage === 'idle' && (
+                <button
+                  onClick={handleDeploy}
+                  disabled={!canDeploy}
+                  className="w-full py-4 bg-near-green/20 hover:bg-near-green/30 disabled:opacity-50 border border-near-green/40 text-near-green rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-near-green/10"
+                >
+                  <Rocket className="w-5 h-5" />
+                  Deploy to {network === 'testnet' ? 'Testnet' : 'Mainnet'}
+                </button>
+              )}
+
+              {stage === 'deploying' && (
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-2 border-near-green/20 animate-ping" />
+                    <div className="absolute inset-0 rounded-full border-2 border-near-green/40" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Loader2 className="w-7 h-7 text-near-green animate-spin" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-300 animate-pulse">{STATUS_MESSAGES[statusIdx]}</p>
+                </div>
+              )}
+
+              {stage === 'success' && deployResult && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-3 bg-near-green/10 border border-near-green/30 rounded-lg">
+                    <CheckCircle2 className="w-5 h-5 text-near-green flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-near-green font-semibold">Deployed Successfully!</p>
+                      <p className="text-xs text-gray-400 font-mono mt-0.5 truncate">{deployResult.contractId}</p>
+                    </div>
+                  </div>
+
+                  {/* Tx hash */}
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Transaction Hash</p>
+                    <div className="flex items-center gap-2 bg-void-black/50 border border-void-purple/20 rounded-lg p-2.5">
+                      <code className="text-xs text-gray-300 font-mono flex-1 truncate">
+                        {deployResult.txHash}
+                      </code>
+                      <button
+                        onClick={copyHash}
+                        className="p-1.5 hover:bg-white/10 rounded transition-colors flex-shrink-0"
+                      >
+                        {copiedHash ? (
+                          <Check className="w-3.5 h-3.5 text-near-green" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 text-gray-500" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Explorer link */}
+                  <a
+                    href={deployResult.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 bg-void-purple/20 hover:bg-void-purple/30 border border-void-purple/30 text-void-purple rounded-lg text-sm transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View on NearBlocks
+                  </a>
+
+                  <button
+                    onClick={() => setShowCelebration(true)}
+                    className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-lg text-sm transition-colors"
+                  >
+                    🎉 Celebrate!
+                  </button>
+                </div>
+              )}
+
+              {stage === 'error' && (
+                <div className="space-y-3">
+                  <div className="flex gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-red-400 font-semibold">Deployment Failed</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{deployError}</p>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 space-y-1 p-3 bg-void-black/30 rounded-lg">
+                    <p className="text-gray-400 font-medium">Suggestions:</p>
+                    <p>• Make sure your wallet has enough NEAR for gas</p>
+                    <p>• Check that your contract code compiles correctly</p>
+                    <p>• Try deploying to testnet first</p>
+                  </div>
+                  <button
+                    onClick={reset}
+                    className="w-full py-2.5 bg-void-purple/20 hover:bg-void-purple/30 border border-void-purple/30 text-void-purple rounded-lg text-sm transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
-      </button>
 
-      {isExpanded && (
-        <div className="border-t border-void-purple/20">
-          {/* Prerequisites */}
-          <div className="px-4 py-3 bg-void-black/20">
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Prerequisites</h4>
-            <div className="space-y-2">
-              {prereqs.map(step => (
-                <StepItem
-                  key={step.id}
-                  step={step}
-                  isChecked={checkedSteps.has(step.id)}
-                  isCopied={copiedId === step.id}
-                  isHelpOpen={expandedHelp.has(step.id)}
-                  onToggleCheck={() => toggleCheck(step.id)}
-                  onCopy={() => copyCommand(step.id, step.command)}
-                  onToggleHelp={() => toggleHelp(step.id)}
-                />
-              ))}
-            </div>
-          </div>
+        {/* Navigation */}
+        <div className="px-4 pb-4 flex gap-2">
+          {step > 1 && stage === 'idle' && (
+            <button
+              onClick={() => setStep(s => s - 1)}
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-void-black/40 hover:bg-void-black/60 border border-gray-700 text-gray-300 rounded-lg text-sm transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+          )}
 
-          {/* Build & Deploy */}
-          <div className="px-4 py-3">
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Build & Deploy</h4>
-            <div className="space-y-2">
-              {deploySteps.map(step => (
-                <StepItem
-                  key={step.id}
-                  step={step}
-                  isChecked={checkedSteps.has(step.id)}
-                  isCopied={copiedId === step.id}
-                  isHelpOpen={expandedHelp.has(step.id)}
-                  onToggleCheck={() => toggleCheck(step.id)}
-                  onCopy={() => copyCommand(step.id, step.command)}
-                  onToggleHelp={() => toggleHelp(step.id)}
-                />
-              ))}
-            </div>
-          </div>
+          {step < 4 && (
+            <button
+              onClick={() => setStep(s => s + 1)}
+              disabled={
+                (step === 1 && !canProceedStep1) ||
+                (step === 3 && !canProceedStep3)
+              }
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-void-purple/20 hover:bg-void-purple/30 disabled:opacity-50 border border-void-purple/40 text-void-purple rounded-lg text-sm font-semibold transition-colors"
+            >
+              Continue
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
-      )}
+      </div>
+    </>
+  );
+}
+
+/* ─── Sub-components ─── */
+
+function ChecklistItem({
+  status,
+  label,
+  detail,
+}: {
+  status: 'ok' | 'warning' | 'info';
+  label: string;
+  detail: string;
+}) {
+  const icon =
+    status === 'ok' ? (
+      <CheckCircle2 className="w-4 h-4 text-near-green flex-shrink-0" />
+    ) : status === 'warning' ? (
+      <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+    ) : (
+      <Info className="w-4 h-4 text-void-cyan flex-shrink-0" />
+    );
+
+  return (
+    <div className="flex items-start gap-2.5 p-2.5 bg-void-black/30 border border-void-purple/10 rounded-lg">
+      <div className="mt-0.5">{icon}</div>
+      <div>
+        <p className="text-sm text-white font-medium">{label}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{detail}</p>
+      </div>
     </div>
   );
 }
 
-function StepItem({
-  step,
-  isChecked,
-  isCopied,
-  isHelpOpen,
-  onToggleCheck,
-  onCopy,
-  onToggleHelp,
+function NetworkCard({
+  id,
+  icon,
+  title,
+  badge,
+  description,
+  selected,
+  onSelect,
+  danger,
+  badgeColor,
 }: {
-  step: Step;
-  isChecked: boolean;
-  isCopied: boolean;
-  isHelpOpen: boolean;
-  onToggleCheck: () => void;
-  onCopy: () => void;
-  onToggleHelp: () => void;
+  id: string;
+  icon: string;
+  title: string;
+  badge?: string;
+  description: string;
+  selected: boolean;
+  onSelect: () => void;
+  danger?: boolean;
+  badgeColor?: string;
 }) {
   return (
-    <div className={`rounded-lg border transition-colors ${
-      isChecked
-        ? 'bg-near-green/5 border-near-green/20'
-        : 'bg-void-black/30 border-void-purple/10'
-    }`}>
-      <div className="flex items-start gap-3 p-3">
-        {/* Checkbox */}
-        <button
-          onClick={onToggleCheck}
-          className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors touch-manipulation ${
-            isChecked
-              ? 'bg-near-green border-near-green text-white'
-              : 'border-gray-600 hover:border-near-green/50'
-          }`}
-        >
-          {isChecked && <Check className="w-3 h-3" />}
-        </button>
-
+    <button
+      onClick={onSelect}
+      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+        selected
+          ? danger
+            ? 'border-amber-500/50 bg-amber-500/10'
+            : 'border-near-green/50 bg-near-green/10'
+          : 'border-void-purple/20 bg-void-black/30 hover:border-void-purple/40'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-2xl">{icon}</span>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm font-medium ${isChecked ? 'text-near-green line-through' : 'text-white'}`}>
-              {step.label}
+          <div className="flex items-center gap-2">
+            <span className={`text-sm font-bold ${selected ? (danger ? 'text-amber-400' : 'text-near-green') : 'text-white'}`}>
+              {title}
             </span>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <button
-                onClick={onToggleHelp}
-                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-300 transition-colors"
-                title="What's this?"
-              >
-                <HelpCircle className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={onCopy}
-                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-near-green transition-colors"
-                title="Copy command"
-              >
-                {isCopied ? (
-                  <Check className="w-3.5 h-3.5 text-near-green" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
-              </button>
-            </div>
+            {badge && (
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${badgeColor || 'bg-gray-700/50 text-gray-400 border-gray-600'}`}>
+                {badge}
+              </span>
+            )}
           </div>
-
-          {/* Command */}
-          <code className="text-xs text-gray-400 font-mono block mt-1 truncate overflow-x-auto">
-            $ {step.command}
-          </code>
-
-          {/* Help explanation */}
-          {isHelpOpen && (
-            <div className="mt-2 p-2 bg-void-black/50 rounded-lg border border-void-purple/10">
-              <p className="text-xs text-gray-400 leading-relaxed">{step.explanation}</p>
-            </div>
-          )}
+          <p className="text-xs text-gray-400 mt-1">{description}</p>
         </div>
+        <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 transition-colors ${
+          selected
+            ? danger
+              ? 'border-amber-500 bg-amber-500'
+              : 'border-near-green bg-near-green'
+            : 'border-gray-600'
+        }`} />
       </div>
-    </div>
+    </button>
   );
 }

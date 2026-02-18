@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 // @ts-ignore
-import { Play, Square, RotateCcw, Terminal, CheckCircle, XCircle, Clock, Zap, Eye, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Square, RotateCcw, Terminal, CheckCircle, XCircle, Clock, Zap, Eye, ArrowRight, ChevronDown, ChevronUp, Cpu, Wifi } from 'lucide-react';
 import { parsePublicMethods, type ParsedMethod } from './DownloadContract';
 
 interface SimulationSandboxProps {
@@ -30,6 +30,97 @@ interface TestCase {
   expected?: string;
   result?: SimulationResult;
   status: 'pending' | 'running' | 'passed' | 'failed';
+}
+
+// ─── Extended method type with mutability ───────────────────────────────────
+interface MethodWithMutability {
+  name: string;
+  isMutating: boolean; // &mut self
+  isView: boolean;     // &self (read-only)
+  paramDefs: { name: string; type: string }[];
+  returnType: string;
+  isInit: boolean;
+  isPayable: boolean;
+  isPrivate: boolean;
+  attributes: string[];
+}
+
+/** Parse pub fn methods AND detect &self vs &mut self mutability */
+function parseMethodsWithMutability(code: string): MethodWithMutability[] {
+  const methods: MethodWithMutability[] = [];
+  const lines = code.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // Match multi-line-safe pub fn
+    const fnMatch = line.match(/pub\s+fn\s+(\w+)\s*\(([^)]*)\)(?:\s*->\s*(.+?))?\s*\{?$/);
+    if (!fnMatch) continue;
+
+    const [, name, paramsStr, returnType] = fnMatch;
+
+    // Detect mutability
+    const isMutating = paramsStr.includes('&mut self');
+    const isView = paramsStr.includes('&self') && !isMutating;
+
+    // Collect attributes above this line
+    const attributes: string[] = [];
+    for (let j = i - 1; j >= Math.max(0, i - 6); j--) {
+      const attrLine = lines[j].trim();
+      if (attrLine.startsWith('#[')) {
+        attributes.push(attrLine);
+      } else if (attrLine === '' || attrLine.startsWith('//') || attrLine.startsWith('///')) {
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    // Parse params — skip &self / &mut self, split name:type
+    const paramDefs = paramsStr
+      .split(',')
+      .map(p => p.trim())
+      .filter(p => p && !p.includes('&self') && !p.includes('&mut self') && p !== '')
+      .map(p => {
+        const colonIdx = p.indexOf(':');
+        if (colonIdx === -1) return { name: p, type: 'String' };
+        return {
+          name: p.slice(0, colonIdx).trim(),
+          type: p.slice(colonIdx + 1).trim(),
+        };
+      });
+
+    methods.push({
+      name,
+      isMutating,
+      isView,
+      paramDefs,
+      returnType: returnType?.trim() || 'void',
+      isInit: attributes.some(a => a.includes('init')),
+      isPayable: attributes.some(a => a.includes('payable')),
+      isPrivate: attributes.some(a => a.includes('private')),
+      attributes,
+    });
+  }
+
+  return methods;
+}
+
+// ─── Transaction log entry ───────────────────────────────────────────────────
+interface TxLogEntry {
+  id: string;
+  timestamp: string;
+  method: string;
+  params: Record<string, string>;
+  gas?: string;
+  deposit?: string;
+  isMutating: boolean;
+  result: {
+    success: boolean;
+    output: string;
+    gasUsed: string;
+    duration: number;
+  };
 }
 
 // Category-specific test scenarios
@@ -76,6 +167,8 @@ const CATEGORY_SCENARIOS: Record<string, { name: string; steps: { method: string
   ],
 };
 
+// ─── Main Component ──────────────────────────────────────────────────────────
+
 export function SimulationSandbox({ code, category, onClose }: SimulationSandboxProps) {
   const [testCases, setTestCases] = useState<TestCase[]>([
     { id: '1', name: 'Initialize Contract', method: 'new', args: '{}', caller: 'owner.testnet', deposit: '0', status: 'pending' },
@@ -87,15 +180,19 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
   const [newCaller, setNewCaller] = useState('alice.testnet');
   const [newDeposit, setNewDeposit] = useState('0');
   const [contractState, setContractState] = useState<Record<string, unknown>>({});
-  const [activeTab, setActiveTab] = useState<'tests' | 'state' | 'flow'>('tests');
+  const [activeTab, setActiveTab] = useState<'methods' | 'tests' | 'state' | 'flow'>('methods');
   const [showMethodDetails, setShowMethodDetails] = useState(false);
 
-  // Parse methods from code
+  // Parse methods
   const parsedMethods = useMemo(() => parsePublicMethods(code), [code]);
+  const methodsWithMutability = useMemo(() => parseMethodsWithMutability(code), [code]);
   const availableMethodNames = useMemo(() => {
     const names = parsedMethods.map(m => m.name);
     return names.length > 0 ? names : ['new', 'get_greeting', 'set_greeting'];
   }, [parsedMethods]);
+
+  // Transaction log (for Methods tab)
+  const [txLog, setTxLog] = useState<TxLogEntry[]>([]);
 
   // Category scenarios
   const scenarios = category ? CATEGORY_SCENARIOS[category] || [] : [];
@@ -220,10 +317,18 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
           {/* Left Panel */}
           <div className="md:w-1/2 border-r border-void-purple/20 flex flex-col overflow-hidden">
             {/* Tabs */}
-            <div className="flex border-b border-void-purple/20 bg-void-black/30">
+            <div className="flex border-b border-void-purple/20 bg-void-black/30 overflow-x-auto">
+              <button
+                onClick={() => setActiveTab('methods')}
+                className={`flex-shrink-0 px-3 py-2 text-sm font-medium transition-colors ${
+                  activeTab === 'methods' ? 'text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                ⚡ Methods
+              </button>
               <button
                 onClick={() => setActiveTab('tests')}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === 'tests' ? 'text-green-400 border-b-2 border-green-500' : 'text-gray-500 hover:text-gray-300'
                 }`}
               >
@@ -231,7 +336,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
               </button>
               <button
                 onClick={() => setActiveTab('state')}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === 'state' ? 'text-cyan-400 border-b-2 border-cyan-500' : 'text-gray-500 hover:text-gray-300'
                 }`}
               >
@@ -239,7 +344,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
               </button>
               <button
                 onClick={() => setActiveTab('flow')}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === 'flow' ? 'text-purple-400 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-300'
                 }`}
               >
@@ -247,7 +352,17 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
               </button>
             </div>
 
-            {/* Tests Tab */}
+            {/* ── METHODS TAB ── */}
+            {activeTab === 'methods' && (
+              <MethodsTab
+                methods={methodsWithMutability}
+                code={code}
+                txLog={txLog}
+                setTxLog={setTxLog}
+              />
+            )}
+
+            {/* ── TESTS TAB ── */}
             {activeTab === 'tests' && (
               <>
                 {/* Add Test Case */}
@@ -363,10 +478,36 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                     </div>
                   )}
                 </div>
+
+                {/* Run Controls */}
+                <div className="p-4 border-t border-void-purple/20 flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={runSimulation}
+                    disabled={isRunning || testCases.length === 0}
+                    className="flex-1 py-2 bg-green-500/20 hover:bg-green-500/30 disabled:opacity-50 text-green-400 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isRunning ? (
+                      <>
+                        <Square className="w-4 h-4" /> Running...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4" /> Run All Tests
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={resetSimulation}
+                    disabled={isRunning}
+                    className="px-4 py-2 bg-void-purple/20 hover:bg-void-purple/30 disabled:opacity-50 text-void-purple rounded-lg transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
               </>
             )}
 
-            {/* State Tab */}
+            {/* ── STATE TAB ── */}
             {activeTab === 'state' && (
               <div className="flex-1 overflow-auto p-4">
                 <h4 className="text-sm font-semibold text-cyan-400 mb-3 flex items-center gap-2">
@@ -385,7 +526,7 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
               </div>
             )}
 
-            {/* Flow Tab */}
+            {/* ── FLOW TAB ── */}
             {activeTab === 'flow' && (
               <div className="flex-1 overflow-auto p-4">
                 <h4 className="text-sm font-semibold text-purple-400 mb-3">Transaction Flow</h4>
@@ -397,12 +538,10 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                   <div className="space-y-4">
                     {testCases.filter(t => t.result).map((tc, i) => (
                       <div key={tc.id} className="relative">
-                        {/* Flow line */}
                         {i < testCases.filter(t => t.result).length - 1 && (
                           <div className="absolute left-6 top-full w-px h-4 bg-void-purple/30" />
                         )}
                         <div className="flex items-start gap-3">
-                          {/* Step number */}
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold ${
                             tc.result?.success
                               ? 'bg-green-500/20 text-green-400 border border-green-500/30'
@@ -411,7 +550,6 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                             #{i + 1}
                           </div>
                           <div className="flex-1 min-w-0">
-                            {/* Arrow diagram */}
                             <div className="bg-void-black/30 border border-void-purple/20 rounded-lg p-3">
                               <div className="flex items-center gap-2 text-sm flex-wrap overflow-x-auto">
                                 <span className="text-amber-400 font-mono truncate max-w-[120px]">{tc.caller}</span>
@@ -446,35 +584,9 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
                 )}
               </div>
             )}
-
-            {/* Run Controls */}
-            <div className="p-4 border-t border-void-purple/20 flex gap-2 flex-shrink-0">
-              <button
-                onClick={runSimulation}
-                disabled={isRunning || testCases.length === 0}
-                className="flex-1 py-2 bg-green-500/20 hover:bg-green-500/30 disabled:opacity-50 text-green-400 rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                {isRunning ? (
-                  <>
-                    <Square className="w-4 h-4" /> Running...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" /> Run All Tests
-                  </>
-                )}
-              </button>
-              <button
-                onClick={resetSimulation}
-                disabled={isRunning}
-                className="px-4 py-2 bg-void-purple/20 hover:bg-void-purple/30 disabled:opacity-50 text-void-purple rounded-lg transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-            </div>
           </div>
 
-          {/* Right Panel - Console + Method Signatures */}
+          {/* Right Panel — Console + Method Signatures */}
           <div className="md:w-1/2 flex flex-col overflow-hidden">
             {/* Method signatures toggle */}
             <button
@@ -524,13 +636,344 @@ export function SimulationSandbox({ code, category, onClose }: SimulationSandbox
   );
 }
 
+// ─── Methods Tab ─────────────────────────────────────────────────────────────
+
+function MethodsTab({
+  methods,
+  code,
+  txLog,
+  setTxLog,
+}: {
+  methods: MethodWithMutability[];
+  code: string;
+  txLog: TxLogEntry[];
+  setTxLog: React.Dispatch<React.SetStateAction<TxLogEntry[]>>;
+}) {
+  const [showLog, setShowLog] = useState(false);
+
+  if (methods.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
+        <Cpu className="w-10 h-10 text-gray-600" />
+        <p className="text-gray-500 text-sm">No public methods detected in your contract.</p>
+        <p className="text-gray-600 text-xs">Make sure the contract uses <code className="font-mono">pub fn</code> declarations.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Testnet note */}
+      <div className="px-4 py-2 bg-void-black/40 border-b border-void-purple/15 flex items-center gap-2">
+        <Wifi className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+        <p className="text-xs text-amber-300/80">
+          💡 Connect to testnet to make real contract calls
+        </p>
+      </div>
+
+      {/* Method list */}
+      <div className="flex-1 overflow-auto p-3 space-y-2">
+        {methods.map(m => (
+          <MethodCallCard key={m.name} method={m} code={code} setTxLog={setTxLog} />
+        ))}
+      </div>
+
+      {/* Transaction log toggle */}
+      <div className="border-t border-void-purple/20 flex-shrink-0">
+        <button
+          onClick={() => setShowLog(s => !s)}
+          className="w-full px-4 py-2 flex items-center justify-between text-xs text-gray-400 hover:text-white transition-colors bg-void-black/40"
+        >
+          <span className="flex items-center gap-1.5">
+            <Terminal className="w-3.5 h-3.5" />
+            Transaction Log
+            {txLog.length > 0 && (
+              <span className="bg-void-purple/30 text-void-purple px-1.5 py-0.5 rounded-full text-[10px]">
+                {txLog.length}
+              </span>
+            )}
+          </span>
+          {showLog ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+        </button>
+
+        {showLog && (
+          <div className="max-h-40 overflow-auto bg-void-black/60 p-3 space-y-1.5">
+            {txLog.length === 0 ? (
+              <p className="text-xs text-gray-600 text-center py-2">No calls yet — use the method cards above</p>
+            ) : (
+              [...txLog].reverse().map(entry => (
+                <div
+                  key={entry.id}
+                  className={`text-xs font-mono p-2 rounded border ${
+                    entry.result.success
+                      ? 'bg-green-500/5 border-green-500/20 text-green-400'
+                      : 'bg-red-500/5 border-red-500/20 text-red-400'
+                  }`}
+                >
+                  <span className="text-gray-500">[{entry.timestamp}]</span>{' '}
+                  <span className={entry.isMutating ? 'text-green-400' : 'text-blue-400'}>
+                    {entry.isMutating ? 'CALL' : 'VIEW'}
+                  </span>{' '}
+                  <span className="text-white">{entry.method}</span>
+                  {Object.keys(entry.params).length > 0 && (
+                    <span className="text-gray-400">({JSON.stringify(entry.params)})</span>
+                  )}
+                  {' → '}
+                  <span>{entry.result.success ? '✅ ' + entry.result.output : '❌ ' + entry.result.output}</span>
+                  <span className="text-gray-600 ml-2">~{entry.result.gasUsed}</span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Per-method call card ─────────────────────────────────────────────────────
+
+function MethodCallCard({
+  method,
+  code,
+  setTxLog,
+}: {
+  method: MethodWithMutability;
+  code: string;
+  setTxLog: React.Dispatch<React.SetStateAction<TxLogEntry[]>>;
+}) {
+  const [paramValues, setParamValues] = useState<Record<string, string>>(
+    Object.fromEntries(method.paramDefs.map(p => [p.name, '']))
+  );
+  const [gas, setGas] = useState('30');
+  const [deposit, setDeposit] = useState('0');
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastResult, setLastResult] = useState<{ success: boolean; output: string; gasUsed: string } | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const isView = method.isView && !method.isMutating;
+
+  const handleCall = async () => {
+    setIsLoading(true);
+    setLastResult(null);
+
+    // Simulate async call
+    await new Promise(r => setTimeout(r, 300 + Math.random() * 500));
+
+    const hasMethod = code.includes(`fn ${method.name}`);
+    const success = hasMethod || Math.random() > 0.2;
+
+    const mockOutput = success
+      ? isView
+        ? generateViewOutput(method.name, paramValues)
+        : `Transaction submitted. Method ${method.name} executed successfully.`
+      : `Error: panicked at 'Method ${method.name} failed'`;
+
+    const baseGas = method.isInit ? 15 : method.isPayable ? 12 : isView ? 3 : 8;
+    const gasUsed = `${(baseGas + Math.random() * 4).toFixed(2)} TGas`;
+
+    const result = { success, output: mockOutput, gasUsed };
+    setLastResult(result);
+
+    setTxLog(prev => [
+      ...prev,
+      {
+        id: `${method.name}-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString(),
+        method: method.name,
+        params: paramValues,
+        gas,
+        deposit,
+        isMutating: method.isMutating,
+        result: { success, output: mockOutput, gasUsed, duration: 300 + Math.floor(Math.random() * 500) },
+      },
+    ]);
+
+    setIsLoading(false);
+  };
+
+  return (
+    <div className={`rounded-lg border transition-all ${
+      isView
+        ? 'border-blue-500/20 bg-blue-500/5'
+        : 'border-green-500/20 bg-green-500/5'
+    }`}>
+      {/* Method header */}
+      <button
+        onClick={() => setIsExpanded(e => !e)}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-left"
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          {/* View / Call badge */}
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${
+            isView
+              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              : 'bg-green-500/20 text-green-400 border border-green-500/30'
+          }`}>
+            {isView ? 'VIEW' : 'CALL'}
+          </span>
+
+          <code className="text-sm font-mono font-semibold text-white truncate">
+            {method.name}
+          </code>
+
+          {/* Attribute badges */}
+          {method.isInit && (
+            <span className="text-[9px] bg-cyan-500/20 text-cyan-400 px-1 py-0.5 rounded border border-cyan-500/20 flex-shrink-0">
+              #init
+            </span>
+          )}
+          {method.isPayable && (
+            <span className="text-[9px] bg-amber-500/20 text-amber-400 px-1 py-0.5 rounded border border-amber-500/20 flex-shrink-0">
+              #payable
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {method.returnType !== 'void' && (
+            <span className="text-[10px] text-gray-500 font-mono hidden sm:block">
+              → {method.returnType.length > 20 ? method.returnType.slice(0, 20) + '…' : method.returnType}
+            </span>
+          )}
+          {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-gray-500" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-500" />}
+        </div>
+      </button>
+
+      {/* Expanded form */}
+      {isExpanded && (
+        <div className="px-3 pb-3 space-y-2.5">
+          {/* Parameter inputs */}
+          {method.paramDefs.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Parameters</p>
+              {method.paramDefs.map(param => (
+                <div key={param.name} className="flex items-center gap-2">
+                  <label className="text-xs text-gray-400 font-mono min-w-[80px] truncate flex-shrink-0">
+                    {param.name}
+                    <span className="text-gray-600 ml-1">:{param.type.length > 12 ? param.type.slice(0, 12) + '…' : param.type}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={paramValues[param.name] || ''}
+                    onChange={e => setParamValues(prev => ({ ...prev, [param.name]: e.target.value }))}
+                    placeholder={getPlaceholder(param.type)}
+                    className="flex-1 bg-void-black/60 border border-void-purple/20 rounded px-2 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-void-purple/50 font-mono"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-600 italic">No parameters</p>
+          )}
+
+          {/* Gas + deposit for change methods */}
+          {method.isMutating && (
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div>
+                <label className="text-[10px] text-gray-500 block mb-1">Gas (TGas)</label>
+                <input
+                  type="number"
+                  value={gas}
+                  onChange={e => setGas(e.target.value)}
+                  min="1"
+                  max="300"
+                  className="w-full bg-void-black/60 border border-void-purple/20 rounded px-2 py-1.5 text-xs text-white focus:outline-none font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-gray-500 block mb-1">Deposit (NEAR)</label>
+                <input
+                  type="text"
+                  value={deposit}
+                  onChange={e => setDeposit(e.target.value)}
+                  placeholder="0"
+                  className="w-full bg-void-black/60 border border-void-purple/20 rounded px-2 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none font-mono"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Call button */}
+          <button
+            onClick={handleCall}
+            disabled={isLoading}
+            className={`w-full py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+              isView
+                ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30'
+                : 'bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30'
+            } disabled:opacity-50`}
+          >
+            {isLoading ? (
+              <>
+                <Clock className="w-3.5 h-3.5 animate-spin" />
+                {isView ? 'Querying…' : 'Executing…'}
+              </>
+            ) : isView ? (
+              <>
+                <Eye className="w-3.5 h-3.5" />
+                View
+              </>
+            ) : (
+              <>
+                <Zap className="w-3.5 h-3.5" />
+                Call
+              </>
+            )}
+          </button>
+
+          {/* Result */}
+          {lastResult && (
+            <div className={`p-2.5 rounded-lg border text-xs font-mono ${
+              lastResult.success
+                ? 'bg-green-500/5 border-green-500/20 text-green-300'
+                : 'bg-red-500/5 border-red-500/20 text-red-300'
+            }`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className={lastResult.success ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                  {lastResult.success ? '✅ Success' : '❌ Error'}
+                </span>
+                <span className="text-gray-500">{lastResult.gasUsed}</span>
+              </div>
+              <p className="text-gray-300 break-all">{lastResult.output}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getPlaceholder(type: string): string {
+  const t = type.toLowerCase();
+  if (t.includes('string') || t === 'accountid') return '"alice.testnet"';
+  if (t.includes('u64') || t.includes('u128') || t.includes('i64') || t.includes('u32')) return '0';
+  if (t.includes('bool')) return 'true';
+  if (t.includes('vec')) return '[]';
+  if (t.includes('option')) return 'null';
+  return '""';
+}
+
+function generateViewOutput(methodName: string, params: Record<string, string>): string {
+  const n = methodName.toLowerCase();
+  if (n.includes('balance')) return '"1000000000000000000000000"';
+  if (n.includes('owner') || n.includes('account')) return '"owner.testnet"';
+  if (n.includes('total') || n.includes('count') || n.includes('supply')) return '42';
+  if (n.includes('greeting') || n.includes('message')) return '"Hello from NEAR!"';
+  if (n.includes('token') || n.includes('nft')) return '{"token_id":"1","owner_id":"alice.testnet"}';
+  if (n.includes('proposal')) return '{"id":0,"status":"Active","votes":3}';
+  if (n.includes('list') || n.includes('all')) return '["item1","item2","item3"]';
+  if (n.includes('bool') || n.includes('is_') || n.includes('has_')) return 'true';
+  return `"${methodName}_result"`;
+}
+
 function MethodSignature({ method }: { method: ParsedMethod }) {
   const badges = [];
   if (method.isInit) badges.push({ label: '#[init]', color: 'text-cyan-400 bg-cyan-500/20' });
   if (method.isPayable) badges.push({ label: '#[payable]', color: 'text-amber-400 bg-amber-500/20' });
   if (method.isPrivate) badges.push({ label: '#[private]', color: 'text-red-400 bg-red-500/20' });
 
-  // Estimate gas
   const baseGas = method.isInit ? 15 : method.isPayable ? 10 : 5;
   const paramGas = method.params.length * 0.5;
   const estimatedGas = (baseGas + paramGas).toFixed(1);
@@ -562,7 +1005,8 @@ function MethodSignature({ method }: { method: ParsedMethod }) {
   );
 }
 
-// Mock simulation execution with state tracking
+// ─── Mock simulation execution ────────────────────────────────────────────────
+
 function simulateExecution(
   method: string,
   args: string,
