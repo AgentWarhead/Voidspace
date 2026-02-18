@@ -1388,9 +1388,29 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Sanctum chat error:', error);
+    // Surface meaningful error messages instead of generic "failed"
+    let errorMessage = 'Failed to generate response';
+    let statusCode = 500;
+    if (error instanceof Anthropic.APIError) {
+      if (error.status === 529) {
+        errorMessage = 'Claude is temporarily overloaded — please try again in a moment';
+        statusCode = 503;
+      } else if (error.status === 429) {
+        errorMessage = 'Rate limit reached — please wait a moment and try again';
+        statusCode = 429;
+      } else if (error.status === 408 || error.message?.includes('timeout')) {
+        errorMessage = 'Request timed out — try a simpler prompt or try again';
+        statusCode = 504;
+      } else {
+        errorMessage = `AI service error (${error.status}) — please try again`;
+      }
+    } else if (error instanceof Error && error.message) {
+      // Don't leak internal details, but log them
+      console.error('Detailed error:', error.message);
+    }
     return NextResponse.json(
-      { error: 'Failed to generate response' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }

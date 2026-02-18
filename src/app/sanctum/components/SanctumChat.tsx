@@ -557,7 +557,29 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         return;
       }
 
-      const data = await response.json();
+      // Safely parse response — handle non-JSON errors (Vercel timeouts, Anthropic errors)
+      let data;
+      if (!response.ok) {
+        let errorText = 'Server error';
+        try {
+          const text = await response.text();
+          // Try to parse as JSON first (our API returns JSON errors)
+          try {
+            const jsonErr = JSON.parse(text);
+            errorText = jsonErr.error || jsonErr.message || `Error ${response.status}`;
+          } catch {
+            // Not JSON — extract first meaningful line from HTML/text error
+            errorText = text.slice(0, 200).replace(/<[^>]*>/g, '').trim() || `Error ${response.status}`;
+          }
+        } catch { /* ignore */ }
+        throw new Error(errorText);
+      }
+
+      try {
+        data = await response.json();
+      } catch (parseErr) {
+        throw new Error('Invalid response from server — please try again');
+      }
 
       if (data.error) {
         throw new Error(data.error);
@@ -701,16 +723,17 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         }]);
       } else {
         console.error('Chat error:', error);
+        const errMsg = error instanceof Error ? error.message : 'Something went wrong';
         
         task.steps = task.steps.map(s => 
-          s.status === 'working' ? { ...s, status: 'error', detail: 'Something went wrong' } : s
+          s.status === 'working' ? { ...s, status: 'error', detail: errMsg.slice(0, 60) } : s
         );
         onTaskUpdate?.({ ...task });
         
         setMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.',
+          content: `⚠️ ${errMsg}\n\nHit the send button to retry.`,
         }]);
       }
     } finally {
