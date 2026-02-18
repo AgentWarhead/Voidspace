@@ -399,8 +399,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     };
     setMessages([initialMessage]);
 
-    // If custom prompt provided, auto-send it
-    if (category === 'custom' && customPrompt && !autoMessage) {
+    // If custom prompt provided, auto-send it (works for any category)
+    if (customPrompt && !autoMessage) {
       setTimeout(() => {
         handleSend(customPrompt);
       }, 500);
