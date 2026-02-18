@@ -526,54 +526,114 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   const shade = PERSONA_LIST.find(p => p.id === 'shade')!;
                   return (
                     <div
-                      className="col-span-2 row-span-2 relative rounded-2xl border-2 border-purple-500/40 overflow-hidden flex flex-col justify-between p-5"
+                      className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden flex flex-col"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.08) 50%, rgba(0,0,0,0.3) 100%)',
-                        boxShadow: '0 0 40px rgba(139,92,246,0.2), inset 0 0 40px rgba(139,92,246,0.05)',
+                        background: 'linear-gradient(145deg, rgba(139,92,246,0.18) 0%, rgba(88,28,235,0.10) 40%, rgba(0,0,0,0.5) 100%)',
+                        border: '1.5px solid rgba(139,92,246,0.45)',
+                        boxShadow: '0 0 60px rgba(139,92,246,0.22), 0 0 20px rgba(139,92,246,0.10), inset 0 0 60px rgba(139,92,246,0.06)',
                         animation: 'sanctumFadeInUp 0.4s ease-out backwards',
                       }}
                     >
-                      {/* Subtle scanlines */}
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
-                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,1) 3px, rgba(255,255,255,1) 4px)' }} />
+                      {/* Scanlines overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none opacity-[0.022]"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,1) 3px, rgba(255,255,255,1) 4px)' }}
+                      />
 
-                      {/* LEAD ARCHITECT badge */}
-                      <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/25 border border-purple-400/40">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-purple-300">Lead Architect</span>
+                      {/* Corner accent dots */}
+                      {[
+                        'top-2 left-2', 'top-2 right-2',
+                        'bottom-2 left-2', 'bottom-2 right-2',
+                      ].map((pos, i) => (
+                        <div key={i} className={`absolute ${pos} w-1 h-1 rounded-full bg-purple-500/50`} />
+                      ))}
+
+                      {/* COMMAND badge top-left */}
+                      <div className="absolute top-3 left-4 flex items-center gap-1.5">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full bg-purple-400"
+                          style={{ animation: 'pulse 2.5s ease-in-out infinite', boxShadow: '0 0 6px rgba(139,92,246,0.8)' }}
+                        />
+                        <span className="text-[8px] font-black uppercase tracking-[0.22em] text-purple-400/70">Council Commander</span>
                       </div>
 
-                      {/* Top: emoji + class label */}
-                      <div>
+                      {/* LEAD ARCHITECT badge top-right */}
+                      <div className="absolute top-3 right-4 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/35">
+                        <span className="text-[8px] font-black uppercase tracking-[0.15em] text-purple-300">Lead Architect</span>
+                      </div>
+
+                      {/* Large emoji centrepiece with ambient halo */}
+                      <div className="flex-1 flex items-center justify-center pt-8 pb-2 relative">
+                        {/* Ambient glow rings */}
+                        <div className="absolute w-28 h-28 rounded-full" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)', filter: 'blur(12px)' }} />
+                        <div className="absolute w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 60%)' }} />
+
+                        {/* Floating particles */}
+                        {[
+                          { top: '20%', left: '20%', delay: '0s', size: 'w-1 h-1' },
+                          { top: '15%', right: '25%', delay: '0.7s', size: 'w-1.5 h-1.5' },
+                          { bottom: '30%', left: '15%', delay: '1.4s', size: 'w-0.5 h-0.5' },
+                          { bottom: '25%', right: '20%', delay: '0.4s', size: 'w-1 h-1' },
+                        ].map((p, i) => (
+                          <div
+                            key={i}
+                            className={`absolute ${p.size} rounded-full bg-purple-400/40`}
+                            style={{
+                              top: p.top, left: p.left, right: p.right, bottom: p.bottom,
+                              animation: `floatParticle 3s ease-in-out infinite`,
+                              animationDelay: p.delay,
+                            }}
+                          />
+                        ))}
+
+                        {/* The penguin — large and commanding */}
                         <div
-                          className="inline-flex items-center justify-center w-14 h-14 rounded-xl text-3xl border border-purple-500/30"
+                          className="relative text-5xl z-10 select-none"
                           style={{
-                            background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0.05) 100%)',
-                            boxShadow: '0 0 24px rgba(139,92,246,0.5)',
+                            filter: 'drop-shadow(0 0 16px rgba(139,92,246,0.9)) drop-shadow(0 0 32px rgba(139,92,246,0.5))',
+                            animation: 'subtleFloat 4s ease-in-out infinite',
                           }}
                         >
                           {shade.emoji}
                         </div>
-                        <div className="mt-2 text-[8px] font-bold uppercase tracking-[0.2em] text-purple-400/50">Class: Mastermind</div>
                       </div>
 
-                      {/* Bottom: name + description + tags */}
-                      <div>
-                        <h3 className="text-xl font-black text-purple-300 mb-0.5">{shade.name}</h3>
-                        <p className="text-[10px] font-mono text-purple-400/70 mb-2">{shade.role}</p>
-                        <p className="text-xs text-text-secondary/80 leading-relaxed mb-3 line-clamp-3">{shade.description}</p>
+                      {/* Character info — bottom section */}
+                      <div className="px-5 pb-5 flex-shrink-0">
+                        {/* Name + role */}
+                        <div className="mb-1">
+                          <h3 className="text-2xl font-black text-purple-200 leading-none tracking-tight">{shade.name}</h3>
+                          <p className="text-[10px] font-mono text-purple-400/60 uppercase tracking-[0.18em] mt-0.5">{shade.role}</p>
+                        </div>
+
+                        {/* Tagline */}
+                        <p className="text-[10px] font-mono italic text-purple-300/70 mb-2 leading-relaxed">
+                          &quot;{shade.description}&quot;
+                        </p>
+
+                        {/* Bio */}
+                        <p className="text-[11px] text-white/55 leading-relaxed mb-3 line-clamp-3">
+                          {shade.bio ?? shade.description}
+                        </p>
+
+                        {/* Tags */}
                         <div className="flex flex-wrap gap-1.5">
                           {['Auto-Routes', 'Sees All', 'Full Stack'].map(tag => (
-                            <span key={tag} className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-purple-400/30 text-purple-300/80 bg-purple-500/10">
+                            <span
+                              key={tag}
+                              className="text-[8px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border border-purple-400/30 text-purple-300/80 bg-purple-500/12"
+                            >
                               {tag}
                             </span>
                           ))}
                         </div>
                       </div>
 
-                      {/* Bottom glow line */}
-                      <div className="absolute bottom-0 left-0 right-0 h-[2px]"
-                        style={{ background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.8), transparent)' }} />
+                      {/* Bottom chromatic bar */}
+                      <div
+                        className="absolute bottom-0 left-0 right-0 h-[2px]"
+                        style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(139,92,246,0.9) 50%, transparent 95%)' }}
+                      />
                     </div>
                   );
                 })()}
@@ -589,6 +649,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                       meta={meta}
                       index={i + 1}
                       isHovered={hoveredCard === id}
+                      isDimmed={hoveredCard !== null && hoveredCard !== id}
                       onHover={() => setHoveredCard(id)}
                       onLeave={() => setHoveredCard(null)}
                     />
@@ -606,6 +667,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                       meta={meta}
                       index={i + 5}
                       isHovered={hoveredCard === id}
+                      isDimmed={hoveredCard !== null && hoveredCard !== id}
                       onHover={() => setHoveredCard(id)}
                       onLeave={() => setHoveredCard(null)}
                       mini
@@ -685,6 +747,18 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
             opacity: 1;
             transform: translateX(0);
           }
+        }
+        @keyframes scanSweep {
+          from { left: -45%; }
+          to { left: 145%; }
+        }
+        @keyframes floatParticle {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.4; }
+          50% { transform: translateY(-6px) scale(1.2); opacity: 0.8; }
+        }
+        @keyframes subtleFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
         }
       `}</style>
     </section>
@@ -867,6 +941,7 @@ function SpecialistCard({
   meta,
   index,
   isHovered,
+  isDimmed,
   onHover,
   onLeave,
   mini = false,
@@ -875,53 +950,86 @@ function SpecialistCard({
   meta: { color: string; tags: string[]; triggers: string[] };
   index: number;
   isHovered: boolean;
+  isDimmed: boolean;
   onHover: () => void;
   onLeave: () => void;
   mini?: boolean;
 }) {
   const { color, tags, triggers } = meta;
-  const glowSubtle = `${color}26`; // ~15% opacity
-  const glowStrong = `${color}55`; // ~33% opacity
-  const glowBorder = `${color}66`; // ~40% opacity
+  const glowSubtle = `${color}20`;
+  const glowMed = `${color}44`;
+  const glowStrong = `${color}66`;
+  const borderIdle = `${color}30`;
+  const borderHover = `${color}88`;
 
   return (
     <div
-      className="relative rounded-xl border transition-all duration-300 cursor-default overflow-hidden"
+      className="relative rounded-xl border overflow-hidden cursor-default"
       style={{
-        background: `linear-gradient(135deg, ${color}0d 0%, rgba(255,255,255,0.02) 100%)`,
-        borderColor: isHovered ? glowBorder : `${color}33`,
+        background: `linear-gradient(135deg, ${color}0e 0%, rgba(0,0,0,0.4) 100%)`,
+        borderColor: isHovered ? borderHover : borderIdle,
         boxShadow: isHovered
-          ? `0 0 24px ${glowStrong}, 0 0 6px ${glowSubtle}, inset 0 0 12px ${glowSubtle}`
-          : `0 0 8px ${glowSubtle}`,
-        transform: isHovered ? 'translateY(-4px) scale(1.03)' : 'translateY(0) scale(1)',
-        animation: `sanctumFadeInUp 0.45s ease-out ${(index + 1) * 80}ms backwards`,
+          ? `0 0 32px ${glowStrong}, 0 4px 16px rgba(0,0,0,0.4), inset 0 0 20px ${glowSubtle}`
+          : `0 0 8px ${glowSubtle}, 0 2px 8px rgba(0,0,0,0.3)`,
+        transform: isHovered
+          ? 'translateY(-5px) scale(1.04) perspective(600px) rotateY(1.5deg)'
+          : 'translateY(0) scale(1)',
+        opacity: isDimmed ? 0.45 : 1,
+        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        animation: `sanctumFadeInUp 0.45s ease-out ${(index + 1) * 75}ms backwards`,
       }}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
     >
-      {/* AUTO-DEPLOYED badge — hidden in mini mode */}
+      {/* Scan sweep on hover */}
+      {isHovered && (
+        <div
+          className="absolute inset-y-0 w-[45%] pointer-events-none z-10"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${color}18, transparent)`,
+            animation: 'scanSweep 0.55s ease-out forwards',
+          }}
+        />
+      )}
+
+      {/* Ambient corner glow */}
+      <div
+        className="absolute top-0 right-0 w-16 h-16 pointer-events-none rounded-bl-full transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(circle at top right, ${color}22, transparent 70%)`,
+          opacity: isHovered ? 1 : 0.4,
+        }}
+      />
+
+      {/* COUNCIL MEMBER badge */}
       {!mini && (
         <div
-          className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+          className="absolute top-2 right-2 flex items-center gap-1 text-[7px] font-black uppercase tracking-[0.18em] px-2 py-0.5 rounded-full border"
           style={{
             color,
-            borderColor: `${color}55`,
-            background: `${color}18`,
+            borderColor: `${color}44`,
+            background: `${color}14`,
           }}
         >
-          AUTO
+          <span
+            className="w-1 h-1 rounded-full"
+            style={{ background: color, boxShadow: `0 0 4px ${color}`, animation: 'pulse 2s ease-in-out infinite' }}
+          />
+          ON CALL
         </div>
       )}
 
-      <div className={mini ? 'p-2.5' : 'p-4 pt-5'}>
-        {/* Glowing emoji avatar */}
-        <div className={mini ? 'mb-1.5' : 'mb-3'}>
+      <div className={mini ? 'p-2.5' : 'p-4'}>
+        {/* Emoji avatar with glow ring */}
+        <div className={mini ? 'mb-1.5' : 'mb-2.5'}>
           <div
-            className={`inline-flex items-center justify-center rounded-full border transition-all duration-300 ${mini ? 'w-8 h-8 text-lg' : 'w-11 h-11 text-2xl'}`}
+            className={`inline-flex items-center justify-center rounded-xl transition-all duration-300 ${mini ? 'w-8 h-8 text-base' : 'w-10 h-10 text-xl'}`}
             style={{
-              background: `radial-gradient(circle, ${color}33 0%, ${color}0d 100%)`,
-              borderColor: `${color}44`,
-              boxShadow: isHovered ? `0 0 16px ${glowStrong}` : `0 0 6px ${glowSubtle}`,
+              background: `radial-gradient(circle, ${color}2e 0%, ${color}0a 100%)`,
+              border: `1px solid ${color}44`,
+              boxShadow: isHovered
+                ? `0 0 20px ${glowStrong}, 0 0 8px ${glowMed}`
+                : `0 0 8px ${glowSubtle}`,
             }}
           >
             {persona.emoji}
@@ -929,45 +1037,68 @@ function SpecialistCard({
         </div>
 
         {/* Name */}
-        <h3 className={`font-bold text-text-primary mb-0.5 ${mini ? 'text-xs pr-0' : 'text-sm pr-8'}`}>{persona.name}</h3>
+        <h3
+          className={`font-black text-white leading-none ${mini ? 'text-xs mb-1' : 'text-sm mb-0.5'}`}
+          style={{ textShadow: isHovered ? `0 0 12px ${color}88` : 'none', transition: 'text-shadow 0.3s' }}
+        >
+          {persona.name}
+        </h3>
 
-        {/* Role — hidden in mini mode */}
+        {/* Role — full only */}
         {!mini && (
-          <p className="text-[11px] font-mono mb-2" style={{ color: `${color}cc` }}>{persona.role}</p>
-        )}
-
-        {/* Tagline — hidden in mini mode */}
-        {!mini && (
-          <p className="text-[11px] text-text-muted/80 leading-relaxed line-clamp-2 mb-3">
-            {persona.description}
+          <p
+            className="text-[10px] font-mono mb-2 font-semibold uppercase tracking-wider"
+            style={{ color: `${color}bb` }}
+          >
+            {persona.role}
           </p>
         )}
 
-        {/* Specialty tags */}
-        <div className="flex flex-wrap gap-1 mb-3">
+        {/* Tagline — shown in BOTH full and mini */}
+        <p
+          className={`font-mono leading-snug italic ${mini ? 'text-[8px] mb-1.5 line-clamp-2' : 'text-[10px] mb-2 line-clamp-2'}`}
+          style={{ color: `${color}cc` }}
+        >
+          &quot;{persona.description}&quot;
+        </p>
+
+        {/* Bio — full mode only, always visible */}
+        {!mini && (
+          <p className="text-[10px] text-white/50 leading-relaxed mb-3 line-clamp-3">
+            {persona.bio ?? persona.description}
+          </p>
+        )}
+
+        {/* Tags */}
+        <div className={`flex flex-wrap gap-1 ${!mini ? 'mb-2' : ''}`}>
           {tags.slice(0, mini ? 2 : 3).map(tag => (
             <span
               key={tag}
-              className={`${mini ? 'text-[8px]' : 'text-[9px]'} font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border`}
-              style={{ color, borderColor: `${color}44`, background: `${color}18` }}
+              className={`font-bold uppercase tracking-wider rounded-full border ${mini ? 'text-[7px] px-1.5 py-0.5' : 'text-[8px] px-2 py-0.5'}`}
+              style={{
+                color,
+                borderColor: `${color}40`,
+                background: `${color}14`,
+              }}
             >
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Hover reveal — triggers — hidden in mini mode */}
+        {/* Triggers hover reveal — full only */}
         {!mini && (
           <div
             className="overflow-hidden transition-all duration-300"
             style={{
-              maxHeight: isHovered ? '60px' : '0px',
+              maxHeight: isHovered ? '48px' : '0px',
               opacity: isHovered ? 1 : 0,
+              marginTop: isHovered ? '8px' : '0px',
             }}
           >
-            <div className="pt-2 border-t" style={{ borderColor: `${color}33` }}>
-              <p className="text-[9px] text-text-muted/60 uppercase tracking-wider font-semibold mb-1">Called in when you say:</p>
-              <p className="text-[10px]" style={{ color: `${color}cc` }}>
+            <div className="pt-2 border-t" style={{ borderColor: `${color}28` }}>
+              <p className="text-[8px] text-white/30 uppercase tracking-[0.15em] font-bold mb-0.5">Deploys when you say:</p>
+              <p className="text-[9px] leading-relaxed" style={{ color: `${color}bb` }}>
                 {triggers.join(' · ')}
               </p>
             </div>
@@ -975,12 +1106,12 @@ function SpecialistCard({
         )}
       </div>
 
-      {/* Bottom accent line */}
+      {/* Bottom chromatic line — always visible, intensifies on hover */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-[2px] transition-opacity duration-300"
+        className="absolute bottom-0 left-0 right-0 transition-all duration-300"
         style={{
-          background: `linear-gradient(90deg, transparent, ${color}88, transparent)`,
-          opacity: isHovered ? 1 : 0.3,
+          height: isHovered ? '2px' : '1px',
+          background: `linear-gradient(90deg, transparent 5%, ${color}${isHovered ? 'cc' : '55'} 50%, transparent 95%)`,
         }}
       />
     </div>
