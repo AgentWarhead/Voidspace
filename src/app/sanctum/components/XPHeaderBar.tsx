@@ -234,8 +234,7 @@ export function XPHeaderBar({
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {/* Bar */}
         <div
-          className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden"
-          style={{ width: '120px' }}
+          className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden w-[80px] sm:w-[100px] md:w-[120px]"
         >
           <div
             className="h-full rounded-full relative overflow-hidden"

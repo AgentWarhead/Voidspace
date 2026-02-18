@@ -188,7 +188,7 @@ export function WebappSession({
 
       {/* Desktop: side by side */}
       <div className="hidden md:flex flex-1 overflow-hidden">
-        <div className="w-1/2 border-r border-void-purple/20">
+        <div className="w-1/2 min-w-0 border-r border-void-purple/20">
           <GlassPanel className="h-full" glow glowColor="blue">
             <WebappChat
               contractName={contractName}
@@ -199,7 +199,7 @@ export function WebappSession({
             />
           </GlassPanel>
         </div>
-        <div className="w-1/2">
+        <div className="w-1/2 min-w-0">
           <GlassPanel className="h-full" glow glowColor="green">
             <WebappPreview
               html={previewHtml}
