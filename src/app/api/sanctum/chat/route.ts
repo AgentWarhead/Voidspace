@@ -1,5 +1,5 @@
-// Claude AI generation needs extended timeout
-export const maxDuration = 60;
+// Claude AI generation needs extended timeout (Pro plan: up to 300s)
+export const maxDuration = 300;
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
@@ -1244,9 +1244,9 @@ export async function POST(request: NextRequest) {
     }));
 
     // Call Claude — model determined by user's subscription tier
-    // All modes need generous tokens — learn/build responses include JSON + code + educational content
-    // Truncation destroys the JSON `code` field, causing code to leak into chat
-    const maxTokens = mode === 'expert' ? 16384 : 12288;
+    // Keep tokens bounded to avoid Vercel function timeout
+    // Server-side extraction handles code in content if response is truncated
+    const maxTokens = mode === 'expert' ? 12288 : 8192;
     // Enable 1M context window beta for all supported models
     const response = await anthropic.messages.create({
       model: modelId,
