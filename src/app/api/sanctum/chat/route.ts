@@ -1244,10 +1244,12 @@ export async function POST(request: NextRequest) {
     }));
 
     // Call Claude — model determined by user's subscription tier
+    // Expert mode needs more tokens for full contracts; learn/build can use less
+    const maxTokens = mode === 'expert' ? 16384 : 8192;
     // Enable 1M context window beta for all supported models
     const response = await anthropic.messages.create({
       model: modelId,
-      max_tokens: 4096,
+      max_tokens: maxTokens,
       system: systemPrompt,
       messages: sanitizedMessages,
     }, {
@@ -1256,6 +1258,11 @@ export async function POST(request: NextRequest) {
 
     // Extract the response text
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+    const wasTruncated = response.stop_reason === 'max_tokens';
+
+    if (wasTruncated) {
+      console.warn(`Sanctum chat response truncated (${maxTokens} max_tokens, mode: ${mode})`);
+    }
 
     // Try to parse as JSON — multiple strategies for robustness
     let parsed;
@@ -1265,7 +1272,8 @@ export async function POST(request: NextRequest) {
     } catch {
       try {
         // Strategy 2: Strip markdown fences (```json ... ```)
-        const fenceMatch = responseText.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+        // Use greedy match to find the LAST ``` delimiter (handles code with backticks)
+        const fenceMatch = responseText.match(/```(?:json)?\s*\n?([\s\S]*)```\s*$/);
         if (fenceMatch) {
           parsed = JSON.parse(fenceMatch[1]);
         } else {
@@ -1291,14 +1299,18 @@ export async function POST(request: NextRequest) {
           }
         }
       } catch {
-        // All strategies failed
+        // All strategies failed — try one more: extract code from raw text
       }
 
-      // Final fallback: treat as plain text response
+      // Strategy 4: If JSON parsing failed but there's Rust code, extract it manually
       if (!parsed) {
+        const rustMatch = responseText.match(/```rust\n([\s\S]*?)```/);
+        const contentBeforeJson = responseText.split(/```(?:json)?/)[0]?.trim();
         parsed = {
-          content: responseText,
-          code: null,
+          content: contentBeforeJson || (wasTruncated
+            ? '⚠️ Response was too long and got truncated. Try a simpler request or break it into steps.'
+            : responseText),
+          code: rustMatch?.[1]?.trim() || null,
           learnTips: null,
           options: null,
         };
