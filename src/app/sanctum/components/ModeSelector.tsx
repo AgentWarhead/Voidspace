@@ -14,7 +14,7 @@ interface ModeSelectorProps {
 const MODES: { key: ChatMode; label: string; emoji: string; tooltip: string }[] = [
   { key: 'learn', label: 'Learn', emoji: '🎓', tooltip: 'Step-by-step guidance. Every concept explained as we build together.' },
   { key: 'build', label: 'Build', emoji: '⚡', tooltip: 'Describe what you want. AI builds it, explains the key parts.' },
-  { key: 'expert', label: 'Expert', emoji: '🔥', tooltip: "Minimal hand-holding. Fast iteration. You're in the driver's seat." },
+  { key: 'expert', label: 'Expert', emoji: '🔥', tooltip: "Fast track. AI makes the decisions — you're in the passenger seat." },
 ];
 
 export function ModeSelector({ mode, onModeChange, disabled }: ModeSelectorProps) {
