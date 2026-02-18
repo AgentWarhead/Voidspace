@@ -20,7 +20,7 @@ import { AnimatedBorderCard } from '@/components/effects/AnimatedBorderCard';
 import { QuickActionsBar } from '@/components/profile/QuickActionsBar';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 import { cn } from '@/lib/utils';
-import { totalAchievementXP, getRank } from '@/lib/achievements';
+import { totalAchievementXP, getRank, RANKS } from '@/lib/achievements';
 import type { TierName, SavedOpportunity } from '@/types';
 import { TIERS } from '@/lib/tiers';
 
@@ -67,6 +67,7 @@ export function OverviewSection({
   const achievementXP = totalAchievementXP(unlocked);
   const xp = activityXP + achievementXP;
   const { current: currentRank, next: nextRank, progress: progressToNext } = getRank(xp);
+  const rankLevel = RANKS.findIndex(r => r.name === currentRank.name) + 1;
 
   const tierConfig = TIERS[tier];
   const joinDate = new Date(joinedAt);
@@ -143,13 +144,23 @@ export function OverviewSection({
           {/* XP Progress */}
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
-              <span className="text-text-secondary">📚 Builder Rank</span>
+              <span className="text-text-secondary flex items-center gap-2">
+                <span
+                  className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-void-black flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #00EC97 0%, #7B61FF 100%)',
+                  }}
+                >
+                  {rankLevel}
+                </span>
+                📚 Builder Rank
+              </span>
               <span className="font-mono text-near-green">{xp.toLocaleString()} XP</span>
             </div>
             <Progress value={progressToNext} size="md" color="green" />
             {nextRank && (
               <div className="flex items-center justify-between text-xs text-text-muted mt-1 flex-wrap gap-1">
-                <span>{currentRank.name}</span>
+                <span>Lv {rankLevel} · {currentRank.name}</span>
                 <span className="flex items-center gap-1">
                   {nextRank.icon} {nextRank.name}
                   <span className="text-text-secondary">({nextRank.minXp - xp} XP to go)</span>
