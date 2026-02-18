@@ -500,9 +500,12 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
           {/* Step 3: Meet the Council — Epic Neon Card Grid */}
           {step === 'persona' && (
-            <div className="flex flex-col h-full px-4 py-3 max-w-5xl mx-auto w-full" style={{ minHeight: 0 }}>
+            <div
+              className="flex flex-col w-full px-3 sm:px-4 pb-3"
+              style={{ minHeight: 'calc(100vh - 80px)', paddingTop: '12px' }}
+            >
               {/* Header */}
-              <div className="text-center mb-4 flex-shrink-0">
+              <div className="text-center mb-3 flex-shrink-0">
                 <div className="inline-flex items-center gap-2 mb-2 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
                   <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400/80">Classified Briefing</span>
@@ -511,15 +514,18 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 <h2 className="text-2xl sm:text-3xl font-bold text-text-primary leading-tight">
                   The <GradientText>Council</GradientText> <span className="text-white/40 text-xl font-light">NEAR</span>
                 </h2>
-                <p className="text-xs text-text-muted/60 mt-1 uppercase tracking-[0.15em] font-mono">
+                <p className="text-xs text-text-muted/60 mt-0.5 uppercase tracking-[0.15em] font-mono">
                   Voidspace Sanctum Protocol
                 </p>
               </div>
 
               {/* Epic Neon Card Grid — 8 members + Launch button */}
-              <div className="flex-1 flex flex-col gap-2 min-h-0 overflow-y-auto">
-                {/* 4×2 grid of council members */}
-                <div className="grid grid-cols-4 gap-2 flex-shrink-0">
+              {/* No overflow-hidden/y-auto here — prevents hover glow clipping */}
+              <div className="flex-1 flex flex-col gap-2 min-h-0">
+                {/* 4×2 grid — fills all available height on desktop */}
+                <div
+                  className="council-grid flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 min-h-0"
+                >
                   {([
                     { id: 'shade',    color: '#8B5CF6', tags: ['Auto-Routes', 'Sees All', 'Full Stack'] },
                     { id: 'oxide',    color: '#F97316', tags: ['Rust', 'NEAR SDK', 'Smart Contracts'] },
@@ -537,97 +543,109 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                         key={id}
                         className="relative rounded-xl overflow-hidden flex flex-col cursor-default select-none"
                         style={{
-                          background: `linear-gradient(160deg, ${color}12 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.9) 100%)`,
+                          minHeight: '150px',
+                          background: `linear-gradient(160deg, ${color}14 0%, rgba(3,4,8,0.92) 55%, rgba(0,0,0,0.97) 100%)`,
                           border: `2px solid ${isHovered ? color : `${color}55`}`,
                           boxShadow: isHovered
-                            ? `0 0 28px ${color}66, 0 0 60px ${color}22, inset 0 0 24px ${color}10`
-                            : `0 0 10px ${color}22, inset 0 0 12px ${color}08`,
-                          transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-                          transform: isHovered ? 'translateY(-4px) scale(1.03)' : 'none',
-                          animation: `sanctumFadeInUp 0.4s ease-out ${i * 60}ms backwards`,
+                            ? `0 0 32px ${color}70, 0 0 80px ${color}25, inset 0 0 30px ${color}12`
+                            : `0 0 12px ${color}25, inset 0 0 14px ${color}08`,
+                          // No transform — prevents overflow outside grid cells
+                          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                          animation: `sanctumFadeInUp 0.4s ease-out ${i * 55}ms backwards`,
                         }}
                         onMouseEnter={() => setHoveredCard(id)}
                         onMouseLeave={() => setHoveredCard(null)}
                       >
-                        {/* Background watermark icon */}
+                        {/* Background watermark icon — large, top-right */}
                         <div
-                          className="absolute top-1 right-1 text-5xl pointer-events-none select-none leading-none"
-                          style={{ opacity: 0.06, filter: `drop-shadow(0 0 8px ${color})` }}
+                          className="absolute top-0 right-0 leading-none pointer-events-none select-none"
+                          style={{
+                            fontSize: '72px',
+                            opacity: isHovered ? 0.1 : 0.05,
+                            filter: `drop-shadow(0 0 12px ${color})`,
+                            transform: 'translate(10px, -8px)',
+                            transition: 'opacity 0.2s',
+                          }}
                         >
                           {persona.emoji}
                         </div>
 
                         {/* Corner accent dots */}
-                        <div className="absolute top-1.5 left-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
-                        <div className="absolute top-1.5 right-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
-                        <div className="absolute bottom-1.5 left-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
-                        <div className="absolute bottom-1.5 right-1.5 w-1 h-1 rounded-full" style={{ background: color, opacity: 0.6 }} />
+                        <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
+                        <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
+                        <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
+                        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: color, opacity: isHovered ? 1 : 0.5 }} />
 
                         {/* Scan sweep on hover */}
                         {isHovered && (
                           <div
                             className="absolute inset-y-0 w-[45%] pointer-events-none z-10"
                             style={{
-                              background: `linear-gradient(90deg, transparent, ${color}20, transparent)`,
+                              background: `linear-gradient(90deg, transparent, ${color}1a, transparent)`,
                               animation: 'scanSweep 0.55s ease-out forwards',
                             }}
                           />
                         )}
 
-                        {/* Card content */}
-                        <div className="relative z-10 flex flex-col items-center px-2 pt-4 pb-3 gap-1.5">
-                          {/* Large emoji with glow halo */}
-                          <div
-                            className="relative flex items-center justify-center w-12 h-12 rounded-full"
-                            style={{
-                              background: `radial-gradient(circle, ${color}25 0%, transparent 70%)`,
-                              filter: isHovered
-                                ? `drop-shadow(0 0 12px ${color}) drop-shadow(0 0 24px ${color}88)`
-                                : `drop-shadow(0 0 6px ${color}88)`,
-                              transition: 'filter 0.25s',
-                            }}
-                          >
-                            <span className="text-3xl leading-none">{persona.emoji}</span>
+                        {/* Card content — flex-1 + justify-between fills full height */}
+                        <div className="relative z-10 flex flex-col items-center justify-between flex-1 px-2 py-3 sm:py-4">
+                          {/* Top: icon + name + role */}
+                          <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                            {/* Large emoji with glow halo */}
+                            <div
+                              className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0"
+                              style={{
+                                background: `radial-gradient(circle, ${color}28 0%, transparent 70%)`,
+                                filter: isHovered
+                                  ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 28px ${color}88)`
+                                  : `drop-shadow(0 0 8px ${color}88)`,
+                                transition: 'filter 0.2s',
+                              }}
+                            >
+                              <span className="text-3xl sm:text-4xl leading-none">{persona.emoji}</span>
+                            </div>
+
+                            {/* Name in bold accent color */}
+                            <h3
+                              className="text-sm sm:text-base font-black uppercase tracking-wide leading-none text-center"
+                              style={{
+                                color,
+                                textShadow: isHovered
+                                  ? `0 0 18px ${color}, 0 0 36px ${color}66`
+                                  : `0 0 10px ${color}55`,
+                                transition: 'text-shadow 0.2s',
+                              }}
+                            >
+                              {persona.name.toUpperCase()}
+                            </h3>
+
+                            {/* Role subtitle */}
+                            <p
+                              className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.15em] leading-none text-center hidden sm:block"
+                              style={{ color: `${color}88` }}
+                            >
+                              {persona.role}
+                            </p>
                           </div>
 
-                          {/* Name in bold accent color */}
-                          <h3
-                            className="text-sm font-black uppercase tracking-wide leading-none text-center"
-                            style={{
-                              color,
-                              textShadow: isHovered ? `0 0 16px ${color}, 0 0 32px ${color}66` : `0 0 8px ${color}66`,
-                              transition: 'text-shadow 0.25s',
-                            }}
-                          >
-                            {persona.name.toUpperCase()}
-                          </h3>
-
-                          {/* Role subtitle */}
+                          {/* Middle: Quote */}
                           <p
-                            className="text-[8px] font-mono uppercase tracking-[0.15em] leading-none text-center"
-                            style={{ color: `${color}88` }}
-                          >
-                            {persona.role}
-                          </p>
-
-                          {/* Quote */}
-                          <p
-                            className="text-[8px] italic text-center leading-snug px-1 line-clamp-2"
+                            className="text-[8px] sm:text-[9px] italic text-center leading-snug px-1 line-clamp-2 flex-shrink-0 my-1 sm:my-1.5"
                             style={{ color: `${color}cc` }}
                           >
                             &quot;{persona.description}&quot;
                           </p>
 
-                          {/* Tags */}
-                          <div className="flex flex-wrap justify-center gap-1 mt-0.5">
+                          {/* Bottom: Tags */}
+                          <div className="flex flex-wrap justify-center gap-1 flex-shrink-0">
                             {tags.slice(0, 3).map(tag => (
                               <span
                                 key={tag}
                                 className="text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                                 style={{
                                   color,
-                                  border: `1px solid ${color}50`,
-                                  background: `${color}15`,
+                                  border: `1px solid ${color}55`,
+                                  background: `${color}18`,
                                 }}
                               >
                                 {tag}
@@ -639,7 +657,11 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                         {/* Bottom chromatic bar */}
                         <div
                           className="absolute bottom-0 left-0 right-0 h-[2px]"
-                          style={{ background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)` }}
+                          style={{
+                            background: `linear-gradient(90deg, transparent 5%, ${color} 50%, transparent 95%)`,
+                            opacity: isHovered ? 1 : 0.6,
+                            transition: 'opacity 0.2s',
+                          }}
                         />
                       </div>
                     );
@@ -649,56 +671,58 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 {/* Full-width LAUNCH SESSION button */}
                 <button
                   onClick={handleLaunch}
-                  className="group relative flex-shrink-0 w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.015] active:scale-[0.99] focus:outline-none"
+                  className="group relative flex-shrink-0 w-full rounded-xl overflow-hidden focus:outline-none active:scale-[0.99]"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(0,236,151,0.15) 0%, rgba(16,185,129,0.10) 100%)',
+                    background: 'linear-gradient(135deg, rgba(0,236,151,0.12) 0%, rgba(0,236,151,0.06) 100%)',
                     border: '2px solid #00ec97',
-                    boxShadow: '0 0 24px rgba(0,236,151,0.4), 0 0 60px rgba(0,236,151,0.15)',
+                    boxShadow: '0 0 28px rgba(0,236,151,0.45), 0 0 70px rgba(0,236,151,0.15)',
                     animation: 'sanctumFadeInUp 0.4s ease-out 0.5s backwards',
-                    minHeight: '64px',
+                    minHeight: '60px',
+                    transition: 'box-shadow 0.2s, background 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 0 40px rgba(0,236,151,0.65), 0 0 90px rgba(0,236,151,0.25)';
+                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, rgba(0,236,151,0.2) 0%, rgba(0,236,151,0.1) 100%)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 0 28px rgba(0,236,151,0.45), 0 0 70px rgba(0,236,151,0.15)';
+                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, rgba(0,236,151,0.12) 0%, rgba(0,236,151,0.06) 100%)';
                   }}
                 >
-                  {/* Hover glow overlay */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: 'linear-gradient(135deg, rgba(0,236,151,0.12) 0%, rgba(16,185,129,0.08) 100%)' }} />
-
                   {/* Scan sweep on hover */}
                   <div
                     className="absolute inset-y-0 w-[30%] pointer-events-none opacity-0 group-hover:opacity-100"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.15), transparent)',
-                      animation: 'scanSweep 0.8s ease-out forwards',
-                    }}
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(0,236,151,0.12), transparent)', animation: 'scanSweep 1s ease-out forwards' }}
                   />
 
                   {/* Corner dots */}
-                  {['top-2 left-3', 'top-2 right-3', 'bottom-2 left-3', 'bottom-2 right-3'].map((pos, i) => (
-                    <div key={i} className={`absolute ${pos} w-1.5 h-1.5 rounded-full bg-near-green/60`} />
+                  {(['top-2 left-3', 'top-2 right-3', 'bottom-2 left-3', 'bottom-2 right-3'] as const).map((pos, i) => (
+                    <div key={i} className={`absolute ${pos} w-1.5 h-1.5 rounded-full`} style={{ background: '#00ec97', opacity: 0.7 }} />
                   ))}
 
-                  <div className="relative z-10 flex items-center justify-center gap-4 py-4 px-6">
+                  <div className="relative z-10 flex items-center justify-center gap-3 sm:gap-5 py-3 sm:py-4 px-4">
                     <div
-                      className="flex items-center justify-center w-10 h-10 rounded-full"
-                      style={{ background: 'rgba(0,236,151,0.2)', border: '1px solid rgba(0,236,151,0.5)' }}
+                      className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0"
+                      style={{ background: 'rgba(0,236,151,0.18)', border: '1px solid rgba(0,236,151,0.45)' }}
                     >
-                      <Rocket className="w-5 h-5 text-near-green" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,0.8))' }} />
+                      <Rocket className="w-4 h-4 text-near-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,236,151,0.9))' }} />
                     </div>
                     <div className="text-center">
                       <div
-                        className="text-xl font-black uppercase tracking-widest leading-none"
-                        style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,0.8), 0 0 40px rgba(0,236,151,0.4)' }}
+                        className="text-lg sm:text-xl font-black uppercase tracking-widest leading-none"
+                        style={{ color: '#00ec97', textShadow: '0 0 20px rgba(0,236,151,0.9), 0 0 45px rgba(0,236,151,0.45)' }}
                       >
-                        LAUNCH SESSION
+                        🚀 LAUNCH SESSION
                       </div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.25em] text-near-green/50 mt-0.5">
-                        with your council — auto-deployed as needed
+                      <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-near-green/50 mt-0.5 hidden sm:block">
+                        with your council — specialists auto-deployed as needed
                       </div>
                     </div>
                     <div
-                      className="flex items-center justify-center w-10 h-10 rounded-full"
-                      style={{ background: 'rgba(0,236,151,0.2)', border: '1px solid rgba(0,236,151,0.5)' }}
+                      className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0"
+                      style={{ background: 'rgba(0,236,151,0.18)', border: '1px solid rgba(0,236,151,0.45)' }}
                     >
-                      <Rocket className="w-5 h-5 text-near-green" style={{ filter: 'drop-shadow(0 0 8px rgba(0,236,151,0.8))' }} />
+                      <Rocket className="w-4 h-4 text-near-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,236,151,0.9))' }} />
                     </div>
                   </div>
 
@@ -716,6 +740,12 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
       {/* Animations */}
       <style jsx>{`
+        /* Council grid: fill available height on desktop, auto-height on mobile */
+        @media (min-width: 768px) {
+          .council-grid {
+            grid-template-rows: repeat(2, 1fr);
+          }
+        }
         @keyframes sanctumFadeInUp {
           from {
             opacity: 0;
