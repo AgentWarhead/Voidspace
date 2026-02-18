@@ -54,7 +54,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     annualPrice: 0,
     creditsPerMonth: 0,  // One-time $2.50 grant, not monthly
     features: [
-      'Sanctum AI builder (Claude Sonnet 4.6)',
+      'Sanctum AI builder (Claude Opus 4.6)',
       '$2.50 one-time starter credits',
       '1 active project',
       '66 NEAR & Rust education modules',
@@ -66,9 +66,10 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdAnnual: '',
     // ── Enforced Limits ──
     maxProjects: 1,
-    aiModel: 'claude-sonnet-4-6',
+    aiModel: 'claude-opus-4-6',
     availableModels: [
-      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Reliable AI coding assistant' },
+      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Most powerful — complex contracts & deep reasoning', default: true },
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Fast & reliable coding assistant' },
     ],
     canExport: false,
     canAudit: true,   // Temporarily enabled for Nearcon judging — revert after contest
