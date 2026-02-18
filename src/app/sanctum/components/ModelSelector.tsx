@@ -17,17 +17,8 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
   const availableModels = tierConfig.availableModels;
   const isFreeTier = tier === 'shade';
 
-  // Initialize from localStorage (sync, no flash)
-  const [selectedModel, setSelectedModel] = useState<string>(() => {
-    if (typeof window === 'undefined' || isFreeTier) return tierConfig.aiModel;
-    try {
-      const saved = localStorage.getItem(MODEL_PREF_KEY);
-      if (saved && availableModels.some((m: AvailableModel) => m.id === saved && !m.comingSoon)) {
-        return saved;
-      }
-    } catch { /* ignore */ }
-    return tierConfig.aiModel;
-  });
+  // Always start with the tier's default model — no localStorage override
+  const [selectedModel, setSelectedModel] = useState<string>(tierConfig.aiModel);
 
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -105,29 +96,24 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
       return;
     }
 
-    // Update state + persist to localStorage (instant, no API call)
     setSelectedModel(modelId);
     onModelChange?.(modelId);
     setIsOpen(false);
-
-    try {
-      localStorage.setItem(MODEL_PREF_KEY, modelId);
-    } catch { /* ignore */ }
   };
 
   const currentModel = availableModels.find((m: AvailableModel) => m.id === selectedModel) || availableModels[0];
   const isOpus = selectedModel.includes('opus');
 
-  // Free tier: show a label with lock (re-enable after Nearcon)
-  // if (isFreeTier) {
-  //   return (
-  //     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs text-gray-400">
-  //       <Cpu className="w-3 h-3" />
-  //       <span>{currentModel.name}</span>
-  //       <Lock className="w-3 h-3 ml-0.5 text-gray-500" />
-  //     </div>
-  //   );
-  // }
+  // Free tier: just show a label
+  if (isFreeTier) {
+    return (
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs text-gray-400">
+        <Cpu className="w-3 h-3" />
+        <span>{currentModel.name}</span>
+        <Lock className="w-3 h-3 ml-0.5 text-gray-500" />
+      </div>
+    );
+  }
 
   // Portal dropdown
   const dropdown = isOpen && typeof document !== 'undefined' ? createPortal(
