@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { Code2, Rocket, Share2, GitCompare, Play, Users, Globe, FolderTree, Wrench, ChevronDown, Check, Lock } from 'lucide-react';
 import { DownloadButton } from './DownloadContract';
 import { FileStructureToggle } from './FileStructure';
@@ -89,7 +90,7 @@ function SmartStatusBadge({
   );
 }
 
-// Dropdown menu component with click-outside handling
+// Dropdown menu component with click-outside handling + portal to escape overflow:hidden
 function ToolbarDropdown({ 
   trigger, 
   children, 
@@ -100,11 +101,24 @@ function ToolbarDropdown({
   align?: 'left' | 'right';
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+
+  // Calculate position from trigger element
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 8, left: rect.left, width: rect.width });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target as Node) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -115,14 +129,24 @@ function ToolbarDropdown({
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={triggerRef}>
       <div onClick={() => setIsOpen(!isOpen)}>
         {trigger}
       </div>
-      {isOpen && (
-        <div className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} z-50 min-w-[200px] py-1.5 bg-[#1a1a2e] backdrop-blur-xl border border-white/[0.1] rounded-xl shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-top-2 duration-200`}>
+      {isOpen && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9999] min-w-[200px] py-1.5 bg-[#1a1a2e] backdrop-blur-xl border border-white/[0.1] rounded-xl shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-top-2 duration-200"
+          style={{
+            top: pos.top,
+            ...(align === 'right' 
+              ? { right: typeof window !== 'undefined' ? window.innerWidth - pos.left - pos.width : 0 }
+              : { left: pos.left }),
+          }}
+        >
           {children}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

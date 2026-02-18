@@ -34,7 +34,7 @@ export function SanctumVisualization({ isGenerating, progress, stage }: SanctumV
       />
 
       {/* Sanctum icon */}
-      <div className="relative z-10 flex flex-col items-center">
+      <div className="relative flex flex-col items-center">
         {/* Animated rings */}
         {isGenerating && (
           <>
