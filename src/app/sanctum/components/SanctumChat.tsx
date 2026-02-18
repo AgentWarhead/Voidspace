@@ -86,6 +86,7 @@ interface SanctumChatProps {
   sessionReset?: number; // increment to signal reset from parent
   externalMessage?: string; // message injected from outside (code panel actions)
   externalMessageSeq?: number; // increment to trigger send
+  externalMessageNoCode?: boolean; // when true, don't extract code from the response (for explain/audit/optimize)
   loadedProjectMessages?: Array<{ role: string; content: string }>; // messages from a loaded project
   loadedProjectSeq?: number; // increment to trigger project message restore
 }
@@ -125,7 +126,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, loadedProjectMessages, loadedProjectSeq }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
@@ -152,6 +153,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const autoMessageSentRef = useRef(false);
+  const noCodeExtractionRef = useRef(false);
 
   // Check for speech recognition support
   useEffect(() => {
@@ -540,6 +542,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           mode: chatMode,
           attachments: userAttachments?.filter(f => f.type.startsWith('image/')),
           preferredModel: typeof window !== 'undefined' ? localStorage.getItem('sanctum-model-preference') : null,
+          noCodeExtraction: noCodeExtractionRef.current || undefined,
         }),
         signal: abortControllerRef.current.signal,
       });
@@ -658,36 +661,44 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       }
 
       // ── CODE EXTRACTION — prefer explicit `code` field, fallback to content parsing ──
-      let extractedCode = data.code;
+      // SKIP code extraction for analysis actions (explain/audit/optimize) — those
+      // responses belong in the chat window, not the code preview panel.
+      const skipCodeExtraction = noCodeExtractionRef.current;
+      let extractedCode: string | null = skipCodeExtraction ? null : (data.code || null);
       try {
-        if (!extractedCode && data.content) {
-          // Strategy 1: Fenced Rust code blocks (```rust ... ```)
-          const rustMatch = data.content.match(/```rust\s*\n([\s\S]*?)```/);
-          if (rustMatch && rustMatch[1] && rustMatch[1].trim().length > 50) {
-            extractedCode = rustMatch[1].trim();
-          }
-          // Strategy 2: Any fenced code block that looks like Rust/NEAR
-          if (!extractedCode) {
-            const anyFence = data.content.match(/```\w*\s*\n([\s\S]*?)```/);
-            if (anyFence && anyFence[1] && /(?:use\s+near_sdk|#\[near|pub\s+(?:fn|struct)|impl\s+\w)/.test(anyFence[1])) {
-              extractedCode = anyFence[1].trim();
+        if (!skipCodeExtraction) {
+          if (!extractedCode && data.content) {
+            // Strategy 1: Fenced Rust code blocks (```rust ... ```)
+            const rustMatch = data.content.match(/```rust\s*\n([\s\S]*?)```/);
+            if (rustMatch && rustMatch[1] && rustMatch[1].trim().length > 50) {
+              extractedCode = rustMatch[1].trim();
+            }
+            // Strategy 2: Any fenced code block that looks like Rust/NEAR
+            if (!extractedCode) {
+              const anyFence = data.content.match(/```\w*\s*\n([\s\S]*?)```/);
+              if (anyFence && anyFence[1] && /(?:use\s+near_sdk|#\[near|pub\s+(?:fn|struct)|impl\s+\w)/.test(anyFence[1])) {
+                extractedCode = anyFence[1].trim();
+              }
             }
           }
-        }
 
-        // ── STRIP CODE from chat content — code belongs in preview panel ONLY ──
-        if (assistantMessage.content) {
-          let cleaned = assistantMessage.content
-            // Strip all fenced code blocks (any language)
-            .replace(/```\w*\s*\n[\s\S]*?```/g, '')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
-          // If stripping left almost nothing and we have code, add a note
-          if (cleaned.length < 30 && extractedCode) {
-            cleaned = '✅ Contract generated — see the preview panel →';
+          // ── STRIP CODE from chat content — code belongs in preview panel ONLY ──
+          // Only strip when we're actually extracting code to the preview panel
+          if (extractedCode && assistantMessage.content) {
+            let cleaned = assistantMessage.content
+              // Strip all fenced code blocks (any language)
+              .replace(/```\w*\s*\n[\s\S]*?```/g, '')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim();
+            // If stripping left almost nothing and we have code, add a note
+            if (cleaned.length < 30 && extractedCode) {
+              cleaned = '✅ Contract generated — see the preview panel →';
+            }
+            assistantMessage.content = cleaned;
           }
-          assistantMessage.content = cleaned;
         }
+        // For analysis actions: keep ALL content (including code blocks) in the chat message
+        // so the explanation with code references displays properly.
       } catch (extractErr) {
         // Never let extraction crash the chat — show whatever we have
         console.error('Code extraction error:', extractErr);
@@ -746,6 +757,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   async function handleSend(messageText?: string) {
     const text = messageText || input;
     if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
+    // Reset noCodeExtraction for normal user input (external injection sets it before calling handleSend)
+    if (!messageText) noCodeExtractionRef.current = false;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -788,6 +801,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   // External message injection (from code panel actions)
   useEffect(() => {
     if (externalMessage && externalMessageSeq && externalMessageSeq > 0 && !isLoading) {
+      // Set the noCodeExtraction flag before sending — sendToApi reads it via ref
+      noCodeExtractionRef.current = !!externalMessageNoCode;
       handleSend(externalMessage);
     }
   }, [externalMessageSeq]);

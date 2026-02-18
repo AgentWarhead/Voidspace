@@ -125,14 +125,16 @@ function SanctumPageInner() {
   // External message injection from code panel → chat
   const [externalMessage, setExternalMessage] = useState('');
   const [externalMessageSeq, setExternalMessageSeq] = useState(0);
+  const [externalMessageNoCode, setExternalMessageNoCode] = useState(false);
   const [loadedProjectMessages, setLoadedProjectMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [loadedProjectSeq, setLoadedProjectSeq] = useState(0);
 
   // Track code selection from TypewriterCode
   const [codeSelection, setCodeSelection] = useState<string | null>(null);
 
-  const sendToChat = useCallback((message: string) => {
+  const sendToChat = useCallback((message: string, options?: { noCodeExtraction?: boolean }) => {
     setExternalMessage(message);
+    setExternalMessageNoCode(!!options?.noCodeExtraction);
     setExternalMessageSeq(prev => prev + 1);
     // On mobile, switch to chat panel to show the response
     if (state.activePanel === 'code') {
@@ -155,7 +157,12 @@ function SanctumPageInner() {
       security: `Audit ${scope} for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
     };
 
-    sendToChat(prompts[action] || prompts.explain);
+    // Analysis actions (explain/optimize/audit) should NOT overwrite the code preview.
+    // Only "tests" may generate new code that belongs in the preview panel.
+    const analysisActions = ['explain', 'optimize', 'security'];
+    sendToChat(prompts[action] || prompts.explain, {
+      noCodeExtraction: analysisActions.includes(action),
+    });
   }, [codeSelection, state.generatedCode, sendToChat]);
 
   const handleNewSession = useCallback(() => {
@@ -716,6 +723,7 @@ function SanctumPageInner() {
                       sessionReset={sessionResetCounter}
                       externalMessage={externalMessage}
                       externalMessageSeq={externalMessageSeq}
+                      externalMessageNoCode={externalMessageNoCode}
                       loadedProjectMessages={loadedProjectMessages}
                       loadedProjectSeq={loadedProjectSeq}
                     />
@@ -888,6 +896,7 @@ function SanctumPageInner() {
                         sessionReset={sessionResetCounter}
                         externalMessage={externalMessage}
                         externalMessageSeq={externalMessageSeq}
+                        externalMessageNoCode={externalMessageNoCode}
                         loadedProjectMessages={loadedProjectMessages}
                         loadedProjectSeq={loadedProjectSeq}
                       />

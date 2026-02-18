@@ -1156,7 +1156,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body early — need preferredModel for model routing
     const body = await request.json();
-    const { messages, category, personaId, mode: rawMode, preferredModel: clientPreferredModel } = body;
+    const { messages, category, personaId, mode: rawMode, preferredModel: clientPreferredModel, noCodeExtraction } = body;
 
     // Resolve model: client sends preference (from localStorage), validate against tier
     // No DB lookup needed — preference is client-side
@@ -1325,40 +1325,48 @@ export async function POST(request: NextRequest) {
     }
 
     // ── SERVER-SIDE CODE EXTRACTION (belt + suspenders) ──
-    // Ensure code ends up in the `code` field, NOT embedded in `content`
-    try {
-      if (!parsed.code && parsed.content) {
-        // Strategy 1: Fenced Rust code blocks (```rust\n...```)
-        const fencedRust = parsed.content.match(/```rust\s*\n([\s\S]*?)```/);
-        if (fencedRust && fencedRust[1] && fencedRust[1].trim().length > 50) {
-          parsed.code = fencedRust[1].trim();
-        }
-        // Strategy 2: Any fenced code block that looks like Rust/NEAR
-        if (!parsed.code) {
-          const fencedAny = parsed.content.match(/```\w*\s*\n([\s\S]*?)```/);
-          if (fencedAny && fencedAny[1] && fencedAny[1].trim().length > 100) {
-            const block = fencedAny[1].trim();
-            if (/(?:use\s+near_sdk|#\[near|pub\s+(?:fn|struct)|impl\s+\w)/.test(block)) {
-              parsed.code = block;
+    // Skip code extraction for analysis actions (explain/audit/optimize) — those
+    // responses should keep code blocks inline in the chat content.
+    if (!noCodeExtraction) {
+      // Ensure code ends up in the `code` field, NOT embedded in `content`
+      try {
+        if (!parsed.code && parsed.content) {
+          // Strategy 1: Fenced Rust code blocks (```rust\n...```)
+          const fencedRust = parsed.content.match(/```rust\s*\n([\s\S]*?)```/);
+          if (fencedRust && fencedRust[1] && fencedRust[1].trim().length > 50) {
+            parsed.code = fencedRust[1].trim();
+          }
+          // Strategy 2: Any fenced code block that looks like Rust/NEAR
+          if (!parsed.code) {
+            const fencedAny = parsed.content.match(/```\w*\s*\n([\s\S]*?)```/);
+            if (fencedAny && fencedAny[1] && fencedAny[1].trim().length > 100) {
+              const block = fencedAny[1].trim();
+              if (/(?:use\s+near_sdk|#\[near|pub\s+(?:fn|struct)|impl\s+\w)/.test(block)) {
+                parsed.code = block;
+              }
             }
           }
         }
-      }
 
-      // Strip fenced code blocks from content — code belongs in the `code` field only
-      if (parsed.content && parsed.code) {
-        let cleaned = parsed.content
-          .replace(/```\w*\s*\n[\s\S]*?```/g, '')
-          .replace(/\n{3,}/g, '\n\n')
-          .trim();
-        if (cleaned.length < 30) {
-          cleaned = '✅ Contract code generated — check the preview panel →';
+        // Strip fenced code blocks from content — code belongs in the `code` field only
+        if (parsed.content && parsed.code) {
+          let cleaned = parsed.content
+            .replace(/```\w*\s*\n[\s\S]*?```/g, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+          if (cleaned.length < 30) {
+            cleaned = '✅ Contract code generated — check the preview panel →';
+          }
+          parsed.content = cleaned;
         }
-        parsed.content = cleaned;
+      } catch (extractErr) {
+        // Never let post-processing crash the response — return whatever we have
+        console.error('Code extraction post-processing error:', extractErr);
       }
-    } catch (extractErr) {
-      // Never let post-processing crash the response — return whatever we have
-      console.error('Code extraction post-processing error:', extractErr);
+    } else {
+      // For analysis actions: explicitly null out the code field so the client
+      // doesn't accidentally push it to the preview panel
+      parsed.code = null;
     }
 
     // Log AI usage for budget tracking (secondary safety net)
