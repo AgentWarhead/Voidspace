@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Opportunity } from '@/types';
+import { PoweredByBadge } from '@/components/ui/PoweredByBadge';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -133,6 +134,9 @@ export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps
             ⚡ Strategic
           </span>
         )}
+        <span className="ml-auto">
+          <PoweredByBadge model="claude-sonnet" size="sm" />
+        </span>
       </div>
     </Link>
   );

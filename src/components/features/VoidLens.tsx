@@ -6,6 +6,7 @@ import { Search, Shield, TrendingUp, TrendingDown, Activity, Wallet, AlertTriang
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { PoweredByBadge } from '@/components/ui/PoweredByBadge';
 import { GradientText } from '@/components/effects/GradientText';
 import { GridPattern } from '@/components/effects/GridPattern';
 import { motion } from 'framer-motion';
@@ -784,16 +785,19 @@ export function VoidLens({ initialAddress }: VoidLensProps = {}) {
                 </div>
                 
                 {/* Freshness + Refresh */}
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <span>Analyzed {result.analysisTimestamp ? formatTimeAgo(result.analysisTimestamp) : 'recently'}</span>
-                  <button
-                    onClick={() => handleAnalyze(result.walletData?.account || result.address)}
-                    className="inline-flex items-center gap-1 text-near-green hover:text-near-green/80 transition-colors"
-                    disabled={loading}
-                  >
-                    <RefreshCw className={cn("w-3 h-3", loading && "animate-spin")} />
-                    Refresh
-                  </button>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <span>Analyzed {result.analysisTimestamp ? formatTimeAgo(result.analysisTimestamp) : 'recently'}</span>
+                    <button
+                      onClick={() => handleAnalyze(result.walletData?.account || result.address)}
+                      className="inline-flex items-center gap-1 text-near-green hover:text-near-green/80 transition-colors"
+                      disabled={loading}
+                    >
+                      <RefreshCw className={cn("w-3 h-3", loading && "animate-spin")} />
+                      Refresh
+                    </button>
+                  </div>
+                  <PoweredByBadge model="claude-haiku" />
                 </div>
               </div>
             </div>

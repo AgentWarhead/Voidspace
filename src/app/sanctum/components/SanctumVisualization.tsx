@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PoweredByBadge } from '@/components/ui/PoweredByBadge';
 
 interface SanctumVisualizationProps {
   isGenerating: boolean;
@@ -88,6 +89,13 @@ export function SanctumVisualization({ isGenerating, progress, stage }: SanctumV
                 className="h-full bg-gradient-to-r from-near-green to-emerald-400 transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
+            </div>
+          )}
+
+          {/* AI model badge — visible when generating or complete */}
+          {(isGenerating || stage === 'complete') && (
+            <div className="mt-2">
+              <PoweredByBadge model="gemini" />
             </div>
           )}
         </div>

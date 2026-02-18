@@ -5,6 +5,7 @@ import { Sparkles, Info, Loader2, ArrowRight, Rocket, X, Dices, Zap, WandSparkle
 import { BriefDisplay } from '@/components/brief/BriefDisplay';
 import type { ProjectBrief } from '@/types';
 import { useAchievementContext } from '@/contexts/AchievementContext';
+import { PoweredByBadge } from '@/components/ui/PoweredByBadge';
 
 // ~20 mystery NEAR ecosystem prompts — randomly picked client-side
 const MYSTERY_PROMPTS = [
@@ -186,9 +187,7 @@ export function VoidBriefCard({ isConnected, openModal, onStartBuild }: VoidBrie
             <span className="text-sm font-semibold text-text-primary tracking-wide">Void Brief</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-near-green/10 border border-near-green/20 text-[10px] font-mono font-medium text-near-green uppercase tracking-wider">
-              Powered by Claude AI
-            </span>
+            <PoweredByBadge model="claude-sonnet" />
             <div className="relative">
               <button
                 onMouseEnter={() => setShowTooltip(true)}
