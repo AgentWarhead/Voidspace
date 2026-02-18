@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Target, Sparkles, Globe, BookOpen, User, Zap } from 'lucide-react';
+import { Menu, X, Search, Target, Sparkles, Globe, BookOpen, User, Zap, Trophy } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Container } from '@/components/ui/Container';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
@@ -64,13 +64,15 @@ export function Header() {
       case 'Learn': return <BookOpen className={iconClass} />;
       case 'Pricing': return <Zap className={iconClass} />;
       case 'Profile': return <User className={iconClass} />;
+      case 'Vault': return <Trophy className={iconClass} />;
       default: return null;
     }
   };
 
-  // Create nav items with conditional Profile
+  // Create nav items with conditional Profile + Vault
   const navItems = [...NAV_ITEMS] as Array<{ label: string; href: string }>;
   if (isConnected) {
+    navItems.push({ label: 'Vault', href: '/trophies' });
     navItems.push({ label: 'Profile', href: '/profile' });
   }
 
