@@ -235,13 +235,15 @@ export function ContractToolbar({
 
   return (
     <div className="flex flex-col items-end gap-1.5">
-      {/* Smart status badge */}
-      <SmartStatusBadge
-        generatedCode={generatedCode}
-        sanctumStage={sanctumStage}
-        isThinking={isThinking}
-        lastAction={lastAction}
-      />
+      {/* Smart status badge — only show when there's code or actively generating */}
+      {(generatedCode || isThinking || sanctumStage === 'thinking' || sanctumStage === 'generating') && (
+        <SmartStatusBadge
+          generatedCode={generatedCode}
+          sanctumStage={sanctumStage}
+          isThinking={isThinking}
+          lastAction={lastAction}
+        />
+      )}
 
       {/* Buttons row */}
       <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
