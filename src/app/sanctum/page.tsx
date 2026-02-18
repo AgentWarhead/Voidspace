@@ -529,9 +529,9 @@ function SanctumPageInner() {
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
           </div>
           
-          <div className="relative z-10 flex flex-1 p-3 overflow-hidden">
-            <div className="w-full max-w-4xl mx-auto">
-              <GlassPanel className="flex-1 flex flex-col h-full overflow-hidden" glow glowColor="red">
+          <div className="relative z-10 flex flex-col flex-1 min-h-0 p-3 overflow-hidden">
+            <div className="w-full max-w-4xl mx-auto flex-1 min-h-0 flex flex-col">
+              <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="red">
                 {/* Header with back button */}
                 <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
                   <div className="flex items-center gap-3">
@@ -846,7 +846,7 @@ function SanctumPageInner() {
             <div className="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
               {/* Chat Panel */}
               {state.activePanel === 'chat' && (
-                <div className="flex-1 min-h-0 p-3 overflow-hidden">
+                <div className="flex-1 min-h-0 p-3 flex flex-col overflow-hidden">
                   <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="purple">
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                       <SanctumChat 
@@ -876,7 +876,7 @@ function SanctumPageInner() {
               {/* Code Panel */}
               {state.activePanel === 'code' && (
                 <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-                  <div className="flex-1 min-h-0 p-3 overflow-hidden">
+                  <div className="flex-1 min-h-0 p-3 flex flex-col overflow-hidden">
                     <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="green">
                       {/* Mobile Code Header */}
                       <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50">
