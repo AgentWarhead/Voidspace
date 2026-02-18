@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { ChevronDown, Cpu, Zap, Brain, Lock, Sparkles } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { SANCTUM_TIERS, type SanctumTier, type AvailableModel } from '@/lib/sanctum-tiers';
@@ -17,7 +17,6 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
   const [selectedModel, setSelectedModel] = useState<string>(tierConfig.aiModel);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,44 +40,48 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     }
   }, [tier, isFreeTier, availableModels]);
 
-  // Calculate dropdown position when opening
-  const updatePosition = useCallback(() => {
-    if (!buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    const dropdownWidth = 288; // w-72 = 18rem = 288px
-    const dropdownHeight = 300; // approximate max height
+  // Position the dropdown after it renders (measures actual size)
+  const positionDropdown = useCallback(() => {
+    if (!buttonRef.current || !dropdownRef.current) return;
+    const btnRect = buttonRef.current.getBoundingClientRect();
+    const dd = dropdownRef.current;
+    const ddHeight = dd.offsetHeight;
+    const ddWidth = Math.min(288, window.innerWidth - 16); // w-72 capped to viewport
 
-    // Position above the button by default
-    let top = rect.top - dropdownHeight - 4;
-    let left = rect.left;
+    // Default: position above the button, aligned left
+    let top = btnRect.top - ddHeight - 4;
+    let left = btnRect.left;
 
-    // If dropdown would go off-screen left, align to left edge with padding
+    // Clamp horizontal: don't overflow left or right
     if (left < 8) left = 8;
-    // If dropdown would go off-screen right, shift left
-    if (left + dropdownWidth > window.innerWidth - 8) {
-      left = window.innerWidth - dropdownWidth - 8;
-    }
-    // If dropdown would go off-screen top, show below instead
-    if (top < 8) {
-      top = rect.bottom + 4;
+    if (left + ddWidth > window.innerWidth - 8) {
+      left = window.innerWidth - ddWidth - 8;
     }
 
-    setDropdownPos({ top, left });
+    // If not enough room above, show below
+    if (top < 8) {
+      top = btnRect.bottom + 4;
+    }
+
+    dd.style.top = `${top}px`;
+    dd.style.left = `${left}px`;
+    dd.style.width = `${ddWidth}px`;
   }, []);
 
-  // Update position on open and on scroll/resize
-  useEffect(() => {
+  // Reposition on open, scroll, resize
+  useLayoutEffect(() => {
     if (!isOpen) return;
-    updatePosition();
+    // Position once DOM has painted
+    requestAnimationFrame(positionDropdown);
 
-    const handleScrollOrResize = () => updatePosition();
-    window.addEventListener('scroll', handleScrollOrResize, true);
-    window.addEventListener('resize', handleScrollOrResize);
+    const handleUpdate = () => requestAnimationFrame(positionDropdown);
+    window.addEventListener('scroll', handleUpdate, true);
+    window.addEventListener('resize', handleUpdate);
     return () => {
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-      window.removeEventListener('resize', handleScrollOrResize);
+      window.removeEventListener('scroll', handleUpdate, true);
+      window.removeEventListener('resize', handleUpdate);
     };
-  }, [isOpen, updatePosition]);
+  }, [isOpen, positionDropdown]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -94,6 +97,14 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen]);
 
   const handleSelect = async (modelId: string) => {
@@ -136,12 +147,12 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
     );
   }
 
-  // Dropdown content (rendered via portal to escape overflow:hidden ancestors)
-  const dropdown = isOpen && dropdownPos && typeof document !== 'undefined' ? createPortal(
+  // Portal dropdown — renders on document.body, positioned after measuring
+  const dropdown = isOpen && typeof document !== 'undefined' ? createPortal(
     <div
       ref={dropdownRef}
-      className="fixed z-[9999] w-72 max-w-[calc(100vw-1rem)] rounded-lg border border-white/10 bg-gray-900/95 backdrop-blur-xl shadow-2xl overflow-hidden"
-      style={{ top: dropdownPos.top, left: dropdownPos.left }}
+      className="fixed z-[9999] rounded-lg border border-white/10 bg-gray-900/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
+      style={{ top: -9999, left: -9999 }} // offscreen until positioned
     >
       <div className="px-3 py-2 border-b border-white/5">
         <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Select AI Model</span>
@@ -163,19 +174,19 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
                   ? modelIsOpus
                     ? 'bg-purple-500/15 border-l-2 border-purple-400'
                     : 'bg-emerald-500/15 border-l-2 border-emerald-400'
-                  : 'hover:bg-white/5 border-l-2 border-transparent'
+                  : 'hover:bg-white/5 border-l-2 border-transparent active:bg-white/10'
               }
             `}
           >
             <div className="flex items-center gap-2">
               {isComingSoon ? (
-                <Sparkles className="w-3.5 h-3.5 text-gray-600" />
+                <Sparkles className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" />
               ) : modelIsOpus ? (
-                <Brain className={`w-3.5 h-3.5 ${isSelected ? 'text-purple-400' : 'text-gray-500'}`} />
+                <Brain className={`w-3.5 h-3.5 flex-shrink-0 ${isSelected ? 'text-purple-400' : 'text-gray-500'}`} />
               ) : (
-                <Zap className={`w-3.5 h-3.5 ${isSelected ? 'text-emerald-400' : 'text-gray-500'}`} />
+                <Zap className={`w-3.5 h-3.5 flex-shrink-0 ${isSelected ? 'text-emerald-400' : 'text-gray-500'}`} />
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className={`text-xs font-medium ${isComingSoon ? 'text-gray-500' : isSelected ? 'text-white' : 'text-gray-300'}`}>
                   {model.name}
                   {model.default && !isComingSoon && (
@@ -185,7 +196,7 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
                     <span className="ml-1.5 text-[9px] uppercase tracking-wider px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-500/70 border border-emerald-500/20">coming soon</span>
                   )}
                 </div>
-                <div className={`text-[11px] mt-0.5 ${isComingSoon ? 'text-gray-600' : 'text-gray-500'}`}>{model.description}</div>
+                <div className={`text-[11px] mt-0.5 leading-snug ${isComingSoon ? 'text-gray-600' : 'text-gray-500'}`}>{model.description}</div>
               </div>
               {isSelected && !isComingSoon && (
                 <div className={`ml-auto flex-shrink-0 w-1.5 h-1.5 rounded-full ${modelIsOpus ? 'bg-purple-400' : 'bg-emerald-400'}`} />

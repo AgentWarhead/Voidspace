@@ -522,7 +522,7 @@ function SanctumPageInner() {
 
       {/* Roast Session - full screen */}
       {state.sessionStarted && state.mode === 'roast' && (
-        <div className="relative z-40 flex flex-col bg-void-black h-screen">
+        <div className="relative z-40 flex flex-col bg-void-black h-dvh overscroll-none touch-manipulation">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-void-black to-orange-900/10" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
@@ -555,7 +555,7 @@ function SanctumPageInner() {
 
       {/* Build Session - full screen immersive mode */}
       {state.sessionStarted && state.mode === 'build' && (
-        <div className="relative z-40 flex flex-col bg-void-black h-screen">
+        <div className="relative z-40 flex flex-col bg-void-black h-dvh overscroll-none touch-manipulation">
           {/* Session background - contained, no bleeding */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-void-black to-near-green/10" />

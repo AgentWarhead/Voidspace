@@ -467,3 +467,57 @@ body::before {
   0%, 100% { box-shadow: 0 0 20px rgba(0,236,151,0.3); }
   50% { box-shadow: 0 0 30px rgba(0,236,151,0.5); }
 }
+
+/* ========= Mobile Viewport & Safe Area Utilities ========= */
+
+/* Dynamic viewport height — respects mobile browser chrome (address bar) */
+.h-dvh {
+  height: 100vh; /* fallback */
+  height: 100dvh;
+}
+.min-h-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Safe area inset padding for notched/rounded devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevent iOS rubber-band overscroll on fixed layouts */
+.overscroll-none {
+  overscroll-behavior: none;
+}
+
+/* Touch-friendly: prevent 300ms tap delay + improve scrolling */
+@supports (touch-action: manipulation) {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+}
+
+/* Prevent text-size-adjust on rotation */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Model selector portal animation */
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in.slide-in-from-bottom-2 {
+  animation: slideInFromBottom 150ms ease-out;
+}

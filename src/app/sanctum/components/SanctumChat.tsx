@@ -754,7 +754,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] ${message.role === 'user' ? 'order-2' : ''}`}>
+            <div className={`max-w-[85%] min-w-0 ${message.role === 'user' ? 'order-2' : ''}`}>
               {/* Avatar */}
               <div className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {(() => {
@@ -770,7 +770,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                   );
                 })()}
                 
-                <div className={`rounded-2xl px-4 py-3 ${
+                <div className={`rounded-2xl px-4 py-3 min-w-0 overflow-hidden ${
                   message.role === 'user'
                     ? 'bg-near-green/20 border border-near-green/30'
                     : 'bg-void-gray border border-border-subtle'
