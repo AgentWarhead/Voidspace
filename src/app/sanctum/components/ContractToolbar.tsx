@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Code2, Rocket, Share2, GitCompare, Play, Users, Globe, FolderTree, Wrench, ChevronDown, Check, Lock } from 'lucide-react';
 import { DownloadButton } from './DownloadContract';
 import { FileStructureToggle } from './FileStructure';
@@ -20,6 +20,73 @@ interface ContractToolbarProps {
   handleDeploy: () => void;
   handleShare: () => void;
   onLoadProject: (project: any) => void;
+  /** Optional hint about the last AI action — drives context-aware status badge */
+  lastAction?: 'generate' | 'test' | 'optimize' | 'audit';
+}
+
+// ---------------------------------------------------------------------------
+// Smart status badge — context-aware message derived from stage + code
+// ---------------------------------------------------------------------------
+function SmartStatusBadge({
+  generatedCode,
+  sanctumStage,
+  isThinking,
+  lastAction,
+}: {
+  generatedCode: string;
+  sanctumStage: string;
+  isThinking: boolean;
+  lastAction?: string;
+}) {
+  const { text, className } = useMemo(() => {
+    const isGenerating =
+      isThinking || sanctumStage === 'thinking' || sanctumStage === 'generating';
+
+    if (isGenerating) {
+      return {
+        text: '⏳ Generating…',
+        className: 'text-amber-400 animate-pulse',
+      };
+    }
+
+    if (!generatedCode) {
+      return {
+        text: '📝 Describe what you want to build',
+        className: 'text-text-muted',
+      };
+    }
+
+    // Derive counts from code
+    const lineCount = generatedCode.split('\n').length;
+    const methodCount = (generatedCode.match(/pub fn /g) || []).length;
+    const testCount = (generatedCode.match(/#\[test\]/g) || []).length;
+
+    // Explicit lastAction override
+    if (lastAction === 'audit') {
+      return { text: '🛡️ Audit complete — review findings above', className: 'text-red-400' };
+    }
+    if (lastAction === 'optimize') {
+      return { text: '⚡ Optimized — review changes above', className: 'text-amber-400' };
+    }
+    if (lastAction === 'test' || testCount > 0) {
+      return {
+        text: `🧪 Tests generated — ${testCount} test case${testCount !== 1 ? 's' : ''}`,
+        className: 'text-cyan-400',
+      };
+    }
+
+    // Default: contract ready
+    return {
+      text: `✅ Contract ready — ${lineCount} line${lineCount !== 1 ? 's' : ''}, ${methodCount} method${methodCount !== 1 ? 's' : ''}`,
+      className: 'text-near-green',
+    };
+  }, [generatedCode, sanctumStage, isThinking, lastAction]);
+
+  return (
+    <span className={`text-[11px] font-medium whitespace-nowrap ${className}`}>
+      {text}
+    </span>
+  );
 }
 
 // Dropdown menu component with click-outside handling
@@ -128,6 +195,7 @@ export function ContractToolbar({
   handleDeploy,
   handleShare,
   onLoadProject,
+  lastAction,
 }: ContractToolbarProps) {
   const hasCode = !!generatedCode;
   const [copied, setCopied] = useState(false);
@@ -142,7 +210,17 @@ export function ContractToolbar({
   };
 
   return (
-    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+    <div className="flex flex-col items-end gap-1.5">
+      {/* Smart status badge */}
+      <SmartStatusBadge
+        generatedCode={generatedCode}
+        sanctumStage={sanctumStage}
+        isThinking={isThinking}
+        lastAction={lastAction}
+      />
+
+      {/* Buttons row */}
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
       {/* --- Quick Actions (always visible, icon-only with tooltips) --- */}
       
       {/* Copy Code */}
@@ -265,6 +343,7 @@ export function ContractToolbar({
         <Globe className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Webapp</span>
       </button>
+      </div>{/* end buttons row */}
     </div>
   );
 }
