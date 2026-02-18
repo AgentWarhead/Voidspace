@@ -399,13 +399,24 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     };
     setMessages([initialMessage]);
 
-    // If custom prompt provided, auto-send it (works for any category)
-    if (customPrompt && !autoMessage) {
-      setTimeout(() => {
-        handleSend(customPrompt);
-      }, 500);
-    }
   }, [category]);
+
+  // Auto-send wizard prompt when it arrives (may arrive after initial mount)
+  const autoMessageFiredRef = useRef(false);
+  useEffect(() => {
+    if (autoMessage && !autoMessageFiredRef.current && !autoMessageSentRef.current) {
+      autoMessageFiredRef.current = true;
+      autoMessageSentRef.current = true;
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: autoMessage,
+      };
+      // Replace greeting with user message + send to API
+      setMessages([userMessage]);
+      sendToApi(autoMessage, [userMessage]);
+    }
+  }, [autoMessage]);
 
   // Auto-scroll to bottom
   useEffect(() => {
