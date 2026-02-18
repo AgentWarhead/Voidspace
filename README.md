@@ -257,17 +257,6 @@ cp .env.example .env.local
 npm run dev
 ```
 
-### Required Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase admin key |
-| `ANTHROPIC_API_KEY` | Claude Opus 4 (Sanctum AI) |
-| `STRIPE_SECRET_KEY` | Stripe payments |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification |
-| `SYNC_API_KEY` | Data sync authentication |
 
 ---
 
