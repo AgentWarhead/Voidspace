@@ -369,7 +369,7 @@ function VaultConnectWall({ onConnect }: { onConnect: () => void }) {
 
 // ─── Main Component ───────────────────────────────────────────
 
-export function TrophyVault() {
+export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
   const { unlocked, timeline, isConnected, isLoaded } = useAchievementContext();
   const { openModal } = useWallet();
 
@@ -464,7 +464,7 @@ export function TrophyVault() {
     return list;
   }, [groupedByCategory, filteredAchievements, sort, unlocked, timelineMap]);
 
-  if (!isConnected) {
+  if (!isConnected && !embedded) {
     return (
       <div className="relative min-h-screen">
         <VaultParticles count={30} />
@@ -488,7 +488,7 @@ export function TrophyVault() {
 
   return (
     <div className="relative">
-      <VaultParticles count={40} />
+      {!embedded && <VaultParticles count={40} />}
 
       <div className="relative z-10 space-y-6">
         {/* Stats bar */}

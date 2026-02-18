@@ -14,6 +14,7 @@ import { AchievementsSection } from './sections/AchievementsSection';
 import { SkillsSection } from './sections/SkillsSection';
 import { MissionsSection } from './sections/MissionsSection';
 import { ActivitySection } from './sections/ActivitySection';
+import { VaultSection } from './sections/VaultSection';
 import type { TierName, SavedOpportunity } from '@/types';
 
 interface WalletReputation {
@@ -97,6 +98,8 @@ export function VoidCommandCenter({
         );
       case 'activity':
         return <ActivitySection stats={stats} />;
+      case 'vault':
+        return <VaultSection />;
       default:
         return null;
     }

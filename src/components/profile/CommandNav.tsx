@@ -14,6 +14,7 @@ import {
   Sparkles,
   Target,
   Activity,
+  Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/Progress';
@@ -30,7 +31,8 @@ export type CommandSection =
   | 'achievements'
   | 'skills'
   | 'missions'
-  | 'activity';
+  | 'activity'
+  | 'vault';
 
 interface NavItem {
   id: CommandSection;
@@ -46,6 +48,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'skills',       label: 'Skills',        icon: Sparkles, emoji: '🌟' },
   { id: 'missions',     label: 'Missions',      icon: Target,   emoji: '🎯' },
   { id: 'activity',     label: 'Activity',      icon: Activity, emoji: '📊' },
+  { id: 'vault',        label: 'Trophy Vault',  icon: Crown,    emoji: '🏆' },
 ];
 
 interface CommandNavProps {
