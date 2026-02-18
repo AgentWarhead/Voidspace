@@ -113,7 +113,13 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
       return;
     }
 
-    setIsLoading(true);
+    // Optimistic update — switch immediately for responsive UX
+    const previousModel = selectedModel;
+    setSelectedModel(modelId);
+    onModelChange?.(modelId);
+    setIsOpen(false);
+
+    // Persist to server in background (non-blocking)
     try {
       const res = await fetch('/api/sanctum/model-preference', {
         method: 'POST',
@@ -121,15 +127,16 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
         body: JSON.stringify({ modelId }),
       });
 
-      if (res.ok) {
-        setSelectedModel(modelId);
-        onModelChange?.(modelId);
+      if (!res.ok) {
+        // Server rejected — revert to previous model
+        console.warn('Model preference save failed:', res.status);
+        setSelectedModel(previousModel);
+        onModelChange?.(previousModel);
       }
     } catch {
-      // Silently fail
-    } finally {
-      setIsLoading(false);
-      setIsOpen(false);
+      // Network error — revert
+      setSelectedModel(previousModel);
+      onModelChange?.(previousModel);
     }
   };
 
