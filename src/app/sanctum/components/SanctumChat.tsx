@@ -14,7 +14,6 @@ import { UpgradeModal } from '@/components/credits/UpgradeModal';
 import { useWallet } from '@/hooks/useWallet';
 import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
 import { ModelSelector } from './ModelSelector';
-import { PoweredByBadge } from '@/components/ui/PoweredByBadge';
 import Link from 'next/link';
 
 interface AttachedFile {
@@ -919,18 +918,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         
         {/* Model watermark / selector */}
         <div className="flex items-center justify-between mb-2 px-1">
-          {isFreeTier ? (
-            <div className="flex items-center gap-2">
-              <PoweredByBadge model="claude-sonnet" />
-              <span className="text-[10px] text-near-green/40">NEAR-specialized</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <PoweredByBadge model="claude-opus" />
-              <ModelSelector tier={userTier} />
-              <span className="text-[10px] text-near-green/40">NEAR-specialized</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <ModelSelector tier={userTier} />
+            <span className="text-[10px] text-near-green/40">NEAR-specialized</span>
+          </div>
         </div>
 
         <div className="flex gap-2">

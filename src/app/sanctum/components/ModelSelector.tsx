@@ -112,7 +112,7 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 z-50 w-72 rounded-lg border border-white/10 bg-gray-900/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="absolute bottom-full right-0 mb-1 z-50 w-72 rounded-lg border border-white/10 bg-gray-900/95 backdrop-blur-xl shadow-2xl overflow-hidden">
           <div className="px-3 py-2 border-b border-white/5">
             <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Select AI Model</span>
           </div>
