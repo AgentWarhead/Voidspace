@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff } from 'lucide-react';
+// @ts-ignore
+import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { ChatMode } from './ModeSelector';
 import { CodeAnnotations, CodeAnnotation } from './CodeAnnotations';
@@ -9,7 +10,7 @@ import { FeatureSuggestion, FeatureSuggestionData } from './FeatureSuggestion';
 import { InlineQuiz, QuizData } from './InlineQuiz';
 import { NextSteps, NextStep } from './NextSteps';
 import { CategoryLearnBanner } from './CategoryLearnBanner';
-import { getPersona } from '../lib/personas';
+import { getPersona, PERSONA_LIST } from '../lib/personas';
 import { UpgradeModal } from '@/components/credits/UpgradeModal';
 import { useWallet } from '@/hooks/useWallet';
 import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
@@ -29,6 +30,8 @@ interface Message {
   content: string;
   code?: string;
   personaId?: string; // Which persona sent this message
+  isPersonaSwitch?: boolean; // True for persona transition banners
+  switchedToPersonaId?: string; // The persona being switched to
   attachments?: AttachedFile[];
   learnTip?: {
     title: string;
@@ -629,6 +632,18 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       );
       onTaskUpdate?.({ ...task });
 
+      // ── SWITCH SIGNAL PARSING — Shade auto-routes to specialists ──
+      const switchSignalRegex = /^\[SWITCH:(\w+)\]\n?/;
+      const switchSignalMatch = data.content?.match(switchSignalRegex);
+      let switchedPersonaId: string | null = null;
+      if (switchSignalMatch) {
+        switchedPersonaId = switchSignalMatch[1];
+        // Strip the routing signal from the content before displaying
+        data.content = data.content.replace(switchSignalRegex, '');
+        // Notify parent to update the active persona
+        onPersonaChange(switchedPersonaId);
+      }
+
       // Build learnTips array from both old and new formats
       const learnTips: { title: string; explanation: string }[] = [];
       if (data.learnTips && Array.isArray(data.learnTips)) {
@@ -642,7 +657,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         role: 'assistant',
         content: data.content,
         code: data.code,
-        personaId: currentPersona.id,
+        personaId: switchedPersonaId || currentPersona.id,
         learnTip: data.learnTip,
         learnTips: learnTips.length > 0 ? learnTips : undefined,
         featureSuggestion: data.featureSuggestion,
@@ -704,7 +719,19 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         console.error('Code extraction error:', extractErr);
       }
 
-      setMessages(prev => [...prev, assistantMessage]);
+      // Insert persona switch banner + assistant message atomically
+      if (switchedPersonaId) {
+        const switchBanner: Message = {
+          id: `switch-banner-${Date.now()}`,
+          role: 'assistant',
+          content: '',
+          isPersonaSwitch: true,
+          switchedToPersonaId: switchedPersonaId,
+        };
+        setMessages(prev => [...prev, switchBanner, assistantMessage]);
+      } else {
+        setMessages(prev => [...prev, assistantMessage]);
+      }
 
       if (extractedCode) {
         onCodeGenerated(extractedCode);
@@ -855,7 +882,27 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
-        {messages.map((message) => (
+        {messages.map((message) => {
+          // ── Persona Switch Banner ──
+          if (message.isPersonaSwitch) {
+            const switchedPersona = getPersona(message.switchedToPersonaId || 'shade');
+            return (
+              <div key={message.id} className="flex justify-center my-2 px-2">
+                <div
+                  className={`w-full max-w-sm rounded-xl border-2 ${switchedPersona.borderColor} ${switchedPersona.bgColor} px-5 py-4 text-center`}
+                  style={{ animation: 'sanctumFadeInUp 0.4s ease-out' }}
+                >
+                  <div className="text-3xl mb-2">{switchedPersona.emoji}</div>
+                  <p className="text-sm font-bold text-text-primary mb-1">
+                    {switchedPersona.name} has entered the session
+                  </p>
+                  <p className="text-xs text-text-muted leading-relaxed">{switchedPersona.description}</p>
+                </div>
+              </div>
+            );
+          }
+
+          return (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[88%] sm:max-w-[85%] min-w-0 overflow-hidden ${message.role === 'user' ? 'order-2' : ''}`}>
               {/* Avatar */}
@@ -937,9 +984,28 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                     />
                   )}
 
-                  {/* Next steps */}
+                  {/* Next steps — with persona switch support */}
                   {message.nextSteps && (
-                    <NextSteps steps={message.nextSteps} onSelect={(value) => handleSend(value)} />
+                    <NextSteps
+                      steps={message.nextSteps}
+                      onSelect={(value) => {
+                        // Check if the clicked step has a persona — switch if so
+                        const step = message.nextSteps?.find(s => s.value === value);
+                        if (step?.persona) {
+                          const switchedPersona = getPersona(step.persona);
+                          const banner: Message = {
+                            id: `switch-banner-${Date.now()}`,
+                            role: 'assistant',
+                            content: '',
+                            isPersonaSwitch: true,
+                            switchedToPersonaId: step.persona,
+                          };
+                          setMessages(prev => [...prev, banner]);
+                          onPersonaChange(step.persona);
+                        }
+                        handleSend(value);
+                      }}
+                    />
                   )}
                   
                   {/* Quick options */}
@@ -968,7 +1034,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
         
         {/* Loading indicator */}
         {isLoading && (
@@ -1019,12 +1086,26 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           </div>
         )}
         
-        {/* Model watermark / selector */}
+        {/* Model watermark / selector + Persona switcher */}
         <div className="flex items-center justify-between mb-2 px-1">
           <div className="flex items-center gap-2">
             <ModelSelector tier={userTier} />
             <span className="text-[10px] text-near-green/40">NEAR-specialized</span>
           </div>
+          <PersonaSwitcherChip
+            currentPersonaId={personaId}
+            onSwitch={(id) => {
+              const banner: Message = {
+                id: `switch-banner-${Date.now()}`,
+                role: 'assistant',
+                content: '',
+                isPersonaSwitch: true,
+                switchedToPersonaId: id,
+              };
+              setMessages(prev => [...prev, banner]);
+              onPersonaChange(id);
+            }}
+          />
         </div>
 
         <div className="flex gap-1.5 sm:gap-2">
@@ -1108,6 +1189,70 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── PersonaSwitcherChip — inline specialist selector in the chat toolbar ──
+function PersonaSwitcherChip({
+  currentPersonaId,
+  onSwitch,
+}: {
+  currentPersonaId: string;
+  onSwitch: (personaId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const persona = getPersona(currentPersonaId);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border ${persona.borderColor} ${persona.bgColor} hover:opacity-90 transition-all text-xs`}
+        title="Switch specialist"
+      >
+        <span>{persona.emoji}</span>
+        <span className={`font-medium ${persona.color} hidden sm:inline`}>{persona.name}</span>
+        <ChevronDown className="w-3 h-3 text-text-muted" />
+      </button>
+
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          {/* Dropdown */}
+          <div className="absolute bottom-full right-0 mb-2 w-60 bg-[#0d0d0d] border border-border-subtle rounded-xl shadow-2xl p-2 z-50">
+            <p className="text-[10px] text-text-muted px-2 pb-1.5 font-mono uppercase tracking-wider border-b border-white/[0.06] mb-1.5">
+              Switch Specialist
+            </p>
+            {PERSONA_LIST.map(p => (
+              <button
+                key={p.id}
+                onClick={() => {
+                  onSwitch(p.id);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all text-left ${
+                  p.id === currentPersonaId
+                    ? `${p.bgColor} border ${p.borderColor}`
+                    : 'hover:bg-white/[0.04]'
+                }`}
+              >
+                <span className="text-lg flex-shrink-0">{p.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <span className={`text-sm font-medium block ${p.id === currentPersonaId ? p.color : 'text-text-primary'}`}>
+                    {p.name}
+                  </span>
+                  <p className="text-[10px] text-text-muted truncate">{p.role}</p>
+                </div>
+                {p.id === currentPersonaId && (
+                  <Sparkles className="w-3 h-3 text-near-green flex-shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

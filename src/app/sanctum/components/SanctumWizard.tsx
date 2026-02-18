@@ -147,12 +147,12 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
   }, []);
 
   const handleLaunch = useCallback(() => {
-    // Save persona to localStorage
+    // Always start with Shade as Lead Architect — specialists are called in automatically
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sanctum-chat-persona', selectedPersona);
+      localStorage.setItem('sanctum-chat-persona', 'shade');
     }
 
-    const config: WizardConfig = { mode: 'build', persona: selectedPersona };
+    const config: WizardConfig = { mode: 'build', persona: 'shade' };
 
     if (goal === 'deploy-first') {
       config.mode = 'build';
@@ -486,54 +486,78 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
             </Container>
           )}
 
-          {/* Step 3: Persona Selector */}
+          {/* Step 3: Meet the Council */}
           {step === 'persona' && (
             <Container size="xl" className="py-8 px-4">
               <div className="text-center mb-8">
                 <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-                  Choose your <GradientText>guide</GradientText>
+                  Meet the <GradientText>Council</GradientText>
                 </h2>
-                <p className="text-text-muted text-sm">
-                  Each expert has a unique personality and specialty
+                <p className="text-text-muted text-sm max-w-md mx-auto">
+                  Every session starts with Shade. As your Lead Architect, he directs the build and calls in specialists when needed.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 max-w-4xl mx-auto mb-8">
-                {PERSONA_LIST.map((persona, i) => (
-                  <button
+              {/* Shade — Featured Lead Architect */}
+              {(() => {
+                const shadePersona = PERSONA_LIST.find(p => p.id === 'shade')!;
+                return (
+                  <div
+                    className="max-w-4xl mx-auto mb-6"
+                    style={{ animation: 'sanctumFadeInUp 0.4s ease-out backwards' }}
+                  >
+                    <div className={`relative p-5 sm:p-6 rounded-2xl border-2 ${shadePersona.borderColor} ${shadePersona.bgColor} shadow-xl shadow-purple-500/20`}>
+                      {/* LEAD ARCHITECT badge */}
+                      <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-purple-500/30 border border-purple-400/40 text-purple-300 text-[10px] font-bold uppercase tracking-wider">
+                        LEAD ARCHITECT
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-4xl sm:text-5xl flex-shrink-0">{shadePersona.emoji}</div>
+                        <div>
+                          <h3 className={`text-lg sm:text-xl font-bold ${shadePersona.color} mb-0.5`}>{shadePersona.name}</h3>
+                          <p className="text-xs text-text-muted mb-2">{shadePersona.role}</p>
+                          <p className="text-sm text-text-secondary leading-relaxed">{shadePersona.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Specialist grid — read-only showcase */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 max-w-4xl mx-auto mb-4">
+                {PERSONA_LIST.filter(p => p.id !== 'shade').map((persona, i) => (
+                  <div
                     key={persona.id}
-                    onClick={() => handlePersonaSelect(persona.id)}
-                    className={`group relative p-4 rounded-xl border-2 transition-all duration-200 text-left hover:scale-[1.02] ${
-                      selectedPersona === persona.id
-                        ? `${persona.borderColor} ${persona.bgColor} shadow-lg`
-                        : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15] hover:bg-white/[0.04]'
-                    }`}
+                    title="Available in session — Shade calls them in automatically"
+                    className="relative p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] opacity-60 hover:opacity-80 transition-opacity duration-200 text-left select-none"
                     style={{
-                      animationDelay: `${i * 50}ms`,
+                      animationDelay: `${(i + 1) * 50}ms`,
                       animation: 'sanctumFadeInUp 0.4s ease-out backwards',
                     }}
                   >
-                    {selectedPersona === persona.id && (
-                      <div className={`absolute top-2 right-2 w-5 h-5 rounded-full ${persona.bgColor} flex items-center justify-center`}>
-                        <Sparkles className="w-3 h-3 text-near-green" />
-                      </div>
-                    )}
                     <div className="text-2xl mb-2">{persona.emoji}</div>
-                    <h3 className={`text-sm font-bold mb-0.5 ${
-                      selectedPersona === persona.id ? persona.color : 'text-text-primary'
-                    }`}>
+                    <h3 className="text-sm font-bold mb-0.5 text-text-primary">
                       {persona.name}
                     </h3>
                     <p className="text-[11px] text-text-muted mb-2">{persona.role}</p>
                     <p className="text-[10px] text-text-muted/70 leading-relaxed line-clamp-2">
                       {persona.description}
                     </p>
-                  </button>
+                    <span className="absolute bottom-2 right-2 text-[9px] text-text-muted/40 font-mono">
+                      Available in session
+                    </span>
+                  </div>
                 ))}
               </div>
 
-              {/* Launch + Skip */}
-              <div className="text-center space-y-3">
+              {/* Subtle hint */}
+              <p className="text-center text-xs text-text-muted/50 italic mb-8 max-w-sm mx-auto">
+                Shade will bring in specialists automatically as your build evolves
+              </p>
+
+              {/* Launch button */}
+              <div className="text-center">
                 <button
                   onClick={handleLaunch}
                   className="group inline-flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-near-green to-emerald-400 text-void-black font-bold text-lg sm:text-xl hover:from-near-green/90 hover:to-emerald-400/90 transition-all shadow-2xl shadow-near-green/30 hover:shadow-near-green/50 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto max-w-md"
@@ -541,17 +565,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                   <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
                   Launch Session
                 </button>
-                <div>
-                  <button
-                    onClick={() => {
-                      setSelectedPersona('shade');
-                      handleLaunch();
-                    }}
-                    className="text-sm text-text-muted hover:text-text-secondary transition-colors underline underline-offset-2"
-                  >
-                    Skip — use Shade (default)
-                  </button>
-                </div>
               </div>
             </Container>
           )}
