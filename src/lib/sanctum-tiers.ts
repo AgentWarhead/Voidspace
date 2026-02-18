@@ -27,7 +27,7 @@ export interface SanctumTierConfig {
   popular?: boolean;
   // ── Enforced Limits ──────────────────────────────────────
   maxProjects: number;           // 0 = unlimited
-  aiModel: 'claude-sonnet-4-6' | 'claude-opus-4-6';
+  aiModel: 'claude-sonnet-4-5' | 'claude-sonnet-4-6' | 'claude-opus-4-6';
   availableModels: AvailableModel[];
   canExport: boolean;
   canAudit: boolean;             // Roast Zone access
@@ -54,7 +54,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     annualPrice: 0,
     creditsPerMonth: 0,  // One-time $2.50 grant, not monthly
     features: [
-      'Sanctum AI builder (Claude Sonnet 4.6)',
+      'Sanctum AI builder (Claude Sonnet 4.5)',
       '$2.50 one-time starter credits',
       '1 active project',
       '66 NEAR & Rust education modules',
@@ -66,9 +66,9 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdAnnual: '',
     // ── Enforced Limits ──
     maxProjects: 1,
-    aiModel: 'claude-sonnet-4-6',
+    aiModel: 'claude-sonnet-4-5',
     availableModels: [
-      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Reliable AI coding assistant' },
+      { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', description: 'AI coding assistant' },
     ],
     canExport: false,
     canAudit: true,   // Temporarily enabled for Nearcon judging — revert after contest
@@ -102,6 +102,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     availableModels: [
       { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Most powerful — complex contracts & deep reasoning', default: true },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Next-gen speed & intelligence' },
+      { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', description: 'Fast & cost-effective' },
     ],
     canExport: true,
     canAudit: true,
@@ -136,6 +137,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     availableModels: [
       { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Most powerful — complex contracts & deep reasoning', default: true },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Next-gen speed & intelligence' },
+      { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', description: 'Fast & cost-effective' },
     ],
     canExport: true,
     canAudit: true,
@@ -170,6 +172,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     availableModels: [
       { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Most powerful — complex contracts & deep reasoning', default: true },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Next-gen speed & intelligence' },
+      { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', description: 'Fast & cost-effective' },
     ],
     canExport: true,
     canAudit: true,
