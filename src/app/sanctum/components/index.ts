@@ -3,6 +3,7 @@ export { SanctumChat } from './SanctumChat';
 export { CodePreview } from './CodePreview';
 export { TokenCounter } from './TokenCounter';
 export { ParticleBackground } from './ParticleBackground';
+export { ModelSelector } from './ModelSelector';
 export { SanctumVisualization } from './SanctumVisualization';
 export { TypewriterCode } from './TypewriterCode';
 export { AchievementPopup, ACHIEVEMENTS } from './AchievementPopup';

@@ -134,7 +134,7 @@ export function BuilderShowcase() {
       {/* Powered by */}
       <p className="text-center text-xs text-text-muted mt-4 flex items-center justify-center gap-1.5">
         <Sparkles className="w-3 h-3 text-near-green/60" />
-        Powered by Claude Opus 4.6
+        Powered by Claude Sonnet 4.6 + Opus 4.6
       </p>
     </div>
   );

@@ -8,7 +8,7 @@ import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import { SANCTUM_TIERS, resolveModel, type SanctumTier } from '@/lib/sanctum-tiers';
 
 function sanitizeUserInput(text: string): string {
   // Remove common prompt injection patterns
@@ -1152,7 +1152,20 @@ export async function POST(request: NextRequest) {
       .single();
     const userTier: SanctumTier = (userSub?.tier as SanctumTier) || 'shade';
     const tierConfig = SANCTUM_TIERS[userTier];
-    const modelId = tierConfig.aiModel;
+
+    // Resolve model: check user preference, fall back to tier default
+    let preferredModel: string | null = null;
+    try {
+      const { data: prefData } = await createAdminClient()
+        .from('credit_balances')
+        .select('preferred_model')
+        .eq('user_id', user.userId)
+        .single();
+      preferredModel = prefData?.preferred_model ?? null;
+    } catch {
+      // Column may not exist yet — graceful fallback
+    }
+    const modelId = resolveModel(userTier, preferredModel);
     const costModel = modelId.includes('opus') ? 'opus' : 'sonnet';
 
     // Primary gate: credit balance check

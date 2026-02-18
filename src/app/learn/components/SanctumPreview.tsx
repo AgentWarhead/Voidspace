@@ -49,7 +49,7 @@ Ready to deploy to testnet? Click "Deploy" and I'll walk you through it.`,
 const FEATURES = [
   {
     icon: Cpu,
-    title: 'Powered by Claude Opus 4.6',
+    title: 'Powered by Claude Sonnet 4.6 + Opus 4.6',
     description: 'The most intelligent AI model available — understands NEAR architecture deeply',
     gradient: 'from-emerald-500/20 to-cyan-500/20',
     border: 'border-emerald-500/20',

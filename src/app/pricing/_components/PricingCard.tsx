@@ -159,7 +159,7 @@ export function PricingCard({
             <div className="mb-4 px-3 py-2.5 rounded-lg border border-white/[0.06] bg-white/[0.02]">
               <p className="text-xs text-text-muted leading-relaxed">
                 <span className="text-amber-400/80 font-medium">Upgrade to unlock:</span>{' '}
-                Opus 4.6, project export, Roast Zone, cloud history, and more projects.
+                Sonnet 4.6 + Opus 4.6, project export, Roast Zone, cloud history, and more projects.
               </p>
             </div>
           )}

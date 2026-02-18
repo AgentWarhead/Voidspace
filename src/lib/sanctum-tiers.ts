@@ -4,6 +4,13 @@
 
 export type SanctumTier = 'shade' | 'specter' | 'legion' | 'leviathan';
 
+export interface AvailableModel {
+  id: string;
+  name: string;
+  description: string;
+  default?: boolean;
+}
+
 export interface SanctumTierConfig {
   name: string;
   tier: SanctumTier;
@@ -19,7 +26,8 @@ export interface SanctumTierConfig {
   popular?: boolean;
   // ── Enforced Limits ──────────────────────────────────────
   maxProjects: number;           // 0 = unlimited
-  aiModel: 'claude-sonnet-4-20250514' | 'claude-opus-4-20250514';
+  aiModel: 'claude-sonnet-4-20250514' | 'claude-sonnet-4-6' | 'claude-opus-4-6';
+  availableModels: AvailableModel[];
   canExport: boolean;
   canAudit: boolean;             // Roast Zone access
   priorityQueue: boolean;
@@ -58,6 +66,9 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     // ── Enforced Limits ──
     maxProjects: 1,
     aiModel: 'claude-sonnet-4-20250514',
+    availableModels: [
+      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', description: 'Reliable AI coding assistant' },
+    ],
     canExport: false,
     canAudit: true,   // Temporarily enabled for Nearcon judging — revert after contest
     priorityQueue: false,
@@ -73,7 +84,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     creditsPerMonth: 25,
     features: [
       '$25/mo in Sanctum credits',
-      'Claude Opus 4.6 — best AI model available',
+      'Claude Sonnet 4.6 + Opus 4.6 — switchable AI models',
       'Up to 3 active projects',
       'Full project export',
       'AI contract auditing (Roast Zone)',
@@ -85,7 +96,11 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZ90gXTP4Q',
     // ── Enforced Limits ──
     maxProjects: 3,
-    aiModel: 'claude-opus-4-20250514',
+    aiModel: 'claude-sonnet-4-6',
+    availableModels: [
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Best for coding — fastest, most accurate code generation', default: true },
+      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Deepest reasoning — best for complex architecture and edge cases' },
+    ],
     canExport: true,
     canAudit: true,
     priorityQueue: false,
@@ -101,7 +116,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     creditsPerMonth: 70,
     features: [
       '$70/mo in Sanctum credits ($10 bonus)',
-      'Claude Opus 4.6 — best AI model available',
+      'Claude Sonnet 4.6 + Opus 4.6 — switchable AI models',
       'Unlimited active projects',
       'Full project export',
       'AI contract auditing (Roast Zone)',
@@ -114,7 +129,11 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     popular: true,
     // ── Enforced Limits ──
     maxProjects: 0,  // unlimited
-    aiModel: 'claude-opus-4-20250514',
+    aiModel: 'claude-sonnet-4-6',
+    availableModels: [
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Best for coding — fastest, most accurate code generation', default: true },
+      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Deepest reasoning — best for complex architecture and edge cases' },
+    ],
     canExport: true,
     canAudit: true,
     priorityQueue: true,
@@ -130,7 +149,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     creditsPerMonth: 230,
     features: [
       '$230/mo in Sanctum credits ($30 bonus)',
-      'Claude Opus 4.6 — best AI model available',
+      'Claude Sonnet 4.6 + Opus 4.6 — switchable AI models',
       'Unlimited active projects',
       'Full project export',
       'AI contract auditing (Roast Zone)',
@@ -143,7 +162,11 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     stripePriceIdAnnual: 'price_1SzsDV0chTjWbsnZx0gHg5id',
     // ── Enforced Limits ──
     maxProjects: 0,  // unlimited
-    aiModel: 'claude-opus-4-20250514',
+    aiModel: 'claude-sonnet-4-6',
+    availableModels: [
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Best for coding — fastest, most accurate code generation', default: true },
+      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', description: 'Deepest reasoning — best for complex architecture and edge cases' },
+    ],
     canExport: true,
     canAudit: true,
     priorityQueue: true,
@@ -194,6 +217,24 @@ export function getTierCredits(tier: SanctumTier): number {
 
 /** Get the AI model for a given tier */
 export function getTierModel(tier: SanctumTier): string {
+  return SANCTUM_TIERS[tier].aiModel;
+}
+
+/** Get available models for a given tier */
+export function getAvailableModels(tier: SanctumTier): AvailableModel[] {
+  return SANCTUM_TIERS[tier].availableModels;
+}
+
+/** Check if a model ID is available for a given tier */
+export function isModelAvailable(tier: SanctumTier, modelId: string): boolean {
+  return SANCTUM_TIERS[tier].availableModels.some(m => m.id === modelId);
+}
+
+/** Resolve the effective model: preferred (if valid for tier) or default */
+export function resolveModel(tier: SanctumTier, preferredModel?: string | null): string {
+  if (preferredModel && isModelAvailable(tier, preferredModel)) {
+    return preferredModel;
+  }
   return SANCTUM_TIERS[tier].aiModel;
 }
 

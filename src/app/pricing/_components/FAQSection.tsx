@@ -6,11 +6,11 @@ import { GradientText } from '@/components/effects/GradientText';
 const faqs = [
   {
     q: 'What is 1 credit?',
-    a: '$1 of AI compute in Sanctum. Free tier runs on Claude Sonnet 4.5 — fast and capable. Paid tiers unlock Claude Opus 4.6, Anthropic\'s most powerful model, for deeper reasoning and better code. A typical build session uses ~$1.50–2 on Sonnet or ~$5–8 on Opus.',
+    a: '$1 of AI compute in Sanctum. Free tier runs on Claude Sonnet 4 — fast and capable. Paid tiers unlock Claude Sonnet 4.6 (best for coding) and Opus 4.6 (deepest reasoning) with a switchable toggle. A typical build session uses ~$1.50–2 on Sonnet or ~$5–8 on Opus.',
   },
   {
-    q: 'Why is Opus 4.6 worth upgrading for?',
-    a: 'Opus 4.6 produces more complete contracts, catches edge cases Sonnet misses, and handles complex multi-contract architectures that Sonnet struggles with. It\'s the difference between a working prototype and production-ready code. Credits burn faster (bigger model = more tokens), but the output quality makes up for it.',
+    q: 'Why upgrade for Sonnet 4.6 + Opus 4.6?',
+    a: 'Sonnet 4.6 is the best coding model available — faster and more accurate than Sonnet 4. Opus 4.6 goes deeper, producing more complete contracts, catching edge cases, and handling complex multi-contract architectures. Paid tiers let you switch between both. Sonnet 4.6 is the default (best bang for your credits), with Opus 4.6 one click away for complex tasks.',
   },
   {
     q: 'Do subscription credits roll over?',

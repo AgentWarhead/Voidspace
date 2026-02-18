@@ -39,7 +39,7 @@ const NOTIFICATIONS: Omit<NotificationCTA, 'id'>[] = [
   {
     category: 'sanctum',
     headline: 'Sanctum AI Builder',
-    message: 'Build smart contracts in plain English — zero Rust experience needed. Powered by Claude Opus 4.6.',
+    message: 'Build smart contracts in plain English — zero Rust experience needed. Powered by Claude Sonnet 4.6 + Opus 4.6.',
     cta: 'Start Building Free →',
     href: '/sanctum',
     icon: <Sparkles className="w-3.5 h-3.5" />,

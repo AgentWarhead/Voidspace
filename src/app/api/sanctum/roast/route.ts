@@ -8,7 +8,7 @@ import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import { SANCTUM_TIERS, resolveModel, type SanctumTier } from '@/lib/sanctum-tiers';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -125,9 +125,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Primary gate: credit balance check
+    // Resolve model: check user preference, fall back to tier default
     const tierConfig = SANCTUM_TIERS[userTier];
-    const costModel = tierConfig.aiModel.includes('opus') ? 'opus' : 'sonnet';
+    let preferredModel: string | null = null;
+    try {
+      const { data: prefData } = await createAdminClient()
+        .from('credit_balances')
+        .select('preferred_model')
+        .eq('user_id', user.userId)
+        .single();
+      preferredModel = prefData?.preferred_model ?? null;
+    } catch {
+      // Column may not exist yet — graceful fallback
+    }
+    const modelId = resolveModel(userTier, preferredModel);
+    const costModel = modelId.includes('opus') ? 'opus' : 'sonnet';
     const estimatedCost = estimateCreditCost(2000, 3000, costModel as 'opus' | 'sonnet');
     const hasCredits = await checkBalance(user.userId, estimatedCost);
     if (!hasCredits) {
@@ -167,7 +179,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await anthropic.messages.create({
-      model: tierConfig.aiModel,
+      model: modelId,
       max_tokens: 4096,
       system: ROAST_SYSTEM_PROMPT,
       messages: [

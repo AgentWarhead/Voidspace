@@ -13,6 +13,7 @@ import { getPersona } from '../lib/personas';
 import { UpgradeModal } from '@/components/credits/UpgradeModal';
 import { useWallet } from '@/hooks/useWallet';
 import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
+import { ModelSelector } from './ModelSelector';
 import Link from 'next/link';
 
 interface AttachedFile {
@@ -128,7 +129,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
   const tierConfig = SANCTUM_TIERS[userTier];
   const isFreeTier = userTier === 'shade';
-  const modelLabel = tierConfig.aiModel.includes('opus') ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5';
+  const modelLabel = tierConfig.aiModel.includes('opus') ? 'Claude Opus 4.6' : (tierConfig.aiModel.includes('sonnet-4-6') ? 'Claude Sonnet 4.6' : 'Claude Sonnet 4');
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesRestoredRef = useRef(false);
   const saveMsgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -915,19 +916,21 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           </div>
         )}
         
-        {/* Model watermark */}
+        {/* Model watermark / selector */}
         <div className="flex items-center justify-between mb-2 px-1">
-          <span className={`text-xs ${isFreeTier ? 'text-text-muted' : 'text-near-green/70'}`}>
-            {isFreeTier ? (
-              <>
-                Powered by {modelLabel}
-                {' · '}
-                <span className="text-near-green/60">NEAR-specialized</span>
-              </>
-            ) : (
-              <>Powered by {modelLabel} · <span className="text-near-green">NEAR-specialized</span></>
-            )}
-          </span>
+          {isFreeTier ? (
+            <span className="text-xs text-text-muted">
+              Powered by {modelLabel}
+              {' · '}
+              <span className="text-near-green/60">NEAR-specialized</span>
+            </span>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-near-green/50">Powered by</span>
+              <ModelSelector tier={userTier} />
+              <span className="text-xs text-near-green/40">· NEAR-specialized</span>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2">
