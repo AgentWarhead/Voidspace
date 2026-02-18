@@ -141,19 +141,26 @@ function SanctumPageInner() {
     }
   }, [state.activePanel, dispatch]);
 
-  // Build a prompt for the bottom action bar — uses selection if available, otherwise full code
+  // Build a prompt for the bottom action bar.
+  // KEY DESIGN: Never embed the full contract in the message — the AI already has it in context
+  // from the conversation history. Embedding it causes truncation on large contracts and clutters
+  // the chat. Only include code when the user has a specific selection highlighted.
   const buildActionPrompt = useCallback((action: string) => {
     const hasSelection = codeSelection && codeSelection.length >= 3;
-    const codeSnippet = hasSelection
-      ? (codeSelection.length > 500 ? codeSelection.slice(0, 500) + '\n// ... (truncated)' : codeSelection)
-      : (state.generatedCode.length > 2000 ? state.generatedCode.slice(0, 2000) + '\n// ... (truncated)' : state.generatedCode);
-    const scope = hasSelection ? 'this code' : 'this entire contract';
 
-    const prompts: Record<string, string> = {
-      explain: `Explain ${scope} in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      tests: `Generate comprehensive unit tests for ${scope} — cover all public methods, edge cases, and error conditions.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      optimize: `How can I optimize ${scope} for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
-      security: `Audit ${scope} for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSnippet}\n\`\`\``,
+    const prompts: Record<string, string> = hasSelection ? {
+      // Selection mode — include the highlighted snippet (small, targeted)
+      explain:  `Explain this selected code in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
+      tests:    `Generate comprehensive unit tests for this selected code — cover all cases and error conditions.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
+      optimize: `How can I optimize this selected code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
+      security: `Audit this selected code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
+    } : {
+      // Full-contract mode — reference the preview, no code paste.
+      // The AI has the full contract in context from generation — no truncation, no clutter, scales to any size.
+      explain:  `Explain the full contract in the preview panel — walk through its structure, what each section does, and the NEAR concepts it demonstrates.`,
+      tests:    `Generate comprehensive unit tests for the full contract in the preview panel — cover all public methods, edge cases, and error conditions.`,
+      optimize: `Analyze the full contract in the preview panel for gas efficiency — identify the most impactful optimizations and show the improved code.`,
+      security: `Perform a complete security audit of the full contract in the preview panel — check for reentrancy, access control issues, integer overflow, storage vulnerabilities, and any NEAR-specific attack vectors. Give me a prioritized findings list.`,
     };
 
     // Analysis actions (explain/optimize/audit) should NOT overwrite the code preview.
