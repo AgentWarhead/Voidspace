@@ -635,8 +635,6 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         }
       }
 
-      setMessages(prev => [...prev, assistantMessage]);
-
       // Extract code — prefer explicit code field, fallback to markdown code blocks in content
       let extractedCode = data.code;
       if (!extractedCode && data.content) {
@@ -645,6 +643,22 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           extractedCode = rustMatch[1].trim();
         }
       }
+
+      // Strip code blocks from chat content — code belongs in the preview panel only
+      if (extractedCode && assistantMessage.content) {
+        let cleaned = assistantMessage.content
+          .replace(/```(?:rust|toml|sh|bash|typescript|javascript)?\n[\s\S]*?```/g, '')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+        // If stripping left almost nothing, add a note
+        if (cleaned.length < 20) {
+          cleaned = '✅ Contract generated — see the preview panel →';
+        }
+        assistantMessage.content = cleaned;
+      }
+
+      setMessages(prev => [...prev, assistantMessage]);
+
       if (extractedCode) {
         onCodeGenerated(extractedCode);
       }
