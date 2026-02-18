@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { User } from 'lucide-react';
+
+const XPRibbonProfile = dynamic(
+  () => import('@/components/xp/XPRibbonProfile').then(m => ({ default: m.XPRibbonProfile })),
+  { ssr: false },
+);
 import { Card, Button, VoidEmptyState } from '@/components/ui';
 import { PageTransition } from '@/components/effects/PageTransition';
 import { GradientText } from '@/components/effects/GradientText';
@@ -164,6 +170,9 @@ export function ProfileContent() {
         </GradientText>
         <div className="text-xs sm:text-sm text-text-muted font-mono flex-shrink-0">🐧 Your Builder HQ</div>
       </div>
+
+      {/* XP Ribbon */}
+      <XPRibbonProfile className="w-full" />
 
       {/* Command Center */}
       <VoidCommandCenter

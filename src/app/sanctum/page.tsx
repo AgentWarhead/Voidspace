@@ -700,7 +700,7 @@ function SanctumPageInner() {
                   </div>
                 </GlassPanel>
 
-                {/* Builder Progress / XP Widget */}
+                {/* Builder Progress / XP HUD */}
                 <div className="flex-shrink-0 mt-2">
                   <BuilderProgress
                     messagesCount={state.messageCount}
@@ -709,7 +709,7 @@ function SanctumPageInner() {
                     tokensUsed={state.tokensUsed}
                     conceptsLearned={state.conceptsLearned.length}
                     quizScore={state.quizScore}
-                    sessionMinutes={state.sessionStartTime ? Math.floor((Date.now() - state.sessionStartTime) / 60000) : 0}
+                    sessionStartTime={state.sessionStartTime}
                   />
                 </div>
               </div>
@@ -882,6 +882,19 @@ function SanctumPageInner() {
                       />
                     </div>
                   </GlassPanel>
+
+                  {/* Mobile XP HUD */}
+                  <div className="flex-shrink-0 mt-2">
+                    <BuilderProgress
+                      messagesCount={state.messageCount}
+                      codeGenerations={state.contractsBuilt}
+                      deploysCount={state.deployCount}
+                      tokensUsed={state.tokensUsed}
+                      conceptsLearned={state.conceptsLearned.length}
+                      quizScore={state.quizScore}
+                      sessionStartTime={state.sessionStartTime}
+                    />
+                  </div>
                 </div>
               )}
 

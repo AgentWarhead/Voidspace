@@ -6,6 +6,11 @@ import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GlowCard } from '@/components/effects/GlowCard';
 import dynamic from 'next/dynamic';
 import { HeroSection } from './components/HeroSection';
+
+const XPRibbonProfile = dynamic(
+  () => import('@/components/xp/XPRibbonProfile').then(m => ({ default: m.XPRibbonProfile })),
+  { ssr: false },
+);
 import { SocialProof } from './components/SocialProof';
 import { LearningTracks } from './components/LearningTracks';
 import { TableOfContents } from './components/TableOfContents';
@@ -342,6 +347,11 @@ export default function LearnPage() {
       <div id="overview">
         <HeroSection />
       </div>
+
+      {/* XP Ribbon — shows connected user's level / progress */}
+      <Container className="pb-4">
+        <XPRibbonProfile className="w-full max-w-2xl mx-auto" />
+      </Container>
 
       {/* Social Proof — Why Builders Choose NEAR */}
       <Container className="pb-12">
