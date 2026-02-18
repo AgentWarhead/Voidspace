@@ -637,8 +637,16 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      if (data.code) {
-        onCodeGenerated(data.code);
+      // Extract code — prefer explicit code field, fallback to markdown code blocks in content
+      let extractedCode = data.code;
+      if (!extractedCode && data.content) {
+        const rustMatch = data.content.match(/```rust\n([\s\S]*?)```/);
+        if (rustMatch && rustMatch[1] && rustMatch[1].length > 100) {
+          extractedCode = rustMatch[1].trim();
+        }
+      }
+      if (extractedCode) {
+        onCodeGenerated(extractedCode);
       }
 
       if (data.usage) {
