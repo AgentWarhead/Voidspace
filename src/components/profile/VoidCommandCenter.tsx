@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CommandNav, type CommandSection } from './CommandNav';
 import { OverviewSection } from './sections/OverviewSection';
 import { ArsenalSection } from './sections/ArsenalSection';
-import { AchievementsSection } from './sections/AchievementsSection';
 import { SkillsSection } from './sections/SkillsSection';
 import { MissionsSection } from './sections/MissionsSection';
 import { ActivitySection } from './sections/ActivitySection';
@@ -81,8 +80,6 @@ export function VoidCommandCenter({
         );
       case 'arsenal':
         return <ArsenalSection userId={userId} tier={tier} />;
-      case 'achievements':
-        return <AchievementsSection />;
       case 'skills':
         return <SkillsSection />;
       case 'missions':

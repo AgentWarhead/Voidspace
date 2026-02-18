@@ -10,7 +10,6 @@ import { motion } from 'framer-motion';
 import {
   Layout,
   Zap,
-  Trophy,
   Sparkles,
   Target,
   Activity,
@@ -28,7 +27,6 @@ import { TIERS } from '@/lib/tiers';
 export type CommandSection =
   | 'overview'
   | 'arsenal'
-  | 'achievements'
   | 'skills'
   | 'missions'
   | 'activity'
@@ -42,13 +40,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'overview',     label: 'Overview',      icon: Layout,   emoji: '🎖️' },
-  { id: 'arsenal',      label: 'Arsenal',       icon: Zap,      emoji: '⚡' },
-  { id: 'achievements', label: 'Achievements',  icon: Trophy,   emoji: '🏆' },
-  { id: 'skills',       label: 'Skills',        icon: Sparkles, emoji: '🌟' },
-  { id: 'missions',     label: 'Missions',      icon: Target,   emoji: '🎯' },
-  { id: 'activity',     label: 'Activity',      icon: Activity, emoji: '📊' },
-  { id: 'vault',        label: 'Trophy Vault',  icon: Crown,    emoji: '🏆' },
+  { id: 'overview',  label: 'Overview',      icon: Layout,   emoji: '🎖️' },
+  { id: 'arsenal',   label: 'Arsenal',       icon: Zap,      emoji: '⚡' },
+  { id: 'skills',    label: 'Skills',        icon: Sparkles, emoji: '🌟' },
+  { id: 'missions',  label: 'Missions',      icon: Target,   emoji: '🎯' },
+  { id: 'activity',  label: 'Activity',      icon: Activity, emoji: '📊' },
+  { id: 'vault',     label: 'Achievements',  icon: Crown,    emoji: '🏆' },
 ];
 
 interface CommandNavProps {
@@ -90,7 +87,7 @@ export function CommandNav({
 
   const getBadgeCount = (id: CommandSection): number | null => {
     if (id === 'missions' && activeMissionCount > 0) return activeMissionCount;
-    if (id === 'achievements') return unlocked.size || null;
+    if (id === 'vault') return unlocked.size || null;
     return null;
   };
 

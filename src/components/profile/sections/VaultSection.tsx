@@ -10,8 +10,8 @@ export function VaultSection() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-text-primary">Trophy Vault</h2>
-        <p className="text-sm text-text-muted">Your collection of achievements and legendary conquests.</p>
+        <h2 className="text-lg font-bold text-text-primary">Achievements</h2>
+        <p className="text-sm text-text-muted">Your trophy collection, featured pins, and legendary conquests.</p>
       </div>
       <TrophyVault embedded />
     </div>

@@ -2,13 +2,14 @@
  * A dedicated trophy display page. Achievements grouped into
  * glass display cases by category. Filter/sort, inspect modal,
  * holographic glow, legendary pedestals, locked silhouettes.
+ * Featured showcase (pin up to 3) + Recent Activity timeline.
  * ─────────────────────────────────────────────────────────── */
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Lock, Sparkles, Search, X, SlidersHorizontal } from 'lucide-react';
+import { Trophy, Lock, Sparkles, Search, X, SlidersHorizontal, Star, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 import {
@@ -26,6 +27,8 @@ import { TrophyDisplayCase } from './TrophyDisplayCase';
 import { TrophyInspectModal } from './TrophyInspectModal';
 import { TrophyItem } from './TrophyItem';
 import { VaultParticles } from './VaultParticles';
+import { AchievementCard } from '@/components/achievements/AchievementCard';
+import { AchievementTimeline } from '@/components/achievements/AchievementTimeline';
 import { useWallet } from '@/hooks/useWallet';
 
 // ─── Types ────────────────────────────────────────────────────
@@ -39,6 +42,56 @@ const RARITY_ORDER: Record<AchievementRarity, number> = {
   legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1,
 };
 
+// ─── Featured Showcase ────────────────────────────────────────
+
+function VaultFeaturedShowcase({
+  featured,
+  timelineMap,
+  onToggleFeatured,
+}: {
+  featured: string[];
+  timelineMap: Map<string, number>;
+  onToggleFeatured: (id: string) => void;
+}) {
+  if (featured.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-2xl p-4 sm:p-5 mb-6"
+      style={{
+        background: 'linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02))',
+        border: '1px solid rgba(245,158,11,0.2)',
+        boxShadow: '0 4px 24px rgba(245,158,11,0.05)',
+        backdropFilter: 'blur(20px)',
+      }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <Star className="w-3.5 h-3.5 text-amber-400 fill-current" />
+        <p className="text-xs uppercase tracking-widest text-amber-400/80 font-medium">
+          Featured ({featured.length}/3)
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        {featured.map((id) => {
+          const achievement = ACHIEVEMENTS.find((a) => a.id === id);
+          if (!achievement) return null;
+          return (
+            <AchievementCard
+              key={id}
+              achievement={achievement}
+              isUnlocked={true}
+              isFeatured={true}
+              unlockedAt={timelineMap.get(id)}
+              onToggleFeatured={onToggleFeatured}
+              featuredCount={featured.length}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Stats Bar ────────────────────────────────────────────────
 
 function VaultStatsBar({
@@ -46,11 +99,15 @@ function VaultStatsBar({
   total,
   xp,
   rarityStats,
+  showTimeline,
+  onToggleTimeline,
 }: {
   unlocked: number;
   total: number;
   xp: number;
   rarityStats: ReturnType<typeof countByRarity>;
+  showTimeline: boolean;
+  onToggleTimeline: () => void;
 }) {
   const pct = total > 0 ? (unlocked / total) * 100 : 0;
 
@@ -83,6 +140,20 @@ function VaultStatsBar({
         </div>
 
         <div className="flex-1" />
+
+        {/* Timeline toggle */}
+        <button
+          onClick={onToggleTimeline}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+            showTimeline
+              ? 'border-near-green/50 bg-near-green/10 text-near-green'
+              : 'border-white/10 bg-white/[0.04] text-text-muted hover:text-text-secondary',
+          )}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          {showTimeline ? 'Show Vault' : 'Recent Activity'}
+        </button>
 
         {/* Completion badge */}
         <div
@@ -370,7 +441,7 @@ function VaultConnectWall({ onConnect }: { onConnect: () => void }) {
 // ─── Main Component ───────────────────────────────────────────
 
 export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
-  const { unlocked, timeline, isConnected, isLoaded } = useAchievementContext();
+  const { unlocked, featured, setFeatured, timeline, isConnected, isLoaded } = useAchievementContext();
   const { openModal } = useWallet();
 
   const [filter, setFilter] = useState<FilterMode>('all');
@@ -378,6 +449,7 @@ export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<AchievementCategory | 'all'>('all');
   const [inspecting, setInspecting] = useState<AchievementDef | null>(null);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   // Timeline map for date lookups
   const timelineMap = useMemo(() => {
@@ -394,6 +466,21 @@ export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
 
   // Total XP from achievements
   const achievementXP = useMemo(() => totalAchievementXP(unlocked), [unlocked]);
+
+  // Featured toggle handler
+  const handleToggleFeatured = useCallback(
+    (id: string) => {
+      const current = [...featured];
+      const idx = current.indexOf(id);
+      if (idx >= 0) {
+        current.splice(idx, 1);
+      } else if (current.length < 3) {
+        current.push(id);
+      }
+      setFeatured(current);
+    },
+    [featured, setFeatured],
+  );
 
   // Apply filters + search
   const filteredAchievements = useMemo(() => {
@@ -491,60 +578,18 @@ export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
       {!embedded && <VaultParticles count={40} />}
 
       <div className="relative z-10 space-y-6">
-        {/* Stats bar */}
+        {/* Stats bar (includes timeline toggle) */}
         <VaultStatsBar
           unlocked={unlocked.size}
           total={ACHIEVEMENTS.length}
           xp={achievementXP}
           rarityStats={rarityStats}
+          showTimeline={showTimeline}
+          onToggleTimeline={() => setShowTimeline((v) => !v)}
         />
 
-        {/* Filters */}
-        <VaultFilterBar
-          filter={filter}
-          sort={sort}
-          search={search}
-          activeCategory={activeCategory}
-          onFilter={setFilter}
-          onSort={setSort}
-          onSearch={setSearch}
-          onCategory={setActiveCategory}
-        />
-
-        {/* No results */}
-        {filteredAchievements.length === 0 && (
-          <div className="text-center py-16">
-            <Trophy className="w-12 h-12 text-text-muted mx-auto mb-4 opacity-40" />
-            <p className="text-text-muted">No trophies match your filters.</p>
-            <button
-              onClick={() => { setFilter('all'); setSearch(''); setActiveCategory('all'); }}
-              className="mt-3 text-sm text-near-green/70 hover:text-near-green transition-colors"
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
-
-        {/* Category view — glass display cases */}
-        {groupedByCategory && groupedByCategory.size > 0 && (
-          <div className="space-y-4">
-            {Array.from(groupedByCategory.entries()).map(([cat, items], index) => (
-              <TrophyDisplayCase
-                key={cat}
-                category={cat}
-                achievements={items}
-                unlocked={unlocked}
-                timelineMap={timelineMap}
-                onInspect={setInspecting}
-                defaultOpen={index < 3}
-                index={index}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Flat rarity/recent view */}
-        {flatSorted && flatSorted.length > 0 && (
+        {/* Timeline view */}
+        {showTimeline ? (
           <div
             className="rounded-2xl p-4"
             style={{
@@ -553,22 +598,93 @@ export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
               backdropFilter: 'blur(20px)',
             }}
           >
-            <div
-              className="grid gap-2"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}
-            >
-              {flatSorted.map((achievement, i) => (
-                <TrophyItem
-                  key={achievement.id}
-                  achievement={achievement}
-                  isUnlocked={unlocked.has(achievement.id)}
-                  unlockedAt={timelineMap.get(achievement.id)}
-                  onClick={() => setInspecting(achievement)}
-                  index={i}
-                />
-              ))}
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-4 h-4 text-near-green" />
+              <h3 className="text-sm font-semibold text-text-primary">Recent Activity</h3>
             </div>
+            <AchievementTimeline timeline={timeline} limit={20} />
           </div>
+        ) : (
+          <>
+            {/* Featured showcase */}
+            <VaultFeaturedShowcase
+              featured={featured}
+              timelineMap={timelineMap}
+              onToggleFeatured={handleToggleFeatured}
+            />
+
+            {/* Filters */}
+            <VaultFilterBar
+              filter={filter}
+              sort={sort}
+              search={search}
+              activeCategory={activeCategory}
+              onFilter={setFilter}
+              onSort={setSort}
+              onSearch={setSearch}
+              onCategory={setActiveCategory}
+            />
+
+            {/* No results */}
+            {filteredAchievements.length === 0 && (
+              <div className="text-center py-16">
+                <Trophy className="w-12 h-12 text-text-muted mx-auto mb-4 opacity-40" />
+                <p className="text-text-muted">No trophies match your filters.</p>
+                <button
+                  onClick={() => { setFilter('all'); setSearch(''); setActiveCategory('all'); }}
+                  className="mt-3 text-sm text-near-green/70 hover:text-near-green transition-colors"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
+
+            {/* Category view — glass display cases */}
+            {groupedByCategory && groupedByCategory.size > 0 && (
+              <div className="space-y-4">
+                {Array.from(groupedByCategory.entries()).map(([cat, items], index) => (
+                  <TrophyDisplayCase
+                    key={cat}
+                    category={cat}
+                    achievements={items}
+                    unlocked={unlocked}
+                    timelineMap={timelineMap}
+                    onInspect={setInspecting}
+                    defaultOpen={index < 3}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Flat rarity/recent view */}
+            {flatSorted && flatSorted.length > 0 && (
+              <div
+                className="rounded-2xl p-4"
+                style={{
+                  background: 'rgba(15,15,20,0.85)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(20px)',
+                }}
+              >
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}
+                >
+                  {flatSorted.map((achievement, i) => (
+                    <TrophyItem
+                      key={achievement.id}
+                      achievement={achievement}
+                      isUnlocked={unlocked.has(achievement.id)}
+                      unlockedAt={timelineMap.get(achievement.id)}
+                      onClick={() => setInspecting(achievement)}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
