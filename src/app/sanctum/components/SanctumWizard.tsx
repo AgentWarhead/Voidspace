@@ -594,7 +594,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
                         {/* NAME — large, bold, neon */}
                         <h3
-                          className="text-base sm:text-lg font-black uppercase tracking-wide leading-none text-center"
+                          className="text-lg sm:text-xl font-black uppercase tracking-wide leading-none text-center"
                           style={{
                             color,
                             textShadow: isHovered
@@ -608,16 +608,16 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
                         {/* Role */}
                         <p
-                          className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.18em] leading-none text-center"
-                          style={{ color: `${color}80` }}
+                          className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.15em] leading-none text-center"
+                          style={{ color: `${color}90` }}
                         >
                           {persona.role}
                         </p>
 
                         {/* Quote */}
                         <p
-                          className="text-[9px] sm:text-[10px] italic text-center leading-snug px-1 line-clamp-2"
-                          style={{ color: `${color}cc` }}
+                          className="text-[10px] sm:text-xs italic text-center leading-snug px-1 line-clamp-2"
+                          style={{ color: `${color}dd` }}
                         >
                           &quot;{persona.description}&quot;
                         </p>
@@ -627,11 +627,11 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                           {tags.slice(0, 3).map(tag => (
                             <span
                               key={tag}
-                              className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                              className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
                               style={{
                                 color,
-                                border: `1px solid ${color}50`,
-                                background: `${color}16`,
+                                border: `1px solid ${color}55`,
+                                background: `${color}18`,
                               }}
                             >
                               {tag}
