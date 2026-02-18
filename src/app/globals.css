@@ -669,3 +669,12 @@ html {
 .animate-in.slide-in-from-bottom-2 {
   animation: slideInFromBottom 150ms ease-out;
 }
+
+/* Hide scrollbar but keep scrollability */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

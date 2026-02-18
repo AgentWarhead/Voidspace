@@ -737,11 +737,11 @@ function SanctumPageInner() {
               <div className="w-1/2 min-h-0 flex flex-col h-full">
                 <GlassPanel className="flex-1 min-h-0 flex flex-col overflow-hidden" glow glowColor="green">
                   {/* Header with inline task progress */}
-                  <div className="flex-shrink-0 p-4 border-b border-white/[0.08] bg-void-black/50 relative z-30">
+                  <div className="flex-shrink-0 p-2.5 sm:p-4 border-b border-white/[0.08] bg-void-black/50 relative z-30">
                     {/* Top row: Title + Buttons */}
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                        <span className="text-xl">⚡</span>
+                    <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+                      <h2 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap">
+                        <span className="text-lg sm:text-xl">⚡</span>
                         <span className="text-near-green">Contract</span> Preview
                       </h2>
                       <ContractToolbar
@@ -827,10 +827,10 @@ function SanctumPageInner() {
                   {/* Smart action bar + gas badge */}
                   {state.generatedCode && (
                     <div className="flex-shrink-0 border-t border-white/[0.08] bg-void-black/50">
-                      <div className="px-3 py-2.5 flex items-center justify-between gap-2" data-preserve-selection>
-                        {/* Quick actions — selection-aware */}
-                        <div className="flex items-center gap-1.5 overflow-x-auto">
-                          <span className="text-xs mr-1 whitespace-nowrap">
+                      <div className="px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-2 min-w-0" data-preserve-selection>
+                        {/* Quick actions — selection-aware, scrollable when tight */}
+                        <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 overflow-x-auto scrollbar-none flex-1">
+                          <span className="text-[10px] sm:text-xs mr-0.5 sm:mr-1 whitespace-nowrap flex-shrink-0">
                             {codeSelection ? (
                               <span className="text-near-green">✦ Selection</span>
                             ) : (
@@ -839,31 +839,33 @@ function SanctumPageInner() {
                           </span>
                           <button
                             onClick={() => buildActionPrompt('explain')}
-                            className="px-2.5 py-1.5 text-xs rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/30 transition-all whitespace-nowrap"
+                            className="px-2 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/30 transition-all whitespace-nowrap flex-shrink-0"
                           >
                             💡 Explain
                           </button>
                           <button
                             onClick={() => buildActionPrompt('tests')}
-                            className="px-2.5 py-1.5 text-xs rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/30 transition-all whitespace-nowrap"
+                            className="px-2 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/30 transition-all whitespace-nowrap flex-shrink-0"
                           >
                             🧪 Tests
                           </button>
                           <button
                             onClick={() => buildActionPrompt('optimize')}
-                            className="px-2.5 py-1.5 text-xs rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/20 hover:border-amber-500/30 transition-all whitespace-nowrap"
+                            className="px-2 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/20 hover:border-amber-500/30 transition-all whitespace-nowrap flex-shrink-0"
                           >
                             ⚡ Optimize
                           </button>
                           <button
                             onClick={() => buildActionPrompt('security')}
-                            className="px-2.5 py-1.5 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/30 transition-all whitespace-nowrap"
+                            className="px-2 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/30 transition-all whitespace-nowrap flex-shrink-0"
                           >
                             🔒 Audit
                           </button>
                         </div>
-                        {/* Gas badge */}
-                        <GasEstimatorCompact code={state.generatedCode} />
+                        {/* Gas badge — flex-shrink-0 to prevent truncation */}
+                        <div className="flex-shrink-0">
+                          <GasEstimatorCompact code={state.generatedCode} />
+                        </div>
                       </div>
                     </div>
                   )}
