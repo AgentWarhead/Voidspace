@@ -594,8 +594,9 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
                         {/* NAME — large, bold, neon */}
                         <h3
-                          className="text-lg sm:text-xl font-black uppercase tracking-wide leading-none text-center"
+                          className="font-black uppercase tracking-wide leading-none text-center"
                           style={{
+                            fontSize: '20px',
                             color,
                             textShadow: isHovered
                               ? `0 0 16px ${color}, 0 0 32px ${color}60`
@@ -608,16 +609,23 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
                         {/* Role */}
                         <p
-                          className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.15em] leading-none text-center"
-                          style={{ color: `${color}90` }}
+                          className="font-mono uppercase text-center"
+                          style={{
+                            fontSize: '11px',
+                            letterSpacing: '0.12em',
+                            color: `${color}99`,
+                          }}
                         >
                           {persona.role}
                         </p>
 
                         {/* Quote */}
                         <p
-                          className="text-[10px] sm:text-xs italic text-center leading-snug px-1 line-clamp-2"
-                          style={{ color: `${color}dd` }}
+                          className="italic text-center leading-snug px-1 line-clamp-2"
+                          style={{
+                            fontSize: '11px',
+                            color: `${color}ee`,
+                          }}
                         >
                           &quot;{persona.description}&quot;
                         </p>
@@ -627,8 +635,11 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                           {tags.slice(0, 3).map(tag => (
                             <span
                               key={tag}
-                              className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                              className="font-black uppercase rounded-full"
                               style={{
+                                fontSize: '10px',
+                                letterSpacing: '0.08em',
+                                padding: '3px 8px',
                                 color,
                                 border: `1px solid ${color}55`,
                                 background: `${color}18`,
