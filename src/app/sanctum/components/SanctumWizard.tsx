@@ -166,13 +166,14 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
 
     const config: WizardConfig = { mode: 'build', persona: 'shade' };
 
+    // Always start in Learn mode — teaches as it builds, maximises value
+    config.chatMode = 'learn';
+
     if (goal === 'deploy-first') {
       config.mode = 'build';
-      config.chatMode = 'build';
       config.category = selectedCategory || 'meme-tokens';
     } else if (goal === 'learn') {
       config.mode = 'build';
-      config.chatMode = 'build';
       config.category = selectedCategory;
       config.customPrompt = state.customPrompt || undefined;
     } else if (goal === 'idea') {
@@ -181,7 +182,6 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
       config.scratchTemplate = state.scratchTemplate;
     } else if (goal === 'discover') {
       config.mode = 'build';
-      config.chatMode = 'build';
       config.category = 'custom';
       config.customPrompt = briefPrompt || undefined;
     } else if (goal === 'existing-code' && existingCodeSub === 'roast') {
