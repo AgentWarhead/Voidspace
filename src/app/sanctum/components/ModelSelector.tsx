@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Cpu, Zap, Brain, Lock } from 'lucide-react';
+import { ChevronDown, Cpu, Zap, Brain, Lock, Sparkles } from 'lucide-react';
 import { SANCTUM_TIERS, type SanctumTier, type AvailableModel } from '@/lib/sanctum-tiers';
 
 interface ModelSelectorProps {
@@ -25,7 +25,7 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
         const res = await fetch('/api/sanctum/model-preference');
         if (res.ok) {
           const data = await res.json();
-          if (data.preferredModel && availableModels.some((m: AvailableModel) => m.id === data.preferredModel)) {
+          if (data.preferredModel && availableModels.some((m: AvailableModel) => m.id === data.preferredModel && !m.comingSoon)) {
             setSelectedModel(data.preferredModel);
           }
         }
@@ -119,36 +119,45 @@ export function ModelSelector({ tier, onModelChange }: ModelSelectorProps) {
           {availableModels.map((model: AvailableModel) => {
             const isSelected = model.id === selectedModel;
             const modelIsOpus = model.id.includes('opus');
+            const isComingSoon = model.comingSoon === true;
             return (
               <button
                 key={model.id}
-                onClick={() => handleSelect(model.id)}
+                onClick={() => !isComingSoon && handleSelect(model.id)}
+                disabled={isComingSoon}
                 className={`
                   w-full px-3 py-2.5 text-left transition-colors
-                  ${isSelected
-                    ? modelIsOpus
-                      ? 'bg-purple-500/15 border-l-2 border-purple-400'
-                      : 'bg-emerald-500/15 border-l-2 border-emerald-400'
-                    : 'hover:bg-white/5 border-l-2 border-transparent'
+                  ${isComingSoon
+                    ? 'opacity-50 cursor-not-allowed border-l-2 border-transparent'
+                    : isSelected
+                      ? modelIsOpus
+                        ? 'bg-purple-500/15 border-l-2 border-purple-400'
+                        : 'bg-emerald-500/15 border-l-2 border-emerald-400'
+                      : 'hover:bg-white/5 border-l-2 border-transparent'
                   }
                 `}
               >
                 <div className="flex items-center gap-2">
-                  {modelIsOpus ? (
+                  {isComingSoon ? (
+                    <Sparkles className="w-3.5 h-3.5 text-gray-600" />
+                  ) : modelIsOpus ? (
                     <Brain className={`w-3.5 h-3.5 ${isSelected ? 'text-purple-400' : 'text-gray-500'}`} />
                   ) : (
                     <Zap className={`w-3.5 h-3.5 ${isSelected ? 'text-emerald-400' : 'text-gray-500'}`} />
                   )}
                   <div>
-                    <div className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                    <div className={`text-xs font-medium ${isComingSoon ? 'text-gray-500' : isSelected ? 'text-white' : 'text-gray-300'}`}>
                       {model.name}
-                      {model.default && (
+                      {model.default && !isComingSoon && (
                         <span className="ml-1.5 text-[9px] uppercase tracking-wider px-1 py-0.5 rounded bg-white/10 text-gray-400">default</span>
                       )}
+                      {isComingSoon && (
+                        <span className="ml-1.5 text-[9px] uppercase tracking-wider px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-500/70 border border-emerald-500/20">coming soon</span>
+                      )}
                     </div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">{model.description}</div>
+                    <div className={`text-[11px] mt-0.5 ${isComingSoon ? 'text-gray-600' : 'text-gray-500'}`}>{model.description}</div>
                   </div>
-                  {isSelected && (
+                  {isSelected && !isComingSoon && (
                     <div className={`ml-auto w-1.5 h-1.5 rounded-full ${modelIsOpus ? 'bg-purple-400' : 'bg-emerald-400'}`} />
                   )}
                 </div>
