@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Secondary safety net: daily AI usage budget
-    const budget = await checkAiBudget(user.userId);
+    const budget = await checkAiBudget(user.userId, userTier);
     if (!budget.allowed) {
       return NextResponse.json({ 
         error: 'Daily AI usage limit reached', 

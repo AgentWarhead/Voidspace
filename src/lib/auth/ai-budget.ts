@@ -1,10 +1,19 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import type { SanctumTier } from '@/lib/sanctum-tiers';
 
-// Token limit reserved for future per-token tracking
-// const DAILY_TOKEN_LIMIT = 50000;
-const DAILY_REQUEST_LIMIT = 50;  // 50 AI requests per user per day
+// Daily request limits per tier — generous enough to not punish real usage
+const TIER_LIMITS: Record<SanctumTier, number> = {
+  shade: 25,        // Free tier: 25 requests/day (enough to explore)
+  specter: 200,     // $25/mo: 200/day — solid daily usage
+  legion: 500,      // $60/mo: 500/day — power user
+  leviathan: 2000,  // $200/mo: 2000/day — practically unlimited
+};
 
-export async function checkAiBudget(userId: string): Promise<{ allowed: boolean; remaining: number }> {
+export async function checkAiBudget(
+  userId: string,
+  tier: SanctumTier = 'shade'
+): Promise<{ allowed: boolean; remaining: number }> {
+  const limit = TIER_LIMITS[tier] || TIER_LIMITS.shade;
   const supabase = createAdminClient();
   const dayStart = new Date();
   dayStart.setUTCHours(0, 0, 0, 0);
@@ -18,8 +27,8 @@ export async function checkAiBudget(userId: string): Promise<{ allowed: boolean;
   
   const used = count || 0;
   return {
-    allowed: used < DAILY_REQUEST_LIMIT,
-    remaining: Math.max(0, DAILY_REQUEST_LIMIT - used)
+    allowed: used < limit,
+    remaining: Math.max(0, limit - used)
   };
 }
 
