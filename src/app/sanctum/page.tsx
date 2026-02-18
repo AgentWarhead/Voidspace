@@ -262,8 +262,10 @@ function SanctumPageInner() {
     }
   }, [searchParams, state.sessionStarted, dispatch]);
 
-  // Derive the auto-message for SanctumChat (only when template triggered the session)
-  const autoMessage = templateHandledRef.current && templateConfig ? templateConfig.message : undefined;
+  // Derive the auto-message for SanctumChat (template walkthrough OR custom prompt from wizard)
+  const autoMessage = templateHandledRef.current && templateConfig
+    ? templateConfig.message
+    : state.customPrompt || undefined;
 
   // Show wallet gate for template arrivals without wallet connected
   const showWalletGate = templateConfig && !isConnected && !walletLoading && !state.sessionStarted;
