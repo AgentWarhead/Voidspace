@@ -123,6 +123,8 @@ function SanctumPageInner() {
   // External message injection from code panel → chat
   const [externalMessage, setExternalMessage] = useState('');
   const [externalMessageSeq, setExternalMessageSeq] = useState(0);
+  const [loadedProjectMessages, setLoadedProjectMessages] = useState<Array<{ role: string; content: string }>>([]);
+  const [loadedProjectSeq, setLoadedProjectSeq] = useState(0);
 
   // Track code selection from TypewriterCode
   const [codeSelection, setCodeSelection] = useState<string | null>(null);
@@ -698,6 +700,8 @@ function SanctumPageInner() {
                       sessionReset={sessionResetCounter}
                       externalMessage={externalMessage}
                       externalMessageSeq={externalMessageSeq}
+                      loadedProjectMessages={loadedProjectMessages}
+                      loadedProjectSeq={loadedProjectSeq}
                     />
                   </div>
                 </GlassPanel>
@@ -739,9 +743,22 @@ function SanctumPageInner() {
                         handleDeploy={handleDeploy}
                         handleShare={handleShare}
                         onLoadProject={(project) => {
-                          dispatch({ type: 'SET_GENERATED_CODE', payload: project.code });
+                          dispatch({ type: 'SET_GENERATED_CODE', payload: project.code || '' });
                           dispatch({ type: 'SET_SELECTED_CATEGORY', payload: project.category || 'custom' });
-                          dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
+                          if (project.code) {
+                            dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
+                          }
+                          if (project.persona) {
+                            dispatch({ type: 'SET_PERSONA_ID', payload: project.persona });
+                          }
+                          if (project.mode) {
+                            dispatch({ type: 'SET_MODE', payload: project.mode });
+                          }
+                          // Restore chat messages from the project
+                          if (project.messages && project.messages.length > 0) {
+                            setLoadedProjectMessages(project.messages);
+                            setLoadedProjectSeq(prev => prev + 1);
+                          }
                         }}
                       />
                     </div>
@@ -867,6 +884,8 @@ function SanctumPageInner() {
                         sessionReset={sessionResetCounter}
                         externalMessage={externalMessage}
                         externalMessageSeq={externalMessageSeq}
+                        loadedProjectMessages={loadedProjectMessages}
+                        loadedProjectSeq={loadedProjectSeq}
                       />
                     </div>
                   </GlassPanel>

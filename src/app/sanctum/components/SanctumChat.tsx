@@ -86,6 +86,8 @@ interface SanctumChatProps {
   sessionReset?: number; // increment to signal reset from parent
   externalMessage?: string; // message injected from outside (code panel actions)
   externalMessageSeq?: number; // increment to trigger send
+  loadedProjectMessages?: Array<{ role: string; content: string }>; // messages from a loaded project
+  loadedProjectSeq?: number; // increment to trigger project message restore
 }
 
 // --- localStorage persistence for chat ---
@@ -123,7 +125,7 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, loadedProjectMessages, loadedProjectSeq }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
@@ -719,6 +721,19 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       handleSend(externalMessage);
     }
   }, [externalMessageSeq]);
+
+  // Restore messages from a loaded project
+  useEffect(() => {
+    if (loadedProjectMessages && loadedProjectSeq && loadedProjectSeq > 0) {
+      const restored: Message[] = loadedProjectMessages.map((m, i) => ({
+        id: `loaded-${Date.now()}-${i}`,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }));
+      setMessages(restored);
+      messagesRestoredRef.current = true;
+    }
+  }, [loadedProjectSeq]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Determine a task name based on the user's request
   function getTaskName(text: string): string {
