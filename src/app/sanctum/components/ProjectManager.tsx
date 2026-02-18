@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 // @ts-ignore
-import { Save, FolderOpen, Trash2, Clock, Code2, X, Loader2, ChevronRight, Check, Edit2, AlertCircle } from 'lucide-react';
+import { Save, FolderOpen, Trash2, Clock, Code2, X, Loader2, ChevronRight, Check, Edit2, AlertCircle, Cloud } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
 
 const STORAGE_KEY = 'sanctum-projects';
+const MIGRATION_FLAG_PREFIX = 'sanctum-migrated-';
 
 export interface LocalProject {
   id: string;
@@ -39,7 +41,9 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'unsaved';
 
-function loadProjects(): LocalProject[] {
+// ── localStorage helpers ──────────────────────────────────────────────────────
+
+function loadLocalProjects(): LocalProject[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -48,13 +52,110 @@ function loadProjects(): LocalProject[] {
   }
 }
 
-function saveProjects(projects: LocalProject[]): void {
+function saveLocalProjects(projects: LocalProject[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
   } catch {
     // ignore storage errors
   }
 }
+
+function hasMigrated(userId: string): boolean {
+  try {
+    return localStorage.getItem(MIGRATION_FLAG_PREFIX + userId) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function markMigrated(userId: string): void {
+  try {
+    localStorage.setItem(MIGRATION_FLAG_PREFIX + userId, 'true');
+  } catch {
+    // ignore
+  }
+}
+
+// ── API helpers ───────────────────────────────────────────────────────────────
+
+async function apiFetchProjects(): Promise<LocalProject[]> {
+  try {
+    const res = await fetch('/api/sanctum/projects');
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data?.projects ?? []).map(dbToLocal);
+  } catch {
+    return [];
+  }
+}
+
+async function apiCreateProject(project: Omit<LocalProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<LocalProject | null> {
+  try {
+    const res = await fetch('/api/sanctum/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: project.name,
+        code: project.code,
+        messages: project.messages,
+        category: project.category,
+        persona: project.persona,
+        mode: project.mode,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return Promise.reject(err);
+    }
+    const data = await res.json();
+    return data?.project ? dbToLocal(data.project) : null;
+  } catch (e) {
+    return Promise.reject(e);
+  }
+}
+
+async function apiUpdateProject(id: string, fields: Partial<LocalProject>): Promise<LocalProject | null> {
+  try {
+    const res = await fetch('/api/sanctum/projects', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...fields }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.project ? dbToLocal(data.project) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function apiDeleteProject(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/sanctum/projects?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Map a DB row (SanctumProject shape) → LocalProject */
+function dbToLocal(db: Record<string, unknown>): LocalProject {
+  return {
+    id: String(db?.id ?? ''),
+    name: String(db?.name ?? ''),
+    code: String(db?.code ?? ''),
+    messages: Array.isArray(db?.messages) ? (db.messages as Array<{ role: string; content: string }>) : [],
+    category: String(db?.category ?? 'custom'),
+    persona: String(db?.persona ?? ''),
+    mode: String(db?.mode ?? 'build'),
+    createdAt: String(db?.created_at ?? new Date().toISOString()),
+    updatedAt: String(db?.updated_at ?? new Date().toISOString()),
+  };
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function ProjectManager({
   code,
@@ -64,8 +165,12 @@ export function ProjectManager({
   mode = 'build',
   onLoadProject,
 }: ProjectManagerProps) {
+  const { user } = useWallet();
+  const isAuthed = Boolean(user?.id);
+
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState<LocalProject[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveName, setSaveName] = useState('');
@@ -75,6 +180,7 @@ export function ProjectManager({
   const [editingName, setEditingName] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const lastSavedCodeRef = useRef<string>('');
+  const migratedRef = useRef(false);
 
   // Track unsaved changes
   useEffect(() => {
@@ -84,10 +190,58 @@ export function ProjectManager({
     }
   }, [code, saveStatus]);
 
-  const fetchProjects = useCallback(() => {
-    const projs = loadProjects();
-    setProjects(projs);
-  }, []);
+  // ── Fetch from API or localStorage ──
+  const fetchProjects = useCallback(async () => {
+    if (isAuthed) {
+      setIsLoading(true);
+      const projs = await apiFetchProjects();
+      setProjects(projs);
+      setIsLoading(false);
+    } else {
+      setProjects(loadLocalProjects());
+    }
+  }, [isAuthed]);
+
+  // ── One-time localStorage → Supabase migration ──
+  const runMigrationIfNeeded = useCallback(async () => {
+    if (!isAuthed || !user?.id || migratedRef.current || hasMigrated(user.id)) return;
+    migratedRef.current = true;
+
+    const localProjs = loadLocalProjects();
+    if (localProjs.length === 0) {
+      markMigrated(user.id);
+      return;
+    }
+
+    // Migrate each local project to Supabase (best-effort)
+    const results = await Promise.allSettled(
+      localProjs.map(p =>
+        apiCreateProject({
+          name: p.name,
+          code: p.code,
+          messages: p.messages ?? [],
+          category: p.category ?? 'custom',
+          persona: p.persona ?? '',
+          mode: p.mode ?? 'build',
+        })
+      )
+    );
+
+    const succeeded = results.filter(r => r.status === 'fulfilled' && r.value).length;
+    if (succeeded > 0) {
+      // Clear localStorage after successful migration
+      saveLocalProjects([]);
+    }
+
+    markMigrated(user.id);
+  }, [isAuthed, user?.id]);
+
+  // On mount or auth change: migrate then fetch
+  useEffect(() => {
+    runMigrationIfNeeded().then(() => {
+      if (showModal) fetchProjects();
+    });
+  }, [isAuthed, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (showModal) {
@@ -95,6 +249,7 @@ export function ProjectManager({
     }
   }, [showModal, fetchProjects]);
 
+  // ── Save ──
   const handleSave = async () => {
     if (!saveName.trim() || !code) return;
     setIsSaving(true);
@@ -102,73 +257,113 @@ export function ProjectManager({
     setError(null);
 
     try {
-      // Small delay to show saving state
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-      const now = new Date().toISOString();
-      const existing = loadProjects();
+      if (isAuthed) {
+        const created = await apiCreateProject({
+          name: saveName.trim(),
+          code,
+          messages,
+          category: category || 'custom',
+          persona,
+          mode,
+        }).catch((err: unknown) => {
+          const apiErr = err as { error?: string; code?: string };
+          if (apiErr?.code === 'PROJECT_LIMIT') {
+            throw new Error(apiErr.error ?? 'Project limit reached. Upgrade your tier to save more.');
+          }
+          throw new Error('Failed to save project');
+        });
 
-      const newProject: LocalProject = {
-        id: typeof crypto !== 'undefined' && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `proj-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        name: saveName.trim(),
-        code,
-        messages,
-        category: category || 'custom',
-        persona,
-        mode,
-        createdAt: now,
-        updatedAt: now,
-      };
+        if (!created) throw new Error('Failed to save project');
 
-      const updated = [newProject, ...existing];
-      saveProjects(updated);
-      setProjects(updated);
+        setProjects(prev => [created, ...prev]);
+      } else {
+        const now = new Date().toISOString();
+        const newProject: LocalProject = {
+          id:
+            typeof crypto !== 'undefined' && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `proj-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          name: saveName.trim(),
+          code,
+          messages,
+          category: category || 'custom',
+          persona,
+          mode,
+          createdAt: now,
+          updatedAt: now,
+        };
+        const existing = loadLocalProjects();
+        const updated = [newProject, ...existing];
+        saveLocalProjects(updated);
+        setProjects(updated);
+      }
 
       lastSavedCodeRef.current = code;
       setSaveStatus('saved');
       setSaveName('');
       setShowSaveForm(false);
-
-      // Reset to idle after 3s
-      setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 3000);
-    } catch {
-      setError('Failed to save project');
+      setTimeout(() => setSaveStatus(s => (s === 'saved' ? 'idle' : s)), 3000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save project');
       setSaveStatus('unsaved');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDelete = (id: string) => {
+  // ── Delete ──
+  const handleDelete = async (id: string) => {
     if (deleteConfirmId !== id) {
       setDeleteConfirmId(id);
-      // Auto-cancel confirm after 3s
-      setTimeout(() => setDeleteConfirmId(prev => prev === id ? null : prev), 3000);
+      setTimeout(() => setDeleteConfirmId(prev => (prev === id ? null : prev)), 3000);
       return;
     }
-    const updated = projects.filter(p => p.id !== id);
-    saveProjects(updated);
-    setProjects(updated);
+
+    if (isAuthed) {
+      const ok = await apiDeleteProject(id);
+      if (!ok) {
+        setError('Failed to delete project');
+        setDeleteConfirmId(null);
+        return;
+      }
+    } else {
+      const updated = projects.filter(p => p.id !== id);
+      saveLocalProjects(updated);
+    }
+
+    setProjects(prev => prev.filter(p => p.id !== id));
     setDeleteConfirmId(null);
   };
 
+  // ── Rename ──
   const handleRenameStart = (project: LocalProject) => {
     setEditingId(project.id);
     setEditingName(project.name);
   };
 
-  const handleRenameCommit = (id: string) => {
+  const handleRenameCommit = async (id: string) => {
     if (!editingName.trim()) {
       setEditingId(null);
       return;
     }
-    const updated = projects.map(p =>
-      p.id === id ? { ...p, name: editingName.trim(), updatedAt: new Date().toISOString() } : p
-    );
-    saveProjects(updated);
-    setProjects(updated);
+
+    const trimmed = editingName.trim();
+
+    if (isAuthed) {
+      const updated = await apiUpdateProject(id, { name: trimmed });
+      if (updated) {
+        setProjects(prev => prev.map(p => (p.id === id ? { ...p, name: trimmed, updatedAt: updated.updatedAt } : p)));
+      }
+    } else {
+      const updated = projects.map(p =>
+        p.id === id ? { ...p, name: trimmed, updatedAt: new Date().toISOString() } : p
+      );
+      saveLocalProjects(updated);
+      setProjects(updated);
+    }
+
     setEditingId(null);
   };
 
@@ -249,10 +444,19 @@ export function ProjectManager({
                   <h3 className="text-lg font-bold text-white">
                     {showSaveForm ? '💾 Save Project' : '📂 My Projects'}
                   </h3>
-                  <p className="text-sm text-gray-400">
-                    {showSaveForm
-                      ? 'Save your work for later'
-                      : `${projects.length} project${projects.length !== 1 ? 's' : ''}`}
+                  <p className="text-sm text-gray-400 flex items-center gap-1.5">
+                    {isAuthed ? (
+                      <>
+                        <Cloud className="w-3 h-3 text-near-green" />
+                        <span className="text-near-green">Synced to cloud</span>
+                      </>
+                    ) : (
+                      <>
+                        {showSaveForm
+                          ? 'Save your work for later'
+                          : `${projects.length} project${projects.length !== 1 ? 's' : ''}`}
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -290,6 +494,14 @@ export function ProjectManager({
                 📂 Projects ({projects.length})
               </button>
             </div>
+
+            {/* Not authenticated hint */}
+            {!isAuthed && (
+              <div className="mx-4 mt-3 px-3 py-2 bg-void-purple/10 border border-void-purple/20 rounded-lg flex items-center gap-2 text-xs text-gray-400">
+                <Cloud className="w-3.5 h-3.5 flex-shrink-0 text-purple-400" />
+                Sign in to sync projects across devices
+              </div>
+            )}
 
             {/* Error */}
             {error && (
@@ -344,7 +556,11 @@ export function ProjectManager({
             {/* Project List */}
             {!showSaveForm && (
               <div className="flex-1 overflow-auto p-4 space-y-2">
-                {projects.length === 0 ? (
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                  </div>
+                ) : projects.length === 0 ? (
                   <div className="text-center py-12">
                     <FolderOpen className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                     <p className="text-gray-500">No saved projects yet</p>
@@ -408,9 +624,7 @@ export function ProjectManager({
                             {/* Code preview */}
                             {project.code && (
                               <pre className="mt-1 text-xs text-gray-600 font-mono truncate">
-                                {project.code
-                                  .split('\n')
-                                  .find(l => l.trim().length > 3) || ''}
+                                {project.code.split('\n').find(l => l.trim().length > 3) || ''}
                               </pre>
                             )}
                           </div>

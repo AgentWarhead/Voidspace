@@ -32,6 +32,8 @@ export interface SanctumProject {
   mode: string;
   version: number;
   concepts_learned: string[];
+  messages: Array<{ role: string; content: string }>;
+  persona: string;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +46,8 @@ export interface CreateProjectInput {
   code: string;
   mode?: string;
   concepts_learned?: string[];
+  messages?: Array<{ role: string; content: string }>;
+  persona?: string;
 }
 
 export interface UpdateProjectInput {
@@ -53,6 +57,8 @@ export interface UpdateProjectInput {
   code?: string;
   mode?: string;
   concepts_learned?: string[];
+  messages?: Array<{ role: string; content: string }>;
+  persona?: string;
 }
 
 export async function listProjects(userId: string): Promise<SanctumProject[]> {
@@ -80,8 +86,10 @@ export async function createProject(input: CreateProjectInput): Promise<SanctumP
       description: input.description || null,
       category: input.category || null,
       code: input.code,
-      mode: input.mode || 'learn',
+      mode: input.mode || 'build',
       concepts_learned: input.concepts_learned || [],
+      messages: input.messages || [],
+      persona: input.persona || '',
     })
     .select()
     .single();

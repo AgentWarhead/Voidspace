@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, description, category, code, mode, concepts_learned } = body;
+    const { name, description, category, code, mode, concepts_learned, messages, persona } = body;
 
     if (!name || !code) {
       return NextResponse.json({ error: 'Name and code are required' }, { status: 400 });
@@ -69,6 +69,8 @@ export async function POST(request: NextRequest) {
       code,
       mode,
       concepts_learned,
+      messages: Array.isArray(messages) ? messages : [],
+      persona: typeof persona === 'string' ? persona : '',
     });
 
     if (!project) {
@@ -92,7 +94,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, name, description, category, code, mode, concepts_learned } = body;
+    const { id, name, description, category, code, mode, concepts_learned, messages, persona } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
@@ -105,6 +107,8 @@ export async function PUT(request: NextRequest) {
       code,
       mode,
       concepts_learned,
+      ...(Array.isArray(messages) ? { messages } : {}),
+      ...(typeof persona === 'string' ? { persona } : {}),
     });
 
     if (!project) {
