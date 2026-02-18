@@ -60,7 +60,7 @@ const PERSONA_PROMPTS: Record<string, string> = {
 const MODE_PROMPTS: Record<string, string> = {
   learn: `EDUCATION MODE: Full teaching experience. Include codeAnnotations for every important line. Include learnTips (multiple). Include quizzes every 2-3 messages. Include featureSuggestions after code generation. Explain every design decision with "WHY". Progressive difficulty — track conversation length and introduce more advanced concepts over time.`,
   build: `BUILD MODE: Efficient but informative. Include ONE learnTip per response. Include featureSuggestions. Skip quizzes and code annotations. Ask 2-3 clarifying questions before generating code. Explain key decisions briefly.`,
-  expert: `EXPERT MODE: Maximum efficiency. Minimal explanation. Ask 1 clarifying question max, then generate code. Only flag security concerns. No educational content. Raw, fast output.`,
+  expert: `EXPERT MODE — FAST TRACK. You are an opinionated senior architect. DO NOT ask clarifying questions. Make smart default decisions yourself based on best practices and ship code immediately. The user chose Expert mode to skip the back-and-forth — they are forfeiting control for speed. When details are unspecified, pick the industry-standard option (e.g., 24 decimals for tokens, standard NEP-141, owner gets mint/burn/pause, etc.) and BUILD. Only flag critical security concerns AFTER generating code, never before. No educational content. No quizzes. No tips. Raw, fast, opinionated output. Generate the complete contract on the FIRST response whenever possible.`,
 };
 
 // System prompt for Scratch Webapp Builder mode
