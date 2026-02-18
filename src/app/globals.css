@@ -371,6 +371,68 @@ body::before {
   animation: materialize-void 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* ─── Epic: Screen shake ─────────────────────────────────────── */
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10%       { transform: translate(-5px, -2px) rotate(-0.5deg); }
+  20%       { transform: translate(5px, 3px) rotate(0.5deg); }
+  30%       { transform: translate(-4px, -1px) rotate(-0.3deg); }
+  40%       { transform: translate(4px, 2px) rotate(0.3deg); }
+  50%       { transform: translate(-3px, -2px) rotate(-0.2deg); }
+  60%       { transform: translate(3px, 1px) rotate(0.2deg); }
+  70%       { transform: translate(-2px, -1px); }
+  80%       { transform: translate(2px, 1px); }
+  90%       { transform: translate(-1px, 0); }
+}
+.animate-screen-shake {
+  animation: screen-shake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* ─── Epic: Expanding ring ──────────────────────────────────── */
+@keyframes ring-expand {
+  0%   { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(6);   opacity: 0; }
+}
+.animate-ring-expand {
+  animation: ring-expand var(--rd, 1.4s) ease-out forwards;
+}
+
+/* ─── Legendary: Star twinkle ───────────────────────────────── */
+@keyframes star-twinkle {
+  0%, 100% { opacity: var(--base-opacity, 0.5); transform: scale(1); }
+  50%       { opacity: 1; transform: scale(1.8); filter: blur(0.5px); }
+}
+
+/* ─── Legendary: Particles rise full screen ─────────────────── */
+@keyframes legendary-particle-rise {
+  0%   { opacity: 0.9; transform: translateY(0) translateX(var(--drift, 0px)) scale(1); }
+  100% { opacity: 0;   transform: translateY(-105vh) translateX(var(--drift, 0px)) scale(0.2); }
+}
+.animate-legendary-particle-rise {
+  animation: legendary-particle-rise var(--pd, 4s) ease-out forwards;
+}
+
+/* ─── Legendary: Title letter-spacing reveal ─────────────────── */
+@keyframes legendary-title-in {
+  0%   { opacity: 0; letter-spacing: 0.6em; filter: blur(10px); transform: translateY(8px); }
+  50%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; letter-spacing: 0.18em; transform: translateY(0); }
+}
+.animate-legendary-title {
+  animation: legendary-title-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+/* ─── Konami: Retro banner reveal ───────────────────────────── */
+@keyframes konami-banner-in {
+  0%   { opacity: 0; transform: scaleY(0) translateY(-10px); }
+  15%  { opacity: 1; transform: scaleY(1) translateY(0); }
+  75%  { opacity: 1; transform: scaleY(1) translateY(0); }
+  100% { opacity: 0; transform: scaleY(0.8) translateY(-5px); }
+}
+.animate-konami-banner {
+  animation: konami-banner-in 2.2s ease-in-out forwards;
+}
+
 /* ─── Teal glow pulse (common/uncommon border) ──────────────── */
 @keyframes teal-glow-pulse {
   0%, 100% { box-shadow: 0 0 12px rgba(0,236,151,0.25), 0 0 24px rgba(0,236,151,0.10); }
