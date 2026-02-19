@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 // Lightweight inline markdown renderer — no external dependency needed
-function SimpleMarkdown({ content }: { content: string }) {
-  const lines = content.split('\n');
+function SimpleMarkdown({ content }: { content: string | null | undefined }) {
+  const lines = (content ?? '').split('\n');
   const elements: React.ReactNode[] = [];
   let i = 0;
   while (i < lines.length) {
@@ -20,8 +20,8 @@ function SimpleMarkdown({ content }: { content: string }) {
   }
   return <>{elements}</>;
 }
-function inlineFormat(text: string): React.ReactNode {
-  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
+function inlineFormat(text: string | null | undefined): React.ReactNode {
+  const parts = (text ?? '').split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('`') && part.endsWith('`')) return <code key={i} className="bg-white/10 rounded px-1 py-0.5 font-mono text-xs">{part.slice(1,-1)}</code>;
     if (part.startsWith('**') && part.endsWith('**')) return <strong key={i} className="font-bold text-white">{part.slice(2,-2)}</strong>;
@@ -672,7 +672,15 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       abortControllerRef.current = new AbortController();
 
       // Enhancement 7: Inject session briefing on the very first API call (resume case)
-      let apiMessages = contextMessages.map(m => ({ role: m.role, content: m.content }));
+      // Also re-include generated code in assistant messages — code is stripped from content
+      // and stored in m.code separately, so the AI can't see it unless we inject it back.
+      let apiMessages = contextMessages.map(m => {
+        if (m.role === 'assistant' && m.code) {
+          const codeBlock = `\n\n\`\`\`rust\n${m.code}\n\`\`\``;
+          return { role: m.role, content: (m.content || '') + codeBlock };
+        }
+        return { role: m.role, content: m.content || '' };
+      });
       if (sessionBriefing && !briefingInjectedRef.current) {
         briefingInjectedRef.current = true;
         apiMessages = [
@@ -801,7 +809,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.content,
+        content: data.content ?? '',
         code: data.code,
         personaId: switchedPersonaId || currentPersona.id,
         learnTip: data.learnTip,

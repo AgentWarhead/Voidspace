@@ -19,7 +19,7 @@ interface CodePreviewProps {
 // ---------------------------------------------------------------------------
 function autoAnnotate(code: string): CodeAnnotation[] {
   const annotations: CodeAnnotation[] = [];
-  const lines = code.split('\n');
+  const lines = (code ?? '').split('\n');
 
   lines.forEach((line, idx) => {
     const lineNum = idx + 1;
