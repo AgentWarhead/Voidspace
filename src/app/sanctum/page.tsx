@@ -285,7 +285,7 @@ function SanctumPageInner() {
   const showWalletGate = templateConfig && !isConnected && !walletLoading && !state.sessionStarted;
 
   return (
-    <div className="min-h-screen bg-void-black relative overflow-hidden">
+    <div className={`min-h-screen bg-void-black relative ${state.sessionStarted && state.mode === 'visual' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
       {/* Animated particle background */}
       <ParticleBackground />
 
@@ -472,7 +472,7 @@ function SanctumPageInner() {
 
       {/* Visual Mode (standalone, not inside a session) */}
       {state.sessionStarted && state.mode === 'visual' && (
-        <section className="relative z-10 min-h-screen flex flex-col pt-16">
+        <section className="relative z-10 min-h-screen flex flex-col pt-16 pb-24">
           <Container size="xl">
             <div className="flex items-center gap-3 mb-8">
               <button
