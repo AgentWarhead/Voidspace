@@ -29,17 +29,17 @@ export function SanctumSection() {
           <div className="text-center mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono mb-4">
               <Sparkles className="w-3 h-3" />
-              THE ONLY CRYPTO VIBE-CODING PLATFORM
+              THE ECOSYSTEM GATEWAY FOR FOUNDERS
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-300 via-violet-300 to-purple-400 bg-clip-text text-transparent">
               The Sanctum
             </h2>
             <p className="text-text-secondary text-base sm:text-lg mt-3 max-w-2xl mx-auto leading-relaxed">
-              <span className="text-purple-300 font-medium">Describe it. Build it. Deploy it.</span><br />
-              The only AI development studio purpose-built for NEAR Protocol.
+              <span className="text-purple-300 font-medium">Describe it. Launch it. No code required.</span><br />
+              The onboarding layer for the next generation of NEAR founders.
             </p>
             <p className="text-text-muted text-sm mt-2 max-w-xl mx-auto">
-              8 expert AI personas handle Rust, security, DeFi, testing, and deployment. You bring the idea — they bring the execution.
+              8 expert AI personas guide you from concept to launch. You bring the vision — they handle the code, security, and deployment.
             </p>
           </div>
 
@@ -57,8 +57,8 @@ export function SanctumSection() {
               </div>
               {/* Terminal content */}
               <div className="p-3 sm:p-4 font-mono text-[10px] sm:text-xs leading-relaxed space-y-2 overflow-x-auto max-w-full">
-                <p><span className="text-purple-400">you:</span> <span className="text-text-secondary">Build me a token staking contract on NEAR</span></p>
-                <p><span className="text-near-green">sanctum:</span> <span className="text-text-secondary">Let&apos;s build it step by step. First, I&apos;ll create the</span></p>
+                <p><span className="text-purple-400">you:</span> <span className="text-text-secondary">I want to launch a staking token for my community</span></p>
+                <p><span className="text-near-green">sanctum:</span> <span className="text-text-secondary">Let&apos;s build it. I&apos;ll handle the Rust code. First, I&apos;ll create the</span></p>
                 <p className="text-text-secondary pl-[4.5rem]">contract struct with staking pools and reward tracking...</p>
                 <div className="mt-2 p-2 rounded bg-purple-500/5 border border-purple-500/10">
                   <p className="text-purple-300/80">{`#[near(contract_state)]`}</p>
@@ -83,16 +83,16 @@ export function SanctumSection() {
                 <div className="w-10 h-10 rounded-lg bg-near-green/10 border border-near-green/20 flex items-center justify-center mb-4">
                   <Zap className="w-5 h-5 text-near-green" />
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Ship Smart Contracts</h3>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">Launch Your Product</h3>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  Describe your idea. AI generates production-ready Rust contracts and React frontends — step by step, from concept to testnet.
+                  Describe your idea. AI generates production-ready code and React frontends — moving you from "concept" to "live on testnet" in minutes.
                 </p>
                 <ul className="space-y-1.5 mb-4">
                   {[
-                    'Every line of code explained',
+                    'No coding experience required',
                     'Contracts → tested → deployed',
                     'Full-stack dApps with React frontends',
-                    'Zero to testnet in hours',
+                    'Zero to testnet in one session',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-xs text-text-secondary">
                       <span className="text-near-green mt-0.5">▸</span>
@@ -101,7 +101,7 @@ export function SanctumSection() {
                   ))}
                 </ul>
                 <div className="flex flex-wrap gap-2">
-                  {['Smart Contracts', 'Web Apps', 'Code Audit', 'Deploy'].map((tag) => (
+                  {['Smart Contracts', 'Web Apps', 'Security Audit', 'Deploy'].map((tag) => (
                     <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded bg-near-green/10 text-near-green/80 border border-near-green/10">
                       {tag}
                     </span>
@@ -117,9 +117,9 @@ export function SanctumSection() {
                 <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4">
                   <BookOpen className="w-5 h-5 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Learn Rust While You Ship</h3>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">Learn as You Build</h3>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  No Rust experience needed. AI teaches you as you build — every pattern, every NEAR concept explained in context.
+                  AI teaches you the concepts as you build. Understand how your product works without getting bogged down in syntax.
                 </p>
                 <ul className="space-y-1.5 mb-4">
                   {[
@@ -173,10 +173,9 @@ export function SanctumSection() {
           {/* How it works */}
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 mb-10 text-sm text-text-muted">
             {[
-              { step: '1', text: 'Describe your idea' },
-              { step: '2', text: 'AI builds with you' },
-              { step: '3', text: 'Learn as you create' },
-              { step: '4', text: 'Deploy to NEAR' },
+              { step: '1', text: 'Describe your vision' },
+              { step: '2', text: 'AI builds it for you' },
+              { step: '3', text: 'Launch to NEAR' },
             ].map((item) => (
               <div key={item.step} className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-mono flex items-center justify-center">{item.step}</span>

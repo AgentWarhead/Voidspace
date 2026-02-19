@@ -49,9 +49,9 @@ export function SanctumLanding({
             className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4"
             style={{ animation: 'sanctumFadeInUp 0.5s ease-out 0.1s backwards' }}
           >
-            <span className="text-text-primary">Describe It.</span>
+            <span className="text-text-primary">Your Gateway to NEAR.</span>
             <br />
-            <GradientText className="mt-2">Ship It on NEAR.</GradientText>
+            <GradientText className="mt-2">Launch Ideas. No Code Required.</GradientText>
           </h1>
 
           {/* Subtitle */}
@@ -59,8 +59,8 @@ export function SanctumLanding({
             className="text-text-secondary text-lg max-w-2xl mx-auto mb-8"
             style={{ animation: 'sanctumFadeInUp 0.5s ease-out 0.2s backwards' }}
           >
-            AI-powered builder for NEAR. Smart contracts, webapps, deployment —{' '}
-            <span className="text-near-green">all through conversation.</span>
+            The onboarding layer for founders. Learn, build, and ship —{' '}
+            <span className="text-near-green">guided by AI every step of the way.</span>
           </p>
 
           {/* Animated Preview */}
