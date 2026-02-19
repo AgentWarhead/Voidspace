@@ -61,6 +61,17 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
             </GradientText>
           </motion.div>
 
+          {/* Permanent brand tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.65 }}
+            className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wide text-text-secondary -mt-2"
+          >
+            See Everything.{' '}
+            <span className="text-near-green">Build Anything.</span>
+          </motion.p>
+
           {/* Typewriter tagline */}
           <motion.div
             initial={{ opacity: 0 }}
