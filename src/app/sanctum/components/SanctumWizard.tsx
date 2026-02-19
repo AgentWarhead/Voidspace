@@ -80,10 +80,12 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
   const goForward = useCallback((nextStep: WizardStep) => {
     setDirection('forward');
     setStep(nextStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const goBack = useCallback(() => {
     setDirection('back');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (step === 'persona') {
       // If deploy-first, skip back to goal (no details step)
       if (goal === 'deploy-first') {
