@@ -674,33 +674,8 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 <span style={{ color: 'rgba(255,255,255,0.45)' }}>Specialists deploy automatically as your project evolves.</span>
               </p>
 
-              {/* ⚡ Expert Quick-Build — power user shortcut, shown after seeing the Council */}
-              <div className="mb-4">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="h-px flex-1 bg-white/[0.06]" />
-                  <span className="text-[9px] font-mono uppercase tracking-widest text-near-green/40">⚡ or skip to instant code</span>
-                  <div className="h-px flex-1 bg-white/[0.06]" />
-                </div>
-                <div className="flex flex-wrap justify-center gap-1.5">
-                  {[
-                    { label: 'Token', category: 'meme-tokens', emoji: '🪙' },
-                    { label: 'NFT', category: 'nfts', emoji: '🎨' },
-                    { label: 'DAO', category: 'daos', emoji: '🏛️' },
-                    { label: 'Staking', category: 'staking-rewards', emoji: '💎' },
-                    { label: 'DeFi', category: 'defi', emoji: '🏦' },
-                    { label: 'Bridge', category: 'bridges', emoji: '🌉' },
-                  ].map(({ label, category, emoji }) => (
-                    <button
-                      key={category}
-                      onClick={() => onComplete({ mode: 'build', category, chatMode: 'expert' })}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-near-green/10 hover:border-near-green/25 text-text-muted/60 hover:text-near-green transition-all text-xs font-medium"
-                    >
-                      <span>{emoji}</span>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Expert Quick-Build removed as per boss directive 2026-02-18 */}
+
 
               {/* [6] Full-width LAUNCH SESSION button — breathing glow */}
               <button

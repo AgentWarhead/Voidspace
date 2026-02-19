@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 // @ts-ignore
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
@@ -1079,7 +1080,27 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                   )}
                   
                   {/* Message content */}
-                  <p className="text-sm sm:text-base text-text-primary whitespace-pre-wrap break-words">{message.content}</p>
+                  <div className="text-sm sm:text-base text-text-primary">
+                    <ReactMarkdown
+                      components={{
+                        p: ({node, ...props}) => <p className="mb-2 last:mb-0 break-words leading-relaxed" {...props} />,
+                        a: ({node, ...props}) => <a className="text-near-green hover:underline cursor-pointer" target="_blank" rel="noopener noreferrer" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                        li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-bold text-white" {...props} />,
+                        em: ({node, ...props}) => <em className="italic text-text-secondary" {...props} />,
+                        code: ({node, ...props}) => <code className="bg-white/10 rounded px-1 py-0.5 font-mono text-xs" {...props} />,
+                        pre: ({node, ...props}) => <pre className="bg-void-black/50 p-3 rounded-lg overflow-x-auto mb-2 text-xs font-mono border border-white/10" {...props} />,
+                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2 text-white" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2 text-white" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1 text-white" {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-near-green/50 pl-3 italic text-text-muted my-2" {...props} />,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
                   
                   {/* Learn tips (array — new format) */}
                   {message.learnTips && message.learnTips.length > 0 ? (
