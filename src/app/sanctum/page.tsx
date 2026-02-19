@@ -156,16 +156,15 @@ function SanctumPageInner() {
       security: `Audit this selected code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
     } : {
       // Full-contract mode — reference the preview, no code paste.
-      // The AI has the full contract in context from generation — no truncation, no clutter, scales to any size.
       explain:  `Explain the full contract in the preview panel — walk through its structure, what each section does, and the NEAR concepts it demonstrates.`,
       tests:    `Simulate running the test suite for the full contract in the preview panel. Analyze each public method and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases) for every public method\n- For each scenario: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end: overall score (X/10), top 3 issues to fix before deploying`,
       optimize: `Analyze the full contract in the preview panel for gas efficiency — identify the most impactful optimizations and show the improved code.`,
       security: `Perform a complete security audit of the full contract in the preview panel — check for reentrancy, access control issues, integer overflow, storage vulnerabilities, and any NEAR-specific attack vectors. Give me a prioritized findings list.`,
+      deploy:   `Give me a complete step-by-step deployment guide for the contract in the preview panel. I want to deploy it to NEAR testnet right now.\n\nInclude:\n1. Prerequisites (Rust toolchain, NEAR CLI — exact install commands)\n2. The exact \`cargo build\` command to compile to WASM\n3. The exact \`near deploy\` command with the correct flags for this contract type\n4. How to initialize the contract after deploy (call \`new\` if needed)\n5. How to verify the deploy worked on testnet explorer\n6. A single \`deploy.sh\` script I can copy and run in one go\n\nMake the commands copy-paste ready. Assume I have a funded testnet account.`,
     };
 
     // ALL analysis actions stay in chat — never overwrite the code preview.
-    // tests = simulation report in chat, not code generation.
-    const analysisActions = ['explain', 'optimize', 'security', 'tests'];
+    const analysisActions = ['explain', 'optimize', 'security', 'tests', 'deploy'];
     sendToChat(prompts[action] || prompts.explain, {
       noCodeExtraction: analysisActions.includes(action),
     });
@@ -778,7 +777,7 @@ function SanctumPageInner() {
                         showFileStructure={state.showFileStructure}
                         isThinking={state.isThinking}
                         dispatch={dispatch}
-                        handleDeploy={handleDeploy}
+                        handleDeploy={() => buildActionPrompt('deploy')}
                         handleShare={handleShare}
                         onLoadProject={(project) => {
                           dispatch({ type: 'SET_GENERATED_CODE', payload: project.code || '' });
@@ -1086,7 +1085,7 @@ function SanctumPageInner() {
               </button>
               <button 
                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-40 whitespace-nowrap font-medium"
-                onClick={handleDeploy}
+                onClick={() => buildActionPrompt('deploy')}
                 disabled={!state.generatedCode || state.sanctumStage === 'thinking'}
               >
                 <Rocket className="w-3.5 h-3.5" />

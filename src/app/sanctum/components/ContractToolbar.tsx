@@ -353,7 +353,7 @@ export function ContractToolbar({
         className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium bg-near-green/15 hover:bg-near-green/25 text-near-green rounded-lg border border-near-green/25 hover:border-near-green/40 transition-all flex items-center gap-1.5 sm:gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-near-green/10 min-h-[36px]"
         onClick={handleDeploy}
         disabled={!hasCode || sanctumStage === 'thinking'}
-        title="Deploy to NEAR testnet"
+        title="Get step-by-step deployment guide"
       >
         <Rocket className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Deploy</span>
