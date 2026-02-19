@@ -285,7 +285,7 @@ function SanctumPageInner() {
   const showWalletGate = templateConfig && !isConnected && !walletLoading && !state.sessionStarted;
 
   return (
-    <div className={`min-h-screen bg-void-black relative ${state.sessionStarted && state.mode === 'visual' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+    <div className={`min-h-screen bg-void-black relative ${state.sessionStarted && state.mode === 'visual' ? '' : 'overflow-hidden'}`}>
       {/* Animated particle background */}
       <ParticleBackground />
 

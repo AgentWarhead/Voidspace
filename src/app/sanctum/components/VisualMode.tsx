@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Sparkles, Download, Loader2, AlertCircle } from 'lucide-react';
 
 const VISUAL_TYPES = [
@@ -20,6 +20,15 @@ export function VisualMode() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ mimeType: string; data: string } | null>(null);
   const [isDemo, setIsDemo] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (result && resultRef.current) {
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [result]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -170,7 +179,7 @@ export function VisualMode() {
 
       {/* Result */}
       {result && (
-        <div className="mt-8">
+        <div ref={resultRef} className="mt-8">
           <div className="rounded-2xl overflow-hidden border border-border-subtle bg-void-gray/30">
             <img
               src={`data:${result.mimeType};base64,${result.data}`}
