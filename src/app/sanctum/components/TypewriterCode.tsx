@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 
 interface TypewriterCodeProps {
   code: string;
@@ -18,6 +18,8 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  // Tracks the current selection for the visible badge (lines/chars count)
+  const [selectionBadge, setSelectionBadge] = useState<string | null>(null);
   // Use a ref (not state) so setting the selection doesn't trigger a re-render,
   // which would cause dangerouslySetInnerHTML to wipe out the highlight marks.
   const selectedTextRef = useRef<string | null>(null);
@@ -85,7 +87,7 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Clear any persisted highlight marks + native browser selection
+  // Clear any persisted highlight marks + native browser selection + badge
   const clearHighlightMarks = useCallback(() => {
     highlightMarksRef.current.forEach(mark => {
       const parent = mark.parentNode;
@@ -96,8 +98,8 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
       }
     });
     highlightMarksRef.current = [];
-    // Also clear the native browser selection
     window.getSelection()?.removeAllRanges();
+    setSelectionBadge(null);
   }, []);
 
   // Selection detection — notify parent of selected text; native ::selection CSS handles the visual
@@ -113,6 +115,13 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
 
     // Dismiss the hint when user first highlights
     if (showHint) dismissHint();
+
+    // Keep the pre focused so ::selection CSS stays visually active
+    containerRef.current?.focus();
+
+    // Show selection badge — visible indicator even if native highlight glitches
+    const lineCount = text.split('\n').length;
+    setSelectionBadge(lineCount > 1 ? `${lineCount} lines selected` : `${text.length} chars selected`);
 
     // Store selected text in ref — the native browser ::selection CSS handles the visual
     selectedTextRef.current = text;
@@ -272,6 +281,11 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     }).join('\n');
   };
 
+  // Memoize highlighted HTML — ensures dangerouslySetInnerHTML gets the SAME string
+  // reference when displayedCode hasn't changed, so React skips DOM replacement and
+  // the browser's native text selection (::selection CSS) stays intact across re-renders.
+  const highlightedHtml = useMemo(() => highlightRust(displayedCode), [displayedCode]);
+
   return (
     <div ref={wrapperRef} className="relative flex-1 min-h-0 flex flex-col">
       {/* Highlight mark styles */}
@@ -321,12 +335,21 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
         </div>
       )}
 
+      {/* Selection active badge — persistent visual indicator */}
+      {selectionBadge && (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-near-green/15 border border-near-green/40 flex items-center gap-2 shadow-lg shadow-near-green/10 pointer-events-none animate-in fade-in duration-150">
+          <span className="w-1.5 h-1.5 rounded-full bg-near-green animate-pulse flex-shrink-0" />
+          <span className="text-xs text-near-green font-medium whitespace-nowrap">{selectionBadge} — use toolbar</span>
+        </div>
+      )}
+
       <pre
         ref={containerRef}
+        tabIndex={0}
         onScroll={handleScroll}
         onMouseUp={handleMouseUp}
         onClick={handleClick}
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-4 text-xs sm:text-sm font-mono leading-relaxed bg-void-black/50 outline-none"
       >
         <div className="flex">
           {/* Line number gutter */}
@@ -335,11 +358,11 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
               <div key={i} className="text-text-muted/30 text-xs leading-relaxed">{i + 1}</div>
             ))}
           </div>
-          {/* Code content */}
+          {/* Code content — memoized HTML so re-renders don't replace DOM nodes and kill browser selection */}
           <code
             ref={codeRef}
             className="flex-1 overflow-x-auto text-text-primary"
-            dangerouslySetInnerHTML={{ __html: highlightRust(displayedCode) }}
+            dangerouslySetInnerHTML={{ __html: highlightedHtml }}
           />
         </div>
         {!isComplete && code && (
