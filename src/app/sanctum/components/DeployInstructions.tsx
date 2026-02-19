@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 // @ts-ignore
 import {
   Rocket, CheckCircle2, AlertCircle, ChevronRight, ChevronLeft,
   Globe, FlaskConical, Wallet, ExternalLink, Loader2,
-  Copy, Check, XCircle, Info, Zap, Shield,
+  Copy, Check, XCircle, Info, Zap, Shield, Terminal,
 } from 'lucide-react';
 import { useWallet } from '@/hooks/useWallet';
 import { parsePublicMethods } from './DownloadContract';
@@ -57,6 +57,32 @@ export function DeployInstructions({
   const [deployError, setDeployError] = useState<string | null>(null);
   const [copiedHash, setCopiedHash] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [gitpodLoading, setGitpodLoading] = useState(false);
+
+  // Open in Gitpod — store code in Supabase, get a kit ID, open Gitpod with CONTRACT_KIT_ID env
+  const handleOpenGitpod = useCallback(async () => {
+    setGitpodLoading(true);
+    try {
+      const res = await fetch('/api/sanctum/deploy-kit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, contractName, category }),
+      });
+      const data = await res.json();
+      if (res.ok && data.id) {
+        const gitpodUrl = `https://gitpod.io/#CONTRACT_KIT_ID=${data.id}/https://github.com/voidspace-io/near-deploy-kit`;
+        window.open(gitpodUrl, '_blank');
+      } else {
+        // Fallback — open without auto-load (user pastes manually)
+        window.open('https://gitpod.io/#https://github.com/voidspace-io/near-deploy-kit', '_blank');
+      }
+    } catch {
+      // Fallback on network error
+      window.open('https://gitpod.io/#https://github.com/voidspace-io/near-deploy-kit', '_blank');
+    } finally {
+      setGitpodLoading(false);
+    }
+  }, [code, contractName, category]);
 
   // Parse contract metadata
   const methods = useMemo(() => parsePublicMethods(code), [code]);
@@ -209,6 +235,33 @@ export function DeployInstructions({
                   <span className="text-white">{lineCount}</span> lines,{' '}
                   <span className="text-white">{methodCount}</span> method{methodCount !== 1 ? 's' : ''}
                 </p>
+              </div>
+
+              {/* Gitpod alternative — no local install needed */}
+              <div className="rounded-lg border border-void-purple/30 bg-gradient-to-r from-void-purple/10 to-blue-500/10 p-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-void-purple/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Terminal className="w-4 h-4 text-void-purple" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-white mb-0.5">No local setup needed</p>
+                    <p className="text-[11px] text-gray-400 leading-relaxed">
+                      Open a cloud IDE with Rust + NEAR CLI pre-installed. Your contract loads automatically — just run <code className="text-void-purple bg-void-black/40 px-1 rounded">bash deploy.sh</code>.
+                    </p>
+                    <button
+                      onClick={handleOpenGitpod}
+                      disabled={gitpodLoading}
+                      className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-void-purple/20 hover:bg-void-purple/30 border border-void-purple/40 hover:border-void-purple/60 transition-all text-[11px] font-semibold text-white disabled:opacity-60"
+                    >
+                      {gitpodLoading ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <ExternalLink className="w-3 h-3" />
+                      )}
+                      {gitpodLoading ? 'Preparing…' : 'Open in Gitpod'}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
