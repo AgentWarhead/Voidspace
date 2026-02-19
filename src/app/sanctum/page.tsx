@@ -440,7 +440,7 @@ function SanctumPageInner() {
       )}
 
       {/* Landing — Hero */}
-      {!state.sessionStarted && !showWalletGate && !showWizard && (
+      {!state.sessionStarted && !showWalletGate && !showWizard && !state.showImportContract && (
         <SanctumLanding
           onEnterSanctum={() => {
             setShowWizard(true);

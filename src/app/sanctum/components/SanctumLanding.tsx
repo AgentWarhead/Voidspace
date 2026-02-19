@@ -31,9 +31,9 @@ export function SanctumLanding({
   onNewSession,
 }: SanctumLandingProps) {
   return (
-    <section className="relative z-10 min-h-screen flex flex-col">
+    <section className="relative z-10 flex flex-col">
       {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center pt-16 pb-8 px-4">
+      <div className="flex flex-col items-center justify-center pt-20 pb-10 px-4">
         <Container size="xl" className="text-center">
           {/* Animated badge */}
           <div className="flex items-center justify-center mb-6" style={{ animation: 'sanctumFadeInUp 0.5s ease-out backwards' }}>
