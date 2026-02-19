@@ -142,11 +142,14 @@ function SanctumPageInner() {
   }, [state.activePanel, dispatch]);
 
   // Build a prompt for the bottom action bar.
-  // KEY DESIGN: Never embed the full contract in the message — the AI already has it in context
-  // from the conversation history. Embedding it causes truncation on large contracts and clutters
-  // the chat. Only include code when the user has a specific selection highlighted.
+  // KEY DESIGN: Always include the contract code for toolbar action prompts.
+  // For freshly AI-generated code the AI has context from chat history, but for
+  // loaded/imported contracts the code was never in the conversation — the AI is blind to it.
+  // Including the code block ensures all toolbar actions work correctly regardless of source.
   const buildActionPrompt = useCallback((action: string) => {
     const hasSelection = codeSelection && codeSelection.length >= 3;
+    const code = state.generatedCode || '';
+    const codeBlock = code ? `\n\nHere is the contract:\n\`\`\`rust\n${code}\n\`\`\`` : '';
 
     const prompts: Record<string, string> = hasSelection ? {
       // Selection mode — include the highlighted snippet (small, targeted)
@@ -155,12 +158,12 @@ function SanctumPageInner() {
       optimize: `How can I optimize this selected code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
       security: `Audit this selected code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
     } : {
-      // Full-contract mode — reference the preview, no code paste.
-      explain:  `Explain the full contract in the preview panel — walk through its structure, what each section does, and the NEAR concepts it demonstrates.`,
-      tests:    `Simulate running the test suite for the full contract in the preview panel. Analyze each public method and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases) for every public method\n- For each scenario: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end: overall score (X/10), top 3 issues to fix before deploying`,
-      optimize: `Analyze the full contract in the preview panel for gas efficiency — identify the most impactful optimizations and show the improved code.`,
-      security: `Perform a complete security audit of the full contract in the preview panel — check for reentrancy, access control issues, integer overflow, storage vulnerabilities, and any NEAR-specific attack vectors. Give me a prioritized findings list.`,
-      deploy:   `Give me a complete step-by-step deployment guide for the contract in the preview panel. I want to deploy it to NEAR testnet right now.\n\nInclude:\n1. Prerequisites (Rust toolchain, NEAR CLI — exact install commands)\n2. The exact \`cargo build\` command to compile to WASM\n3. The exact \`near deploy\` command with the correct flags for this contract type\n4. How to initialize the contract after deploy (call \`new\` if needed)\n5. How to verify the deploy worked on testnet explorer\n6. A single \`deploy.sh\` script I can copy and run in one go\n\nMake the commands copy-paste ready. Assume I have a funded testnet account.`,
+      // Full-contract mode — always inject the code so loaded/imported contracts work too.
+      explain:  `Explain this contract — walk through its structure, what each section does, and the NEAR concepts it demonstrates.${codeBlock}`,
+      tests:    `Simulate running the test suite for this contract. Analyze each public method and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases) for every public method\n- For each scenario: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end: overall score (X/10), top 3 issues to fix before deploying${codeBlock}`,
+      optimize: `Analyze this contract for gas efficiency — identify the most impactful optimizations and show the improved code.${codeBlock}`,
+      security: `Perform a complete security audit of this contract — check for reentrancy, access control issues, integer overflow, storage vulnerabilities, and any NEAR-specific attack vectors. Give me a prioritized findings list.${codeBlock}`,
+      deploy:   `Give me a complete step-by-step deployment guide for this contract. I want to deploy it to NEAR testnet right now.\n\nInclude:\n1. Prerequisites (Rust toolchain, NEAR CLI — exact install commands)\n2. The exact \`cargo build\` command to compile to WASM\n3. The exact \`near deploy\` command with the correct flags for this contract type\n4. How to initialize the contract after deploy (call \`new\` if needed)\n5. How to verify the deploy worked on testnet explorer\n6. A single \`deploy.sh\` script I can copy and run in one go\n\nMake the commands copy-paste ready. Assume I have a funded testnet account.${codeBlock}`,
     };
 
     // ALL analysis actions stay in chat — never overwrite the code preview.
