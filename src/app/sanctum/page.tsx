@@ -517,11 +517,26 @@ function SanctumPageInner() {
                 onImport={(data) => {
                   dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
                   dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
-                  if (data.code) {
+                  dispatch({ type: 'SET_MODE', payload: 'build' });
+
+                  if (data.source === 'solidity-convert' && data.conversionPrompt) {
+                    // Solidity → start Sanctum chat with the conversion prompt
+                    dispatch({ type: 'SET_CUSTOM_PROMPT', payload: data.conversionPrompt });
+                    dispatch({ type: 'SET_SELECTED_CATEGORY', payload: 'custom' });
+                    dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+                  } else if (data.code) {
+                    // NEAR code (paste / file) → load into preview + start session with context
                     dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
+                    dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name || 'custom' });
+                    dispatch({ type: 'SET_CUSTOM_PROMPT', payload: `I've imported an existing NEAR contract called "${data.name}". Please analyze it, explain what it does, identify any improvements or security issues, and help me continue building on it.` });
+                    dispatch({ type: 'SET_SESSION_STARTED', payload: true });
+                  } else if (data.source === 'address' && data.address) {
+                    // Contract address → start session with contract context
+                    const methodList = data.methods.slice(0, 8).map(m => m.name).join(', ');
+                    dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name || 'custom' });
+                    dispatch({ type: 'SET_CUSTOM_PROMPT', payload: `I'm working with an existing NEAR contract deployed at "${data.address}" on ${data.network ?? 'testnet'}. Detected methods: ${methodList}. Help me understand this contract and build on it.` });
+                    dispatch({ type: 'SET_SESSION_STARTED', payload: true });
                   }
-                  dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
-                  dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
                 }}
                 onCancel={() => {
                   dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });

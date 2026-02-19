@@ -264,8 +264,14 @@ export function ImportContract({ onImport, onCancel, onStartChat }: ImportContra
 
     try {
       if (mode === 'address') {
-        if (!address.includes('.near') && !address.includes('.testnet')) {
+        const trimmedAddress = address.trim();
+        if (!trimmedAddress || trimmedAddress.length < 2) {
           throw new Error('Please enter a valid NEAR contract address (e.g., contract.testnet)');
+        }
+        // Accept any valid NEAR account format: name.testnet, name.near, hexhash (implicit)
+        const validFormat = trimmedAddress.includes('.') || /^[0-9a-f]{64}$/.test(trimmedAddress);
+        if (!validFormat) {
+          throw new Error('Please enter a valid NEAR contract address (e.g., contract.testnet or myapp.near)');
         }
 
         setLoadingStatus('Checking account on-chain...');
@@ -338,7 +344,7 @@ export function ImportContract({ onImport, onCancel, onStartChat }: ImportContra
           <span className="text-2xl">📤</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Import Your Contract</h2>
-        <p className="text-gray-400">Bring your existing contract and we&apos;ll build a webapp for it</p>
+        <p className="text-gray-400">Bring your existing contract — analyze, extend, or convert it with Sanctum AI</p>
       </div>
 
       {/* Mode Selection */}
@@ -609,7 +615,7 @@ contract MyToken {
               onClick={handleContinue}
               className="flex-1 min-h-[44px] py-3 bg-near-green hover:bg-near-green/90 text-black font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
             >
-              <span className="hidden sm:inline">Continue to Webapp Builder</span>
+              <span className="hidden sm:inline">Continue to Sanctum</span>
               <span className="sm:hidden">Continue</span>
               <ArrowRight className="w-4 h-4" />
             </button>
