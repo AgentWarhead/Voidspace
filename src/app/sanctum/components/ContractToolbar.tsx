@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Code2, Rocket, Share2, GitCompare, Play, Users, Globe, FolderTree, Wrench, ChevronDown, Check, Lock } from 'lucide-react';
+import { Code2, Rocket, Share2, GitCompare, Play, Users, FolderTree, Wrench, ChevronDown, Check, Lock } from 'lucide-react';
 import { DownloadButton } from './DownloadContract';
 import { FileStructureToggle } from './FileStructure';
 import { ProjectManager } from './ProjectManager';
@@ -359,16 +359,6 @@ export function ContractToolbar({
         <span className="hidden sm:inline">Deploy</span>
       </button>
 
-      {/* Webapp */}
-      <button
-        className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 rounded-lg border border-cyan-500/25 hover:border-cyan-500/40 transition-all flex items-center gap-1.5 sm:gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyan-500/10 min-h-[36px]"
-        onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
-        disabled={!hasCode}
-        title="Generate a frontend webapp for this contract"
-      >
-        <Globe className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">Webapp</span>
-      </button>
       </div>{/* end buttons row */}
     </div>
   );
