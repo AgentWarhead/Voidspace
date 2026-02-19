@@ -242,9 +242,9 @@ function SanctumPageInner() {
     setShowWizard(false);
   }, [dispatch, handleCategorySelect]);
 
-  // Auto-start session when template query param is present AND wallet is connected
+  // Auto-start session when template query param is present (Guest Mode: allow entry without wallet)
   useEffect(() => {
-    if (templateConfig && !templateHandledRef.current && !state.sessionStarted && isConnected) {
+    if (templateConfig && !templateHandledRef.current && !state.sessionStarted) {
       templateHandledRef.current = true;
       // Start the build session with the mapped category
       handleCategorySelect(templateConfig.category);
@@ -255,7 +255,7 @@ function SanctumPageInner() {
         window.history.replaceState({}, '', url.pathname);
       }
     }
-  }, [templateConfig, state.sessionStarted, handleCategorySelect, isConnected]);
+  }, [templateConfig, state.sessionStarted, handleCategorySelect]); // Removed isConnected dependency
 
   // Auto-start session when arriving from a Void Brief (?from=brief)
   const briefHandledRef = useRef(false);
@@ -291,8 +291,9 @@ function SanctumPageInner() {
     ? templateConfig.message
     : state.customPrompt || undefined;
 
-  // Show wallet gate for template arrivals without wallet connected
-  const showWalletGate = templateConfig && !isConnected && !walletLoading && !state.sessionStarted;
+  // Wallet gate REMOVED — Guest Mode enabled.
+  // Users can now enter the chat, see the prompt, and are only gated when they try to SEND a message.
+  const showWalletGate = false;
 
   return (
     <div className={`min-h-screen bg-void-black relative ${state.sessionStarted && state.mode === 'visual' ? '' : 'overflow-hidden'}`}>

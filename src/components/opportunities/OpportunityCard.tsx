@@ -79,10 +79,16 @@ export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps
       <div className="p-3 sm:p-4 flex gap-3">
         {/* Left: info */}
         <div className="flex-1 min-w-0 space-y-1 sm:space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm">{categoryIcon}</span>
-            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-text-muted truncate">
-              {categoryName}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm">{categoryIcon}</span>
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-text-muted truncate">
+                {categoryName}
+              </span>
+            </div>
+            {/* Trust badge: Make it clear this is an AI-detected opportunity, not a fake project */}
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[9px] sm:text-[10px] text-purple-300 font-medium whitespace-nowrap">
+              ✨ AI Startup Concept
             </span>
           </div>
           <h3 className="font-semibold text-text-primary text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">

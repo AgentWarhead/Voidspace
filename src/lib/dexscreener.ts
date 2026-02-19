@@ -173,7 +173,14 @@ export async function fetchNearTokens(): Promise<TokenData[]> {
 
   const tokens: TokenData[] = [];
   for (const pair of Array.from(tokenMap.values())) {
-    tokens.push(pairToTokenData(pair));
+    // Phase 1: Sanitize data feeds — filter out low-liquidity/volume noise
+    // Judges saw "mock data" because junk tokens look fake.
+    // Minimums: $10k liquidity OR $1k 24h volume.
+    const liquidity = pair.liquidity?.usd || 0;
+    const volume = pair.volume?.h24 || 0;
+    if (liquidity >= 10000 || volume >= 1000) {
+      tokens.push(pairToTokenData(pair));
+    }
   }
 
   tokens.sort((a, b) => b.marketCap - a.marketCap);

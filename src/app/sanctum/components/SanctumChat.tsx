@@ -243,7 +243,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
-  const { user } = useWallet();
+  const { user, isConnected, openModal } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
   // API enforces actual tier regardless. Once user loads, syncs to real tier.
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'specter';
@@ -952,6 +952,13 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }
 
   async function handleSend(messageText?: string) {
+    // Phase 2: Guest Mode Gate
+    // Users can view the initial AI message, but must connect wallet to reply.
+    if (!isConnected) {
+      openModal();
+      return;
+    }
+
     const text = messageText || input;
     if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
     // Reset noCodeExtraction for normal user input (external injection sets it before calling handleSend)
@@ -1389,7 +1396,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
               }
             }}
             rows={1}
-            placeholder={isListening ? "Listening..." : "Describe what you want to build..."}
+            placeholder={isListening ? "Listening..." : isConnected ? "Describe what you want to build..." : "Connect wallet to reply..."}
             className={`flex-1 min-w-0 px-3 sm:px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-sm sm:text-base text-white placeholder:text-text-muted transition-all resize-none ${
               isListening 
                 ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30 animate-pulse' 
@@ -1402,7 +1409,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           {speechSupported && (
             <button
               onClick={toggleListening}
-              disabled={isLoading}
+              disabled={isLoading || !isConnected}
               className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border transition-all flex-shrink-0 ${
                 isListening
                   ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
@@ -1425,10 +1432,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           ) : (
             <button
               onClick={() => handleSend()}
-              disabled={!input.trim() && attachedFiles.length === 0}
+              disabled={isConnected && !input.trim() && attachedFiles.length === 0}
               className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
             >
-              <ArrowRight className="w-5 h-5" />
+              {!isConnected ? <Wallet className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
             </button>
           )}
         </div>
