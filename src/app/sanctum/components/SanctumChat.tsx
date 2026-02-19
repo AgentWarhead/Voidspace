@@ -32,6 +32,7 @@ interface Message {
   personaId?: string; // Which persona sent this message
   isPersonaSwitch?: boolean; // True for persona transition banners
   switchedToPersonaId?: string; // The persona being switched to
+  switchReason?: string; // Why the persona switch happened
   attachments?: AttachedFile[];
   learnTip?: {
     title: string;
@@ -53,6 +54,7 @@ interface Message {
     input: number;
     output: number;
   };
+  milestone?: string | null;
 }
 
 // Task tracking types
@@ -92,6 +94,8 @@ interface SanctumChatProps {
   externalMessageNoCode?: boolean; // when true, don't extract code from the response (for explain/audit/optimize)
   loadedProjectMessages?: Array<{ role: string; content: string }>; // messages from a loaded project
   loadedProjectSeq?: number; // increment to trigger project message restore
+  sessionBriefing?: string | null; // briefing from previous session to inject on resume
+  onBriefingUpdate?: (briefing: string) => void; // called when AI generates a project briefing
 }
 
 // --- localStorage persistence for chat ---
@@ -109,7 +113,50 @@ function loadSavedMessages(): Message[] | null {
   }
 }
 
-// Category-specific starter prompts
+// Specialist switch reasons — shown in the persona switch banner
+const SWITCH_REASONS: Record<string, string> = {
+  oxide:    'Rust-specific syntax or compilation question detected',
+  warden:   'Security concern or audit request detected',
+  phantom:  'Gas optimization or performance question detected',
+  nexus:    'Cross-chain or NEAR Intents question detected',
+  prism:    'Frontend integration or wallet UX question detected',
+  crucible: 'Testing or QA request detected',
+  ledger:   'Tokenomics or DeFi mechanics question detected',
+};
+
+// Natural next builds after code generation, keyed by category
+const CONTRACT_PROGRESSIONS: Record<string, { title: string; emoji: string; prompt: string }[]> = {
+  'meme-tokens': [
+    { title: 'Staking Contract', emoji: '💎', prompt: 'Build a staking contract that locks my token for rewards' },
+    { title: 'Liquidity Pool', emoji: '🌊', prompt: 'Build an AMM liquidity pool for my token' },
+  ],
+  'nfts': [
+    { title: 'NFT Marketplace', emoji: '🏪', prompt: 'Build an NFT marketplace contract for buying and selling' },
+    { title: 'Royalty Distributor', emoji: '👑', prompt: 'Build a royalty distribution contract for secondary sales' },
+  ],
+  'daos': [
+    { title: 'Treasury Contract', emoji: '🏦', prompt: 'Build a DAO treasury with multi-sig spending control' },
+    { title: 'Delegation System', emoji: '🤝', prompt: 'Build vote delegation for my DAO' },
+  ],
+  'defi': [
+    { title: 'Price Oracle', emoji: '📊', prompt: 'Build an on-chain price oracle for my DeFi protocol' },
+    { title: 'Liquidation Engine', emoji: '⚡', prompt: 'Build a liquidation mechanism for undercollateralized positions' },
+  ],
+  'staking-rewards': [
+    { title: 'Governance Contract', emoji: '🗳️', prompt: 'Build governance voting weighted by staked tokens' },
+    { title: 'Reward Booster', emoji: '🚀', prompt: 'Build a boosted rewards mechanism based on lock duration' },
+  ],
+  'gaming': [
+    { title: 'NFT Loot System', emoji: '🎲', prompt: 'Build an NFT loot drop system for my game' },
+    { title: 'Leaderboard Contract', emoji: '🏆', prompt: 'Build an on-chain leaderboard with rewards' },
+  ],
+  'chain-signatures': [
+    { title: 'Multi-Chain Wallet', emoji: '🌐', prompt: 'Build a multi-chain wallet using Chain Signatures' },
+    { title: 'Cross-Chain Swap', emoji: '🔄', prompt: 'Build a cross-chain token swap using Chain Signatures' },
+  ],
+};
+
+// Category-specific starter prompts (mode-agnostic — used for initial options only)
 const CATEGORY_STARTERS: Record<string, string> = {
   'ai-agents': "I'll help you build an AI-powered Shade Agent on NEAR. These autonomous agents can control assets across multiple chains using Chain Signatures. What should your agent do?",
   'intents': "Let's create an intent-based system on NEAR. Intents let users define WHAT they want, while solvers figure out HOW to execute it. What outcome should your intent achieve?",
@@ -129,7 +176,44 @@ const CATEGORY_STARTERS: Record<string, string> = {
   'custom': "Tell me more about what you want to build, and I'll guide you through creating it step by step.",
 };
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq }: SanctumChatProps) {
+// Returns a mode-appropriate greeting for the given category
+function getModeStarter(category: string | null, mode: ChatMode): string {
+  const cat = category || 'custom';
+  // Get a human-readable category name for the greeting
+  const CATEGORY_NAMES: Record<string, string> = {
+    'ai-agents': 'AI Agent',
+    'intents': 'Intent-Based',
+    'chain-signatures': 'Chain Signatures',
+    'privacy': 'Privacy',
+    'rwa': 'Real World Asset',
+    'defi': 'DeFi',
+    'dex-trading': 'DEX / Trading',
+    'gaming': 'GameFi',
+    'nfts': 'NFT',
+    'daos': 'DAO Governance',
+    'social': 'Social & Creator',
+    'dev-tools': 'Developer Tools',
+    'wallets': 'Wallet & Identity',
+    'data-analytics': 'Data & Analytics',
+    'infrastructure': 'Infrastructure',
+    'meme-tokens': 'Meme Token',
+    'staking-rewards': 'Staking & Rewards',
+    'bridges': 'Bridge',
+    'custom': 'Smart Contract',
+  };
+  const name = CATEGORY_NAMES[cat] || 'Smart Contract';
+
+  if (mode === 'learn') {
+    return `Welcome! Let's build a ${name} contract together. Quick check first — are you new to Rust/smart contracts, or have you built on a blockchain before? This shapes how I teach.`;
+  }
+  if (mode === 'expert') {
+    return `Describe your ${name} contract. I'll generate production-ready code immediately — no questions asked.`;
+  }
+  // build mode
+  return `Let's build a ${name} contract. Two quick things before I start: (1) Who calls this — your frontend, another contract, or both? (2) Any specific access control or pause/unpause requirements?`;
+}
+
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
@@ -157,6 +241,14 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   const abortControllerRef = useRef<AbortController | null>(null);
   const autoMessageSentRef = useRef(false);
   const noCodeExtractionRef = useRef(false);
+  const briefingInjectedRef = useRef(false);
+
+  // Enhancement 4: Mode auto-detection banner
+  const [modeSuggestion, setModeSuggestion] = useState<ChatMode | null>(null);
+  const [modeSuggestionDismissed, setModeSuggestionDismissed] = useState(false);
+
+  // Enhancement 5: Learn mode progress path
+  const [learnMilestone, setLearnMilestone] = useState<string | null>(null);
 
   // Check for speech recognition support
   useEffect(() => {
@@ -394,7 +486,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       return;
     }
 
-    const starterMessage = CATEGORY_STARTERS[category || 'custom'] || CATEGORY_STARTERS['custom'];
+    const starterMessage = getModeStarter(category, chatMode);
     const initialMessage: Message = {
       id: 'initial',
       role: 'assistant',
@@ -532,14 +624,21 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
 
       abortControllerRef.current = new AbortController();
 
+      // Enhancement 7: Inject session briefing on the very first API call (resume case)
+      let apiMessages = contextMessages.map(m => ({ role: m.role, content: m.content }));
+      if (sessionBriefing && !briefingInjectedRef.current) {
+        briefingInjectedRef.current = true;
+        apiMessages = [
+          { role: 'assistant', content: `[Session context: ${sessionBriefing}]` },
+          ...apiMessages,
+        ];
+      }
+
       const response = await fetch('/api/sanctum/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: contextMessages.map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: apiMessages,
           category,
           personaId: currentPersona.id,
           mode: chatMode,
@@ -666,6 +765,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         nextSteps: data.nextSteps,
         options: data.options,
         tokensUsed: data.usage,
+        milestone: data.milestone || null,
       };
 
       // Notify parent about concepts from learn tips
@@ -719,6 +819,16 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         console.error('Code extraction error:', extractErr);
       }
 
+      // Enhancement 7: trigger briefing update
+      if (data.projectBriefing && onBriefingUpdate) {
+        onBriefingUpdate(data.projectBriefing);
+      }
+
+      // Enhancement 5: update learn milestone
+      if (data.milestone) {
+        setLearnMilestone(data.milestone);
+      }
+
       // Insert persona switch banner + assistant message atomically
       if (switchedPersonaId) {
         const switchBanner: Message = {
@@ -727,6 +837,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           content: '',
           isPersonaSwitch: true,
           switchedToPersonaId: switchedPersonaId,
+          switchReason: SWITCH_REASONS[switchedPersonaId] || undefined,
         };
         setMessages(prev => [...prev, switchBanner, assistantMessage]);
       } else {
@@ -867,6 +978,20 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     handleSend(value);
   }
 
+  // Enhancement 4: Detect suggested mode from user input
+  function detectSuggestedMode(text: string): ChatMode | null {
+    if (messages.length > 0 || modeSuggestionDismissed) return null;
+    const lower = text.toLowerCase().trim();
+    if (lower.length < 8) return null;
+    const learnSignals = ['what is', 'how does', 'how do', 'explain', "i'm new", 'im new', 'beginner', 'never built', "don't understand", 'what are', 'what does'];
+    const expertSignals = ['write me', 'build me', 'generate a', 'implement a', 'create a', 'make me', 'give me'];
+    const isLearnSignal = learnSignals.some(s => lower.includes(s));
+    const isExpertSignal = expertSignals.some(s => lower.includes(s)) && lower.length > 20;
+    if (isLearnSignal && chatMode !== 'learn') return 'learn';
+    if (isExpertSignal && chatMode !== 'expert') return 'expert';
+    return null;
+  }
+
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Upgrade Modal */}
@@ -878,6 +1003,13 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       {/* Category learn banner */}
       {category && (
         <CategoryLearnBanner category={category} mode={chatMode} />
+      )}
+
+      {/* Enhancement 5: Learn mode progress path */}
+      {chatMode === 'learn' && (
+        <div className="flex-shrink-0 border-b border-border-subtle/50 bg-void-black/20">
+          <LearnProgressPath currentMilestone={learnMilestone} />
+        </div>
       )}
       
       {/* Messages */}
@@ -897,6 +1029,11 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                     {switchedPersona.name} has entered the session
                   </p>
                   <p className="text-xs text-text-muted leading-relaxed">{switchedPersona.description}</p>
+                  {message.switchReason && (
+                    <p className="text-[10px] text-text-muted/60 mt-1.5 font-mono">
+                      ↳ {message.switchReason}
+                    </p>
+                  )}
                 </div>
               </div>
             );
@@ -1007,6 +1144,25 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                       }}
                     />
                   )}
+
+                  {/* Enhancement 6: Natural next builds after code generation */}
+                  {message.code && message.role === 'assistant' && category && CONTRACT_PROGRESSIONS[category] && (
+                    <div className="mt-3 pt-3 border-t border-white/5">
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-text-muted/50 mb-2">🔗 Natural next build</p>
+                      <div className="flex flex-wrap gap-2">
+                        {CONTRACT_PROGRESSIONS[category].map((prog) => (
+                          <button
+                            key={prog.title}
+                            onClick={() => handleSend(prog.prompt)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-near-green/10 hover:border-near-green/25 text-text-muted hover:text-near-green transition-all text-xs font-medium"
+                          >
+                            <span>{prog.emoji}</span>
+                            {prog.title}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Quick options */}
                   {message.options && message.options.length > 0 && (
@@ -1061,6 +1217,29 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           </div>
         )}
         
+        {/* Enhancement 4: Mode auto-detection banner */}
+        {modeSuggestion && !modeSuggestionDismissed && (
+          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-near-green/[0.08] border border-near-green/20 text-xs">
+            <span className="text-near-green/80">
+              {modeSuggestion === 'learn' ? '🎓 Looks like you\'re exploring — ' : '⚡ Sounds like you know what you want — '}
+              <button
+                onClick={() => {
+                  onChatModeChange?.(modeSuggestion);
+                  setModeSuggestionDismissed(true);
+                  setModeSuggestion(null);
+                }}
+                className="underline text-near-green font-medium"
+              >
+                switch to {modeSuggestion === 'learn' ? 'Learn' : 'Expert'} mode?
+              </button>
+            </span>
+            <button
+              onClick={() => { setModeSuggestionDismissed(true); setModeSuggestion(null); }}
+              className="ml-auto text-text-muted hover:text-white"
+            >✕</button>
+          </div>
+        )}
+
         {/* Attached files preview */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
@@ -1137,6 +1316,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                 textareaRef.current.style.height = 'auto';
                 textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
               }
+              // Enhancement 4: mode auto-detection
+              if (!modeSuggestionDismissed && messages.length === 0) {
+                setModeSuggestion(detectSuggestedMode(e.target.value));
+              }
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -1189,6 +1372,43 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Enhancement 5: LearnProgressPath — milestone tracker for learn mode ──
+const LEARN_STEPS = [
+  { key: 'calibrated', label: 'Calibrated', icon: '🎯' },
+  { key: 'concepts_explained', label: 'Concepts', icon: '📚' },
+  { key: 'first_contract', label: 'First Build', icon: '🏗️' },
+  { key: 'features_added', label: 'Features', icon: '⚡' },
+  { key: 'deployed', label: 'Deployed', icon: '🚀' },
+];
+const STEP_ORDER = LEARN_STEPS.map(s => s.key);
+
+function LearnProgressPath({ currentMilestone }: { currentMilestone: string | null }) {
+  const currentIdx = currentMilestone ? STEP_ORDER.indexOf(currentMilestone) : -1;
+  return (
+    <div className="flex items-center gap-1 px-3 py-2 overflow-x-auto">
+      {LEARN_STEPS.map((step, i) => {
+        const done = i <= currentIdx;
+        const active = i === currentIdx + 1;
+        return (
+          <div key={step.key} className="flex items-center gap-1 flex-shrink-0">
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono transition-all ${
+              done ? 'bg-near-green/20 text-near-green border border-near-green/30' :
+              active ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25 animate-pulse' :
+              'bg-white/5 text-text-muted/40 border border-white/5'
+            }`}>
+              <span>{step.icon}</span>
+              <span className="hidden sm:inline">{step.label}</span>
+            </div>
+            {i < LEARN_STEPS.length - 1 && (
+              <div className={`w-3 h-px flex-shrink-0 ${done ? 'bg-near-green/40' : 'bg-white/10'}`} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

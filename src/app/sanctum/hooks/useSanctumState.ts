@@ -19,6 +19,7 @@ const PERSISTED_FIELDS = [
   'contractsBuilt', 'scratchDescription', 'scratchGeneratedCode',
   'scratchTemplate', 'showScratchSession',
   'personaId',
+  'projectBriefing',
 ] as const;
 
 interface PersistedState {
@@ -105,6 +106,7 @@ export interface SanctumState {
   scratchGeneratedCode: string;
   scratchTemplate: string | null;
   personaId: string;
+  projectBriefing: string | null;
 }
 
 type SanctumAction =
@@ -150,6 +152,7 @@ type SanctumAction =
   | { type: 'SET_SCRATCH_GENERATED_CODE'; payload: string }
   | { type: 'SET_SCRATCH_TEMPLATE'; payload: string | null }
   | { type: 'SET_PERSONA_ID'; payload: string }
+  | { type: 'SET_BRIEFING'; payload: string | null }
   | { type: 'RESET_SESSION' }
   | { type: 'START_CODE_GENERATION'; payload: string }
   | { type: 'COMPLETE_CODE_GENERATION' };
@@ -194,6 +197,7 @@ const defaultState: SanctumState = {
   scratchGeneratedCode: '',
   scratchTemplate: null,
   personaId: 'shade',
+  projectBriefing: null,
 };
 
 function getInitialState(): SanctumState {
@@ -338,6 +342,9 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
     
     case 'SET_PERSONA_ID':
       return { ...state, personaId: action.payload };
+
+    case 'SET_BRIEFING':
+      return { ...state, projectBriefing: action.payload };
     
     case 'RESET_SESSION':
       clearPersistedSession();

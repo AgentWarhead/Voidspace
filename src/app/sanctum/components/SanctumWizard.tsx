@@ -29,7 +29,7 @@ import Link from 'next/link';
 export interface WizardConfig {
   mode: 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
   category?: string | null;
-  chatMode?: 'build' | 'learn';
+  chatMode?: 'build' | 'learn' | 'expert';
   customPrompt?: string;
   persona?: string;
   scratchDescription?: string;
@@ -41,6 +41,7 @@ interface SavedSessionInfo {
   selectedCategory?: string;
   messageCount?: number;
   tokensUsed?: number;
+  briefing?: string | null;
 }
 
 interface SanctumWizardProps {
@@ -266,11 +267,18 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                         <h3 className="text-base font-bold text-purple-300 mb-0.5">
                           Continue existing project
                         </h3>
-                        <p className="text-sm text-text-muted flex items-center gap-2">
+                        <p className="text-sm text-text-muted flex items-center gap-2 flex-wrap">
                           {savedSessionInfo?.selectedCategory && (
                             <span className="capitalize">{savedSessionInfo.selectedCategory.replace('-', ' ')}</span>
                           )}
-                          {savedSessionInfo?.messageCount ? (
+                          {savedSessionInfo?.briefing ? (
+                            <>
+                              <span>•</span>
+                              <span className="italic text-text-muted/80 truncate max-w-[280px]">
+                                {savedSessionInfo.briefing.split('.')[0]?.slice(0, 80)}{savedSessionInfo.briefing.split('.')[0]?.length > 80 ? '…' : ''}
+                              </span>
+                            </>
+                          ) : savedSessionInfo?.messageCount ? (
                             <>
                               <span>•</span>
                               <span className="flex items-center gap-1">
@@ -377,6 +385,35 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Enhancement 3: Expert Quick-Build — zero friction for power users */}
+              <div className="max-w-4xl mx-auto mt-5">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-white/[0.08]" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-near-green/50">⚡ Expert Quick-Build</span>
+                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-white/[0.08]" />
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {[
+                    { label: 'Token', category: 'meme-tokens', emoji: '🪙' },
+                    { label: 'NFT', category: 'nfts', emoji: '🎨' },
+                    { label: 'DAO', category: 'daos', emoji: '🏛️' },
+                    { label: 'Staking', category: 'staking-rewards', emoji: '💎' },
+                    { label: 'DeFi', category: 'defi', emoji: '🏦' },
+                    { label: 'Bridge', category: 'bridges', emoji: '🌉' },
+                  ].map(({ label, category, emoji }) => (
+                    <button
+                      key={category}
+                      onClick={() => onComplete({ mode: 'build', category, chatMode: 'expert' })}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-near-green/20 bg-near-green/5 hover:bg-near-green/15 hover:border-near-green/40 text-near-green/80 hover:text-near-green transition-all text-sm font-medium"
+                    >
+                      <span>{emoji}</span>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-center text-[10px] text-text-muted/40 mt-2 font-mono">Skip the wizard — instant production code, zero questions</p>
               </div>
             </Container>
           )}

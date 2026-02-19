@@ -199,6 +199,7 @@ function SanctumPageInner() {
         selectedCategory: parsed.selectedCategory,
         messageCount: parsed.messageCount,
         tokensUsed: parsed.tokensUsed,
+        briefing: parsed.projectBriefing || null,
       };
     } catch { return null; }
   })();
@@ -730,6 +731,8 @@ function SanctumPageInner() {
                       externalMessageNoCode={externalMessageNoCode}
                       loadedProjectMessages={loadedProjectMessages}
                       loadedProjectSeq={loadedProjectSeq}
+                      sessionBriefing={state.projectBriefing}
+                      onBriefingUpdate={(b) => dispatch({ type: 'SET_BRIEFING', payload: b })}
                     />
                   </div>
                 </GlassPanel>
@@ -905,6 +908,8 @@ function SanctumPageInner() {
                         externalMessageNoCode={externalMessageNoCode}
                         loadedProjectMessages={loadedProjectMessages}
                         loadedProjectSeq={loadedProjectSeq}
+                        sessionBriefing={state.projectBriefing}
+                        onBriefingUpdate={(b) => dispatch({ type: 'SET_BRIEFING', payload: b })}
                       />
                     </div>
                   </GlassPanel>
