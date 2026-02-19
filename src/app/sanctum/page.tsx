@@ -259,17 +259,21 @@ function SanctumPageInner() {
   const briefHandledRef = useRef(false);
   useEffect(() => {
     const fromBrief = searchParams.get('from') === 'brief';
-    if (fromBrief && !briefHandledRef.current && !state.sessionStarted) {
+    if (fromBrief && !briefHandledRef.current) {
       const storedBrief = consumeStoredBrief();
       if (storedBrief) {
         briefHandledRef.current = true;
         const prompt = briefToSanctumPrompt(storedBrief);
-        dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt });
-        // Small delay to ensure state is set before starting
+        // Always wipe previous session — brief must start fresh
+        clearPersistedSession();
+        dispatch({ type: 'RESET_SESSION' });
+        setSessionResetCounter(c => c + 1); // clears saved chat messages
+        // Apply brief after reset settles
         setTimeout(() => {
+          dispatch({ type: 'SET_CUSTOM_PROMPT', payload: prompt });
           dispatch({ type: 'SET_SELECTED_CATEGORY', payload: 'custom' });
           dispatch({ type: 'SET_SESSION_STARTED', payload: true });
-        }, 50);
+        }, 80);
         // Clean URL
         if (typeof window !== 'undefined') {
           const url = new URL(window.location.href);
@@ -278,7 +282,7 @@ function SanctumPageInner() {
         }
       }
     }
-  }, [searchParams, state.sessionStarted, dispatch]);
+  }, [searchParams, dispatch]); // removed state.sessionStarted — must run regardless of session state
 
   // Derive the auto-message for SanctumChat (template walkthrough OR custom prompt from wizard)
   const autoMessage = templateHandledRef.current && templateConfig
