@@ -1,7 +1,34 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
+// Lightweight inline markdown renderer — no external dependency needed
+function SimpleMarkdown({ content }: { content: string }) {
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^### /.test(line)) { elements.push(<h3 key={i} className="text-sm font-bold mb-1 text-white">{line.slice(4)}</h3>); }
+    else if (/^## /.test(line)) { elements.push(<h2 key={i} className="text-base font-bold mb-2 text-white">{line.slice(3)}</h2>); }
+    else if (/^# /.test(line)) { elements.push(<h1 key={i} className="text-lg font-bold mb-2 text-white">{line.slice(2)}</h1>); }
+    else if (/^> /.test(line)) { elements.push(<blockquote key={i} className="border-l-2 border-near-green/50 pl-3 italic text-text-muted my-2">{line.slice(2)}</blockquote>); }
+    else if (/^[-*] /.test(line)) { elements.push(<li key={i} className="ml-4 list-disc pl-1 break-words">{inlineFormat(line.slice(2))}</li>); }
+    else if (/^\d+\. /.test(line)) { elements.push(<li key={i} className="ml-4 list-decimal pl-1 break-words">{inlineFormat(line.replace(/^\d+\. /, ''))}</li>); }
+    else if (line.trim() === '') { elements.push(<br key={i} />); }
+    else { elements.push(<p key={i} className="mb-2 last:mb-0 break-words leading-relaxed">{inlineFormat(line)}</p>); }
+    i++;
+  }
+  return <>{elements}</>;
+}
+function inlineFormat(text: string): React.ReactNode {
+  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('`') && part.endsWith('`')) return <code key={i} className="bg-white/10 rounded px-1 py-0.5 font-mono text-xs">{part.slice(1,-1)}</code>;
+    if (part.startsWith('**') && part.endsWith('**')) return <strong key={i} className="font-bold text-white">{part.slice(2,-2)}</strong>;
+    if (part.startsWith('*') && part.endsWith('*')) return <em key={i} className="italic text-text-secondary">{part.slice(1,-1)}</em>;
+    return part;
+  });
+}
 // @ts-ignore
 import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
@@ -1100,25 +1127,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                   
                   {/* Message content */}
                   <div className="text-sm sm:text-base text-text-primary">
-                    <ReactMarkdown
-                      components={{
-                        p: ({node, ...props}) => <p className="mb-2 last:mb-0 break-words leading-relaxed" {...props} />,
-                        a: ({node, ...props}) => <a className="text-near-green hover:underline cursor-pointer" target="_blank" rel="noopener noreferrer" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
-                        li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-bold text-white" {...props} />,
-                        em: ({node, ...props}) => <em className="italic text-text-secondary" {...props} />,
-                        code: ({node, ...props}) => <code className="bg-white/10 rounded px-1 py-0.5 font-mono text-xs" {...props} />,
-                        pre: ({node, ...props}) => <pre className="bg-void-black/50 p-3 rounded-lg overflow-x-auto mb-2 text-xs font-mono border border-white/10" {...props} />,
-                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2 text-white" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2 text-white" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1 text-white" {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-near-green/50 pl-3 italic text-text-muted my-2" {...props} />,
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
+                    <SimpleMarkdown content={message.content} />
                   </div>
                   
                   {/* Learn tips (array — new format) */}
