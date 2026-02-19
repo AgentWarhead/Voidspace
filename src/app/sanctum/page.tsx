@@ -25,7 +25,6 @@ import { PairProgramming } from './components/PairProgramming';
 import { FileStructure } from './components/FileStructure';
 import { ContractToolbar } from './components/ContractToolbar';
 import { WebappBuilder } from './components/WebappBuilder';
-import { ImportContract } from './components/ImportContract';
 import { WebappSession } from './components/WebappSession';
 import { ScratchWebappSession } from './components/ScratchWebappSession';
 // LearnSession removed — original build chat handles all modes via Learn/Build/Expert toggle
@@ -227,9 +226,8 @@ function SanctumPageInner() {
       // For now, start session so the visual mode section renders
       dispatch({ type: 'SET_SESSION_STARTED', payload: true });
     } else if (config.mode === 'webapp') {
-      dispatch({ type: 'SET_MODE', payload: 'webapp' });
-      dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true });
-      // Don't start session - webapp has its own import flow
+      // Import Contract standalone page removed — route webapp mode through normal session
+      handleCategorySelect(config.category || 'custom');
     } else {
       handleCategorySelect(config.category || 'custom');
     }
@@ -440,7 +438,7 @@ function SanctumPageInner() {
       )}
 
       {/* Landing — Hero */}
-      {!state.sessionStarted && !showWalletGate && !showWizard && !state.showImportContract && (
+      {!state.sessionStarted && !showWalletGate && !showWizard && (
         <SanctumLanding
           onEnterSanctum={() => {
             setShowWizard(true);
@@ -487,45 +485,6 @@ function SanctumPageInner() {
               <h2 className="text-2xl font-bold text-text-primary">Visual Generator</h2>
             </div>
             <VisualMode />
-          </Container>
-        </section>
-      )}
-
-      {/* Webapp Import Flow (standalone, before session) */}
-      {!state.sessionStarted && state.mode === 'webapp' && state.showImportContract && (
-        <section className="relative z-10 min-h-screen flex flex-col pt-16">
-          <Container size="xl">
-            <div className="flex items-center gap-3 mb-8">
-              <button
-                onClick={() => {
-                  dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
-                  dispatch({ type: 'SET_MODE', payload: 'build' });
-                  setShowWizard(true);
-                }}
-                className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors"
-              >
-                ← Back
-              </button>
-              <h2 className="text-2xl font-bold text-text-primary">Import Contract</h2>
-            </div>
-            <div className="max-w-2xl mx-auto">
-              <ImportContract
-                onImport={(data) => {
-                  dispatch({ type: 'SET_IMPORTED_CONTRACT', payload: data });
-                  dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
-                  if (data.code) {
-                    dispatch({ type: 'SET_GENERATED_CODE', payload: data.code });
-                  }
-                  dispatch({ type: 'SET_SELECTED_CATEGORY', payload: data.name });
-                  dispatch({ type: 'SET_SHOW_WEBAPP_SESSION', payload: true });
-                }}
-                onCancel={() => {
-                  dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: false });
-                  dispatch({ type: 'SET_MODE', payload: 'build' });
-                  setShowWizard(true);
-                }}
-              />
-            </div>
           </Container>
         </section>
       )}
