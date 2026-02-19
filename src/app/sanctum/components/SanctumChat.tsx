@@ -556,9 +556,9 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     // Learn mode: Always ask for skill level first (matching getModeStarter)
     if (mode === 'learn') {
       return [
-        { label: '👶 I\'m new to Rust', value: 'I\'m new to Rust and smart contracts. Guide me step by step.' },
-        { label: '⛓️ I\'ve built on other chains', value: 'I have experience with Solidity/Solana but I\'m new to NEAR/Rust.' },
-        { label: '🦀 I know Rust', value: 'I\'m comfortable with Rust, just new to the NEAR SDK.' },
+        { label: '👶 I\'m new to Rust', value: 'I\'m new to Rust and smart contracts. Start from the basics and explain everything as we build.' },
+        { label: '⛓️ I\'ve built on other chains', value: 'I know Solidity/Solana but not Rust or NEAR. Show me the key differences — skip generic blockchain concepts, focus on what\'s unique to NEAR.' },
+        { label: '🦀 I know Rust', value: 'I know Rust well. Skip all Rust basics — focus only on NEAR-specific patterns, the SDK, and what makes NEAR contracts different. Let\'s build.' },
       ];
     }
 
