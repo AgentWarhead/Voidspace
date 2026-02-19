@@ -493,7 +493,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       role: 'assistant',
       content: starterMessage,
       personaId: currentPersona.id,
-      options: getInitialOptions(category),
+      options: getInitialOptions(category, chatMode),
     };
     setMessages([initialMessage]);
 
@@ -521,7 +521,26 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  function getInitialOptions(cat: string | null): { label: string; value: string }[] | undefined {
+  function getInitialOptions(cat: string | null, mode: ChatMode): { label: string; value: string }[] | undefined {
+    // Learn mode: Always ask for skill level first (matching getModeStarter)
+    if (mode === 'learn') {
+      return [
+        { label: '👶 I\'m new to Rust', value: 'I\'m new to Rust and smart contracts. Guide me step by step.' },
+        { label: '⛓️ I\'ve built on other chains', value: 'I have experience with Solidity/Solana but I\'m new to NEAR/Rust.' },
+        { label: '🦀 I know Rust', value: 'I\'m comfortable with Rust, just new to the NEAR SDK.' },
+      ];
+    }
+
+    // Build mode: Ask about callers/access (matching getModeStarter)
+    if (mode === 'build') {
+      return [
+        { label: 'Frontend Only', value: 'My frontend will be the main caller.' },
+        { label: 'Other Contracts', value: 'This contract will be called by other smart contracts.' },
+        { label: 'Hybrid / Both', value: 'Both frontend users and other contracts will interact with this.' },
+      ];
+    }
+
+    // Expert mode (or fallback): Offer templates as "Describe your app" shortcuts
     switch (cat) {
       case 'ai-agents':
         return [
