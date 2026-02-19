@@ -212,7 +212,8 @@ function SanctumPageInner() {
     dispatch({ type: 'SET_MODE', payload: config.mode });
     if (config.category) dispatch({ type: 'SET_SELECTED_CATEGORY', payload: config.category });
     if (config.chatMode) dispatch({ type: 'SET_CHAT_MODE', payload: config.chatMode });
-    if (config.customPrompt) dispatch({ type: 'SET_CUSTOM_PROMPT', payload: config.customPrompt });
+    // Always set customPrompt — clear it if not provided so old persisted value doesn't leak into new session
+    dispatch({ type: 'SET_CUSTOM_PROMPT', payload: config.customPrompt || '' });
     if (config.scratchDescription) dispatch({ type: 'SET_SCRATCH_DESCRIPTION', payload: config.scratchDescription });
     if (config.scratchTemplate) dispatch({ type: 'SET_SCRATCH_TEMPLATE', payload: config.scratchTemplate });
 
@@ -231,6 +232,10 @@ function SanctumPageInner() {
       dispatch({ type: 'SET_SHOW_IMPORT_CONTRACT', payload: true });
     } else {
       handleCategorySelect(config.category || 'custom');
+    }
+    // Reset chat so old messages don't bleed into fresh template sessions
+    if (!config.customPrompt) {
+      setSessionResetCounter(c => c + 1);
     }
     setShowWizard(false);
   }, [dispatch, handleCategorySelect]);

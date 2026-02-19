@@ -444,6 +444,7 @@ export function useSanctumState() {
 
   const handleCategorySelect = useCallback((categorySlug: string) => {
     dispatch({ type: 'SET_SELECTED_CATEGORY', payload: categorySlug });
+    dispatch({ type: 'SET_CUSTOM_PROMPT', payload: '' }); // clear any persisted prompt from previous session
     dispatch({ type: 'SET_SESSION_STARTED', payload: true });
 
     // Category-specific achievements (fired at code-gen, not just selection)
