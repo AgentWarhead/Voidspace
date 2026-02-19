@@ -34,7 +34,7 @@ import { useSanctumState, clearPersistedSession } from './hooks/useSanctumState'
 import { useWallet } from '@/hooks/useWallet';
 import { consumeStoredBrief, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 // @ts-ignore
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, GitCompare, Play, Users, Globe, Palette, Wallet, Shield, Star, ArrowRight, Wand2, RefreshCw } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Play, Users, Palette, Wallet, Shield, Star, ArrowRight, Wand2, RefreshCw } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 import { DownloadButton } from './components/DownloadContract';
@@ -1059,46 +1059,38 @@ function SanctumPageInner() {
 
           {/* Mobile Bottom Toolbar */}
           <div className="md:hidden relative z-10 flex-shrink-0 border-t border-white/[0.08] bg-void-black/80 backdrop-blur-sm safe-area-bottom">
-            <div className="flex items-center gap-2 p-2 sm:p-3 overflow-x-auto">
+            <div className="flex items-center gap-1.5 p-2 overflow-x-auto">
               <button 
-                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg border border-purple-500/30 transition-all disabled:opacity-40 whitespace-nowrap"
                 onClick={handleShare}
                 disabled={!state.generatedCode}
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-3.5 h-3.5" />
                 Share
               </button>
               <button 
-                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg border border-blue-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-                onClick={() => dispatch({ type: 'SET_SHOW_COMPARISON', payload: true })}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg border border-amber-500/30 transition-all disabled:opacity-40 whitespace-nowrap"
+                onClick={() => buildActionPrompt('security')}
                 disabled={!state.generatedCode}
               >
-                <GitCompare className="w-4 h-4" />
-                Compare
+                <Shield className="w-3.5 h-3.5" />
+                Audit
               </button>
               <button 
-                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg border border-green-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-                onClick={() => dispatch({ type: 'SET_SHOW_SIMULATION', payload: true })}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg border border-blue-500/30 transition-all disabled:opacity-40 whitespace-nowrap"
+                onClick={() => buildActionPrompt('tests')}
                 disabled={!state.generatedCode}
               >
-                <Play className="w-4 h-4" />
+                <Play className="w-3.5 h-3.5" />
                 Test
               </button>
               <button 
-                className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-50 whitespace-nowrap font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-near-green/20 hover:bg-near-green/30 text-near-green rounded-lg border border-near-green/30 transition-all disabled:opacity-40 whitespace-nowrap font-medium"
                 onClick={handleDeploy}
                 disabled={!state.generatedCode || state.sanctumStage === 'thinking'}
               >
-                <Rocket className="w-4 h-4" />
+                <Rocket className="w-3.5 h-3.5" />
                 Deploy
-              </button>
-              <button 
-                className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-500/30 transition-all disabled:opacity-50 whitespace-nowrap"
-                onClick={() => dispatch({ type: 'SET_SHOW_WEBAPP_BUILDER', payload: true })}
-                disabled={!state.generatedCode}
-              >
-                <Globe className="w-4 h-4" />
-                Webapp
               </button>
             </div>
           </div>
