@@ -527,8 +527,12 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }, [category]);
 
   // Auto-send wizard prompt when it arrives (may arrive after initial mount)
+  // IMPORTANT: only fires for fresh sessions — never overwrites restored chat history
   const autoMessageFiredRef = useRef(false);
   useEffect(() => {
+    // If messages were already restored from localStorage, do NOT overwrite them.
+    // messagesRestoredRef.current is true if we loaded from storage on this mount.
+    if (messagesRestoredRef.current && messagesRef.current.length > 0) return;
     if (autoMessage && !autoMessageFiredRef.current && !autoMessageSentRef.current) {
       autoMessageFiredRef.current = true;
       autoMessageSentRef.current = true;
