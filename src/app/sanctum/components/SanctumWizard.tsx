@@ -387,34 +387,7 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 )}
               </div>
 
-              {/* Enhancement 3: Expert Quick-Build — zero friction for power users */}
-              <div className="max-w-4xl mx-auto mt-5">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-white/[0.08]" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-near-green/50">⚡ Expert Quick-Build</span>
-                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-white/[0.08]" />
-                </div>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {[
-                    { label: 'Token', category: 'meme-tokens', emoji: '🪙' },
-                    { label: 'NFT', category: 'nfts', emoji: '🎨' },
-                    { label: 'DAO', category: 'daos', emoji: '🏛️' },
-                    { label: 'Staking', category: 'staking-rewards', emoji: '💎' },
-                    { label: 'DeFi', category: 'defi', emoji: '🏦' },
-                    { label: 'Bridge', category: 'bridges', emoji: '🌉' },
-                  ].map(({ label, category, emoji }) => (
-                    <button
-                      key={category}
-                      onClick={() => onComplete({ mode: 'build', category, chatMode: 'expert' })}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-near-green/20 bg-near-green/5 hover:bg-near-green/15 hover:border-near-green/40 text-near-green/80 hover:text-near-green transition-all text-sm font-medium"
-                    >
-                      <span>{emoji}</span>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-center text-[10px] text-text-muted/40 mt-2 font-mono">Skip the wizard — instant production code, zero questions</p>
-              </div>
+              {/* Expert Quick-Build pills removed from here — moved to Council step */}
             </Container>
           )}
 
@@ -698,6 +671,34 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 {' '}leads every build.{' '}
                 <span style={{ color: 'rgba(255,255,255,0.45)' }}>Specialists deploy automatically as your project evolves.</span>
               </p>
+
+              {/* ⚡ Expert Quick-Build — power user shortcut, shown after seeing the Council */}
+              <div className="mb-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="h-px flex-1 bg-white/[0.06]" />
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-near-green/40">⚡ or skip to instant code</span>
+                  <div className="h-px flex-1 bg-white/[0.06]" />
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {[
+                    { label: 'Token', category: 'meme-tokens', emoji: '🪙' },
+                    { label: 'NFT', category: 'nfts', emoji: '🎨' },
+                    { label: 'DAO', category: 'daos', emoji: '🏛️' },
+                    { label: 'Staking', category: 'staking-rewards', emoji: '💎' },
+                    { label: 'DeFi', category: 'defi', emoji: '🏦' },
+                    { label: 'Bridge', category: 'bridges', emoji: '🌉' },
+                  ].map(({ label, category, emoji }) => (
+                    <button
+                      key={category}
+                      onClick={() => onComplete({ mode: 'build', category, chatMode: 'expert' })}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-near-green/10 hover:border-near-green/25 text-text-muted/60 hover:text-near-green transition-all text-xs font-medium"
+                    >
+                      <span>{emoji}</span>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* [6] Full-width LAUNCH SESSION button — breathing glow */}
               <button

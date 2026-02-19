@@ -443,7 +443,6 @@ function SanctumPageInner() {
       {!state.sessionStarted && !showWalletGate && !showWizard && (
         <SanctumLanding
           onEnterSanctum={() => {
-            if (!isConnected) { openModal(); return; }
             setShowWizard(true);
           }}
           hasSavedSession={hasSavedSession}

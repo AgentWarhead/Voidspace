@@ -1000,13 +1000,13 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         onClose={() => setShowUpgradeModal(false)}
       />
 
-      {/* Category learn banner */}
-      {category && (
+      {/* Category learn banner — suppressed in Learn mode (progress path handles context there) */}
+      {category && chatMode !== 'learn' && (
         <CategoryLearnBanner category={category} mode={chatMode} />
       )}
 
-      {/* Enhancement 5: Learn mode progress path */}
-      {chatMode === 'learn' && (
+      {/* Enhancement 5: Learn mode progress path — only once first milestone fires */}
+      {chatMode === 'learn' && learnMilestone !== null && (
         <div className="flex-shrink-0 border-b border-border-subtle/50 bg-void-black/20">
           <LearnProgressPath currentMilestone={learnMilestone} />
         </div>
