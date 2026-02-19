@@ -69,9 +69,9 @@ export function HeroSection({ stats, totalOpportunities }: HeroSectionProps) {
           >
             <TypewriterText
               lines={[
-                'Find the gaps. Launch your idea.',
-                'The gateway to building on NEAR — no code required.',
-                'Intelligence. Education. Execution.',
+                'The onboarding layer for the NEAR ecosystem.',
+                'Education. Access. Execution — no code required.',
+                'Where non-developers become NEAR builders.',
               ]}
               speed={35}
               className="max-w-lg mx-auto"
