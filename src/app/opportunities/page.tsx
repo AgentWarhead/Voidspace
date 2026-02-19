@@ -31,6 +31,30 @@ interface Props {
 export const metadata = {
   title: 'Explore Voids — NEAR Ecosystem Gaps & Build Opportunities | Voidspace',
   description: 'AI-detected gaps in the NEAR ecosystem. Find high-impact opportunities, generate build plans, and start shipping.',
+  alternates: { canonical: 'https://voidspace.io/opportunities' },
+  openGraph: {
+    title: 'Explore Voids — NEAR Ecosystem Gaps & Build Opportunities | Voidspace',
+    description: 'AI-detected gaps in the NEAR ecosystem. Find high-impact opportunities, generate build plans, and start shipping.',
+    url: 'https://voidspace.io/opportunities',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: 'https://voidspace.io/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Voidspace — NEAR Ecosystem Gaps & Build Opportunities',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Explore Voids — NEAR Ecosystem Gaps | Voidspace',
+    description: 'AI-detected gaps in NEAR. Find opportunities, generate build plans, start shipping.',
+    creator: '@VoidSpaceIO',
+    images: ['https://voidspace.io/og-image.jpg'],
+  },
 };
 
 export default async function OpportunitiesPage({ searchParams }: Props) {

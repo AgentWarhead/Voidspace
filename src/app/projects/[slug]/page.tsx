@@ -50,9 +50,40 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const project = await getProjectBySlug(params.slug);
   if (!project) return { title: 'Project Not Found — Voidspace' };
+
+  const title = `${project.name} — NEAR Ecosystem Project | Voidspace`;
+  const description =
+    project.description ||
+    `Explore ${project.name} on NEAR Protocol — live market data, GitHub activity, on-chain stats, and ecosystem context.`;
+  const canonical = `https://voidspace.io/projects/${params.slug}`;
+
   return {
-    title: `${project.name} — Voidspace`,
-    description: project.description || `Explore ${project.name} on the NEAR ecosystem.`,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      siteName: 'Voidspace',
+      locale: 'en_US',
+      type: 'website',
+      images: [
+        {
+          url: 'https://voidspace.io/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${project.name} — Voidspace`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      creator: '@VoidSpaceIO',
+      images: ['https://voidspace.io/og-image.jpg'],
+    },
   };
 }
 

@@ -9,6 +9,30 @@ export const metadata: Metadata = {
   title: 'Observatory — NEAR Wallet Analytics & Market Intelligence | Voidspace',
   description: 'Free tools: live token bubbles, AI wallet analysis, and transaction mapping for NEAR Protocol.',
   keywords: ['NEAR', 'wallet', 'analytics', 'blockchain', 'monitoring', 'reputation', 'Void Bubbles', 'Void Lens'],
+  alternates: { canonical: 'https://voidspace.io/observatory' },
+  openGraph: {
+    title: 'Observatory — NEAR Wallet Analytics & Market Intelligence | Voidspace',
+    description: 'Free tools: live token bubbles, AI wallet analysis, and transaction mapping for NEAR Protocol.',
+    url: 'https://voidspace.io/observatory',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: 'https://voidspace.io/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Voidspace Observatory — NEAR Intelligence Dashboard',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Observatory — Free NEAR Analytics & Intelligence | Voidspace',
+    description: 'Live token bubbles, AI wallet analysis, and transaction mapping for NEAR — all free.',
+    creator: '@VoidSpaceIO',
+    images: ['https://voidspace.io/og-image.jpg'],
+  },
 };
 
 function ObservatoryLoading() {

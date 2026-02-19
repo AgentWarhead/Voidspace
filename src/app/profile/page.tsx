@@ -5,6 +5,29 @@ import { GridPattern } from '@/components/effects/GridPattern';
 export const metadata = {
   title: 'Your Profile — Voidspace',
   description: 'Track your Voidspace progress, saved opportunities, learning achievements, and usage stats.',
+  openGraph: {
+    title: 'Your Profile — Voidspace',
+    description: 'Track your Voidspace progress, saved opportunities, learning achievements, and usage stats.',
+    url: 'https://voidspace.io/profile',
+    siteName: 'Voidspace',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: 'https://voidspace.io/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Voidspace Profile',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Your Profile — Voidspace',
+    description: 'Track your progress, learning achievements, and NEAR ecosystem activity.',
+    creator: '@VoidSpaceIO',
+    images: ['https://voidspace.io/og-image.jpg'],
+  },
 };
 
 export default function ProfilePage() {
