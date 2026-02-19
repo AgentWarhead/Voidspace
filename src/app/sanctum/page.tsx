@@ -151,21 +151,21 @@ function SanctumPageInner() {
     const prompts: Record<string, string> = hasSelection ? {
       // Selection mode — include the highlighted snippet (small, targeted)
       explain:  `Explain this selected code in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
-      tests:    `Generate comprehensive unit tests for this selected code — cover all cases and error conditions.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
+      tests:    `Simulate running tests on this selected code. Analyze the logic and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases)\n- For each: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end, give the test suite a score (e.g. 8/10) and the top 2 things to fix\n\nCode to test:\n\`\`\`rust\n${codeSelection}\n\`\`\``,
       optimize: `How can I optimize this selected code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
       security: `Audit this selected code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
     } : {
       // Full-contract mode — reference the preview, no code paste.
       // The AI has the full contract in context from generation — no truncation, no clutter, scales to any size.
       explain:  `Explain the full contract in the preview panel — walk through its structure, what each section does, and the NEAR concepts it demonstrates.`,
-      tests:    `Generate comprehensive unit tests for the full contract in the preview panel — cover all public methods, edge cases, and error conditions.`,
+      tests:    `Simulate running the test suite for the full contract in the preview panel. Analyze each public method and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases) for every public method\n- For each scenario: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end: overall score (X/10), top 3 issues to fix before deploying`,
       optimize: `Analyze the full contract in the preview panel for gas efficiency — identify the most impactful optimizations and show the improved code.`,
       security: `Perform a complete security audit of the full contract in the preview panel — check for reentrancy, access control issues, integer overflow, storage vulnerabilities, and any NEAR-specific attack vectors. Give me a prioritized findings list.`,
     };
 
-    // Analysis actions (explain/optimize/audit) should NOT overwrite the code preview.
-    // Only "tests" may generate new code that belongs in the preview panel.
-    const analysisActions = ['explain', 'optimize', 'security'];
+    // ALL analysis actions stay in chat — never overwrite the code preview.
+    // tests = simulation report in chat, not code generation.
+    const analysisActions = ['explain', 'optimize', 'security', 'tests'];
     sendToChat(prompts[action] || prompts.explain, {
       noCodeExtraction: analysisActions.includes(action),
     });
