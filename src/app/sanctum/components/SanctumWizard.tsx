@@ -21,7 +21,7 @@ const SPECIALIST_META: Record<string, { color: string; tags: string[]; triggers:
 import { storeBriefForSanctum, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 import type { ProjectBrief } from '@/types';
 // @ts-ignore
-import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Wrench, Palette, Flame, Globe, ChevronRight, Sparkles, Search, MessageSquare, Play, Lock } from 'lucide-react';
+import { ArrowLeft, Rocket, BookOpen, Hammer, Lightbulb, Palette, ChevronRight, Sparkles, Search, MessageSquare, Play, Lock } from 'lucide-react';
 import { useWallet } from '@/hooks/useWallet';
 import { SANCTUM_TIERS, type SanctumTier } from '@/lib/sanctum-tiers';
 import Link from 'next/link';
@@ -327,66 +327,78 @@ export function SanctumWizard({ onComplete, onBack, dispatch, state, isConnected
                 />
               </div>
 
-              {/* Secondary options — sleeker pills */}
-              <div className="max-w-4xl mx-auto">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-white/[0.08]" />
+              {/* Bottom feature cards — Visual Generator + Import Contract */}
+              <div className="max-w-4xl mx-auto mt-2">
+                <div className="flex items-center justify-center gap-2 mb-5">
+                  <div className="h-px flex-1 max-w-[100px] bg-gradient-to-r from-transparent to-white/[0.08]" />
                   <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted/50">or</span>
-                  <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-white/[0.08]" />
-                </div>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <button
-                    onClick={() => handleGoalSelect('existing-code')}
-                    className={`group flex items-center gap-2.5 px-5 py-3 rounded-2xl border-2 transition-all duration-300 text-sm font-medium ${
-                      goal === 'existing-code'
-                        ? 'border-red-500/40 bg-red-500/10 text-red-300 shadow-lg shadow-red-500/10'
-                        : 'border-white/[0.06] bg-white/[0.02] text-text-muted hover:border-red-500/20 hover:bg-red-500/5 hover:text-red-300'
-                    }`}
-                  >
-                    <Wrench className="w-4 h-4" />
-                    I have existing code
-                    <ChevronRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                  </button>
-                  <button
-                    onClick={() => handleGoalSelect('visual')}
-                    className="group flex items-center gap-2.5 px-5 py-3 rounded-2xl border-2 border-white/[0.06] bg-white/[0.02] text-text-muted hover:border-purple-500/20 hover:bg-purple-500/5 hover:text-purple-300 transition-all duration-300 text-sm font-medium"
-                  >
-                    <Palette className="w-4 h-4" />
-                    Visual Generator
-                    <ChevronRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                  </button>
+                  <div className="h-px flex-1 max-w-[100px] bg-gradient-to-l from-transparent to-white/[0.08]" />
                 </div>
 
-                {/* Existing code sub-options (inline) */}
-                {goal === 'existing-code' && (
-                  <div className="mt-4 flex flex-wrap justify-center gap-3" style={{ animation: 'sanctumSlideUp 0.3s ease-out' }}>
-                    {canAudit ? (
-                      <button
-                        onClick={() => handleExistingCodeSub('roast')}
-                        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all text-sm font-medium"
-                      >
-                        <Flame className="w-4 h-4" />
-                        Roast Zone (Audit)
-                      </button>
-                    ) : (
-                      <Link
-                        href="/pricing"
-                        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 transition-all text-sm font-medium hover:bg-red-500/10"
-                      >
-                        <Lock className="w-4 h-4" />
-                        Roast Zone
-                        <span className="text-xs text-near-green ml-1">Specter+</span>
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => handleExistingCodeSub('webapp')}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 transition-all text-sm font-medium"
-                    >
-                      <Globe className="w-4 h-4" />
-                      Build a Webapp
-                    </button>
-                  </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Visual Generator — featured card */}
+                  <button
+                    onClick={() => handleGoalSelect('visual')}
+                    className="group relative text-left p-5 rounded-2xl border-2 border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent hover:border-purple-500/40 hover:from-purple-500/15 hover:via-pink-500/10 transition-all duration-300 overflow-hidden"
+                    style={{ animation: 'sanctumFadeInUp 0.5s ease-out 0.4s backwards' }}
+                  >
+                    {/* Background glow */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500/30 to-pink-500/20 border border-purple-500/20 flex items-center justify-center text-lg">
+                            🎨
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-text-primary">Visual Generator</div>
+                            <div className="text-[10px] text-purple-400/80 font-mono uppercase tracking-wide">AI Image Creation</div>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-purple-400/50 group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all mt-1" />
+                      </div>
+                      <p className="text-xs text-text-muted leading-relaxed mb-3">
+                        Generate architecture diagrams, user flows, infographics, and social graphics — powered by Gemini AI image generation.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['Architecture', 'User Flows', 'Infographics', 'Social'].map(tag => (
+                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300/80">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Import Contract card */}
+                  <button
+                    onClick={() => handleExistingCodeSub('webapp')}
+                    className="group relative text-left p-5 rounded-2xl border-2 border-cyan-500/20 bg-gradient-to-br from-cyan-500/8 via-teal-500/5 to-transparent hover:border-cyan-500/35 hover:from-cyan-500/12 transition-all duration-300 overflow-hidden"
+                    style={{ animation: 'sanctumFadeInUp 0.5s ease-out 0.5s backwards' }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/5 to-teal-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/30 to-teal-500/20 border border-cyan-500/20 flex items-center justify-center text-lg">
+                            📥
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-text-primary">Import Contract</div>
+                            <div className="text-[10px] text-cyan-400/80 font-mono uppercase tracking-wide">Existing Code</div>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-cyan-400/50 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all mt-1" />
+                      </div>
+                      <p className="text-xs text-text-muted leading-relaxed mb-3">
+                        Have an existing NEAR contract? Paste your code, upload a file, or connect via contract address — Sanctum will analyze and extend it.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['Paste Code', 'Upload File', 'Contract Address', 'Solidity'].map(tag => (
+                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300/80">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
 
               {/* Expert Quick-Build pills removed from here — moved to Council step */}
