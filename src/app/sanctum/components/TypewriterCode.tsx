@@ -85,91 +85,22 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Remove any existing highlight marks from the DOM
+  // Clear any persisted highlight marks + native browser selection
   const clearHighlightMarks = useCallback(() => {
     highlightMarksRef.current.forEach(mark => {
       const parent = mark.parentNode;
       if (parent) {
-        // Replace mark with its text content
         const text = document.createTextNode(mark.textContent || '');
         parent.replaceChild(text, mark);
-        parent.normalize(); // merge adjacent text nodes
+        parent.normalize();
       }
     });
     highlightMarksRef.current = [];
+    // Also clear the native browser selection
+    window.getSelection()?.removeAllRanges();
   }, []);
 
-  // Apply visual highlight marks to the selected range in the DOM
-  const applyHighlightMarks = useCallback((range: Range) => {
-    clearHighlightMarks();
-
-    try {
-      // Use a TreeWalker to find all text nodes in the range
-      const container = codeRef.current;
-      if (!container) return;
-
-      // Clone the range to avoid modifying the original
-      const startContainer = range.startContainer;
-      const endContainer = range.endContainer;
-      const startOffset = range.startOffset;
-      const endOffset = range.endOffset;
-
-      // Simple case: selection is within a single text node
-      if (startContainer === endContainer && startContainer.nodeType === Node.TEXT_NODE) {
-        const textNode = startContainer as Text;
-        const selectedPart = textNode.splitText(startOffset);
-        selectedPart.splitText(endOffset - startOffset);
-        const mark = document.createElement('mark');
-        mark.className = 'sanctum-highlight';
-        selectedPart.parentNode?.replaceChild(mark, selectedPart);
-        mark.appendChild(selectedPart);
-        highlightMarksRef.current.push(mark);
-        return;
-      }
-
-      // Multi-node selection: collect all text nodes in range
-      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-      const textNodes: Text[] = [];
-      let inRange = false;
-
-      while (walker.nextNode()) {
-        const node = walker.currentNode as Text;
-        if (node === startContainer) inRange = true;
-        if (inRange) textNodes.push(node);
-        if (node === endContainer) break;
-      }
-
-      // Wrap each text node (or partial) in a mark
-      for (let i = 0; i < textNodes.length; i++) {
-        const node = textNodes[i];
-        let targetNode: Text = node;
-
-        if (i === 0 && node === startContainer) {
-          // Split at start offset
-          targetNode = node.splitText(startOffset);
-        }
-        if (node === endContainer || (i === textNodes.length - 1 && targetNode === endContainer)) {
-          // For the last node, we need to handle endOffset
-          if (targetNode === endContainer) {
-            const after = targetNode.splitText(endOffset - (i === 0 && node === startContainer ? startOffset : 0));
-            // targetNode is now just the selected part
-            void after; // the rest stays unwrapped
-          }
-        }
-
-        const mark = document.createElement('mark');
-        mark.className = 'sanctum-highlight';
-        targetNode.parentNode?.replaceChild(mark, targetNode);
-        mark.appendChild(targetNode);
-        highlightMarksRef.current.push(mark);
-      }
-    } catch {
-      // If DOM manipulation fails (edge cases), just clear and rely on state
-      clearHighlightMarks();
-    }
-  }, [clearHighlightMarks]);
-
-  // Selection detection — notify parent of selected text and apply visual highlight
+  // Selection detection — notify parent of selected text; native ::selection CSS handles the visual
   const handleMouseUp = useCallback(() => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.toString().trim()) {
@@ -183,18 +114,10 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
     // Dismiss the hint when user first highlights
     if (showHint) dismissHint();
 
-    // Save the range before the browser clears the selection
-    const range = sel.getRangeAt(0).cloneRange();
-
-    // Apply persistent visual highlights
-    applyHighlightMarks(range);
-
-    // Clear the browser selection (our marks handle the visual now)
-    sel.removeAllRanges();
-
+    // Store selected text in ref — the native browser ::selection CSS handles the visual
     selectedTextRef.current = text;
     onSelectionChangeRef.current?.(text);
-  }, [showHint, applyHighlightMarks]);
+  }, [showHint, dismissHint]);
 
   // Clear selection on click inside the code area (but not on the marks themselves)
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -354,15 +277,15 @@ export function TypewriterCode({ code, speed = 10, instant = false, onComplete, 
       {/* Highlight mark styles */}
       <style jsx global>{`
         pre ::selection {
-          background: rgba(0, 236, 151, 0.25);
+          background: rgba(0, 236, 151, 0.35);
           color: inherit;
         }
         pre ::-moz-selection {
-          background: rgba(0, 236, 151, 0.25);
+          background: rgba(0, 236, 151, 0.35);
           color: inherit;
         }
         mark.sanctum-highlight {
-          background: rgba(0, 236, 151, 0.2);
+          background: rgba(0, 236, 151, 0.35);
           color: inherit;
           border-radius: 2px;
           padding: 1px 0;
