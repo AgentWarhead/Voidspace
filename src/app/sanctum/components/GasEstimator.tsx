@@ -171,7 +171,7 @@ function GasCard({ label, tgas, near, icon }: GasCardProps) {
 
 // Analyze code and estimate gas
 function analyzeGas(code: string): GasEstimate {
-  const lines = code.split('\n').length;
+  const lines = (code ?? '').split('\n').length;
   const functions = (code.match(/pub fn/g) || []).length;
   const structs = (code.match(/pub struct/g) || []).length;
   const storageOps = (code.match(/env::storage|self\./g) || []).length;

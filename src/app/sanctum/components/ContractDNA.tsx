@@ -102,7 +102,7 @@ function generateSegments(hash: number, code: string) {
   ];
 
   const segments: Array<{ height: number; color: string; opacity: number; label: string }> = [];
-  const lines = code.split('\n');
+  const lines = (code ?? '').split('\n');
   
   // Sample every N lines to create ~30 segments
   const step = Math.max(1, Math.floor(lines.length / 30));

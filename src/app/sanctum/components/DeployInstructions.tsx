@@ -60,7 +60,7 @@ export function DeployInstructions({
 
   // Parse contract metadata
   const methods = useMemo(() => parsePublicMethods(code), [code]);
-  const lineCount = useMemo(() => code.split('\n').filter(l => l.trim()).length, [code]);
+  const lineCount = useMemo(() => (code ?? '').split('\n').filter(l => l.trim()).length, [code]);
   const methodCount = methods.length;
   const safeName = contractName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
 

@@ -268,7 +268,7 @@ export function CodePreview({ code, mode, contractName, annotations: propAnnotat
   });
 
   // --- Active file content (for multi-file switching) ---
-  const [activeFileContent, setActiveFileContent] = useState<string>(code);
+  const [activeFileContent, setActiveFileContent] = useState<string>(code ?? '');
   const [activeFileName, setActiveFileName] = useState<string>('src/lib.rs');
 
   // Sync activeFileContent when code prop changes
@@ -438,7 +438,7 @@ export function CodePreview({ code, mode, contractName, annotations: propAnnotat
       <div className="p-2 border-t border-border-subtle bg-void-gray/30 flex items-center justify-between text-xs text-text-muted">
         <span>📄 {activeFileName}</span>
         <span>
-          {activeFileContent.split('\n').length} lines
+          {(activeFileContent ?? '').split('\n').length} lines
           {annotationsVisible && computedAnnotations.length > 0
             ? ` • ${computedAnnotations.length} annotations`
             : ''}

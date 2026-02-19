@@ -48,7 +48,7 @@ interface MethodWithMutability {
 /** Parse pub fn methods AND detect &self vs &mut self mutability */
 function parseMethodsWithMutability(code: string): MethodWithMutability[] {
   const methods: MethodWithMutability[] = [];
-  const lines = code.split('\n');
+  const lines = (code ?? '').split('\n');
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();

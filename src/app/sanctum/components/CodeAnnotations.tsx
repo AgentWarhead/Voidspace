@@ -34,7 +34,7 @@ export function CodeAnnotations({ annotations, code }: CodeAnnotationsProps) {
 
   if (!annotations || annotations.length === 0) return null;
 
-  const lines = code.split('\n');
+  const lines = (code ?? '').split('\n');
 
   return (
     <div className="mt-3 space-y-1.5">

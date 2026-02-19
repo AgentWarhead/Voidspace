@@ -127,7 +127,7 @@ export function DeployCelebration({ isVisible, contractId, network = 'testnet', 
       {isVisible && (
         <>
           {/* Confetti layer */}
-          <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+          <div className="fixed inset-0 pointer-events-none z-[200] overflow-hidden">
             {particles.map(particle => (
               <motion.div
                 key={particle.id}
@@ -150,7 +150,7 @@ export function DeployCelebration({ isVisible, contractId, network = 'testnet', 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-void-black/80 backdrop-blur-sm z-40 flex items-center justify-center"
+            className="fixed inset-0 bg-void-black/80 backdrop-blur-sm z-[199] flex items-center justify-center"
             onClick={onClose}
           >
             {/* Modal content */}

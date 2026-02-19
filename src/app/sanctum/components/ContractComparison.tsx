@@ -145,7 +145,7 @@ function CodePanel({
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const lines = code.split('\n');
+  const lines = (code ?? '').split('\n');
 
   return (
     <div className="flex flex-col flex-1 min-w-0 bg-void-black/40 rounded-xl border border-void-purple/20 overflow-hidden">

@@ -384,7 +384,7 @@ export interface ParsedMethod {
 
 export function parsePublicMethods(code: string): ParsedMethod[] {
   const methods: ParsedMethod[] = [];
-  const lines = code.split('\n');
+  const lines = (code ?? '').split('\n');
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
