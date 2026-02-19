@@ -183,8 +183,7 @@ ANNOUNCEMENT: ${prompt}${ctx}`;
           }],
         }],
         generationConfig: {
-          responseModalities: ['image', 'text'],
-          responseMimeType: 'image/png',
+          responseModalities: ['IMAGE', 'TEXT'],
         },
       }),
     });
