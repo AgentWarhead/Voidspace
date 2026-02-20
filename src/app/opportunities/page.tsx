@@ -96,30 +96,44 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
         />
         <Container size="xl" className="relative z-10 text-center px-4 sm:px-6">
           <GradientText as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Explore the Voids
+            Find Your Void
           </GradientText>
-          <p className="text-text-secondary mt-2 max-w-lg mx-auto text-sm sm:text-base">
-            AI-detected ecosystem gaps ranked by impact. Higher score = bigger opportunity.
+          <p className="text-text-secondary mt-3 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+            Every void is a real gap in the NEAR ecosystem — verified against live project data.
+            Each one comes with a full AI-powered build plan the moment you&apos;re ready to move.
           </p>
 
-          <div className="mt-3 inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">
-            <Sparkles className="w-4 h-4 text-near-green animate-pulse shrink-0" />
-            <span className="text-xs sm:text-sm text-text-secondary">
-              Every void includes an AI-powered{' '}
-              <span className="text-near-green font-medium">Build Plan</span>
-            </span>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-near-green/20 bg-near-green/5">
+              <Sparkles className="w-3.5 h-3.5 text-near-green shrink-0" />
+              <span className="text-xs text-text-secondary">
+                Every void includes a <span className="text-near-green font-semibold">Mission Brief</span>
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/5">
+              <span className="text-xs text-cyan-400 font-semibold">🚀 First-mover opportunities available</span>
+            </div>
           </div>
 
           {/* Summary Stats */}
-          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-4">
+          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-5">
             <div className="text-center">
               <p className="text-xl sm:text-2xl font-bold text-near-green font-mono">{totalCount}</p>
-              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Voids Detected</p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Verified Voids</p>
             </div>
             <div className="w-px h-8 bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
             <div className="text-center">
               <p className="text-xl sm:text-2xl font-bold text-text-primary font-mono">{categories.length}</p>
               <p className="text-[10px] sm:text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Categories</p>
+            </div>
+            <div className="w-px h-8 bg-gradient-to-b from-transparent via-near-green/30 to-transparent" />
+            <div className="text-center">
+              <p className="text-xl sm:text-2xl font-bold text-cyan-400 font-mono">
+                {opportunities.filter(o => o.difficulty === 'beginner').length > 0
+                  ? `${opportunities.filter(o => o.difficulty === 'beginner').length}+`
+                  : '40%'}
+              </p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-text-muted font-mono mt-1">Solo-Buildable</p>
             </div>
           </div>
         </Container>

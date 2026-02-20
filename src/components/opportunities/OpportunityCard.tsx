@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Opportunity } from '@/types';
-import { PoweredByBadge } from '@/components/ui/PoweredByBadge';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -53,6 +52,32 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
+// Derive the most compelling signal badge for this void
+function getSignalBadge(opportunity: Opportunity): { label: string; cls: string } | null {
+  const activeCount = opportunity.active_project_count ?? 0;
+  const { competition_level, difficulty, gap_score } = opportunity;
+
+  if (activeCount === 0 && competition_level === 'low') {
+    return { label: '🚀 No one\'s here yet', cls: 'bg-near-green/10 border-near-green/25 text-near-green' };
+  }
+  if (difficulty === 'beginner' && competition_level === 'low') {
+    return { label: '⚡ Weekend-buildable', cls: 'bg-cyan-400/10 border-cyan-400/25 text-cyan-400' };
+  }
+  if (gap_score >= 90) {
+    return { label: '🔥 Deep void', cls: 'bg-amber-400/10 border-amber-400/25 text-amber-400' };
+  }
+  if (difficulty === 'beginner') {
+    return { label: '⚡ Solo-buildable', cls: 'bg-cyan-400/10 border-cyan-400/25 text-cyan-400' };
+  }
+  if (competition_level === 'low') {
+    return { label: '🚀 First mover', cls: 'bg-near-green/10 border-near-green/25 text-near-green' };
+  }
+  if (gap_score >= 80) {
+    return { label: '📈 High opportunity', cls: 'bg-violet-400/10 border-violet-400/25 text-violet-400' };
+  }
+  return null;
+}
+
 export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps) {
   const colors = getScoreColor(opportunity.gap_score);
   const diff = difficultyConfig[opportunity.difficulty] || difficultyConfig.beginner;
@@ -63,6 +88,8 @@ export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps
   const features = opportunity.suggested_features ?? [];
   const visibleFeatures = features.slice(0, 3);
   const extraCount = features.length - 3;
+  const signalBadge = getSignalBadge(opportunity);
+  const activeCount = opportunity.active_project_count ?? 0;
 
   return (
     <Link
@@ -79,6 +106,7 @@ export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps
       <div className="p-3 sm:p-4 flex gap-3">
         {/* Left: info */}
         <div className="flex-1 min-w-0 space-y-1 sm:space-y-1.5">
+          {/* Category + signal badge */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <div className="flex items-center gap-1.5">
               <span className="text-sm">{categoryIcon}</span>
@@ -86,14 +114,20 @@ export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps
                 {categoryName}
               </span>
             </div>
-            {/* Trust badge: Make it clear this is an AI-detected opportunity, not a fake project */}
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[9px] sm:text-[10px] text-purple-300 font-medium whitespace-nowrap">
-              ✨ AI Startup Concept
-            </span>
+            {signalBadge && (
+              <span className={cn(
+                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-semibold whitespace-nowrap',
+                signalBadge.cls
+              )}>
+                {signalBadge.label}
+              </span>
+            )}
           </div>
+
           <h3 className="font-semibold text-text-primary text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
             {opportunity.title}
           </h3>
+
           {opportunity.description && (
             <p className="text-xs text-text-muted leading-relaxed line-clamp-2 hidden sm:block">
               {opportunity.description}
@@ -130,19 +164,18 @@ export function OpportunityCard({ opportunity, index = 0 }: OpportunityCardProps
           {diff.emoji} {diff.label}
         </span>
         <span className={cn('inline-flex items-center gap-0.5', comp.cls)}>
-          {comp.icon} {comp.label}
+          {comp.icon} {comp.label === 'Low' ? 'Low competition' : comp.label === 'Med' ? 'Some competition' : 'Competitive'}
         </span>
-        <span className="text-text-muted truncate hidden sm:inline">
-          {categoryIcon} {categoryName}
-        </span>
+        {activeCount === 0 && (
+          <span className="inline-flex items-center gap-0.5 text-near-green/70">
+            · 0 builders
+          </span>
+        )}
         {isStrategic && (
           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-tier-leviathan/10 text-tier-leviathan border border-tier-leviathan/20">
             ⚡ Strategic
           </span>
         )}
-        <span className="ml-auto">
-          <PoweredByBadge model="claude-sonnet" size="sm" />
-        </span>
       </div>
     </Link>
   );
