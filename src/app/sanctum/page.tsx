@@ -34,7 +34,7 @@ import { useSanctumState, clearPersistedSession } from './hooks/useSanctumState'
 import { useWallet } from '@/hooks/useWallet';
 import { consumeStoredBrief, briefToSanctumPrompt } from '@/lib/brief-to-sanctum';
 // @ts-ignore
-import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Play, Users, Palette, Wallet, Shield, Star, ArrowRight, Wand2, RefreshCw } from 'lucide-react';
+import { Sparkles, Zap, Code2, Rocket, ChevronLeft, Flame, Hammer, Share2, Play, Users, Palette, Wallet, Shield, Star, ArrowRight, Wand2, RefreshCw, Loader2 } from 'lucide-react';
 import { RoastMode } from './components/RoastMode';
 import { VisualMode } from './components/VisualMode';
 import { DownloadButton } from './components/DownloadContract';
@@ -122,6 +122,11 @@ function SanctumPageInner() {
   // Counter to signal chat component to reset
   const [sessionResetCounter, setSessionResetCounter] = useState(0);
   const [showWizard, setShowWizard] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Cloud save status — updated by SanctumChat, displayed in ContractToolbar
   const [cloudSaveStatus, setCloudSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
@@ -196,8 +201,7 @@ function SanctumPageInner() {
   }, [state.generatedCode, dispatch]);
 
   // Check for saved session
-  const hasSavedSession = (() => {
-    if (typeof window === 'undefined') return false;
+  const hasSavedSession = isMounted && (() => {
     try {
       const raw = localStorage.getItem('sanctum-session-state');
       if (!raw) return false;
@@ -206,8 +210,7 @@ function SanctumPageInner() {
     } catch { return false; }
   })();
 
-  const savedSessionInfo = (() => {
-    if (typeof window === 'undefined') return null;
+  const savedSessionInfo = isMounted ? (() => {
     try {
       const raw = localStorage.getItem('sanctum-session-state');
       if (!raw) return null;
@@ -220,7 +223,7 @@ function SanctumPageInner() {
         briefing: parsed.projectBriefing || null,
       };
     } catch { return null; }
-  })();
+  })() : null;
 
   const handleResumeSession = useCallback(() => {
     dispatch({ type: 'SET_SESSION_STARTED', payload: true });
@@ -312,11 +315,17 @@ function SanctumPageInner() {
   const showWalletGate = false;
 
   return (
-    <div className={`min-h-screen bg-void-black relative ${state.sessionStarted && state.mode === 'visual' ? '' : 'overflow-hidden'}`}>
+    <div className={`min-h-screen bg-void-black relative ${isMounted && state.sessionStarted && state.mode === 'visual' ? '' : 'overflow-hidden'}`}>
       {/* Animated particle background */}
       <ParticleBackground />
 
-      {/* Deploy celebration with confetti */}
+      {!isMounted ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-near-green/20" />
+        </div>
+      ) : (
+        <>
+          {/* Deploy celebration with confetti */}
       <DeployCelebration
         isVisible={state.showDeployCelebration}
         contractId={state.deployedContractId || undefined}
@@ -1126,7 +1135,7 @@ function SanctumPageInner() {
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
