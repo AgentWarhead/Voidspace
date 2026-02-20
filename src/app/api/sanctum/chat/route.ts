@@ -1308,8 +1308,8 @@ export async function POST(request: NextRequest) {
       if (!msg || typeof msg.content !== 'string') {
         return NextResponse.json({ error: `Invalid message at index ${i}` }, { status: 400 });
       }
-      if (msg.content.length > 10000) {
-        return NextResponse.json({ error: `Message ${i} too long (max 10000 chars)` }, { status: 400 });
+      if (msg.content.length > 50000) {
+        return NextResponse.json({ error: `Message ${i} too long (max 50000 chars)` }, { status: 400 });
       }
     }
 
