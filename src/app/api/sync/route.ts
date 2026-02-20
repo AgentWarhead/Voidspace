@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
+
+export const maxDuration = 300; // 5 min — Vercel Pro max
 import { rateLimit } from '@/lib/auth/rate-limit';
 import { syncEcosystem } from '@/lib/sync/ecosystem';
 import { syncDeFiLlama } from '@/lib/sync/defillama';

@@ -597,21 +597,27 @@ export async function generateOpportunities(
     console.log('Horizon projects: none loaded (non-fatal)');
   }
 
-  // Gather cross-chain analogues for each category slug
+  // Gather cross-chain analogues — parallel with 8s total budget
   const crossChainData: Record<
     string,
     { chain: string; totalTVL: number; topProjects: string[] }[]
   > = {};
-  for (const snapshot of categorySnapshots) {
-    try {
-      const analogues = await fetchCrossChainAnalogues(snapshot.slug);
-      if (analogues.length > 0) {
-        crossChainData[snapshot.slug] = analogues;
+  try {
+    const crossChainResults = await Promise.allSettled(
+      categorySnapshots.map(async (snapshot) => ({
+        slug: snapshot.slug,
+        analogues: await Promise.race([
+          fetchCrossChainAnalogues(snapshot.slug),
+          new Promise<[]>((resolve) => setTimeout(() => resolve([]), 8000)),
+        ]),
+      })),
+    );
+    for (const result of crossChainResults) {
+      if (result.status === 'fulfilled' && result.value.analogues.length > 0) {
+        crossChainData[result.value.slug] = result.value.analogues;
       }
-    } catch {
-      /* non-fatal */
     }
-  }
+  } catch { /* non-fatal */ }
 
   // Step 5: Call Claude to detect voids
   let claudeVoids: ClaudeVoid[];
@@ -652,10 +658,15 @@ export async function generateOpportunities(
     return { created: 0, updated: 0, error: 'Claude returned 0 valid voids' };
   }
 
-  // Step 5b: Tier 2 — Skeptic verification pass
+  // Step 5b: Tier 2 — Skeptic verification pass (30s budget)
   let skepticScores = new Map<string, number>();
   try {
-    skepticScores = await verifyVoidsWithSkeptic(claudeVoids, categorySnapshots);
+    skepticScores = await Promise.race([
+      verifyVoidsWithSkeptic(claudeVoids, categorySnapshots),
+      new Promise<Map<string, number>>((resolve) =>
+        setTimeout(() => resolve(new Map()), 30000),
+      ),
+    ]);
     const beforeCount = claudeVoids.length;
     // Filter out voids the skeptic scores below 6
     claudeVoids = claudeVoids.filter((v) => {

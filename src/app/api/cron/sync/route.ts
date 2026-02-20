@@ -35,7 +35,7 @@ const CATEGORIES = [
 ];
 
 // Allow up to 60s for full ecosystem sync (10+ data sources + opportunity generation)
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /**
  * Vercel Cron Job — runs internally, bypasses SSO/auth protection.
