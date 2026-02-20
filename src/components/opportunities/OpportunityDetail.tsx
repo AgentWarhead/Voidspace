@@ -114,11 +114,11 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
   const [showInactive, setShowInactive] = useState(false);
   const allProjects = competitors ?? relatedProjects;
   const activeCompetitors = allProjects.filter((p) => {
-    const status = getActivityStatus(p.last_github_commit);
+    const status = getActivityStatus(p);
     return status === 'active' || status === 'stale';
   });
   const inactiveCompetitors = allProjects.filter((p) => {
-    const status = getActivityStatus(p.last_github_commit);
+    const status = getActivityStatus(p);
     return status === 'abandoned';
   });
 

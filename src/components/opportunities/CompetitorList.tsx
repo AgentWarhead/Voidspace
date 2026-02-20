@@ -5,13 +5,20 @@ import type { Project } from '@/types';
 
 export type ActivityStatus = 'active' | 'stale' | 'abandoned';
 
-export function getActivityStatus(lastCommit: string | null): ActivityStatus {
+export function getActivityStatus(project: { tvl_usd?: number | null, last_github_commit?: string | null }): ActivityStatus {
+  // 1. TVL Override: If > $5,000 TVL, it's active regardless of commits
+  if ((Number(project.tvl_usd) || 0) > 5000) return 'active';
+
+  const lastCommit = project.last_github_commit;
   if (!lastCommit) return 'abandoned';
+
   const commitDate = new Date(lastCommit);
   const now = new Date();
   const monthsAgo = (now.getTime() - commitDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+
   if (monthsAgo <= 3) return 'active';
   if (monthsAgo <= 12) return 'stale';
+  
   return 'abandoned';
 }
 
@@ -27,7 +34,7 @@ export function CompetitorList({ projects }: { projects: Project[] }) {
   return (
     <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
       {projects.map((project) => {
-        const status = getActivityStatus(project.last_github_commit);
+        const status = getActivityStatus(project);
         return (
           <div
             key={project.id}
