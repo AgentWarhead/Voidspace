@@ -24,6 +24,7 @@ import { VoidMotivationPanel } from '@/components/opportunities/VoidMotivationPa
 import { CrossChainRivalry } from '@/components/opportunities/CrossChainRivalry';
 import { SaveButton } from '@/components/opportunities/SaveButton';
 import { ShareButton } from '@/components/opportunities/ShareButton';
+import { FlagVoidButton } from '@/components/opportunities/FlagVoidButton';
 import { VoidTimer } from '@/components/opportunities/VoidTimer';
 import { BriefGenerator } from '@/components/brief/BriefGenerator';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
@@ -216,6 +217,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
                   title={opportunity.title}
                   gapScore={opportunity.gap_score}
                 />
+                <FlagVoidButton opportunityId={opportunity.id} />
               </div>
             </div>
           </div>
@@ -264,6 +266,25 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </div>
         </div>
       </ScrollReveal>
+
+      {/* ── 2b. Verified Against (evidence_projects) ─────────────────────────── */}
+      {opportunity.evidence_projects && opportunity.evidence_projects.length > 0 && (
+        <ScrollReveal delay={0.04}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-text-muted shrink-0">
+              Verified against:
+            </span>
+            {opportunity.evidence_projects.map((proj: string) => (
+              <span
+                key={proj}
+                className="text-[11px] px-2 py-0.5 rounded-full border border-near-green/20 bg-near-green/[0.05] text-near-green/80 font-mono"
+              >
+                {proj}
+              </span>
+            ))}
+          </div>
+        </ScrollReveal>
+      )}
 
       {/* ── 3. Why This Void Exists ──────────────────────────────────────────── */}
       {opportunity.reasoning && (

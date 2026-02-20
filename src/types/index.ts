@@ -50,6 +50,11 @@ export interface Opportunity {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   created_at: string;
   updated_at: string;
+  // Void engine credibility fields
+  evidence_projects?: string[];
+  void_confidence?: number;
+  void_status?: 'active' | 'filling' | 'filled' | 'flagged';
+  stable_id?: string;
   // Joined fields
   category?: Category;
   active_project_count?: number;
