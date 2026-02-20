@@ -30,7 +30,7 @@ function inlineFormat(text: string | null | undefined): React.ReactNode {
   });
 }
 // @ts-ignore
-import { Loader2, ArrowRight, Wallet, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
+import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { ChatMode } from './ModeSelector';
 import { CodeAnnotations, CodeAnnotation } from './CodeAnnotations';
@@ -245,7 +245,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, onProjectFilesUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
-  const { user, isConnected, openModal, refetchUser } = useWallet();
+  const { user, isConnected } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
   // API enforces actual tier regardless. Once user loads, syncs to real tier.
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'specter';
@@ -779,16 +779,15 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         return;
       }
 
-      // Session expired mid-chat — silently re-auth and surface a retry prompt
+      // 401 should not occur (Sanctum chat is auth-optional), but handle gracefully
       if (response.status === 401) {
         setIsLoading(false);
         onThinkingChange?.(false);
         onTaskUpdate?.(null);
-        refetchUser();
         setMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: '🔑 Session expired — please sign in again, then resend your message.',
+          content: '⚠️ Something went wrong with authentication. Please refresh the page and try again.',
         }]);
         return;
       }
@@ -1033,24 +1032,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }
 
   async function handleSend(messageText?: string) {
-    // Phase 2: Guest Mode Gate
-    // Users can view the initial AI message, but must connect wallet to reply.
-    if (!isConnected) {
-      openModal();
-      return;
-    }
-    // Wallet connected but no server session — need to sign in once.
-    // Only fires when user explicitly tries to send, never on page load.
-    if (!user) {
-      // Show context before the sign popup appears so user isn't surprised
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: '🔑 One-time sign-in required — your wallet will ask you to sign a message to start your session. No transaction, no gas, just authentication.',
-      }]);
-      refetchUser();
-      return;
-    }
+    // No wallet gate for chat — anyone can use Sanctum.
+    // Wallet connection only required at Launch.
 
     const text = messageText || input;
     if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
@@ -1518,7 +1501,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
               }
             }}
             rows={1}
-            placeholder={isListening ? "Listening..." : isConnected ? "Describe what you want to build..." : "Connect wallet to reply..."}
+            placeholder={isListening ? "Listening..." : "Describe what you want to build..."}
             className={`flex-1 min-w-0 px-3 sm:px-4 py-3 rounded-xl bg-surface border focus:outline-none focus:ring-1 text-sm sm:text-base text-white placeholder:text-text-muted transition-all resize-none ${
               isListening 
                 ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30 animate-pulse' 
@@ -1531,7 +1514,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           {speechSupported && (
             <button
               onClick={toggleListening}
-              disabled={isLoading || !isConnected}
+              disabled={isLoading}
               className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border transition-all flex-shrink-0 ${
                 isListening
                   ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
@@ -1554,10 +1537,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           ) : (
             <button
               onClick={() => handleSend()}
-              disabled={isConnected && !input.trim() && attachedFiles.length === 0}
+              disabled={!input.trim() && attachedFiles.length === 0}
               className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-near-green text-void-black hover:bg-near-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
             >
-              {!isConnected ? <Wallet className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+              <ArrowRight className="w-5 h-5" />
             </button>
           )}
         </div>

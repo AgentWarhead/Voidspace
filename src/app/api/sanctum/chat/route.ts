@@ -8,7 +8,7 @@ import { getAuthenticatedUser } from '@/lib/auth/verify-request';
 import { checkAiBudget, logAiUsage } from '@/lib/auth/ai-budget';
 import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { SANCTUM_TIERS, resolveModel, type SanctumTier } from '@/lib/sanctum-tiers';
+import { resolveModel, type SanctumTier } from '@/lib/sanctum-tiers';
 
 function sanitizeUserInput(text: string): string {
   // Remove common prompt injection patterns
@@ -1281,53 +1281,65 @@ impl WrappedToken {
 
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication
+    // Auth is OPTIONAL — wallet connection not required to chat.
+    // Authenticated users get credit tracking + tier model access.
+    // Guests get free access with IP rate limiting (Shade tier model).
     const user = getAuthenticatedUser(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+
+    // ── Rate limiting (auth-aware) ──
+    if (user) {
+      const rateKey = `chat:auth:${user.userId}`;
+      if (!rateLimit(rateKey, 10, 60_000).allowed) {
+        return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+      }
+    } else {
+      // Guest: 20 requests per hour per IP
+      const guestKey = `guest:chat:ip:${ip}`;
+      if (!rateLimit(guestKey, 20, 60 * 60 * 1000).allowed) {
+        return NextResponse.json(
+          { error: 'Too many requests. Connect your wallet for unlimited access.' },
+          { status: 429 }
+        );
+      }
     }
 
     // ── Resolve user tier for model routing ──
-    const { data: userSub } = await createAdminClient()
-      .from('subscriptions')
-      .select('tier')
-      .eq('user_id', user.userId)
-      .single();
-    const userTier: SanctumTier = (userSub?.tier as SanctumTier) || 'shade';
-    const tierConfig = SANCTUM_TIERS[userTier];
-
+    let userTier: SanctumTier = 'shade'; // guests get free tier
+    if (user) {
+      const { data: userSub } = await createAdminClient()
+        .from('subscriptions')
+        .select('tier')
+        .eq('user_id', user.userId)
+        .single();
+      userTier = (userSub?.tier as SanctumTier) || 'shade';
+    }
     // Parse request body early - need preferredModel for model routing
     const body = await request.json();
     const { messages, category, personaId, mode: rawMode, preferredModel: clientPreferredModel, noCodeExtraction } = body;
 
     // Resolve model: client sends preference (from localStorage), validate against tier
-    // No DB lookup needed - preference is client-side
     const modelId = resolveModel(userTier, clientPreferredModel);
     const costModel = modelId.includes('opus') ? 'opus' : 'sonnet';
 
-    // Primary gate: credit balance check
-    // Estimate ~2000 input + ~3000 output tokens for a chat turn
-    const estimatedCost = estimateCreditCost(2000, 3000, costModel as 'opus' | 'sonnet');
-    const hasCredits = await checkBalance(user.userId, estimatedCost);
-    if (!hasCredits) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Top up your Sanctum balance to continue chatting.' },
-        { status: 402 }
-      );
-    }
+    // ── Credit checks (authenticated users only) ──
+    if (user) {
+      const estimatedCost = estimateCreditCost(2000, 3000, costModel as 'opus' | 'sonnet');
+      const hasCredits = await checkBalance(user.userId, estimatedCost);
+      if (!hasCredits) {
+        return NextResponse.json(
+          { error: 'Insufficient credits. Top up your Sanctum balance to continue chatting.' },
+          { status: 402 }
+        );
+      }
 
-    // Secondary safety net: daily AI usage budget (tier-aware)
-    const budget = await checkAiBudget(user.userId, userTier);
-    if (!budget.allowed) {
-      return NextResponse.json({
-        error: 'Daily AI usage limit reached',
-        remaining: budget.remaining
-      }, { status: 429 });
-    }
-
-    const rateKey = `chat:auth:${user.userId}`;
-    if (!rateLimit(rateKey, 10, 60_000).allowed) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+      const budget = await checkAiBudget(user.userId, userTier);
+      if (!budget.allowed) {
+        return NextResponse.json({
+          error: 'Daily AI usage limit reached',
+          remaining: budget.remaining
+        }, { status: 429 });
+      }
     }
 
     // Check request body size (max 50KB)
@@ -1512,18 +1524,23 @@ export async function POST(request: NextRequest) {
       parsed.code = null;
     }
 
-    // Log AI usage for budget tracking (secondary safety net)
+    // Log usage + deduct credits for authenticated users only
     const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
-    await logAiUsage(user.userId, 'sanctum_chat', totalTokens);
+    let creditsInfo: { cost: number; remaining: number } | undefined;
 
-    // Deduct credits based on actual token usage and tier model
-    const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, costModel as 'opus' | 'sonnet');
-    const deduction = await deductCredits(user.userId, creditCost, 'Sanctum chat', {
-      tokensInput: response.usage.input_tokens,
-      tokensOutput: response.usage.output_tokens,
-    });
-    if (!deduction.success) {
-      console.error('Failed to deduct credits for chat:', deduction.error);
+    if (user) {
+      await logAiUsage(user.userId, 'sanctum_chat', totalTokens);
+      const creditCost = estimateCreditCost(response.usage.input_tokens, response.usage.output_tokens, costModel as 'opus' | 'sonnet');
+      const deduction = await deductCredits(user.userId, creditCost, 'Sanctum chat', {
+        tokensInput: response.usage.input_tokens,
+        tokensOutput: response.usage.output_tokens,
+      });
+      if (!deduction.success) {
+        console.error('Failed to deduct credits for chat:', deduction.error);
+      }
+      if (deduction.success) {
+        creditsInfo = { cost: creditCost, remaining: deduction.remaining.totalCredits };
+      }
     }
 
     return NextResponse.json({
@@ -1532,10 +1549,7 @@ export async function POST(request: NextRequest) {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
       },
-      credits: deduction.success ? {
-        cost: creditCost,
-        remaining: deduction.remaining.totalCredits,
-      } : undefined,
+      credits: creditsInfo,
     });
   } catch (error) {
     console.error('Sanctum chat error:', error);
