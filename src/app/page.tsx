@@ -13,6 +13,7 @@ import { LearnSection } from '@/components/landing/LearnSection';
 import { SocialProofSection } from '@/components/landing/SocialProofSection';
 import { DataSourcesSection } from '@/components/landing/DataSourcesSection';
 import { BottomCtaSection } from '@/components/landing/BottomCtaSection';
+import { VoidMethodology } from '@/components/landing/VoidMethodology';
 import {
   getEcosystemStats,
   getCategoriesWithStats,
@@ -53,6 +54,11 @@ export default async function DashboardPage() {
 
       {/* SECTION 2: Mission Control Stats Bar */}
       <MissionControlBar categoryCount={stats.categoryCount} />
+
+      {/* SECTION 2.5: Methodology */}
+      <ScrollReveal delay={0.04}>
+        <VoidMethodology />
+      </ScrollReveal>
 
       <Container size="xl" className="py-6 sm:py-8 space-y-8 sm:space-y-12">
         {/* SECTION 3: Priority Voids */}
