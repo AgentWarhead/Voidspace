@@ -51,7 +51,7 @@ export function SanctumLanding({
           >
             <span className="text-text-primary">Your Gateway to NEAR.</span>
             <br />
-            <GradientText className="mt-2">Launch Ideas. No Code Required.</GradientText>
+            <GradientText className="mt-2">Launch Ideas. Learn to Build.</GradientText>
           </h1>
 
           {/* Subtitle */}
