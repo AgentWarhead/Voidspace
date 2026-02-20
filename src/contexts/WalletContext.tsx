@@ -135,12 +135,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         });
 
         // Check for existing connection (autoConnect)
+        // IMPORTANT: Only restore session silently here — do NOT trigger wallet signing.
+        // Calling authenticateUser() on auto-connect opens the wallet modal on every page
+        // refresh when the cookie is expired. Instead, just restore the cookie-backed session.
+        // Full re-auth only happens on explicit wallet:signIn events.
         try {
           const { wallet, accounts } = await conn.getConnectedWallet();
           if (wallet && accounts.length > 0) {
             const existingAccountId = accounts[0].accountId;
             setAccountId(existingAccountId);
-            authenticateUser(existingAccountId, conn);
+            // Silently restore server session from cookie — no wallet modal
+            await tryRestoreSession();
           }
         } catch {
           // No existing connection — that's fine
