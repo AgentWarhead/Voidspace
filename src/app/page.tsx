@@ -51,7 +51,7 @@ export default async function DashboardPage() {
       <HeroSection stats={stats} totalOpportunities={opportunities.length} />
 
       {/* SECTION 2: Mission Control Stats Bar */}
-      <MissionControlBar />
+      <MissionControlBar categoryCount={stats.categoryCount} />
 
       <Container size="xl" className="py-6 sm:py-8 space-y-8 sm:space-y-12">
         {/* SECTION 3: Priority Voids */}
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
 
         {/* SECTION 8.5: Social Proof */}
         <ScrollReveal delay={0.15}>
-          <SocialProofSection />
+          <SocialProofSection totalProjects={stats.totalProjects} totalOpportunities={opportunities.length} />
         </ScrollReveal>
 
         {/* SECTION 8.6: Data Sources */}

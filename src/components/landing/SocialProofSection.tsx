@@ -1,13 +1,9 @@
-'use client';
-
 import { Cpu, BookOpen, Search, BarChart3 } from 'lucide-react';
 
-const stats = [
-  { value: '383+', label: 'Projects Analyzed', icon: Search },
-  { value: '78', label: 'Voids Detected', icon: Cpu },
-  { value: '66', label: 'Learning Modules', icon: BookOpen },
-  { value: '150+', label: 'Tokens Tracked', icon: BarChart3 },
-];
+interface SocialProofSectionProps {
+  totalProjects: number;
+  totalOpportunities: number;
+}
 
 const signals = [
   'The first AI-native intelligence platform for NEAR Protocol',
@@ -15,7 +11,14 @@ const signals = [
   'The most comprehensive free NEAR developer education platform',
 ];
 
-export function SocialProofSection() {
+export function SocialProofSection({ totalProjects, totalOpportunities }: SocialProofSectionProps) {
+  const stats = [
+    { value: totalProjects > 0 ? `${totalProjects}+` : '300+', label: 'Projects Analyzed', icon: Search },
+    { value: totalOpportunities > 0 ? String(totalOpportunities) : '70+', label: 'Voids Detected', icon: Cpu },
+    { value: '66', label: 'Learning Modules', icon: BookOpen },
+    { value: '150+', label: 'Tokens Tracked', icon: BarChart3 },
+  ];
+
   return (
     <section>
       <div className="relative overflow-hidden rounded-2xl border border-border/40">

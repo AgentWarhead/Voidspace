@@ -1,14 +1,17 @@
 import { Layers, GraduationCap, Database, Radio } from 'lucide-react';
 import { Container } from '@/components/ui';
 
-const stats = [
-  { value: '20+', label: 'CATEGORIES SCANNED', icon: Layers, delay: '0s' },
-  { value: '66', label: 'FREE MODULES', icon: GraduationCap, delay: '0.5s' },
-  { value: '10+', label: 'LIVE DATA SOURCES', icon: Database, delay: '1s' },
-  { value: 'LIVE', label: 'REAL-TIME INTEL', icon: Radio, delay: '1.5s' },
-];
+interface MissionControlBarProps {
+  categoryCount: number;
+}
 
-export function MissionControlBar() {
+export function MissionControlBar({ categoryCount }: MissionControlBarProps) {
+  const stats = [
+    { value: categoryCount > 0 ? `${categoryCount}` : '20+', label: 'CATEGORIES SCANNED', icon: Layers, delay: '0s' },
+    { value: '66', label: 'FREE MODULES', icon: GraduationCap, delay: '0.5s' },
+    { value: '10+', label: 'LIVE DATA SOURCES', icon: Database, delay: '1s' },
+    { value: 'LIVE', label: 'REAL-TIME INTEL', icon: Radio, delay: '1.5s' },
+  ];
   return (
     <div className="relative overflow-hidden border-y border-near-green/10">
       <div
