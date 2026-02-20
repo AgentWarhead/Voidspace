@@ -112,7 +112,6 @@ const CATEGORIES: Category[] = [
     color: 'text-yellow-400',
     description: 'The building blocks — tools, SDKs, indexers, and services for developers.',
     projects: [
-      { name: 'Pagoda', description: 'Development platform for NEAR. APIs, RPC, and developer tools.', highlight: 'Dev platform' },
       { name: 'NEAR DA', description: 'Data availability layer for Ethereum rollups. Store data cheaply on NEAR.', highlight: 'L2 infra' },
       { name: 'Pikespeak', description: 'Analytics and data APIs for NEAR. Query blockchain data easily.', highlight: 'Analytics' },
       { name: 'Fastnear', description: 'Fast RPC and real-time indexing infrastructure.', highlight: 'Fast RPCs' },
@@ -215,7 +214,7 @@ function EcosystemStats() {
     { label: 'Total Value Locked', value: '$200M+', emoji: '💰' },
     { label: 'Active Projects', value: '800+', emoji: '🚀' },
     { label: 'Monthly Transactions', value: '180M+', emoji: '⚡' },
-    { label: 'Grants Distributed', value: '$50M+', emoji: '🎁' },
+    { label: 'Grants Distributed', value: '$330M+', emoji: '🎁' },
   ];
 
   return (
@@ -358,7 +357,7 @@ export function NearEcosystemTour() {
               'NFTs: Mintbase, Paras — create and trade digital assets for fractions of a penny.',
               'AI: NEAR is positioning as the blockchain for AI agents (Bitte, NEAR AI).',
               'The ecosystem is still early — massive opportunity for builders and users.',
-              'Over $50M in grants have been distributed to support new projects.',
+              'Over $330M in grants have been distributed to support new projects.',
             ].map((point, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-text-secondary">
                 <span className="text-near-green mt-0.5 font-bold">→</span>

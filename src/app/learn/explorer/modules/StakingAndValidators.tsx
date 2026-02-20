@@ -74,7 +74,7 @@ function StakingConceptExplorer() {
       title: 'Choosing a Validator',
       emoji: '🔍',
       tagline: 'Not all validators are equal.',
-      description: 'Choosing the right validator matters. Look for high uptime (99%+), reasonable fees (5-10%), and a track record of consistent block production. Supporting smaller validators helps decentralize the network. NEAR currently has ~200 active validators, with a seat price that fluctuates based on total stake.',
+      description: 'Choosing the right validator matters. Look for high uptime (99%+), reasonable fees (5-10%), and a track record of consistent block production. Supporting smaller validators helps decentralize the network. NEAR currently has ~100 active validators, with a seat price that fluctuates based on total stake.',
       nearProject: 'NEAR Validators',
       howItWorks: [
         'Check uptime percentage — 99%+ is ideal for maximum rewards',

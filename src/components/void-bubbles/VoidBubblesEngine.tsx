@@ -718,33 +718,7 @@ export function VoidBubblesEngine() {
     simulationRef.current?.alpha(isMobileDevice ? 0.1 : 0.2).restart();
   }, []);
 
-  // ────────────────────── Whale Alerts (simulated) ──────────────────────
-
-  useEffect(() => {
-    if (tokens.length === 0) return;
-
-    const generateWhaleAlert = () => {
-      const token = tokens[Math.floor(Math.random() * Math.min(tokens.length, 20))];
-      const amount = 10000 + Math.random() * 90000;
-      
-      // Play whale alert sound
-      sonicRef.current.playWhaleAlert();
-
-      // Trigger dramatic visual shockwave effect on the bubble
-      triggerShockwave(token.id, amount);
-    };
-
-    const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
-    const baseInterval = isMobileDevice ? 40000 : 20000;
-    const randomRange = isMobileDevice ? 30000 : 25000;
-    const interval = setInterval(generateWhaleAlert, baseInterval + Math.random() * randomRange);
-    const firstTimeout = setTimeout(generateWhaleAlert, isMobileDevice ? 10000 : 5000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(firstTimeout);
-    };
-  }, [tokens, triggerShockwave]);
+  // Whale alert simulation removed — no fake whale data
 
   const initSimulation = useCallback(() => {
     if (!svgRef.current || !containerRef.current || filteredTokens.length === 0) return;
@@ -2074,7 +2048,7 @@ export function VoidBubblesEngine() {
               SCANNING THE VOID
             </p>
             <p className="text-text-muted text-sm font-mono">
-              Mapping {'>'}350 tokens across the NEAR ecosystem...
+              Mapping 150+ tokens across the NEAR ecosystem...
             </p>
           </div>
           

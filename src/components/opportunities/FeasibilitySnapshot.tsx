@@ -35,7 +35,7 @@ function getEstimates(opportunity: Opportunity) {
   const nearStack = (() => {
     if (categoryName.includes('defi')) return 'NEAR SDK + Aurora';
     if (categoryName.includes('gaming')) return 'NEAR SDK + PlayNEAR';
-    if (categoryName.includes('infrastructure')) return 'NEAR SDK + Pagoda';
+    if (categoryName.includes('infrastructure')) return 'NEAR SDK + Fastnear';
     return 'NEAR SDK + BOS';
   })();
   

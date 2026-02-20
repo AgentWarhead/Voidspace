@@ -359,10 +359,10 @@ export default function BuildingInPublic({ isActive, onToggle }: BuildingInPubli
               <div className="bg-black/20 border border-border rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Star className="w-4 h-4 text-amber-400" />
-                  <h5 className="font-semibold text-text-primary text-sm">Pagoda — Transparency Reports</h5>
+                  <h5 className="font-semibold text-text-primary text-sm">NEAR Foundation — Transparency Reports</h5>
                 </div>
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  Pagoda (formerly NEAR Inc) pioneered detailed transparency reports for the NEAR ecosystem,
+                  The NEAR Foundation pioneered detailed transparency reports for the ecosystem,
                   publishing quarterly updates on ecosystem fund allocation, development milestones, and treasury
                   management. These reports included both wins and challenges, with honest assessments of what
                   didn&apos;t work. The transparency reports became a template that other NEAR projects adopted,

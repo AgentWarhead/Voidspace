@@ -4,12 +4,6 @@ import { fetchNearTokens, type TokenData } from '@/lib/dexscreener';
 // ISR: revalidate every 60 seconds
 export const revalidate = 60;
 
-interface RefTokenData {
-  price: string;
-  symbol: string;
-  decimal: number;
-}
-
 export interface VoidBubbleToken {
   id: string;
   symbol: string;
@@ -110,7 +104,9 @@ function calculateHealthScore(token: {
 }
 
 function tokenDataToVoidBubble(t: TokenData, period: string): VoidBubbleToken {
-  // Map period to the appropriate price change for current display
+  // Map period to the appropriate price change for current display.
+  // Only 1h, 6h, and 24h data are real (sourced from DexScreener).
+  // For 7d/30d there is no real historical source — fall back to 24h data.
   let currentPriceChange = t.priceChange24h;
   let currentVolume = t.volume24h;
 
@@ -124,16 +120,11 @@ function tokenDataToVoidBubble(t: TokenData, period: string): VoidBubbleToken {
       currentVolume = t.volume6h;
       break;
     case '1d':
+    case '7d':  // No real 7d source — show 24h data
+    case '30d': // No real 30d source — show 24h data
+    default:
       currentPriceChange = t.priceChange24h;
       currentVolume = t.volume24h;
-      break;
-    case '7d':
-      currentPriceChange = t.priceChange24h * (0.8 + Math.random() * 0.4);
-      currentVolume = t.volume24h * 7;
-      break;
-    case '30d':
-      currentPriceChange = t.priceChange24h * (1.2 + Math.random() * 1.8);
-      currentVolume = t.volume24h * 30;
       break;
   }
 
@@ -157,7 +148,7 @@ function tokenDataToVoidBubble(t: TokenData, period: string): VoidBubbleToken {
     healthScore: health.score,
     riskLevel: health.riskLevel,
     riskFactors: health.factors,
-    detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+    detectedAt: new Date().toISOString(),
     priceChange1h: t.priceChange1h,
     priceChange6h: t.priceChange6h,
     dexScreenerUrl: t.dexScreenerUrl,
@@ -185,76 +176,17 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || '1d';
 
-    // Fetch from both sources in parallel
-    // DexScreener data comes through the shared cached lib
-    const [dexTokens, refRes] = await Promise.all([
-      fetchNearTokens().catch(() => [] as TokenData[]),
-      fetch('https://indexer.ref.finance/list-token-price', { next: { revalidate: 60 } })
-        .catch(() => null),
-    ]);
+    // Fetch real market data from DexScreener (via shared cached lib)
+    const dexTokens = await fetchNearTokens().catch(() => [] as TokenData[]);
 
     const tokens: VoidBubbleToken[] = [];
     const seenSymbols = new Set<string>();
 
-    // Process DexScreener data first (richer data) — via shared lib
+    // Process DexScreener data — only real data, no fallback fabrication
     for (const t of dexTokens) {
       if (seenSymbols.has(t.symbol)) continue;
       seenSymbols.add(t.symbol);
       tokens.push(tokenDataToVoidBubble(t, period));
-    }
-
-    // Supplement with Ref Finance data
-    if (refRes?.ok) {
-      const refData: Record<string, RefTokenData> = await refRes.json();
-
-      for (const [contractId, data] of Object.entries(refData)) {
-        if (seenSymbols.has(data.symbol)) continue;
-        const price = parseFloat(data.price) || 0;
-        if (price === 0 || price > 100000) continue;
-
-        seenSymbols.add(data.symbol);
-
-        const estimatedMarketCap = price * 1_000_000;
-        const health = calculateHealthScore({
-          volume24h: 0,
-          liquidity: 0,
-          priceChange24h: 0,
-          marketCap: estimatedMarketCap,
-        });
-
-        const sim24h = (Math.random() - 0.5) * 20;
-        const sim1h = (Math.random() - 0.5) * 8;
-        const sim6h = (Math.random() - 0.5) * 15;
-
-        let currentPriceChange = sim24h;
-        switch (period) {
-          case '1h': currentPriceChange = sim1h; break;
-          case '4h': currentPriceChange = sim6h; break;
-          case '7d': currentPriceChange = sim24h * 1.5; break;
-          case '30d': currentPriceChange = sim24h * 3; break;
-        }
-
-        tokens.push({
-          id: contractId,
-          symbol: data.symbol,
-          name: data.symbol,
-          price,
-          priceChange24h: currentPriceChange,
-          volume24h: Math.random() * 50000,
-          liquidity: Math.random() * 100000,
-          marketCap: estimatedMarketCap,
-          category: TOKEN_CATEGORIES[data.symbol] || DEFAULT_CATEGORY,
-          healthScore: health.score,
-          riskLevel: health.riskLevel,
-          riskFactors: health.factors,
-          detectedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-          priceChange1h: sim1h,
-          priceChange6h: sim6h,
-          dexScreenerUrl: undefined,
-          refFinanceUrl: `https://app.ref.finance/#near|${contractId}`,
-          contractAddress: contractId,
-        });
-      }
     }
 
     // Sort by market cap descending
@@ -322,7 +254,7 @@ export async function GET(request: Request) {
         dominanceTop5,
       },
       lastUpdated: new Date().toISOString(),
-      sources: ['ref-finance', 'dexscreener'],
+      sources: ['dexscreener'],
       period,
     }, {
       headers: {

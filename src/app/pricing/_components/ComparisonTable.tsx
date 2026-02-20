@@ -15,7 +15,7 @@ interface ComparisonRow {
 }
 
 const rows: ComparisonRow[] = [
-  { feature: 'AI Model', shade: 'Sonnet 4', specter: 'Sonnet 4.6 + Opus 4.6', legion: 'Sonnet 4.6 + Opus 4.6', leviathan: 'Sonnet 4.6 + Opus 4.6' },
+  { feature: 'AI Model', shade: 'Sonnet 4.6', specter: 'Sonnet 4.6 + Opus 4.6', legion: 'Sonnet 4.6 + Opus 4.6', leviathan: 'Sonnet 4.6 + Opus 4.6' },
   { feature: 'Monthly Credits', shade: '$2.50 once', specter: '$25/mo', legion: '$70/mo', leviathan: '$230/mo' },
   { feature: 'Active Projects', shade: '1', specter: '3', legion: 'Unlimited', leviathan: 'Unlimited' },
   { feature: 'Project Export', shade: false, specter: true, legion: true, leviathan: true },

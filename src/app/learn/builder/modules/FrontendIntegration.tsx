@@ -265,7 +265,7 @@ const FrontendIntegration: React.FC<FrontendIntegrationProps> = ({ isActive, onT
                 </h4>
                 <p className="text-xs text-text-secondary leading-relaxed">
                   Don&apos;t rely on the default public RPC (https://rpc.mainnet.near.org) for production apps — it has
-                  rate limits. Use Pagoda&apos;s RPC (free tier available), Lava Network, or dRPC for reliable mainnet
+                  rate limits. Use Fastnear, Lava Network, or dRPC for reliable mainnet
                   access. Set the RPC URL via NEXT_PUBLIC_RPC_URL environment variable so you can switch providers
                   without code changes. For view calls, consider using multiple RPC endpoints with fallback logic.
                 </p>

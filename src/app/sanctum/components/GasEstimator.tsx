@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Zap, TrendingDown, AlertTriangle } from 'lucide-react';
 
 interface GasEstimatorProps {
@@ -26,10 +26,20 @@ interface Optimization {
 }
 
 const NEAR_PER_TGAS = 0.0001; // 1 TGas = 0.0001 NEAR
-const NEAR_PRICE_USD = 5.50; // Approximate, should fetch live
+const NEAR_PRICE_FALLBACK = 5.00; // Fallback only; live price fetched from /api/near-price
 
 export function GasEstimator({ code, network = 'testnet' }: GasEstimatorProps) {
   const [showOptimizations, setShowOptimizations] = useState(false);
+  const [nearPriceUsd, setNearPriceUsd] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('/api/near-price')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.price) setNearPriceUsd(Number(data.price));
+      })
+      .catch(() => { /* use fallback */ });
+  }, []);
 
   const estimate = useMemo(() => {
     if (!code) return null;
@@ -137,7 +147,7 @@ export function GasEstimator({ code, network = 'testnet' }: GasEstimatorProps) {
       {/* Footer */}
       <div className="px-4 py-2 bg-void-black/30 text-xs text-gray-500 flex items-center justify-between">
         <span>Estimates based on code analysis • Actual costs may vary</span>
-        <span>NEAR ≈ ${NEAR_PRICE_USD}</span>
+        <span>NEAR ≈ ${nearPriceUsd !== null ? nearPriceUsd.toFixed(2) : NEAR_PRICE_FALLBACK.toFixed(2)}</span>
       </div>
     </div>
   );

@@ -71,7 +71,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Fast & intelligent coding assistant' },
     ],
     canExport: false,
-    canAudit: true,   // Temporarily enabled for Nearcon judging — revert after contest
+    canAudit: false,
     priorityQueue: false,
     maxBriefsPerMonth: 3,
     maxSavedOpportunities: 5,
