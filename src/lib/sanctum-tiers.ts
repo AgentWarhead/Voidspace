@@ -94,6 +94,7 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     ],
     color: '#00EC97',
     glowColor: 'rgba(0, 236, 151, 0.3)',
+    popular: true,
     stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZwHUVPdiA',
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZ90gXTP4Q',
     // ── Enforced Limits ──
@@ -129,7 +130,6 @@ export const SANCTUM_TIERS: Record<SanctumTier, SanctumTierConfig> = {
     glowColor: 'rgba(0, 212, 255, 0.3)',
     stripePriceIdMonthly: 'price_1SzsDU0chTjWbsnZSfnTGo4G',
     stripePriceIdAnnual: 'price_1SzsDU0chTjWbsnZVfWYySmG',
-    popular: true,
     // ── Enforced Limits ──
     maxProjects: 0,  // unlimited
     aiModel: 'claude-opus-4-6',
