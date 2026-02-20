@@ -314,18 +314,20 @@ function SanctumPageInner() {
   // Users can now enter the chat, see the prompt, and are only gated when they try to SEND a message.
   const showWalletGate = false;
 
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-void-black relative overflow-hidden flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-near-green/20" />
+      </div>
+    );
+  }
+
   return (
-    <div className={`min-h-screen bg-void-black relative ${isMounted && state.sessionStarted && state.mode === 'visual' ? '' : 'overflow-hidden'}`}>
+    <div className={`min-h-screen bg-void-black relative ${state.sessionStarted && state.mode === 'visual' ? '' : 'overflow-hidden'}`}>
       {/* Animated particle background */}
       <ParticleBackground />
 
-      {!isMounted ? (
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-near-green/20" />
-        </div>
-      ) : (
-        <>
-          {/* Deploy celebration with confetti */}
+      {/* Deploy celebration with confetti */}
       <DeployCelebration
         isVisible={state.showDeployCelebration}
         contractId={state.deployedContractId || undefined}
@@ -1135,7 +1137,7 @@ function SanctumPageInner() {
               </button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
