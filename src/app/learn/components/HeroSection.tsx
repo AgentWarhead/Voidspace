@@ -395,20 +395,19 @@ export function HeroSection() {
                 <div className="relative bg-surface/70 backdrop-blur-xl border border-white/[0.06] rounded-2xl px-4 sm:px-6 py-6 sm:py-8 shadow-2xl">
                   <div className="grid grid-cols-3 gap-4 sm:gap-8 sm:divide-x sm:divide-border">
                     <StatItem
-                      value={78}
-                      suffix="+"
-                      label="Voids Detected"
+                      value={4}
+                      label="Learning Tracks"
                       delay={0.8}
                     />
                     <StatItem
                       value={66}
-                      label="Learning Modules"
+                      label="Free Modules"
                       delay={1.0}
                     />
                     <StatItem
-                      value={20}
+                      value={60}
                       suffix="+"
-                      label="Categories Analyzed"
+                      label="Hours of Content"
                       delay={1.2}
                     />
                   </div>
