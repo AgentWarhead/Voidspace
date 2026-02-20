@@ -260,7 +260,7 @@ function MiniQuiz() {
 
 interface ZeroKnowledgeOnNearProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 const ZeroKnowledgeOnNear: React.FC<ZeroKnowledgeOnNearProps> = ({ isActive, onToggle }) => {
@@ -285,7 +285,7 @@ const ZeroKnowledgeOnNear: React.FC<ZeroKnowledgeOnNearProps> = ({ isActive, onT
   return (
     <Card variant="glass" padding="none" className="border-cyan-500/20">
       {/* Accordion Header */}
-      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
             <Eye className="w-6 h-6 text-white" />

@@ -13,7 +13,7 @@ import {
 
 interface CollectionsIteratorsProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive: Gas Cost Comparison Visualizer ───────────────────────────────
@@ -281,7 +281,7 @@ const CollectionsIterators: React.FC<CollectionsIteratorsProps> = ({ isActive, o
     <Card variant="glass" padding="none" className="border-teal-500/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">

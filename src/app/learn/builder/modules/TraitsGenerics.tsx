@@ -13,7 +13,7 @@ import {
 
 interface TraitsGenericsProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive: Trait Implementation Explorer ────────────────────────────────
@@ -291,7 +291,7 @@ const TraitsGenerics: React.FC<TraitsGenericsProps> = ({ isActive, onToggle }) =
     <Card variant="glass" padding="none" className="border-amber-500/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">

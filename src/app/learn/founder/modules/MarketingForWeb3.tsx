@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 
 interface MarketingForWeb3Props {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 const channels = [
@@ -218,7 +218,7 @@ export default function MarketingForWeb3({ isActive, onToggle }: MarketingForWeb
 
   return (
     <Card variant="glass" padding="none" className="border-near-green/20">
-      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
             <Megaphone className="w-6 h-6 text-white" />

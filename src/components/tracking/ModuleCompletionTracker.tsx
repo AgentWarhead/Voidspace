@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 import { WalletContext } from '@/contexts/WalletContext';
 import {
@@ -91,9 +92,13 @@ function XPCounter({ xp }: { xp: number }) {
 interface Props {
   moduleSlug: string;
   track: TrackId;
+  nextModule?: {
+    title: string;
+    slug: string;
+  };
 }
 
-export function ModuleCompletionTracker({ moduleSlug, track }: Props) {
+export function ModuleCompletionTracker({ moduleSlug, track, nextModule }: Props) {
   const { trackStat, isConnected: achievementsConnected } = useAchievementContext();
   const { accountId, isConnected } = useContext(WalletContext);
   const [completed, setCompleted] = useState(false);
@@ -176,9 +181,11 @@ export function ModuleCompletionTracker({ moduleSlug, track }: Props) {
     if (completed) return;
 
     // 1. Update UI immediately — this must happen FIRST
-    setCompleted(true);
     setCelebrating(true);
-    setTimeout(() => setCelebrating(false), 3000);
+    setTimeout(() => {
+      setCelebrating(false);
+      setCompleted(true);
+    }, 3000);
 
     // 2. Persist to localStorage (Skill Constellation — works without wallet)
     const progress = loadProgress();
@@ -221,66 +228,111 @@ export function ModuleCompletionTracker({ moduleSlug, track }: Props) {
 
   if (!mounted) return null;
 
-  return (
-    <div className="flex flex-col items-center gap-4 py-8">
-      <div className="relative">
-        {/* Confetti burst */}
-        <AnimatePresence>
-          {celebrating && confettiParticles.map(i => (
-            <ConfettiParticle key={i} index={i} />
-          ))}
-        </AnimatePresence>
-
-        {/* XP float */}
-        <AnimatePresence>
-          {celebrating && (
+  /* ── Celebrating: show confetti overlay over the button ── */
+  if (celebrating) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-8">
+        <div className="relative">
+          <AnimatePresence>
+            {confettiParticles.map(i => <ConfettiParticle key={i} index={i} />)}
+          </AnimatePresence>
+          <AnimatePresence>
             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
               <XPCounter xp={xp} />
             </div>
-          )}
-        </AnimatePresence>
-
-        {/* Button */}
-        <motion.button
-          onClick={handleComplete}
-          disabled={completed && !celebrating}
-          className={`
-            relative px-8 py-3 rounded-xl font-semibold text-sm
-            border backdrop-blur-md transition-all duration-300
-            ${completed
-              ? 'bg-near-green/15 border-near-green/40 text-near-green cursor-default shadow-[0_0_20px_rgba(0,236,151,0.2)]'
-              : 'bg-white/5 border-white/10 text-text-secondary hover:bg-near-green/10 hover:border-near-green/30 hover:text-near-green hover:shadow-[0_0_20px_rgba(0,236,151,0.15)] cursor-pointer'
-            }
-          `}
-          whileHover={!completed ? { scale: 1.03 } : {}}
-          whileTap={!completed ? { scale: 0.97 } : {}}
-        >
-          <span className="flex items-center gap-2">
-            {completed ? (
-              <>
-                <CheckCircle className="w-5 h-5" />
-                Completed ✓
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                Mark Complete ✓
-              </>
-            )}
-          </span>
-        </motion.button>
+          </AnimatePresence>
+          <motion.button
+            disabled
+            className="relative px-8 py-3 rounded-xl font-semibold text-sm border backdrop-blur-md bg-near-green/15 border-near-green/40 text-near-green shadow-[0_0_20px_rgba(0,236,151,0.2)] cursor-default"
+          >
+            <span className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Completed ✓
+            </span>
+          </motion.button>
+        </div>
       </div>
+    );
+  }
 
-      {completed && !celebrating && (
-        <motion.p
-          className="text-xs text-text-muted"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          +{xp} XP earned
-        </motion.p>
-      )}
+  /* ── Pre-completion: just the button ── */
+  if (!completed) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-8">
+        <div className="relative">
+          <motion.button
+            onClick={handleComplete}
+            className="relative px-8 py-3 rounded-xl font-semibold text-sm border backdrop-blur-md transition-all duration-300 bg-white/5 border-white/10 text-text-secondary hover:bg-near-green/10 hover:border-near-green/30 hover:text-near-green hover:shadow-[0_0_20px_rgba(0,236,151,0.15)] cursor-pointer"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              Mark Complete ✓
+            </span>
+          </motion.button>
+        </div>
+        <p className="text-xs text-text-muted">Earn +{xp} XP and track your progress</p>
+      </div>
+    );
+  }
+
+  /* ── Post-completion: success + next module CTA ── */
+  return (
+    <div className="py-8 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-xl mx-auto"
+      >
+        {/* Success header */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, delay: 0.1 }}
+          >
+            <CheckCircle className="w-8 h-8 text-near-green" />
+          </motion.div>
+          <div>
+            <p className="text-lg font-semibold text-text-primary">Module Complete</p>
+            <p className="text-sm text-near-green">+{xp} XP earned</p>
+          </div>
+        </div>
+
+        {/* Next module CTA — shown when nextModule is provided */}
+        {nextModule ? (
+          <Link
+            href={`/learn/${track}/${nextModule.slug}`}
+            className="group flex items-center justify-between w-full p-4 rounded-xl border border-near-green/20 bg-near-green/5 hover:bg-near-green/10 hover:border-near-green/40 transition-all duration-200"
+          >
+            <div className="text-left">
+              <p className="text-xs text-text-muted uppercase tracking-widest mb-1">Up Next</p>
+              <p className="text-sm font-semibold text-text-primary group-hover:text-near-green transition-colors">
+                {nextModule.title}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-near-green">
+              <span className="text-sm font-medium">Continue</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        ) : (
+          /* Last module in track */
+          <div className="text-center p-4 rounded-xl border border-near-green/20 bg-near-green/5">
+            <p className="text-sm font-semibold text-near-green mb-1">🎉 Track Complete!</p>
+            <p className="text-xs text-text-muted mb-3">You&apos;ve finished this track.</p>
+            <Link
+              href="/learn"
+              className="inline-flex items-center gap-2 text-sm text-near-green hover:underline underline-offset-2"
+            >
+              <ArrowRight className="w-4 h-4" />
+              Explore other tracks
+            </Link>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }

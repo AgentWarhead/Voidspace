@@ -238,7 +238,7 @@ function MiniQuiz() {
 
 interface MultiChainWithNearProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 const MultiChainWithNear: React.FC<MultiChainWithNearProps> = ({ isActive, onToggle }) => {
@@ -263,7 +263,7 @@ const MultiChainWithNear: React.FC<MultiChainWithNearProps> = ({ isActive, onTog
   return (
     <Card variant="glass" padding="none" className="border-purple-500/20">
       {/* Accordion Header */}
-      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
             <Globe className="w-6 h-6 text-white" />

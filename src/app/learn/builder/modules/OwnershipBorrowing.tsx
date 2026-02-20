@@ -13,7 +13,7 @@ import {
 
 interface OwnershipBorrowingProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive: Ownership Flow Visualizer ────────────────────────────────────
@@ -230,7 +230,7 @@ const OwnershipBorrowing: React.FC<OwnershipBorrowingProps> = ({ isActive, onTog
     <Card variant="glass" padding="none" className="border-cyan-500/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">

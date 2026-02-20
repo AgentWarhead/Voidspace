@@ -14,7 +14,7 @@ import {
 
 interface DevEnvironmentSetupProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive Visual: Toolchain Stack ───────────────────────────────────────
@@ -195,7 +195,7 @@ const DevEnvironmentSetup: React.FC<DevEnvironmentSetupProps> = ({ isActive, onT
     <Card variant="glass" padding="none" className="border-near-green/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">

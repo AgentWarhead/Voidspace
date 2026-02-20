@@ -224,7 +224,7 @@ function MiniQuiz() {
 
 interface GasOptimizationDeepDiveProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 const GasOptimizationDeepDive: React.FC<GasOptimizationDeepDiveProps> = ({ isActive, onToggle }) => {
@@ -249,7 +249,7 @@ const GasOptimizationDeepDive: React.FC<GasOptimizationDeepDiveProps> = ({ isAct
   return (
     <Card variant="glass" padding="none" className="border-purple-500/20">
       {/* Accordion Header */}
-      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
             <Zap className="w-6 h-6 text-white" />

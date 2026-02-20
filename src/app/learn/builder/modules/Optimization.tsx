@@ -14,7 +14,7 @@ import {
 
 interface OptimizationProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive Visual: Gas Cost Calculator ───────────────────────────────────
@@ -287,7 +287,7 @@ const Optimization: React.FC<OptimizationProps> = ({ isActive, onToggle }) => {
     <Card variant="glass" padding="none" className="border-yellow-500/20">
       {/* Accordion Header */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">

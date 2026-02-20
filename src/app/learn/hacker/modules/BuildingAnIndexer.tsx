@@ -265,7 +265,7 @@ function MiniQuiz() {
 
 interface BuildingAnIndexerProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 const BuildingAnIndexer: React.FC<BuildingAnIndexerProps> = ({ isActive, onToggle }) => {
@@ -290,7 +290,7 @@ const BuildingAnIndexer: React.FC<BuildingAnIndexerProps> = ({ isActive, onToggl
   return (
     <Card variant="glass" padding="none" className="border-orange-500/20">
       {/* Accordion Header */}
-      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
             <Search className="w-6 h-6 text-white" />

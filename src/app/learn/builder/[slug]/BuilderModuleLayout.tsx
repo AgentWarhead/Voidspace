@@ -6,7 +6,6 @@ import { Container } from '@/components/ui';
 import { ChevronLeft, ChevronRight, Home, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { BuilderModule } from '../../types';
-import { RelatedContent } from '../../components/RelatedContent';
 import { ModuleCompletionTracker } from '@/components/tracking/ModuleCompletionTracker';
 import { WalletPromptBanner } from '@/components/tracking/WalletPromptBanner';
 
@@ -140,11 +139,12 @@ export function BuilderModuleLayout({
         {ModuleComponent && <ModuleComponent isActive={true} onToggle={() => {}} />}
       </main>
 
-      {/* ── Related Content ── */}
-      <RelatedContent currentTrack="builder" />
-
       {/* ── Completion Tracker ── */}
-      <ModuleCompletionTracker moduleSlug={currentModule.slug} track="builder" />
+      <ModuleCompletionTracker
+        moduleSlug={currentModule.slug}
+        track="builder"
+        nextModule={nextModule ? { title: nextModule.title, slug: nextModule.slug } : undefined}
+      />
 
       {/* ── Prev / Next Navigation ── */}
       <div className="border-t border-border bg-surface/30">

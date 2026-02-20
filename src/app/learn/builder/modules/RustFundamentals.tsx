@@ -13,7 +13,7 @@ import {
 
 interface RustFundamentalsProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive Visual: Ownership Flow Diagram ────────────────────────────────
@@ -194,7 +194,7 @@ const RustFundamentals: React.FC<RustFundamentalsProps> = ({ isActive, onToggle 
     <Card variant="glass" padding="none" className="border-near-green/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">

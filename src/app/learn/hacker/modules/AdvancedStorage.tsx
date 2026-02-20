@@ -264,7 +264,7 @@ function MiniQuiz() {
 
 interface AdvancedStorageProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 const AdvancedStorage: React.FC<AdvancedStorageProps> = ({ isActive, onToggle }) => {
@@ -289,7 +289,7 @@ const AdvancedStorage: React.FC<AdvancedStorageProps> = ({ isActive, onToggle })
   return (
     <Card variant="glass" padding="none" className="border-amber-500/20">
       {/* Accordion Header */}
-      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
             <Database className="w-6 h-6 text-white" />

@@ -13,7 +13,7 @@ import {
 
 interface DeploymentProps {
   isActive: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
 }
 
 // ─── Interactive Visual: Deployment Pipeline ───────────────────────────────────
@@ -279,7 +279,7 @@ const Deployment: React.FC<DeploymentProps> = ({ isActive, onToggle }) => {
     <Card variant="glass" padding="none" className="border-green-500/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={onToggle}
+        onClick={() => {}} style={{display:"none"}}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">
