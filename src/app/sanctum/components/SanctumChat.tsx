@@ -30,7 +30,7 @@ function inlineFormat(text: string | null | undefined): React.ReactNode {
   });
 }
 // @ts-ignore
-import { Loader2, ArrowRight, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
+import { Loader2, ArrowRight, Wallet, Sparkles, Lightbulb, Link2, X, FileText, Image, Square, Mic, MicOff, ChevronDown } from 'lucide-react';
 import { VoiceIndicator } from './VoiceIndicator';
 import { ChatMode } from './ModeSelector';
 import { CodeAnnotations, CodeAnnotation } from './CodeAnnotations';
