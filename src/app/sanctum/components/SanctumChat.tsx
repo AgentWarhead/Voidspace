@@ -1119,6 +1119,11 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }
 
   function handleOptionClick(value: string) {
+    // Empty value = "Custom" preset — just focus the input so user can type
+    if (!value.trim()) {
+      textareaRef.current?.focus();
+      return;
+    }
     // Mode-switching options are encoded as: __mode:<mode>|<message text>
     if (value.startsWith('__mode:')) {
       const pipeIdx = value.indexOf('|');
