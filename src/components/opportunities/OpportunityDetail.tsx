@@ -20,6 +20,7 @@ import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator'
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { GapScoreBreakdown } from '@/components/opportunities/GapScoreBreakdown';
 import { VoidOpportunityPanel } from '@/components/opportunities/VoidOpportunityPanel';
+import { VoidMotivationPanel } from '@/components/opportunities/VoidMotivationPanel';
 import { CrossChainRivalry } from '@/components/opportunities/CrossChainRivalry';
 import { SaveButton } from '@/components/opportunities/SaveButton';
 import { ShareButton } from '@/components/opportunities/ShareButton';
@@ -306,6 +307,16 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </div>
         </ScrollReveal>
       )}
+
+      {/* ── 3.5 Builder Intelligence ─────────────────────────────────────────── */}
+      <ScrollReveal delay={0.075}>
+        <VoidMotivationPanel
+          opportunity={opportunity}
+          category={category}
+          activeBuilderCount={activeBuilderCount}
+          breakdown={breakdown}
+        />
+      </ScrollReveal>
 
       {/* ── 4. Opportunity Panel ─────────────────────────────────────────────── */}
       <ScrollReveal delay={0.09}>
