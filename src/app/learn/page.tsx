@@ -1,32 +1,18 @@
 import { Metadata } from 'next';
 import { Key, Zap, Bug, BookOpen, ArrowRight, Code2, GitCompareArrows, ArrowRightLeft, Rocket } from 'lucide-react';
-import { Container, Card } from '@/components/ui';
+import { Container } from '@/components/ui';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { GlowCard } from '@/components/effects/GlowCard';
 import dynamic from 'next/dynamic';
 import { HeroSection } from './components/HeroSection';
-
-const XPRibbonProfile = dynamic(
-  () => import('@/components/xp/XPRibbonProfile').then(m => ({ default: m.XPRibbonProfile })),
-  { ssr: false },
-);
-import { SocialProof } from './components/SocialProof';
 import { LearningTracks } from './components/LearningTracks';
-import { TableOfContents } from './components/TableOfContents';
-import { NonDevCallout } from './components/NonDevCallout';
 import { DeepDiveSection } from './components/DeepDiveSection';
-import { CrossChainSection } from './components/CrossChainSection';
 import Link from 'next/link';
 
 // ─── Lazy-loaded below-fold components ─────────────────────────────────────────
 
-
 const ProjectTemplates = dynamic(() => import('./components/ProjectTemplates'), {
-  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
-});
-
-const ResourceHub = dynamic(() => import('./components/ResourceHub').then(m => ({ default: m.ResourceHub })), {
   loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
 });
 
@@ -35,14 +21,6 @@ const BottomCTA = dynamic(() => import('./components/BottomCTA'), {
 });
 
 const SanctumPreview = dynamic(() => import('./components/SanctumPreview').then(m => ({ default: m.SanctumPreview })), {
-  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
-});
-
-const ProgressTracker = dynamic(() => import('./components/ProgressTracker').then(m => ({ default: m.ProgressTracker })), {
-  loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
-});
-
-const CertificateShowcase = dynamic(() => import('./components/CertificateShowcase').then(m => ({ default: m.CertificateShowcase })), {
   loading: () => <div className="h-64 animate-pulse bg-surface rounded-xl" />,
 });
 
@@ -106,9 +84,6 @@ const DEEP_DIVE_CARDS = [
     href: '/learn/rust-curriculum',
     icon: BookOpen,
   },
-];
-
-const CROSS_CHAIN_CARDS = [
   {
     emoji: '🦀',
     title: 'Rust for Blockchain',
@@ -231,167 +206,22 @@ export default function LearnPage() {
                   text: 'Sanctum uses a credit-based system. The Shade tier is free with $2.50 in credits. Paid tiers: Specter ($25/mo), Legion ($60/mo), and Leviathan ($200/mo). Top-up packs are also available.',
                 },
               },
-              {
-                '@type': 'Question',
-                name: 'What is Void Lens?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Void Lens is a free wallet analyzer that gives you portfolio valuation, on-chain reputation scoring, and DeFi position tracking for any NEAR account.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What are Void Bubbles?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Void Bubbles is a free real-time visualization of NEAR token markets. Watch token activity as dynamic bubbles — great for spotting trends at a glance.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What is the Constellation Map?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Constellation Map is a free transaction graph explorer. Paste any NEAR account and visualize its on-chain relationships and transaction flows as an interactive network graph.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What can I build with Sanctum?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Anything. Sanctum is a general-purpose AI builder powered by Claude — not limited to templates. Build smart contracts, web apps, full-stack dApps, code audits, visual assets, and more. Six starter templates help you get going fast, but Sanctum handles any NEAR development task you throw at it.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What\'s free and what\'s paid?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Free: All learning tracks, Void Lens, Void Bubbles, and Constellation Map. Paid: Sanctum (the AI builder) and Void Brief generation (AI-generated build plans) — both powered by Claude. Sanctum starts with a free tier so you can try before you commit.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Is Rust hard to learn for smart contracts?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Rust has a steeper learning curve than JavaScript, but the strict compiler catches bugs before they reach production. Our Builder track starts from zero Rust experience and many developers find it rewarding once it clicks.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'How does NEAR compare to Solana technically?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Both use Rust for smart contracts. NEAR adds human-readable accounts, built-in chain abstraction, and a sharded architecture optimized for usability. Solana optimizes for raw throughput. If you know Solana Rust, your skills transfer directly.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What is Chain Abstraction?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Chain Abstraction is NEAR\'s approach to making blockchain invisible to end users. Technologies like Intents, Chain Signatures, and Shade Agents let users interact across multiple blockchains from a single NEAR account.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What are Shade Agents?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Shade Agents are NEAR\'s autonomous AI agents that can own wallets, sign transactions, and interact across chains. By combining chain abstraction with AI, they enable truly autonomous on-chain applications.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What is Nightshade Sharding?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Nightshade is NEAR\'s sharding approach that splits the network into parallel processing lanes. It scales horizontally — like the internet itself — so throughput grows with demand instead of hitting a ceiling.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What are Chain Signatures?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Chain Signatures let you sign transactions on any blockchain — Bitcoin, Ethereum, Arbitrum, and more — directly from your NEAR account. No bridges, no wrapped tokens, no separate wallets.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What are Intents on NEAR?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Intents let users express what they want to do, not how to do it. Intent relayers handle the execution — enabling gasless transactions, cross-chain operations, and seamless user experiences.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What is NEAR Data Availability (DA)?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'NEAR DA provides cheap, reliable data availability for rollups and Layer 2s. Ethereum L2s can use NEAR DA to dramatically reduce data costs while inheriting NEAR\'s security and performance.',
-                },
-              },
             ],
           }),
         }}
       />
 
-      {/* Sticky Table of Contents (desktop only) */}
-      <TableOfContents />
-
-      {/* Hero — "From Zero to NEAR Builder" */}
+      {/* 1. Hero — "From Zero to NEAR Builder" */}
       <div id="overview">
         <HeroSection />
       </div>
 
-      {/* XP Ribbon — shows connected user's level / progress */}
-      <Container className="pb-4">
-        <XPRibbonProfile className="w-full max-w-2xl mx-auto" />
-      </Container>
+      {/* 2. Learning Tracks — moved up to #2 */}
+      <div id="learning-tracks">
+        <LearningTracks />
+      </div>
 
-      {/* Social Proof — Why Builders Choose NEAR */}
-      <Container className="pb-12">
-        <SocialProof />
-      </Container>
-
-      {/* What is NEAR? — moved up for beginner context */}
-      <Container className="pb-12">
-        <ScrollReveal>
-          <div id="near-overview">
-            <SectionHeader title="What is NEAR Protocol?" badge="OVERVIEW" />
-            <Card variant="glass" padding="lg">
-              <div className="space-y-4 text-text-secondary leading-relaxed">
-                <p>
-                  <strong className="text-text-primary">NEAR Protocol</strong> is a
-                  high-performance Layer 1 blockchain designed for usability and
-                  scalability. Often called &ldquo;The Blockchain for AI,&rdquo; NEAR
-                  combines sub-second transaction finality, human-readable account names
-                  (like{' '}
-                  <code className="text-emerald-400 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-1.5 py-0.5 rounded text-sm">
-                    alice.near
-                  </code>
-                  ), and innovative sharding technology to deliver an experience that
-                  feels more like using a traditional web app than a blockchain.
-                </p>
-                <p>
-                  What sets NEAR apart is its focus on{' '}
-                  <strong className="text-text-primary">chain abstraction</strong> — the
-                  idea that users shouldn&apos;t need to think about which blockchain
-                  they&apos;re on. With technologies like Intents, Chain Signatures, and
-                  Shade Agents, NEAR is building toward a future where one account works
-                  seamlessly across every chain.
-                </p>
-              </div>
-            </Card>
-          </div>
-        </ScrollReveal>
-      </Container>
-
-      {/* Quick Start CTA */}
+      {/* 3. Quick Start CTA */}
       <Container className="pb-12">
         <ScrollReveal>
           <div id="quick-start">
@@ -417,52 +247,22 @@ export default function LearnPage() {
         </ScrollReveal>
       </Container>
 
-      {/* "Not a developer?" callout */}
-      <Container className="pb-8">
-        <NonDevCallout />
-      </Container>
-
-      {/* Learning Tracks — Explorer / Builder / Hacker */}
-      <div id="learning-tracks">
-        <LearningTracks />
-      </div>
-
-      {/* Sanctum AI Preview */}
+      {/* 4. Sanctum AI Preview */}
       <Container className="py-8 sm:py-12">
         <SanctumPreview />
       </Container>
 
-      {/* Track Your Progress */}
-      <Container className="py-8 sm:py-12">
-        <ProgressTracker />
-      </Container>
-
-      {/* Earn Your Certificate */}
-      <Container className="pb-12 sm:pb-20">
-        <CertificateShowcase />
-      </Container>
-
-      {/* Deep Dive Cards — premium bento layout with glassmorphism */}
+      {/* 5. Combined Guides — Deep Dives + Cross-Chain merged */}
       <Container className="pb-12 sm:pb-20">
         <ScrollReveal>
-          <div id="deep-dives">
-            <SectionHeader title="Deep Dives" badge="EXPLORE" />
+          <div id="guides">
+            <SectionHeader title="Guides & Deep Dives" badge="EXPLORE" />
             <DeepDiveSection cards={DEEP_DIVE_CARDS.map(({ icon, ...rest }) => rest)} />
           </div>
         </ScrollReveal>
       </Container>
 
-      {/* Cross-Chain Guides — developer-oriented with code-themed styling */}
-      <Container className="pb-12 sm:pb-20">
-        <ScrollReveal>
-          <div id="cross-chain">
-            <SectionHeader title="Cross-Chain Guides" badge="MULTI-CHAIN" />
-            <CrossChainSection cards={CROSS_CHAIN_CARDS.map(({ icon, ...rest }) => rest)} />
-          </div>
-        </ScrollReveal>
-      </Container>
-
-      {/* Project Templates */}
+      {/* 6. Project Templates */}
       <Container className="pb-12 sm:pb-20">
         <ScrollReveal delay={0.15}>
           <div id="templates">
@@ -471,21 +271,12 @@ export default function LearnPage() {
         </ScrollReveal>
       </Container>
 
-      {/* Resources */}
-      <Container className="pb-12 sm:pb-20">
-        <ScrollReveal delay={0.18}>
-          <div id="resources">
-            <ResourceHub />
-          </div>
-        </ScrollReveal>
-      </Container>
-
-      {/* FAQ */}
+      {/* 7. FAQ */}
       <Container className="pb-12 sm:pb-20">
         <FAQ />
       </Container>
 
-      {/* Bottom CTA */}
+      {/* 8. Bottom CTA */}
       <BottomCTA />
     </div>
   );

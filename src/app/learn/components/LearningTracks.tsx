@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
   Globe,
@@ -16,7 +15,6 @@ import {
   Wallet,
   Send,
   Eye,
-
   Compass,
   Wrench,
   FileCode,
@@ -33,7 +31,7 @@ import {
   KeyRound,
   Bot,
   Boxes,
-  ChevronDown,
+  ArrowRight,
   Clock,
   MapPin,
 } from 'lucide-react';
@@ -398,7 +396,6 @@ function ModuleChecklist({
 // ─── Track Card ────────────────────────────────────────────────────────────────
 
 function TrackCard({ track }: { track: Track }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const styles = themeStyles[track.theme];
   const Icon = track.icon;
 
@@ -437,8 +434,7 @@ function TrackCard({ track }: { track: Track }) {
       <div
         className={cn(
           'relative bg-surface border rounded-2xl overflow-hidden transition-all duration-300 h-full flex flex-col',
-          isExpanded ? styles.borderActive : styles.border,
-          isExpanded && `shadow-lg ${styles.glow}`
+          styles.border
         )}
       >
         {/* Top accent bar */}
@@ -504,16 +500,9 @@ function TrackCard({ track }: { track: Track }) {
             </div>
           </div>
 
-          {/* Expand / Collapse modules */}
-          <AnimatePresence>
-            {isExpanded && (
-              <ModuleChecklist modules={track.modules} theme={track.theme} trackId={track.id} />
-            )}
-          </AnimatePresence>
-
-          {/* Toggle button */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
+          {/* Start Track link */}
+          <Link
+            href={`/learn/${track.id}`}
             className={cn(
               'w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl border font-semibold text-sm transition-all mt-4 min-h-[44px]',
               'bg-surface-hover',
@@ -522,14 +511,9 @@ function TrackCard({ track }: { track: Track }) {
               'hover:bg-surface'
             )}
           >
-            <motion.div
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ChevronDown className="w-4 h-4" />
-            </motion.div>
-            {isExpanded ? 'Hide Modules' : `View All ${track.moduleCount} Modules`}
-          </button>
+            Start Track
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </motion.div>

@@ -58,17 +58,6 @@ export const FAQ_DATA: FAQCategory[] = [
         ),
       },
       {
-        question: 'What is Voidspace?',
-        answer: (
-          <>
-            Voidspace is your all-in-one platform for learning, building, and analyzing on NEAR Protocol. It includes{' '}
-            <Link href="/learn" className="text-near-green hover:underline">free learning tracks</Link>,{' '}
-            an <Link href="/sanctum" className="text-near-green hover:underline">AI-powered smart contract builder</Link>,{' '}
-            and a suite of <Link href="/void-lens" className="text-near-green hover:underline">free intelligence tools</Link>.
-          </>
-        ),
-      },
-      {
         question: 'Do I need coding experience to get started?',
         answer:
           'Not at all. The Explorer track gets you on-chain with zero code — wallets, ecosystem navigation, DeFi basics. The Builder and Hacker tracks assume some programming background, but the Rust Curriculum takes you from your first variable to deployed contracts. Start where you are.',
@@ -97,16 +86,6 @@ export const FAQ_DATA: FAQCategory[] = [
           </>
         ),
       },
-      {
-        question: 'I\'m a Solana/Ethereum developer — is this relevant to me?',
-        answer: (
-          <>
-            Absolutely. If you know Rust (Solana) or Solidity (Ethereum), your skills transfer directly. The Hacker track covers NEAR-specific patterns, and we have dedicated{' '}
-            <Link href="/learn/for-solana-developers" className="text-near-green hover:underline">cross-chain guides</Link>{' '}
-            comparing architectures and tooling side by side.
-          </>
-        ),
-      },
     ],
   },
   {
@@ -121,71 +100,11 @@ export const FAQ_DATA: FAQCategory[] = [
         ),
       },
       {
-        question: 'What can I build with Sanctum?',
-        answer: (
-          <>
-            Anything. Sanctum is a general-purpose AI builder powered by Claude — not limited to templates. Build smart contracts (tokens, NFTs, DAOs, DeFi protocols, any Rust/NEAR contract), web apps, full-stack dApps, code audits, visual assets, and more. Six starter templates (Token, NFT, DAO, DeFi Vault, Marketplace, AI Agent) help you get going fast, but Sanctum handles any NEAR development task you throw at it.
-          </>
-        ),
-      },
-      {
         question: 'How much does Sanctum cost?',
         answer: (
           <>
             Sanctum uses a credit-based system. The Shade tier is free with $2.50 in credits. Paid tiers: Specter ($25/mo), Legion ($60/mo), and Leviathan ($200/mo). Top-up packs are also available.{' '}
             <Link href="/pricing" className="text-near-green hover:underline">See all pricing →</Link>
-          </>
-        ),
-      },
-    ],
-  },
-  {
-    category: 'Intelligence Tools',
-    items: [
-      {
-        question: 'What data sources does Voidspace use?',
-        answer: (
-          <>
-            Voidspace aggregates <strong className="text-text-primary">10+ real-time data sources</strong> to power all analysis, briefs, and intelligence tools:
-            <ul className="mt-2 space-y-1 list-none">
-              <li><strong className="text-cyan-400">NearBlocks</strong> — Blockchain transactions, accounts, validators &amp; block data</li>
-              <li><strong className="text-cyan-400">Pikespeak</strong> — Wallet analytics, account activity &amp; NEAR network metrics</li>
-              <li><strong className="text-cyan-400">FastNEAR</strong> — High-speed indexer for real-time on-chain state queries</li>
-              <li><strong className="text-emerald-400">DexScreener</strong> — Live DEX prices, volume, liquidity &amp; trading pair data</li>
-              <li><strong className="text-emerald-400">DefiLlama</strong> — Total Value Locked (TVL) &amp; cross-chain DeFi analytics</li>
-              <li><strong className="text-emerald-400">Mintbase</strong> — NFT marketplace data, collections &amp; trading activity on NEAR</li>
-              <li><strong className="text-purple-400">GitHub</strong> — Repository activity, commits &amp; contributor metrics</li>
-              <li><strong className="text-purple-400">AstroDAO</strong> — DAO governance proposals, voting records &amp; treasury data</li>
-              <li><strong className="text-cyan-400">NEAR RPC</strong> — Direct mainnet blockchain queries &amp; contract state reads</li>
-              <li><strong className="text-teal-400">Ecosystem Registry</strong> — Curated database of 180+ NEAR projects with metadata</li>
-            </ul>
-            <p className="mt-2">
-              All data is fetched from live APIs in real-time and cached for performance. Plus, <strong className="text-amber-400">Anthropic Claude</strong> powers our AI features including Sanctum, Void Briefs, and reputation analysis. No synthetic data — every number is verifiable on-chain.
-            </p>
-          </>
-        ),
-      },
-      {
-        question: 'What is Void Lens?',
-        answer: (
-          <>
-            <Link href="/void-lens" className="text-near-green hover:underline">Void Lens</Link> is a free wallet analyzer that gives you portfolio valuation, on-chain reputation scoring, and DeFi position tracking for any NEAR account.
-          </>
-        ),
-      },
-      {
-        question: 'What are Void Bubbles?',
-        answer: (
-          <>
-            <Link href="/void-bubbles" className="text-near-green hover:underline">Void Bubbles</Link> is a free real-time visualization of NEAR token markets. Watch token activity as dynamic bubbles — great for spotting trends at a glance.
-          </>
-        ),
-      },
-      {
-        question: 'What is the Constellation Map?',
-        answer: (
-          <>
-            <Link href="/constellation" className="text-near-green hover:underline">Constellation Map</Link> is a free transaction graph explorer. Paste any NEAR account and visualize its on-chain relationships and transaction flows as an interactive network graph.
           </>
         ),
       },
@@ -204,64 +123,6 @@ export const FAQ_DATA: FAQCategory[] = [
             <Link href="/opportunities" className="text-near-green hover:underline">Void Brief generation</Link> (AI-generated build plans) — both powered by Claude. Sanctum starts with a free tier so you can try before you commit.
           </>
         ),
-      },
-      {
-        question: 'Can I try Sanctum before paying?',
-        answer: (
-          <>
-            Yes. The Shade tier gives you $2.50 in free credits to test Sanctum with no commitment. Upgrade anytime from the{' '}
-            <Link href="/pricing" className="text-near-green hover:underline">pricing page</Link>.
-          </>
-        ),
-      },
-    ],
-  },
-  {
-    category: 'Technical',
-    items: [
-      {
-        question: 'Is Rust hard to learn for smart contracts?',
-        answer:
-          'Rust has a steeper learning curve than JavaScript — but that strictness is exactly why it\'s the #1 language for smart contracts. The compiler catches bugs before they cost you money. Our Builder track starts from zero Rust and most developers say it "clicks" within the first few modules.',
-      },
-      {
-        question: 'How does NEAR compare to Solana technically?',
-        answer: (
-          <>
-            Both use Rust for smart contracts. NEAR adds human-readable accounts, built-in chain abstraction, and a sharded architecture optimized for usability. Solana optimizes for raw throughput. If you know Solana Rust, your skills transfer directly.{' '}
-            <Link href="/learn/solana-vs-near" className="text-near-green hover:underline">Full comparison →</Link>
-          </>
-        ),
-      },
-      {
-        question: 'What is Chain Abstraction?',
-        answer:
-          'Chain Abstraction is NEAR\'s biggest bet — making blockchain invisible to users. One NEAR account can sign transactions on Bitcoin, Ethereum, Solana, and any other chain. No network switching, no multi-wallet juggling, no bridges. Users just do things; the chain figures out the rest.',
-      },
-      {
-        question: 'What are Shade Agents?',
-        answer:
-          'Shade Agents are autonomous AI agents that live on NEAR — they own wallets, sign transactions, and operate across chains without human intervention. Think AI that can manage funds, execute trades, and interact with any blockchain autonomously. It\'s where chain abstraction meets AI, and it\'s only possible on NEAR.',
-      },
-      {
-        question: 'What is Nightshade Sharding?',
-        answer:
-          'Nightshade splits NEAR into parallel processing lanes that scale with demand — more users means more shards, not slower transactions. While other chains hit throughput ceilings, NEAR scales horizontally, like the internet itself.',
-      },
-      {
-        question: 'What are Chain Signatures?',
-        answer:
-          'Chain Signatures let you sign transactions on any blockchain — Bitcoin, Ethereum, Arbitrum, and more — directly from your NEAR account. No bridges, no wrapped tokens, no separate wallets. One account, every chain.',
-      },
-      {
-        question: 'What are Intents on NEAR?',
-        answer:
-          'Intents let you say what you want — "swap token A for token B" — without caring how it happens. Solvers compete to fulfill your intent across chains, finding the best route automatically. No manual bridging, no gas management, no thinking about which chain you\'re on.',
-      },
-      {
-        question: 'What is NEAR Data Availability (DA)?',
-        answer:
-          'NEAR DA provides cheap, reliable data availability for rollups and Layer 2s. Ethereum L2s can use NEAR DA to dramatically reduce data costs while inheriting NEAR\'s security and performance — making rollups more economical to operate.',
       },
     ],
   },
@@ -596,6 +457,14 @@ export function FAQ() {
             ))}
           </div>
         )}
+
+        {/* Link to full FAQ page */}
+        <p className="text-center text-sm text-text-muted mt-6">
+          More questions?{' '}
+          <Link href="/learn/faq" className="text-near-green hover:underline underline-offset-2">
+            View all FAQs →
+          </Link>
+        </p>
       </div>
     </ScrollReveal>
   );
