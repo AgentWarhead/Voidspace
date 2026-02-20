@@ -30,7 +30,7 @@ export default async function DashboardPage() {
     [stats, categories, opportunities] = await Promise.all([
       getEcosystemStats(),
       getCategoriesWithStats(),
-      getTopOpportunities(100),
+      getTopOpportunities(200),
     ]);
   } catch (error) {
     console.error('[DashboardPage] Failed to fetch Supabase data:', error);
