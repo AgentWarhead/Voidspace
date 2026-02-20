@@ -29,7 +29,7 @@ import Link from 'next/link';
 export interface WizardConfig {
   mode: 'build' | 'roast' | 'webapp' | 'visual' | 'scratch';
   category?: string | null;
-  chatMode?: 'build' | 'learn' | 'expert';
+  chatMode?: 'learn' | 'void';
   customPrompt?: string;
   persona?: string;
   scratchDescription?: string;

@@ -623,11 +623,11 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     if (mode === 'learn') {
       return [
         { label: '🌱 Learn mode — teach me as we build', value: '__mode:learn|I\'m new to NEAR and smart contracts. Teach me the concepts as we build — start from the basics.' },
-        { label: '🔥 Expert mode — just generate the code', value: '__mode:expert|I know Rust. Skip all explanation — generate production-ready code immediately, defaults used.' },
+        { label: '🌑 Void mode — just generate the code', value: '__mode:void|I know Rust. Skip all explanation — generate production-ready code immediately, defaults used.' },
       ];
     }
 
-    // Expert mode (or fallback): Offer templates as "Describe your app" shortcuts
+    // Void mode (or fallback): Offer templates as "Describe your app" shortcuts
     switch (cat) {
       case 'ai-agents':
         return [
@@ -1142,7 +1142,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     const isLearnSignal = learnSignals.some(s => lower.includes(s));
     const isExpertSignal = expertSignals.some(s => lower.includes(s)) && lower.length > 20;
     if (isLearnSignal && chatMode !== 'learn') return 'learn';
-    if (isExpertSignal && chatMode !== 'expert') return 'expert';
+    if (isExpertSignal && chatMode !== 'void') return 'void';
     return null;
   }
 
@@ -1386,7 +1386,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
                 }}
                 className="underline text-near-green font-medium"
               >
-                switch to {modeSuggestion === 'learn' ? 'Learn' : 'Expert'} mode?
+                switch to {modeSuggestion === 'learn' ? 'Learn' : 'Void'} mode?
               </button>
             </span>
             <button

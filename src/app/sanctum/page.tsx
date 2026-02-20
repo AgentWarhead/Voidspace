@@ -27,7 +27,7 @@ import { ContractToolbar } from './components/ContractToolbar';
 import { WebappBuilder } from './components/WebappBuilder';
 import { WebappSession } from './components/WebappSession';
 import { ScratchWebappSession } from './components/ScratchWebappSession';
-// LearnSession removed — original build chat handles all modes via Learn/Build/Expert toggle
+// Sanctum handles all modes via Learn/Void toggle
 import { ScratchTemplates, SCRATCH_TEMPLATES } from './components/ScratchTemplates';
 import { ImportContract } from './components/ImportContract';
 import { useSanctumState, clearPersistedSession } from './hooks/useSanctumState';

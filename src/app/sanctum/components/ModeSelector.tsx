@@ -3,7 +3,7 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-export type ChatMode = 'learn' | 'expert';
+export type ChatMode = 'learn' | 'void';
 
 interface ModeSelectorProps {
   mode: ChatMode;
@@ -13,7 +13,7 @@ interface ModeSelectorProps {
 
 const MODES: { key: ChatMode; label: string; emoji: string; tooltip: string }[] = [
   { key: 'learn', label: 'Learn', emoji: '🎓', tooltip: 'Step-by-step guidance. Every concept explained as we build together.' },
-  { key: 'expert', label: 'Expert', emoji: '🔥', tooltip: "Fast track. AI makes the decisions — you're in the passenger seat." },
+  { key: 'void', label: 'Void', emoji: '🌑', tooltip: 'Enter the Void. Production-ready code instantly — zero questions, zero hand-holding.' },
 ];
 
 export function ModeSelector({ mode, onModeChange, disabled }: ModeSelectorProps) {

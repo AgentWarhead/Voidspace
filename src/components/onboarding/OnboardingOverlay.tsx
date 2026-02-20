@@ -33,7 +33,7 @@ const slides: Slide[] = [
   {
     icon: Terminal,
     title: 'The Sanctum',
-    description: '8 AI expert personas. 3 modes — Learn, Build, Expert. Describe what you want to build and vibe-code smart contracts through conversation. Your AI dev team awaits.',
+    description: '8 AI expert personas. Two modes — Learn and Void. Describe what you want to build and vibe-code smart contracts through conversation. Your AI dev team awaits.',
   },
   {
     icon: GraduationCap,
