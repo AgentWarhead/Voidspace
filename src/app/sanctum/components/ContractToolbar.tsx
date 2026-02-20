@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Code2, Rocket, Share2, GitCompare, Play, Users, FolderTree, Wrench, ChevronDown, Check, Lock, Undo2, Cloud, CloudOff, CloudCheck } from 'lucide-react';
+import { Code2, Rocket, Share2, GitCompare, Play, Users, FolderTree, Wrench, ChevronDown, Check, Lock, Undo2, Cloud, CloudOff } from 'lucide-react';
 import { DownloadButton } from './DownloadContract';
 import { FileStructureToggle } from './FileStructure';
 import { ProjectManager } from './ProjectManager';
@@ -263,7 +263,7 @@ export function ContractToolbar({
             cloudSaveStatus === 'failed' ? 'text-amber-400' : ''
           }`} title={cloudSaveStatus === 'failed' ? 'Your contract is backed up locally' : undefined}>
             {cloudSaveStatus === 'saving' && <><Cloud className="w-3 h-3" /> Saving…</>}
-            {cloudSaveStatus === 'saved' && <><CloudCheck className="w-3 h-3" /> Saved</>}
+            {cloudSaveStatus === 'saved' && <><Cloud className="w-3 h-3" /> Saved ✓</>}
             {cloudSaveStatus === 'failed' && <><CloudOff className="w-3 h-3" /> Not saved</>}
           </span>
         )}
@@ -286,6 +286,18 @@ export function ContractToolbar({
 
       {/* Download */}
       <DownloadButton code={generatedCode} contractName={selectedCategory || 'contract'} category={selectedCategory || undefined} />
+
+      {/* Undo — restore previous contract version */}
+      {hasUndoHistory && onUndo && (
+        <Tooltip label="Restore previous version">
+          <button
+            className="p-2 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 rounded-lg transition-all"
+            onClick={onUndo}
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+        </Tooltip>
+      )}
 
       {/* Share */}
       <Tooltip label="Share contract">

@@ -218,7 +218,7 @@ IMPORTANT:
 - Dark theme with modern glassmorphism aesthetic
 - Mobile-responsive by default`;
 
-const VALID_MODES = ['learn', 'build', 'expert'] as const;
+const VALID_MODES = ['learn', 'expert'] as const;
 type BuilderMode = typeof VALID_MODES[number];
 
 // System prompt for Sanctum - teaches as it builds
@@ -1291,8 +1291,8 @@ export async function POST(request: NextRequest) {
 
     // Body already parsed above for model routing
 
-    // Validate and default mode
-    const mode: BuilderMode = VALID_MODES.includes(rawMode) ? rawMode : 'learn';
+    // Validate and default mode — map legacy 'build' to 'expert'
+    const mode: BuilderMode = rawMode === 'build' ? 'expert' : (VALID_MODES.includes(rawMode) ? rawMode : 'learn');
 
     // Input validation
     if (!Array.isArray(messages)) {

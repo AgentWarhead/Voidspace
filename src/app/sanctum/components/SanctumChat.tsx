@@ -238,11 +238,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
   if (mode === 'learn') {
     return `Welcome to the Sanctum. Choose how you'd like to work — I'll switch into that mode and we'll get started on your ${name} contract right away.`;
   }
-  if (mode === 'expert') {
-    return `Describe your ${name} contract. I'll generate production-ready code immediately — no questions asked.`;
-  }
-  // build mode
-  return `Let's build a ${name} contract. Two quick things before I start: (1) Who calls this — your frontend, another contract, or both? (2) Any specific access control or pause/unpause requirements?`;
+  return `Describe your ${name} contract. I'll generate production-ready code immediately — no questions asked.`;
 }
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
@@ -627,17 +623,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     if (mode === 'learn') {
       return [
         { label: '🌱 Learn mode — teach me as we build', value: '__mode:learn|I\'m new to NEAR and smart contracts. Teach me the concepts as we build — start from the basics.' },
-        { label: '⚡ Build mode — guide me through it', value: '__mode:build|I have some dev experience. Guide me through building this without over-explaining the basics.' },
         { label: '🔥 Expert mode — just generate the code', value: '__mode:expert|I know Rust. Skip all explanation — generate production-ready code immediately, defaults used.' },
-      ];
-    }
-
-    // Build mode: Ask about callers/access (matching getModeStarter)
-    if (mode === 'build') {
-      return [
-        { label: 'Frontend Only', value: 'My frontend will be the main caller.' },
-        { label: 'Other Contracts', value: 'This contract will be called by other smart contracts.' },
-        { label: 'Hybrid / Both', value: 'Both frontend users and other contracts will interact with this.' },
       ];
     }
 
