@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Check tier — free users don't get server-side history
+  // Check tier — free users don't get server-side history browsing
   const supabase = createAdminClient();
   const { data: sub } = await supabase
     .from('subscriptions')
@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
 }
 
 // ── POST /api/sanctum/conversations — create or update conversation + save messages ──
+// NOTE: All authenticated users can save (POST). The tier gate only applies to GET (history list).
+// Free/shade tier users get a single active session backed up to cloud — they just can't browse history.
 export async function POST(request: NextRequest) {
   const auth = getAuthenticatedUser(request);
   if (!auth) {
@@ -52,35 +54,9 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Check tier
-  const { data: sub } = await supabase
-    .from('subscriptions')
-    .select('tier')
-    .eq('user_id', auth.userId)
-    .single();
-  const userTier: SanctumTier = (sub?.tier as SanctumTier) || 'shade';
-
-  // Also allow top-up purchasers (check if they have any credit balance > 0 from purchases)
-  let hasTopUpCredits = false;
-  if (userTier === 'shade') {
-    const { data: credits } = await supabase
-      .from('credit_balances')
-      .select('topup_credits')
-      .eq('user_id', auth.userId)
-      .single();
-    hasTopUpCredits = (credits?.topup_credits ?? 0) > 0;
-  }
-
-  if (userTier === 'shade' && !hasTopUpCredits) {
-    return NextResponse.json({
-      error: 'Cloud conversation history requires a paid subscription or credit top-up.',
-      code: 'TIER_REQUIRED',
-    }, { status: 403 });
-  }
-
   try {
     const body = await request.json();
-    const { conversationId, title, category, persona, mode, messages } = body;
+    const { conversationId, title, category, persona, mode, messages, contractCode } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: 'Messages array is required' }, { status: 400 });
@@ -90,17 +66,23 @@ export async function POST(request: NextRequest) {
 
     // Create conversation if new
     if (!convId) {
+      const insertData: Record<string, unknown> = {
+        user_id: auth.userId,
+        title: title || 'Untitled Session',
+        category: category || null,
+        persona: persona || 'shade',
+        mode: mode || 'learn',
+        message_count: messages.length,
+        last_message_at: new Date().toISOString(),
+      };
+      // Persist contract code if provided
+      if (contractCode !== undefined && contractCode !== null) {
+        insertData.contract_code = contractCode;
+      }
+
       const { data: conv, error: convErr } = await supabase
         .from('sanctum_conversations')
-        .insert({
-          user_id: auth.userId,
-          title: title || 'Untitled Session',
-          category: category || null,
-          persona: persona || 'shade',
-          mode: mode || 'learn',
-          message_count: messages.length,
-          last_message_at: new Date().toISOString(),
-        })
+        .insert(insertData)
         .select('id')
         .single();
 
@@ -109,14 +91,19 @@ export async function POST(request: NextRequest) {
       }
       convId = conv.id;
     } else {
-      // Update existing conversation metadata
+      // Update existing conversation metadata + contract code
+      const updateData: Record<string, unknown> = {
+        message_count: messages.length,
+        last_message_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      if (contractCode !== undefined && contractCode !== null) {
+        updateData.contract_code = contractCode;
+      }
+
       await supabase
         .from('sanctum_conversations')
-        .update({
-          message_count: messages.length,
-          last_message_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', convId)
         .eq('user_id', auth.userId);
     }

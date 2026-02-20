@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Code2, Rocket, Share2, GitCompare, Play, Users, FolderTree, Wrench, ChevronDown, Check, Lock } from 'lucide-react';
+import { Code2, Rocket, Share2, GitCompare, Play, Users, FolderTree, Wrench, ChevronDown, Check, Lock, Undo2, Cloud, CloudOff, CloudCheck } from 'lucide-react';
 import { DownloadButton } from './DownloadContract';
 import { FileStructureToggle } from './FileStructure';
 import { ProjectManager } from './ProjectManager';
@@ -23,6 +23,12 @@ interface ContractToolbarProps {
   onLoadProject: (project: any) => void;
   /** Optional hint about the last AI action — drives context-aware status badge */
   lastAction?: 'generate' | 'test' | 'optimize' | 'audit';
+  /** Undo last contract generation */
+  onUndo?: () => void;
+  /** Whether there's a previous version to undo to */
+  hasUndoHistory?: boolean;
+  /** Cloud save status indicator */
+  cloudSaveStatus?: 'idle' | 'saving' | 'saved' | 'failed';
 }
 
 // ---------------------------------------------------------------------------
@@ -220,10 +226,13 @@ export function ContractToolbar({
   handleShare,
   onLoadProject,
   lastAction,
+  onUndo,
+  hasUndoHistory,
+  cloudSaveStatus,
 }: ContractToolbarProps) {
   const hasCode = !!generatedCode;
   const [copied, setCopied] = useState(false);
-  const { user } = useWallet();
+  const { user, isConnected } = useWallet();
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'shade';
   const canPairProgram = userTier === 'leviathan';
 
@@ -235,15 +244,30 @@ export function ContractToolbar({
 
   return (
     <div className="flex flex-col items-end gap-1.5">
-      {/* Smart status badge — only show when there's code or actively generating */}
-      {(generatedCode || isThinking || sanctumStage === 'thinking' || sanctumStage === 'generating') && (
-        <SmartStatusBadge
-          generatedCode={generatedCode}
-          sanctumStage={sanctumStage}
-          isThinking={isThinking}
-          lastAction={lastAction}
-        />
-      )}
+      {/* Status row: smart badge + cloud save indicator */}
+      <div className="flex items-center gap-2">
+        {/* Smart status badge — only show when there's code or actively generating */}
+        {(generatedCode || isThinking || sanctumStage === 'thinking' || sanctumStage === 'generating') && (
+          <SmartStatusBadge
+            generatedCode={generatedCode}
+            sanctumStage={sanctumStage}
+            isThinking={isThinking}
+            lastAction={lastAction}
+          />
+        )}
+        {/* Cloud save indicator — only show when user is connected */}
+        {isConnected && cloudSaveStatus && cloudSaveStatus !== 'idle' && (
+          <span className={`text-[10px] font-medium flex items-center gap-1 transition-opacity ${
+            cloudSaveStatus === 'saving' ? 'text-blue-400 animate-pulse' :
+            cloudSaveStatus === 'saved' ? 'text-near-green' :
+            cloudSaveStatus === 'failed' ? 'text-amber-400' : ''
+          }`} title={cloudSaveStatus === 'failed' ? 'Your contract is backed up locally' : undefined}>
+            {cloudSaveStatus === 'saving' && <><Cloud className="w-3 h-3" /> Saving…</>}
+            {cloudSaveStatus === 'saved' && <><CloudCheck className="w-3 h-3" /> Saved</>}
+            {cloudSaveStatus === 'failed' && <><CloudOff className="w-3 h-3" /> Not saved</>}
+          </span>
+        )}
+      </div>
 
       {/* Buttons row */}
       <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end min-w-0">

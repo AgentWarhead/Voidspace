@@ -105,6 +105,8 @@ function SanctumPageInner() {
     handleCustomStart,
     handleTokensUsed,
     handleCodeGenerated,
+    handleUndo,
+    contractVersionsCount,
     handleTaskUpdate,
     handleThinkingChange,
     handleDeploy,
@@ -120,6 +122,9 @@ function SanctumPageInner() {
   // Counter to signal chat component to reset
   const [sessionResetCounter, setSessionResetCounter] = useState(0);
   const [showWizard, setShowWizard] = useState(false);
+
+  // Cloud save status — updated by SanctumChat, displayed in ContractToolbar
+  const [cloudSaveStatus, setCloudSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
 
   // External message injection from code panel → chat
   const [externalMessage, setExternalMessage] = useState('');
@@ -174,10 +179,21 @@ function SanctumPageInner() {
   }, [codeSelection, state.generatedCode, sendToChat]);
 
   const handleNewSession = useCallback(() => {
+    // Warn if user has a meaningful contract they might lose
+    if (state.generatedCode && state.generatedCode.length > 100) {
+      const confirmed = window.confirm(
+        'Starting a new session will clear your current contract and conversation. Make sure you\'ve downloaded your contract first.\n\nContinue?'
+      );
+      if (!confirmed) return;
+    }
     clearPersistedSession();
     dispatch({ type: 'RESET_SESSION' });
     setSessionResetCounter(c => c + 1);
-  }, [dispatch]);
+    // Clear cloud conversation ID so next session creates a new cloud record
+    try { localStorage.removeItem('sanctum-cloud-conversation-id'); } catch { /* ignore */ }
+    // Clear undo stack — fresh session
+    try { localStorage.removeItem('sanctum-contract-versions'); } catch { /* ignore */ }
+  }, [state.generatedCode, dispatch]);
 
   // Check for saved session
   const hasSavedSession = (() => {
@@ -755,6 +771,8 @@ function SanctumPageInner() {
                       loadedProjectSeq={loadedProjectSeq}
                       sessionBriefing={state.projectBriefing}
                       onBriefingUpdate={(b) => dispatch({ type: 'SET_BRIEFING', payload: b })}
+                      currentContractCode={state.generatedCode}
+                      onCloudSaveStatus={setCloudSaveStatus}
                     />
                   </div>
                 </GlassPanel>
@@ -783,6 +801,9 @@ function SanctumPageInner() {
                         dispatch={dispatch}
                         handleDeploy={() => buildActionPrompt('deploy')}
                         handleShare={handleShare}
+                        onUndo={handleUndo}
+                        hasUndoHistory={contractVersionsCount > 0}
+                        cloudSaveStatus={cloudSaveStatus}
                         onLoadProject={(project) => {
                           dispatch({ type: 'SET_GENERATED_CODE', payload: project.code || '' });
                           dispatch({ type: 'SET_SELECTED_CATEGORY', payload: project.category || 'custom' });
@@ -932,6 +953,8 @@ function SanctumPageInner() {
                         loadedProjectSeq={loadedProjectSeq}
                         sessionBriefing={state.projectBriefing}
                         onBriefingUpdate={(b) => dispatch({ type: 'SET_BRIEFING', payload: b })}
+                        currentContractCode={state.generatedCode}
+                        onCloudSaveStatus={setCloudSaveStatus}
                       />
                     </div>
                   </GlassPanel>

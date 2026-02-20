@@ -124,6 +124,10 @@ interface SanctumChatProps {
   loadedProjectSeq?: number; // increment to trigger project message restore
   sessionBriefing?: string | null; // briefing from previous session to inject on resume
   onBriefingUpdate?: (briefing: string) => void; // called when AI generates a project briefing
+  /** Current contract code — tracked for cloud backup */
+  currentContractCode?: string;
+  /** Called whenever the cloud save status changes — drives indicator in ContractToolbar */
+  onCloudSaveStatus?: (status: 'idle' | 'saving' | 'saved' | 'failed') => void;
 }
 
 // --- localStorage persistence for chat ---
@@ -232,7 +236,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
   const name = CATEGORY_NAMES[cat] || 'Smart Contract';
 
   if (mode === 'learn') {
-    return `Welcome! Let's build a ${name} contract together. Quick check first — are you new to Rust/smart contracts, or have you built on a blockchain before? This shapes how I teach.`;
+    return `Welcome to the Sanctum. Choose how you'd like to work — I'll switch into that mode and we'll get started on your ${name} contract right away.`;
   }
   if (mode === 'expert') {
     return `Describe your ${name} contract. I'll generate production-ready code immediately — no questions asked.`;
@@ -241,7 +245,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
   return `Let's build a ${name} contract. Two quick things before I start: (1) Who calls this — your frontend, another contract, or both? (2) Any specific access control or pause/unpause requirements?`;
 }
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user, isConnected, openModal } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
@@ -355,32 +359,59 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   // Save messages to localStorage (debounced, but flush on unmount)
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
-  const cloudConvIdRef = useRef<string | null>(null);
+
+  // Initialize cloud conv ID from localStorage — so on reload we update the same record
+  const cloudConvIdRef = useRef<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('sanctum-cloud-conversation-id') : null
+  );
+  // Track latest contract code without causing re-render cycles
+  const currentContractRef = useRef<string>(currentContractCode || '');
+  useEffect(() => {
+    currentContractRef.current = currentContractCode || '';
+  }, [currentContractCode]);
+
   const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cloud save for paid users (debounced 3s to avoid spamming)
-  const saveToCloud = (msgs: Message[]) => {
-    if (isFreeTier || msgs.length < 2) return; // need at least 1 exchange
+  // Cloud save for ALL authenticated (connected) users — debounced 3s after last message.
+  // Free/shade users get single-session backup; paid users get full history browsing.
+  // NEVER let save failures interrupt the UI — fire and forget.
+  const saveToCloud = (msgs: Message[], contractCode?: string) => {
+    if (!isConnected || msgs.length < 2) return; // need at least 1 exchange + must be logged in
     if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = setTimeout(async () => {
+      onCloudSaveStatus?.('saving');
       try {
+        const convId = cloudConvIdRef.current;
+        const code = contractCode ?? currentContractRef.current;
         const res = await fetch('/api/sanctum/conversations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            conversationId: cloudConvIdRef.current,
-            title: msgs.find(m => m.role === 'user')?.content?.slice(0, 80) || 'Untitled',
+            conversationId: convId || undefined,
+            title: msgs.find(m => m.role === 'user')?.content?.slice(0, 80) || 'Sanctum Session',
             category,
             persona: personaId,
             mode: chatMode,
             messages: msgs.map(m => ({ role: m.role, content: m.content })),
+            contractCode: code || undefined,
           }),
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.conversationId) cloudConvIdRef.current = data.conversationId;
+          if (!convId && data.conversationId) {
+            cloudConvIdRef.current = data.conversationId;
+            try { localStorage.setItem('sanctum-cloud-conversation-id', data.conversationId); } catch { /* ignore */ }
+          }
+          onCloudSaveStatus?.('saved');
+          // Fade back to idle after 3s
+          setTimeout(() => onCloudSaveStatus?.('idle'), 3000);
+        } else {
+          onCloudSaveStatus?.('failed');
         }
-      } catch { /* silent fail — localStorage is backup */ }
+      } catch {
+        // Silent fail — localStorage is the primary backup, cloud is the safety net
+        onCloudSaveStatus?.('failed');
+      }
     }, 3000);
   };
 
@@ -394,8 +425,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         } catch { /* ignore */ }
       }
     }, 500);
-    // Also save to cloud for paid users
-    saveToCloud(messages);
+    // Also save to cloud for authenticated users (all tiers)
+    saveToCloud(messages, currentContractRef.current || undefined);
     return () => {
       if (saveMsgTimerRef.current) clearTimeout(saveMsgTimerRef.current);
       if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
@@ -430,13 +461,51 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     if (sessionReset && sessionReset > 0) {
       setMessages([]);
       messagesRestoredRef.current = false;
+      // Clear cloud conversation ID — new session should create a new cloud record
+      cloudConvIdRef.current = null;
       if (typeof window !== 'undefined') {
         try {
           localStorage.removeItem(CHAT_MESSAGES_KEY);
+          localStorage.removeItem('sanctum-cloud-conversation-id');
         } catch { /* ignore */ }
       }
     }
   }, [sessionReset]);
+
+  // Session restore from cloud: if localStorage messages are empty but cloud ID exists,
+  // try to restore from the cloud backup. This handles the "cleared localStorage" scenario.
+  useEffect(() => {
+    const cloudId = typeof window !== 'undefined' ? localStorage.getItem('sanctum-cloud-conversation-id') : null;
+    if (!cloudId || !isConnected) return;
+
+    // Only restore if localStorage messages are empty
+    const savedMsgs = loadSavedMessages();
+    if (savedMsgs && savedMsgs.length > 0) return; // localStorage is fine
+
+    // Fetch from cloud
+    (async () => {
+      try {
+        const res = await fetch(`/api/sanctum/conversations/${cloudId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const msgs: Array<{ role: string; content: string }> = data.messages || [];
+        if (msgs.length === 0) return;
+        const restored: Message[] = msgs.map((m, i) => ({
+          id: `restored-${i}`,
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        }));
+        setMessages(restored);
+        messagesRestoredRef.current = true;
+        cloudConvIdRef.current = cloudId;
+        // Restore contract code if available
+        if (data.conversation?.contract_code && onCodeGenerated) {
+          onCodeGenerated(data.conversation.contract_code);
+        }
+      } catch { /* silent — localStorage backup will handle it */ }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]); // Only on mount/auth change, not on every dep update
 
   // Handle file selection
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -553,12 +622,13 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }, [messages]);
 
   function getInitialOptions(cat: string | null, mode: ChatMode): { label: string; value: string }[] | undefined {
-    // Learn mode: Always ask for skill level first (matching getModeStarter)
+    // Learn mode: First interaction = mode selection. Options encode __mode:<mode>|<message>
+    // handleOptionClick parses the prefix, switches the tab, then sends the message + category context.
     if (mode === 'learn') {
       return [
-        { label: '👶 I\'m new to Rust', value: 'I\'m new to Rust and smart contracts. Start from the basics and explain everything as we build.' },
-        { label: '⛓️ I\'ve built on other chains', value: 'I know Solidity/Solana but not Rust or NEAR. Show me the key differences — skip generic blockchain concepts, focus on what\'s unique to NEAR.' },
-        { label: '🦀 I know Rust', value: 'I know Rust well. Skip all Rust basics — focus only on NEAR-specific patterns, the SDK, and what makes NEAR contracts different. Let\'s build.' },
+        { label: '🌱 Learn mode — teach me as we build', value: '__mode:learn|I\'m new to NEAR and smart contracts. Teach me the concepts as we build — start from the basics.' },
+        { label: '⚡ Build mode — guide me through it', value: '__mode:build|I have some dev experience. Guide me through building this without over-explaining the basics.' },
+        { label: '🔥 Expert mode — just generate the code', value: '__mode:expert|I know Rust. Skip all explanation — generate production-ready code immediately, defaults used.' },
       ];
     }
 
@@ -906,6 +976,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
 
       if (extractedCode) {
         onCodeGenerated(extractedCode);
+        // Update contract ref immediately so the next cloud save captures the new code
+        currentContractRef.current = extractedCode;
       }
 
       if (data.usage) {
@@ -1044,6 +1116,33 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }
 
   function handleOptionClick(value: string) {
+    // Mode-switching options are encoded as: __mode:<mode>|<message text>
+    if (value.startsWith('__mode:')) {
+      const pipeIdx = value.indexOf('|');
+      const targetMode = value.slice(7, pipeIdx) as ChatMode;
+      const messageText = value.slice(pipeIdx + 1);
+
+      // Switch the mode tab immediately
+      onChatModeChange?.(targetMode);
+
+      // Inject the user's category or custom idea so the AI knows what to build
+      const CATEGORY_NAMES: Record<string, string> = {
+        'ai-agents': 'AI Agent', 'intents': 'Intent-Based', 'chain-signatures': 'Chain Signatures',
+        'privacy': 'Privacy', 'rwa': 'Real World Asset', 'defi': 'DeFi', 'dex-trading': 'DEX / Trading',
+        'gaming': 'GameFi', 'nfts': 'NFT', 'daos': 'DAO Governance', 'social': 'Social & Creator',
+        'dev-tools': 'Developer Tools', 'wallets': 'Wallet & Identity', 'data-analytics': 'Data & Analytics',
+        'infrastructure': 'Infrastructure', 'meme-tokens': 'Meme Token', 'staking-rewards': 'Staking & Rewards',
+        'bridges': 'Bridge',
+      };
+      const categoryContext = customPrompt
+        ? ` Here's what I want to build: ${customPrompt}`
+        : category && category !== 'custom'
+          ? ` I want to build a ${CATEGORY_NAMES[category] || category} contract on NEAR.`
+          : '';
+
+      handleSend(messageText + categoryContext);
+      return;
+    }
     handleSend(value);
   }
 

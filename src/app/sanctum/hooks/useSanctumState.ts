@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { CurrentTask } from '../components/TaskProgressInline';
 import { useAchievementContext } from '@/contexts/AchievementContext';
 import { DeployedContract, saveDeployment } from '../components/DeploymentHistory';
@@ -378,6 +378,27 @@ export function useSanctumState() {
   const [state, dispatch] = useReducer(sanctumReducer, undefined, getInitialState);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ─── Contract version history (undo stack) ───────────────────
+  // Keeps last 5 versions in memory + localStorage for undo support.
+  // This is the most critical user protection: prevents lost contracts from AI overwrites.
+  const contractVersionsRef = useRef<{ code: string; timestamp: number; label: string }[]>([]);
+
+  // Reactive count so UI re-renders when versions are added/removed
+  const [contractVersionsCount, setContractVersionsCount] = useState(0);
+
+  // Load persisted undo stack on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('sanctum-contract-versions');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        contractVersionsRef.current = parsed;
+        setContractVersionsCount(parsed.length);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // Save to localStorage after every state change (debounced, but flush on unmount)
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -515,6 +536,22 @@ export function useSanctumState() {
   }, [setStat]);
 
   const handleCodeGenerated = useCallback((code: string) => {
+    // ── UNDO STACK: Save previous version before overwriting ──
+    // stateRef holds the latest state without creating a stale closure dependency.
+    const prevCode = stateRef.current.generatedCode;
+    if (prevCode && prevCode !== code && prevCode.trim().length > 50) {
+      const prev = {
+        code: prevCode,
+        timestamp: Date.now(),
+        label: `Version ${contractVersionsRef.current.length + 1}`,
+      };
+      contractVersionsRef.current = [prev, ...contractVersionsRef.current].slice(0, 5);
+      setContractVersionsCount(contractVersionsRef.current.length);
+      try {
+        localStorage.setItem('sanctum-contract-versions', JSON.stringify(contractVersionsRef.current));
+      } catch { /* ignore quota errors */ }
+    }
+
     dispatch({ type: 'START_CODE_GENERATION', payload: code });
     dispatch({ type: 'INCREMENT_CONTRACTS_BUILT' });
 
@@ -541,6 +578,20 @@ export function useSanctumState() {
       dispatch({ type: 'COMPLETE_CODE_GENERATION' });
     }, code.length * 10 + 500);
   }, [trackStat, setStat, state.sessionStartTime]);
+
+  // ── UNDO: Restore the previous contract version ──
+  const handleUndo = useCallback(() => {
+    const versions = contractVersionsRef.current;
+    if (versions.length === 0) return;
+    const [latest, ...rest] = versions;
+    contractVersionsRef.current = rest;
+    setContractVersionsCount(rest.length);
+    try {
+      localStorage.setItem('sanctum-contract-versions', JSON.stringify(rest));
+    } catch { /* ignore */ }
+    dispatch({ type: 'SET_GENERATED_CODE', payload: latest.code });
+    dispatch({ type: 'SET_SANCTUM_STAGE', payload: 'complete' });
+  }, []);
 
   const handleTaskUpdate = useCallback((task: CurrentTask | null) => {
     dispatch({ type: 'SET_CURRENT_TASK', payload: task });
@@ -679,6 +730,8 @@ export function useSanctumState() {
     handleCustomStart,
     handleTokensUsed,
     handleCodeGenerated,
+    handleUndo,
+    contractVersionsCount,
     handleTaskUpdate,
     handleThinkingChange,
     handleDeploy,
