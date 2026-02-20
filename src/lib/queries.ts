@@ -473,6 +473,32 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return data as Project | null;
 }
 
+// --- Sitemap Helpers ---
+
+/** Returns all project slugs and their last-modified date for sitemap generation. */
+export async function getAllProjectSlugs(): Promise<{ slug: string; updated_at: string | null }[]> {
+  const supabase = createAdminClient();
+
+  const { data } = await supabase
+    .from('projects')
+    .select('slug, updated_at')
+    .order('slug');
+
+  return (data || []) as { slug: string; updated_at: string | null }[];
+}
+
+/** Returns all opportunity IDs and their last-modified date for sitemap generation. */
+export async function getAllOpportunityIds(): Promise<{ id: string; updated_at: string | null }[]> {
+  const supabase = createAdminClient();
+
+  const { data } = await supabase
+    .from('opportunities')
+    .select('id, updated_at')
+    .order('id');
+
+  return (data || []) as { id: string; updated_at: string | null }[];
+}
+
 // --- Search ---
 
 export async function searchAll(query: string): Promise<{
