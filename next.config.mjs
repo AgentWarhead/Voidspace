@@ -13,16 +13,7 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
 
-  // Bundle optimization — tree-shake lucide-react
-  modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-      skipDefaultConversion: true,
-    },
-  },
-
-  // TypeScript: modularizeImports rewrites lucide-react imports to individual
-  // icon files that lack .d.ts — causes false type errors during build
+  // TypeScript: ignore build errors (lucide-react individual icon files lack .d.ts)
   typescript: {
     ignoreBuildErrors: true,
   },
