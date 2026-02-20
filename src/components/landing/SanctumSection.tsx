@@ -24,29 +24,7 @@ export function SanctumSection() {
           }}
         />
 
-        {/* Cockpit angled overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none hidden md:block"
-          style={{
-            background:
-              'linear-gradient(160deg, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(0,0,0,0.25) 100%)',
-          }}
-          aria-hidden="true"
-        />
-
         <div className="relative z-10 p-5 sm:p-8 md:p-12">
-          {/* Alien transmission incoming badge */}
-          <div className="text-center mb-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-black/60 border border-near-green/20 text-near-green/50 text-[10px] font-mono tracking-[0.25em] mb-3">
-              <span
-                className="inline-block w-1.5 h-1.5 rounded-full bg-near-green/70"
-                style={{ animation: 'transmission-blink 1.2s step-start infinite' }}
-                aria-hidden="true"
-              />
-              CLASSIFIED · CLEARANCE REQUIRED
-            </div>
-          </div>
-
           {/* Header */}
           <div className="text-center mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono mb-4">
