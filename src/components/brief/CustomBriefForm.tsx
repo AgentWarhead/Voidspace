@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Lightbulb } from 'lucide-react';
+import { Sparkles, Loader2, Lightbulb, Lock } from 'lucide-react';
 import { Card, Button } from '@/components/ui';
 import { BriefDisplay } from './BriefDisplay';
 import { BriefPreview } from './BriefPreview';
@@ -88,11 +88,12 @@ export function CustomBriefForm() {
       <Card padding="lg" id="custom-brief">
         <div className="text-center mb-6">
           <Lightbulb className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-          <h2 className="text-lg font-semibold text-text-primary mb-2">
-            Bring Your Own Idea
+          <h2 className="text-xl font-bold text-text-primary mb-2">
+            What Are You Building?
           </h2>
           <p className="text-sm text-text-secondary max-w-md mx-auto">
-            Describe your project idea and get a full AI-powered build plan — market analysis, architecture, NEAR strategy, and roadmap.
+            Give us the concept — even a rough idea is enough. Sanctum will map the market,
+            design the architecture, and write the roadmap so you can start building immediately.
           </p>
         </div>
 
@@ -115,7 +116,7 @@ export function CustomBriefForm() {
             <p className="text-sm text-error text-center">{error}</p>
           )}
 
-          <div className="text-center">
+          <div className="text-center space-y-3">
             <Button
               variant="primary"
               size="lg"
@@ -131,6 +132,13 @@ export function CustomBriefForm() {
             >
               {loading ? 'Generating Your Build Plan...' : 'Generate Build Plan'}
             </Button>
+            {/* Paywall note — clear and visible */}
+            <p className="text-xs text-text-muted flex items-center justify-center gap-1.5">
+              <Lock className="w-3 h-3 shrink-0" />
+              Free tier shows a preview ·{' '}
+              <a href="/pricing" className="text-near-green hover:underline font-medium">Specter plan or credits</a>{' '}
+              required for the full 12-section build plan
+            </p>
           </div>
         </div>
       </Card>
