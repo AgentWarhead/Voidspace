@@ -1039,8 +1039,15 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       openModal();
       return;
     }
-    // Wallet connected but session expired/missing — re-trigger silent auth, don't fire API
+    // Wallet connected but no server session — need to sign in once.
+    // Only fires when user explicitly tries to send, never on page load.
     if (!user) {
+      // Show context before the sign popup appears so user isn't surprised
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: '🔑 One-time sign-in required — your wallet will ask you to sign a message to start your session. No transaction, no gas, just authentication.',
+      }]);
       refetchUser();
       return;
     }

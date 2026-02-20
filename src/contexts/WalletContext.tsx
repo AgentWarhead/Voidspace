@@ -135,12 +135,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         });
 
         // Check for existing connection (autoConnect)
+        // RESTORE ONLY — never prompt to sign on page load.
+        // User will be prompted when they explicitly try to use Sanctum.
         try {
           const { wallet, accounts } = await conn.getConnectedWallet();
           if (wallet && accounts.length > 0) {
             const existingAccountId = accounts[0].accountId;
             setAccountId(existingAccountId);
-            authenticateUser(existingAccountId, conn);
+            // Silently restore session from cookie — no wallet.signMessage() here
+            setUserLoading(true);
+            tryRestoreSession().finally(() => setUserLoading(false));
           }
         } catch {
           // No existing connection — that's fine
