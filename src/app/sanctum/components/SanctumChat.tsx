@@ -609,7 +609,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
   }
 
   // Core API call logic — used by both handleSend and auto-message
-  async function sendToApi(text: string, contextMessages: Message[], userAttachments?: AttachedFile[]) {
+  async function sendToApi(text: string, contextMessages: Message[], userAttachments?: AttachedFile[], noCodeExtraction?: boolean) {
     setIsLoading(true);
     onThinkingChange?.(true);
 
@@ -837,7 +837,8 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       // ── CODE EXTRACTION — prefer explicit `code` field, fallback to content parsing ──
       // SKIP code extraction for analysis actions (explain/audit/optimize) — those
       // responses belong in the chat window, not the code preview panel.
-      const skipCodeExtraction = noCodeExtractionRef.current;
+      // Use passed param if available (captured before async boundary), fall back to ref
+      const skipCodeExtraction = noCodeExtraction ?? noCodeExtractionRef.current;
       let extractedCode: string | null = skipCodeExtraction ? null : (data.code || null);
       try {
         if (!skipCodeExtraction) {
@@ -982,7 +983,9 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     // Notify parent for achievement checks
     onUserMessage?.(text);
 
-    await sendToApi(text, allMessages, userMessage.attachments);
+    // Capture flag synchronously before any async boundary — ref can change mid-flight
+    const capturedNoCode = noCodeExtractionRef.current;
+    await sendToApi(text, allMessages, userMessage.attachments, capturedNoCode);
   }
 
   // Stop/cancel the current request

@@ -153,13 +153,13 @@ function SanctumPageInner() {
 
     const prompts: Record<string, string> = hasSelection ? {
       // Selection mode — include the highlighted snippet (small, targeted)
-      explain:  `Explain this selected code in detail — what does it do, why is it written this way, and what NEAR concepts does it use?\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
+      explain:  `Explain this code in plain English. Be brief — 2 to 4 short bullet points max. One sentence each. No headers, no deep dives. Just what it does and why, simple enough for a beginner.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
       tests:    `Simulate running tests on this selected code. Analyze the logic and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases)\n- For each: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end, give the test suite a score (e.g. 8/10) and the top 2 things to fix\n\nCode to test:\n\`\`\`rust\n${codeSelection}\n\`\`\``,
       optimize: `How can I optimize this selected code for gas efficiency on NEAR? Suggest specific improvements.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
       security: `Audit this selected code for security vulnerabilities — check for reentrancy, access control, overflow, and NEAR-specific issues.\n\n\`\`\`rust\n${codeSelection}\n\`\`\``,
     } : {
       // Full-contract mode — always inject the code so loaded/imported contracts work too.
-      explain:  `Explain this contract — walk through its structure, what each section does, and the NEAR concepts it demonstrates.${codeBlock}`,
+      explain:  `Give a brief plain-English overview of this contract. What does it do? What are its main sections? Keep it short and beginner-friendly — a quick summary, not a lecture.${codeBlock}`,
       tests:    `Simulate running the test suite for this contract. Analyze each public method and give me a test execution report:\n- List each test scenario (happy path + edge cases + failure cases) for every public method\n- For each scenario: show ✅ PASS, ⚠️ WARN, or ❌ FAIL with a one-line reason\n- Flag any bugs you find that would cause real test failures\n- At the end: overall score (X/10), top 3 issues to fix before deploying${codeBlock}`,
       optimize: `Analyze this contract for gas efficiency — identify the most impactful optimizations and show the improved code.${codeBlock}`,
       security: `Perform a complete security audit of this contract — check for reentrancy, access control issues, integer overflow, storage vulnerabilities, and any NEAR-specific attack vectors. Give me a prioritized findings list.${codeBlock}`,
