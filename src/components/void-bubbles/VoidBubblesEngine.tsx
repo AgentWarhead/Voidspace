@@ -1367,9 +1367,9 @@ export function VoidBubblesEngine() {
         .strength(0.95)
         .iterations(isMobile ? 6 : 4) // More iterations on mobile for tighter packing
       )
-      .alphaDecay(isMobile ? 0.03 : 0.025) // Even faster settling on mobile
+      .alphaDecay(isMobile ? 0.03 : 0.022) // Slightly slower decay so wander kicks last longer
       .alpha(0.5)
-      .velocityDecay(isMobile ? 0.55 : 0.45); // More friction on mobile
+      .velocityDecay(isMobile ? 0.5 : 0.38); // Less friction — momentum carries between wander nudges
 
     // Store simulation reference
     simulationRef.current = simulation;
@@ -1492,17 +1492,22 @@ export function VoidBubblesEngine() {
       });
     }
 
-    // ── "Alive" Breathing Effect ──
-    // Subtle CSS breathing animation on all bubble-main circles + glow rings
+    // ── "Alive" Breathing + Float Effect ──
+    // Bubbles breathe AND gently float — combined scale + translate keeps them
+    // feeling organic and alive even after the simulation settles.
     const breatheStyle = document.createElement('style');
     breatheStyle.textContent = `
       @keyframes bubble-breathe {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.02); }
+        0%   { transform: scale(1)     translate(0px,   0px); }
+        20%  { transform: scale(1.018) translate(1.5px, -2px); }
+        40%  { transform: scale(1.028) translate(0px,   -3px); }
+        60%  { transform: scale(1.022) translate(-1.5px,-1.5px); }
+        80%  { transform: scale(1.012) translate(-1px,  1px); }
+        100% { transform: scale(1)     translate(0px,   0px); }
       }
       @keyframes glow-breathe {
         0%, 100% { stroke-opacity: 0.4; }
-        50% { stroke-opacity: 0.55; }
+        50%      { stroke-opacity: 0.65; }
       }
     `;
     document.head.appendChild(breatheStyle);
@@ -1547,11 +1552,15 @@ export function VoidBubblesEngine() {
       }
     });
 
-    // Apply breathing with random delays so bubbles don't sync
+    // Apply breathing with random delays and durations so bubbles never sync.
+    // Larger bubbles float slower (more mass); smaller ones bob more quickly.
     bubbleGroups.each(function(_d, i) {
       const group = d3.select(this);
-      const delay = (i * 0.7 + Math.random() * 3).toFixed(2);
-      const duration = (3 + Math.random() * 3).toFixed(2);
+      const d = _d as BubbleNode;
+      const delay = (i * 0.4 + Math.random() * 4).toFixed(2);
+      // Bigger bubbles = longer, lazier cycle; small bubbles = quicker bob
+      const baseDuration = d.targetRadius > 40 ? 7 : d.targetRadius > 25 ? 5.5 : 4;
+      const duration = (baseDuration + Math.random() * 4).toFixed(2);
       group.select('.bubble-main')
         .style('transform-origin', 'center')
         .style('transform-box', 'fill-box')
@@ -1560,12 +1569,20 @@ export function VoidBubblesEngine() {
         .style('animation', `glow-breathe ${duration}s ease-in-out ${delay}s infinite`);
     });
 
-    // Keep simulation gently alive — periodic alpha nudge
+    // ── Perpetual Wander Loop ──
+    // Every 1.8 seconds give each bubble a tiny random velocity impulse so they
+    // never fully settle — the void is always alive.  The impulse is tiny enough
+    // that bubbles barely drift, but visible enough that the canvas feels live.
     const breatheInterval = setInterval(() => {
-      if (simulationRef.current) {
-        simulationRef.current.alpha(0.015).restart();
+      if (simulationRef.current && nodesRef.current.length > 0) {
+        nodesRef.current.forEach(d => {
+          // Gentle organic wander: random ±0.5 px/tick impulse
+          d.vx = (d.vx || 0) + (Math.random() - 0.5) * 0.5;
+          d.vy = (d.vy || 0) + (Math.random() - 0.5) * 0.5;
+        });
+        simulationRef.current.alpha(0.04).restart();
       }
-    }, 6000);
+    }, 1800);
     // Clean up interval on next re-init or unmount
     const prevCleanup = () => clearInterval(breatheInterval);
     // Store cleanup in a style element's remove handler (piggyback)
