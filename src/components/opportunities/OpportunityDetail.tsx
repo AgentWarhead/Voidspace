@@ -24,7 +24,6 @@ import { formatCurrency, formatNumber } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
 import { HELP_CONTENT } from '@/lib/help-content';
 import { CompetitorList, getActivityStatus } from '@/components/opportunities/CompetitorList';
-import { VoidInsightPanel } from '@/components/opportunities/VoidInsightPanel';
 import type { Opportunity, Project, Category, GapScoreBreakdown as GapScoreBreakdownType } from '@/types';
 
 interface OpportunityDetailProps {
@@ -134,14 +133,6 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </div>
         </div>
       </div>
-
-      {/* AI Void Intelligence Panel */}
-      <ScrollReveal delay={0.03}>
-        <VoidInsightPanel
-          opportunityId={opportunity.id}
-          opportunityTitle={opportunity.title}
-        />
-      </ScrollReveal>
 
       {/* Void Analysis */}
       <ScrollReveal delay={0.05}>
