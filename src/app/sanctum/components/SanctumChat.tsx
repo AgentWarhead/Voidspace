@@ -83,6 +83,7 @@ interface Message {
     output: number;
   };
   milestone?: string | null;
+  projectFiles?: import('../components/FileStructure').ProjectFile[];
 }
 
 // Task tracking types
@@ -124,6 +125,7 @@ interface SanctumChatProps {
   loadedProjectSeq?: number; // increment to trigger project message restore
   sessionBriefing?: string | null; // briefing from previous session to inject on resume
   onBriefingUpdate?: (briefing: string) => void; // called when AI generates a project briefing
+  onProjectFilesUpdate?: (files: import('../components/FileStructure').ProjectFile[] | undefined) => void; // called when AI populates projectFiles
   /** Current contract code — tracked for cloud backup */
   currentContractCode?: string;
   /** Called whenever the cloud save status changes — drives indicator in ContractToolbar */
@@ -241,7 +243,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
   return `Describe your ${name} contract. I'll generate production-ready code immediately — no questions asked.`;
 }
 
-export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
+export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, onProjectFilesUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user, isConnected, openModal } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
@@ -881,6 +883,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         options: data.options,
         tokensUsed: data.usage,
         milestone: data.milestone || null,
+        projectFiles: data.projectFiles || undefined,
       };
 
       // Notify parent about concepts from learn tips
@@ -938,6 +941,11 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       // Enhancement 7: trigger briefing update
       if (data.projectBriefing && onBriefingUpdate) {
         onBriefingUpdate(data.projectBriefing);
+      }
+
+      // Project files update (multi-contract wiring)
+      if (onProjectFilesUpdate) {
+        onProjectFilesUpdate(data.projectFiles || undefined);
       }
 
       // Enhancement 5: update learn milestone

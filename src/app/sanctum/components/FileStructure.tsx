@@ -3,10 +3,19 @@
 import { useState, useMemo } from 'react';
 import { Folder, FolderOpen, FileCode, FileText, ChevronRight, ChevronDown } from 'lucide-react';
 
+export interface ProjectFile {
+  name: string;
+  role: string;
+  status: 'generated' | 'suggested';
+  triggerPrompt?: string;
+}
+
 interface FileStructureProps {
   code: string;
   contractName?: string;
   onFileSelect?: (filename: string, content: string) => void;
+  projectFiles?: ProjectFile[];
+  onGenerateFile?: (triggerPrompt: string) => void;
 }
 
 interface FileNode {
@@ -18,7 +27,7 @@ interface FileNode {
   language?: string;
 }
 
-export function FileStructure({ code, contractName = 'my-contract', onFileSelect }: FileStructureProps) {
+export function FileStructure({ code, contractName = 'my-contract', onFileSelect, projectFiles, onGenerateFile }: FileStructureProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['src', 'tests']));
   const [selectedFile, setSelectedFile] = useState<string>('src/lib.rs');
 
@@ -122,6 +131,57 @@ export function FileStructure({ code, contractName = 'my-contract', onFileSelect
       <div className="p-2 max-h-[300px] overflow-y-auto">
         {projectStructure.map(node => renderNode(node))}
       </div>
+
+      {/* Project Files — suggested contracts needed to complete the project */}
+      {(() => {
+        const suggestedFiles = (projectFiles || []).filter(f => f.status === 'suggested');
+        const generatedFiles = (projectFiles || []).filter(f => f.status === 'generated');
+        if (suggestedFiles.length === 0 && generatedFiles.length === 0) return null;
+        return (
+          <div className="border-t border-void-purple/20 pt-2 mt-1">
+            {generatedFiles.length > 0 && (
+              <>
+                <div className="px-3 py-1.5 text-xs text-text-muted font-medium uppercase tracking-wide">
+                  Built
+                </div>
+                {generatedFiles.map(file => (
+                  <div key={file.name} className="px-3 py-2 flex items-start gap-2">
+                    <span className="text-near-green mt-0.5">✅</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-mono text-text-muted truncate">{file.name}</div>
+                      <div className="text-xs text-text-secondary mt-0.5">{file.role}</div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+            {suggestedFiles.length > 0 && (
+              <>
+                <div className="px-3 py-1.5 text-xs text-text-muted font-medium uppercase tracking-wide">
+                  Also needed
+                </div>
+                {suggestedFiles.map(file => (
+                  <div key={file.name} className="px-3 py-2 flex items-start gap-2">
+                    <span className="text-yellow-400 mt-0.5">💡</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-mono text-text-muted truncate">{file.name}</div>
+                      <div className="text-xs text-text-secondary mt-0.5">{file.role}</div>
+                    </div>
+                    {file.triggerPrompt && onGenerateFile && (
+                      <button
+                        onClick={() => onGenerateFile(file.triggerPrompt!)}
+                        className="shrink-0 text-xs px-2 py-1 rounded bg-near-green/10 text-near-green border border-near-green/20 hover:bg-near-green/20 transition-colors"
+                      >
+                        Generate →
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Footer */}
       <div className="px-3 py-2 border-t border-void-purple/20 bg-void-black/30 text-xs text-gray-500">

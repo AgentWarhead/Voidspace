@@ -771,6 +771,7 @@ function SanctumPageInner() {
                       loadedProjectSeq={loadedProjectSeq}
                       sessionBriefing={state.projectBriefing}
                       onBriefingUpdate={(b) => dispatch({ type: 'SET_BRIEFING', payload: b })}
+                      onProjectFilesUpdate={(files) => dispatch({ type: 'SET_PROJECT_FILES', payload: files })}
                       currentContractCode={state.generatedCode}
                       onCloudSaveStatus={setCloudSaveStatus}
                     />
@@ -842,6 +843,8 @@ function SanctumPageInner() {
                       <FileStructure 
                         code={state.generatedCode} 
                         contractName={state.selectedCategory || 'my-contract'}
+                        projectFiles={state.projectFiles}
+                        onGenerateFile={(prompt) => sendToChat(prompt)}
                       />
                     </div>
                   )}
@@ -953,6 +956,7 @@ function SanctumPageInner() {
                         loadedProjectSeq={loadedProjectSeq}
                         sessionBriefing={state.projectBriefing}
                         onBriefingUpdate={(b) => dispatch({ type: 'SET_BRIEFING', payload: b })}
+                        onProjectFilesUpdate={(files) => dispatch({ type: 'SET_PROJECT_FILES', payload: files })}
                         currentContractCode={state.generatedCode}
                         onCloudSaveStatus={setCloudSaveStatus}
                       />
@@ -1004,6 +1008,8 @@ function SanctumPageInner() {
                           <FileStructure 
                             code={state.generatedCode} 
                             contractName={state.selectedCategory || 'my-contract'}
+                            projectFiles={state.projectFiles}
+                            onGenerateFile={(prompt) => sendToChat(prompt)}
                           />
                         </div>
                       )}

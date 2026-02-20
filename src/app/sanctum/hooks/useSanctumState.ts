@@ -4,6 +4,7 @@ import { useAchievementContext } from '@/contexts/AchievementContext';
 import { DeployedContract, saveDeployment } from '../components/DeploymentHistory';
 import { ImportedContract } from '../components/ImportContract';
 import { generateSessionId } from '../components/PairProgramming';
+import { ProjectFile } from '../components/FileStructure';
 
 import { ChatMode } from '../components/ModeSelector';
 import { LearnedConcept } from '../components/KnowledgeTracker';
@@ -107,6 +108,7 @@ export interface SanctumState {
   scratchTemplate: string | null;
   personaId: string;
   projectBriefing: string | null;
+  projectFiles?: ProjectFile[];
 }
 
 type SanctumAction =
@@ -153,6 +155,7 @@ type SanctumAction =
   | { type: 'SET_SCRATCH_TEMPLATE'; payload: string | null }
   | { type: 'SET_PERSONA_ID'; payload: string }
   | { type: 'SET_BRIEFING'; payload: string | null }
+  | { type: 'SET_PROJECT_FILES'; payload: ProjectFile[] | undefined }
   | { type: 'RESET_SESSION' }
   | { type: 'START_CODE_GENERATION'; payload: string }
   | { type: 'COMPLETE_CODE_GENERATION' };
@@ -198,6 +201,7 @@ const defaultState: SanctumState = {
   scratchTemplate: null,
   personaId: 'shade',
   projectBriefing: null,
+  projectFiles: undefined,
 };
 
 function getInitialState(): SanctumState {
@@ -345,6 +349,9 @@ function sanctumReducer(state: SanctumState, action: SanctumAction): SanctumStat
 
     case 'SET_BRIEFING':
       return { ...state, projectBriefing: action.payload };
+
+    case 'SET_PROJECT_FILES':
+      return { ...state, projectFiles: action.payload };
     
     case 'RESET_SESSION':
       clearPersistedSession();
