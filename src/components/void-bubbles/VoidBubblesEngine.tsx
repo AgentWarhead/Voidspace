@@ -1367,9 +1367,9 @@ export function VoidBubblesEngine() {
         .strength(0.95)
         .iterations(isMobile ? 6 : 4) // More iterations on mobile for tighter packing
       )
-      .alphaDecay(isMobile ? 0.03 : 0.022) // Slightly slower decay so wander kicks last longer
+      .alphaDecay(isMobile ? 0.028 : 0.015) // Lower decay → wander nudges propagate ~2-3s each
       .alpha(0.5)
-      .velocityDecay(isMobile ? 0.5 : 0.38); // Less friction — momentum carries between wander nudges
+      .velocityDecay(isMobile ? 0.48 : 0.36); // Slightly less friction → movement carries further
 
     // Store simulation reference
     simulationRef.current = simulation;
@@ -1570,19 +1570,23 @@ export function VoidBubblesEngine() {
     });
 
     // ── Perpetual Wander Loop ──
-    // Every 1.8 seconds give each bubble a tiny random velocity impulse so they
-    // never fully settle — the void is always alive.  The impulse is tiny enough
-    // that bubbles barely drift, but visible enough that the canvas feels live.
+    // Every 1.1 seconds apply sinusoidal velocity impulses so bubbles orbit gently
+    // forever. Sinusoidal (not random) means direction rotates over time — bubbles
+    // don't drift out of bounds, they trace slow organic circles. Each bubble gets
+    // a unique phase (golden angle) so they all move independently.
+    // Impulse of ±1.5px with velocityDecay 0.38 → ~4px net travel per interval = visible.
     const breatheInterval = setInterval(() => {
       if (simulationRef.current && nodesRef.current.length > 0) {
-        nodesRef.current.forEach(d => {
-          // Gentle organic wander: random ±0.5 px/tick impulse
-          d.vx = (d.vx || 0) + (Math.random() - 0.5) * 0.5;
-          d.vy = (d.vy || 0) + (Math.random() - 0.5) * 0.5;
+        const t = Date.now() / 1000;
+        nodesRef.current.forEach((d, i) => {
+          const phase = i * 2.399; // golden angle — unique direction per bubble
+          d.vx = (d.vx || 0) + Math.sin(t * 0.5 + phase) * 1.5;
+          d.vy = (d.vy || 0) + Math.cos(t * 0.4 + phase * 0.7) * 1.5;
         });
-        simulationRef.current.alpha(0.04).restart();
+        // alpha(0.08) with alphaDecay 0.015 → sim runs ~2.3s per nudge
+        simulationRef.current.alpha(0.08).restart();
       }
-    }, 1800);
+    }, 1100);
     // Clean up interval on next re-init or unmount
     const prevCleanup = () => clearInterval(breatheInterval);
     // Store cleanup in a style element's remove handler (piggyback)

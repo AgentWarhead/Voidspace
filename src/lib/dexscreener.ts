@@ -162,10 +162,11 @@ function deduplicatePairs(pairs: DexPair[]): Map<string, DexPair> {
 // bypass the liquidity/volume filter entirely.
 
 const NEAR_BASE_QUERIES = [
-  'wrap.near',                 // wNEAR — the largest pool, most pairs
-  'aurora',                    // AURORA — ETH-bridged asset pairs
-  'usdc.token.a11bd.near',     // Native USDC — major stablecoin-quoted pairs
-  'usdt.tether-token.near',    // USDT — secondary stablecoin route
+  'wrap.near',                                                    // wNEAR — largest pool, most pairs
+  'aurora',                                                       // AURORA — ETH-bridged asset pairs
+  'usdt.tether-token.near',                                       // USDT — stablecoin-quoted pairs
+  'a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.factory.bridge.near', // USDC (Rainbow Bridge) — brings NEKO, DAI, STNEAR, cUSD
+  'token.v2.ref-finance.near',                                    // REF — surfaces REF, OCT and ref-paired tokens
 ];
 
 // Known NEAR ecosystem token contract addresses.
