@@ -10,6 +10,98 @@ import { checkBalance, deductCredits, estimateCreditCost } from '@/lib/credits';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { resolveModel, type SanctumTier } from '@/lib/sanctum-tiers';
 
+// ── Curated Void mode intake presets (injected server-side, never AI-generated) ──
+// Keys match the category field from the client request.
+const VOID_INTAKE_PRESETS: Record<string, Array<{ label: string; value: string }>> = {
+  'meme-tokens': [
+    { label: '1B supply · 3% burn tax · owner controls', value: 'Frontend only. 1 billion supply, 3% burn tax on every transfer, owner controls mint/pause/tax rate.' },
+    { label: 'Fixed 1B · no tax · fully immutable', value: 'Frontend only. Fixed 1 billion at deploy, no taxes, fully immutable — no admin after launch.' },
+    { label: 'Inflationary · 5% split tax · treasury', value: 'Frontend only. No supply cap, 5% transfer tax: 2% burn + 3% to treasury, owner can mint/pause.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'nfts': [
+    { label: '1K collection · 0.1 NEAR · 5% royalty', value: 'Frontend only. 1000 max supply, 0.1 NEAR mint price, 5% royalty to owner on secondary sales.' },
+    { label: 'Open edition · free mint · owner pause', value: 'Frontend only. No supply cap, free to mint, owner can pause. Standard NEP-171.' },
+    { label: 'Allowlist + public · 0.5 NEAR · 10% royalty', value: 'Frontend only. 500 max, allowlist phase then public, 0.5 NEAR mint price, 10% royalty.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'defi': [
+    { label: 'AMM pool · 0.3% fee · LP tokens', value: 'Frontend + contract calls. AMM liquidity pool, 0.3% swap fee, LP tokens for providers.' },
+    { label: 'Lending · overcollateralized · auto-liquidate', value: 'Frontend + contract. Lending/borrowing, 150% collateral ratio, auto-liquidation.' },
+    { label: 'Yield vault · auto-compound · 1% perf fee', value: 'Frontend + contract. Yield vault, auto-compounding, 1% performance fee to owner.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'dex-trading': [
+    { label: 'AMM · 0.3% swap fee · permissionless', value: 'Frontend + contract. AMM-style, 0.3% swap fee, permissionless liquidity provision.' },
+    { label: 'Order book · maker 0.1% / taker 0.2%', value: 'Frontend only. Order book, maker 0.1% / taker 0.2% fees, owner can pause.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'staking-rewards': [
+    { label: 'Time-locked · 10% APY · owner sets rate', value: 'Frontend only. Time-locked staking, 10% APY, owner updates rates, emergency withdraw.' },
+    { label: 'Flexible · reward per epoch · no lock', value: 'Frontend only. No lock period, rewards per epoch, owner tops up reward pool.' },
+    { label: 'Liquid staking · receipt token · auto-compound', value: 'Frontend + contract. Liquid staking token issued on deposit, auto-compound, 0.5% fee.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'daos': [
+    { label: 'Token-weighted · 7d vote · 10% quorum', value: 'Frontend only. Token-weighted voting, 7-day window, 10% quorum to pass.' },
+    { label: 'Council · 5 members · 3-of-5 multisig', value: 'Contract-to-contract. 5-member council, 3-of-5 multisig, council manages membership.' },
+    { label: 'Quadratic · 1-member-1-vote · guardian veto', value: 'Frontend only. Quadratic voting, equal member weight, guardian can veto proposals.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'ai-agents': [
+    { label: 'NEAR AI agent · owner-authorized · spend limits', value: 'Contract-to-contract. NEAR AI agent, owner authorizes agent address, per-call spend limits.' },
+    { label: 'Multi-agent · role-based · orchestrator', value: 'Contract-to-contract. Orchestrator assigns tasks to sub-agents, role-based permissions.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'chain-signatures': [
+    { label: 'Multi-chain wallet · ETH + BTC + SOL', value: 'Frontend only. Multi-chain wallet via chain signatures, signs ETH/BTC/SOL txs from NEAR.' },
+    { label: 'Cross-chain bridge · lock-and-mint · ETH', value: 'Frontend + contract. Lock-and-mint bridge to Ethereum, owner controls emergency pause.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'gaming': [
+    { label: 'NFT items · minted on achievement · tradeable', value: 'Contract-to-contract (game server mints). NFT items on achievement, tradeable P2P.' },
+    { label: 'Token rewards · earn by playing · owner mints', value: 'Contract-to-contract. Fungible token rewards, game server mints to players, owner controls rate.' },
+    { label: 'Tournament · prize pool · trustless payout', value: 'Frontend + contract. Entry fees pooled, top-3 payout, oracle submits result.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'bridges': [
+    { label: 'Lock-and-mint · ETH → NEAR · owner relayer', value: 'Contract-to-contract. Lock on ETH side, mint wrapped on NEAR, owner-run relayer.' },
+    { label: 'Burn-and-release · NEAR → ETH · multisig verify', value: 'Contract-to-contract. Burn on NEAR, release on ETH, 3-of-5 multisig verification.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'intents': [
+    { label: 'Swap intent · solver fills · any-to-any', value: 'Both. User signs intent, solvers compete to fill, any-to-any swap via NEAR intents protocol.' },
+    { label: 'Cross-chain intent · deadline · escrow-backed', value: 'Both. Cross-chain intent with expiry, best-route solver, escrow-backed settlement.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'rwa': [
+    { label: 'Tokenized asset · fractional · KYC-gated', value: 'Frontend only. Fractional ownership NFT, KYC whitelist enforced on all transfers.' },
+    { label: 'Invoice financing · discount rate · auto-redeem', value: 'Frontend + contract. Invoice as NFT, fixed discount rate, auto-redeems at maturity.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'privacy': [
+    { label: 'Private transfer · shielded balance · ZK proof', value: 'Frontend only. Shielded balances, ZK proof required to transfer.' },
+    { label: 'Commit-reveal voting · hidden until reveal', value: 'Frontend only. Commit-reveal scheme, votes hidden until reveal phase, owner tallies.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'social': [
+    { label: 'Creator token · tip-to-mint · holder rewards', value: 'Frontend only. Per-creator fungible token, mint by tipping, holders earn % of future tips.' },
+    { label: 'On-chain posts · NFT receipts · gated content', value: 'Frontend only. Posts minted as NFTs, token-gated content, owner moderation.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+  'infrastructure': [
+    { label: 'Oracle · multi-source · median price feed', value: 'Contract-to-contract. Multi-source price oracle, median aggregation, stale-data guard.' },
+    { label: 'Registry · name → address · owner curated', value: 'Both. On-chain registry mapping names to addresses, owner approves entries.' },
+    { label: 'Custom ✏️', value: '' },
+  ],
+};
+const VOID_INTAKE_PRESETS_DEFAULT = [
+  { label: 'Frontend only · owner-controlled · pauseable', value: 'Frontend only. Owner controls all admin functions. Pauseable by owner.' },
+  { label: 'Contract-to-contract · permissionless · immutable', value: 'Contract-to-contract calls. Permissionless. Immutable after deploy.' },
+  { label: 'Both · multisig admin · upgradeable', value: 'Both frontend and contract calls. 2-of-3 multisig for admin. Upgradeable proxy.' },
+  { label: 'Custom ✏️', value: '' },
+];
+
 function sanitizeUserInput(text: string): string {
   // Remove common prompt injection patterns
   const patterns = [
@@ -116,23 +208,8 @@ Ask EXACTLY 2 targeted requirements questions before writing a single line of co
 - Question 2: What specific behavior or edge case matters most for this use case? (Shapes business logic defaults)
 Combine into 2 tight, direct questions. Do NOT generate code yet. Wait for their answers.
 
-INTAKE OPTIONS (mandatory on this first response):
-Always populate the options field with 3-4 pre-filled "combo presets" — each one answers BOTH questions at once with a realistic default config. Tailor them to the specific contract type the user described.
-Format: { label: "short label (key traits)", value: "full answer covering both questions" }
-End your content field with exactly: "Tap a preset or describe your own specs below ↓"
-
-Example presets for a meme token:
-- { label: "1B supply · 3% burn tax · owner-only controls", value: "Frontend only. 1 billion supply, 3% burn tax on every transfer, owner controls mint/pause/tax rate." }
-- { label: "Fixed supply · no tax · fully immutable", value: "Frontend only. Fixed 1B supply at deploy, no taxes, fully immutable — no admin controls after launch." }
-- { label: "Inflationary · 5% split tax · owner + multisig", value: "Frontend only. No supply cap, 5% tax: 2% burn + 3% to treasury, owner + 2-of-3 multisig controls mint/pause." }
-- { label: "Custom — I'll type my specs", value: "" }
-
-Example presets for an NFT:
-- { label: "1K collection · 0.1 NEAR mint · 5% royalty", value: "Frontend only. 1000 max supply, 0.1 NEAR mint price, 5% royalty to owner, standard NEP-171." }
-- { label: "Open edition · free mint · DAO controlled", value: "Frontend + contract calls. No supply cap, free to mint, DAO multisig controls all admin." }
-- { label: "Custom — I'll type my specs", value: "" }
-
-Always include a "Custom — I'll type my specs" option with an empty value as the last option.
+INTAKE OPTIONS: Do NOT include options in your intake response — preset pills are injected server-side.
+End your content field with: "Tap a preset below or describe your own specs ↓"
 
 AFTER THEY ANSWER → do NOT generate code yet. Enter the CONFIRMATION STEP.
 
@@ -1540,6 +1617,15 @@ export async function POST(request: NextRequest) {
       // For analysis actions: explicitly null out the code field so the client
       // doesn't accidentally push it to the preview panel
       parsed.code = null;
+    }
+
+    // ── Void mode intake presets injection ──
+    // On the first user message in void mode, override options with curated
+    // server-side presets keyed by category. Never trust AI-generated options here.
+    const userMessageCount = (messages as Array<{ role: string }>).filter(m => m.role === 'user').length;
+    if (mode === 'void' && userMessageCount === 1 && !parsed.code) {
+      const presets = VOID_INTAKE_PRESETS[category as string] ?? VOID_INTAKE_PRESETS_DEFAULT;
+      parsed.options = presets;
     }
 
     // Log usage + deduct credits for authenticated users only
