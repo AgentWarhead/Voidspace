@@ -289,7 +289,7 @@ export default function DefiContractPatterns({ isActive, onToggle }: DefiContrac
   return (
     <Card variant="glass" padding="none" className="border-amber-500/20">
       {/* Accordion Header */}
-      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center">
             <TrendingUp className="w-6 h-6 text-white" />
@@ -509,17 +509,6 @@ impl AmmPool {
                 </ul>
               </Card>
 
-              {/* Mark Complete */}
-              {!completed && (
-                <motion.button
-                  onClick={handleComplete}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-bold text-sm hover:brightness-110 transition-all"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  ✓ Mark as Complete
-                </motion.button>
-              )}
             </div>
           </motion.div>
         )}

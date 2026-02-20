@@ -440,7 +440,7 @@ const NearCliMastery: React.FC<NearCliMasteryProps> = ({
   return (
     <Card variant="glass" padding="none" className="border-near-green/20">
       <div
-        onClick={() => {}} style={{display:"none"}}
+        onClick={onToggle}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">
@@ -804,20 +804,6 @@ const NearCliMastery: React.FC<NearCliMasteryProps> = ({
                 </ul>
               </Card>
 
-              {/* Mark Complete */}
-              <motion.button
-                onClick={handleComplete}
-                whileHover={{ scale: completed ? 1 : 1.02 }}
-                whileTap={{ scale: completed ? 1 : 0.98 }}
-                className={cn(
-                  'w-full py-3 rounded-xl font-semibold text-sm transition-all',
-                  completed
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : 'bg-near-green/10 text-near-green border border-near-green/30 hover:bg-near-green/20'
-                )}
-              >
-                {completed ? '✓ Module Complete' : 'Mark as Complete'}
-              </motion.button>
             </div>
           </motion.div>
         )}

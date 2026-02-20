@@ -298,41 +298,6 @@ function NextSteps() {
   );
 }
 
-// ─── Mark Complete ─────────────────────────────────────────────────────────────
-
-function MarkComplete({ moduleSlug }: { moduleSlug: string }) {
-  const [completed, setCompleted] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const progress = JSON.parse(localStorage.getItem('voidspace-explorer-progress') || '{}');
-      return !!progress[moduleSlug];
-    } catch { return false; }
-  });
-
-  const handleComplete = () => {
-    try {
-      const progress = JSON.parse(localStorage.getItem('voidspace-explorer-progress') || '{}');
-      progress[moduleSlug] = true;
-      localStorage.setItem('voidspace-explorer-progress', JSON.stringify(progress));
-      setCompleted(true);
-    } catch { /* noop */ }
-  };
-
-  return (
-    <div className="flex justify-center">
-      <Button
-        variant={completed ? 'secondary' : 'primary'}
-        size="lg"
-        onClick={handleComplete}
-        leftIcon={completed ? <CheckCircle2 className="w-5 h-5" /> : undefined}
-        className={completed ? 'border-near-green/30 text-near-green' : ''}
-      >
-        {completed ? 'Explorer Track Completed! 🏆' : 'Complete Explorer Track'}
-      </Button>
-    </div>
-  );
-}
-
 // ─── Main Module ───────────────────────────────────────────────────────────────
 
 export function ChooseYourPath() {
@@ -453,7 +418,6 @@ export function ChooseYourPath() {
       </ScrollReveal>
 
       <ScrollReveal delay={0.4}>
-        <MarkComplete moduleSlug="choose-your-path" />
       </ScrollReveal>
     </Container>
   );

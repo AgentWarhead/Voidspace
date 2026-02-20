@@ -316,41 +316,6 @@ function StepByStepGuide() {
   );
 }
 
-// ─── Mark Complete ─────────────────────────────────────────────────────────────
-
-function MarkComplete({ moduleSlug }: { moduleSlug: string }) {
-  const [completed, setCompleted] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const progress = JSON.parse(localStorage.getItem('voidspace-explorer-progress') || '{}');
-      return !!progress[moduleSlug];
-    } catch { return false; }
-  });
-
-  const handleComplete = () => {
-    try {
-      const progress = JSON.parse(localStorage.getItem('voidspace-explorer-progress') || '{}');
-      progress[moduleSlug] = true;
-      localStorage.setItem('voidspace-explorer-progress', JSON.stringify(progress));
-      setCompleted(true);
-    } catch { /* noop */ }
-  };
-
-  return (
-    <div className="flex justify-center">
-      <Button
-        variant={completed ? 'secondary' : 'primary'}
-        size="lg"
-        onClick={handleComplete}
-        leftIcon={completed ? <CheckCircle2 className="w-5 h-5" /> : undefined}
-        className={completed ? 'border-near-green/30 text-near-green' : ''}
-      >
-        {completed ? 'Module Completed ✓' : 'Mark as Complete'}
-      </Button>
-    </div>
-  );
-}
-
 // ─── Main Module ───────────────────────────────────────────────────────────────
 
 export function YourFirstTransaction() {
@@ -455,7 +420,6 @@ export function YourFirstTransaction() {
       </ScrollReveal>
 
       <ScrollReveal delay={0.35}>
-        <MarkComplete moduleSlug="your-first-transaction" />
       </ScrollReveal>
     </Container>
   );

@@ -209,7 +209,7 @@ const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle })
     <Card variant="glass" padding="none" className="border-near-green/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={() => {}} style={{display:"none"}}
+        onClick={onToggle}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">
@@ -449,39 +449,6 @@ const StateManagement: React.FC<StateManagementProps> = ({ isActive, onToggle })
                 </ul>
               </Card>
 
-              {/* Mark Complete Button */}
-              <div className="flex justify-center pt-2">
-                <motion.button
-                  onClick={handleComplete}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className={cn(
-                    'px-8 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2',
-                    completed
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
-                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer'
-                  )}
-                  disabled={completed}
-                >
-                  {completed ? (
-                    <>
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                      >
-                        <CheckCircle2 className="w-5 h-5" />
-                      </motion.div>
-                      Module Complete!
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-5 h-5" />
-                      Mark as Complete
-                    </>
-                  )}
-                </motion.button>
-              </div>
             </div>
           </motion.div>
         )}

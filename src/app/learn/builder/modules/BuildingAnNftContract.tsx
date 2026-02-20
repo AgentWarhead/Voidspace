@@ -226,7 +226,7 @@ export default function BuildingAnNftContract({ isActive, onToggle }: BuildingAn
 
   return (
     <Card variant="glass" padding="none" className="border-pink-500/20">
-      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-xl flex items-center justify-center">
             <Sparkles className="w-6 h-6 text-white" />
@@ -397,11 +397,6 @@ export default function BuildingAnNftContract({ isActive, onToggle }: BuildingAn
             </ul>
           </div>
 
-          {/* Mark Complete */}
-          <motion.button onClick={handleComplete} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            className={cn('w-full py-3 rounded-xl font-semibold text-sm transition-all', completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-pink-500/10 text-pink-400 border border-pink-500/30 hover:bg-pink-500/20')}>
-            {completed ? '✓ Module Complete' : 'Mark as Complete'}
-          </motion.button>
         </div>
       )}
     </Card>

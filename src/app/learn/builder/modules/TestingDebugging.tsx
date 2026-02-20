@@ -196,7 +196,7 @@ const TestingDebugging: React.FC<TestingDebuggingProps> = ({ isActive, onToggle 
     <Card variant="glass" padding="none" className="border-pink-500/20">
       {/* ── Accordion Header ── */}
       <div
-        onClick={() => {}} style={{display:"none"}}
+        onClick={onToggle}
         className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-4">
@@ -418,21 +418,6 @@ async fn test_greeting_contract() -> anyhow::Result<()> {
                 </ul>
               </Card>
 
-              {/* Mark Complete */}
-              <motion.button
-                onClick={handleComplete}
-                disabled={completed}
-                whileHover={{ scale: completed ? 1 : 1.02 }}
-                whileTap={{ scale: completed ? 1 : 0.98 }}
-                className={cn(
-                  'w-full py-3 rounded-lg font-semibold text-sm transition-all',
-                  completed
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
-                    : 'bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30'
-                )}
-              >
-                {completed ? '✓ Module Completed' : 'Mark as Complete'}
-              </motion.button>
             </div>
           </motion.div>
         )}

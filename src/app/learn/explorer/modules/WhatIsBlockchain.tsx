@@ -241,46 +241,6 @@ function MiniQuiz() {
   );
 }
 
-// ─── Mark as Complete ──────────────────────────────────────────────────────────
-
-function MarkComplete({ moduleSlug }: { moduleSlug: string }) {
-  const [completed, setCompleted] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const progress = JSON.parse(localStorage.getItem('voidspace-explorer-progress') || '{}');
-      return !!progress[moduleSlug];
-    } catch { return false; }
-  });
-
-  const handleComplete = () => {
-    try {
-      const progress = JSON.parse(localStorage.getItem('voidspace-explorer-progress') || '{}');
-      progress[moduleSlug] = true;
-      localStorage.setItem('voidspace-explorer-progress', JSON.stringify(progress));
-      setCompleted(true);
-    } catch { /* noop */ }
-  };
-
-  return (
-    <motion.div
-      className="flex justify-center"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-    >
-      <Button
-        variant={completed ? 'secondary' : 'primary'}
-        size="lg"
-        onClick={handleComplete}
-        leftIcon={completed ? <CheckCircle2 className="w-5 h-5" /> : undefined}
-        className={completed ? 'border-near-green/30 text-near-green' : ''}
-      >
-        {completed ? 'Module Completed ✓' : 'Mark as Complete'}
-      </Button>
-    </motion.div>
-  );
-}
-
 // ─── Main Module ───────────────────────────────────────────────────────────────
 
 export function WhatIsBlockchain() {
@@ -451,7 +411,6 @@ export function WhatIsBlockchain() {
 
       {/* Complete */}
       <ScrollReveal delay={0.45}>
-        <MarkComplete moduleSlug="what-is-blockchain" />
       </ScrollReveal>
     </Container>
   );

@@ -207,7 +207,7 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
 
   return (
     <Card variant="glass" padding="none" className="border-near-green/20">
-      <div onClick={() => {}} style={{display:"none"}} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+      <div onClick={onToggle} className="cursor-pointer p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
             <Layers className="w-6 h-6 text-white" />
@@ -419,39 +419,6 @@ const BuildingADapp: React.FC<BuildingADappProps> = ({ isActive, onToggle }) => 
                 </ul>
               </Card>
 
-              {/* Mark Complete Button */}
-              <div className="flex justify-center pt-2">
-                <motion.button
-                  onClick={handleComplete}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className={cn(
-                    'px-8 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2',
-                    completed
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
-                      : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-emerald-500/20 cursor-pointer'
-                  )}
-                  disabled={completed}
-                >
-                  {completed ? (
-                    <>
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                      >
-                        <CheckCircle2 className="w-5 h-5" />
-                      </motion.div>
-                      Module Complete!
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-5 h-5" />
-                      Mark as Complete
-                    </>
-                  )}
-                </motion.button>
-              </div>
             </div>
           </motion.div>
         )}
