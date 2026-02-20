@@ -7,24 +7,40 @@ import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { ScanLine } from '@/components/effects/ScanLine';
 import { GradientText } from '@/components/effects/GradientText';
 import { 
-  getCompetitorsForCategory, 
-  getCategoryCompetitionSummary,
   CHAIN_COLORS,
-  CHAIN_EMOJIS,
-  type CrossChainCompetitor 
+  CHAIN_EMOJIS
 } from '@/lib/cross-chain-data';
+import type { CrossChainCompetitor } from '@/types';
 
 interface CrossChainRivalryProps {
-  categorySlug: string;
+  competitors?: CrossChainCompetitor[];
   nearProjectCount: number;
   className?: string;
 }
 
-export function CrossChainRivalry({ categorySlug, nearProjectCount, className }: CrossChainRivalryProps) {
-  const competitors = getCompetitorsForCategory(categorySlug);
-  const summary = getCategoryCompetitionSummary(categorySlug);
+export function CrossChainRivalry({ competitors = [], nearProjectCount, className }: CrossChainRivalryProps) {
+  if (!competitors || competitors.length === 0) return null;
 
-  if (competitors.length === 0) return null;
+  // Compute summary stats dynamically from the passed competitors
+  const chainStats: Record<string, number> = {};
+  let totalTVL = 0;
+
+  competitors.forEach(comp => {
+    chainStats[comp.chain] = (chainStats[comp.chain] || 0) + 1;
+    // Parse TVL string "$50M" -> 50000000
+    if (comp.tvl) {
+      const raw = comp.tvl.replace(/[$,]/g, '');
+      let val = parseFloat(raw);
+      if (raw.includes('B')) val *= 1e9;
+      else if (raw.includes('M')) val *= 1e6;
+      else if (raw.includes('K')) val *= 1e3;
+      if (!isNaN(val)) totalTVL += val;
+    }
+  });
+
+  const topChains = Object.entries(chainStats)
+    .map(([chain, count]) => ({ chain, count }))
+    .sort((a, b) => b.count - a.count);
 
   const competitorsByChain = competitors.reduce((acc, competitor) => {
     if (!acc[competitor.chain]) acc[competitor.chain] = [];
@@ -32,11 +48,11 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
     return acc;
   }, {} as Record<string, CrossChainCompetitor[]>);
 
-  const formatTVLSummary = (totalTVL: number) => {
-    if (totalTVL >= 1e9) return `$${(totalTVL / 1e9).toFixed(1)}B`;
-    if (totalTVL >= 1e6) return `$${(totalTVL / 1e6).toFixed(0)}M`;
-    if (totalTVL >= 1e3) return `$${(totalTVL / 1e3).toFixed(0)}K`;
-    return `$${totalTVL.toFixed(0)}`;
+  const formatTVLSummary = (tvl: number) => {
+    if (tvl >= 1e9) return `$${(tvl / 1e9).toFixed(1)}B`;
+    if (tvl >= 1e6) return `$${(tvl / 1e6).toFixed(0)}M`;
+    if (tvl >= 1e3) return `$${(tvl / 1e3).toFixed(0)}K`;
+    return `$${tvl.toFixed(0)}`;
   };
 
   return (
@@ -65,24 +81,28 @@ export function CrossChainRivalry({ categorySlug, nearProjectCount, className }:
             transition={{ delay: 0.1 }}
           >
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-text-secondary">
-              {summary.topChains.map((item, index) => (
+              {topChains.map((item, index) => (
                 <span key={item.chain} className="flex items-center gap-1">
-                  <span style={{ color: CHAIN_COLORS[item.chain as keyof typeof CHAIN_COLORS] }}>
-                    {CHAIN_EMOJIS[item.chain as keyof typeof CHAIN_EMOJIS]} {item.chain}
+                  <span style={{ color: CHAIN_COLORS[item.chain as keyof typeof CHAIN_COLORS] || '#fff' }}>
+                    {CHAIN_EMOJIS[item.chain as keyof typeof CHAIN_EMOJIS] || '🔗'} {item.chain}
                   </span>
                   <span className="text-text-primary font-medium">
                     {item.count}
                   </span>
-                  {index < summary.topChains.length - 1 && (
+                  {index < topChains.length - 1 && (
                     <span className="text-text-muted/50 mx-0.5 sm:mx-1">•</span>
                   )}
                 </span>
               ))}
-              <span className="text-text-muted/50">•</span>
-              <span className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-near-green" />
-                {formatTVLSummary(summary.totalTVL)} TVL
-              </span>
+              {totalTVL > 0 && (
+                <>
+                  <span className="text-text-muted/50">•</span>
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3 text-near-green" />
+                    {formatTVLSummary(totalTVL)} TVL
+                  </span>
+                </>
+              )}
             </div>
             
             {/* NEAR comparison */}

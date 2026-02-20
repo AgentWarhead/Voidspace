@@ -55,10 +55,19 @@ export interface Opportunity {
   void_confidence?: number;
   void_status?: 'active' | 'filling' | 'filled' | 'flagged';
   stable_id?: string;
+  cross_chain_examples?: CrossChainCompetitor[];
   // Joined fields
   category?: Category;
   active_project_count?: number;
   category_name?: string;
+}
+
+export interface CrossChainCompetitor {
+  name: string;
+  chain: string;
+  tvl?: string;
+  description: string;
+  website_url?: string;
 }
 
 export interface User {

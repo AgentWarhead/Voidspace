@@ -446,7 +446,7 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
       {/* ── 6. Cross-Chain Competition ───────────────────────────────────────── */}
       <ScrollReveal delay={0.15}>
         <CrossChainRivalry
-          categorySlug={category.slug}
+          competitors={opportunity.cross_chain_examples || []}
           nearProjectCount={relatedProjects.length}
         />
       </ScrollReveal>
