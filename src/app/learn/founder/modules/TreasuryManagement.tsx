@@ -268,7 +268,7 @@ export default function TreasuryManagement({ isActive, onToggle }: TreasuryManag
                 icon={Shield}
                 title="DAO Treasuries & Sputnik"
                 preview="On-chain governance for transparent fund management."
-                details="Sputnik DAO on NEAR enables transparent, on-chain treasury governance. Set up councils for different spending categories — development, marketing, partnerships — each with their own approval thresholds. The NEAR ecosystem uses Sputnik extensively: AstroDAO provides a user-friendly interface for proposal creation, voting, and fund disbursement. Key benefit: every transaction is publicly auditable."
+                details="SputnikDAO contracts on NEAR enable transparent, on-chain treasury governance. Set up councils for different spending categories — development, marketing, partnerships — each with their own approval thresholds. Key benefit: every transaction is publicly auditable. Check near.org/ecosystem for current DAO tooling interfaces built on SputnikDAO."
               />
               <ConceptCard
                 icon={Lock}
@@ -303,9 +303,9 @@ export default function TreasuryManagement({ isActive, onToggle }: TreasuryManag
                 </p>
               </div>
               <div className="bg-black/30 rounded-xl p-4 border border-border">
-                <h5 className="font-semibold text-text-primary text-sm mb-2">Sputnik DAO Treasury Tools</h5>
+                <h5 className="font-semibold text-text-primary text-sm mb-2">SputnikDAO On-Chain Treasury</h5>
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  Sputnik DAO (AstroDAO) provides NEAR projects with on-chain treasury management including proposal-based spending, role-based access control, and automatic fund disbursement. Projects like Ref Finance and Mintbase use Sputnik for transparent budget allocation, allowing token holders to verify every expense and vote on major financial decisions.
+                  SputnikDAO contracts provide NEAR projects with on-chain treasury management including proposal-based spending, role-based access control, and automatic fund disbursement. This approach allows token holders to verify every expense and vote on major financial decisions — full transparency by default. Check near.org/ecosystem for current DAO tooling built on these contracts.
                 </p>
               </div>
             </div>

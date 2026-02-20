@@ -6,9 +6,9 @@ interface SocialProofSectionProps {
 }
 
 const signals = [
-  'The first AI-native intelligence platform for NEAR Protocol',
+  'The only AI-native intelligence platform built for NEAR Protocol',
   'Powered by Claude AI · DexScreener · NEAR Protocol data',
-  'The most comprehensive free NEAR developer education platform',
+  '66 free learning modules — the most complete NEAR dev curriculum available',
 ];
 
 export function SocialProofSection({ totalProjects, totalOpportunities }: SocialProofSectionProps) {

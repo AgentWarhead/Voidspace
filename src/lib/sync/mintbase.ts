@@ -1,7 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const GRAPHQL_URL = 'https://graph.mintbase.xyz/mainnet';
-const API_KEY = process.env.MINTBASE_API_KEY || '2d1513ca-0eae-4b22-be81-245e4f2f4f03';
+const API_KEY = process.env.MINTBASE_API_KEY ?? '';
 
 interface MintbaseStore {
   id: string;

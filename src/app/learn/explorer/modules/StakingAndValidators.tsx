@@ -169,7 +169,9 @@ function StakingConceptExplorer() {
 function StakingCalculator() {
   const [amount, setAmount] = useState(100);
   const [period, setPeriod] = useState(12);
-  const apy = 9.5;
+  // NEAR staking APY varies by network conditions — typically 8–12%
+  // Using midpoint for illustration; actual yield depends on validator and total stake
+  const apy = 10;
 
   const rewards = amount * (apy / 100) * (period / 12);
   const total = amount + rewards;
@@ -220,7 +222,7 @@ function StakingCalculator() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'APY', value: `~${apy}%`, icon: Percent },
+          { label: 'APY (est.)', value: `~8–12%`, icon: Percent },
           { label: 'Monthly Earn', value: `${monthly.toFixed(1)} Ⓝ`, icon: TrendingUp },
           { label: 'Total Rewards', value: `${rewards.toFixed(1)} Ⓝ`, icon: Coins },
           { label: 'Final Balance', value: `${total.toFixed(1)} Ⓝ`, icon: Zap },
@@ -238,7 +240,7 @@ function StakingCalculator() {
 
       <div className="mt-4 p-3 rounded-lg bg-near-green/5 border border-near-green/15">
         <p className="text-xs text-near-green">
-          💡 This is an estimate based on ~{apy}% APY. Actual rewards vary based on network conditions, validator uptime, and total stake.
+          💡 This is an illustration using ~{apy}% APY (midpoint). Actual NEAR staking yields typically range from 8–12% APY and vary based on network conditions, validator uptime, and total stake.
           Liquid staking (Meta Pool, LiNEAR) typically yields slightly less due to protocol fees.
         </p>
       </div>

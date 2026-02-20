@@ -39,17 +39,17 @@ function DAOConceptExplorer() {
     },
     {
       icon: Landmark,
-      title: 'Astro DAO',
+      title: 'SputnikDAO Contracts',
       emoji: '🚀',
-      tagline: 'The DAO launchpad on NEAR.',
-      description: 'Astro DAO (built on SputnikDAO v2 contracts) is the primary platform for creating and managing DAOs on NEAR. It provides a user-friendly interface for creating DAOs, managing proposals, handling treasury, and coordinating community governance. Hundreds of DAOs run on Astro, from developer guilds to creative collectives.',
-      nearProject: 'app.astrodao.com',
+      tagline: 'The on-chain DAO framework for NEAR.',
+      description: 'SputnikDAO is the smart contract framework powering most DAOs on NEAR. It enables on-chain governance with configurable voting policies, treasury management, and proposal systems. The NEAR DAO tooling ecosystem is actively evolving — check the NEAR ecosystem page for the latest DAO platforms and interfaces.',
+      nearProject: 'near.org/ecosystem',
       howItWorks: [
-        'Visit Astro DAO and connect your NEAR wallet',
-        'Create a new DAO or join an existing one',
-        'Configure governance: voting policy, bond amounts, council members',
+        'DAOs on NEAR are governed by SputnikDAO smart contracts',
+        'Each DAO has configurable voting policies, bond amounts, and council members',
         'Submit proposals: transfer funds, add members, change policy, bounties',
         'Track all activity transparently — every vote and transaction is on-chain',
+        'Check near.org/ecosystem for current DAO tooling options',
       ],
       risk: 'DAO bonds (deposits for proposals) are forfeited if a proposal is rejected. Understand the rules before proposing.',
     },
@@ -305,8 +305,8 @@ function ExploreProposals() {
 
       <div className="mt-4 p-3 rounded-lg bg-near-green/5 border border-near-green/15">
         <p className="text-xs text-near-green">
-          💡 Visit <span className="font-mono">app.astrodao.com</span> to explore real DAOs and their proposals.
-          Join a DAO that aligns with your interests — most are open to new members!
+          💡 Explore NEAR&apos;s DAO ecosystem by searching <span className="font-mono">near.org/ecosystem</span> or joining a DAO&apos;s Discord/Telegram.
+          The DAO tooling landscape is actively evolving — check NEAR&apos;s official channels for the latest platforms.
         </p>
       </div>
     </Card>
@@ -458,7 +458,7 @@ export function DAOsOnNear() {
           </div>
           <div className="space-y-3">
             {[
-              { step: '1', title: 'Find a DAO', desc: 'Browse DAOs on app.astrodao.com — filter by category (DeFi, NFT, Social, Grants).' },
+              { step: '1', title: 'Find a DAO', desc: 'Explore DAOs through near.org/ecosystem or search NEAR community channels — look for DeFi, NFT, Social, or Grants-focused communities.' },
               { step: '2', title: 'Join the Community', desc: 'Most DAOs have Telegram or Discord groups. Introduce yourself and learn the culture.' },
               { step: '3', title: 'Start Contributing', desc: 'Pick up bounties, participate in discussions, and show up consistently.' },
               { step: '4', title: 'Vote & Propose', desc: 'Once you\'re a member, vote on proposals and eventually submit your own.' },

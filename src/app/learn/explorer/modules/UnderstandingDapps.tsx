@@ -135,12 +135,12 @@ function DappShowcase() {
       color: 'text-purple-400',
     },
     {
-      name: 'AstroDAO',
+      name: 'NDC Governance',
       category: 'DAOs',
       emoji: '🏛️',
-      description: 'Create and manage decentralized organizations. Vote on proposals, manage treasuries, and coordinate communities on-chain.',
-      features: ['Governance', 'Treasury management', 'Voting', 'Custom policies'],
-      users: '50K+',
+      description: 'NEAR\'s community governance hub. Vote on ecosystem proposals, participate in grants, and help shape the protocol\'s direction.',
+      features: ['Governance', 'Grant voting', 'Community proposals', 'Treasury oversight'],
+      users: '40K+',
       color: 'text-orange-400',
     },
   ];

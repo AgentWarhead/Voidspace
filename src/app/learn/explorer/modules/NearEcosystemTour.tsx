@@ -58,7 +58,6 @@ const CATEGORIES: Category[] = [
     projects: [
       { name: 'Mintbase', description: 'NFT creation platform with AI tools. Mint for fractions of a penny.', highlight: 'AI-powered' },
       { name: 'Paras', description: 'Digital art marketplace focused on curated collections.', highlight: 'Curated art' },
-      { name: 'Few and Far', description: 'NFT marketplace with social features and creator tools.', highlight: 'Social NFTs' },
     ],
     opportunity: 'NFTs on NEAR are incredibly cheap to mint (~$0.01). Perfect for gaming items, event tickets, and real-world asset tokenization.',
   },
@@ -70,9 +69,8 @@ const CATEGORIES: Category[] = [
     color: 'text-accent-cyan',
     description: 'Decentralized governance — communities making decisions together on-chain.',
     projects: [
-      { name: 'AstroDAO', description: 'DAO creation and management platform. Governance, treasury, voting.', highlight: '1000+ DAOs' },
       { name: 'NDC (NEAR Digital Collective)', description: 'NEAR\'s own community governance. Vote on protocol decisions.', highlight: 'Protocol governance' },
-      { name: 'SputnikDAO', description: 'Flexible DAO framework. Custom policies and multi-sig support.', highlight: 'Flexible rules' },
+      { name: 'NEAR Forum', description: 'Governance discussions, grant applications, and ecosystem proposals happen here.', highlight: 'Community hub' },
     ],
     opportunity: 'DAOs are the future of organizations. Build tools, join a DAO, or create one for your own community.',
   },
@@ -86,7 +84,6 @@ const CATEGORIES: Category[] = [
     projects: [
       { name: 'PlayEmber', description: 'Gaming infrastructure for NEAR. SDKs and tools for game developers.', highlight: 'Dev tools' },
       { name: 'Armored Kingdom', description: 'Strategy trading card game with NFT cards and competitive play.', highlight: 'TCG gaming' },
-      { name: 'Secretum', description: 'Encrypted messaging and gaming platform on NEAR.', highlight: 'Encrypted play' },
     ],
     opportunity: 'Gaming is the killer app for blockchain. NEAR\'s low fees and fast finality make it ideal for real-time games.',
   },

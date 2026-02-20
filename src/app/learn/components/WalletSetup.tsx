@@ -267,7 +267,7 @@ const securityTips = [
   {
     icon: Users,
     title: 'Multisig for Teams',
-    description: 'For team or DAO treasuries, use multisig accounts requiring multiple signatures. AstroDAO provides easy multisig setup on NEAR.',
+    description: 'For team or DAO treasuries, use multisig accounts requiring multiple signatures. SputnikDAO contracts on NEAR provide built-in multisig and governance for shared funds.',
     priority: 'medium' as const,
   },
 ];
