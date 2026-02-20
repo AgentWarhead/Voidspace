@@ -26,7 +26,7 @@ interface Optimization {
 }
 
 const NEAR_PER_TGAS = 0.0001; // 1 TGas = 0.0001 NEAR
-const NEAR_PRICE_FALLBACK = 5.00; // Fallback only; live price fetched from /api/near-price
+const NEAR_PRICE_FALLBACK = 1.00; // Fallback only; live price fetched from /api/near-price
 
 export function GasEstimator({ code, network = 'testnet' }: GasEstimatorProps) {
   const [showOptimizations, setShowOptimizations] = useState(false);
