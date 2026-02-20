@@ -247,6 +247,36 @@ export interface GitHubAggregateStats {
 
 // --- Gap Score Breakdown ---
 
+export interface VoidPersona {
+  emoji: string;
+  type: string;       // "Weekend Builder", "DeFi Developer", etc.
+  fit: string;        // Why this void is perfect for them (1-2 sentences)
+  skillsNeeded: string; // e.g. "React, NEAR JS SDK, basic API design"
+  timeToMVP: string;  // e.g. "1-2 weekends"
+}
+
+export interface VoidBuildAngle {
+  title: string;      // e.g. "Start with a free dashboard, monetize with alerts"
+  description: string; // How to approach the build
+  timeToMVP: string;  // e.g. "3-4 days"
+  inspiration: string; // e.g. "Like DeFiLlama but focused purely on NEAR gas"
+}
+
+export interface VoidEnrichment {
+  hook: string;         // One-liner vision: "The Bloomberg Terminal of NEAR data"
+  vision: string;       // 2-3 sentence picture of what this becomes at scale
+  personas: VoidPersona[];
+  buildAngles: VoidBuildAngle[];
+  revenue: {
+    model: string;      // e.g. "Freemium SaaS"
+    potential: string;  // e.g. "$3K–$25K/month"
+    howTo: string;      // Specific monetization path
+  };
+  quickStart: string[]; // ["Day 1: ...", "Day 3: ...", "Week 2: ..."]
+  moat: string;         // What makes this defensible once built
+  generatedAt: string;  // ISO timestamp
+}
+
 export interface GapScoreBreakdown {
   supplyScarcity: number;
   tvlConcentration: number;
