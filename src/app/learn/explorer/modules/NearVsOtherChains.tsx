@@ -46,7 +46,7 @@ const CHAINS: ChainInfo[] = [
     borderColor: 'border-near-green/30',
     stats: {
       tps: '100K+ (sharded)',
-      finality: '~1.3 sec',
+      finality: '~1 sec',
       gasCost: '~$0.001',
       consensus: 'Proof of Stake (Nightshade)',
       language: 'Rust, JavaScript',

@@ -439,7 +439,7 @@ export function YourFirstTransaction() {
           <ul className="space-y-2">
             {[
               'A transaction is signed by your private key and verified by validators.',
-              'NEAR transactions confirm in ~1.3 seconds — sub-second finality.',
+              'NEAR transactions confirm in ~1 second — near-instant finality.',
               'Gas fees on NEAR are tiny (~0.0001 NEAR for a simple transfer).',
               '30% of gas is burned, 70% goes to the contract developer.',
               'Always verify the recipient name before confirming — transactions are irreversible.',

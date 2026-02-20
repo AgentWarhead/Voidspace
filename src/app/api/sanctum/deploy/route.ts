@@ -6,8 +6,8 @@ import { rateLimit } from '@/lib/auth/rate-limit';
 // 2. WASM compilation (cargo build --target wasm32-unknown-unknown)
 // 3. near-api-js with funded deployer account
 //
-// For Nearcon demo, this provides a simulated deployment flow.
-// Real deployment will be enabled post-demo with a proper backend.
+// Currently provides a simulated deployment flow.
+// Real deployment will be enabled with a proper backend.
 
 interface DeployRequest {
   code: string;

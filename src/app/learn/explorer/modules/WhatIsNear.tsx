@@ -41,14 +41,14 @@ function FeatureShowcase() {
     {
       icon: Zap,
       title: 'Sub-Second Finality',
-      tagline: '~1.3 seconds to confirm. Done.',
-      description: 'Bitcoin takes 60 minutes for "safe" confirmation. Ethereum takes ~12 seconds per block. NEAR confirms your transaction in about 1.3 seconds. That\'s faster than your card payment at a coffee shop.',
+      tagline: '~1 second to confirm. Done.',
+      description: 'Bitcoin takes 60 minutes for "safe" confirmation. Ethereum takes ~12 seconds per block. NEAR confirms your transaction in about 1 second. That\'s faster than your card payment at a coffee shop.',
       visual: (
         <div className="space-y-2">
           {[
             { chain: 'Bitcoin', time: '~60 min', width: '100%', color: 'bg-orange-500/40' },
             { chain: 'Ethereum', time: '~12 sec', width: '15%', color: 'bg-blue-500/40' },
-            { chain: 'NEAR', time: '~1.3 sec', width: '2%', color: 'bg-near-green' },
+            { chain: 'NEAR', time: '~1 sec', width: '2%', color: 'bg-near-green' },
           ].map((item) => (
             <div key={item.chain} className="flex items-center gap-3">
               <span className="text-xs text-text-muted w-16 text-right">{item.chain}</span>
@@ -388,7 +388,7 @@ export function WhatIsNear() {
             {[
               'NEAR is a Layer 1 blockchain designed for usability, speed, and scalability.',
               'Human-readable accounts (alice.near) replace cryptographic addresses.',
-              'Sub-second finality (~1.3s) and near-zero gas fees ($0.001).',
+              'Near-instant finality (~1 second) and near-zero gas fees ($0.001).',
               'Nightshade sharding lets NEAR scale horizontally like the internet.',
               'Founded by the co-creator of the Transformer (the AI architecture behind ChatGPT).',
               'NEAR is building for the AI era — with support for autonomous agents and chain signatures.',

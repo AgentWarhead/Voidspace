@@ -425,7 +425,7 @@ export function NFTBasicsOnNear() {
             {[
               { label: 'Mint Cost', value: '<$0.01' },
               { label: 'Transfer Fee', value: '~$0.001' },
-              { label: 'Finality', value: '~1.3s' },
+              { label: 'Finality', value: '~1s' },
               { label: 'Storage', value: 'On-chain' },
             ].map((stat) => (
               <div key={stat.label} className="p-3 rounded-lg bg-surface border border-border text-center">
