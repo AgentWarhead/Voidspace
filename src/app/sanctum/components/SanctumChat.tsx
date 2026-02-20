@@ -245,7 +245,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, onProjectFilesUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
-  const { user, isConnected, openModal } = useWallet();
+  const { user, isConnected, openModal, refetchUser } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
   // API enforces actual tier regardless. Once user loads, syncs to real tier.
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'specter';
@@ -779,6 +779,20 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
         return;
       }
 
+      // Session expired mid-chat — silently re-auth and surface a retry prompt
+      if (response.status === 401) {
+        setIsLoading(false);
+        onThinkingChange?.(false);
+        onTaskUpdate?.(null);
+        refetchUser();
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '🔑 Session expired — please sign in again, then resend your message.',
+        }]);
+        return;
+      }
+
       // Safely parse response — handle non-JSON errors (Vercel timeouts, Anthropic errors)
       let data;
       if (!response.ok) {
@@ -1023,6 +1037,11 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     // Users can view the initial AI message, but must connect wallet to reply.
     if (!isConnected) {
       openModal();
+      return;
+    }
+    // Wallet connected but session expired/missing — re-trigger silent auth, don't fire API
+    if (!user) {
+      refetchUser();
       return;
     }
 
