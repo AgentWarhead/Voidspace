@@ -151,34 +151,127 @@ function deduplicatePairs(pairs: DexPair[]): Map<string, DexPair> {
 
 // --- Public API ---
 
+// ── Option C: Multi-source discovery + curated safety net ────────────────────
+//
+// Query DexScreener using multiple major NEAR quote assets as base tokens.
+// This surfaces tokens paired against wNEAR, AURORA, USDC, and USDT on Ref
+// Finance — far broader than the single wrap.near query which only returned ~20.
+//
+// A curated address set acts as a safety net: known ecosystem tokens are always
+// included even if they don't surface through the base-token queries, and they
+// bypass the liquidity/volume filter entirely.
+
+const NEAR_BASE_QUERIES = [
+  'wrap.near',                 // wNEAR — the largest pool, most pairs
+  'aurora',                    // AURORA — ETH-bridged asset pairs
+  'usdc.token.a11bd.near',     // Native USDC — major stablecoin-quoted pairs
+  'usdt.tether-token.near',    // USDT — secondary stablecoin route
+];
+
+// Known NEAR ecosystem token contract addresses.
+// Always fetched & included regardless of current liquidity/volume.
+const CURATED_TOKEN_ADDRESSES = new Set([
+  // Core DeFi
+  'token.v2.ref-finance.near',     // REF (Ref Finance)
+  'token.paras.near',              // PARAS (NFT marketplace)
+  'sweat_welcome.near',            // SWEAT (Move-to-Earn)
+  'meta-token.near',               // META (Meta Pool governance)
+  'v2-nearx.stader-labs.near',     // NearX (Stader liquid staking)
+  'token.burrow.near',             // BRRR (Burrow lending)
+  'token.cheddar.near',            // CHEDDAR
+  'token.pembrock.near',           // PEM (Pembrock)
+  // Meme / Community
+  'blackdragon.tkn.near',          // BLACKDRAGON
+  'lonk.meme-cooking.near',        // LONK
+  'neko.tkn.near',                 // NEKO
+  'bean.tkn.near',                 // BEAN
+  // Infra / Bridges
+  'aurora',                        // AURORA
+  'wrap.near',                     // wNEAR
+  // Other ecosystem
+  'hapi.tkn.near',                 // HAPI (security oracle)
+  'intel.tkn.near',                // INTEL (AI/oracle)
+]);
+
 /**
- * Fetch all NEAR pairs from DexScreener (via wrap.near base query).
+ * Fetch all NEAR pairs from DexScreener using multi-source discovery.
+ * Sources: 4 base-token queries (parallel) + curated safety-net addresses.
  */
 export async function fetchNearTokens(): Promise<TokenData[]> {
   const cacheKey = 'near-all-tokens';
   const cached = getCached<TokenData[]>(cacheKey);
   if (cached !== CACHE_MISS) return cached;
 
-  const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/wrap.near', {
-    next: { revalidate: 60 },
-  });
+  // ── 1. Parallel base-token queries ─────────────────────────────────────────
+  const fetchResults = await Promise.allSettled(
+    NEAR_BASE_QUERIES.map(addr =>
+      fetch(`https://api.dexscreener.com/latest/dex/tokens/${addr}`, {
+        next: { revalidate: 60 },
+      })
+        .then(r => r.ok ? r.json() : { pairs: [] })
+        .catch(() => ({ pairs: [] }))
+    )
+  );
 
-  if (!res.ok) {
-    throw new Error(`DexScreener API error: ${res.status}`);
+  const allPairs: DexPair[] = [];
+  for (const result of fetchResults) {
+    if (result.status === 'fulfilled') {
+      allPairs.push(...(result.value?.pairs || []));
+    }
   }
 
-  const data = await res.json();
-  const pairs: DexPair[] = data?.pairs || [];
-  const tokenMap = deduplicatePairs(pairs);
+  // Best pair per symbol, NEAR chain only (highest liquidity wins)
+  const tokenMap = deduplicatePairs(allPairs);
 
+  // ── 2. Fetch any curated tokens not yet discovered ──────────────────────────
+  const discoveredAddresses = new Set(
+    Array.from(tokenMap.values()).map(p => p.baseToken?.address || '')
+  );
+  const missingCurated = [...CURATED_TOKEN_ADDRESSES].filter(
+    addr => !discoveredAddresses.has(addr)
+  );
+
+  if (missingCurated.length > 0) {
+    const BATCH = 15;
+    for (let i = 0; i < missingCurated.length; i += BATCH) {
+      if (i > 0) await new Promise(r => setTimeout(r, 200));
+      try {
+        const res = await fetch(
+          `https://api.dexscreener.com/latest/dex/tokens/${missingCurated.slice(i, i + BATCH).join(',')}`,
+          { next: { revalidate: 60 } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const pairs: DexPair[] = (data?.pairs || []).filter((p: DexPair) => p.chainId === 'near');
+          for (const pair of pairs) {
+            const sym = pair.baseToken?.symbol;
+            if (!sym) continue;
+            const existing = tokenMap.get(sym);
+            if (!existing || (pair.liquidity?.usd || 0) > (existing.liquidity?.usd || 0)) {
+              tokenMap.set(sym, pair);
+            }
+          }
+        }
+      } catch { /* skip failed batches silently */ }
+    }
+  }
+
+  // ── 3. Build output with quality filter ────────────────────────────────────
   const tokens: TokenData[] = [];
+  const seenAddresses = new Set<string>();
+
   for (const pair of Array.from(tokenMap.values())) {
-    // Phase 1: Sanitize data feeds — filter out low-liquidity/volume noise
-    // Judges saw "mock data" because junk tokens look fake.
-    // Minimums: $10k liquidity OR $1k 24h volume.
+    const addr = pair.baseToken?.address || '';
+    if (seenAddresses.has(addr)) continue;
+    seenAddresses.add(addr);
+
     const liquidity = pair.liquidity?.usd || 0;
     const volume = pair.volume?.h24 || 0;
-    if (liquidity >= 10000 || volume >= 1000) {
+    const isCurated = CURATED_TOKEN_ADDRESSES.has(addr);
+
+    // Curated tokens: always include (known ecosystem tokens).
+    // Others: $5k liquidity OR $500 daily volume to filter dead/junk pairs.
+    if (isCurated || liquidity >= 5000 || volume >= 500) {
       tokens.push(pairToTokenData(pair));
     }
   }

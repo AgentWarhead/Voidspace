@@ -43,15 +43,32 @@ export interface VoidBubbleToken {
 
 // Known NEAR token categories
 const TOKEN_CATEGORIES: Record<string, string> = {
+  // DeFi
   'REF': 'DeFi', 'BRRR': 'DeFi', 'LINEAR': 'DeFi', 'STNEAR': 'DeFi',
-  'NETH': 'DeFi', 'USN': 'Stablecoin', 'USDC': 'Stablecoin', 'USDt': 'Stablecoin',
-  'USDC.e': 'Stablecoin', 'DAI': 'Stablecoin', 'wNEAR': 'Infrastructure',
-  'NEAR': 'Infrastructure', 'AURORA': 'Infrastructure', 'SWEAT': 'Move-to-Earn',
-  'PARAS': 'NFT', 'BLACKDRAGON': 'Meme', 'SHITZU': 'Meme', 'LONK': 'Meme',
-  'NEKO': 'Meme', 'BEAN': 'Meme', 'FT': 'Meme', 'GEAR': 'Gaming',
-  'HOT': 'Gaming', 'JUMP': 'DeFi', 'META': 'DeFi', 'PEM': 'DeFi',
-  'INTEL': 'AI', 'NEARVIDIA': 'AI', 'TRUMP': 'Meme', 'PEPE': 'Meme',
-  'DEGEN': 'Meme', 'CHAD': 'Meme',
+  'NETH': 'DeFi', 'META': 'DeFi', 'PEM': 'DeFi', 'JUMP': 'DeFi',
+  'CHEDDAR': 'DeFi', 'NEARX': 'DeFi', 'USM': 'DeFi', 'OIN': 'DeFi',
+  'SKYWARD': 'DeFi', 'PULSE': 'DeFi', 'FRAX': 'DeFi',
+  'ROSE': 'DeFi', 'RLY': 'DeFi', 'HAPI': 'DeFi', 'TRI': 'DeFi',
+  // Stablecoins
+  'USN': 'Stablecoin', 'USDC': 'Stablecoin', 'USDt': 'Stablecoin',
+  'USDC.e': 'Stablecoin', 'DAI': 'Stablecoin', 'USDT': 'Stablecoin',
+  'TRUENEAR': 'Stablecoin', 'TruNEAR': 'Stablecoin',
+  // Infrastructure
+  'wNEAR': 'Infrastructure', 'NEAR': 'Infrastructure', 'AURORA': 'Infrastructure',
+  'ETH': 'Infrastructure', 'WBTC': 'Infrastructure', 'ZEC': 'Infrastructure',
+  // Move-to-Earn
+  'SWEAT': 'Move-to-Earn',
+  // NFT / Marketplace
+  'PARAS': 'NFT', 'TENK': 'NFT',
+  // Gaming
+  'GEAR': 'Gaming', 'HOT': 'Gaming', 'JAMBO': 'Gaming',
+  // Meme / Community
+  'BLACKDRAGON': 'Meme', 'SHITZU': 'Meme', 'LONK': 'Meme',
+  'NEKO': 'Meme', 'BEAN': 'Meme', 'FT': 'Meme', 'TRUMP': 'Meme',
+  'PEPE': 'Meme', 'DEGEN': 'Meme', 'CHAD': 'Meme', 'RHEA': 'Meme',
+  'PURGE': 'Meme', 'PUBLIC': 'Meme', 'NPRO': 'Meme', 'CFI': 'Meme',
+  // AI
+  'INTEL': 'AI', 'NEARVIDIA': 'AI',
 };
 
 const DEFAULT_CATEGORY = 'Other';
