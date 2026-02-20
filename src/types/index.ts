@@ -216,6 +216,7 @@ export interface EcosystemStats {
   activeProjects: number;
   totalTVL: number;
   categoryCount: number;
+  totalOpportunities: number;
   lastSyncAt: string | null;
 }
 

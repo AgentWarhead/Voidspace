@@ -26,12 +26,14 @@ export async function getEcosystemStats(): Promise<EcosystemStats> {
     { count: activeProjects },
     { data: tvlData },
     { count: categoryCount },
+    { count: totalOpportunities },
     { data: lastSync },
   ] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
     supabase.from('projects').select('*', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('projects').select('tvl_usd'),
     supabase.from('categories').select('*', { count: 'exact', head: true }),
+    supabase.from('opportunities').select('*', { count: 'exact', head: true }),
     supabase
       .from('sync_logs')
       .select('completed_at')
@@ -47,6 +49,7 @@ export async function getEcosystemStats(): Promise<EcosystemStats> {
     activeProjects: activeProjects || 0,
     totalTVL,
     categoryCount: categoryCount || 0,
+    totalOpportunities: totalOpportunities || 0,
     lastSyncAt: lastSync?.[0]?.completed_at || null,
   };
 }

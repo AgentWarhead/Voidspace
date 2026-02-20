@@ -39,6 +39,7 @@ export default async function DashboardPage() {
       activeProjects: 0,
       totalTVL: 0,
       categoryCount: 0,
+      totalOpportunities: 0,
       lastSyncAt: null,
     };
     categories = [];
@@ -48,7 +49,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen">
       {/* SECTION 1: Hero */}
-      <HeroSection stats={stats} totalOpportunities={opportunities.length} />
+      <HeroSection stats={stats} totalOpportunities={stats.totalOpportunities} />
 
       {/* SECTION 2: Mission Control Stats Bar */}
       <MissionControlBar categoryCount={stats.categoryCount} />
@@ -98,7 +99,7 @@ export default async function DashboardPage() {
 
         {/* SECTION 8.5: Social Proof */}
         <ScrollReveal delay={0.15}>
-          <SocialProofSection totalProjects={stats.totalProjects} totalOpportunities={opportunities.length} />
+          <SocialProofSection totalProjects={stats.totalProjects} totalOpportunities={stats.totalOpportunities} />
         </ScrollReveal>
 
         {/* SECTION 8.6: Data Sources */}
