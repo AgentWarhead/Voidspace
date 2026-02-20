@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
   Globe,
@@ -32,6 +33,7 @@ import {
   Bot,
   Boxes,
   ArrowRight,
+  ChevronDown,
   Clock,
   MapPin,
 } from 'lucide-react';
@@ -396,8 +398,10 @@ function ModuleChecklist({
 // ─── Track Card ────────────────────────────────────────────────────────────────
 
 function TrackCard({ track }: { track: Track }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const styles = themeStyles[track.theme];
   const Icon = track.icon;
+  const firstModuleSlug = track.modules[0]?.slug ?? '';
 
   return (
     <motion.div
@@ -434,7 +438,8 @@ function TrackCard({ track }: { track: Track }) {
       <div
         className={cn(
           'relative bg-surface border rounded-2xl overflow-hidden transition-all duration-300 h-full flex flex-col',
-          styles.border
+          isExpanded ? styles.borderActive : styles.border,
+          isExpanded && `shadow-lg ${styles.glow}`
         )}
       >
         {/* Top accent bar */}
@@ -500,20 +505,47 @@ function TrackCard({ track }: { track: Track }) {
             </div>
           </div>
 
-          {/* Start Track link */}
-          <Link
-            href={`/learn/${track.id}`}
-            className={cn(
-              'w-full flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl border font-semibold text-sm transition-all mt-4 min-h-[44px]',
-              'bg-surface-hover',
-              styles.border,
-              styles.accent,
-              'hover:bg-surface'
+          {/* Module checklist accordion */}
+          <AnimatePresence>
+            {isExpanded && (
+              <ModuleChecklist modules={track.modules} theme={track.theme} trackId={track.id} />
             )}
-          >
-            Start Track
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          </AnimatePresence>
+
+          {/* Button row: expand toggle + start link */}
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3.5 sm:py-3 rounded-xl border font-semibold text-sm transition-all min-h-[44px]',
+                'bg-surface-hover',
+                styles.border,
+                styles.accent,
+                'hover:bg-surface'
+              )}
+            >
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChevronDown className="w-4 h-4" />
+              </motion.div>
+              {isExpanded ? 'Hide Modules' : `View ${track.moduleCount} Modules`}
+            </button>
+            <Link
+              href={`/learn/${track.id}/${firstModuleSlug}`}
+              className={cn(
+                'flex items-center justify-center gap-1.5 px-5 py-3.5 sm:py-3 rounded-xl border font-semibold text-sm transition-all min-h-[44px] whitespace-nowrap',
+                'bg-surface-hover',
+                styles.border,
+                styles.accent,
+                'hover:bg-surface'
+              )}
+            >
+              Start
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </motion.div>
