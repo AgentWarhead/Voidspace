@@ -623,7 +623,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     if (mode === 'learn') {
       return [
         { label: '🌱 Learn mode — teach me as we build', value: '__mode:learn|I\'m new to NEAR and smart contracts. Teach me the concepts as we build — start from the basics.' },
-        { label: '🌑 Void mode — just generate the code', value: '__mode:void|I know Rust. Skip all explanation — generate production-ready code immediately, defaults used.' },
+        { label: '🌑 Void mode — fast intake, ship code', value: '__mode:void|I know what I\'m doing. No teaching — ask me what you need to know, then generate production-ready code.' },
       ];
     }
 

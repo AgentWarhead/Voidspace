@@ -13,7 +13,7 @@ interface ModeSelectorProps {
 
 const MODES: { key: ChatMode; label: string; emoji: string; tooltip: string }[] = [
   { key: 'learn', label: 'Learn', emoji: '🎓', tooltip: 'Step-by-step guidance. Every concept explained as we build together.' },
-  { key: 'void', label: 'Void', emoji: '🌑', tooltip: 'Enter the Void. Production-ready code instantly — zero questions, zero hand-holding.' },
+  { key: 'void', label: 'Void', emoji: '🌑', tooltip: 'Two quick questions, then production-ready code. No lectures. No hand-holding.' },
 ];
 
 export function ModeSelector({ mode, onModeChange, disabled }: ModeSelectorProps) {
