@@ -245,7 +245,7 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
 
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, onProjectFilesUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
-  const { user, isConnected, openModal } = useWallet();
+  const { user, isConnected, openModal, refetchUser } = useWallet();
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
   // API enforces actual tier regardless. Once user loads, syncs to real tier.
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'specter';
@@ -1023,6 +1023,15 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
     // Users can view the initial AI message, but must connect wallet to reply.
     if (!isConnected) {
       openModal();
+      return;
+    }
+
+    // Session expired: wallet connected but no server session — re-auth silently
+    // This happens when the cookie expires between page loads. refetchUser will
+    // restore the session (or prompt wallet signing if the cookie is truly gone).
+    if (!user) {
+      await refetchUser();
+      // If still no user after refetch, bail — refetchUser will have opened the modal
       return;
     }
 
