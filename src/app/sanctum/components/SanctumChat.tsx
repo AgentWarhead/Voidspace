@@ -246,6 +246,10 @@ function getModeStarter(category: string | null, mode: ChatMode): string {
 export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'learn', onChatModeChange, personaId, onPersonaChange, onCodeGenerated, onTokensUsed, onTaskUpdate, onThinkingChange, onQuizAnswer, onConceptLearned, onUserMessage, sessionReset, externalMessage, externalMessageSeq, externalMessageNoCode, loadedProjectMessages, loadedProjectSeq, sessionBriefing, onBriefingUpdate, onProjectFilesUpdate, currentContractCode, onCloudSaveStatus }: SanctumChatProps) {
   const currentPersona = getPersona(personaId);
   const { user, isConnected } = useWallet();
+  // Ref so handleSend always uses the up-to-date mode even when a mode switch
+  // and a send happen in the same tick (React state updates are async).
+  const chatModeRef = useRef<ChatMode>(chatMode);
+  useEffect(() => { chatModeRef.current = chatMode; }, [chatMode]);
   // Default to 'specter' while user hasn't loaded — shows Opus as the premium default.
   // API enforces actual tier regardless. Once user loads, syncs to real tier.
   const userTier: SanctumTier = (user?.tier as SanctumTier) || 'specter';
@@ -389,7 +393,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
             title: msgs.find(m => m.role === 'user')?.content?.slice(0, 80) || 'Sanctum Session',
             category,
             persona: personaId,
-            mode: chatMode,
+            mode: chatModeRef.current,
             messages: msgs.map(m => ({ role: m.role, content: m.content })),
             contractCode: code || undefined,
           }),
@@ -758,7 +762,7 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
           messages: apiMessages,
           category,
           personaId: currentPersona.id,
-          mode: chatMode,
+          mode: chatModeRef.current,
           attachments: userAttachments?.filter(f => f.type.startsWith('image/')),
           preferredModel: typeof window !== 'undefined' ? localStorage.getItem('sanctum-model-preference') : null,
           noCodeExtraction: noCodeExtractionRef.current || undefined,
@@ -1131,6 +1135,10 @@ export function SanctumChat({ category, customPrompt, autoMessage, chatMode = 'l
       const messageText = value.slice(pipeIdx + 1);
 
       // Switch the mode tab immediately
+      // Update ref immediately so handleSend (called below) uses the new mode —
+      // parent state update from onChatModeChange is async and won't be reflected
+      // in the chatMode prop until the next render.
+      chatModeRef.current = targetMode;
       onChatModeChange?.(targetMode);
 
       // Inject the user's category or custom idea so the AI knows what to build

@@ -11,96 +11,95 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { resolveModel, type SanctumTier } from '@/lib/sanctum-tiers';
 
 // ── Curated Void mode intake presets (injected server-side, never AI-generated) ──
-// These are ARCHITECTURAL PATTERNS, not config dumps.
-// Short labels that answer "what kind" not "what exact parameters".
-// The AI fills in production defaults for anything not specified.
+// Written for the USER, not the developer. Plain English, outcome-focused.
+// The AI handles all technical defaults — these just communicate intent.
 const VOID_INTAKE_PRESETS: Record<string, Array<{ label: string; value: string }>> = {
   'meme-tokens': [
-    { label: 'No tax · fixed supply', value: 'No transfer tax. Fixed supply, fully immutable after deploy.' },
-    { label: 'Transfer tax → burn', value: 'Transfer tax that burns a percentage on every transaction. Owner can mint and pause.' },
-    { label: 'Reflection tax → holders', value: 'Transfer tax redistributed proportionally to all token holders.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Just a basic token, no frills', value: 'Simple token. No tax. Fixed supply. Nothing fancy.' },
+    { label: 'Tokens burn on every trade', value: 'Every buy and sell burns a small percentage, reducing supply over time.' },
+    { label: 'Holders earn from every trade', value: 'Every transaction rewards existing holders automatically.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'nfts': [
-    { label: 'Fixed collection · paid mint', value: 'Fixed max supply. Paid mint. Royalties on secondary sales.' },
-    { label: 'Free mint · open edition', value: 'Free to mint. No supply cap. Owner can pause.' },
-    { label: 'Allowlist → public sale', value: 'Allowlist phase followed by public sale. Owner sets price and dates.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Limited collection, people pay to mint', value: 'Fixed number of NFTs. Users pay to mint. Royalties on resales.' },
+    { label: 'Anyone can mint for free', value: 'Free to mint. No supply limit. I can pause it.' },
+    { label: 'Early access first, then open to everyone', value: 'Allowlist phase first, then public sale opens.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'defi': [
-    { label: 'AMM liquidity pool', value: 'AMM-style liquidity pool with swap fees and LP tokens.' },
-    { label: 'Lending / borrowing', value: 'Overcollateralized lending and borrowing with auto-liquidation.' },
-    { label: 'Yield vault', value: 'Yield-bearing vault with auto-compounding rewards.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'People swap tokens and earn fees', value: 'Liquidity pool where users swap tokens and liquidity providers earn fees.' },
+    { label: 'People lend and borrow assets', value: 'Lending protocol. Users deposit to earn interest, others borrow against collateral.' },
+    { label: 'Deposit tokens, earn yield automatically', value: 'Yield vault that auto-compounds rewards for depositors.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'dex-trading': [
-    { label: 'AMM swap', value: 'AMM-style swap with configurable fee and permissionless liquidity.' },
-    { label: 'Order book', value: 'On-chain order book with maker/taker fee model.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Automatic price, anyone adds liquidity', value: 'AMM-style exchange. Price set by the pool. Anyone can provide liquidity.' },
+    { label: 'Users post buy/sell orders', value: 'Order book exchange. Users set their own prices.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'staking-rewards': [
-    { label: 'Fixed APY · time-locked', value: 'Time-locked staking with fixed APY. Owner sets rate. Emergency withdraw.' },
-    { label: 'Flexible · no lock period', value: 'Flexible staking. No lock. Rewards distributed per epoch.' },
-    { label: 'Liquid staking · receipt token', value: 'Liquid staking: deposit and receive a receipt token. Auto-compounds.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Lock tokens, earn a fixed rate', value: 'Time-locked staking. Users lock tokens for a set period and earn fixed rewards.' },
+    { label: 'Stake and unstake anytime', value: 'Flexible staking. No lock-up. Rewards accumulate and can be claimed anytime.' },
+    { label: 'Stake and get a tradeable receipt', value: 'Liquid staking. Users get a token representing their stake that they can trade.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'daos': [
-    { label: 'Token-weighted voting', value: 'Token-weighted voting with configurable quorum and voting window.' },
-    { label: 'Council multisig', value: 'Fixed council of members with multisig approval on all proposals.' },
-    { label: 'One member one vote', value: 'Equal-weight voting. Membership managed by owner or existing council.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'More tokens = more voting power', value: 'Token-weighted voting. Proposals need a minimum quorum to pass.' },
+    { label: 'A small council votes on proposals', value: 'Council-based DAO. A fixed group of members approve or reject proposals.' },
+    { label: 'Every member gets one equal vote', value: 'Equal voting weight for all members regardless of token holdings.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'ai-agents': [
-    { label: 'Single authorized agent', value: 'One AI agent address authorized by owner. Per-call spend limits.' },
-    { label: 'Multi-agent orchestrator', value: 'Orchestrator contract assigns tasks to sub-agents with role-based permissions.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'One AI agent acts on my behalf', value: 'Single authorized AI agent that can call contract functions within set limits.' },
+    { label: 'Multiple agents with different roles', value: 'Multiple AI agents with different permissions and an orchestrator managing them.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'chain-signatures': [
-    { label: 'Multi-chain wallet', value: 'Multi-chain wallet via NEAR chain signatures. Signs transactions on other chains.' },
-    { label: 'Cross-chain bridge', value: 'Lock-and-mint bridge to another chain. Owner controls pause.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Control wallets on other blockchains', value: 'Use NEAR to sign and send transactions on Ethereum, Bitcoin, and other chains.' },
+    { label: 'Move assets between blockchains', value: 'Bridge that locks assets on one chain and mints them on another.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'gaming': [
-    { label: 'NFT items on achievement', value: 'Game server mints NFT items to players on achievement. Tradeable P2P.' },
-    { label: 'Fungible token rewards', value: 'Game server mints fungible token rewards to players. Owner controls emission rate.' },
-    { label: 'Tournament + prize pool', value: 'Entry fees pooled. Trustless payout to top finishers.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Players earn NFT items in-game', value: 'Game awards NFT items to players. Items can be traded between players.' },
+    { label: 'Players earn tokens by playing', value: 'Game mints token rewards to players. Owner controls the emission rate.' },
+    { label: 'Tournament with prize money', value: 'Players pay an entry fee. Winnings paid out automatically to top finishers.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'bridges': [
-    { label: 'Lock-and-mint', value: 'Lock assets on source chain, mint wrapped version on NEAR.' },
-    { label: 'Burn-and-release', value: 'Burn on NEAR, release on destination chain. Multisig verification.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Bring assets from another chain to NEAR', value: 'Lock assets on the source chain, mint a wrapped version on NEAR.' },
+    { label: 'Send assets from NEAR to another chain', value: 'Burn tokens on NEAR and release the original assets on the destination chain.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'intents': [
-    { label: 'Solver-based swap', value: 'User signs intent, solvers compete to fill. Any-to-any token swap.' },
-    { label: 'Cross-chain intent', value: 'Cross-chain intent with expiry deadline and escrow-backed settlement.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Users say what they want, solvers handle it', value: 'User signs an intent. Competing solvers find the best way to fill it.' },
+    { label: 'Swap across different blockchains', value: 'Cross-chain intent. User specifies desired outcome, solver handles routing.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'rwa': [
-    { label: 'Fractional ownership · KYC-gated', value: 'Fractional ownership token. KYC whitelist enforced on all transfers.' },
-    { label: 'Invoice / receivable financing', value: 'Invoice represented as NFT. Auto-redeems at maturity date.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Tokenize a real-world asset', value: 'Fractional ownership of a real asset. Only verified wallets can hold or trade it.' },
+    { label: 'Finance invoices or receivables', value: 'Invoice represented on-chain. Investors fund it and get repaid at maturity.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'privacy': [
-    { label: 'Shielded token transfers', value: 'Private fungible token with shielded balances and ZK proof transfers.' },
-    { label: 'Commit-reveal voting', value: 'Votes committed as hashes, revealed in a second phase. Owner tallies.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Hide token balances and transfers', value: 'Private token where balances and transaction amounts are hidden on-chain.' },
+    { label: 'Secret voting, results revealed later', value: 'Votes are hidden until a reveal phase. Prevents last-minute manipulation.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'social': [
-    { label: 'Creator tip token', value: 'Per-creator fungible token. Mint by tipping. Holders earn share of future tips.' },
-    { label: 'Token-gated content', value: 'Posts or content gated behind token ownership. Owner moderates.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Fans tip creators and earn a share', value: 'Creator gets a personal token. Fans mint it by tipping and earn from future tips.' },
+    { label: 'Token-gated content or community', value: 'Content or community access locked behind owning a specific token.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
   'infrastructure': [
-    { label: 'Price oracle', value: 'Multi-source price feed with median aggregation and staleness guard.' },
-    { label: 'On-chain registry', value: 'Registry mapping names or IDs to addresses. Owner-curated entries.' },
-    { label: 'Type my own specs ✏️', value: '' },
+    { label: 'Reliable on-chain price feed', value: 'Price oracle aggregating multiple sources. Protects against manipulation.' },
+    { label: 'On-chain directory or registry', value: 'Registry mapping names or IDs to addresses. Owner manages entries.' },
+    { label: 'I\'ll describe it myself ✏️', value: '' },
   ],
 };
 const VOID_INTAKE_PRESETS_DEFAULT = [
-  { label: 'Frontend-facing · owner-controlled', value: 'Called from frontend only. Owner controls admin functions.' },
-  { label: 'Contract-to-contract · permissionless', value: 'Called by other contracts. Permissionless. Immutable after deploy.' },
-  { label: 'Type my own specs ✏️', value: '' },
+  { label: 'Users interact from a website', value: 'Called from a frontend. Owner controls admin functions.' },
+  { label: 'Other smart contracts call it', value: 'Designed for contract-to-contract calls. Permissionless.' },
+  { label: 'I\'ll describe it myself ✏️', value: '' },
 ];
 
 function sanitizeUserInput(text: string): string {
