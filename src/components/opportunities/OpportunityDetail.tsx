@@ -19,6 +19,7 @@ import { Card, Badge, InfoTooltip } from '@/components/ui';
 import { GapScoreIndicator } from '@/components/opportunities/GapScoreIndicator';
 import { AnimatedCounter } from '@/components/effects/AnimatedCounter';
 import { GapScoreBreakdown } from '@/components/opportunities/GapScoreBreakdown';
+import { VoidOpportunityPanel } from '@/components/opportunities/VoidOpportunityPanel';
 import { CrossChainRivalry } from '@/components/opportunities/CrossChainRivalry';
 import { SaveButton } from '@/components/opportunities/SaveButton';
 import { ShareButton } from '@/components/opportunities/ShareButton';
@@ -306,7 +307,17 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
         </ScrollReveal>
       )}
 
-      {/* ── 4. Void Analysis (GapScoreBreakdown) ─────────────────────────────── */}
+      {/* ── 4. Opportunity Panel ─────────────────────────────────────────────── */}
+      <ScrollReveal delay={0.09}>
+        <VoidOpportunityPanel
+          opportunity={opportunity}
+          category={category}
+          breakdown={breakdown}
+          activeBuilderCount={activeBuilderCount}
+        />
+      </ScrollReveal>
+
+      {/* ── 5. Void Analysis (GapScoreBreakdown) ─────────────────────────────── */}
       <ScrollReveal delay={0.09}>
         <SectionHeader title="Void Analysis" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
