@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -34,9 +34,11 @@ import {
   Boxes,
   ArrowRight,
   ChevronDown,
+  CheckCircle,
   Clock,
   MapPin,
 } from 'lucide-react';
+import { loadProgress } from '@/app/profile/skills/constellation-data';
 import { SectionHeader } from '@/components/effects/SectionHeader';
 import { ScrollReveal } from '@/components/effects/ScrollReveal';
 import { Container } from '@/components/ui';
@@ -332,10 +334,12 @@ function ModuleChecklist({
   modules,
   theme,
   trackId,
+  completedSlugs,
 }: {
   modules: Module[];
   theme: 'green' | 'cyan' | 'purple';
   trackId: string;
+  completedSlugs: Set<string>;
 }) {
   const styles = themeStyles[theme];
 
@@ -381,8 +385,12 @@ function ModuleChecklist({
               {/* Icon + label */}
               <Icon className={cn('w-4 h-4 flex-shrink-0', styles.accent)} />
               <span className="text-sm text-text-secondary flex-1">{mod.label}</span>
-              {/* Unchecked circle */}
-              <div className="w-5 h-5 rounded-full border-2 border-border flex-shrink-0" />
+              {/* Completion indicator */}
+              {mod.slug && completedSlugs.has(mod.slug) ? (
+                <CheckCircle className={cn('w-5 h-5 flex-shrink-0', styles.accent)} />
+              ) : (
+                <div className="w-5 h-5 rounded-full border-2 border-border flex-shrink-0" />
+              )}
             </motion.div>
           );
           if (mod.slug) {
@@ -399,7 +407,19 @@ function ModuleChecklist({
 
 function TrackCard({ track }: { track: Track }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [trackProgress, setTrackProgress] = useState(0);
+  const [completedSlugs, setCompletedSlugs] = useState<Set<string>>(new Set());
   const styles = themeStyles[track.theme];
+
+  useEffect(() => {
+    const completed = loadProgress();
+    setCompletedSlugs(completed);
+    const completedInTrack = track.modules.filter(m => m.slug && completed.has(m.slug)).length;
+    const pct = track.modules.length > 0
+      ? Math.round((completedInTrack / track.modules.length) * 100)
+      : 0;
+    setTrackProgress(pct);
+  }, [track.modules]);
   const Icon = track.icon;
   const firstModuleSlug = track.modules[0]?.slug ?? '';
 
@@ -466,7 +486,7 @@ function TrackCard({ track }: { track: Track }) {
             >
               <Icon className={cn('w-7 h-7', styles.accent)} />
             </motion.div>
-            <ProgressRing progress={0} theme={track.theme} />
+            <ProgressRing progress={trackProgress} theme={track.theme} />
           </div>
 
           {/* Title */}
@@ -508,7 +528,7 @@ function TrackCard({ track }: { track: Track }) {
           {/* Module checklist accordion */}
           <AnimatePresence>
             {isExpanded && (
-              <ModuleChecklist modules={track.modules} theme={track.theme} trackId={track.id} />
+              <ModuleChecklist modules={track.modules} theme={track.theme} trackId={track.id} completedSlugs={completedSlugs} />
             )}
           </AnimatePresence>
 

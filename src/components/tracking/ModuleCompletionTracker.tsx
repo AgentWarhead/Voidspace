@@ -105,20 +105,42 @@ export function ModuleCompletionTracker({ moduleSlug, track }: Props) {
   /* ── Check completion on mount ── */
   useEffect(() => {
     setMounted(true);
+
+    // Check localStorage first (fast path for all users)
     const constellationProgress = loadProgress();
     if (constellationProgress.has(moduleSlug)) {
       setCompleted(true);
       return;
     }
-    // Also check anon fallback
+
+    // Check anon fallback
     try {
       const anon = localStorage.getItem(COMPLETED_KEY);
       if (anon) {
         const set: string[] = JSON.parse(anon);
-        if (set.includes(moduleSlug)) setCompleted(true);
+        if (set.includes(moduleSlug)) {
+          setCompleted(true);
+          return;
+        }
       }
     } catch { /* silent */ }
-  }, [moduleSlug]);
+
+    // If signed in, also check server (handles cross-device progress)
+    if (accountId) {
+      fetch(`/api/progress?moduleSlug=${encodeURIComponent(moduleSlug)}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.completed) {
+            setCompleted(true);
+            // Also save to localStorage so it's fast next time
+            const progress = loadProgress();
+            progress.add(moduleSlug);
+            saveProgress(progress);
+          }
+        })
+        .catch(() => { /* offline — localStorage is source of truth */ });
+    }
+  }, [moduleSlug, accountId]);
 
   /* ── Merge anon progress when wallet connects ── */
   useEffect(() => {
@@ -150,16 +172,32 @@ export function ModuleCompletionTracker({ moduleSlug, track }: Props) {
   }, [isConnected, accountId]);
 
   /* ── Mark Complete Handler ── */
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     if (completed) return;
 
-    // 1. Update Skill Constellation (always — works without wallet)
+    // 1. Update UI immediately — this must happen FIRST
+    setCompleted(true);
+    setCelebrating(true);
+    setTimeout(() => setCelebrating(false), 3000);
+
+    // 2. Persist to localStorage (Skill Constellation — works without wallet)
     const progress = loadProgress();
     progress.add(moduleSlug);
     saveProgress(progress);
 
-    // 2. Save to anon fallback if no wallet
-    if (!isConnected) {
+    // 3. Persist to server if signed in
+    if (accountId) {
+      try {
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ moduleSlug, track }),
+        });
+      } catch {
+        // Offline — localStorage is the fallback
+      }
+    } else {
+      // Save to anon fallback if no wallet
       try {
         const anon = localStorage.getItem(COMPLETED_KEY);
         const set: string[] = anon ? JSON.parse(anon) : [];
@@ -168,18 +206,13 @@ export function ModuleCompletionTracker({ moduleSlug, track }: Props) {
       } catch { /* silent */ }
     }
 
-    // 3. Track achievement stats (wallet-gated internally)
+    // 4. Track achievement stats (wallet-gated internally) — LAST, non-blocking
     const trackKey = TRACK_STAT[track];
     if (trackKey) {
       trackStat('modulesCompleted');
       trackStat(trackKey as any);
     }
-
-    // 4. Celebrate!
-    setCompleted(true);
-    setCelebrating(true);
-    setTimeout(() => setCelebrating(false), 3000);
-  }, [completed, moduleSlug, track, isConnected, trackStat]);
+  }, [completed, moduleSlug, track, accountId, isConnected, trackStat]);
 
   const confettiParticles = useMemo(
     () => Array.from({ length: 16 }, (_, i) => i),
