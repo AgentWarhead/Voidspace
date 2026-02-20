@@ -7,10 +7,10 @@ interface MissionControlBarProps {
 
 export function MissionControlBar({ categoryCount }: MissionControlBarProps) {
   const stats = [
-    { value: categoryCount > 0 ? `${categoryCount}` : '20+', label: '⬡ CATEGORIES SCANNED', icon: Layers, delay: '0s', pulse: true },
-    { value: '66', label: '⬡ FREE MODULES', icon: GraduationCap, delay: '0.5s', pulse: true },
-    { value: '10+', label: '⬡ LIVE DATA SOURCES', icon: Database, delay: '1s', pulse: false },
-    { value: 'LIVE', label: '⬡ REAL-TIME INTEL', icon: Radio, delay: '1.5s', pulse: true },
+    { value: categoryCount > 0 ? `${categoryCount}` : '20+', label: 'CATEGORIES SCANNED', icon: Layers, delay: '0s' },
+    { value: '66', label: 'FREE MODULES', icon: GraduationCap, delay: '0.5s' },
+    { value: '10+', label: 'LIVE DATA SOURCES', icon: Database, delay: '1s' },
+    { value: 'LIVE', label: 'REAL-TIME INTEL', icon: Radio, delay: '1.5s' },
   ];
   return (
     <div className="relative overflow-hidden border-y border-near-green/10">
@@ -38,20 +38,13 @@ export function MissionControlBar({ categoryCount }: MissionControlBarProps) {
             >
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-0 group-hover:w-3/4 bg-gradient-to-r from-transparent via-near-green/50 to-transparent transition-all duration-500" />
               <div className="flex items-center justify-center gap-2 mb-1.5">
-                {stat.pulse && (
-                  <span
-                    className="inline-block w-1.5 h-1.5 rounded-full bg-near-green shrink-0"
-                    style={{ animation: 'alien-pulse 2s ease-in-out infinite' }}
-                    aria-hidden="true"
-                  />
-                )}
                 <stat.icon
                   className="w-3.5 h-3.5 text-near-green/60 group-hover:text-near-green transition-colors duration-300"
                   style={{ animation: `pulse 3s ease-in-out ${stat.delay} infinite` }}
                 />
                 <span
                   className="text-lg sm:text-xl md:text-2xl font-bold font-mono text-text-primary group-hover:text-near-green transition-colors duration-300"
-                  style={{ textShadow: '0 0 20px rgba(0,236,151,0.0)', transition: 'text-shadow 0.3s', fontVariantNumeric: 'tabular-nums' }}
+                  style={{ textShadow: '0 0 20px rgba(0,236,151,0.0)', transition: 'text-shadow 0.3s' }}
                 >
                   {stat.value}
                 </span>
