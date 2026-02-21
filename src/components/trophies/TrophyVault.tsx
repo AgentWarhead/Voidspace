@@ -27,6 +27,7 @@ import { TrophyDisplayCase } from './TrophyDisplayCase';
 import { TrophyInspectModal } from './TrophyInspectModal';
 import { TrophyItem } from './TrophyItem';
 import { VaultParticles } from './VaultParticles';
+import { VaultNextUnlocks } from './VaultNextUnlocks';
 import { AchievementCard } from '@/components/achievements/AchievementCard';
 import { AchievementTimeline } from '@/components/achievements/AchievementTimeline';
 import { useWallet } from '@/hooks/useWallet';
@@ -612,6 +613,9 @@ export function TrophyVault({ embedded = false }: { embedded?: boolean } = {}) {
               timelineMap={timelineMap}
               onToggleFeatured={handleToggleFeatured}
             />
+
+            {/* Next to Unlock — closest achievements based on current stats */}
+            <VaultNextUnlocks />
 
             {/* Filters */}
             <VaultFilterBar
