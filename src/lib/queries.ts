@@ -473,6 +473,30 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return data as Project | null;
 }
 
+// --- Sitemap Helpers ---
+
+export async function getAllProjectSlugsForSitemap(): Promise<{ slug: string; updated_at?: string | null }[]> {
+  const supabase = createAdminClient();
+
+  const { data } = await supabase
+    .from('projects')
+    .select('slug, updated_at')
+    .order('slug');
+
+  return (data || []).map((p) => ({ slug: p.slug as string, updated_at: p.updated_at as string | null }));
+}
+
+export async function getAllOpportunityIdsForSitemap(): Promise<{ id: string; updated_at?: string | null }[]> {
+  const supabase = createAdminClient();
+
+  const { data } = await supabase
+    .from('opportunities')
+    .select('id, updated_at')
+    .order('id');
+
+  return (data || []).map((o) => ({ id: o.id as string, updated_at: o.updated_at as string | null }));
+}
+
 // --- Search ---
 
 export async function searchAll(query: string): Promise<{

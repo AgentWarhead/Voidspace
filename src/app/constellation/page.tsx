@@ -22,10 +22,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ConstellationPage() {
+export default async function ConstellationPage({ searchParams }: { searchParams: Promise<{ address?: string }> }) {
+  const params = await searchParams;
+  const address = params?.address;
   return (
     <div className="min-h-screen bg-background">
-      <ConstellationMap />
+      <ConstellationMap initialAddress={address} />
     </div>
   );
 }

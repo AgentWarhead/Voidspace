@@ -23,10 +23,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function VoidLensPage() {
+export default async function VoidLensPage({ searchParams }: { searchParams: Promise<{ address?: string }> }) {
+  const params = await searchParams;
+  const address = params?.address;
   return (
     <Container className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <VoidLens />
+      <VoidLens initialAddress={address} />
     </Container>
   );
 }
