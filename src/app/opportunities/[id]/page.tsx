@@ -14,23 +14,46 @@ export async function generateMetadata({ params }: Props) {
   const opportunity = await getOpportunityById(params.id);
   if (!opportunity) return { title: 'Opportunity Not Found — Voidspace' };
 
+  const title = `${opportunity.title} — NEAR Ecosystem Gap | Voidspace`;
+  const description =
+    opportunity.description ||
+    `An identified gap in the NEAR Protocol ecosystem — analyze the opportunity, review existing projects, and build what's missing.`;
+  const canonical = `https://voidspace.io/opportunities/${params.id}`;
+
+  const ogTitle = encodeURIComponent(opportunity.title?.slice(0, 80) || 'Ecosystem Void');
+  const ogSubtitle = encodeURIComponent(
+    opportunity.description?.slice(0, 100) ||
+      'AI-detected gap in the NEAR Protocol ecosystem. Analyze the opportunity and build what\'s missing.'
+  );
+  const ogTag = opportunity.category?.name ? encodeURIComponent(opportunity.category.name) : '';
+  const ogImageUrl = `https://voidspace.io/api/og?type=void&title=${ogTitle}&subtitle=${ogSubtitle}${ogTag ? `&tag=${ogTag}` : ''}`;
+
   return {
-    title: `${opportunity.title} — NEAR Ecosystem Gap | Voidspace`,
-    description: opportunity.description || `An identified gap in the NEAR Protocol ecosystem — analyze the opportunity, review existing projects, and build what's missing.`,
-    alternates: { canonical: `https://voidspace.io/opportunities/${params.id}` },
+    title,
+    description,
+    alternates: { canonical },
     openGraph: {
-      title: `${opportunity.title} — NEAR Ecosystem Gap | Voidspace`,
-      description: opportunity.description || `Ecosystem gap identified on NEAR Protocol. Analyze the opportunity and build what's missing.`,
-      url: `https://voidspace.io/opportunities/${params.id}`,
+      title,
+      description,
+      url: canonical,
       siteName: 'Voidspace',
       locale: 'en_US',
       type: 'website',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${opportunity.title} — Voidspace`,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${opportunity.title} — NEAR Gap | Voidspace`,
       description: opportunity.description || `NEAR ecosystem gap — analyze and build what's missing.`,
       creator: '@VoidSpaceIO',
+      images: [ogImageUrl],
     },
   };
 }

@@ -57,6 +57,14 @@ export async function generateMetadata({ params }: Props) {
     `Explore ${project.name} on NEAR Protocol — live market data, GitHub activity, on-chain stats, and ecosystem context.`;
   const canonical = `https://voidspace.io/projects/${params.slug}`;
 
+  const ogTitle = encodeURIComponent(project.name);
+  const ogSubtitle = encodeURIComponent(
+    project.description?.slice(0, 100) ||
+      'Live market data, GitHub activity, on-chain stats, and ecosystem context.'
+  );
+  const ogTag = project.category?.name ? encodeURIComponent(project.category.name) : '';
+  const ogImageUrl = `https://voidspace.io/api/og?type=project&title=${ogTitle}&subtitle=${ogSubtitle}${ogTag ? `&tag=${ogTag}` : ''}`;
+
   return {
     title,
     description,
@@ -70,7 +78,7 @@ export async function generateMetadata({ params }: Props) {
       type: 'website',
       images: [
         {
-          url: 'https://voidspace.io/og-image.jpg',
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: `${project.name} — Voidspace`,
@@ -82,7 +90,7 @@ export async function generateMetadata({ params }: Props) {
       title,
       description,
       creator: '@VoidSpaceIO',
-      images: ['https://voidspace.io/og-image.jpg'],
+      images: [ogImageUrl],
     },
   };
 }

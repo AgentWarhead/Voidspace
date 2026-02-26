@@ -25,23 +25,45 @@ export async function generateMetadata({ params }: Props) {
   const category = await getCategoryBySlug(params.slug);
   if (!category) return { title: 'Category Not Found — Voidspace' };
 
+  const title = `${category.name} on NEAR Protocol — Projects, Gaps & Opportunities | Voidspace`;
+  const description =
+    category.description ||
+    `Explore ${category.name} in the NEAR ecosystem. Track active projects, identify gaps, and find what's missing.`;
+  const canonical = `https://voidspace.io/categories/${params.slug}`;
+
+  const ogTitle = encodeURIComponent(category.name?.slice(0, 80) || 'NEAR Category');
+  const ogSubtitle = encodeURIComponent(
+    category.description?.slice(0, 100) ||
+      'Track active projects, identify gaps, and find build opportunities in the NEAR ecosystem.'
+  );
+  const ogImageUrl = `https://voidspace.io/api/og?type=category&title=${ogTitle}&subtitle=${ogSubtitle}`;
+
   return {
-    title: `${category.name} on NEAR Protocol — Projects, Gaps & Opportunities | Voidspace`,
-    description: category.description || `Explore ${category.name} in the NEAR ecosystem. Track active projects, identify gaps, and find what's missing.`,
-    alternates: { canonical: `https://voidspace.io/categories/${params.slug}` },
+    title,
+    description,
+    alternates: { canonical },
     openGraph: {
       title: `${category.name} on NEAR Protocol — Projects & Gaps | Voidspace`,
       description: category.description || `Explore ${category.name} projects and gaps in the NEAR ecosystem.`,
-      url: `https://voidspace.io/categories/${params.slug}`,
+      url: canonical,
       siteName: 'Voidspace',
       locale: 'en_US',
       type: 'website',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${category.name} — NEAR Ecosystem | Voidspace`,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${category.name} — NEAR Ecosystem | Voidspace`,
       description: category.description || `${category.name} projects and opportunities on NEAR Protocol.`,
       creator: '@VoidSpaceIO',
+      images: [ogImageUrl],
     },
   };
 }
