@@ -114,13 +114,16 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/search"
-              className="flex items-center justify-center gap-1 p-2 text-text-secondary hover:text-cyan-400 transition-all duration-200 hover:drop-shadow-[0_0_6px_rgba(0,212,255,0.5)] min-w-[44px] min-h-[44px] active:scale-[0.97]"
-              aria-label="Search"
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('voidspace:open-palette'))}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-muted hover:text-cyan-400 hover:bg-surface-hover transition-all duration-200 hover:drop-shadow-[0_0_6px_rgba(0,212,255,0.5)] min-h-[36px] active:scale-[0.97]"
+              aria-label="Open command palette"
             >
               <Search className="w-4 h-4" />
-            </Link>
+              <span className="hidden lg:flex items-center gap-1 text-[10px] font-mono">
+                <kbd className="px-1 py-0.5 rounded bg-surface border border-border">⌘K</kbd>
+              </span>
+            </button>
             <ConnectWalletButton />
           </div>
 

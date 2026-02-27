@@ -1,32 +1,31 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { CommandPalette } from './CommandPalette';
 
 export function SearchShortcut() {
-  const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
+      // Cmd+K (Mac) or Ctrl+K (Windows/Linux)
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        // Prevent default browser behavior (Cmd+K usually opens address bar)
         event.preventDefault();
-        
-        // Navigate to search page
-        router.push('/search');
+        setOpen((prev) => !prev);
       }
     };
 
-    // Add event listener
-    document.addEventListener('keydown', handleKeyDown);
+    // Custom event from search button clicks in the Header
+    const handleCustomOpen = () => setOpen(true);
 
-    // Cleanup
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('voidspace:open-palette', handleCustomOpen);
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('voidspace:open-palette', handleCustomOpen);
     };
-  }, [router]);
+  }, []);
 
-  // This component doesn't render anything visible
-  return null;
+  return <CommandPalette open={open} onClose={() => setOpen(false)} />;
 }
