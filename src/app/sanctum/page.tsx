@@ -42,6 +42,7 @@ import { SanctumLanding } from './components/SanctumLanding';
 import { SanctumWizard, WizardConfig } from './components/SanctumWizard';
 // BuilderProgress kept for /profile and /learn pages; XPHeaderBar used in Sanctum header
 import { XPHeaderBar } from './components/XPHeaderBar';
+import { SessionCreditPulse } from './components/SessionCreditPulse';
 
 // Template slug → starter message mapping
 const TEMPLATE_MESSAGES: Record<string, { message: string; category: string; title: string; subtitle: string }> = {
@@ -656,8 +657,9 @@ function SanctumPageInner() {
                 />
               </div>
 
-              {/* Right: XP Bar + New Session */}
+              {/* Right: Credit Pulse + XP Bar + New Session */}
               <div className="flex items-center gap-3 flex-shrink-0">
+                <SessionCreditPulse />
                 <XPHeaderBar
                   messagesCount={state.messageCount}
                   codeGenerations={state.contractsBuilt}
@@ -702,22 +704,25 @@ function SanctumPageInner() {
                   <RefreshCw className="w-3.5 h-3.5" />
                 </button>
               </div>
-              {/* Bottom row: Mode Selector + compact XP bar */}
+              {/* Bottom row: Mode Selector + Credit Pulse + compact XP bar */}
               <div className="flex items-center justify-between gap-3">
                 <ModeSelector
                   mode={state.chatMode}
                   onModeChange={(m) => dispatch({ type: 'SET_CHAT_MODE', payload: m })}
                   disabled={false}
                 />
-                <XPHeaderBar
-                  messagesCount={state.messageCount}
-                  codeGenerations={state.contractsBuilt}
-                  deploysCount={state.deployCount}
-                  tokensUsed={state.tokensUsed}
-                  conceptsLearned={state.conceptsLearned.length}
-                  quizScore={state.quizScore}
-                  sessionStartTime={state.sessionStartTime}
-                />
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <SessionCreditPulse />
+                  <XPHeaderBar
+                    messagesCount={state.messageCount}
+                    codeGenerations={state.contractsBuilt}
+                    deploysCount={state.deployCount}
+                    tokensUsed={state.tokensUsed}
+                    conceptsLearned={state.conceptsLearned.length}
+                    quizScore={state.quizScore}
+                    sessionStartTime={state.sessionStartTime}
+                  />
+                </div>
               </div>
             </div>
           </div>
