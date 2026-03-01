@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -38,6 +38,8 @@ import { formatCurrency, formatNumber } from '@/lib/utils';
 import { COMPETITION_LABELS, DIFFICULTY_LABELS } from '@/lib/constants';
 import { HELP_CONTENT } from '@/lib/help-content';
 import { CompetitorList, getActivityStatus } from '@/components/opportunities/CompetitorList';
+import { RecentlyViewedVoids } from '@/components/opportunities/RecentlyViewedVoids';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import type { Opportunity, Project, Category, GapScoreBreakdown as GapScoreBreakdownType } from '@/types';
 
 interface OpportunityDetailProps {
@@ -112,6 +114,21 @@ const competitionContext = {
 
 export function OpportunityDetail({ opportunity, relatedProjects, category, breakdown, competitors }: OpportunityDetailProps) {
   const [showInactive, setShowInactive] = useState(false);
+
+  // ── Recently viewed ──────────────────────────────────────────────────────
+  const [recentItems, recordView] = useRecentlyViewed(opportunity.id);
+
+  useEffect(() => {
+    recordView({
+      id: opportunity.id,
+      title: opportunity.title,
+      gap_score: opportunity.gap_score,
+      category_name: category.name,
+      category_icon: category.icon ?? '◈',
+    });
+  // recordView is stable (useCallback), run once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opportunity.id]);
   const allProjects = competitors ?? relatedProjects;
   const activeCompetitors = allProjects.filter((p) => {
     const status = getActivityStatus(p);
@@ -530,6 +547,13 @@ export function OpportunityDetail({ opportunity, relatedProjects, category, brea
           </div>
         </Card>
       </ScrollReveal>
+
+      {/* ── 9. Recently Viewed ───────────────────────────────────────────────── */}
+      {recentItems.length > 0 && (
+        <ScrollReveal delay={0.24}>
+          <RecentlyViewedVoids items={recentItems} />
+        </ScrollReveal>
+      )}
     </motion.div>
   );
 }
